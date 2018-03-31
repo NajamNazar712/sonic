@@ -14,3 +14,9 @@
 Route::get('/', function () {
     return view('welcome');
 });
+Route::get('/shippers',function(){
+	return view('client/index');
+})->name('shippers');
+Route::get('/admins',function(){
+	return view('admin/index');
+});
