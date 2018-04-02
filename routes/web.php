@@ -22,5 +22,5 @@ Route::get('/admins',function(){
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/shipperDashboard', 'ShipperDashboardController@index');
+Route::get('/shipperDashboard', 'ShipperDashboardController@orderList');
 Route::get('/ecommerce', 'ShipperDashboardController@ecommerce');

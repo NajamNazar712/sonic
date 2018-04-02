@@ -12,4 +12,7 @@ class ShipperDashboardController extends Controller
    public function ecommerce(){
    		return view('client.ecommerce');
    }
+   public function orderList(){
+   		return view('client.dashboard');
+   }
 }
