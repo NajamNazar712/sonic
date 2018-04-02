@@ -449,10 +449,10 @@
 
     function changeLogo(logo){
         if(logo == 'light'){
-            $('.brand-logo').attr('src','../../app-assets/images/logo/logo.png');
+            $('.brand-logo').attr('src','../../../app-assets/images/logo/logo.png');
         }
         else{
-            $('.brand-logo').attr('src','../../app-assets/images/logo/logo.png');
+            $('.brand-logo').attr('src','../../../app-assets/images/logo/logo.png');
         }
     }
 })(window, document, jQuery);

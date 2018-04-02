@@ -228,7 +228,7 @@ $(window).on("load", function(){
 
     require.config({
         paths: {
-            echarts: '../vendors/js/charts/echarts'
+            echarts: '../../../app-assets/vendors/js/charts/echarts'
         }
     });
 
