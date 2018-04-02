@@ -14,3 +14,13 @@
 Route::get('/', function () {
     return view('welcome');
 });
+Route::resource('shippers','shipperLoginController');
+Route::get('/admins',function(){
+	return view('admin/index');
+});
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');
+Route::get('/shipperDashboard', 'ShipperDashboardController@index');
+Route::get('/ecommerce', 'ShipperDashboardController@ecommerce');
