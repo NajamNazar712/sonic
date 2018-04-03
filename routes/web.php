@@ -31,3 +31,9 @@ Route::prefix('shipper')->group(function () {
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
 
 });
+Route::prefix('admin')->group(function () {
+    Route::get('/dashboard', 'Admins\AdminDashboardController@index');
+    Route::get('/order/management', 'Admins\AdminDashboardController@orderList');
+    Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
+
+});
