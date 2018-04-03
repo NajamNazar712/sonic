@@ -14,7 +14,7 @@
 Route::get('/', function () {
     return view('welcome');
 });
-Route::resource('shippers','shipperLoginController');
+Route::resource('shippers','Shippers\shipperLoginController');
 Route::get('/admins',function(){
 	return view('admin/index');
 });
@@ -22,5 +22,6 @@ Route::get('/admins',function(){
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/shipperDashboard', 'ShipperDashboardController@index');
-Route::get('/ecommerce', 'ShipperDashboardController@ecommerce');
+Route::get('/shipperDashboard', 'Shippers\ShipperDashboardController@index');
+Route::get('/ecommerce', 'Shippers\ShipperDashboardController@ecommerce');
+Route::get('/OrderManagement', 'Shippers\ShipperDashboardController@orderList');
