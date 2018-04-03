@@ -1,9 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
-
+namespace App\Http\Controllers\Shippers;
 use Illuminate\Http\Request;
-
+use App\Http\Controllers\Controller;
 class shipperLoginController extends Controller
 {
     /**

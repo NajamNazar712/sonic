@@ -7,13 +7,8 @@
       </div>
       <div class="content-body">
         
-        <!-- Candlestick Multi Level Control Chart -->
+        
        
-        <!-- Trade History & Place Order -->
-        
-        <!--/ Trade History & Place Order -->
-        
-        <!--/ Sell Orders & Buy Order -->
         <!-- Active Orders -->
        <h1>Dashboard</h1>
         <!-- Active Orders -->
