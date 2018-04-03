@@ -22,6 +22,12 @@ Route::get('/admins',function(){
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/shipperDashboard', 'Shippers\ShipperDashboardController@index');
 Route::get('/ecommerce', 'Shippers\ShipperDashboardController@ecommerce');
-Route::get('/OrderManagement', 'Shippers\ShipperDashboardController@orderList');
+
+//Route::get('/shipperDashboard', 'Shippers\ShipperDashboardController@index');
+Route::prefix('shipper')->group(function () {
+    Route::get('/dashboard', 'Shippers\ShipperDashboardController@index');
+    Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
+    Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+
+});
