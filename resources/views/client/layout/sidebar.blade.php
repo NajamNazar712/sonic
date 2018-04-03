@@ -5,14 +5,14 @@
         
       
         <!-- official -->
-        <li class=" nav-item"><a href="/shipperDashboard"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a></li>
+        <li class=" nav-item"><a href="/shipper/dashboard"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a></li>
         <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Order Management</span></a>
           <ul class="menu-content">
-            <li><a class="menu-item" href="/OrderManagement" data-i18n="nav.dash.ecommerce">Order Management</a>
+            <li><a class="menu-item" href="/shipper/order/management" data-i18n="nav.dash.ecommerce">Order Management</a>
             </li>
-            <li class=""><a class="menu-item" href="" data-i18n="nav.dash.crypto">Pending Booked Orders</a>
+            <li class=""><a class="menu-item" href="/shipper/order/pending" data-i18n="nav.dash.crypto">Pending Booked Orders</a>
             </li>
-            <li><a class="menu-item" href="#" data-i18n="nav.dash.sales">Booked Receiving Sheets</a>
+            <li><a class="menu-item" href="/shipper/sheet/receiving" data-i18n="nav.dash.sales">Booked Receiving Sheets</a>
             </li>
             <li><a class="menu-item" href="#" data-i18n="nav.dash.sales">Printed Receiving Sheets</a>
             </li>

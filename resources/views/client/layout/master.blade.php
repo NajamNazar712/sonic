@@ -9,7 +9,15 @@ data-open="click" data-menu="vertical-overlay-menu" data-col="2-columns">
   @include('client.layout.navbar')
   <!-- ////////////////////////////////////////////////////////////////////////////-->
   @include('client.layout.sidebar')
+  <div class="app-content content">
+    <div class="content-wrapper">
+
+      <div class="content-body">
   @yield('content')
+
+      </div>
+    </div>
+  </div>
   @include('client.layout.footer')
 </body>
 </html>

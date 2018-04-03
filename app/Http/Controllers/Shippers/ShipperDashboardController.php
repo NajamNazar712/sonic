@@ -15,4 +15,7 @@ class ShipperDashboardController extends Controller
    public function orderList(){
    		return view('client.order_management');
    }
+    public function orderPending(){
+        return view('client.pending_booked_orders');
+    }
 }
