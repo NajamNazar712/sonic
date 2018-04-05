@@ -1,4 +1,4 @@
-@extends('client.layout.master')
+@extends('admin.layout.master')
 
 @section('content')
 <h1>Order Management</h1>

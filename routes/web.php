@@ -14,10 +14,8 @@
 Route::get('/', function () {
     return view('welcome');
 });
-Route::resource('shippers','Shippers\shipperLoginController');
-Route::get('/admins',function(){
-	return view('admin/index');
-});
+//Route::resource('shippers','Shippers\shipperLoginController');
+
 
 Auth::routes();
 
@@ -25,15 +23,20 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/ecommerce', 'Shippers\ShipperDashboardController@ecommerce');
 
 //Route::get('/shipperDashboard', 'Shippers\ShipperDashboardController@index');
-Route::prefix('shipper')->group(function () {
-    Route::get('/dashboard', 'Shippers\ShipperDashboardController@index');
+Route::prefix('cod')->group(function () {
+    Route::get('/login','Auth\LoginController@showLoginForm');
+    Route::post('/login','Auth\LoginController@login')->name('cod.login.submit');
+    Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('cod.dashboard');
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
 
 });
 Route::prefix('admin')->group(function () {
-    Route::get('/dashboard', 'Admins\AdminDashboardController@index');
+    Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('admin.login');
+    Route::post('/login','Auth\AdminLoginController@login')->name('admin.login.submit');
+    Route::get('/dashboard', 'Admins\AdminDashboardController@index')->name('admin.dashboard');
     Route::get('/order/management', 'Admins\AdminDashboardController@orderList');
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
+    Route::post('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
 
 });

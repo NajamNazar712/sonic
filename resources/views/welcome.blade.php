@@ -108,7 +108,10 @@
                                             <a class="active" href="#home" title="Home">Home</a><span class="m-sparator"></span>
                                         </li>
                                         <li>
-                                            <a class="" href="{{URL::to('/shipperDashboard')}}" title="COD">COD</a><span class="m-sparator"></span>
+                                            <a class="" href="{{URL::to('/cod/login')}}" title="COD">COD</a><span class="m-sparator"></span>
+                                        </li>
+                                        <li>
+                                            <a class="" href="{{URL::to('/admin/login')}}" title="COD">Admin COD</a><span class="m-sparator"></span>
                                         </li>
                                     </ul>
                                 </nav>
