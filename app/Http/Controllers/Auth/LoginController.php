@@ -25,7 +25,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = 'cod/dashboard';
 
     /**
      * Create a new controller instance.
@@ -42,12 +42,4 @@ class LoginController extends Controller
         return view('client.auth.login');
     }
 
-    public function logout(Request $request)
-    {
-        $this->guard('web')->logout();
-
-        $request->session()->invalidate();
-
-        return redirect('/');
-    }
 }
