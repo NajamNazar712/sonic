@@ -24,11 +24,14 @@ Route::get('/ecommerce', 'Shippers\ShipperDashboardController@ecommerce');
 
 //Route::get('/shipperDashboard', 'Shippers\ShipperDashboardController@index');
 Route::prefix('cod')->group(function () {
-    Route::get('/login','Auth\LoginController@showLoginForm');
+    Route::get('/login','Auth\LoginController@showLoginForm')->name('cod.login');
     Route::post('/login','Auth\LoginController@login')->name('cod.login.submit');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('cod.dashboard');
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+    Route::get('/logout','Auth\LoginController@logout')->name('cod.logout');
+
+    Route::post('/logout','Auth\LoginController@logout')->name('cod.logout');
 
 });
 Route::prefix('admin')->group(function () {
@@ -37,6 +40,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/dashboard', 'Admins\AdminDashboardController@index')->name('admin.dashboard');
     Route::get('/order/management', 'Admins\AdminDashboardController@orderList');
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
+    Route::get('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
 
 });

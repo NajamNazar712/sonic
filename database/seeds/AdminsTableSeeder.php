@@ -17,7 +17,7 @@ class AdminsTableSeeder extends Seeder
             'email' => 'admin@email.com',
             'username' => 'admin',
             'department' => 'Admin Department',
-            'password' => bcrypt('admin123')
+            'password' => bcrypt('password')
         ]);
 
     }
