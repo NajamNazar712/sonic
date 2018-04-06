@@ -1,77 +1,330 @@
-@extends('layouts.app')
+<!DOCTYPE html>
+<html class="loading" lang="en" data-textdirection="ltr">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+    <meta name="description" content="Trax Logistics, Sonic Project">
+    <meta name="keywords" content="Trax Logistics">
+    <meta name="author" content="Waqas">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <title>Sonic Login</title>
+    <link rel="apple-touch-icon" href="{{asset('app-assets/images/ico/apple-icon-120.png')}}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{asset('app-assets/images/ico/favicon.ico')}}">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
+          rel="stylesheet">
+    <link href="https://maxcdn.icons8.com/fonts/line-awesome/1.1/css/line-awesome.min.css"
+          rel="stylesheet">
+    <!-- BEGIN VENDOR CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/vendors.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    {{--date picker--}}
+    {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/daterange/daterangepicker.css')}}">--}}
+    {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">--}}
+    {{--date picker--}}
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">
+    <!-- END VENDOR CSS-->
+    <!-- BEGIN MODERN CSS-->
 
-@section('content')
-<div class="container">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card">
-                <div class="card-header">{{ __('Register') }}</div>
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/app.css')}}">
+    <!-- END MODERN CSS-->
+    <!-- BEGIN Page Level CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/core/menu/menu-types/vertical-overlay-menu.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/core/colors/palette-gradient.css')}}">
 
-                <div class="card-body">
-                    <form method="POST" action="{{ route('register') }}">
-                        @csrf
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/wizard.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/pages/login-register.css')}}">
+    <!-- END Page Level CSS-->
+    <!-- BEGIN Custom CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
+    <!-- END Custom CSS-->
+</head>
+<body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded fixed-navbar"
+      data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
 
-                        <div class="form-group row">
-                            <label for="name" class="col-md-4 col-form-label text-md-right">{{ __('Name') }}</label>
 
-                            <div class="col-md-6">
-                                <input id="name" type="text" class="form-control{{ $errors->has('name') ? ' is-invalid' : '' }}" name="name" value="{{ old('name') }}" required autofocus>
+<div class="app-content content">
+    <div class="content-wrapper">
+        <div class="content-header row">
+        </div>
+        <div class="content-body">
+            <section class="flexbox-container">
+                <div class="col-12 d-flex align-items-center justify-content-center">
+                    <div class="col-md-8 col-10 box-shadow-2 p-0">
+                        <div class="card border-grey border-lighten-3 m-0">
+                            <div class="card-header border-0 pb-0">
+                                <div class="card-title text-center">
+                                    <img src="{{asset('app-assets/images/logo/logo-dark.png')}}" alt="branding logo">
+                                </div>
+                                <h6 class="card-subtitle line-on-side text-muted text-center font-small-3 pt-2">
+                                    <span>Please Sign Up</span>
+                                </h6>
+                            </div>
+                            <div class="card-content">
+                                <div class="card-body">
+                                    <form id="registership" action="{{route('cod.register.submit')}}" method="post" class="steps-validation wizard-circle">
+                                        <!-- Step 1 -->
+                                        @csrf
+                                        @method('post')
+                                        <h6>Personal Information</h6>
+                                        <fieldset>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="company_name">
+                                                            Company Name :
+                                                            <span class="danger">*</span>
+                                                        </label>
 
-                                @if ($errors->has('name'))
-                                    <span class="invalid-feedback">
-                                        <strong>{{ $errors->first('name') }}</strong>
-                                    </span>
-                                @endif
+                                                        <input type="text" class="form-control input-lg required"  name="company_name">
+                                                        
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="shipper_poc">
+                                                            Person Of Contact :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control required"   name="shipper_poc">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="company_address">
+                                                            Company Address :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control required"   name="company_address">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="shipper_phone">Phone Number :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="tel" class="form-control required"   name="shipper_phone">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="cnic">CNIC :<span class="danger">*</span></label>
+                                                        <input type="text" class="form-control required"   name="cnic">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="shipper_phone2">Phone Number 2:</label>
+                                                        <input type="tel" class="form-control"   name="shipper_phone2">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="ntn_no">NTN Number :<span class="danger">*</span></label>
+                                                        <input type="text" class="form-control required"    name="ntn_no">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="url">URL :</label>
+                                                        <input type="text" class="form-control"   name="url">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <!-- Step 2 -->
+                                        <h6>Shipping Information</h6>
+                                        <fieldset>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="pickup_address">
+                                                            Pickup Address :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control "   name="pickup_address">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="shipping_poc">
+                                                            Person Of Contact :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control required"   name="shipping_poc">
+                                                    </div>
+
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="shipping_phone">
+                                                            Phone Number :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="tel" class="form-control required"   name="shipping_phone">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="shipping_email">Email :</label>
+                                                        <input type="email" name="shipping_email" class="form-control required">
+                                                        </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <!-- Step 3 -->
+                                        <h6>Bank Information</h6>
+                                        <fieldset>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="bank_name">
+                                                            Bank Name :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control required"   name="bank_name">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="bank_branch">
+                                                            Bank Branch :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control required" name="bank_branch">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="account_name">Account Name :</label>
+                                                        <input type="text" class="form-control required" name="account_name">
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="account_title">
+                                                            Account Title :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div class='input-group'>
+                                                            <input type='text' class="form-control required"   name="account_title"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="iban">
+                                                            IBAN NO :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control required" name="iban_no">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="mode_of_payment">Mode Of Payment :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <select name="mode_of_payment" class="form-control required">
+                                                            <option value="" selected="" disabled="">Select A Payment Mode</option>
+                                                            <option value="ibft">IBFT Reimbursements</option>
+                                                            <option value="invoices">Invoices</option>
+                                                        </select>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <div class="">
+                                                        <label for="cycle_of_payment">Cycle Of Payment :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        </div>
+                                                        <select name="cycle_of_payment" class="form-control required">
+                                                            <option value="" selected="" disabled="">Select A Payment Mode</option>
+                                                            <option value="daily">Daily</option>
+                                                            <option value="weekly">Weekly</option>
+                                                            <option value="fortnight">Fortnight</option>
+                                                            <option value="monthly">Monthly</option>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </fieldset>
+                                        <!-- Step 4 -->
+                                        <h6>Login Information</h6>
+                                        <fieldset>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+                                                        <label for="email">
+                                                            Email :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="text" class="form-control required"   name="email">
+                                                    </div>
+                                                    <div class="form-group">
+                                                        <label for="password">
+                                                            Password :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div class="input-group">
+                                                        <input type="password" class="form-control required" name="password">
+                                                        <div class="input-group-append" id="peye">
+                                                            <span class="input-group-text"><i class="la la-eye"></i></span>
+                                                        </div>
+                                                    </div>
+                                                    </div>
+                                                    {{--<div class="form-group">--}}
+                                                        {{--<label for="password-confirm">--}}
+                                                           {{--Confirm Password :--}}
+                                                            {{--<span class="danger">*</span>--}}
+                                                        {{--</label>--}}
+                                                        {{--<input type="password" class="form-control required"  name="password-confirm">--}}
+                                                        {{--<span id="perror" class="danger" style="display: none;">* Password doesn't match</span>--}}
+                                                    {{--</div>--}}
+                                                </div>
+
+                                            </div>
+                                        </fieldset>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-
-                        <div class="form-group row">
-                            <label for="email" class="col-md-4 col-form-label text-md-right">{{ __('E-Mail Address') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="email" type="email" class="form-control{{ $errors->has('email') ? ' is-invalid' : '' }}" name="email" value="{{ old('email') }}" required>
-
-                                @if ($errors->has('email'))
-                                    <span class="invalid-feedback">
-                                        <strong>{{ $errors->first('email') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="password" class="col-md-4 col-form-label text-md-right">{{ __('Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password" type="password" class="form-control{{ $errors->has('password') ? ' is-invalid' : '' }}" name="password" required>
-
-                                @if ($errors->has('password'))
-                                    <span class="invalid-feedback">
-                                        <strong>{{ $errors->first('password') }}</strong>
-                                    </span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="password-confirm" class="col-md-4 col-form-label text-md-right">{{ __('Confirm Password') }}</label>
-
-                            <div class="col-md-6">
-                                <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
-                            </div>
-                        </div>
-
-                        <div class="form-group row mb-0">
-                            <div class="col-md-6 offset-md-4">
-                                <button type="submit" class="btn btn-primary">
-                                    {{ __('Register') }}
-                                </button>
-                            </div>
-                        </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+            </section>
         </div>
     </div>
 </div>
-@endsection
+<!-- ////////////////////////////////////////////////////////////////////////////-->
+<!-- BEGIN VENDOR JS-->
+<script src="{{asset('app-assets/vendors/js/vendors.min.js')}}" ></script>
+<!-- BEGIN VENDOR JS-->
+<script src="{{asset('app-assets/vendors/js/extensions/jquery.steps.min.js')}}" type="text/javascript"></script>
+<!-- BEGIN PAGE VENDOR JS-->
+<script src="{{asset('app-assets/vendors/js/forms/validation/jqBootstrapValidation.js')}}"
+></script>
+<script src="{{asset('app-assets/vendors/js/pickers/dateTime/moment-with-locales.min.js')}}"
+        type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/daterange/daterangepicker.js')}}"
+        type="text/javascript"></script>
+{{--<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>--}}
+{{--<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>--}}
+<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
+        type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" ></script>
+<!-- END PAGE VENDOR JS-->
+<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/js/scripts/forms/wizard-steps.js')}}" type="text/javascript"></script>
+<!-- BEGIN MODERN JS-->
+<script src="{{asset('app-assets/js/core/app-menu.js')}}" ></script>
+<script src="{{asset('app-assets/js/core/app.js')}}" ></script>
+<!-- END MODERN JS-->
+{{--<script src="{{asset('app-assets/js/scripts/customizer.js')}}" type="text/javascript"></script>--}}
+<!-- BEGIN PAGE LEVEL JS-->
+<script src="{{asset('app-assets/js/scripts/forms/form-login-register.js')}}" ></script>
+<!-- END PAGE LEVEL JS-->
+<script>
+    //$('.pickadate').pickadate();
+    $(document).ready(function () {
+       //$('.select2').select2();
+
+        $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')})
+    });
+</script>
+</body>
+</html>

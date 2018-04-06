@@ -26,6 +26,8 @@ Route::get('/ecommerce', 'Shippers\ShipperDashboardController@ecommerce');
 Route::prefix('cod')->group(function () {
     Route::get('/login','Auth\LoginController@showLoginForm')->name('cod.login');
     Route::post('/login','Auth\LoginController@login')->name('cod.login.submit');
+    Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('cod.register');
+    Route::post('/register','Auth\RegisterController@register')->name('cod.register.submit');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('cod.dashboard');
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');

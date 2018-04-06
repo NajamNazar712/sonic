@@ -89,11 +89,18 @@ $(".steps-validation").steps({
     onFinishing: function (event, currentIndex)
     {
         form.validate().settings.ignore = ":disabled";
+        // if($('input[name="password"]') != $('input[name="password-confirm"]')){
+        //
+        //     $('#perror').css('display','block');
+        // }else if($('input[name="password"]') == $('input[name="password-confirm"]')){
+        //     $('#perror').css('display','none');
+        //
+        // }
         return form.valid();
     },
     onFinished: function (event, currentIndex)
     {
-        alert("Submitted!");
+        $('#registership').submit();
     }
 });
 
