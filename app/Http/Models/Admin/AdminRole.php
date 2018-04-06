@@ -4,7 +4,7 @@ namespace App\Http\Models\Admin;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Role extends Model
+class AdminRole extends Model
 {
     //
 }

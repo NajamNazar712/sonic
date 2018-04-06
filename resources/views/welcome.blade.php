@@ -111,6 +111,9 @@
                                             <a class="" href="{{URL::to('/cod/login')}}" title="COD">COD</a><span class="m-sparator"></span>
                                         </li>
                                         <li>
+                                            <a class="" href="{{URL::to('/cod/register')}}" title="COD Register">COD Register</a><span class="m-sparator"></span>
+                                        </li>
+                                        <li>
                                             <a class="" href="{{URL::to('/admin/login')}}" title="COD">Admin COD</a><span class="m-sparator"></span>
                                         </li>
                                     </ul>
