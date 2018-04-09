@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Auth;
 
-use App\User;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipper\UserBankInfo;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
@@ -29,7 +32,7 @@ class RegisterController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/home';
+    protected $redirectTo = '/cod/register/success';
 
     /**
      * Create a new controller instance.
@@ -55,17 +58,45 @@ class RegisterController extends Controller
     {
 
         return Validator::make($data, [
-            'name' => 'required|string|max:255',
+            'company_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
+            'password' => 'required|string|min:6',
+            'shipper_poc'=>'required|string|max:255',
+            'company_address'=>'required|string|max:255',
+            'shipper_phone'=>'required|string|max:255',
+            'shipper_phone2'=>'string|max:255',
+            'cnic'=>'required|string|max:255',
+            'ntn_no'=>'string|max:255',
+            'url'=>'string|max:255',
+            'pickup_address'=>'required|string|max:255',
+            'shipping_poc'=>'required|string|max:255',
+            'shipping_phone'=>'required|string|max:255',
+            'shipping_email'=>'required|string|max:255',
+            'bank_name'=>'required|string|max:255',
+            'bank_branch'=>'required|string|max:255',
+            'account_no'=>'required|string|max:255',
+            'account_title'=>'required|string|max:255',
+            'iban_no'=>'required|string|max:255',
+            'mode_of_payment'=>'required|string|max:255',
+            'cycle_of_payment'=>'required|string|max:255',
+
         ]);
     }
 
     public function register(Request $request)
     {
-        return $request;
+        //return $request;
+        $this->validator($request->all())->validate();
 
+        event(new Registered($user = $this->create($request->all())));
+
+        //$this->guard()->login($user);
+
+        return $this->registered($request, $user)
+            ?: redirect($this->redirectPath());
     }
+
+
     /**
      * Create a new user instance after a valid registration.
      *
@@ -75,10 +106,39 @@ class RegisterController extends Controller
     protected function create(array $data)
     {
 
-        return User::create([
-            'name' => $data['name'],
+        $newUser = User::create([
+            'name' => $data['company_name'],
             'email' => $data['email'],
             'password' => Hash::make($data['password']),
+            'address' => $data['company_address'],
+            'poc' => $data['shipper_poc'],
+            'phone'=>$data['shipper_phone'],
+            'phone2'=>$data['shipper_phone2'],
+            'cnic' => $data['cnic'],
+            'ntn_no' => $data['ntn_no'],
+            'url' => $data['url'],
+            'fpage'=>'http://facebook.com',
         ]);
+        UserShippingInfo::create([
+                'user_id'=>$newUser->id,
+                'pickup_address'=>$data['pickup_address'],
+                'poc'=>$data['shipping_poc'],
+                'phone'=>$data['shipping_phone'],
+                'email'=>$data['shipping_email'],
+        ]);
+        UserBankInfo::create([
+                'user_id'=>$newUser->id,
+                'bank_name'=>$data['bank_name'],
+                'bank_branch'=>$data['bank_branch'],
+                'account_no'=>$data['account_no'],
+                'account_title'=>$data['account_title'],
+                'iban'=>$data['iban_no'],
+                'payment_mode'=>$data['mode_of_payment'],
+                'payment_cycle'=>$data['cycle_of_payment'],
+        ]);
+        return $newUser;
+    }
+    public function register_success(){
+        return view('client.register_success');
     }
 }

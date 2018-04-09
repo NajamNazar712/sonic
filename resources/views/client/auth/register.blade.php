@@ -68,6 +68,7 @@
                                         @csrf
                                         @method('post')
                                         <h6>Personal Information</h6>
+                                        @include('client.inc.messages')
                                         <fieldset>
                                             <div class="row">
                                                 <div class="col-md-6">
@@ -114,7 +115,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="cnic">CNIC :<span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required"   name="cnic">
+                                                        <input type="text" class="form-control required" placeholder="(e.g: 42201-1221333-9)"  name="cnic">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -127,8 +128,8 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="ntn_no">NTN Number :<span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required"    name="ntn_no">
+                                                        <label for="ntn_no">NTN Number :</label>
+                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)"   name="ntn_no">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -149,7 +150,7 @@
                                                             Pickup Address :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control "   name="pickup_address">
+                                                        <input type="text" class="form-control "  name="pickup_address">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_poc">
@@ -169,7 +170,7 @@
                                                         <input type="tel" class="form-control required"   name="shipping_phone">
                                                     </div>
                                                     <div class="form-group">
-                                                        <label for="shipping_email">Email :</label>
+                                                        <label for="shipping_email">Email :<span class="danger">*</span></label>
                                                         <input type="email" name="shipping_email" class="form-control required">
                                                         </div>
                                                 </div>
@@ -195,8 +196,8 @@
                                                         <input type="text" class="form-control required" name="bank_branch">
                                                     </div>
                                                     <div class="form-group">
-                                                        <label for="account_name">Account Name :</label>
-                                                        <input type="text" class="form-control required" name="account_name">
+                                                        <label for="account_name">Account No. :<span class="danger">*</span></label>
+                                                        <input type="text" class="form-control required" name="account_no">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -215,7 +216,7 @@
                                                             IBAN NO :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" name="iban_no">
+                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="mode_of_payment">Mode Of Payment :

@@ -32,7 +32,7 @@ Route::prefix('cod')->group(function () {
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
     Route::get('/logout','Auth\LoginController@logout')->name('cod.logout');
-
+    Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('cod.logout');
 
 });
