@@ -21,6 +21,7 @@ class CreateBankInfosTable extends Migration
             $table->string('account_no');
             $table->string('account_title');
             $table->string('iban');
+            $table->integer('city_code');
             $table->string('payment_mode');
             $table->string('payment_cycle');
             $table->timestamps();
