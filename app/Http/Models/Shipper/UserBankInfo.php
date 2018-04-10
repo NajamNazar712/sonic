@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class UserBankInfo extends Model
 {
-    protected $fillable = ['user_id','bank_name','bank_branch','account_no','account_title','iban','payment_mode','payment_cycle'];
+    protected $fillable = ['user_id','bank_name','bank_branch','account_no','account_title','iban','city_code','payment_mode','payment_cycle'];
 }

@@ -23,9 +23,9 @@ class CreateUsersTable extends Migration
             $table->string('phone');
             $table->string('phone2')->nullable();
             $table->string('cnic');
-            $table->string('ntn_no');
-            $table->string('url');
-            $table->string('fpage');
+            $table->string('ntn_no')->nullable();
+            $table->string('url')->nullable();
+            $table->integer('city_code');
             $table->boolean('active')->default(0);
             $table->rememberToken();
             $table->timestamps();

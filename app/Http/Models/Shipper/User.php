@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','address','poc','phone','phone2','cnic','ntn_no','url','fpage','active',
+        'name', 'email', 'password','address','poc','phone','phone2','cnic','ntn_no','url','city_code','active',
     ];
 
     /**
@@ -26,4 +26,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password', 'remember_token',
     ];
+    public function products(){
+        return $this->belongsToMany('App\Http\Models\Product')->withTimestamps();
+    }
 }

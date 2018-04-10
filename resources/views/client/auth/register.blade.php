@@ -17,18 +17,18 @@
           rel="stylesheet">
     <!-- BEGIN VENDOR CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/vendors.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     {{--date picker--}}
     {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/daterange/daterangepicker.css')}}">--}}
     {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">--}}
     {{--date picker--}}
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">
+    {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">--}}
+    {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">--}}
     <!-- END VENDOR CSS-->
     <!-- BEGIN MODERN CSS-->
 
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/app.css')}}">
     <!-- END MODERN CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <!-- BEGIN Page Level CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/core/menu/menu-types/vertical-overlay-menu.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/core/colors/palette-gradient.css')}}">
@@ -139,6 +139,24 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+
+                                                        <label for="shipper_city">City :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="shipper_city" id="shipper_city" class="select2 form-control required" style="width: 100%">
+                                                                <option value="" selected>Select City</option>
+                                                                @foreach($cities as $city)
+                                                                    <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </fieldset>
                                         <!-- Step 2 -->
                                         <h6>Shipping Information</h6>
@@ -150,7 +168,7 @@
                                                             Pickup Address :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control "  name="pickup_address">
+                                                        <input type="text" class="form-control required"  name="pickup_address">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_poc">
@@ -159,7 +177,19 @@
                                                         </label>
                                                         <input type="text" class="form-control required"   name="shipping_poc">
                                                     </div>
+                                                    <div class="form-group">
 
+                                                        <label for="url">Product Type :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="product_type" id="product_select" class="select2 form-control" style="width: 100%">
+                                                                @foreach($products as $product)
+                                                                    <option value="{{$product->id}}">{{$product->product_name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -172,9 +202,26 @@
                                                     <div class="form-group">
                                                         <label for="shipping_email">Email :<span class="danger">*</span></label>
                                                         <input type="email" name="shipping_email" class="form-control required">
+                                                    </div>
+                                                    <div class="form-group">
+
+                                                        <label for="shipping_city">Shipping City :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="shipping_city" id="shipping_city" class="select2 form-control required" style="width: 100%">
+                                                                <option value="" selected>Select Shipping City</option>
+                                                                @foreach($cities as $city)
+                                                                    <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                                                @endforeach
+                                                            </select>
                                                         </div>
+                                                    </div>
+
                                                 </div>
                                             </div>
+
+
                                         </fieldset>
                                         <!-- Step 3 -->
                                         <h6>Bank Information</h6>
@@ -199,6 +246,16 @@
                                                         <label for="account_name">Account No. :<span class="danger">*</span></label>
                                                         <input type="text" class="form-control required" name="account_no">
                                                     </div>
+                                                    <div class="form-group">
+                                                        <label for="mode_of_payment">Mode Of Payment :
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <select name="mode_of_payment" class="form-control required">
+                                                            <option value="" selected="" disabled="">Select A Payment Mode</option>
+                                                            <option value="ibft">IBFT Reimbursements</option>
+                                                            <option value="invoices">Invoices</option>
+                                                        </select>
+                                                    </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -211,6 +268,7 @@
                                                             />
                                                         </div>
                                                     </div>
+
                                                     <div class="form-group">
                                                         <label for="iban">
                                                             IBAN NO :
@@ -218,21 +276,26 @@
                                                         </label>
                                                         <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no">
                                                     </div>
-                                                    <div class="form-group">
-                                                        <label for="mode_of_payment">Mode Of Payment :
-                                                            <span class="danger">*</span>
-                                                        </label>
-                                                        <select name="mode_of_payment" class="form-control required">
-                                                            <option value="" selected="" disabled="">Select A Payment Mode</option>
-                                                            <option value="ibft">IBFT Reimbursements</option>
-                                                            <option value="invoices">Invoices</option>
-                                                        </select>
-                                                    </div>
+
+                                                        <div class="form-group">
+
+                                                            <label for="url">Bank City :
+                                                                <span class="danger">*</span>
+                                                            </label>
+                                                            <div>
+                                                                <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
+                                                                    <option value="" selected>Select Bank City</option>
+                                                                    @foreach($cities as $city)
+                                                                        <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                                                    @endforeach
+                                                                </select>
+                                                            </div>
+                                                        </div>
                                                     <div class="form-group">
                                                         <div class="">
-                                                        <label for="cycle_of_payment">Cycle Of Payment :
-                                                            <span class="danger">*</span>
-                                                        </label>
+                                                            <label for="cycle_of_payment">Cycle Of Payment :
+                                                                <span class="danger">*</span>
+                                                            </label>
                                                         </div>
                                                         <select name="cycle_of_payment" class="form-control required">
                                                             <option value="" selected="" disabled="">Select A Payment Mode</option>
@@ -243,7 +306,9 @@
                                                         </select>
                                                     </div>
                                                 </div>
-                                            </div>
+
+                                                </div>
+
                                         </fieldset>
                                         <!-- Step 4 -->
                                         <h6>Login Information</h6>
@@ -322,8 +387,8 @@
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function () {
-       //$('.select2').select2();
-
+       $('.select2').select2();
+        $('#product_select').select2();
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')})
     });
 </script>

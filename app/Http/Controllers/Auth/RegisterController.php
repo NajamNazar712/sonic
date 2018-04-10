@@ -11,7 +11,8 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
-
+use App\Http\Models\Product;
+use App\Http\Models\CityInfo;
 class RegisterController extends Controller
 {
     /*
@@ -46,7 +47,10 @@ class RegisterController extends Controller
 
     public function showRegistrationForm()
     {
-        return view('client.auth.register');
+        $products = Product::all();
+        $cities = CityInfo::all();
+//        return $cities;
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$cities]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -64,14 +68,18 @@ class RegisterController extends Controller
             'shipper_poc'=>'required|string|max:255',
             'company_address'=>'required|string|max:255',
             'shipper_phone'=>'required|string|max:255',
-            'shipper_phone2'=>'string|max:255',
+//            'shipper_phone2'=>'string|max:255',
             'cnic'=>'required|string|max:255',
-            'ntn_no'=>'string|max:255',
-            'url'=>'string|max:255',
+//            'ntn_no'=>'string|max:255',
+//            'url'=>'string|max:255',
+            'shipper_city'=>'required|string|max:255',
+            'shipping_city'=>'required|string|max:255',
+            'bank_city'=>'required|string|max:255',
             'pickup_address'=>'required|string|max:255',
             'shipping_poc'=>'required|string|max:255',
             'shipping_phone'=>'required|string|max:255',
             'shipping_email'=>'required|string|max:255',
+            'product_type'=>'required|string|max:255',
             'bank_name'=>'required|string|max:255',
             'bank_branch'=>'required|string|max:255',
             'account_no'=>'required|string|max:255',
@@ -85,7 +93,9 @@ class RegisterController extends Controller
 
     public function register(Request $request)
     {
-        //return $request;
+//        $products = implode(',',$request->product_type);
+//
+//        return $request;
         $this->validator($request->all())->validate();
 
         event(new Registered($user = $this->create($request->all())));
@@ -105,7 +115,6 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
-
         $newUser = User::create([
             'name' => $data['company_name'],
             'email' => $data['email'],
@@ -117,14 +126,17 @@ class RegisterController extends Controller
             'cnic' => $data['cnic'],
             'ntn_no' => $data['ntn_no'],
             'url' => $data['url'],
-            'fpage'=>'http://facebook.com',
+            'city_code'=>$data['shipper_city'],
         ]);
+        $shipper = User::find($newUser->id);
+        $shipper->products()->attach($data['product_type']);
         UserShippingInfo::create([
                 'user_id'=>$newUser->id,
                 'pickup_address'=>$data['pickup_address'],
                 'poc'=>$data['shipping_poc'],
                 'phone'=>$data['shipping_phone'],
                 'email'=>$data['shipping_email'],
+                'city_code'=>$data['shipping_city'],
         ]);
         UserBankInfo::create([
                 'user_id'=>$newUser->id,
@@ -135,7 +147,9 @@ class RegisterController extends Controller
                 'iban'=>$data['iban_no'],
                 'payment_mode'=>$data['mode_of_payment'],
                 'payment_cycle'=>$data['cycle_of_payment'],
+                'city_code'=>$data['bank_city'],
         ]);
+
         return $newUser;
     }
     public function register_success(){
