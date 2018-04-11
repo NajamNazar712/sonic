@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Models\Shipper;
-
+use App\Http\Models\CityInfo;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -28,5 +28,14 @@ class User extends Authenticatable
     ];
     public function products(){
         return $this->belongsToMany('App\Http\Models\Product')->withTimestamps();
+    }
+    public function city(){
+        return $this->belongsTo('App\Http\Models\CityInfo','city_code');
+    }
+    public function userCity(){
+
+    }
+    public function bank(){
+        return $this->hasOne('App\Http\Models\Shipper\UserBankInfo');
     }
 }
