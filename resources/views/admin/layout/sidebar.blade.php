@@ -10,17 +10,14 @@
                 <ul class="menu-content">
                     <li><a class="menu-item" href="/admin/order/management" data-i18n="nav.dash.ecommerce">Order Management</a>
                     </li>
-                    <li class=""><a class="menu-item" href="/admin/order/pending" data-i18n="nav.dash.crypto">Pending Booked Orders</a>
-                    </li>
                     <li><a class="menu-item" href="/admin/sheet/receiving" data-i18n="nav.dash.sales">Booked Receiving Sheets</a>
                     </li>
-                    <li><a class="menu-item" href="#" data-i18n="nav.dash.sales">Printed Receiving Sheets</a>
-                    </li>
+
                 </ul>
             </li>
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Book A Service</span></a>
+            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Account Requests</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="/RegularDelivery" data-i18n="nav.dash.ecommerce">Regular Delivery</a></li>
+                    <li><a class="menu-item" href="/admin/accounts/pending" data-i18n="nav.dash.ecommerce">Pending Accounts List</a></li>
                     <li><a class="menu-item" href="/RegularDelivery" data-i18n="nav.dash.ecommerce">Replacement Delivery</a></li>
                     <li><a class="menu-item" href="/RegularDelivery" data-i18n="nav.dash.ecommerce">Try & Buy Delivery</a></li>
                 </ul>
