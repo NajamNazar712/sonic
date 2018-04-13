@@ -27,6 +27,7 @@ class CreateUsersTable extends Migration
             $table->string('url')->nullable();
             $table->integer('city_code');
             $table->boolean('active')->default(0);
+            $table->boolean('blacklist')->default(0);
             $table->rememberToken();
             $table->timestamps();
         });
