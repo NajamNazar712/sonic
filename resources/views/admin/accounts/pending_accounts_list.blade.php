@@ -37,8 +37,19 @@
                                         <td>{{$account->address}}</td>
                                         <td>{{$account->email}}</td>
                                         <td>
-                                            <a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal">View Bank Info</a><br>
-                                            <a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ShippingInfoModal">View Shipping Info</a>
+                                            <span class="dropdown">
+                                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"
+                                                    aria-haspopup="true" aria-expanded="false"><i class="ft-settings"></i></button>
+                                            <div class="dropdown-menu open-left arrow">
+                                              <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal"><i class="ft-plus-circle primary"></i> View Bank Info</a>
+                                              <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ShippingInfoModal"><i class="ft-plus-circle primary"></i> View Shipping Info</a>
+                                                {{--<div class="dropdown-divider"></div>--}}
+                                              {{--<a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal"><i class="ft-plus-circle primary"></i> View Bank Info</a>--}}
+
+                                            </div>
+                                          </span>
+                                            {{--<a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal">View Bank Info</a><br>--}}
+                                            {{--<a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ShippingInfoModal">View Shipping Info</a>--}}
                                         </td>
                                     </tr>
                                 @endforeach
