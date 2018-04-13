@@ -30,12 +30,13 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Http\Models\Product')->withTimestamps();
     }
     public function city(){
-        return $this->belongsTo('App\Http\Models\CityInfo','city_code');
+        return $this->belongsTo('App\Http\Models\CityInfo','city_code','city_code');
     }
-    public function userCity(){
 
-    }
     public function bank(){
         return $this->hasOne('App\Http\Models\Shipper\UserBankInfo');
+    }
+    public function shipping(){
+        return $this->hasOne('App\Http\Models\Shipper\UserShippingInfo');
     }
 }

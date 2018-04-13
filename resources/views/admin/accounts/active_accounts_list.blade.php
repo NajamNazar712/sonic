@@ -1,14 +1,14 @@
 @extends('admin.layout.master')
 
 @section('content')
-    <h1>Pending Accounts List</h1>
+    <h1>Active Accounts List</h1>
 
     <section>
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4>Pending Accounts</h4>
+                        <h4>Active Accounts</h4>
                     </div>
 
                     <div class="card-content">
@@ -39,6 +39,7 @@
                                         <td>
                                             <a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal">View Bank Info</a><br>
                                             <a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ShippingInfoModal">View Shipping Info</a>
+                                            <a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#RatesModal">View Shipper Rates</a>
                                         </td>
                                     </tr>
                                 @endforeach

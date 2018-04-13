@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\CityInfo;
+use App\Http\Models\PickupType;
 class AdminDashboardController extends Controller
 {
 
@@ -32,10 +33,10 @@ class AdminDashboardController extends Controller
 //       return $pendingAccounts->city();
         return view('admin.accounts.pending_accounts_list')->with('accounts',$pendingAccounts);
     }
-    public function cities(){
-//        $city = CityInfo::find(11)->users;
-        $city = confide::user();
-        dd($city);
+    public function activeAccountsList(){
+        $activeAccounts =  User::where('active',1)->get();
+        return view('admin.accounts.active_accounts_list')->with('accounts',$activeAccounts);
+
     }
 
     /**
@@ -43,9 +44,30 @@ class AdminDashboardController extends Controller
      * @throws \Throwable
      */
     public function viewBankInfo($id){
-        $user = User::find($id)->bank;
-
-        $returnHTML = view('admin/components/bank')->with('bank',$user)->render();
+        $user = User::find($id);
+        $bank = $user->bank;
+        $returnHTML = view('admin/components/bank')->with(['bank'=>$bank,'user'=>$user])->render();
         return response()->json($returnHTML);
+    }
+    public function viewShippingInfo($id){
+        $user = User::find($id);
+        $shipping = $user->shipping;
+        $returnHTML = view('admin/components/shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
+        return response()->json($returnHTML);
+    }
+    public function viewShipperRates($id){
+        $user = User::find($id);
+        $shipping = $user->shipping;
+        $returnHTML = view('admin/components/shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
+        return response()->json($returnHTML);
+    }
+    public function pickup(){
+//        $cit = CityInfo::all()->where('city_code','202');
+        $cit = PickupType::find(1)->cities()->orderBy('city_name')->get();
+//        $cite = $cit->cities()->get();
+//        return $cite;
+
+
+//    return $cit;
     }
 }

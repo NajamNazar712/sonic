@@ -285,7 +285,7 @@
                                                             <div>
                                                                 <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                     <option value="" selected>Select Bank City</option>
-                                                                    @foreach($cities as $city)
+                                                                    @foreach($bank_cities as $city)
                                                                         <option value="{{$city->city_code}}">{{$city->city_name}}</option>
                                                                     @endforeach
                                                                 </select>

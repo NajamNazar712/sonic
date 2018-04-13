@@ -9,4 +9,11 @@ class UserShippingInfo extends Model
     protected $fillable = [
         'user_id', 'pickup_address','poc','phone','email','city_code',
     ];
+
+    public function user(){
+        return $this->belongsTo('App\Http\Models\Shipper\User');
+    }
+    public function city(){
+        return $this->belongsTo('App\Http\Models\CityInfo','city_code','city_code');
+    }
 }

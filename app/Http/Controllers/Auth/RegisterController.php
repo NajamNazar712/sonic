@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use App\Http\Models\Product;
 use App\Http\Models\CityInfo;
+use App\Http\Models\PickupType;
 class RegisterController extends Controller
 {
     /*
@@ -48,9 +49,11 @@ class RegisterController extends Controller
     public function showRegistrationForm()
     {
         $products = Product::all();
-        $cities = CityInfo::all();
+        $bank = CityInfo::all();
 //        return $cities;
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$cities]);
+        $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
+
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$cities,'bank_cities'=>$bank]);
     }
     /**
      * Get a validator for an incoming registration request.
