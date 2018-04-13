@@ -18,8 +18,7 @@
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Account Requests</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="/admin/accounts/pending" data-i18n="nav.dash.ecommerce">Pending Accounts List</a></li>
-                    <li><a class="menu-item" href="/RegularDelivery" data-i18n="nav.dash.ecommerce">Replacement Delivery</a></li>
-                    <li><a class="menu-item" href="/RegularDelivery" data-i18n="nav.dash.ecommerce">Try & Buy Delivery</a></li>
+                    <li><a class="menu-item" href="/admin/accounts/active" data-i18n="nav.dash.ecommerce">Active Accounts List</a></li>
                 </ul>
             </li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Profile Update</span></a></li>

@@ -10,4 +10,7 @@ class UserBankInfo extends Model
     public function user(){
         return $this->belongsTo('App\Http\Models\Shipper\User');
     }
+    public function city(){
+        return $this->belongsTo('App\Http\Models\CityInfo','city_code','city_code');
+    }
 }

@@ -1,11 +1,12 @@
-<h1>Bank Information Of {{$bank->name}}</h1>
+<h1>Bank Information Of {{$user->name}}</h1>
 <div class="bs-callout-primary callout-border-left callout-transparent p-1">
 
-    <p>Bank Name : {{$bank->bank_name}}</p>
-    <p>Bank Branch : {{$bank->bank_branch}}</p>
-    <p>Account No. : {{$bank->account_no}}</p>
-    <p>Account Title : {{$bank->account_title}}</p>
-    <p>IBAN No. : {{$bank->iban}}</p>
-    <p>Payment Mode : {{$bank->payment_mode}}</p>
-    <p>Payment Cycle : {{$bank->payment_cycle}}</p>
+    <p><b>Bank Name :</b> {{$bank->bank_name}}</p>
+    <p><b>Bank Branch :</b> {{$bank->bank_branch}}</p>
+    <p><b>Account No. :</b> {{$bank->account_no}}</p>
+    <p><b>Account Title :</b> {{$bank->account_title}}</p>
+    <p><b>IBAN No. :</b> {{$bank->iban}}</p>
+    <p><b>City :</b> {{$bank->city->city_name}}</p>
+    <p><b>Payment Mode :</b> {{$bank->payment_mode}}</p>
+    <p><b>Payment Cycle :</b> {{$bank->payment_cycle}}</p>
 </div>
