@@ -109,7 +109,12 @@
                                         <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Login</button>
                                     </form>
                                 </div>
-
+                                <p class="card-subtitle line-on-side text-muted text-center font-small-3 mx-2 my-1">
+                                    <span>New to Trax ?</span>
+                                </p>
+                                <div class="card-body">
+                                    <a href="{{route('cod.register')}}" class="btn btn-outline-danger btn-block"><i class="ft-user"></i> Register</a>
+                                </div>
                             </div>
                         </div>
                     </div>
