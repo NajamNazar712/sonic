@@ -16,5 +16,8 @@ class DatabaseSeeder extends Seeder
         $this->call(AdminsTableSeeder::class);
         $this->call(CityTableSeeder::class);
         $this->call(ProductsTableSeeder::class);
+        $this->call(BookingTableSeeder::class);
+        $this->call(PickupTypeTableSeeder::class);
+        $this->call(ShippingModeTableSeeder::class);
     }
 }
