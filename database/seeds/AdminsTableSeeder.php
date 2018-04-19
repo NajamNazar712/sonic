@@ -12,7 +12,7 @@ class AdminsTableSeeder extends Seeder
      */
     public function run()
     {
-        $admin = Admin::create([
+        Admin::create([
             'name' => 'admin',
             'email' => 'admin@email.com',
             'username' => 'admin',
