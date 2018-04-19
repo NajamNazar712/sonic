@@ -78,7 +78,7 @@
                                                             <span class="danger">*</span>
                                                         </label>
 
-                                                        <input type="text" class="form-control input-lg required"  name="company_name">
+                                                        <input type="text" class="form-control required" value="{{ old('name') }}"  name="name">
                                                         
                                                     </div>
                                                 </div>
@@ -88,7 +88,7 @@
                                                             Person Of Contact :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"   name="shipper_poc">
+                                                        <input type="text" class="form-control required"   name="shipper_poc" value="{{old('shipper_poc')}}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -99,7 +99,7 @@
                                                             Company Address :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"   name="company_address">
+                                                        <input type="text" class="form-control required"   name="company_address" value="{{ old('company_address') }}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -107,7 +107,7 @@
                                                         <label for="shipper_phone">Phone Number :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required"   name="shipper_phone">
+                                                        <input type="tel" class="form-control required"   name="shipper_phone" value="{{ old('shipper_phone') }}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -115,7 +115,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="cnic">CNIC :<span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required" placeholder="(e.g: 42201-1221333-9)"  name="cnic">
+                                                        <input type="text" class="form-control required" placeholder="(e.g: 12345-6789123-9)" value="{{ old('cnic') }}"  name="cnic">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -135,7 +135,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="url">URL :</label>
-                                                        <input type="text" class="form-control"   name="url">
+                                                        <input type="text" class="form-control"  name="url" placeholder="URL/Facebook Page">
                                                     </div>
                                                 </div>
                                             </div>
@@ -183,7 +183,8 @@
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                            <select name="product_type" id="product_select" class="select2 form-control" style="width: 100%">
+                                                            <select name="product_type" id="product_select" class="select2 form-control required" style="width: 100%">
+                                                                <option value="" selected>Select Product Type</option>
                                                                 @foreach($products as $product)
                                                                     <option value="{{$product->id}}">{{$product->product_name}}</option>
                                                                 @endforeach
@@ -197,7 +198,7 @@
                                                             Phone Number :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required"   name="shipping_phone">
+                                                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_email">Email :<span class="danger">*</span></label>
@@ -263,10 +264,8 @@
                                                             Account Title :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <div class='input-group'>
-                                                            <input type='text' class="form-control required"   name="account_title"
-                                                            />
-                                                        </div>
+                                                        <input type='text' class="form-control required" placeholder="e.g: Trax Logistics" name="account_title">
+
                                                     </div>
 
                                                     <div class="form-group">
@@ -298,7 +297,7 @@
                                                             </label>
                                                         </div>
                                                         <select name="cycle_of_payment" class="form-control required">
-                                                            <option value="" selected="" disabled="">Select A Payment Mode</option>
+                                                            <option value="" selected="" disabled="">Select A Payment Duration</option>
                                                             <option value="daily">Daily</option>
                                                             <option value="weekly">Weekly</option>
                                                             <option value="fortnight">Fortnight</option>
@@ -327,12 +326,14 @@
                                                             Password :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <div class="input-group">
+                                                        <div class="form-group position-relative">
+
                                                         <input type="password" class="form-control required" name="password">
-                                                        <div class="input-group-append" id="peye">
-                                                            <span class="input-group-text"><i class="la la-eye"></i></span>
+                                                        <div class="form-control-position" id="peye">
+                                                            <i class="la la-eye success"></i>
                                                         </div>
-                                                    </div>
+
+                                                        </div>
                                                     </div>
                                                     {{--<div class="form-group">--}}
                                                         {{--<label for="password-confirm">--}}
@@ -370,8 +371,8 @@
         type="text/javascript"></script>
 {{--<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>--}}
 {{--<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>--}}
-<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}"
-        type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" ></script>
 <!-- END PAGE VENDOR JS-->
 <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
@@ -387,9 +388,16 @@
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function () {
-       $('.select2').select2();
-        $('#product_select').select2();
+       $('.select2').select2({
+           dropdownParent:$('#registership')
+       });
+        $('#product_select').select2({
+            dropdownParent:$('#registership')
+        });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')})
+        $("input[name='cnic']").inputmask("99999-9999999-9");
+        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask("(9999) 999-9999");
+
     });
 </script>
 </body>
