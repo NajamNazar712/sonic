@@ -46,6 +46,7 @@ Route::prefix('admin')->group(function () {
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::get('/accounts/pending', 'Admins\AdminDashboardController@pendingAccountsList');
     Route::get('/accounts/active', 'Admins\AdminDashboardController@activeAccountsList');
+    Route::get('/accounts/block', 'Admins\AdminDashboardController@blockAccountsList');
     Route::get('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');
