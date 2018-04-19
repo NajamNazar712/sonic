@@ -47,9 +47,7 @@
                                                 {{--<a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal"><i class="ft-plus-circle primary"></i> View Bank Info</a>--}}
 
                                             </div>
-                                          </span>
-                                            {{--<a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal">View Bank Info</a><br>--}}
-                                            {{--<a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ShippingInfoModal">View Shipping Info</a>--}}
+                                            </span>
                                         </td>
                                     </tr>
                                 @endforeach
