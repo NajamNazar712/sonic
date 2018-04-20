@@ -14,7 +14,6 @@ class CreateCityPickupTable extends Migration
     public function up()
     {
         Schema::create('city_pickup', function (Blueprint $table) {
-            $table->increments('id');
             $table->integer('city_code');
             $table->integer('pickup_type_id');
         });

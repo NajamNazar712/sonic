@@ -206,12 +206,12 @@
                                                     </div>
                                                     <div class="form-group">
 
-                                                        <label for="shipping_city">Shipping City :
+                                                        <label for="shipping_city">Shipper City :
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
                                                             <select name="shipping_city" id="shipping_city" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected>Select Shipping City</option>
+                                                                <option value="" selected>Select Shipper City</option>
                                                                 @foreach($cities as $city)
                                                                     <option value="{{$city->city_code}}">{{$city->city_name}}</option>
                                                                 @endforeach
@@ -251,11 +251,13 @@
                                                         <label for="mode_of_payment">Mode Of Payment :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <select name="mode_of_payment" class="form-control required">
+                                                        <div>
+                                                        <select name="mode_of_payment" class="select2 form-control required" style="width: 100%;">
                                                             <option value="" selected="" disabled="">Select A Payment Mode</option>
                                                             <option value="ibft">IBFT Reimbursements</option>
                                                             <option value="invoices">Invoices</option>
                                                         </select>
+                                                        </div>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -278,7 +280,7 @@
 
                                                         <div class="form-group">
 
-                                                            <label for="url">Bank City :
+                                                            <label for="bank_city">Bank City :
                                                                 <span class="danger">*</span>
                                                             </label>
                                                             <div>
@@ -291,18 +293,19 @@
                                                             </div>
                                                         </div>
                                                     <div class="form-group">
-                                                        <div class="">
+
                                                             <label for="cycle_of_payment">Cycle Of Payment :
                                                                 <span class="danger">*</span>
                                                             </label>
-                                                        </div>
-                                                        <select name="cycle_of_payment" class="form-control required">
+                                                        <div>
+                                                        <select name="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
                                                             <option value="" selected="" disabled="">Select A Payment Duration</option>
                                                             <option value="daily">Daily</option>
                                                             <option value="weekly">Weekly</option>
                                                             <option value="fortnight">Fortnight</option>
                                                             <option value="monthly">Monthly</option>
                                                         </select>
+                                                        </div>
                                                     </div>
                                                 </div>
 
@@ -397,7 +400,7 @@
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')})
         $("input[name='cnic']").inputmask("99999-9999999-9");
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask("(9999) 999-9999");
-
+        $("input[name='ntn_no']").inputmask("9999999-9");
     });
 </script>
 </body>
