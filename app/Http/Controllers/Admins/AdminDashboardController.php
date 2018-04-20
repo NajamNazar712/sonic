@@ -39,8 +39,8 @@ class AdminDashboardController extends Controller
 
     }
     public function blockAccountsList(){
-        $blockAccounts = User::where('active',0)->get();
-        return view('admin.accounts.block_accounts_list')->with('accounts',$blockAccounts);
+        $blackAccounts = User::where('blacklist',1)->get();
+        return view('admin.accounts.block_accounts_list')->with('accounts',$blackAccounts);
     }
     /**
      * @return \Illuminate\Http\JsonResponse

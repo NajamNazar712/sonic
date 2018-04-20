@@ -1,14 +1,14 @@
 @extends('admin.layout.master')
 
 @section('content')
-    <h1>Active Accounts List</h1>
+    <h1>Blacklist Accounts</h1>
 
     <section>
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4>Active Accounts</h4>
+                        <h4>Blacklist Accounts</h4>
                     </div>
 
                     <div class="card-content">
@@ -43,8 +43,8 @@
                                             <div class="dropdown-menu open-left arrow">
                                               <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal"><i class="ft-plus-circle primary"></i> View Bank Info</a>
                                               <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ShippingInfoModal"><i class="ft-plus-circle primary"></i> View Shipping Info</a>
-                                                {{--<div class="dropdown-divider"></div>--}}
-                                                {{--<a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal"><i class="ft-plus-circle primary"></i> View Bank Info</a>--}}
+                                                <div class="dropdown-divider"></div>
+                                                <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ConfirmModal"><i class="ft-plus-circle primary"></i> Remove</a>
 
                                             </div>
                                             </span>
