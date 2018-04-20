@@ -34,13 +34,30 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.pending_accounts_list')->with('accounts',$pendingAccounts);
     }
     public function activeAccountsList(){
-        $activeAccounts =  User::where('active',1)->get();
+        $activeAccounts =  User::where('active',1)->where('blacklist',0)->get();
         return view('admin.accounts.active_accounts_list')->with('accounts',$activeAccounts);
 
     }
     public function blockAccountsList(){
         $blackAccounts = User::where('blacklist',1)->get();
         return view('admin.accounts.block_accounts_list')->with('accounts',$blackAccounts);
+    }
+    public function UserStatus(Request $request){
+//        dd($request);
+        $id = $request->shid;
+        $status = $request->status;
+//        $active = User::where('id',$id)->s
+        if($status == 'unblock'){
+            $user = User::where('id',$id)->where('blacklist',1)->update(['blacklist'=>0]);
+            $active = User::find($id)->first()->active;
+            if($user == 1){
+                if($active == 1){
+                    return redirect()->route('admin.accounts.active');
+                }elseif($active == 0){
+                    return redirect()->route('admin.accounts.pending');
+                }
+            }
+        }
     }
     /**
      * @return \Illuminate\Http\JsonResponse
@@ -55,13 +72,13 @@ class AdminDashboardController extends Controller
     public function viewShippingInfo($id){
         $user = User::find($id);
         $shipping = $user->shipping;
-        $returnHTML = view('admin/components/shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
+        $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
         return response()->json($returnHTML);
     }
     public function viewShipperRates($id){
         $user = User::find($id);
         $shipping = $user->shipping;
-        $returnHTML = view('admin/components/shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
+        $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
         return response()->json($returnHTML);
     }
     public function pickup(){

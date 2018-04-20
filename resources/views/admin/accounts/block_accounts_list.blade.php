@@ -44,7 +44,7 @@
                                               <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal"><i class="ft-plus-circle primary"></i> View Bank Info</a>
                                               <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ShippingInfoModal"><i class="ft-plus-circle primary"></i> View Shipping Info</a>
                                                 <div class="dropdown-divider"></div>
-                                                <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ConfirmModal"><i class="ft-plus-circle primary"></i> Remove</a>
+                                                <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" rel="unblock" data-toggle="modal" data-target="#ConfirmModal"><i class="ft-plus-circle primary"></i> Remove</a>
 
                                             </div>
                                             </span>

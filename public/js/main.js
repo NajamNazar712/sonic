@@ -1,4 +1,5 @@
-$(document).ready(function () {
+let axios = require('axios');
+
     $("#BankInfoModal").on("show.bs.modal", function(e) {
         var id = $(e.relatedTarget).data('target-id');
 
@@ -26,4 +27,19 @@ $(document).ready(function () {
         // });
 
     });
-});
+    $("#ConfirmModal").on("show.bs.modal", function(e) {
+        var id = $(e.relatedTarget).data('target-id');
+        console.log(id);
+        axios.get('/accounts/block/active', {
+            params: {
+                id: id
+            }
+        })
+            .then(function (response) {
+                $(".modal-body.confirmation").html(response);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });
+
+    });

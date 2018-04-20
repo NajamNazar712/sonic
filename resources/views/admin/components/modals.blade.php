@@ -59,3 +59,30 @@
         </div>
     </div>
 </div>
+
+
+<!--Confirm Modal -->
+<div class="modal fade text-left" id="ConfirmModal" tabindex="-1" role="dialog" aria-labelledby="ConfirmModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white" id="myModalLabel8">Please Confirm</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body confirmation text-center">
+                <form action="{{route('admin.account.status')}}" method="post">
+                    {{csrf_field()}}
+                    <input type="hidden" name="shid" id="shid">
+                    <input type="hidden" name="status" id="shstatus">
+                    <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
+                    <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

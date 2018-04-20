@@ -71,6 +71,7 @@
                                     <span>Login Details</span>
                                 </p>
                                 <div class="card-body">
+                                    @include('client.inc.messages')
                                     <form class="form-horizontal" method="POST" action="{{ route('cod.login.submit') }}">
                                         @csrf
                                         <fieldset class="form-group position-relative has-icon-left">
