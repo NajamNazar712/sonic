@@ -21,3 +21,22 @@ $factory->define(App\User::class, function (Faker $faker) {
         'remember_token' => str_random(10),
     ];
 });
+
+$factory->define(App\Http\Models\Shipper\User::class,function(Faker $faker){
+
+        return [
+                'name' => $faker->company(),
+                'email' => $faker->email(),
+                'password' => bcrypt('password'),
+                'address' => $faker->address(),
+                'poc' => $faker->name(),
+                'phone' => $faker->phoneNumber(),
+                'phone2' => $faker->phoneNumber(),
+                'cnic' => '4258384858483',
+                'ntn_no' => '1234567',
+                'url' => $faker->url(),
+                'city_code' => '202',
+                'active' => '1'
+
+        ];
+});
