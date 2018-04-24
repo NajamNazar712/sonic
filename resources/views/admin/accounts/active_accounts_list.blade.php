@@ -13,10 +13,10 @@
 
                     <div class="card-content">
                         <div class="card-body card-dashboard">
-                            <table class="table table-stripped table-bordered zero-configuration">
+                            <table class="datatable table table-stripped table-bordered zero-configuration" id="datatable">
                                 <thead>
                                 <tr>
-                                    <th>Account ID</th>
+                                 <th>Account ID</th>
                                     <th>Company Name</th>
                                     <th>City</th>
                                     <th>Contact Person</th>
@@ -26,34 +26,6 @@
                                     <th>Action</th>
                                 </tr>
                                 </thead>
-                                <tbody>
-                                @foreach($accounts as $account)
-                                    <tr>
-                                        <td>{{$account->id}}</td>
-                                        <td>{{$account->name}}</td>
-                                        <td>{{$account->city->city_name}}</td>
-                                        <td>{{$account->poc}}</td>
-                                        <td>{{$account->phone}}</td>
-                                        <td>{{$account->address}}</td>
-                                        <td>{{$account->email}}</td>
-                                        <td>
-                                            <span class="dropdown">
-                                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"
-                                                    aria-haspopup="true" aria-expanded="false"><i class="ft-settings"></i></button>
-                                            <div class="dropdown-menu open-left arrow">
-                                              <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal"><i class="ft-plus-circle primary"></i> View Bank Info</a>
-                                              <a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ShippingInfoModal"><i class="ft-plus-circle primary"></i> View Shipping Info</a>
-                                                {{--<div class="dropdown-divider"></div>--}}
-                                                {{--<a href="#" class="dropdown-item" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal"><i class="ft-plus-circle primary"></i> View Bank Info</a>--}}
-
-                                            </div>
-                                          </span>
-                                            {{--<a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#BankInfoModal">View Bank Info</a><br>--}}
-                                            {{--<a href="#" data-target-id="{{$account->id}}" data-toggle="modal" data-target="#ShippingInfoModal">View Shipping Info</a>--}}
-                                        </td>
-                                    </tr>
-                                @endforeach
-                                </tbody>
                                 <tfoot>
                                 <tr>
                                     <th>Account ID</th>
@@ -66,7 +38,9 @@
                                     <th>Action</th>
                                 </tr>
                                 </tfoot>
+
                             </table>
+
                         </div>
                     </div>
                 </div>
@@ -75,4 +49,43 @@
     </section>
 
 
+
+
+
+
+
+<script>
+    $(document).ready(function() {
+        $('.datatable').DataTable({
+            processing: true,
+            serverSide: true,
+            ajax: '{{ route('admin.accounts.active.ajax') }}',
+            columns: [
+                {data: 'id', name: 'id'},
+                {data: 'name', name: 'name'},
+                {data: 'city', name: 'city'},
+                {data: 'poc', name: 'poc'},
+                {data: 'phone', name: 'phone'},
+                {data: 'address', name: 'address'},
+                {data: 'email', name: 'email'},
+                {data: 'action', name: 'action', orderable: false, searchable: false}
+            ],
+              initComplete: function () {
+                    var r = $('#datatable tfoot tr');
+                    $('#datatable thead').append(r);
+            this.api().columns().every(function () {
+                var column = this;
+                var input = document.createElement("input");
+                $(input).appendTo($(column.footer()).empty())
+                .on('change', function () {
+                    column.search($(this).val(), false, false, true).draw();
+                });
+            });
+        }
+    });
+    });
+
+</script>
+
 @endsection
+
