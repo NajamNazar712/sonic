@@ -5,9 +5,14 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+//use Illuminate\Support\MessageBag;
+use Illuminate\Validation\ValidationException;
+
+
 class AdminLoginController extends Controller
 {
     //protected $guard = 'admin';
+
     public function __construct()
     {
         $this->middleware('guest:admin')->except('logout');
@@ -18,6 +23,7 @@ class AdminLoginController extends Controller
     }
     public function login(Request $request){
         //validate the form
+//        $errors = new MessageBag;
         $this->validate($request, [
             'email' =>'required|email',
             'password' => 'required|min:6'
@@ -27,9 +33,17 @@ class AdminLoginController extends Controller
             //if Successfull then redirect to intended location
             return redirect()->intended(route('admin.dashboard'));
         }
-        return redirect()->back()->withInput($request->only('email','remember'));
+        $errors = [$this->username() => trans('auth.failed')];
+//        $errors = new MessageBag(['password' => ['Email and/or password invalid.']]);
+        return redirect()->back()->withInput($request->only('email','remember'))->withErrors($errors);
 
     }
+
+    public function username()
+    {
+        return 'email';
+    }
+
 
     public function logout(Request $request)
     {
@@ -43,4 +57,6 @@ class AdminLoginController extends Controller
         return redirect()->route('admin.login');
 
     }
+
+
 }

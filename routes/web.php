@@ -28,6 +28,7 @@ Route::prefix('cod')->group(function () {
     Route::post('/login','Auth\LoginController@login')->name('cod.login.submit');
     Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('cod.register');
     Route::post('/register','Auth\RegisterController@register')->name('cod.register.submit');
+    Route::get('/new/address','Auth\RegisterController@addressView')->name('cod.new.address');
 //    Route::post('/reset','Auth\RegisterController@register')->name('cod.register.submit');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('cod.dashboard');
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
@@ -59,4 +60,6 @@ Route::prefix('admin')->group(function () {
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('admin.password.request');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('admin.password.reset');
+    //new address
+
 });

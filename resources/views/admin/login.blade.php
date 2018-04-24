@@ -71,19 +71,20 @@
                                     <span>Login Details</span>
                                 </p>
                                 <div class="card-body">
+                                    @include('admin.inc.messages')
                                     <form class="form-horizontal" method="POST" action="{{ route('admin.login.submit') }}">
                                     @csrf
                                         <fieldset class="form-group position-relative has-icon-left">
-                                            <input type="text" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Your Email"
-                                                   required>
+                                            <input type="email" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Your Email"
+                                                 value="{{old('email')}}"  required>
                                             <div class="form-control-position">
                                                 <i class="ft-user"></i>
                                             </div>
-                                            @if ($errors->has('email'))
-                                                <span class="invalid-feedback">
-                                            <strong>{{ $errors->first('email') }}</strong>
-                                            </span>
-                                            @endif
+                                            {{--@if ($errors->has('email'))--}}
+                                                {{--<span class="invalid-feedback">--}}
+                                            {{--<strong>{{ $errors->first('email') }}</strong>--}}
+                                            {{--</span>--}}
+                                            {{--@endif--}}
                                         </fieldset>
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="password" name="password" class="form-control {{ $errors->has('password') ? ' is-invalid' : '' }}" id="password" placeholder="Enter Password"

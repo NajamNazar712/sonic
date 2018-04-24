@@ -39,6 +39,11 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
+    <style>
+        .hide{
+            display: none;
+        }
+    </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded fixed-navbar"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
@@ -121,7 +126,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="shipper_phone2">Phone Number 2:</label>
-                                                        <input type="tel" class="form-control"   name="shipper_phone2">
+                                                        <input type="tel" class="form-control"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">
                                                     </div>
                                                 </div>
                                             </div>
@@ -129,13 +134,13 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="ntn_no">NTN Number :</label>
-                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)"   name="ntn_no">
+                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('ntn_no') }}"  name="ntn_no">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="url">URL :</label>
-                                                        <input type="text" class="form-control"  name="url" placeholder="URL/Facebook Page">
+                                                        <input type="text" class="form-control" value="{{ old('url') }}" name="url" placeholder="URL/Facebook Page">
                                                     </div>
                                                 </div>
                                             </div>
@@ -148,8 +153,8 @@
                                                         </label>
                                                         <div>
                                                             <select name="shipper_city" id="shipper_city" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected>Select City</option>
-                                                                @foreach($cities as $city)
+                                                                <option value="{{ old('shipper_city') }}" selected>Select City</option>
+                                                                @foreach($all_cities as $city)
                                                                     <option value="{{$city->city_code}}">{{$city->city_name}}</option>
                                                                 @endforeach
                                                             </select>
@@ -161,21 +166,22 @@
                                         <!-- Step 2 -->
                                         <h6>Shipping Information</h6>
                                         <fieldset>
-                                            <div class="row">
+                                            <div class="row vertical-scroll" id="shipInfo" style="max-height: 350px;overflow: scroll;">
+
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="pickup_address">
                                                             Pickup Address :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"  name="pickup_address">
+                                                        <input type="text" class="form-control required" value="{{ old('pickup_address[]') }}"  name="pickup_address[]">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_poc">
                                                             Person Of Contact :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"   name="shipping_poc">
+                                                        <input type="text" class="form-control required" value="{{ old('shipping_poc[]') }}"  name="shipping_poc[]">
                                                     </div>
                                                     <div class="form-group">
 
@@ -183,8 +189,8 @@
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                            <select name="product_type" id="product_select" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected>Select Product Type</option>
+                                                            <select name="product_type[]" id="product_select" class="select2 form-control required" style="width: 100%">
+                                                                <option value="{{ old('product_type[]') }}" selected>Select Product Type</option>
                                                                 @foreach($products as $product)
                                                                     <option value="{{$product->id}}">{{$product->product_name}}</option>
                                                                 @endforeach
@@ -198,11 +204,11 @@
                                                             Phone Number :
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone">
+                                                        <input type="tel" class="form-control required" value="{{ old('shipping_phone[]') }}" placeholder="(0345) 999-9999" name="shipping_phone[]">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_email">Email :<span class="danger">*</span></label>
-                                                        <input type="email" name="shipping_email" class="form-control required">
+                                                        <input type="email" name="shipping_email[]" value="{{ old('shipping_email[]') }}" class="form-control required">
                                                     </div>
                                                     <div class="form-group">
 
@@ -210,8 +216,8 @@
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                            <select name="shipping_city" id="shipping_city" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected>Select Shipper City</option>
+                                                            <select name="shipping_city[]" id="shipping_city" class="select2 form-control required" style="width: 100%">
+                                                                <option value="{{ old('shipping_city[]') }}" selected>Select Shipper City</option>
                                                                 @foreach($cities as $city)
                                                                     <option value="{{$city->city_code}}">{{$city->city_name}}</option>
                                                                 @endforeach
@@ -220,6 +226,19 @@
                                                     </div>
 
                                                 </div>
+
+                                                {{--Add more addresses--}}
+                                                {{--Accordion--}}
+                                                <div class="col-12" id="newAddress">
+
+                                                </div>{{--column end--}}
+                                                {{--Accordion--}}
+                                                <div class="col-12">
+
+                                                    <button id="addMoreAddress" type="button" class="btn btn-primary btn-min-width mr-1 mb-1"><i class="la la-plus"></i>&nbsp Add Pickup Locations</button>
+
+                                                </div>
+
                                             </div>
 
 
@@ -286,7 +305,7 @@
                                                             <div>
                                                                 <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                     <option value="" selected>Select Bank City</option>
-                                                                    @foreach($bank_cities as $city)
+                                                                    @foreach($all_cities as $city)
                                                                         <option value="{{$city->city_code}}">{{$city->city_name}}</option>
                                                                     @endforeach
                                                                 </select>
@@ -391,6 +410,7 @@
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function () {
+
        $('.select2').select2({
            dropdownParent:$('#registership')
        });
@@ -401,6 +421,34 @@
         $("input[name='cnic']").inputmask("99999-9999999-9");
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask("(9999) 999-9999");
         $("input[name='ntn_no']").inputmask("9999999-9");
+        // Vertical Scroll
+        $('.vertical-scroll').perfectScrollbar({
+            suppressScrollX : true,
+            theme: 'dark',
+            wheelPropagation: true
+        });
+        var count = 0;
+        $('body').on('click','#addMoreAddress',function () {
+            $.get( 'new/address', function( data ) {
+                $('#newAddress').append(data);
+
+            }).done(function() {
+                var cc = $('.card.naddress').length;
+                var nid = $('.card.naddress').eq(count);
+                nid.attr('id','shipping_'+count);
+
+                $('#shipping_' + count + ' .select2').select2({
+                    dropdownParent:$('#registership')
+                });
+                $('#shipping_' + count + ' a[data-action="close"]').on('click',function(){
+                    $(this).closest('.card').removeClass().slideUp('fast');
+                });
+
+                count++;
+            })
+
+
+        });
     });
 </script>
 </body>
