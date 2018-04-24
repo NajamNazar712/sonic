@@ -61,7 +61,7 @@
                                     <form class="form-horizontal" method="post" action="{{ route('admin.password.email') }}">
                                         @csrf
                                         <fieldset class="form-group position-relative has-icon-left">
-                                            <input type="email" class="form-control form-control-lg input-lg {{ $errors->has('email') ? ' is-invalid' : '' }}" value="{{ old('email') }}" name="email" id="user-email"
+                                            <input type="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" value="{{ old('email') }}" name="email" id="user-email"
                                                    placeholder="Your Email Address" required>
                                             <div class="form-control-position">
                                                 <i class="ft-mail"></i>
@@ -72,7 +72,7 @@
                                         </span>
                                             @endif
                                         </fieldset>
-                                        <button type="submit" class="btn btn-outline-info btn-lg btn-block"><i class="ft-unlock"></i> Recover Password</button>
+                                        <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Recover Password</button>
                                     </form>
                                 </div>
                             </div>
