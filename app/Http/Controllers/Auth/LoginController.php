@@ -45,10 +45,10 @@ class LoginController extends Controller
     {
         if ($user->blacklist) {
             auth()->logout();
-            return back()->with('info', 'Your account is blacklisted, contact admin');
+            return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
         }elseif (!$user->active) {
             auth()->logout();
-            return back()->with('info', 'Your account is not activated yet, contact admin');
+            return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
         }
         return redirect()->intended($this->redirectPath());
 

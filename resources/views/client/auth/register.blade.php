@@ -79,7 +79,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="company_name">
-                                                            Company Name :
+                                                            Company Name:
                                                             <span class="danger">*</span>
                                                         </label>
 
@@ -90,18 +90,17 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="shipper_poc">
-                                                            Person Of Contact :
+                                                            Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"   name="shipper_poc" value="{{old('shipper_poc')}}">
+                                                        <input type="text" class="form-control required" placeholder="Person Name" name="shipper_poc" value="{{old('shipper_poc')}}">
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="company_address">
-                                                            Company Address :
+                                                        <label for="company_address">Company Address:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <input type="text" class="form-control required"   name="company_address" value="{{ old('company_address') }}">
@@ -109,46 +108,42 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="shipper_phone">Phone Number :
+                                                        <label for="shipper_phone">Phone Number 1:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required"   name="shipper_phone" value="{{ old('shipper_phone') }}">
+                                                        <input type="tel" class="form-control required" placeholder="0345-9999999" name="shipper_phone" value="{{ old('shipper_phone') }}">
                                                     </div>
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="cnic">CNIC :<span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required" placeholder="(e.g: 12345-6789123-9)" value="{{ old('cnic') }}"  name="cnic">
+                                                        <label for="cnic">CNIC:
+                                                            <span class="danger">*</span></label>
+                                                        <input type="text" class="form-control required" placeholder="XXXXX-1234567-X" value="{{ old('cnic') }}"  name="cnic">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="shipper_phone2">Phone Number 2:</label>
-                                                        <input type="tel" class="form-control"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">
-                                                    </div>
+                                                        <input type="tel" class="form-control" placeholder="0345-9999999"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="ntn_no">NTN Number :</label>
-                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('ntn_no') }}"  name="ntn_no">
-                                                    </div>
+                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('ntn_no') }}"  name="ntn_no">                                                    </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="url">URL :</label>
-                                                        <input type="text" class="form-control" value="{{ old('url') }}" name="url" placeholder="URL/Facebook Page">
-                                                    </div>
+                                                        <input type="text" class="form-control" value="{{ old('url') }}" name="url" placeholder="URL/Facebook Page">                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
 
-                                                        <label for="shipper_city">City :
+                                                        <label for="shipper_city">City:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
@@ -171,21 +166,20 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="pickup_address">
-                                                            Pickup Address :
+                                                            Pickup Address:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <input type="text" class="form-control required" value="{{ old('pickup_address[]') }}"  name="pickup_address[]">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_poc">
-                                                            Person Of Contact :
+                                                            Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('shipping_poc[]') }}"  name="shipping_poc[]">
-                                                    </div>
+                                                        <input type="text" class="form-control required" value="{{ old('shipping_poc[]') }}"  name="shipping_poc[]">                                                    </div>
                                                     <div class="form-group">
 
-                                                        <label for="url">Product Type :
+                                                        <label for="url">Product Type:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
@@ -201,18 +195,15 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="shipping_phone">
-                                                            Phone Number :
+                                                            Phone Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" value="{{ old('shipping_phone[]') }}" placeholder="(0345) 999-9999" name="shipping_phone[]">
-                                                    </div>
+                                                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone[]" value="{{ old('shipping_phone[]') }}">                                                    </div>
                                                     <div class="form-group">
-                                                        <label for="shipping_email">Email :<span class="danger">*</span></label>
-                                                        <input type="email" name="shipping_email[]" value="{{ old('shipping_email[]') }}" class="form-control required">
-                                                    </div>
+                                                        <input type="email" name="shipping_email[]" value="{{ old('shipping_email[]') }}" class="form-control required">                                                    </div>
                                                     <div class="form-group">
 
-                                                        <label for="shipping_city">Shipper City :
+                                                        <label for="shipping_city">Shipper City:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
@@ -250,29 +241,30 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="bank_name">
-                                                            Bank Name :
+                                                            Bank Name:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <input type="text" class="form-control required"   name="bank_name">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="bank_branch">
-                                                            Bank Branch :
+                                                            Bank Branch:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <input type="text" class="form-control required" name="bank_branch">
                                                     </div>
                                                     <div class="form-group">
-                                                        <label for="account_name">Account No. :<span class="danger">*</span></label>
+                                                        <label for="account_name">Account Number:
+                                                            <span class="danger">*</span></label>
                                                         <input type="text" class="form-control required" name="account_no">
                                                     </div>
                                                     <div class="form-group">
-                                                        <label for="mode_of_payment">Mode Of Payment :
+                                                        <label for="mode_of_payment">Mode of Payment:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
                                                         <select name="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected="" disabled="">Select A Payment Mode</option>
+                                                            <option value="" selected="" disabled="">Select Mode of Payment</option>
                                                             <option value="ibft">IBFT Reimbursements</option>
                                                             <option value="invoices">Invoices</option>
                                                         </select>
@@ -282,16 +274,16 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="account_title">
-                                                            Account Title :
+                                                            Account Title:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type='text' class="form-control required" placeholder="e.g: Trax Logistics" name="account_title">
+                                                        <input type='text' class="form-control required" name="account_title">
 
                                                     </div>
 
                                                     <div class="form-group">
                                                         <label for="iban">
-                                                            IBAN NO :
+                                                            IBAN Number:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no">
@@ -299,7 +291,7 @@
 
                                                         <div class="form-group">
 
-                                                            <label for="bank_city">Bank City :
+                                                            <label for="bank_city">Bank City:
                                                                 <span class="danger">*</span>
                                                             </label>
                                                             <div>
@@ -313,12 +305,12 @@
                                                         </div>
                                                     <div class="form-group">
 
-                                                            <label for="cycle_of_payment">Cycle Of Payment :
+                                                            <label for="cycle_of_payment">Cycle of Payment:
                                                                 <span class="danger">*</span>
                                                             </label>
                                                         <div>
                                                         <select name="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected="" disabled="">Select A Payment Duration</option>
+                                                            <option value="" selected="" disabled="">Select Cycle of Payment</option>
                                                             <option value="daily">Daily</option>
                                                             <option value="weekly">Weekly</option>
                                                             <option value="fortnight">Fortnight</option>
@@ -338,19 +330,19 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="email">
-                                                            Email :
+                                                            Email Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"   name="email">
+                                                        <input type="text" class="form-control required" placeholder="abc@example.com"  name="email">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="password">
-                                                            Password :
+                                                            Password:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div class="form-group position-relative">
 
-                                                        <input type="password" class="form-control required" name="password">
+                                                        <input type="password" class="form-control required" placeholder="Minimum 6 Character" name="password">
                                                         <div class="form-control-position" id="peye">
                                                             <i class="la la-eye success"></i>
                                                         </div>
@@ -418,9 +410,9 @@
             dropdownParent:$('#registership')
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')})
-        $("input[name='cnic']").inputmask("99999-9999999-9");
-        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask("(9999) 999-9999");
-        $("input[name='ntn_no']").inputmask("9999999-9");
+        $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
+        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+        $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
         // Vertical Scroll
         $('.vertical-scroll').perfectScrollbar({
             suppressScrollX : true,

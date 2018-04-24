@@ -1,14 +1,14 @@
 @extends('admin.layout.master')
 
 @section('content')
-    <h1>Blacklist Accounts</h1>
+    <h1>Block Accounts List</h1>
 
     <section>
         <div class="row">
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4>Blacklist Accounts</h4>
+                        <h4>Blocked Accounts</h4>
                     </div>
 
                     <div class="card-content">

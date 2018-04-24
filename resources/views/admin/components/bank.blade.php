@@ -1,4 +1,4 @@
-<h1>Bank Information Of {{$user->name}}</h1>
+<h1>Bank Information of {{$user->name}}</h1>
 <div class="bs-callout-primary callout-border-left callout-transparent p-1">
 
     <p><b>Bank Name :</b> {{$bank->bank_name}}</p>
