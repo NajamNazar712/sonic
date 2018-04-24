@@ -200,6 +200,10 @@
                                                         </label>
                                                         <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone[]" value="{{ old('shipping_phone[]') }}">                                                    </div>
                                                     <div class="form-group">
+                                                        <label for="shipping_phone">
+                                                            Email:
+                                                            <span class="danger">*</span>
+                                                        </label>
                                                         <input type="email" name="shipping_email[]" value="{{ old('shipping_email[]') }}" class="form-control required">                                                    </div>
                                                     <div class="form-group">
 
