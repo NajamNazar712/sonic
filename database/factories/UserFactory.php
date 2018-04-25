@@ -22,6 +22,7 @@ $factory->define(App\User::class, function (Faker $faker) {
     ];
 });
 
+
 $factory->define(App\Http\Models\Shipper\User::class,function(Faker $faker){
 
         return [
