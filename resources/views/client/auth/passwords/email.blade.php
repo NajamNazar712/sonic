@@ -62,7 +62,7 @@
                                         @csrf
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" value="{{ old('email') }}" name="email" id="user-email"
-                                                   placeholder="Your Email Address" required>
+                                                   placeholder="Email Address" required>
                                             <div class="form-control-position">
                                                 <i class="ft-mail"></i>
                                             </div>
@@ -72,7 +72,7 @@
                                         </span>
                                             @endif
                                         </fieldset>
-                                        <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Recover Password</button>
+                                        <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Reset Password</button>
                                     </form>
                                 </div>
                             </div>

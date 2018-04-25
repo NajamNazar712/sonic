@@ -43,13 +43,13 @@
                     <div class="col-md-4 col-10 p-0">
                         <div class="card-header bg-transparent border-0">
 
-                            <h3 class="text-uppercase text-center">Thanks for registration, Our sales team will get back to you soon</h3>
+                            <h3 class="text-uppercase text-center">Thanks For Registration, Our Team Will Get Back To You Soon</h3>
                         </div>
                         <div class="card-content">
 
                             <div class="row py-2">
                                 <div class="col-12 ">
-                                    <a href="{{URL::to('/')}}" class="btn btn-primary btn-block"><i class="ft-home"></i> Back to Home</a>
+                                    <a href="{{URL::to('/')}}" class="btn btn-primary btn-block"><i class="ft-home"></i> Back To Home</a>
                                 </div>
 
                             </div>

@@ -249,7 +249,7 @@
 
                         <!-- Footer copyright text start \-->
                         <footer class="copyright">
-                            <p>All Rights Reserved by Trax Team</p>
+                            <p>All Rights Reserved By Trax Team</p>
                         </footer>
                         <!--/ Footer copyright text end-->
                     </div>
