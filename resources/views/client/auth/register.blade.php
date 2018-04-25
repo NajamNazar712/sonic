@@ -83,7 +83,7 @@
                                                             <span class="danger">*</span>
                                                         </label>
 
-                                                        <input type="text" class="form-control required" value="{{ old('name') }}"  name="name">
+                                                        <input type="text" class="form-control required" value="{{ old('name') }}"  name="name" minlength="3">
                                                         
                                                     </div>
                                                 </div>
@@ -103,7 +103,7 @@
                                                         <label for="company_address">Company Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"   name="company_address" value="{{ old('company_address') }}">
+                                                        <input type="text" class="form-control required"  name="company_address" value="{{ old('company_address') }}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -423,28 +423,81 @@
             theme: 'dark',
             wheelPropagation: true
         });
-        var count = 0;
+        var count = 1;
         $('body').on('click','#addMoreAddress',function () {
             $.get( 'new/address', function( data ) {
                 $('#newAddress').append(data);
 
             }).done(function() {
-                var cc = $('.card.naddress').length;
+                //var cc = $('.card.naddress').length;
                 var nid = $('.card.naddress').eq(count);
                 nid.attr('id','shipping_'+count);
-
+                $('#shipping_'+count+' h3.card-title' ).text('Address '+count);
                 $('#shipping_' + count + ' .select2').select2({
                     dropdownParent:$('#registership')
                 });
                 $('#shipping_' + count + ' a[data-action="close"]').on('click',function(){
                     $(this).closest('.card').removeClass().slideUp('fast');
                 });
-
+                //const container = document.querySelector('#shipping_'+count);
+                //container.scrollTop = 0;
+                //form validatiion
+                // Initialize validation
+                $(function () { $("input,select,textarea").not("[type=submit]").jqBootstrapValidation(); } );
+                //
                 count++;
-            })
+
+            });
 
 
         });
+        $('body').on('change','input[name="name"]',function () {
+            var name = $(this).val();
+            var error = 0;
+            var err0 = '<span name="cname" class="danger" for="name">Atleast 3 characters required.</span>';
+            var err = '<span name="cname" class="danger" for="name">company name already exists, select another name.</span>';
+            if(name.length < 3){
+                $(err0).insertAfter('input[name="name"]');
+                error = 1;
+            }else{
+                error = 0;
+                $('span[name="cname"]').css('display','none');
+            }
+            if(error == 0){
+                $.ajax({
+                    url: "name/match/{name}",
+                    type:'GET',
+                    data: {name:name},
+                    success: function(data) {
+                        if(data.status == 0){
+                            $(err).insertAfter('input[name="name"]');
+                            console.log(data.status);
+                        }else if(data.status == 1){
+                            $('span[name="cname"]').css('display','none');
+                            console.log(data.status);
+
+                        }
+                        console.log(data.status);
+                    }
+                });
+            }
+
+
+        });
+
+        // $('a[href="#next"]').on('click',function(e){
+        //     // $("#registership").validate().element("");
+        // });
+        // $( 'a[href="#next"]' ).dblclick(function() {
+        //     alert( "Handler for .dblclick() called." );
+        // });
+
+        // $('body').on('dblclick', 'a[href="#next"]', function(e) {
+        //     e.preventDefault();
+        //     // alert('You skipped one step');
+        //     //$('a[href="#previous"]').trigger('click');
+        // });
+
     });
 </script>
 </body>

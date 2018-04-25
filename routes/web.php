@@ -36,7 +36,7 @@ Route::prefix('cod')->group(function () {
     Route::get('/logout','Auth\LoginController@logout')->name('cod.logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('cod.logout');
-
+    Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
 });
 
 Route::prefix('admin')->group(function () {

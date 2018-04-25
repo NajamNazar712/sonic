@@ -167,4 +167,21 @@ class RegisterController extends Controller
         $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
         return view('client.components.pickup_address')->with(['cities'=>$cities,'products'=>$products]);
     }
+    public function checkCompanyName(Request $request){
+
+//        dd($request);
+           $name = $request->name;
+           $res = User::where('name','LIKE',$name)->get();
+            if(!$res->isEmpty()){
+                return response()->json([
+                    'message' => 'name already exists',
+                    'status' => 0
+                ]);
+            }else{
+                return response()->json([
+                    'message' => 'name available',
+                    'status' => 1
+                ]);
+            }
+    }
 }

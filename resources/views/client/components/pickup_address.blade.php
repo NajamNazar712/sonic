@@ -1,7 +1,7 @@
 <hr>
 <div class="card naddress">
     <div class="card-header">
-        <h4 class="card-title">New Address</h4>
+        <h3 class="card-title">New Address</h3>
         <div class="heading-elements">
             <ul class="list-inline mb-0">
                 <li><a data-action="close"><i class="ft-x"></i></a></li>
