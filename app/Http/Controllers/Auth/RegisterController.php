@@ -53,7 +53,7 @@ class RegisterController extends Controller
 //        return $cities;
         $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
 
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$cities,'bank_cities'=>$bank]);
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$cities,'all_cities'=>$bank]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -76,13 +76,13 @@ class RegisterController extends Controller
 //            'ntn_no'=>'string|max:255',
 //            'url'=>'string|max:255',
             'shipper_city'=>'required|string|max:255',
-            'shipping_city'=>'required|string|max:255',
+            'shipping_city.*'=>'required|string|max:255',
+            'pickup_address.*'=>'required|string|max:255',
+            'shipping_poc.*'=>'required|string|max:255',
+            'shipping_phone.*'=>'required|string|max:255',
+            'shipping_email.*'=>'required|string|max:255',
+            'product_type.*'=>'required|string|max:255',
             'bank_city'=>'required|string|max:255',
-            'pickup_address'=>'required|string|max:255',
-            'shipping_poc'=>'required|string|max:255',
-            'shipping_phone'=>'required|string|max:255',
-            'shipping_email'=>'required|string|max:255',
-            'product_type'=>'required|string|max:255',
             'bank_name'=>'required|string|max:255',
             'bank_branch'=>'required|string|max:255',
             'account_no'=>'required|string|max:255',
@@ -118,6 +118,7 @@ class RegisterController extends Controller
      */
     protected function create(array $data)
     {
+//        dd($data);
         $newUser = User::create([
             'name' => $data['name'],
             'email' => $data['email'],
@@ -133,14 +134,17 @@ class RegisterController extends Controller
         ]);
         $shipper = User::find($newUser->id);
         $shipper->products()->attach($data['product_type']);
-        UserShippingInfo::create([
-                'user_id'=>$newUser->id,
-                'pickup_address'=>$data['pickup_address'],
-                'poc'=>$data['shipping_poc'],
-                'phone'=>$data['shipping_phone'],
-                'email'=>$data['shipping_email'],
-                'city_code'=>$data['shipping_city'],
-        ]);
+
+        foreach ($data['pickup_address'] as $index => $pickup_address) {
+            UserShippingInfo::create([
+                'user_id' => $newUser->id,
+                'pickup_address' => $pickup_address,
+                'poc' => $data['shipping_poc'][$index],
+                'phone' => $data['shipping_phone'][$index],
+                'email' => $data['shipping_email'][$index],
+                'city_code' => $data['shipping_city'][$index],
+            ]);
+        }
         UserBankInfo::create([
                 'user_id'=>$newUser->id,
                 'bank_name'=>$data['bank_name'],
@@ -157,5 +161,27 @@ class RegisterController extends Controller
     }
     public function register_success(){
         return view('client.register_success');
+    }
+    public function addressView(){
+        $products = Product::all();
+        $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
+        return view('client.components.pickup_address')->with(['cities'=>$cities,'products'=>$products]);
+    }
+    public function checkCompanyName(Request $request){
+
+//        dd($request);
+           $name = $request->name;
+           $res = User::where('name','LIKE',$name)->get();
+            if(!$res->isEmpty()){
+                return response()->json([
+                    'message' => 'name already exists',
+                    'status' => 0
+                ]);
+            }else{
+                return response()->json([
+                    'message' => 'name available',
+                    'status' => 1
+                ]);
+            }
     }
 }
