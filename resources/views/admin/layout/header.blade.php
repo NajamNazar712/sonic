@@ -17,6 +17,7 @@
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/vendors.css')}}">
 <!-- END VENDOR CSS-->
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
 <!-- BEGIN MODERN CSS-->
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/app.css')}}">
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
