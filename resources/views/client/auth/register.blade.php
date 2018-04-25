@@ -73,6 +73,12 @@
                                         @csrf
                                         @method('post')
                                         <h6>Personal Information</h6>
+                                        <?php $i = 0;?>
+                                        @while (old('pickup_address.'.$i) != null)
+                                            {{ $i++}}
+                                            {{ old('pickup_address.'.$i) }} <br>
+
+                                        @endwhile
                                         @include('client.inc.messages')
                                         <fieldset>
                                             <div class="row">
