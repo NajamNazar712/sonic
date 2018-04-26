@@ -63,5 +63,6 @@ $("#ConfirmModal").on("show.bs.modal", function(e) {
 //
 //        });
 // });
+    $(".daterange").daterangepicker();
 
 });

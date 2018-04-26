@@ -429,7 +429,7 @@
                 $('#newAddress').append(data);
 
             }).done(function() {
-                //var cc = $('.card.naddress').length;
+                var cc = $('.card.naddress').length;
                 var nid = $('.card.naddress').eq(count);
                 nid.attr('id','shipping_'+count);
                 $('#shipping_'+count+' h3.card-title' ).text('Address '+count);
@@ -443,7 +443,7 @@
                 //container.scrollTop = 0;
                 //form validatiion
                 // Initialize validation
-                $(function () { $("input,select,textarea").not("[type=submit]").jqBootstrapValidation(); } );
+                //$(function () { $("input,select,textarea").not("[type=submit]").jqBootstrapValidation(); } );
                 //
                 count++;
 

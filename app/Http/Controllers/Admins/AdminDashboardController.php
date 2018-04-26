@@ -90,5 +90,8 @@ class AdminDashboardController extends Controller
 
 //    return $cit;
     }
-
+    public function addRatesView($id){
+        $user = User::find($id);
+        return view('admin.accounts.add_rates')->with('shipper',$user);
+    }
 }

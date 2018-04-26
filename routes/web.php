@@ -48,7 +48,13 @@ Route::prefix('admin')->group(function () {
     Route::get('/accounts/pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('admin.accounts.pending');
     Route::get('/accounts/active', 'Admins\AdminDashboardController@activeAccountsList')->name('admin.accounts.active');
     Route::get('/accounts/block', 'Admins\AdminDashboardController@blockAccountsList');
+    //add rates view
+    Route::get('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRatesView')->name('admin.add.rates');
+    //ajax request
     Route::post('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('admin.account.status');
+    //new address
+
+
     Route::get('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');
@@ -60,6 +66,4 @@ Route::prefix('admin')->group(function () {
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('admin.password.request');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('admin.password.reset');
-    //new address
-
 });
