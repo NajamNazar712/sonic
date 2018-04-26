@@ -268,7 +268,7 @@
                                                         </label>
                                                         <div>
                                                         <select name="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected="" disabled="">Select Mode of Payment</option>
+                                                            <option value="" selected>Select Mode of Payment</option>
                                                             <option value="ibft">IBFT Reimbursements</option>
                                                             <option value="invoices">Invoices</option>
                                                         </select>
@@ -314,7 +314,7 @@
                                                             </label>
                                                         <div>
                                                         <select name="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected="" disabled="">Select Cycle of Payment</option>
+                                                            <option value="" selected>Select Cycle of Payment</option>
                                                             <option value="daily">Daily</option>
                                                             <option value="weekly">Weekly</option>
                                                             <option value="fortnight">Fortnight</option>

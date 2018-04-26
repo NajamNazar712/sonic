@@ -59,7 +59,7 @@
                                         <input type="hidden" name="token" value="{{ $token }}">
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" value="{{ old('email') }}" name="email" id="user-email"
-                                                   placeholder="Your Email Address" required autofocus>
+                                                   placeholder="Email Address" required autofocus>
                                             <div class="form-control-position">
                                                 <i class="ft-mail"></i>
                                             </div>
@@ -70,7 +70,7 @@
                                             @endif
                                         </fieldset>
                                         <fieldset class="form-group position-relative has-icon-left">
-                                            <input type="password" name="password" class="form-control {{ $errors->has('password') ? ' is-invalid' : '' }}" id="password" placeholder="Enter Password"
+                                            <input type="password" name="password" class="form-control {{ $errors->has('password') ? ' is-invalid' : '' }}" id="password" placeholder="Password"
                                                    required>
                                             <div class="form-control-position">
                                                 <i class="la la-key"></i>
@@ -82,7 +82,7 @@
                                             @endif
                                         </fieldset>
                                             <fieldset class="form-group position-relative has-icon-left">
-                                                <input type="password" id="password-confirm" name="password_confirmation" class="form-control {{ $errors->has('password_confirmation') ? ' is-invalid' : '' }}" placeholder="Enter Confirm Password"
+                                                <input type="password" id="password-confirm" name="password_confirmation" class="form-control {{ $errors->has('password_confirmation') ? ' is-invalid' : '' }}" placeholder="Confirm Password"
                                                        required>
                                                 <div class="form-control-position">
                                                     <i class="la la-key"></i>
@@ -93,13 +93,13 @@
                                                     </span>
                                                 @endif
                                             </fieldset>
-                                        <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Recover Password</button>
+                                        <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Reset Password</button>
                                     </form>
                                 </div>
                             </div>
                             <div class="card-footer border-0">
                                 <p class="float-sm-left text-center"><a href="{{route('cod.login')}}" class="card-link">Login</a></p>
-                                <p class="float-sm-right text-center">New to Trax ? <a href="{{route('cod.register')}}" class="card-link">Create Account</a></p>
+                                <p class="float-sm-right text-center">New To Trax ? <a href="{{route('cod.register')}}" class="card-link">Create Account</a></p>
                             </div>
                         </div>
                     </div>
