@@ -94,4 +94,9 @@ class AdminDashboardController extends Controller
         $user = User::find($id);
         return view('admin.accounts.add_rates')->with('shipper',$user);
     }
+    public function addRates(Request $request){
+        return $request;
+//        $user = User::find($id);
+//        return view('admin.accounts.add_rates')->with('shipper',$user);
+    }
 }

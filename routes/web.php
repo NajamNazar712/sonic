@@ -50,6 +50,8 @@ Route::prefix('admin')->group(function () {
     Route::get('/accounts/block', 'Admins\AdminDashboardController@blockAccountsList');
     //add rates view
     Route::get('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRatesView')->name('admin.add.rates');
+    Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('admin.add.rates.submit');
+
     //ajax request
     Route::post('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('admin.account.status');
     //new address
