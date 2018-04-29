@@ -90,6 +90,7 @@ class RegisterController extends Controller
             'iban_no'=>'required|string|max:255',
             'mode_of_payment'=>'required|string|max:255',
             'cycle_of_payment'=>'required|string|max:255',
+            'g-recaptcha-response' => 'required|captcha'
 
         ]);
     }
