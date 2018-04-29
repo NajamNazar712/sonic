@@ -2,6 +2,8 @@
 
 use Illuminate\Database\Seeder;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\Shipper\UserShippingInfo;
 class UsersTableSeeder extends Seeder
 {
     /**

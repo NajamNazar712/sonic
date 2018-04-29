@@ -46,6 +46,12 @@ Route::prefix('admin')->group(function () {
     Route::get('/order/management', 'Admins\AdminDashboardController@orderList');
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::get('/accounts/pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('admin.accounts.pending');
+   
+   //Datatables data using ajax calls
+    Route::get('/accounts/active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('admin.accounts.active.ajax');
+    Route::get('/accounts/pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('admin.accounts.pending.ajax');
+    Route::get('/accounts/block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('admin.accounts.block.ajax');
+
     Route::get('/accounts/active', 'Admins\AdminDashboardController@activeAccountsList')->name('admin.accounts.active');
     Route::get('/accounts/block', 'Admins\AdminDashboardController@blockAccountsList');
     //add rates view
