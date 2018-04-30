@@ -19,3 +19,5 @@
   <!-- BEGIN PAGE LEVEL JS-->
   <script src="{{asset('app-assets/js/scripts/forms/form-login-register.js')}}" type="text/javascript"></script>
   <!-- END PAGE LEVEL JS-->
+
+  @yield('js')

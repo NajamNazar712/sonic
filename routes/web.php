@@ -32,6 +32,8 @@ Route::prefix('cod')->group(function () {
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('cod.dashboard');
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
+    Route::get('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookView');
+    Route::post('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookStore');
     Route::get('/logout','Auth\LoginController@logout')->name('cod.logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('cod.logout');
