@@ -83,8 +83,8 @@
                                                             <span class="danger">*</span>
                                                         </label>
 
-                                                        <input type="text" class="form-control required" value="{{ old('name') }}"  name="name" minlength="3">
-                                                        
+                                                        <input type="text" class="form-control required" value="{{ old('name') }}"  name="name">
+
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -148,9 +148,9 @@
                                                         </label>
                                                         <div>
                                                             <select name="shipper_city" id="shipper_city" class="select2 form-control required" style="width: 100%">
-                                                                <option value="{{ old('shipper_city') }}" selected>Select City</option>
+                                                                <option value="" selected>Select City</option>
                                                                 @foreach($all_cities as $city)
-                                                                    <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                                                    <option value="{{$city->city_code}}" {{ old('shipper_city') == $city->city_code ? 'selected' : '' }} >{{$city->city_name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -169,14 +169,14 @@
                                                             Pickup Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('pickup_address[]') }}"  name="pickup_address[]">
+                                                        <input type="text" class="form-control required" value="{{ old('pickup_address.0') }}"  name="pickup_address[]">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_poc">
                                                             Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('shipping_poc[]') }}"  name="shipping_poc[]">                                                    </div>
+                                                        <input type="text" class="form-control required" value="{{ old('shipping_poc.0') }}"  name="shipping_poc[]">                                                    </div>
                                                     <div class="form-group">
 
                                                         <label for="url">Product Type:
@@ -184,9 +184,9 @@
                                                         </label>
                                                         <div>
                                                             <select name="product_type[]" id="product_select" class="select2 form-control required" style="width: 100%">
-                                                                <option value="{{ old('product_type[]') }}" selected>Select Product Type</option>
+                                                                <option value="" selected disabled="">Select Product Type</option>
                                                                 @foreach($products as $product)
-                                                                    <option value="{{$product->id}}">{{$product->product_name}}</option>
+                                                                    <option value="{{$product->id}}" {{ (collect(old('product_type'))->contains($product->id)) ? 'selected' : '' }} >{{$product->product_name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -198,13 +198,13 @@
                                                             Phone Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone[]" value="{{ old('shipping_phone[]') }}">                                                    </div>
+                                                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">                                                    </div>
                                                     <div class="form-group">
                                                         <label for="shipping_phone">
                                                             Email:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="email" name="shipping_email[]" value="{{ old('shipping_email[]') }}" class="form-control required">                                                    </div>
+                                                        <input type="email" name="shipping_email[]" value="{{ old('shipping_email.0') }}" class="form-control required">                                                    </div>
                                                     <div class="form-group">
 
                                                         <label for="shipping_city">Shipper City:
@@ -212,9 +212,9 @@
                                                         </label>
                                                         <div>
                                                             <select name="shipping_city[]" id="shipping_city" class="select2 form-control required" style="width: 100%">
-                                                                <option value="{{ old('shipping_city[]') }}" selected>Select Shipper City</option>
+                                                                <option value="" selected disabled="">Select Shipper City</option>
                                                                 @foreach($cities as $city)
-                                                                    <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                                                    <option value="{{$city->city_code}}" {{ (collect(old('shipping_city'))->contains($city->city_code)) ? 'selected' : '' }} >{{$city->city_name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -226,6 +226,91 @@
                                                 {{--Accordion--}}
                                                 <div class="col-12" id="newAddress">
 
+                                            <!--To find if the form was submitted showing validation error
+                                                 it will not work by defualt -->
+                                        @if (old('pickup_address'))
+                                            @php ($i = 1)
+                                        @else
+                                            @php ($i = 0)
+                                        @endif
+                                        @while (old('pickup_address.'.$i) != null)
+
+                                        <div class="card naddress" id="shipping_{{$i}}">
+                                            <div class="card-header">
+                                                <h4 class="card-title">New Address</h4>
+                                                <div class="heading-elements">
+                                                    <ul class="list-inline mb-0">
+                                                        <li><a data-action="close"><i class="ft-x"></i></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="card-content">
+                                                <div class="">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="pickup_address">
+                                                                    Pickup Address :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control required" value="{{ old('pickup_address.'.$i) }}" name="pickup_address[]">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="shipping_poc">
+                                                                    Person Of Contact :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control required" value="{{ old('shipping_poc.'.$i) }}"  name="shipping_poc[]">
+                                                            </div>
+                                                            <div class="form-group">
+
+                                                                <label for="url">Product Type :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <div>
+                                                                    <select name="product_type[]" class="select2 form-control required" style="width: 100%">
+                                                                        <option value="" selected>Select Product Type</option>
+                                                                        @foreach($products as $product)
+                                                                            <option value="{{$product->id}}" {{ (collect(old('product_type.'.$i))->contains($product->id)) ? 'selected' : '' }} >{{$product->product_name}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="shipping_phone">
+                                                                    Phone Number :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <input type="tel" class="form-control required" placeholder="(0345) 999-9999" value="{{ old('shipping_phone.'.$i) }}" name="shipping_phone[]">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="shipping_email">Email :<span class="danger">*</span></label>
+                                                                <input type="email" name="shipping_email[]" class="form-control required" value="{{ old('shipping_email.'.$i) }}">
+                                                            </div>
+                                                            <div class="form-group">
+
+                                                                <label for="shipping_city">Shipper City :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <div>
+                                                                    <select name="shipping_city[]" class="select2 form-control required" style="width: 100%">
+                                                                        <option value="" selected>Select Shipper City</option>
+                                                                        @foreach($cities as $city)
+                                                                            <option value="{{$city->city_code}}" {{ (collect(old('shipping_city.'.$i))->contains($city->city_code)) ? 'selected' : '' }} >{{$city->city_name}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>{{--row end--}}
+                                                </div>{{--card body end--}}
+                                            </div>
+                                        </div>
+                                        @php ($i++)
+                                        @endwhile
                                                 </div>{{--column end--}}
                                                 {{--Accordion--}}
                                                 <div class="col-12">
@@ -248,19 +333,19 @@
                                                             Bank Name:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"   name="bank_name">
+                                                        <input type="text" class="form-control required" value="{{ old('bank_name') }}"   name="bank_name">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="bank_branch">
                                                             Bank Branch:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" name="bank_branch">
+                                                        <input type="text" class="form-control required" value="{{ old('bank_branch') }}" name="bank_branch">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="account_name">Account Number:
                                                             <span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required" name="account_no">
+                                                        <input type="text" class="form-control required" value="{{ old('account_no') }}" name="account_no">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="mode_of_payment">Mode of Payment:
@@ -268,9 +353,9 @@
                                                         </label>
                                                         <div>
                                                         <select name="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected>Select Mode of Payment</option>
-                                                            <option value="ibft">IBFT Reimbursements</option>
-                                                            <option value="invoices">Invoices</option>
+                                                            <option value=""  selected disabled="">Select Mode of Payment</option>
+                                                            <option value="ibft" {{ old('mode_of_payment') == 'ibft' ? 'selected' : '' }}>IBFT Reimbursements</option>
+                                                            <option value="invoices" {{ old('mode_of_payment') == 'invoices' ? 'selected' : '' }}>Invoices</option>
                                                         </select>
                                                         </div>
                                                     </div>
@@ -281,7 +366,7 @@
                                                             Account Title:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type='text' class="form-control required" name="account_title">
+                                                        <input type='text' class="form-control required" value="{{ old('account_title') }}" name="account_title">
 
                                                     </div>
 
@@ -290,7 +375,7 @@
                                                             IBAN Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no">
+                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no') }}" name="iban_no">
                                                     </div>
 
                                                         <div class="form-group">
@@ -302,7 +387,7 @@
                                                                 <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                     <option value="" selected>Select Bank City</option>
                                                                     @foreach($all_cities as $city)
-                                                                        <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                                                        <option value="{{$city->city_code}}"  {{ old('bank_city') == '$city->city_code' ? 'selected' : '' }} >{{$city->city_name}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -314,11 +399,11 @@
                                                             </label>
                                                         <div>
                                                         <select name="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected>Select Cycle of Payment</option>
-                                                            <option value="daily">Daily</option>
-                                                            <option value="weekly">Weekly</option>
-                                                            <option value="fortnight">Fortnight</option>
-                                                            <option value="monthly">Monthly</option>
+                                                            <option value="" selected disabled="">Select Cycle of Payment</option>
+                                                            <option value="daily" {{ old('cycle_of_payment') == 'daily' ? 'selected' : '' }}>Daily</option>
+                                                            <option value="weekly" {{ old('cycle_of_payment') == 'weekly' ? 'selected' : '' }}>Weekly</option>
+                                                            <option value="fortnight" {{ old('cycle_of_payment') == 'fortnight' ? 'selected' : '' }}>Fortnight</option>
+                                                            <option value="monthly" {{ old('cycle_of_payment') == 'monthly' ? 'selected' : '' }}>Monthly</option>
                                                         </select>
                                                         </div>
                                                     </div>
@@ -337,7 +422,7 @@
                                                             Email Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="abc@example.com"  name="email">
+                                                        <input type="text" class="form-control required" placeholder="abc@example.com" value="{{ old('email') }}"  name="email">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="password">
@@ -346,12 +431,16 @@
                                                         </label>
                                                         <div class="form-group position-relative">
 
-                                                        <input type="password" class="form-control required" placeholder="Minimum 6 Character" name="password">
+                                                        <input type="password" class="form-control required" placeholder="Minimum 6 Character" value="{{ old('password') }}" name="password">
                                                         <div class="form-control-position" id="peye">
                                                             <i class="la la-eye success"></i>
                                                         </div>
 
                                                         </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        {!! app('captcha')->display() !!}
+                                                        <!--<button id="reset" class="btn btn-primary btn-min-width mr-1 mb-1">Reset</button>-->
                                                     </div>
                                                     {{--<div class="form-group">--}}
                                                         {{--<label for="password-confirm">--}}
@@ -423,28 +512,49 @@
             theme: 'dark',
             wheelPropagation: true
         });
-        var count = 1;
+
+
+        var count = {{$i}};
         $('body').on('click','#addMoreAddress',function () {
             $.get( 'new/address', function( data ) {
                 $('#newAddress').append(data);
 
             }).done(function() {
                 var cc = $('.card.naddress').length;
-                var nid = $('.card.naddress').eq(count);
+                var nid = $('.card.naddress').eq(cc-1);
+
                 nid.attr('id','shipping_'+count);
                 $('#shipping_'+count+' h3.card-title' ).text('Address '+count);
+                //becasuse count is starting from 0 and 0 index is there by default for following values
+                var innerdivcount = count + 1;
+                var temp_pickupaddress = $('#shipping_'+count+' input[name="temp_pickupaddress"]');
+                temp_pickupaddress.attr('name','pickup_address['+innerdivcount+']');
+                var temp_shipping_poc = $('#shipping_'+count+' input[name="temp_shipping_poc"]');
+                temp_shipping_poc.attr('name','shipping_poc['+innerdivcount+']');
+                var temp_product_type = $('#shipping_'+count+' select[name="temp_product_type"]');
+                temp_product_type.attr('name','product_type['+innerdivcount+']');
+                var temp_shipping_phone = $('#shipping_'+count+' input[name="temp_shipping_phone"]');
+                temp_shipping_phone.attr('name','shipping_phone['+innerdivcount+']');
+                var temp_shipping_email = $('#shipping_'+count+' input[name="temp_shipping_email"]');
+                temp_shipping_email.attr('name','shipping_email['+innerdivcount+']');
+                var temp_shipping_city = $('#shipping_'+count+' select[name="temp_shipping_city"]');
+                temp_shipping_city.attr('name','shipping_city['+innerdivcount+']');
+
+                $('#shipInfo').stop().animate({
+                  scrollTop: $('#shipInfo')[0].scrollHeight
+                }, 2000);
+
                 $('#shipping_' + count + ' .select2').select2({
                     dropdownParent:$('#registership')
                 });
                 $('#shipping_' + count + ' a[data-action="close"]').on('click',function(){
-                    $(this).closest('.card').removeClass().slideUp('fast');
+                  //  $(this).closest('.card').removeClass().slideUp('fast'); // comenting this because display none will allow values to be posted
+                   $(this).closest('.card').remove();
+                $('#shipInfo').stop().animate({
+                  scrollTop: $('#shipInfo')[0].scrollHeight
+                }, 2000);
+
                 });
-                //const container = document.querySelector('#shipping_'+count);
-                //container.scrollTop = 0;
-                //form validatiion
-                // Initialize validation
-                //$(function () { $("input,select,textarea").not("[type=submit]").jqBootstrapValidation(); } );
-                //
                 count++;
 
             });
@@ -499,6 +609,19 @@
         // });
 
     });
+
+    var reset = document.querySelector('#reset');
+    if (reset) {
+        reset.addEventListener('click', () => {
+          grecaptcha.reset()
+        });
+    }
+
+
+
+
+
+
 </script>
 </body>
 </html>

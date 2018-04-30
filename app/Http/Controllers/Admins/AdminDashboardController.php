@@ -7,6 +7,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\CityInfo;
 use App\Http\Models\PickupType;
+use Yajra\Datatables\Datatables;
+use Illuminate\Database\Eloquent\Collection;
+
 class AdminDashboardController extends Controller
 {
 
@@ -28,19 +31,14 @@ class AdminDashboardController extends Controller
         return view('admin.pending_booked_orders');
     }
     public function pendingAccountsList(){
-       $pendingAccounts =  User::where('active',0)->get();
-//       $pendingAccounts = User::find(2);
-//       return $pendingAccounts->city();
-        return view('admin.accounts.pending_accounts_list')->with('accounts',$pendingAccounts);
+        return view('admin.accounts.pending_accounts_list');
     }
     public function activeAccountsList(){
-        $activeAccounts =  User::where('active',1)->where('blacklist',0)->get();
-        return view('admin.accounts.active_accounts_list')->with('accounts',$activeAccounts);
+        return view('admin.accounts.active_accounts_list');
 
     }
     public function blockAccountsList(){
-        $blackAccounts = User::where('blacklist',1)->get();
-        return view('admin.accounts.block_accounts_list')->with('accounts',$blackAccounts);
+        return view('admin.accounts.block_accounts_list');
     }
     public function UserStatus(Request $request){
 //        dd($request);
@@ -99,4 +97,95 @@ class AdminDashboardController extends Controller
 //        $user = User::find($id);
 //        return view('admin.accounts.add_rates')->with('shipper',$user);
     }
+    public function activeAccountListAjax(){
+
+        $data  = [];
+        $users = User::where('active',1)->where('blacklist',0)->get();
+        foreach ($users as $user) {
+            $obj = new \stdClass;
+            $obj->id = $user->id;
+            $obj->name = $user->name;
+            $obj->city = $user->city->city_name;
+            $obj->poc = $user->poc;
+            $obj->phone = $user->phone;
+            $obj->address = $user->address;
+            $obj->email = $user->email;
+            $data[] = $obj;
+        }
+        $result = new Collection($data);
+        return Datatables::of($result)->addColumn("action", function ($result) {
+                                            return " <span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
+
+                                            </div>
+                                            </span>";
+                                        })
+                                      ->make(true);
+
+    }
+    public function pendingAccountListAjax(){
+
+        $data  = [];
+        $users = User::where('active',0)->where('blacklist',0)->get();
+        foreach ($users as $user) {
+            $obj = new \stdClass;
+            $obj->id = $user->id;
+            $obj->name = $user->name;
+            $obj->city = $user->city->city_name;
+            $obj->poc = $user->poc;
+            $obj->phone = $user->phone;
+            $obj->address = $user->address;
+            $obj->email = $user->email;
+            $data[] = $obj;
+        }
+        $result = new Collection($data);
+        return Datatables::of($result)->addColumn("action", function ($result) {
+                                            return " <span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
+                                              <a href='".route('admin.add.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Add Rates</a>
+                                            </div>
+                                            </span>";
+                                        })
+                                      ->make(true);
+
+    }
+    public function blockAccountListAjax(){
+
+        $data  = [];
+        $users = User::where('blacklist',1)->get();
+        foreach ($users as $user) {
+            $obj = new \stdClass;
+            $obj->id = $user->id;
+            $obj->name = $user->name;
+            $obj->city = $user->city->city_name;
+            $obj->poc = $user->poc;
+            $obj->phone = $user->phone;
+            $obj->address = $user->address;
+            $obj->email = $user->email;
+            $data[] = $obj;
+        }
+        $result = new Collection($data);
+        return Datatables::of($result)->addColumn("action", function ($result) {
+                                            return " <span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
+
+                                            </div>
+                                            </span>";
+                                        })
+                                      ->make(true);
+
+    }
+
 }
