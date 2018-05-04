@@ -98,22 +98,10 @@ class AdminDashboardController extends Controller
 //        return view('admin.accounts.add_rates')->with('shipper',$user);
     }
     public function activeAccountListAjax(){
+       $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
+            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('active',1)->where('blacklist',0);
 
-        $data  = [];
-        $users = User::where('active',1)->where('blacklist',0)->get();
-        foreach ($users as $user) {
-            $obj = new \stdClass;
-            $obj->id = $user->id;
-            $obj->name = $user->name;
-            $obj->city = $user->city->city_name;
-            $obj->poc = $user->poc;
-            $obj->phone = $user->phone;
-            $obj->address = $user->address;
-            $obj->email = $user->email;
-            $data[] = $obj;
-        }
-        $result = new Collection($data);
-        return Datatables::of($result)->addColumn("action", function ($result) {
+        return Datatables::of($users)->addColumn("action", function ($result) {
                                             return " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
@@ -128,29 +116,17 @@ class AdminDashboardController extends Controller
 
     }
     public function pendingAccountListAjax(){
+        $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
+            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('active',0)->where('blacklist',0);
 
-        $data  = [];
-        $users = User::where('active',0)->where('blacklist',0)->get();
-        foreach ($users as $user) {
-            $obj = new \stdClass;
-            $obj->id = $user->id;
-            $obj->name = $user->name;
-            $obj->city = $user->city->city_name;
-            $obj->poc = $user->poc;
-            $obj->phone = $user->phone;
-            $obj->address = $user->address;
-            $obj->email = $user->email;
-            $data[] = $obj;
-        }
-        $result = new Collection($data);
-        return Datatables::of($result)->addColumn("action", function ($result) {
+        return Datatables::of($users)->addColumn("action", function ($result) {
                                             return " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
                                               <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
                                               <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
-                                              <a href='".route('admin.add.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Add Rates</a>
+
                                             </div>
                                             </span>";
                                         })
@@ -158,22 +134,10 @@ class AdminDashboardController extends Controller
 
     }
     public function blockAccountListAjax(){
+        $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
+            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('blacklist',1);
 
-        $data  = [];
-        $users = User::where('blacklist',1)->get();
-        foreach ($users as $user) {
-            $obj = new \stdClass;
-            $obj->id = $user->id;
-            $obj->name = $user->name;
-            $obj->city = $user->city->city_name;
-            $obj->poc = $user->poc;
-            $obj->phone = $user->phone;
-            $obj->address = $user->address;
-            $obj->email = $user->email;
-            $data[] = $obj;
-        }
-        $result = new Collection($data);
-        return Datatables::of($result)->addColumn("action", function ($result) {
+        return Datatables::of($users)->addColumn("action", function ($result) {
                                             return " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
