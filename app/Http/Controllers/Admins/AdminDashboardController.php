@@ -140,20 +140,27 @@ class AdminDashboardController extends Controller
                 $wa_switch = array();
                 $wa_spkg = array();
                 foreach ($request->on_wa_range_up as $index => $on_wa_range_up) {
-                    $wa_switch = $request->on_wa_switch;
-                    $wa_spkg = $request->on_wa_spkg;
+//                    $wa_switch = array_key_exists($index,$request->on_wa_switch)? $request->on_wa_switch[$index] : 0;
+//                    $wa_switch = if(array_key_exists($index,$request->on_wa_switch)){ echo $request->on_wa_switch[$index];}else{echo 0;};
 
+                    if(array_key_exists($index,$request->on_wa_switch)){ $wa_switch[] = 1;}else{$wa_switch[] =  0;};
+                    if(array_key_exists($index,$request->on_wa_spkg)){ $wa_spkg[] = $request->on_wa_spkg[$index];}else{$wa_spkg[] =  0;};
+//                    $wa_spkg = array_key_exists($index,$request->on_wa_spkg)? $request->on_wa_spkg[$index] : 0.00;
+                    //$wa_switch = $request->on_wa_switch;
+                    //$wa_spkg = $request->on_wa_spkg;
+//                    $swit = $wa_switch[1];
                     WeightCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
                         'range_up' => $request->on_wa_range_up[$index],
                         'range_down' => $request->on_wa_range_down[$index],
-                        'weight_addition' => ($wa_switch[$index] ? $wa_switch[$index] : 0),
-                        'spkg' => ($request->on_wa_spkg[$index]? $request->on_wa_spkg[$index] : 0.00),
+                        'weight_addition' => $wa_switch[$index],
+                        'spkg' => $wa_spkg[$index],
                         'local_or_6hr' => $request->on_wa_local_charges[$index],
                         'national_or_sameday' => $request->on_wa_national_charges[$index]
                     ]);
                 }
+//                print_r($wa_spkg[0]);die();
 
                 //Replacement and Try and Buy charges
                 BookingTypeCharges::create([
