@@ -140,15 +140,10 @@ class AdminDashboardController extends Controller
                 $wa_switch = array();
                 $wa_spkg = array();
                 foreach ($request->on_wa_range_up as $index => $on_wa_range_up) {
-//                    $wa_switch = array_key_exists($index,$request->on_wa_switch)? $request->on_wa_switch[$index] : 0;
-//                    $wa_switch = if(array_key_exists($index,$request->on_wa_switch)){ echo $request->on_wa_switch[$index];}else{echo 0;};
 
                     if(array_key_exists($index,$request->on_wa_switch)){ $wa_switch[] = 1;}else{$wa_switch[] =  0;};
                     if(array_key_exists($index,$request->on_wa_spkg)){ $wa_spkg[] = $request->on_wa_spkg[$index];}else{$wa_spkg[] =  0;};
-//                    $wa_spkg = array_key_exists($index,$request->on_wa_spkg)? $request->on_wa_spkg[$index] : 0.00;
-                    //$wa_switch = $request->on_wa_switch;
-                    //$wa_spkg = $request->on_wa_spkg;
-//                    $swit = $wa_switch[1];
+
                     WeightCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -160,7 +155,7 @@ class AdminDashboardController extends Controller
                         'national_or_sameday' => $request->on_wa_national_charges[$index]
                     ]);
                 }
-//                print_r($wa_spkg[0]);die();
+
 
                 //Replacement and Try and Buy charges
                 BookingTypeCharges::create([
@@ -246,9 +241,7 @@ class AdminDashboardController extends Controller
                     $to =date_format($nto,"Y-m-d H:i:s");
                     $nfrom = date_create($from);
                     $from =date_format($nfrom,"Y-m-d H:i:s");
-//                    var_dump($from);die();
-//                    $to = $to . ' 00:00:00';
-//                    $from = $from . ' 23:59:59';
+
                     DiscountCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -263,125 +256,387 @@ class AdminDashboardController extends Controller
                 }
 
             }
-            return "Donnne";
+            
         }
         //Overland
-//        if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
-//            $weightAlreadyOverland = WeightCharge::where('user_id',$id)->where('shipping_mode_id',2)->get();
-//            //dd($weightAlready);
-//            if($weightAlreadyOverland->isEmpty()) {
-//                foreach ($request->ol_wa_range_up as $index => $ol_wa_range_up) {
-//                    WeightCharge::create([
-//                        'user_id' => $id,
-//                        'shipping_mode_id' => 1,
-//                        'range_up' => $request->ol_wa_range_up[$index],
-//                        'range_down' => $request->ol_wa_range_down[$index],
-//                        'weight_addition' => ($request->has("ol_wa_switch[$index]"))? 1 : 0,
-//                        'spkg' => ($request->has("ol_wa_spkg[$index]")? $request->ol_wa_spkg[$index] : 0.00),
-//                        'local_or_6hr' => $request->ol_wa_local_charges[$index],
-//                        'national_or_sameday' => $request->ol_wa_national_charges[$index]
-//                    ]);
-//                }
-//                //Replacement and Try and Buy charges
-//                BookingTypeCharges::create([
-//                    'user_id'=>$id,
-//                    'shipping_mode_id'=>1,
-//                    'replacement_charges'=>$request->ol_replacement_charges,
-//                    'try_and_buy_charges'=>$request->ol_tnb_charges
-//                ]);
-//                //Cash handling Charges
-//                if($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on'){
-//                    foreach ($request->ol_cash_range_up as $ind => $ol_cash_range_up){
-//                        CashHandlingCharge::create([
-//                            'user_id'=>$id,
-//                            'shipping_mode_id'=>1,
-//                            'range_up'=> $request->ol_cash_range_up[$ind],
-//                            'range_down'=> $request->ol_cash_range_down[$ind],
-//                            'charges'=> $request->ol_cash_charges[$ind]
-//                        ]);
-//                    }
-//                }
-//                //insurance charges
-//                if($request->has('ol_insurance_charges_switch') && $request->ol_insurance_charges_switch == 'on'){
-//                    foreach ($request->ol_ins_range_up as $insurance => $ol_ins_range_up){
-//                        InsuranceCharge::create([
-//                            'user_id'=>$id,
-//                            'shipping_mode_id'=>1,
-//                            'range_up'=> $request->ol_ins_range_up[$insurance],
-//                            'range_down'=> $request->ol_ins_range_down[$insurance],
-//                            'charges'=> $request->ol_ins_charges[$insurance]
-//                        ]);
-//                    }
-//                }
-//                //Return Charges
-//                if($request->has('ol_return_switch') && $request->ol_return_switch == 'on'){
-//                    ReturnCharge::create([
-//                        'user_id'=>$id,
-//                        'shipping_mode_id'=>1,
-//                        'local'=> $request->ol_return_local_charges,
-//                        'national'=> $request->ol_return_national_charges
-//                    ]);
-//                }
-//                //Packaging Charges
-//                if($request->has('ol_packaging_switch') && $request->ol_packaging_switch == 'on'){
-//                    PackagingCharge::create([
-//                        'user_id'=>$id,
-//                        'shipping_mode_id'=>1,
-//                        'sm_flyer'=> $request->ol_flyer_sm,
-//                        'md_flyer'=> $request->ol_flyer_md,
-//                        'lg_flyer'=> $request->ol_flyer_lg,
-//                        'box_flyer'=> $request->ol_flyer_box
-//                    ]);
-//                }
-//                $discount_cash = null;
-//                $discount_weight = null;
-//                $discount_insurance = null;
-//                $discount_return = null;
-//                $discount_packaging = null;
-//
-//                if($request->has('ol_discount_weight_switch') && $request->ol_discount_weight_switch == 'on'){
-//                    $discount_weight = $request->ol_discount_weight_rate != null ? $request->ol_discount_weight_rate : null;
-////                    $discount_weight = $request->ol_discount_weight_rate;
-//                }
-//                if($request->has('ol_discount_cash_switch') && $request->ol_discount_cash_switch == 'on'){
-//                    $discount_cash = $request->ol_discount_cash_rate != null ? $request->ol_discount_cash_rate : null;
-//                }
-//                if($request->has('ol_discount_insurance_switch') && $request->ol_discount_insurance_switch == 'on'){
-//                    $discount_insurance = $request->ol_discount_insurance_rate != null ? $request->ol_discount_insurance_rate : null;
-//                }
-//                if($request->has('ol_discount_return_switch') && $request->ol_discount_return_switch == 'on'){
-//                    $discount_return = $request->ol_discount_return_rate != null ? $request->ol_discount_insurance_rate : null;
-//                }
-//                if($request->has('ol_discount_packaging_switch') && $request->ol_discount_packaging_switch == 'on'){
-//                    $discount_packaging = $request->ol_discount_packaging_rate != null ? $request->ol_discount_packaging_rate : null;
-//                }
-//                if($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
-//
-//
-//                    $date_str = $request->on_daterange;
-//                    $date_sep = explode(' - ', $date_str);
-//                    $to = str_replace('/', '-', $date_sep[0]);
-//                    $from = str_replace('/', '-', $date_sep[1]);
-//                    $to = $to . ' 00:00:00';
-//                    $from = $from . ' 24:59:59';
-////                $from = date_create($from);
-////                $to =date_format($to,"Y-m-d H:i:s");
-////                $from =date_format($from,"Y-m-d H:i:s");
-//                    DiscountCharge::create([
-//                        'user_id' => $id,
-//                        'shipping_mode_id' => 1,
-//                        'weight' => $discount_weight,
-//                        'cash' => $discount_cash,
-//                        'insurance' => $discount_insurance,
-//                        'return' => $discount_return,
-//                        'packaging' => $discount_packaging,
-//                        'to' => $to,
-//                        'from' => $from
-//                    ]);
-//                }
-//            }
-//        }
-        //
+        if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
+            $weightAlready = WeightCharge::where('user_id',$id)->where('shipping_mode_id',2)->get();
+            //dd($weightAlready);
+            if($weightAlready->isEmpty()) {
+                $wa_switch_overland = array();
+                $wa_spkg_overland = array();
+                foreach ($request->ol_wa_range_up as $index => $ol_wa_range_up) {
+
+                    if(array_key_exists($index,$request->ol_wa_switch)){ $wa_switch_overland[] = 1;}else{$wa_switch_overland[] =  0;};
+                    if(array_key_exists($index,$request->ol_wa_spkg)){ $wa_spkg_overland[] = $request->ol_wa_spkg[$index];}else{$wa_spkg_overland[] =  0;};
+
+                    WeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'range_up' => $request->ol_wa_range_up[$index],
+                        'range_down' => $request->ol_wa_range_down[$index],
+                        'weight_addition' => $wa_switch_overland[$index],
+                        'spkg' => $wa_spkg_overland[$index],
+                        'local_or_6hr' => $request->ol_wa_local_charges[$index],
+                        'national_or_sameday' => $request->ol_wa_national_charges[$index]
+                    ]);
+                }
+
+
+                //Replacement and Try and Buy charges
+                BookingTypeCharges::create([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>2,
+                    'replacement_charges'=>$request->ol_replacement_charges,
+                    'try_and_buy_charges'=>$request->ol_tnb_charges
+                ]);
+                //Cash handling Charges
+                if($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on'){
+                    foreach ($request->ol_cash_range_up as $ind => $ol_cash_range_up){
+                        CashHandlingCharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>2,
+                            'range_up'=> $request->ol_cash_range_up[$ind],
+                            'range_down'=> $request->ol_cash_range_down[$ind],
+                            'charges'=> $request->ol_cash_charges[$ind]
+                        ]);
+                    }
+                }
+                //insurance charges
+                if($request->has('ol_insurance_charges_switch') && $request->ol_insurance_charges_switch == 'on'){
+                    foreach ($request->ol_ins_range_up as $insurance => $ol_ins_range_up){
+                        InsuranceCharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>2,
+                            'range_up'=> $request->ol_ins_range_up[$insurance],
+                            'range_down'=> $request->ol_ins_range_down[$insurance],
+                            'charges'=> $request->ol_ins_charges[$insurance]
+                        ]);
+                    }
+                }
+                //Return Charges
+                if($request->has('ol_return_switch') && $request->ol_return_switch == 'on'){
+                    ReturnCharge::create([
+                        'user_id'=>$id,
+                        'shipping_mode_id'=>2,
+                        'local'=> $request->ol_return_local_charges,
+                        'national'=> $request->ol_return_national_charges
+                    ]);
+                }
+                //Packaging Charges
+                if($request->has('ol_packaging_switch') && $request->ol_packaging_switch == 'on'){
+                    PackagingCharge::create([
+                        'user_id'=>$id,
+                        'shipping_mode_id'=>2,
+                        'sm_flyer'=> $request->ol_flyer_sm,
+                        'md_flyer'=> $request->ol_flyer_md,
+                        'lg_flyer'=> $request->ol_flyer_lg,
+                        'box_flyer'=> $request->ol_flyer_box
+                    ]);
+                }
+                $discount_cash = null;
+                $discount_weight = null;
+                $discount_insurance = null;
+                $discount_return = null;
+                $discount_packaging = null;
+
+                if($request->has('ol_discount_weight_switch') && $request->ol_discount_weight_switch == 'on'){
+                    $discount_weight = $request->ol_discount_weight_rate != null ? $request->ol_discount_weight_rate : null;
+//                    $discount_weight = $request->ol_discount_weight_rate;
+                }
+                if($request->has('ol_discount_cash_switch') && $request->ol_discount_cash_switch == 'on'){
+                    $discount_cash = $request->ol_discount_cash_rate != null ? $request->ol_discount_cash_rate : null;
+                }
+                if($request->has('ol_discount_insurance_switch') && $request->ol_discount_insurance_switch == 'on'){
+                    $discount_insurance = $request->ol_discount_insurance_rate != null ? $request->ol_discount_insurance_rate : null;
+                }
+                if($request->has('ol_discount_return_switch') && $request->ol_discount_return_switch == 'on'){
+                    $discount_return = $request->ol_discount_return_rate != null ? $request->ol_discount_insurance_rate : null;
+                }
+                if($request->has('ol_discount_packaging_switch') && $request->ol_discount_packaging_switch == 'on'){
+                    $discount_packaging = $request->ol_discount_packaging_rate != null ? $request->ol_discount_packaging_rate : null;
+                }
+                if($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+
+
+                    $date_str = $request->ol_daterange;
+                    $date_sep = explode(' - ', $date_str);
+                    $to = str_replace('/', '-', $date_sep[0]);
+                    $from = str_replace('/', '-', $date_sep[1]);
+                    $nto = date_create($to);
+                    $to =date_format($nto,"Y-m-d H:i:s");
+                    $nfrom = date_create($from);
+                    $from =date_format($nfrom,"Y-m-d H:i:s");
+
+                    DiscountCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'weight' => $discount_weight,
+                        'cash' => $discount_cash,
+                        'insurance' => $discount_insurance,
+                        'return' => $discount_return,
+                        'packaging' => $discount_packaging,
+                        'to' => $to,
+                        'from' => $from
+                    ]);
+                }
+
+            }
+            
+        }
+        //Detain
+        if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
+            $weightAlready = WeightCharge::where('user_id',$id)->where('shipping_mode_id',3)->get();
+            //dd($weightAlready);
+            if($weightAlready->isEmpty()) {
+                $wa_switch_detain = array();
+                $wa_spkg_detain = array();
+                foreach ($request->detain_wa_range_up as $index => $detain_wa_range_up) {
+
+                    if(array_key_exists($index,$request->detain_wa_switch)){ $wa_switch_detain[] = 1;}else{$wa_switch_detain[] =  0;};
+                    if(array_key_exists($index,$request->detain_wa_spkg)){ $wa_spkg_detain[] = $request->detain_wa_spkg[$index];}else{$wa_spkg_detain[] =  0;};
+
+                    WeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'range_up' => $request->detain_wa_range_up[$index],
+                        'range_down' => $request->detain_wa_range_down[$index],
+                        'weight_addition' => $wa_switch_detain[$index],
+                        'spkg' => $wa_spkg_detain[$index],
+                        'local_or_6hr' => $request->detain_wa_local_charges[$index],
+                        'national_or_sameday' => $request->detain_wa_national_charges[$index]
+                    ]);
+                }
+
+
+                //Replacement and Try and Buy charges
+                BookingTypeCharges::create([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>3,
+                    'replacement_charges'=>$request->detain_replacement_charges,
+                    'try_and_buy_charges'=>$request->detain_tnb_charges
+                ]);
+                //Cash handling Charges
+                if($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on'){
+                    foreach ($request->detain_cash_range_up as $ind => $detain_cash_range_up){
+                        CashHandlingCharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>3,
+                            'range_up'=> $request->detain_cash_range_up[$ind],
+                            'range_down'=> $request->detain_cash_range_down[$ind],
+                            'charges'=> $request->detain_cash_charges[$ind]
+                        ]);
+                    }
+                }
+                //insurance charges
+                if($request->has('detain_insurance_charges_switch') && $request->detain_insurance_charges_switch == 'on'){
+                    foreach ($request->detain_ins_range_up as $insurance => $detain_ins_range_up){
+                        InsuranceCharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>3,
+                            'range_up'=> $request->detain_ins_range_up[$insurance],
+                            'range_down'=> $request->detain_ins_range_down[$insurance],
+                            'charges'=> $request->detain_ins_charges[$insurance]
+                        ]);
+                    }
+                }
+                //Return Charges
+                if($request->has('detain_return_switch') && $request->detain_return_switch == 'on'){
+                    ReturnCharge::create([
+                        'user_id'=>$id,
+                        'shipping_mode_id'=>3,
+                        'local'=> $request->detain_return_local_charges,
+                        'national'=> $request->detain_return_national_charges
+                    ]);
+                }
+                //Packaging Charges
+                if($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on'){
+                    PackagingCharge::create([
+                        'user_id'=>$id,
+                        'shipping_mode_id'=>3,
+                        'sm_flyer'=> $request->detain_flyer_sm,
+                        'md_flyer'=> $request->detain_flyer_md,
+                        'lg_flyer'=> $request->detain_flyer_lg,
+                        'box_flyer'=> $request->detain_flyer_box
+                    ]);
+                }
+                $discount_cash = null;
+                $discount_weight = null;
+                $discount_insurance = null;
+                $discount_return = null;
+                $discount_packaging = null;
+
+                if($request->has('detain_discount_weight_switch') && $request->detain_discount_weight_switch == 'on'){
+                    $discount_weight = $request->detain_discount_weight_rate != null ? $request->detain_discount_weight_rate : null;
+//                    $discount_weight = $request->detain_discount_weight_rate;
+                }
+                if($request->has('detain_discount_cash_switch') && $request->detain_discount_cash_switch == 'on'){
+                    $discount_cash = $request->detain_discount_cash_rate != null ? $request->detain_discount_cash_rate : null;
+                }
+                if($request->has('detain_discount_insurance_switch') && $request->detain_discount_insurance_switch == 'on'){
+                    $discount_insurance = $request->detain_discount_insurance_rate != null ? $request->detain_discount_insurance_rate : null;
+                }
+                if($request->has('detain_discount_return_switch') && $request->detain_discount_return_switch == 'on'){
+                    $discount_return = $request->detain_discount_return_rate != null ? $request->detain_discount_insurance_rate : null;
+                }
+                if($request->has('detain_discount_packaging_switch') && $request->detain_discount_packaging_switch == 'on'){
+                    $discount_packaging = $request->detain_discount_packaging_rate != null ? $request->detain_discount_packaging_rate : null;
+                }
+                if($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+
+
+                    $date_str = $request->detain_daterange;
+                    $date_sep = explode(' - ', $date_str);
+                    $to = str_replace('/', '-', $date_sep[0]);
+                    $from = str_replace('/', '-', $date_sep[1]);
+                    $nto = date_create($to);
+                    $to =date_format($nto,"Y-m-d H:i:s");
+                    $nfrom = date_create($from);
+                    $from =date_format($nfrom,"Y-m-d H:i:s");
+
+                    DiscountCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'weight' => $discount_weight,
+                        'cash' => $discount_cash,
+                        'insurance' => $discount_insurance,
+                        'return' => $discount_return,
+                        'packaging' => $discount_packaging,
+                        'to' => $to,
+                        'from' => $from
+                    ]);
+                }
+
+            }
+            
+        }
+        //Sameday
+        if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
+            $weightAlready = WeightCharge::where('user_id',$id)->where('shipping_mode_id',4)->get();
+            //dd($weightAlready);
+            if($weightAlready->isEmpty()) {
+                $wa_switch_sameday = array();
+                $wa_spkg_sameday = array();
+                foreach ($request->sameday_wa_range_up as $index => $sameday_wa_range_up) {
+
+                    if(array_key_exists($index,$request->sameday_wa_switch)){ $wa_switch_sameday[] = 1;}else{$wa_switch_sameday[] =  0;};
+                    if(array_key_exists($index,$request->sameday_wa_spkg)){ $wa_spkg_sameday[] = $request->sameday_wa_spkg[$index];}else{$wa_spkg_sameday[] =  0;};
+
+                    WeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'range_up' => $request->sameday_wa_range_up[$index],
+                        'range_down' => $request->sameday_wa_range_down[$index],
+                        'weight_addition' => $wa_switch_sameday[$index],
+                        'spkg' => $wa_spkg_sameday[$index],
+                        'local_or_6hr' => $request->sameday_wa_local_charges[$index],
+                        'national_or_sameday' => $request->sameday_wa_national_charges[$index]
+                    ]);
+                }
+
+
+                //Replacement and Try and Buy charges
+                BookingTypeCharges::create([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>4,
+                    'replacement_charges'=>$request->sameday_replacement_charges,
+                    'try_and_buy_charges'=>$request->sameday_tnb_charges
+                ]);
+                //Cash handling Charges
+                if($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on'){
+                    foreach ($request->sameday_cash_range_up as $ind => $sameday_cash_range_up){
+                        CashHandlingCharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>4,
+                            'range_up'=> $request->sameday_cash_range_up[$ind],
+                            'range_down'=> $request->sameday_cash_range_down[$ind],
+                            'charges'=> $request->sameday_cash_charges[$ind]
+                        ]);
+                    }
+                }
+                //insurance charges
+                if($request->has('sameday_insurance_charges_switch') && $request->sameday_insurance_charges_switch == 'on'){
+                    foreach ($request->sameday_ins_range_up as $insurance => $sameday_ins_range_up){
+                        InsuranceCharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>4,
+                            'range_up'=> $request->sameday_ins_range_up[$insurance],
+                            'range_down'=> $request->sameday_ins_range_down[$insurance],
+                            'charges'=> $request->sameday_ins_charges[$insurance]
+                        ]);
+                    }
+                }
+                //Return Charges
+                if($request->has('sameday_return_switch') && $request->sameday_return_switch == 'on'){
+                    ReturnCharge::create([
+                        'user_id'=>$id,
+                        'shipping_mode_id'=>4,
+                        'local'=> $request->sameday_return_local_charges,
+                        'national'=> $request->sameday_return_national_charges
+                    ]);
+                }
+                //Packaging Charges
+                if($request->has('sameday_packaging_switch') && $request->sameday_packaging_switch == 'on'){
+                    PackagingCharge::create([
+                        'user_id'=>$id,
+                        'shipping_mode_id'=>4,
+                        'sm_flyer'=> $request->sameday_flyer_sm,
+                        'md_flyer'=> $request->sameday_flyer_md,
+                        'lg_flyer'=> $request->sameday_flyer_lg,
+                        'box_flyer'=> $request->sameday_flyer_box
+                    ]);
+                }
+                $discount_cash = null;
+                $discount_weight = null;
+                $discount_insurance = null;
+                $discount_return = null;
+                $discount_packaging = null;
+
+                if($request->has('sameday_discount_weight_switch') && $request->sameday_discount_weight_switch == 'on'){
+                    $discount_weight = $request->sameday_discount_weight_rate != null ? $request->sameday_discount_weight_rate : null;
+//                    $discount_weight = $request->sameday_discount_weight_rate;
+                }
+                if($request->has('sameday_discount_cash_switch') && $request->sameday_discount_cash_switch == 'on'){
+                    $discount_cash = $request->sameday_discount_cash_rate != null ? $request->sameday_discount_cash_rate : null;
+                }
+                if($request->has('sameday_discount_insurance_switch') && $request->sameday_discount_insurance_switch == 'on'){
+                    $discount_insurance = $request->sameday_discount_insurance_rate != null ? $request->sameday_discount_insurance_rate : null;
+                }
+                if($request->has('sameday_discount_return_switch') && $request->sameday_discount_return_switch == 'on'){
+                    $discount_return = $request->sameday_discount_return_rate != null ? $request->sameday_discount_insurance_rate : null;
+                }
+                if($request->has('sameday_discount_packaging_switch') && $request->sameday_discount_packaging_switch == 'on'){
+                    $discount_packaging = $request->sameday_discount_packaging_rate != null ? $request->sameday_discount_packaging_rate : null;
+                }
+                if($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+
+
+                    $date_str = $request->sameday_daterange;
+                    $date_sep = explode(' - ', $date_str);
+                    $to = str_replace('/', '-', $date_sep[0]);
+                    $from = str_replace('/', '-', $date_sep[1]);
+                    $nto = date_create($to);
+                    $to =date_format($nto,"Y-m-d H:i:s");
+                    $nfrom = date_create($from);
+                    $from =date_format($nfrom,"Y-m-d H:i:s");
+
+                    DiscountCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'weight' => $discount_weight,
+                        'cash' => $discount_cash,
+                        'insurance' => $discount_insurance,
+                        'return' => $discount_return,
+                        'packaging' => $discount_packaging,
+                        'to' => $to,
+                        'from' => $from
+                    ]);
+                }
+
+            }
+            
+        }
+        return redirect()->back()->with('info','All Rates Done');
     }
     public function activeAccountListAjax(){
 

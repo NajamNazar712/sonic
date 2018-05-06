@@ -96,7 +96,7 @@ $(document).ready(function () {
     $('body').on('click','#waddition_btn',function () {
         // let htmdiv = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'range_up\']"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'range_down\']"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa[][\'switch\']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa[][\'spkg\']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'local_charges\']"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'national_charges\']"></fieldset></div></div>';
 
-        let htmdiv = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa_switch['+count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa_spkg['+count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa_national_charges[]"></fieldset></div></div>';
+        let htmdiv = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="on_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="on_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa_switch['+count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa_spkg['+count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="on_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="on_wa_national_charges[]"></fieldset></div></div>';
         $('.weight-addition-overnight').append(htmdiv);
         var switches = document.querySelector('.switchery.weightAdditionOvernight'+count);
         var switchery = new Switchery(switches, { disabled: false,color: '#37BC9B',size:'small' });
@@ -122,18 +122,18 @@ $(document).ready(function () {
         let htmdiv = '<div class="row">\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="on_cash_range_up[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="on_cash_range_up[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="on_cash_range_down[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="on_cash_range_down[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '\n' +
             '                                                <div class="col-md-2">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="on_cash_charges[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="on_cash_charges[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                            </div>';
@@ -148,18 +148,18 @@ $(document).ready(function () {
         let htmdiv = '<div class="row">\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="on_ins_range_up[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="on_ins_range_up[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="on_ins_range_down[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="on_ins_range_down[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '\n' +
             '                                                <div class="col-md-2">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="on_ins_charges[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="on_ins_charges[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                            </div>';
@@ -216,7 +216,7 @@ $(document).ready(function () {
     };
 
 
-    //Overnight
+    //Overland
     var weightAdditionOverland = document.querySelector('.switchery.weightAdditionOverland');
     var cashhandlingswitchOverland = document.querySelector('.switchery.cashChargesOverland');
     var insuranceChargesSwitchOverland = document.querySelector('.switchery.insuranceChargesoverland');
@@ -239,7 +239,7 @@ $(document).ready(function () {
 
     var overland_count = 1;
     $('body').on('click','#overland_weightadd',function () {
-        let htmdiv1 = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="ol_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="ol_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOverland'+overland_count+'" data-color="success" data-size="sm" name="ol_wa_switch[]"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[]"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="ol_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="ol_wa_national_charges[]"></fieldset></div></div>';
+        let htmdiv1 = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOverland'+overland_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+overland_count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+overland_count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_national_charges[]"></fieldset></div></div>';
         $('.weight-addition-overland').append(htmdiv1);
         let switches = document.querySelector('.switchery.weightAdditionOverland'+overland_count);
         let switchery = new Switchery(switches, { disabled: false,color: '#37BC9B',size:'small' });
@@ -263,18 +263,18 @@ $(document).ready(function () {
         let htmdiv = '<div class="row">\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="ol_cash_range_up[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="ol_cash_range_up[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="ol_cash_range_down[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="ol_cash_range_down[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '\n' +
             '                                                <div class="col-md-2">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="ol_cash_charges[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="ol_cash_charges[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                            </div>';
@@ -289,18 +289,18 @@ $(document).ready(function () {
         let htmdiv = '<div class="row">\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="ol_ins_range_up[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="ol_ins_range_up[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="ol_ins_range_down[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="ol_ins_range_down[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '\n' +
             '                                                <div class="col-md-2">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="ol_ins_charges[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="ol_ins_charges[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                            </div>';
@@ -379,7 +379,7 @@ $(document).ready(function () {
 
     var detain_count = 1;
     $('body').on('click','#detain_weightadd',function () {
-        let htmdiv2 = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="detain_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="detain_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+detain_count+'" data-color="success" data-size="sm" name="detain_wa_switch[]"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="detain_wa_spkg[]"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="detain_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="detain_wa_national_charges[]"></fieldset></div></div>';
+        let htmdiv2 = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="detain_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="detain_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+detain_count+'" data-color="success" data-size="sm" name="detain_wa_switch['+detain_count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="detain_wa_spkg['+detain_count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="detain_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="detain_wa_national_charges[]"></fieldset></div></div>';
         $('.weight-addition-detain').append(htmdiv2);
         let switches = document.querySelector('.switchery.weightAdditionDetain'+detain_count);
         let switchery = new Switchery(switches, { disabled: false,color: '#37BC9B',size:'small' });
@@ -403,18 +403,18 @@ $(document).ready(function () {
         let htmdiv = '<div class="row">\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="detain_cash_range_up[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="detain_cash_range_up[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="detain_cash_range_down[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="detain_cash_range_down[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '\n' +
             '                                                <div class="col-md-2">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="detain_cash_charges[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="detain_cash_charges[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                            </div>';
@@ -429,18 +429,18 @@ $(document).ready(function () {
         let htmdiv = '<div class="row">\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="detain_ins_range_up[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="detain_ins_range_up[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="detain_ins_range_down[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="detain_ins_range_down[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '\n' +
             '                                                <div class="col-md-2">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="detain_ins_charges[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="detain_ins_charges[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                            </div>';
@@ -518,7 +518,7 @@ $(document).ready(function () {
 
     var sameday_count = 1;
     $('body').on('click','#sameday_weightadd',function () {
-        let htmdiv2 = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="sameday_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="sameday_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionSameday'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch[]"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg[]"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="sameday_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="sameday_wa_national_charges[]"></fieldset></div></div>';
+        let htmdiv2 = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="sameday_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="sameday_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionSameday'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch['+sameday_count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="sameday_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="sameday_wa_national_charges[]"></fieldset></div></div>';
         $('.weight-addition-sameday').append(htmdiv2);
         let switches = document.querySelector('.switchery.weightAdditionSameday'+sameday_count);
         let switchery = new Switchery(switches, { disabled: false,color: '#37BC9B',size:'small' });
@@ -542,18 +542,18 @@ $(document).ready(function () {
         let htmdiv = '<div class="row">\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="sameday_cash_range_up[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="sameday_cash_range_up[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="sameday_cash_range_down[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="sameday_cash_range_down[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '\n' +
             '                                                <div class="col-md-2">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="sameday_cash_charges[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="sameday_cash_charges[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                            </div>';
@@ -568,18 +568,18 @@ $(document).ready(function () {
         let htmdiv = '<div class="row">\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="sameday_ins_range_up[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="sameday_ins_range_up[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                                <div class="col-md-2 text-center">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="sameday_ins_range_down[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="sameday_ins_range_down[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '\n' +
             '                                                <div class="col-md-2">\n' +
             '                                                    <fieldset class="form-group">\n' +
-            '                                                        <input name="sameday_ins_charges[]" type="number" class="form-control" id="" value="">\n' +
+            '                                                        <input name="sameday_ins_charges[]" type="number" class="form-control" min="0" value="">\n' +
             '                                                    </fieldset>\n' +
             '                                                </div>\n' +
             '                                            </div>';

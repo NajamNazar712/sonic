@@ -10,7 +10,9 @@
 
                     <div class="card-header">
                         <h2 class="font-large-1">{{$shipper->name}}</h2>
+                        @include('admin.inc.messages')
                     </div>
+
 
                     <div class="card-content">
                         <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.add.rates.submit',['id'=>$shipper->id])}}" method="post">
@@ -60,13 +62,13 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="0.00" name="on_wa_range_up[]">
+                                                        <input type="number" class="form-control" min="0" value="0.00" name="on_wa_range_up[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
 
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="1.10" name="on_wa_range_down[]">
+                                                        <input type="number" class="form-control" min="0" value="1.10" name="on_wa_range_down[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
@@ -86,12 +88,12 @@
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="100" name="on_wa_local_charges[]">
+                                                        <input type="number" class="form-control" min="0" value="100" name="on_wa_local_charges[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="150" name="on_wa_national_charges[]">
+                                                        <input type="number" class="form-control" min="0" value="150" name="on_wa_national_charges[]">
                                                     </fieldset>
                                                 </div>
                                             </div>{{--Row--}}
@@ -107,7 +109,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" id="basic-addon1">Replacement</span>
                                                         </div>
-                                                        <input type="number" class="form-control" name="on_replacement_charges" aria-describedby="basic-addon1">
+                                                        <input type="number" class="form-control" min="0" name="on_replacement_charges" aria-describedby="basic-addon1">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" id="basic-addon2">%</span>
                                                         </div>
@@ -120,7 +122,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" id="basic-addon1">Try & Buy</span>
                                                         </div>
-                                                        <input type="number" class="form-control" name="on_tnb_charges" aria-describedby="basic-addon1">
+                                                        <input type="number" class="form-control" min="0" name="on_tnb_charges" aria-describedby="basic-addon1">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" id="basic-addon2">%</span>
                                                         </div>
@@ -155,18 +157,18 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="on_cash_range_up[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="on_cash_range_up[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="on_cash_range_down[]" type="number" class="form-control" id="" value="3000">
+                                                        <input name="on_cash_range_down[]" type="number" class="form-control" min="0" value="3000">
                                                     </fieldset>
                                                 </div>
 
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input name="on_cash_charges[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="on_cash_charges[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                             </div>
@@ -201,18 +203,18 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="on_ins_range_up[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="on_ins_range_up[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="on_ins_range_down[]" type="number" class="form-control" id="" value="3000">
+                                                        <input name="on_ins_range_down[]" type="number" class="form-control" min="0" value="3000">
                                                     </fieldset>
                                                 </div>
 
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input name="on_ins_charges[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="on_ins_charges[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                             </div>
@@ -237,14 +239,14 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="number" class="form-control" name="on_return_local_charges" value="100">
+                                                    <input type="number" class="form-control" name="on_return_local_charges" min="0" value="100">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-2">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="number" class="form-control" name="on_return_national_charges" value="150">
+                                                    <input type="number" class="form-control" name="on_return_national_charges" min="0" value="150">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -265,26 +267,26 @@
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Small Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="on_flyer_sm" type="number" class="form-control" id="" value="10">
+                                                    <input name="on_flyer_sm" type="number" class="form-control" min="0" value="10">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Medium Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="on_flyer_md" type="number" class="form-control" id="" value="20">
+                                                    <input name="on_flyer_md" type="number" class="form-control" min="0" value="20">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Large Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="on_flyer_lg" type="number" class="form-control" id="" value="30">
+                                                    <input name="on_flyer_lg" type="number" class="form-control" min="0" value="30">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Box</label>
                                                 <fieldset class="form-group">
-                                                    <input name="on_flyer_box" type="number" class="form-control" id="" value="40">
+                                                    <input name="on_flyer_box" type="number" class="form-control" min="0" value="40">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -305,7 +307,7 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesOvernight" name="on_discount_weight_switch" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control on-discount-inp" name="on_discount_weight_rate" disabled>
+                                                        <input type="number" min="0" class="form-control on-discount-inp" name="on_discount_weight_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -320,7 +322,7 @@
                                                                 <input type="checkbox" name="on_discount_cash_switch" class="switchery discountSwitchesOvernight" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control on-discount-inp" name="on_discount_cash_rate" disabled>
+                                                        <input type="number" min="0" class="form-control on-discount-inp" name="on_discount_cash_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -335,7 +337,7 @@
                                                                 <input type="checkbox" name="on_discount_insurance_switch" class="switchery discountSwitchesOvernight" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control on-discount-inp" name="on_discount_insurance_rate" disabled>
+                                                        <input type="number" min="0" class="form-control on-discount-inp" name="on_discount_insurance_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -350,7 +352,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_return_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control on-discount-inp" name="on_discount_return_rate" disabled>
+                                                        <input type="number" min="0" class="form-control on-discount-inp" name="on_discount_return_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -366,7 +368,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control on-discount-inp" name="on_discount_packaging_rate" disabled>
+                                                        <input type="number" min="0" class="form-control on-discount-inp" name="on_discount_packaging_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -434,19 +436,19 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="0.00" name="ol_wa_range_up[]">
+                                                        <input type="number" class="form-control" min="0" value="0.00" name="ol_wa_range_up[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
 
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="1.10" name="ol_wa_range_down[]">
+                                                        <input type="number" class="form-control" min="0" value="1.10" name="ol_wa_range_down[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
 
                                                     <div class="form-group " style="padding-top: 8px;">
-                                                        <input type="checkbox" id="" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="on_wa_switch[]"/>
+                                                        <input type="checkbox" id="" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="on_wa_switch[0]"/>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-2 text-center">
@@ -454,18 +456,18 @@
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm">
                                                             <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
-                                                                   data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[]">
+                                                                   data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[0]">
                                                         </div>
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="100" name="ol_wa_local_charges[]">
+                                                        <input type="number" class="form-control" min="0" value="100" name="ol_wa_local_charges[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="150" name="ol_wa_national_charges[]">
+                                                        <input type="number" class="form-control" min="0" value="150" name="ol_wa_national_charges[]">
                                                     </fieldset>
                                                 </div>
                                             </div>{{--Row--}}
@@ -481,7 +483,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" id="basic-addon1">Replacement</span>
                                                         </div>
-                                                        <input type="number" class="form-control" name="ol_replacement_charges" aria-describedby="basic-addon1">
+                                                        <input type="number" class="form-control" min="0" name="ol_replacement_charges" aria-describedby="basic-addon1">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" id="basic-addon2">%</span>
                                                         </div>
@@ -494,7 +496,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" id="basic-addon1">Try & Buy</span>
                                                         </div>
-                                                        <input type="number" class="form-control" name="ol_tnb_charges" aria-describedby="basic-addon1">
+                                                        <input type="number" class="form-control" min="0" name="ol_tnb_charges" aria-describedby="basic-addon1">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" id="basic-addon2">%</span>
                                                         </div>
@@ -529,18 +531,18 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="ol_cash_range_up[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="ol_cash_range_up[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="ol_cash_range_down[]" type="number" class="form-control" id="" value="3000">
+                                                        <input name="ol_cash_range_down[]" type="number" class="form-control" min="0" value="3000">
                                                     </fieldset>
                                                 </div>
 
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input name="ol_cash_charges[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="ol_cash_charges[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                             </div>
@@ -575,18 +577,18 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="ol_ins_range_up[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="ol_ins_range_up[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="ol_ins_range_down[]" type="number" class="form-control" id="" value="3000">
+                                                        <input name="ol_ins_range_down[]" type="number" class="form-control" min="0" value="3000">
                                                     </fieldset>
                                                 </div>
 
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input name="ol_ins_charges[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="ol_ins_charges[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                             </div>
@@ -611,14 +613,14 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="number" class="form-control" name="ol_return_local_charges" value="100">
+                                                    <input type="number" class="form-control" name="ol_return_local_charges" min="0" value="100">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-2">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="number" class="form-control" name="ol_return_national_charges" value="150">
+                                                    <input type="number" class="form-control" name="ol_return_national_charges" min="0" value="150">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -639,26 +641,26 @@
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Small Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="ol_flyer_sm" type="number" class="form-control" id="" value="10">
+                                                    <input name="ol_flyer_sm" type="number" class="form-control" min="0" value="10">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Medium Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="ol_flyer_md" type="number" class="form-control" id="" value="20">
+                                                    <input name="ol_flyer_md" type="number" class="form-control" min="0" value="20">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Large Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="ol_flyer_lg" type="number" class="form-control" id="" value="30">
+                                                    <input name="ol_flyer_lg" type="number" class="form-control" min="0" value="30">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Box</label>
                                                 <fieldset class="form-group">
-                                                    <input name="ol_flyer_box" type="number" class="form-control" id="" value="40">
+                                                    <input name="ol_flyer_box" type="number" class="form-control" min="0" value="40">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -679,7 +681,7 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesOverland" name="ol_discount_weight_switch" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control ol-discount-inp" name="ol_discount_weight_rate" disabled>
+                                                        <input type="number" min="0" class="form-control ol-discount-inp" name="ol_discount_weight_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -694,7 +696,7 @@
                                                                 <input type="checkbox" name="ol_cash_weight_switch" class="switchery discountSwitchesOverland" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control ol-discount-inp" name="ol_discount_cash_rate" disabled>
+                                                        <input type="number" min="0" class="form-control ol-discount-inp" name="ol_discount_cash_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -709,7 +711,7 @@
                                                                 <input type="checkbox" name="ol_discount_insurance_switch" class="switchery discountSwitchesOverland" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control ol-discount-inp" name="ol_discount_insurance_rate" disabled>
+                                                        <input type="number" min="0" class="form-control ol-discount-inp" name="ol_discount_insurance_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -724,7 +726,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_return_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control ol-discount-inp" name="ol_discount_return_rate" disabled>
+                                                        <input type="number" min="0" class="form-control ol-discount-inp" name="ol_discount_return_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -740,7 +742,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control ol-discount-inp" name="ol_discount_packaging_rate" disabled>
+                                                        <input type="number" min="0" class="form-control ol-discount-inp" name="ol_discount_packaging_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -808,19 +810,19 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="0.00" name="detain_wa_range_up[]">
+                                                        <input type="number" class="form-control" min="0" value="0.00" name="detain_wa_range_up[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
 
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="1.10" name="detain_wa_range_down[]">
+                                                        <input type="number" class="form-control" min="0" value="1.10" name="detain_wa_range_down[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
 
                                                     <div class="form-group " style="padding-top: 8px;">
-                                                        <input type="checkbox" id="" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[]"/>
+                                                        <input type="checkbox" id="" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[0]"/>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-2 text-center">
@@ -828,18 +830,18 @@
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm">
                                                             <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
-                                                                   data-bts-button-up-class="btn btn-success" name="detain_wa_spkg[]">
+                                                                   data-bts-button-up-class="btn btn-success" name="detain_wa_spkg[0]">
                                                         </div>
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="100" name="detain_wa_local_charges[]">
+                                                        <input type="number" class="form-control" min="0" value="100" name="detain_wa_local_charges[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="150" name="detain_wa_national_charges[]">
+                                                        <input type="number" class="form-control" min="0" value="150" name="detain_wa_national_charges[]">
                                                     </fieldset>
                                                 </div>
                                             </div>{{--Row--}}
@@ -855,7 +857,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" id="basic-addon1">Replacement</span>
                                                         </div>
-                                                        <input type="number" class="form-control" name="detain_replacement_charges" aria-describedby="basic-addon1">
+                                                        <input type="number" min="0" class="form-control" name="detain_replacement_charges" aria-describedby="basic-addon1">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" id="basic-addon2">%</span>
                                                         </div>
@@ -868,7 +870,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" id="basic-addon1">Try & Buy</span>
                                                         </div>
-                                                        <input type="number" class="form-control" name="detain_tnb_charges" aria-describedby="basic-addon1">
+                                                        <input type="number" min="0" class="form-control" name="detain_tnb_charges" aria-describedby="basic-addon1">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" id="basic-addon2">%</span>
                                                         </div>
@@ -903,18 +905,18 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="detain_cash_range_up[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="detain_cash_range_up[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="detain_cash_range_down[]" type="number" class="form-control" id="" value="3000">
+                                                        <input name="detain_cash_range_down[]" type="number" class="form-control" min="0" value="3000">
                                                     </fieldset>
                                                 </div>
 
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input name="detain_cash_charges[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="detain_cash_charges[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                             </div>
@@ -949,18 +951,18 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="detain_ins_range_up[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="detain_ins_range_up[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="detain_ins_range_down[]" type="number" class="form-control" id="" value="3000">
+                                                        <input name="detain_ins_range_down[]" type="number" class="form-control" min="0" value="3000">
                                                     </fieldset>
                                                 </div>
 
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input name="detain_ins_charges[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="detain_ins_charges[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                             </div>
@@ -985,14 +987,14 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="number" class="form-control" name="detain_return_local_charges" value="100">
+                                                    <input type="number" class="form-control" name="detain_return_local_charges" min="0" value="100">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-2">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="number" class="form-control" name="detain_return_national_charges" value="150">
+                                                    <input type="number" class="form-control" name="detain_return_national_charges" min="0" value="150">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1013,26 +1015,26 @@
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Small Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="detain_flyer_sm" type="number" class="form-control" id="" value="10">
+                                                    <input name="detain_flyer_sm" type="number" class="form-control" min="0" value="10">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Medium Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="detain_flyer_md" type="number" class="form-control" id="" value="20">
+                                                    <input name="detain_flyer_md" type="number" class="form-control" min="0" value="20">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Large Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="detain_flyer_lg" type="number" class="form-control" id="" value="30">
+                                                    <input name="detain_flyer_lg" type="number" class="form-control" min="0" value="30">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Box</label>
                                                 <fieldset class="form-group">
-                                                    <input name="detain_flyer_box" type="number" class="form-control" id="" value="40">
+                                                    <input name="detain_flyer_box" type="number" class="form-control" min="0" value="40">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1046,14 +1048,14 @@
                                                 <fieldset>
                                                     <div class="input-group input-group-sm">
                                                         <div class="input-group-prepend">
-                                                            <span class="input-group-text" id="">Weight</span>
+                                                            <span class="input-group-text">Weight</span>
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesDetain" name="detain_discount_weight_switch" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control detain-discount-inp" name="detain_discount_weight_rate">
+                                                        <input type="number" min="0" class="form-control detain-discount-inp" name="detain_discount_weight_rate">
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1068,7 +1070,7 @@
                                                                 <input type="checkbox" name="detain_cash_weight_switch" class="switchery discountSwitchesDetain" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control detain-discount-inp" name="detain_discount_cash_rate" disabled>
+                                                        <input type="number" min="0" class="form-control detain-discount-inp" name="detain_discount_cash_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1083,7 +1085,7 @@
                                                                 <input type="checkbox" name="detain_discount_insurance_switch" class="switchery discountSwitchesDetain" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control detain-discount-inp" name="detain_discount_insurance_rate" disabled>
+                                                        <input type="number" min="0" class="form-control detain-discount-inp" name="detain_discount_insurance_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1098,7 +1100,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_return_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control detain-discount-inp" name="detain_discount_return_rate" disabled>
+                                                        <input type="number" min="0" class="form-control detain-discount-inp" name="detain_discount_return_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1114,7 +1116,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control detain-discount-inp" name="detain_discount_packaging_rate" disabled>
+                                                        <input type="number" min="0" class="form-control detain-discount-inp" name="detain_discount_packaging_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1182,19 +1184,19 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="0.00" name="sameday_wa_range_up[]">
+                                                        <input type="number" class="form-control" min="0" value="0.00" name="sameday_wa_range_up[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
 
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="1.10" name="sameday_wa_range_down[]">
+                                                        <input type="number" class="form-control" min="0" value="1.10" name="sameday_wa_range_down[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
 
                                                     <div class="form-group " style="padding-top: 8px;">
-                                                        <input type="checkbox" id="" class="switchery weightAdditionSameday" data-color="success" data-size="sm" name="sameday_wa_switch[]"/>
+                                                        <input type="checkbox" id="" class="switchery weightAdditionSameday" data-color="success" data-size="sm" name="sameday_wa_switch[0]"/>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-2 text-center">
@@ -1202,18 +1204,18 @@
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm">
                                                             <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
-                                                                   data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg[]">
+                                                                   data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg[0]">
                                                         </div>
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="100" name="sameday_wa_local_charges[]">
+                                                        <input type="number" class="form-control" min="0" value="100" name="sameday_wa_local_charges[]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input type="number" class="form-control" id="" value="150" name="sameday_wa_national_charges[]">
+                                                        <input type="number" class="form-control" min="0" value="150" name="sameday_wa_national_charges[]">
                                                     </fieldset>
                                                 </div>
                                             </div>{{--Row--}}
@@ -1229,7 +1231,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" id="basic-addon1">Replacement</span>
                                                         </div>
-                                                        <input type="number" class="form-control" name="sameday_replacement_charges" aria-describedby="basic-addon1">
+                                                        <input type="number" min="0" class="form-control" name="sameday_replacement_charges" aria-describedby="basic-addon1">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" id="basic-addon2">%</span>
                                                         </div>
@@ -1242,7 +1244,7 @@
                                                         <div class="input-group-prepend">
                                                             <span class="input-group-text" id="basic-addon1">Try & Buy</span>
                                                         </div>
-                                                        <input type="number" class="form-control" name="sameday_tnb_charges" aria-describedby="basic-addon1">
+                                                        <input type="number" min="0" class="form-control" name="sameday_tnb_charges" aria-describedby="basic-addon1">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text" id="basic-addon2">%</span>
                                                         </div>
@@ -1277,18 +1279,18 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="sameday_cash_range_up[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="sameday_cash_range_up[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="sameday_cash_range_down[]" type="number" class="form-control" id="" value="3000">
+                                                        <input name="sameday_cash_range_down[]" type="number" class="form-control" min="0" value="3000">
                                                     </fieldset>
                                                 </div>
 
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input name="sameday_cash_charges[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="sameday_cash_charges[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                             </div>
@@ -1323,18 +1325,18 @@
                                             <div class="row">
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="sameday_ins_range_up[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="sameday_ins_range_up[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col-md-2 text-center">
                                                     <fieldset class="form-group">
-                                                        <input name="sameday_ins_range_down[]" type="number" class="form-control" id="" value="3000">
+                                                        <input name="sameday_ins_range_down[]" type="number" class="form-control" min="0" value="3000">
                                                     </fieldset>
                                                 </div>
 
                                                 <div class="col-md-2">
                                                     <fieldset class="form-group">
-                                                        <input name="sameday_ins_charges[]" type="number" class="form-control" id="" value="0">
+                                                        <input name="sameday_ins_charges[]" type="number" class="form-control" min="0" value="0">
                                                     </fieldset>
                                                 </div>
                                             </div>
@@ -1359,14 +1361,14 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="number" class="form-control" name="sameday_return_local_charges" value="100">
+                                                    <input type="number" min="0" class="form-control" name="sameday_return_local_charges" value="100">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-2">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="number" class="form-control" name="sameday_return_national_charges" value="150">
+                                                    <input type="number" min="0" class="form-control" name="sameday_return_national_charges" value="150">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1387,26 +1389,26 @@
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Small Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="sameday_flyer_sm" type="number" class="form-control" id="" value="10">
+                                                    <input name="sameday_flyer_sm" type="number" class="form-control" min="0" value="10">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Medium Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="sameday_flyer_md" type="number" class="form-control" id="" value="20">
+                                                    <input name="sameday_flyer_md" type="number" class="form-control" min="0" value="20">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Large Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="sameday_flyer_lg" type="number" class="form-control" id="" value="30">
+                                                    <input name="sameday_flyer_lg" type="number" class="form-control" min="0" value="30">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Box</label>
                                                 <fieldset class="form-group">
-                                                    <input name="sameday_flyer_box" type="number" class="form-control" id="" value="40">
+                                                    <input name="sameday_flyer_box" type="number" class="form-control" min="0" value="40">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1427,7 +1429,7 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesSameday" name="sameday_discount_weight_switch" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control sameday-discount-inp" name="sameday_discount_weight_rate" disabled>
+                                                        <input type="number" min="0" class="form-control sameday-discount-inp" name="sameday_discount_weight_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1442,7 +1444,7 @@
                                                                 <input type="checkbox" name="sameday_cash_weight_switch" class="switchery discountSwitchesSameday" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control sameday-discount-inp" name="sameday_discount_cash_rate" disabled>
+                                                        <input type="number" min="0" class="form-control sameday-discount-inp" name="sameday_discount_cash_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1457,7 +1459,7 @@
                                                                 <input type="checkbox" name="sameday_discount_insurance_switch" class="switchery discountSwitchesSameday" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control sameday-discount-inp" name="sameday_discount_insurance_rate" disabled>
+                                                        <input type="number" min="0" class="form-control sameday-discount-inp" name="sameday_discount_insurance_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1472,7 +1474,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_return_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control sameday-discount-inp" name="sameday_discount_return_rate" disabled>
+                                                        <input type="number" min="0" class="form-control sameday-discount-inp" name="sameday_discount_return_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1488,7 +1490,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" class="form-control sameday-discount-inp" name="sameday_discount_packaging_rate" disabled>
+                                                        <input type="number" min="0" class="form-control sameday-discount-inp" name="sameday_discount_packaging_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
