@@ -14,7 +14,8 @@ class ShippingModeTableSeeder extends Seeder
         DB::table('shipping_modes')->insert(array(
             array('mode'=>'Overnight'),
             array('mode'=>'Overland'),
-            array('mode'=>'Sameday'),
+            array('mode'=>'Detain'),
+            array('mode'=>'Same-day'),
 
 
         ));
