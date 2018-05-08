@@ -556,9 +556,8 @@
                 $('#shipping_' + count + ' a[data-action="close"]').on('click',function(){
                   //  $(this).closest('.card').removeClass().slideUp('fast'); // comenting this because display none will allow values to be posted
                    $(this).closest('.card').remove();
-                $('#shipInfo').stop().animate({
-                  scrollTop: $('#shipInfo')[0].scrollHeight
-                }, 2000);
+
+                $('#shipInfo').perfectScrollbar('update');
 
                 });
                 count++;
