@@ -58,7 +58,7 @@
             columns: [
                 {data: 'id', name: 'id', class: 'account_id'},
                 {data: 'name', name: 'name', class: 'company_name'},
-                {data: 'city', name: 'city', class: 'city'},
+                {data: 'city_name', name: 'city', class: 'city'},
                 {data: 'poc', name: 'poc', class: 'contact_person'},
                 {data: 'phone', name: 'phone', class: 'phone'},
                 {data: 'address', name: 'address', class: 'address'},

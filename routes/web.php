@@ -28,6 +28,7 @@ Route::prefix('cod')->group(function () {
     Route::post('/login','Auth\LoginController@login')->name('cod.login.submit');
     Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('cod.register');
     Route::post('/register','Auth\RegisterController@register')->name('cod.register.submit');
+    Route::get('/new/address','Auth\RegisterController@addressView')->name('cod.new.address');
 //    Route::post('/reset','Auth\RegisterController@register')->name('cod.register.submit');
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('cod.dashboard');
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
@@ -38,7 +39,7 @@ Route::prefix('cod')->group(function () {
     Route::get('/logout','Auth\LoginController@logout')->name('cod.logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('cod.logout');
-
+    Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
 });
 
 Route::prefix('admin')->group(function () {
@@ -56,7 +57,15 @@ Route::prefix('admin')->group(function () {
 
     Route::get('/accounts/active', 'Admins\AdminDashboardController@activeAccountsList')->name('admin.accounts.active');
     Route::get('/accounts/block', 'Admins\AdminDashboardController@blockAccountsList');
+    //add rates view
+    Route::get('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRatesView')->name('admin.add.rates');
+    Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('admin.add.rates.submit');
+
+    //ajax request
     Route::post('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('admin.account.status');
+    //new address
+
+
     Route::get('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');

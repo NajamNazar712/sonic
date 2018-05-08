@@ -39,6 +39,11 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
+    <style>
+        .hide{
+            display: none;
+        }
+    </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded fixed-navbar"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
@@ -79,7 +84,7 @@
                                                         </label>
 
                                                         <input type="text" class="form-control required" value="{{ old('name') }}"  name="name">
-                                                        
+
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -98,7 +103,7 @@
                                                         <label for="company_address">Company Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"   name="company_address" value="{{ old('company_address') }}">
+                                                        <input type="text" class="form-control required"  name="company_address" value="{{ old('company_address') }}">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -121,22 +126,17 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="shipper_phone2">Phone Number 2:</label>
-                                                        <input type="tel" class="form-control" placeholder="0345-9999999" name="shipper_phone2">
-                                                    </div>
+                                                        <input type="tel" class="form-control" placeholder="0345-9999999"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="ntn_no">NTN Number:</label>
-                                                        <input type="text" class="form-control" placeholder="1234567-8"   name="ntn_no">
-                                                    </div>
+                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('ntn_no') }}"  name="ntn_no">                                                    </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="url">URL:</label>
-                                                        <input type="text" class="form-control"  name="url" placeholder="Facebook / Website">
-                                                    </div>
+                                                        <input type="text" class="form-control" value="{{ old('url') }}" name="url" placeholder="URL/Facebook Page">                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -149,8 +149,8 @@
                                                         <div>
                                                             <select name="shipper_city" id="shipper_city" class="select2 form-control required" style="width: 100%">
                                                                 <option value="" selected>Select City</option>
-                                                                @foreach($cities as $city)
-                                                                    <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                                                @foreach($all_cities as $city)
+                                                                    <option value="{{$city->city_code}}" {{ old('shipper_city') == $city->city_code ? 'selected' : '' }} >{{$city->city_name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -161,32 +161,32 @@
                                         <!-- Step 2 -->
                                         <h6>Shipping Information</h6>
                                         <fieldset>
-                                            <div class="row">
+                                            <div class="row vertical-scroll" id="shipInfo" style="max-height: 350px;overflow: scroll;">
+
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="pickup_address">
                                                             Pickup Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"  name="pickup_address">
+                                                        <input type="text" class="form-control required" value="{{ old('pickup_address.0') }}"  name="pickup_address[]">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_poc">
                                                             Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="Person Name" name="shipping_poc">
-                                                    </div>
+                                                        <input type="text" class="form-control required" value="{{ old('shipping_poc.0') }}"  name="shipping_poc[]">                                                    </div>
                                                     <div class="form-group">
 
                                                         <label for="url">Product Type:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                            <select name="product_type" id="product_select" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected>Select Product Type</option>
+                                                            <select name="product_type[]" id="product_select" class="select2 form-control required" style="width: 100%">
+                                                                <option value="" selected disabled="">Select Product Type</option>
                                                                 @foreach($products as $product)
-                                                                    <option value="{{$product->id}}">{{$product->product_name}}</option>
+                                                                    <option value="{{$product->id}}" {{ (collect(old('product_type'))->contains($product->id)) ? 'selected' : '' }} >{{$product->product_name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -198,29 +198,127 @@
                                                             Phone Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" placeholder="0345-9999999" name="shipping_phone">
-                                                    </div>
+                                                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">                                                    </div>
                                                     <div class="form-group">
-                                                        <label for="shipping_email">Email:
-                                                            <span class="danger">*</span></label>
-                                                        <input type="email" name="shipping_email" class="form-control required" placeholder="abc@example.com">
-                                                    </div>
+                                                        <label for="shipping_phone">
+                                                            Email:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <input type="email" name="shipping_email[]" value="{{ old('shipping_email.0') }}" class="form-control required">                                                    </div>
                                                     <div class="form-group">
 
                                                         <label for="shipping_city">Shipper City:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                            <select name="shipping_city" id="shipping_city" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected>Select Shipper City</option>
+                                                            <select name="shipping_city[]" id="shipping_city" class="select2 form-control required" style="width: 100%">
+                                                                <option value="" selected disabled="">Select Shipper City</option>
                                                                 @foreach($cities as $city)
-                                                                    <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                                                    <option value="{{$city->city_code}}" {{ (collect(old('shipping_city'))->contains($city->city_code)) ? 'selected' : '' }} >{{$city->city_name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
 
                                                 </div>
+
+                                                {{--Add more addresses--}}
+                                                {{--Accordion--}}
+                                                <div class="col-12" id="newAddress">
+
+                                            <!--To find if the form was submitted showing validation error
+                                                 it will not work by defualt -->
+                                        @if (old('pickup_address'))
+                                            @php ($i = 1)
+                                        @else
+                                            @php ($i = 0)
+                                        @endif
+                                        @while (old('pickup_address.'.$i) != null)
+
+                                        <div class="card naddress" id="shipping_{{$i}}">
+                                            <div class="card-header">
+                                                <h4 class="card-title">New Address</h4>
+                                                <div class="heading-elements">
+                                                    <ul class="list-inline mb-0">
+                                                        <li><a data-action="close"><i class="ft-x"></i></a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                            <div class="card-content">
+                                                <div class="">
+                                                    <div class="row">
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="pickup_address">
+                                                                    Pickup Address :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control required" value="{{ old('pickup_address.'.$i) }}" name="pickup_address[]">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="shipping_poc">
+                                                                    Person Of Contact :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <input type="text" class="form-control required" value="{{ old('shipping_poc.'.$i) }}"  name="shipping_poc[]">
+                                                            </div>
+                                                            <div class="form-group">
+
+                                                                <label for="url">Product Type :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <div>
+                                                                    <select name="product_type[]" class="select2 form-control required" style="width: 100%">
+                                                                        <option value="" selected>Select Product Type</option>
+                                                                        @foreach($products as $product)
+                                                                            <option value="{{$product->id}}" {{ (collect(old('product_type.'.$i))->contains($product->id)) ? 'selected' : '' }} >{{$product->product_name}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <div class="form-group">
+                                                                <label for="shipping_phone">
+                                                                    Phone Number :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <input type="tel" class="form-control required" placeholder="(0345) 999-9999" value="{{ old('shipping_phone.'.$i) }}" name="shipping_phone[]">
+                                                            </div>
+                                                            <div class="form-group">
+                                                                <label for="shipping_email">Email :<span class="danger">*</span></label>
+                                                                <input type="email" name="shipping_email[]" class="form-control required" value="{{ old('shipping_email.'.$i) }}">
+                                                            </div>
+                                                            <div class="form-group">
+
+                                                                <label for="shipping_city">Shipper City :
+                                                                    <span class="danger">*</span>
+                                                                </label>
+                                                                <div>
+                                                                    <select name="shipping_city[]" class="select2 form-control required" style="width: 100%">
+                                                                        <option value="" selected>Select Shipper City</option>
+                                                                        @foreach($cities as $city)
+                                                                            <option value="{{$city->city_code}}" {{ (collect(old('shipping_city.'.$i))->contains($city->city_code)) ? 'selected' : '' }} >{{$city->city_name}}</option>
+                                                                        @endforeach
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+
+                                                        </div>
+                                                    </div>{{--row end--}}
+                                                </div>{{--card body end--}}
+                                            </div>
+                                        </div>
+                                        @php ($i++)
+                                        @endwhile
+                                                </div>{{--column end--}}
+                                                {{--Accordion--}}
+                                                <div class="col-12">
+
+                                                    <button id="addMoreAddress" type="button" class="btn btn-primary btn-min-width mr-1 mb-1"><i class="la la-plus"></i>&nbsp Add Pickup Locations</button>
+
+                                                </div>
+
                                             </div>
 
 
@@ -235,19 +333,19 @@
                                                             Bank Name:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required"   name="bank_name">
+                                                        <input type="text" class="form-control required" value="{{ old('bank_name') }}"   name="bank_name">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="bank_branch">
                                                             Bank Branch:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" name="bank_branch">
+                                                        <input type="text" class="form-control required" value="{{ old('bank_branch') }}" name="bank_branch">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="account_name">Account Number:
                                                             <span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required" name="account_no">
+                                                        <input type="text" class="form-control required" value="{{ old('account_no') }}" name="account_no">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="mode_of_payment">Mode of Payment:
@@ -255,9 +353,9 @@
                                                         </label>
                                                         <div>
                                                         <select name="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected="" disabled="">Select Mode of Payment</option>
-                                                            <option value="ibft">IBFT Reimbursements</option>
-                                                            <option value="invoices">Invoices</option>
+                                                            <option value=""  selected disabled="">Select Mode of Payment</option>
+                                                            <option value="ibft" {{ old('mode_of_payment') == 'ibft' ? 'selected' : '' }}>IBFT Reimbursements</option>
+                                                            <option value="invoices" {{ old('mode_of_payment') == 'invoices' ? 'selected' : '' }}>Invoices</option>
                                                         </select>
                                                         </div>
                                                     </div>
@@ -268,7 +366,7 @@
                                                             Account Title:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type='text' class="form-control required" name="account_title">
+                                                        <input type='text' class="form-control required" value="{{ old('account_title') }}" name="account_title">
 
                                                     </div>
 
@@ -277,7 +375,7 @@
                                                             IBAN Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" name="iban_no">
+                                                        <input type="text" class="form-control required" placeholder="(e.g: PK-37-MEZN-0001-2201-0000-4069)" value="{{ old('iban_no') }}" name="iban_no">
                                                     </div>
 
                                                         <div class="form-group">
@@ -288,8 +386,8 @@
                                                             <div>
                                                                 <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                     <option value="" selected>Select Bank City</option>
-                                                                    @foreach($bank_cities as $city)
-                                                                        <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                                                    @foreach($all_cities as $city)
+                                                                        <option value="{{$city->city_code}}"  {{ old('bank_city') == '$city->city_code' ? 'selected' : '' }} >{{$city->city_name}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -301,11 +399,11 @@
                                                             </label>
                                                         <div>
                                                         <select name="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected="" disabled="">Select Cycle of Payment</option>
-                                                            <option value="daily">Daily</option>
-                                                            <option value="weekly">Weekly</option>
-                                                            <option value="fortnight">Fortnight</option>
-                                                            <option value="monthly">Monthly</option>
+                                                            <option value="" selected disabled="">Select Cycle of Payment</option>
+                                                            <option value="daily" {{ old('cycle_of_payment') == 'daily' ? 'selected' : '' }}>Daily</option>
+                                                            <option value="weekly" {{ old('cycle_of_payment') == 'weekly' ? 'selected' : '' }}>Weekly</option>
+                                                            <option value="fortnight" {{ old('cycle_of_payment') == 'fortnight' ? 'selected' : '' }}>Fortnight</option>
+                                                            <option value="monthly" {{ old('cycle_of_payment') == 'monthly' ? 'selected' : '' }}>Monthly</option>
                                                         </select>
                                                         </div>
                                                     </div>
@@ -324,7 +422,7 @@
                                                             Email Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="abc@example.com"  name="email">
+                                                        <input type="text" class="form-control required" placeholder="abc@example.com" value="{{ old('email') }}"  name="email">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="password">
@@ -333,12 +431,16 @@
                                                         </label>
                                                         <div class="form-group position-relative">
 
-                                                        <input type="password" class="form-control required" placeholder="Minimum 6 Character" name="password">
+                                                        <input type="password" class="form-control required" placeholder="Minimum 6 Character" value="{{ old('password') }}" name="password">
                                                         <div class="form-control-position" id="peye">
                                                             <i class="la la-eye success"></i>
                                                         </div>
 
                                                         </div>
+                                                    </div>
+                                                    <div class="form-group">
+                                                        {!! app('captcha')->display() !!}
+                                                        <!--<button id="reset" class="btn btn-primary btn-min-width mr-1 mb-1">Reset</button>-->
                                                     </div>
                                                     {{--<div class="form-group">--}}
                                                         {{--<label for="password-confirm">--}}
@@ -393,6 +495,7 @@
 <script>
     //$('.pickadate').pickadate();
     $(document).ready(function () {
+
        $('.select2').select2({
            dropdownParent:$('#registership')
        });
@@ -403,7 +506,122 @@
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
+        // Vertical Scroll
+        $('.vertical-scroll').perfectScrollbar({
+            suppressScrollX : true,
+            theme: 'dark',
+            wheelPropagation: true
+        });
+
+
+        var count = {{$i}};
+        $('body').on('click','#addMoreAddress',function () {
+            $.get( 'new/address', function( data ) {
+                $('#newAddress').append(data);
+
+            }).done(function() {
+                var cc = $('.card.naddress').length;
+                var nid = $('.card.naddress').eq(cc-1);
+
+                nid.attr('id','shipping_'+count);
+                $('#shipping_'+count+' h3.card-title' ).text('Address '+count);
+                //becasuse count is starting from 0 and 0 index is there by default for following values
+                var innerdivcount = count + 1;
+                var temp_pickupaddress = $('#shipping_'+count+' input[name="temp_pickupaddress"]');
+                temp_pickupaddress.attr('name','pickup_address['+innerdivcount+']');
+                var temp_shipping_poc = $('#shipping_'+count+' input[name="temp_shipping_poc"]');
+                temp_shipping_poc.attr('name','shipping_poc['+innerdivcount+']');
+                var temp_product_type = $('#shipping_'+count+' select[name="temp_product_type"]');
+                temp_product_type.attr('name','product_type['+innerdivcount+']');
+                var temp_shipping_phone = $('#shipping_'+count+' input[name="temp_shipping_phone"]');
+                temp_shipping_phone.attr('name','shipping_phone['+innerdivcount+']');
+                var temp_shipping_email = $('#shipping_'+count+' input[name="temp_shipping_email"]');
+                temp_shipping_email.attr('name','shipping_email['+innerdivcount+']');
+                var temp_shipping_city = $('#shipping_'+count+' select[name="temp_shipping_city"]');
+                temp_shipping_city.attr('name','shipping_city['+innerdivcount+']');
+
+                $('#shipInfo').stop().animate({
+                  scrollTop: $('#shipInfo')[0].scrollHeight
+                }, 2000);
+
+                $('#shipping_' + count + ' .select2').select2({
+                    dropdownParent:$('#registership')
+                });
+                $('#shipping_' + count + ' a[data-action="close"]').on('click',function(){
+                  //  $(this).closest('.card').removeClass().slideUp('fast'); // comenting this because display none will allow values to be posted
+                   $(this).closest('.card').remove();
+                $('#shipInfo').stop().animate({
+                  scrollTop: $('#shipInfo')[0].scrollHeight
+                }, 2000);
+
+                });
+                count++;
+
+            });
+
+
+        });
+        $('body').on('change','input[name="name"]',function () {
+            var name = $(this).val();
+            var error = 0;
+            var err0 = '<span name="cname" class="danger" for="name">Atleast 3 characters required.</span>';
+            var err = '<span name="cname" class="danger" for="name">company name already exists, select another name.</span>';
+            if(name.length < 3){
+                $(err0).insertAfter('input[name="name"]');
+                error = 1;
+            }else{
+                error = 0;
+                $('span[name="cname"]').css('display','none');
+            }
+            if(error == 0){
+                $.ajax({
+                    url: "name/match/{name}",
+                    type:'GET',
+                    data: {name:name},
+                    success: function(data) {
+                        if(data.status == 0){
+                            $(err).insertAfter('input[name="name"]');
+                            console.log(data.status);
+                        }else if(data.status == 1){
+                            $('span[name="cname"]').css('display','none');
+                            console.log(data.status);
+
+                        }
+                        console.log(data.status);
+                    }
+                });
+            }
+
+
+        });
+
+        // $('a[href="#next"]').on('click',function(e){
+        //     // $("#registership").validate().element("");
+        // });
+        // $( 'a[href="#next"]' ).dblclick(function() {
+        //     alert( "Handler for .dblclick() called." );
+        // });
+
+        // $('body').on('dblclick', 'a[href="#next"]', function(e) {
+        //     e.preventDefault();
+        //     // alert('You skipped one step');
+        //     //$('a[href="#previous"]').trigger('click');
+        // });
+
     });
+
+    var reset = document.querySelector('#reset');
+    if (reset) {
+        reset.addEventListener('click', () => {
+          grecaptcha.reset()
+        });
+    }
+
+
+
+
+
+
 </script>
 </body>
 </html>

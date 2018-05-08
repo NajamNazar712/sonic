@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 10);
+/******/ 	return __webpack_require__(__webpack_require__.s = 7);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -70,8 +70,8 @@
 "use strict";
 
 
-var bind = __webpack_require__(5);
-var isBuffer = __webpack_require__(18);
+var bind = __webpack_require__(2);
+var isBuffer = __webpack_require__(12);
 
 /*global toString:true*/
 
@@ -381,7 +381,7 @@ module.exports = {
 /* WEBPACK VAR INJECTION */(function(process) {
 
 var utils = __webpack_require__(0);
-var normalizeHeaderName = __webpack_require__(21);
+var normalizeHeaderName = __webpack_require__(15);
 
 var DEFAULT_CONTENT_TYPE = {
   'Content-Type': 'application/x-www-form-urlencoded'
@@ -397,10 +397,10 @@ function getDefaultAdapter() {
   var adapter;
   if (typeof XMLHttpRequest !== 'undefined') {
     // For browsers use XHR adapter
-    adapter = __webpack_require__(6);
+    adapter = __webpack_require__(3);
   } else if (typeof process !== 'undefined') {
     // For node use HTTP adapter
-    adapter = __webpack_require__(6);
+    adapter = __webpack_require__(3);
   }
   return adapter;
 }
@@ -475,13 +475,10 @@ utils.forEach(['post', 'put', 'patch'], function forEachMethodWithData(method) {
 
 module.exports = defaults;
 
-/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(20)))
+/* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(14)))
 
 /***/ }),
-/* 2 */,
-/* 3 */,
-/* 4 */,
-/* 5 */
+/* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -499,19 +496,19 @@ module.exports = function bind(fn, thisArg) {
 
 
 /***/ }),
-/* 6 */
+/* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(0);
-var settle = __webpack_require__(22);
-var buildURL = __webpack_require__(24);
-var parseHeaders = __webpack_require__(25);
-var isURLSameOrigin = __webpack_require__(26);
-var createError = __webpack_require__(7);
-var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(27);
+var settle = __webpack_require__(16);
+var buildURL = __webpack_require__(18);
+var parseHeaders = __webpack_require__(19);
+var isURLSameOrigin = __webpack_require__(20);
+var createError = __webpack_require__(4);
+var btoa = (typeof window !== 'undefined' && window.btoa && window.btoa.bind(window)) || __webpack_require__(21);
 
 module.exports = function xhrAdapter(config) {
   return new Promise(function dispatchXhrRequest(resolve, reject) {
@@ -608,7 +605,7 @@ module.exports = function xhrAdapter(config) {
     // This is only done if running in a standard browser environment.
     // Specifically not if we're in a web worker, or react-native.
     if (utils.isStandardBrowserEnv()) {
-      var cookies = __webpack_require__(28);
+      var cookies = __webpack_require__(22);
 
       // Add xsrf header
       var xsrfValue = (config.withCredentials || isURLSameOrigin(config.url)) && config.xsrfCookieName ?
@@ -686,13 +683,13 @@ module.exports = function xhrAdapter(config) {
 
 
 /***/ }),
-/* 7 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var enhanceError = __webpack_require__(23);
+var enhanceError = __webpack_require__(17);
 
 /**
  * Create an Error with the specified message, config, error code, request and response.
@@ -711,7 +708,7 @@ module.exports = function createError(message, config, code, request, response) 
 
 
 /***/ }),
-/* 8 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -723,7 +720,7 @@ module.exports = function isCancel(value) {
 
 
 /***/ }),
-/* 9 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -749,15 +746,15 @@ module.exports = Cancel;
 
 
 /***/ }),
-/* 10 */
+/* 7 */
 /***/ (function(module, exports, __webpack_require__) {
 
-__webpack_require__(11);
-module.exports = __webpack_require__(36);
+__webpack_require__(8);
+module.exports = __webpack_require__(30);
 
 
 /***/ }),
-/* 11 */
+/* 8 */
 /***/ (function(module, exports, __webpack_require__) {
 
 
@@ -768,28 +765,184 @@ module.exports = __webpack_require__(36);
  */
 
 // require('./bootstrap');
-__webpack_require__(41);
+__webpack_require__(9);
 
 /***/ }),
-/* 12 */,
-/* 13 */,
-/* 14 */,
-/* 15 */,
-/* 16 */
+/* 9 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(17);
+$(document).ready(function () {
+    var axios = __webpack_require__(10);
+    $("#BankInfoModal").on("show.bs.modal", function (e) {
+        var id = $(e.relatedTarget).data('target-id');
+
+        $.get("/admin/accounts/pending/" + id + "/bank", function (data) {
+            $(".modal-body").html(data);
+            // console.log(data);
+        });
+    });
+
+    $("#ShippingInfoModal").on("show.bs.modal", function (e) {
+        var id = $(e.relatedTarget).data('target-id');
+        // console.log(id);
+        $.get("/admin/accounts/pending/" + id + "/shipping", function (data) {
+            $(".modal-body").html(data);
+            // console.log(data);
+        });
+    });
+    $("#RatesModal").on("show.bs.modal", function (e) {
+        var id = $(e.relatedTarget).data('target-id');
+        console.log(id);
+        // $.get( "/admin/accounts/pending/"+id+"/rates", function( data ) {
+        //     $(".modal-body").html(data);
+        //     // console.log(data);
+        // });
+    });
+    $("#ConfirmModal").on("show.bs.modal", function (e) {
+        var id = $(e.relatedTarget).data('target-id');
+        var rel = $(e.relatedTarget).attr('rel');
+
+        $('#shid').val(id);
+        $('#shstatus').val(rel);
+        // axios.get('/accounts/block/active', {
+        //     params: {
+        //         id: id
+        //     }
+        // })
+        //     .then(function (response) {
+        //         $(".modal-body.confirmation").html(response);
+        //     })
+        //     .catch(function (error) {
+        //         console.log(error);
+        //     });
+    });
+    // $('body').on('click','#confirmAction',function () {
+    //    var uid = $('#shid').val();
+    //    var status = $('#shstatus').val();
+    //    axios.post('/account/status',{
+    //        params:{
+    //            uid: uid,
+    //            status: status
+    //        }
+    //    })
+    //        .then(function (response) {
+    //             console.log(response);
+    //        })
+    //        .catch(function(error){
+    //
+    //        });
+    // });
+    $(".daterange").daterangepicker();
+    var clickCheckbox = document.querySelector('.switchery.weightAddition');
+    var cashhandlingswitch = document.querySelector('.switchery.cashChargesOvernight');
+    var insuranceChargesSwitch = document.querySelector('.switchery.insuranceChargesOvernight');
+    var returnChargesSwitch = document.querySelector('.switchery.returnChargesOvernight');
+    var packagingChargesSwitch = document.querySelector('.switchery.packagingChargesOvernight');
+
+    clickCheckbox.onchange = function () {
+        if (clickCheckbox.checked === true) {
+            // $(this).next('.spkg').attr('disabled','');
+            // $(this).closest('div.col-md-2').find('input.spkg').attr('disabled','');
+            $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+        } else if (clickCheckbox.checked === false) {
+            $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+        }
+    };
+    var count = 1;
+    $('body').on('click', '#waddition_btn', function () {
+        var htmdiv = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAddition' + count + '" data-color="success" data-size="sm" name="wa_switch[]"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="wa_spkg[]"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="wa_national_charges[]"></fieldset></div></div>';
+        $('.weight-addition-overnight').append(htmdiv);
+        var switches = document.querySelector('.switchery.weightAddition' + count);
+        var switchery = new Switchery(switches, { disabled: false, color: '#37BC9B', size: 'small' });
+        $(".touchspin-color").TouchSpin();
+        // var switchery = new Switchery('.switchery.weightAddition'+count, { color: '#37BC9B' });
+        count++;
+        switches.onchange = function () {
+            if (switches.checked === true) {
+                // $(this).next('.spkg').attr('disabled','');
+                // $(this).closest('div.col-md-2').find('input.spkg').attr('disabled','');
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
+            } else if (switches.checked === false) {
+                $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
+            }
+        };
+    });
+
+    //addMoreSlabs
+    $('body').on('click', '#addMoreSlabs', function () {
+        var htmdiv = '<div class="row">\n' + '                                                <div class="col-md-2 text-center">\n' + '                                                    <fieldset class="form-group">\n' + '                                                        <input name="cash_range_up[]" type="number" class="form-control" id="" value="">\n' + '                                                    </fieldset>\n' + '                                                </div>\n' + '                                                <div class="col-md-2 text-center">\n' + '                                                    <fieldset class="form-group">\n' + '                                                        <input name="cash_range_down[]" type="number" class="form-control" id="" value="">\n' + '                                                    </fieldset>\n' + '                                                </div>\n' + '\n' + '                                                <div class="col-md-2">\n' + '                                                    <fieldset class="form-group">\n' + '                                                        <input name="cash_charges[]" type="number" class="form-control" id="" value="">\n' + '                                                    </fieldset>\n' + '                                                </div>\n' + '                                            </div>';
+        $('.cash-handling-div-overnight').append(htmdiv);
+
+        // $(this).parent().prev().find('div.slabs').append(htmdiv);
+        // console.log();
+    });
+    //add more slabs insurance
+    $('body').on('click', '#addMoreSlabsInsurance', function () {
+        var htmdiv = '<div class="row">\n' + '                                                <div class="col-md-2 text-center">\n' + '                                                    <fieldset class="form-group">\n' + '                                                        <input name="ins_range_up[]" type="number" class="form-control" id="" value="">\n' + '                                                    </fieldset>\n' + '                                                </div>\n' + '                                                <div class="col-md-2 text-center">\n' + '                                                    <fieldset class="form-group">\n' + '                                                        <input name="ins_range_down[]" type="number" class="form-control" id="" value="">\n' + '                                                    </fieldset>\n' + '                                                </div>\n' + '\n' + '                                                <div class="col-md-2">\n' + '                                                    <fieldset class="form-group">\n' + '                                                        <input name="ins_charges[]" type="number" class="form-control" id="" value="">\n' + '                                                    </fieldset>\n' + '                                                </div>\n' + '                                            </div>';
+        $('.insurance-charges-div-overnight').append(htmdiv);
+
+        // $(this).parent().prev().find('div.slabs').append(htmdiv);
+        // console.log();
+    });
+    //Cash handling
+    // cashChargesOvernight
+    cashhandlingswitch.onchange = function () {
+        if (cashhandlingswitch.checked === true) {
+            // $('.cash-handling-div').
+            $('.cash-handling-div-overnight').find('input').prop('disabled', false);
+            $('.cash-handling-btn-overnight').find('button').prop('disabled', false);
+        } else if (cashhandlingswitch.checked === false) {
+            $('.cash-handling-div-overnight').find('input').prop('disabled', true);
+            $('.cash-handling-btn-overnight').find('button').prop('disabled', true);
+        }
+    };
+
+    // InsuranceOvernight
+    insuranceChargesSwitch.onchange = function () {
+        if (insuranceChargesSwitch.checked === true) {
+            // $('.cash-handling-div').
+            $('.insurance-charges-div-overnight').find('input').prop('disabled', false);
+            $('.insurance-charges-btn-overnight').find('button').prop('disabled', false);
+        } else if (insuranceChargesSwitch.checked === false) {
+            $('.insurance-charges-div-overnight').find('input').prop('disabled', true);
+            $('.insurance-charges-btn-overnight').find('button').prop('disabled', true);
+        }
+    };
+    // Return Overnight
+    returnChargesSwitch.onchange = function () {
+        if (returnChargesSwitch.checked === true) {
+            // $('.cash-handling-div').
+            $('.return-charges-div-overnight').find('input').prop('disabled', false);
+        } else if (returnChargesSwitch.checked === false) {
+            $('.return-charges-div-overnight').find('input').prop('disabled', true);
+        }
+    }; // Packaging Charges Overnight
+    packagingChargesSwitch.onchange = function () {
+        if (packagingChargesSwitch.checked === true) {
+            // $('.cash-handling-div').
+            $('.packaging-charges-div-overnight').find('input').prop('disabled', false);
+        } else if (packagingChargesSwitch.checked === false) {
+            $('.packaging-charges-div-overnight').find('input').prop('disabled', true);
+        }
+    };
+});
 
 /***/ }),
-/* 17 */
+/* 10 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(11);
+
+/***/ }),
+/* 11 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(0);
-var bind = __webpack_require__(5);
-var Axios = __webpack_require__(19);
+var bind = __webpack_require__(2);
+var Axios = __webpack_require__(13);
 var defaults = __webpack_require__(1);
 
 /**
@@ -823,15 +976,15 @@ axios.create = function create(instanceConfig) {
 };
 
 // Expose Cancel & CancelToken
-axios.Cancel = __webpack_require__(9);
-axios.CancelToken = __webpack_require__(34);
-axios.isCancel = __webpack_require__(8);
+axios.Cancel = __webpack_require__(6);
+axios.CancelToken = __webpack_require__(28);
+axios.isCancel = __webpack_require__(5);
 
 // Expose all/spread
 axios.all = function all(promises) {
   return Promise.all(promises);
 };
-axios.spread = __webpack_require__(35);
+axios.spread = __webpack_require__(29);
 
 module.exports = axios;
 
@@ -840,7 +993,7 @@ module.exports.default = axios;
 
 
 /***/ }),
-/* 18 */
+/* 12 */
 /***/ (function(module, exports) {
 
 /*!
@@ -867,7 +1020,7 @@ function isSlowBuffer (obj) {
 
 
 /***/ }),
-/* 19 */
+/* 13 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -875,8 +1028,8 @@ function isSlowBuffer (obj) {
 
 var defaults = __webpack_require__(1);
 var utils = __webpack_require__(0);
-var InterceptorManager = __webpack_require__(29);
-var dispatchRequest = __webpack_require__(30);
+var InterceptorManager = __webpack_require__(23);
+var dispatchRequest = __webpack_require__(24);
 
 /**
  * Create a new instance of Axios
@@ -953,7 +1106,7 @@ module.exports = Axios;
 
 
 /***/ }),
-/* 20 */
+/* 14 */
 /***/ (function(module, exports) {
 
 // shim for using process in browser
@@ -1143,7 +1296,7 @@ process.umask = function() { return 0; };
 
 
 /***/ }),
-/* 21 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1162,13 +1315,13 @@ module.exports = function normalizeHeaderName(headers, normalizedName) {
 
 
 /***/ }),
-/* 22 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var createError = __webpack_require__(7);
+var createError = __webpack_require__(4);
 
 /**
  * Resolve or reject a Promise based on response status.
@@ -1195,7 +1348,7 @@ module.exports = function settle(resolve, reject, response) {
 
 
 /***/ }),
-/* 23 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1223,7 +1376,7 @@ module.exports = function enhanceError(error, config, code, request, response) {
 
 
 /***/ }),
-/* 24 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1296,7 +1449,7 @@ module.exports = function buildURL(url, params, paramsSerializer) {
 
 
 /***/ }),
-/* 25 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1356,7 +1509,7 @@ module.exports = function parseHeaders(headers) {
 
 
 /***/ }),
-/* 26 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1431,7 +1584,7 @@ module.exports = (
 
 
 /***/ }),
-/* 27 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1474,7 +1627,7 @@ module.exports = btoa;
 
 
 /***/ }),
-/* 28 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1534,7 +1687,7 @@ module.exports = (
 
 
 /***/ }),
-/* 29 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1593,18 +1746,18 @@ module.exports = InterceptorManager;
 
 
 /***/ }),
-/* 30 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
 var utils = __webpack_require__(0);
-var transformData = __webpack_require__(31);
-var isCancel = __webpack_require__(8);
+var transformData = __webpack_require__(25);
+var isCancel = __webpack_require__(5);
 var defaults = __webpack_require__(1);
-var isAbsoluteURL = __webpack_require__(32);
-var combineURLs = __webpack_require__(33);
+var isAbsoluteURL = __webpack_require__(26);
+var combineURLs = __webpack_require__(27);
 
 /**
  * Throws a `Cancel` if cancellation has been requested.
@@ -1686,7 +1839,7 @@ module.exports = function dispatchRequest(config) {
 
 
 /***/ }),
-/* 31 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1713,7 +1866,7 @@ module.exports = function transformData(data, headers, fns) {
 
 
 /***/ }),
-/* 32 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1734,7 +1887,7 @@ module.exports = function isAbsoluteURL(url) {
 
 
 /***/ }),
-/* 33 */
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1755,13 +1908,13 @@ module.exports = function combineURLs(baseURL, relativeURL) {
 
 
 /***/ }),
-/* 34 */
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 
-var Cancel = __webpack_require__(9);
+var Cancel = __webpack_require__(6);
 
 /**
  * A `CancelToken` is an object that can be used to request cancellation of an operation.
@@ -1819,7 +1972,7 @@ module.exports = CancelToken;
 
 
 /***/ }),
-/* 35 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -1853,81 +2006,10 @@ module.exports = function spread(callback) {
 
 
 /***/ }),
-/* 36 */
+/* 30 */
 /***/ (function(module, exports) {
 
 // removed by extract-text-webpack-plugin
-
-/***/ }),
-/* 37 */,
-/* 38 */,
-/* 39 */,
-/* 40 */,
-/* 41 */
-/***/ (function(module, exports, __webpack_require__) {
-
-$(document).ready(function () {
-    var axios = __webpack_require__(16);
-    $("#BankInfoModal").on("show.bs.modal", function (e) {
-        var id = $(e.relatedTarget).data('target-id');
-
-        $.get("/admin/accounts/pending/" + id + "/bank", function (data) {
-            $(".modal-body").html(data);
-            // console.log(data);
-        });
-    });
-
-    $("#ShippingInfoModal").on("show.bs.modal", function (e) {
-        var id = $(e.relatedTarget).data('target-id');
-        // console.log(id);
-        $.get("/admin/accounts/pending/" + id + "/shipping", function (data) {
-            $(".modal-body").html(data);
-            // console.log(data);
-        });
-    });
-    $("#RatesModal").on("show.bs.modal", function (e) {
-        var id = $(e.relatedTarget).data('target-id');
-        console.log(id);
-        // $.get( "/admin/accounts/pending/"+id+"/rates", function( data ) {
-        //     $(".modal-body").html(data);
-        //     // console.log(data);
-        // });
-    });
-    $("#ConfirmModal").on("show.bs.modal", function (e) {
-        var id = $(e.relatedTarget).data('target-id');
-        var rel = $(e.relatedTarget).attr('rel');
-
-        $('#shid').val(id);
-        $('#shstatus').val(rel);
-        // axios.get('/accounts/block/active', {
-        //     params: {
-        //         id: id
-        //     }
-        // })
-        //     .then(function (response) {
-        //         $(".modal-body.confirmation").html(response);
-        //     })
-        //     .catch(function (error) {
-        //         console.log(error);
-        //     });
-    });
-    // $('body').on('click','#confirmAction',function () {
-    //    var uid = $('#shid').val();
-    //    var status = $('#shstatus').val();
-    //    axios.post('/account/status',{
-    //        params:{
-    //            uid: uid,
-    //            status: status
-    //        }
-    //    })
-    //        .then(function (response) {
-    //             console.log(response);
-    //        })
-    //        .catch(function(error){
-    //
-    //        });
-    // });
-});
 
 /***/ })
 /******/ ]);

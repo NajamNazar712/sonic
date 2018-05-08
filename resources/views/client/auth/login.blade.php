@@ -75,7 +75,7 @@
                                     <form class="form-horizontal" method="POST" action="{{ route('cod.login.submit') }}">
                                         @csrf
                                         <fieldset class="form-group position-relative has-icon-left">
-                                            <input type="text" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Your Email"
+                                            <input type="text" name="email" class="form-control {{ $errors->has('email') ? ' is-invalid' : '' }}" id="email" placeholder="Email Address"
                                                    required>
                                             <div class="form-control-position">
                                                 <i class="ft-user"></i>
@@ -87,7 +87,7 @@
                                             @endif
                                         </fieldset>
                                         <fieldset class="form-group position-relative has-icon-left">
-                                            <input type="password" name="password" class="form-control {{ $errors->has('password') ? ' is-invalid' : '' }}" id="password" placeholder="Enter Password"
+                                            <input type="password" name="password" class="form-control {{ $errors->has('password') ? ' is-invalid' : '' }}" id="password" placeholder="Password"
                                                    required>
                                             <div class="form-control-position">
                                                 <i class="la la-key"></i>
@@ -111,7 +111,7 @@
                                     </form>
                                 </div>
                                 <p class="card-subtitle line-on-side text-muted text-center font-small-3 mx-2 my-1">
-                                    <span>New to Trax ?</span>
+                                    <span>New To Trax ?</span>
                                 </p>
                                 <div class="card-body">
                                     <a href="{{route('cod.register')}}" class="btn btn-outline-danger btn-block"><i class="ft-user"></i> Register</a>
