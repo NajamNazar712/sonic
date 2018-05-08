@@ -146,7 +146,9 @@ class ShipperDashboardController extends Controller
 
       $shipment_id = $shipment->id;
 
-      $shipment->tracking_number = $pickup_city_code . $request->input('consignee_city') . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
+      $consignee_city_code =- CityInfo::find($request->input('consignee_city'))->value('city_code');
+
+      $shipment->tracking_number = $pickup_city_code . $consignee_city_code . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
 
       $shipment->save();
 
