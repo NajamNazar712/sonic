@@ -21,6 +21,7 @@ class CreateShipmentItemTable extends Migration
             $table->string('description')->nullable()->default(NULL);
             $table->integer('quantity');
             $table->integer('price')->nullable()->default(null);
+            $table->boolean('insurance');
             $table->integer('type');
         });
     }

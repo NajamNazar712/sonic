@@ -50,6 +50,20 @@ class ShipperDashboardController extends Controller
       return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes]);
     }
 
+    public function shipmentBookOrderID(Request $request) {
+      if ($request->filled('order_id')) {
+        if (Shipment::where('user_id', Auth::id())->where('order_id', $request->input('order_id'))->exists()) {
+          return 'false';
+        }
+        else {
+          return 'true';
+        }
+      }
+      else {
+        return 'false';
+      }
+    }
+
     public function shipmentBookStore(Request $request) {
       $service = BookingType::find($request->input('selected_service_type'));
 
@@ -57,6 +71,8 @@ class ShipperDashboardController extends Controller
       session(['service_type_name' => $service->booking_type]);
 
       if ($request->input('pickup_address') == 0) {
+        $pickup_city_code = CityInfo::find($request->input('new_pickup_city'))->value('city_code');
+
         $user_shipping_info = new UserShippingInfo();
 
         $user_shipping_info->user_id = Auth::id();
@@ -64,13 +80,12 @@ class ShipperDashboardController extends Controller
         $user_shipping_info->poc = $request->input('new_pickup_point_of_contact');
         $user_shipping_info->phone = $request->input('new_pickup_phone_number');
         $user_shipping_info->email = $request->input('new_pickup_email_address');
-        $user_shipping_info->city_code = $request->input('new_pickup_city');
+
+        $user_shipping_info->city_code = $pickup_city_code;
 
         $user_shipping_info->save();
 
         $pickup_address_id = $user_shipping_info->id;
-
-        $pickup_city_code = $request->input('new_pickup_city');
       }
       else {
         $pickup_address_id = $request->input('pickup_address');
@@ -93,7 +108,7 @@ class ShipperDashboardController extends Controller
         $shipment->information_display = FALSE;
       }
 
-      $shipment->consignee_city_code = $request->input('consignee_city');
+      $shipment->consignee_city_id = $request->input('consignee_city');
       $shipment->consignee_name = $request->input('consignee_name');
       $shipment->consignee_address = $request->input('consignee_address');
       $shipment->consignee_phone_number_1 = $request->input('consignee_phone_number_1');
@@ -123,8 +138,9 @@ class ShipperDashboardController extends Controller
         $shipment->same_day_timing_id = $request->input('same-day_timing');
       }
 
-      $shipment->amount = str_replace(',', '', $request->input('amount'));
+      $shipment->amount = $request->input('amount');
       $shipment->payment_mode_id = $request->input('payment_mode');
+      $shipment->status_id = 1;
 
       $shipment->save();
 
@@ -145,6 +161,11 @@ class ShipperDashboardController extends Controller
         }
 
         $shipment_item->quantity = $request->input('item_quantity');
+
+        if ($request->filled('item_price')) {
+          $shipment->price = $request->input('item_price');
+        }
+
         $shipment_item->type = 0;
 
         $shipment_item->save();
@@ -156,10 +177,22 @@ class ShipperDashboardController extends Controller
         $shipment_item->product_type_id = $request->input('product_type');
 
         if ($request->filled('item_description')) {
-          $shipment->description = $request->input('item_description');
+          $shipment_item->description = $request->input('item_description');
         }
 
         $shipment_item->quantity = $request->input('item_quantity');
+
+        if ($request->filled('item_price')) {
+          $shipment_item->price = $request->input('item_price');
+        }
+
+        if ($request->filled('insurance')) {
+          $shipment_item->insurance = TRUE;
+        }
+        else {
+          $shipment_item->insurance = FALSE;
+        }
+
         $shipment_item->type = 0;
 
         $shipment_item->save();
@@ -170,7 +203,7 @@ class ShipperDashboardController extends Controller
         $shipment_item->product_type_id = $request->input('replacement_product_type');
 
         if ($request->filled('replacement_item_description')) {
-          $shipment->description = $request->input('replacement_item_description');
+          $shipment_item->description = $request->input('replacement_item_description');
         }
 
         $shipment_item->quantity = $request->input('replacement_item_quantity');
@@ -186,10 +219,19 @@ class ShipperDashboardController extends Controller
           $shipment_item->product_type_id = $try_and_buy['product_type'];
 
           if (isset($try_and_buy['item_description']) && !empty($try_and_buy['item_description'])) {
-            $shipment->description = $try_and_buy['item_description'];
+            $shipment_item->description = $try_and_buy['item_description'];
           }
 
           $shipment_item->quantity = $try_and_buy['item_quantity'];
+          $shipment_item->price = $try_and_buy['item_price'];
+
+          if (isset($try_and_buy['insurance']) && !empty($try_and_buy['insurance'])) {
+            $shipment_item->insurance = TRUE;
+          }
+          else {
+            $shipment_item->insurance = FALSE;
+          }
+
           $shipment_item->type = 2;
 
           $shipment_item->save();

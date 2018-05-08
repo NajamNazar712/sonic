@@ -20,18 +20,18 @@
 							<form id="booking_form" class="form-horizontal" method="POST" action="{{ url('cod/shipment/book') }}" novalidate="novalidate">
 								{{ csrf_field() }}
 
-								<input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') or '' }}">
+								<input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') }}">
 
 								<div class="row">
 									<div class="col" style="max-width: 20%;">
 										<h4 class="form-section mb-2 text-center">Shipper Information</h4>
 
 										<div class="form-group">
-											<p class="mb-2 border-bottom border-light text-center font-medium-1 text-bold-600">{{ $user->name }}</p>
+											<p class="border-bottom border-light text-center font-medium-1 text-bold-600">{{ $user->name }}</p>
 										</div>
 
 										<div class="form-group">
-											<p class="mb-2 border-bottom border-light text-center font-medium-1 text-bold-600">{{ $user->phone }}</p>
+											<p class="border-bottom border-light text-center font-medium-1 text-bold-600">{{ $user->phone }}</p>
 										</div>
 
 										<div class="form-group">
@@ -39,7 +39,7 @@
 												<option value="0">New</option>
 
 												@foreach($user->shipping as $shipping_information)
-													<option value="{{ $shipping_information['id'] }}" data-city-code="{{ $shipping_information['city']['city_code'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['city_name'] }}</option>
+													<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['city_name'] }}</option>
 												@endforeach
 											</select>
 										</div>
@@ -64,14 +64,14 @@
 											<div class="form-group">
 												<select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
 													@foreach($cities as $city)
-														<option value="{{ $city->city_code }}">{{ $city->city_name }}</option>
+														<option value="{{ $city->id }}">{{ $city->city_name }}</option>
 													@endforeach
 												</select>
 											</div>
 										</div>
 
-										<div class="form-group text-center">
-											<label>Show Information on Address Label</label>
+										<div class="form-group text-center p-1 border border-light rounded">
+											<label class="d-block">Show Information on Air Waybill</label>
 											<input type="checkbox" name="information_display" class="switch hidden" id="information_display" checked="checked">
 										</div>
 									</div>
@@ -82,7 +82,7 @@
 										<div class="form-group">
 											<select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
 												@foreach($cities as $city)
-													<option value="{{ $city->city_code }}">{{ $city->city_name }}</option>
+													<option value="{{ $city->id }}">{{ $city->city_name }}</option>
 												@endforeach
 											</select>
 										</div>
@@ -112,7 +112,7 @@
 										<h4 class="form-section mb-2 text-center">Order Information</h4>
 
 										<div class="form-group">
-											<input name="order_id" class="form-control" placeholder="Order ID">
+											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ url('cod/shipment/book/order_id') }}" data-msg-remote="Order ID must be unique">
 										</div>
 
 										<div id="regular">
@@ -128,15 +128,28 @@
 												<textarea name="item_description" class="form-control" placeholder="Item Description"></textarea>
 											</div>
 
-											<div class="form-group">
-												<input type="text" name="item_quantity" class="form-control number" placeholder="Item Quantity*" min="1" data-rule-required="true" data-msg-required="Item Quantity is required">
+											<div class="form-group input-group">
+												<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
+											</div>
+
+											<div class="form-group input-group">
+												<div class="input-group-prepend">
+													<span class="input-group-text">Rs</span>
+												</div>
+
+												<input type="text" name="item_price" class="form-control price" placeholder="Item Price" data-rule-required="false" data-msg-required="Item Price is required">
+											</div>
+
+											<div class="form-group text-center p-1 border border-light rounded">
+												<label class="d-block">Insurance</label>
+												<input type="checkbox" name="insurance" class="switch hidden insurance">
 											</div>
 										</div>
 
 										<div id="replacement" class="mb-1 d-none">
-											<h4>Replacement</h4>
+											<h4 class="text-center m-0 p-1 bg-dark white border border-dark rounded-top">Replacement</h4>
 
-											<div class="pt-1 pl-1 pr-1 border border-light">
+											<div class="pt-1 pl-1 pr-1 border border-light rounded-bottom">
 												<div class="form-group">
 													<select name="replacement_product_type" class="select2" id="replacement_product_type" data-rule-required="true" data-msg-required="Product Type is required">
 														@foreach($products as $product)
@@ -149,8 +162,8 @@
 													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description"></textarea>
 												</div>
 
-												<div class="form-group">
-													<input type="text" name="replacement_item_quantity" class="form-control number" placeholder="Item Quantity*" min="1" data-rule-required="true" data-msg-required="Replacement Item Quantity is required">
+												<div class="form-group input-group">
+													<input type="text" name="replacement_item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Replacement Item Quantity is required">
 												</div>
 											</div>
 										</div>
@@ -159,9 +172,9 @@
 											<div class="repeater mb-1">
 												<div data-repeater-list="try_and_buy">
 													<div class="product mb-1" data-repeater-item>
-														<h4>Product #<span>1</span></h4>
+														<h4 class="text-center m-0 p-1 bg-dark white border border-dark rounded-top">Product #<span>1</span></h4>
 
-														<div class="pt-1 pl-1 pr-1 border border-light">
+														<div class="pt-1 pl-1 pr-1 border border-light rounded-bottom">
 															<div class="form-group">
 																<select name="product_type" class="select2" data-rule-required="true" data-msg-required="Product Type is required">
 																	@foreach($products as $product)
@@ -174,8 +187,8 @@
 																<textarea name="item_description" class="form-control" placeholder="Item Description"></textarea>
 															</div>
 
-															<div class="form-group">
-																<input type="text" name="item_quantity" class="form-control number" placeholder="Item Quantity*" min="1" data-rule-required="true" data-msg-required="Item Quanity is required">
+															<div class="form-group input-group">
+																<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quanity is required">
 															</div>
 
 															<div class="form-group input-group">
@@ -186,27 +199,40 @@
 																<input type="text" name="item_price" class="form-control price" placeholder="Item Price*" data-rule-required="true" data-msg-required="Item Price is required">
 															</div>
 
-															<div class="form-group text-right">
-																<button data-repeater-delete type="button" class="btn btn-danger">Delete</button>
+															<div class="form-group text-center p-1 border border-light rounded">
+																<label class="d-block">Insurance</label>
+																<input type="checkbox" name="insurance" class="switch hidden insurance">
+															</div>
+
+															<div class="form-group">
+																<button data-repeater-delete type="button" class="btn btn-block btn-danger">Delete</button>
 															</div>
 														</div>
 													</div>
 												</div>
 
 												<div class="form-group text-right">
-													<button data-repeater-create type="button" class="btn btn-primary">Add</button>
+													<button data-repeater-create type="button" class="btn btn-block btn-primary">Add</button>
 												</div>
+											</div>
+
+											<div class="form-group">
+												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_quantity">Total Quantity: <span>0</span></p>
+											</div>
+
+											<div class="form-group">
+												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Price: Rs <span>0</span></p>
 											</div>
 										</div>
 
 										<div class="form-group input-group">
 											<div class="input-group-prepend">
-												<span class="input-group-text">
+												<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
 													<span class="la la-calendar-o"></span>
 												</span>
 											</div>
 
-											<input type="text" name="pickup_date" class="form-control pickadate" id="pickup_date" placeholder="Pickup Date*" data-rule-required="true" data-msg-required="Pickup Date is required">
+											<input type="text" name="pickup_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="pickup_date" placeholder="Pickup Date*" data-rule-required="true" data-msg-required="Pickup Date is required">
 										</div>
 
 										<div class="form-group">
@@ -262,7 +288,7 @@
 										</div>
 
 										<div class="form-group">
-											<p class="mt-2 border-bottom border-light text-center font-medium-1 text-bold-600">Estimated Charges</p>
+											<p class="border-bottom border-light text-center font-medium-1 text-bold-600">Estimated Charges</p>
 										</div>
 									</div>
 								</div>
@@ -318,6 +344,7 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/switch.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
@@ -325,6 +352,7 @@
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/toggle/bootstrap-checkbox.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
@@ -373,6 +401,30 @@
 				}, 500);
 			}
 
+			function try_and_buy_total_quantity() {
+				var total_quantity = 0;
+
+				$('#try_and_buy .repeater div .product .quantity').each(function(index) {
+					if (this.value != '') {
+						total_quantity += parseInt(this.value);
+
+						$('#try_and_buy #total_quantity span').html(total_quantity);
+					}
+				});
+			}
+
+			function try_and_buy_total_price() {
+				var total_price = 0;
+
+				$('#try_and_buy .repeater div .product .price').each(function(index) {
+					if (this.value != '') {
+						total_price += parseInt(this.value.replace(',', ''));
+
+						$('#try_and_buy #total_price span').html(total_price.toLocaleString());
+					}
+				});
+			}
+
 			$('#select_service_type').modal({
 				backdrop: 'static',
 				keyboard: false,
@@ -384,10 +436,12 @@
 				placeholder: 'Service Type*'
 			});
 
+			var service_type = '';
+
 			@if (!Session::has('service_type_id'))
 				$('#select_service_type').modal('show');
 			@else
-				var service_type = '{{ Session::get('service_type_id') }}';
+				service_type = '{{ Session::get('service_type_id') }}';
 
 				if (service_type == 2) {
 					$('#replacement').removeClass('d-none');
@@ -405,26 +459,28 @@
 
 				var selected = $('#select_service_type form #service_type').find(':selected');
 
-				if (selected.val() !== '' && selected.val() !== undefined && selected.val() !== null) {
+				service_type = selected.val();
+
+				if (service_type !== '' && service_type !== undefined && service_type !== null) {
 					$('#select_service_type form #service_type-error').addClass('d-none');
 
-					if (selected.val() == 1) {
+					if (service_type == 1) {
 						$('#regular').removeClass('d-none');
 						$('#replacement').addClass('d-none');
 						$('#try_and_buy').addClass('d-none');
 					}
-					else if (selected.val() == 2) {
+					else if (service_type == 2) {
 						$('#regular').removeClass('d-none');
 						$('#replacement').removeClass('d-none');
 						$('#try_and_buy').addClass('d-none');
 					}
-					else if (selected.val() == 3) {
+					else if (service_type == 3) {
 						$('#regular').addClass('d-none');
 						$('#replacement').addClass('d-none');
 						$('#try_and_buy').removeClass('d-none');
 					}
 
-					$('#booking_form #selected_service_type').val(selected.val());
+					$('#booking_form #selected_service_type').val(service_type);
 
 					$('#selected_service_type_name').html('(' + selected.html() + ')');
 
@@ -448,7 +504,7 @@
 					$('#new_pickup_address').addClass('d-none');
 				}
 
-				var pickup_city = $(this).find(':selected').data('city-code');
+				var pickup_city = $(this).find(':selected').data('city-id');
 				var consignee_city = $('#consignee_city').val();
 
 				shipping_mode_same_day(pickup_city, consignee_city);
@@ -478,7 +534,7 @@
 					var pickup_city = $('#new_pickup_city').val();
 				}
 				else {
-					var pickup_city = $('#pickup_address').find(':selected').data('city-code');
+					var pickup_city = $('#pickup_address').find(':selected').data('city-id');
 				}
 
 				var consignee_city = $(this).val();
@@ -492,6 +548,21 @@
 			}).bind('change', function() {
 				$(this).valid();
 			});
+
+			$('#regular .insurance').checkboxpicker().bind('change', function() {
+				var parent = $(this).parent('.form-group').prev('.form-group');
+
+				if (this.checked) {
+					parent.children('.price').attr('placeholder', 'Item Price*').attr('data-rule-required', true).rules('add', {'required': true});
+				}
+				else {
+					parent.children('.price').attr('placeholder', 'Item Price').attr('data-rule-required', false).rules('remove');
+
+					parent.children('#item_price-error').remove();
+				}
+			});
+
+			$('#try_and_buy .insurance').checkboxpicker();
 
 			$('#pickup_date').pickadate({
 				firstDay: 1,
@@ -541,11 +612,21 @@
 						scrollTop: ($(this).offset().top - $('.header-navbar').height())
 					}, 1000);
 
-					$(this).find('.number').inputmask({
-						'alias': 'integer',
-						'allowMinus': false,
-						'allowPlus': false,
-						'max': 1000
+					$(this).find('.quantity').TouchSpin({
+						min: 1,
+						max: 1000,
+						buttonup_class: 'btn btn-primary',
+						buttondown_class: 'btn btn-primary',
+						buttondown_txt: '<i class="ft-minus"></i>',
+						buttonup_txt: '<i class="ft-plus"></i>'
+					}).bind('input change', function() {
+						if ($(this).hasClass('danger')) {
+							$(this).valid();
+						}
+
+						if (service_type == 3) {
+							try_and_buy_total_quantity();
+						}
 					});
 
 					$(this).find('.price').inputmask({
@@ -555,8 +636,19 @@
 						'groupSeparator': ',',
 						'autoGroup': true,
 						'min': 1,
-						'max': 100000
+						'max': 100000,
+						'removeMaskOnSubmit': true
+					}).bind('input change', function() {
+						if (service_type == 3) {
+							try_and_buy_total_price();
+						}
 					});
+
+					var insurance = $(this).find('.insurance');
+
+					insurance.parent('.form-group').children('.btn-group').remove();
+
+					insurance.checkboxpicker();
 
 					try_and_buy_product_numbering();
 				},
@@ -614,11 +706,21 @@
 				'clearIncomplete': true
 			});
 
-			$('.number').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false,
-				'max': 1000
+			$('.quantity').TouchSpin({
+				min: 1,
+				max: 1000,
+				buttonup_class: 'btn btn-primary',
+				buttondown_class: 'btn btn-primary',
+				buttondown_txt: '<i class="ft-minus"></i>',
+				buttonup_txt: '<i class="ft-plus"></i>'
+			}).bind('input change', function() {
+				if ($(this).hasClass('danger')) {
+					$(this).valid();
+				}
+
+				if (service_type == 3) {
+					try_and_buy_total_quantity();
+				}
 			});
 
 			$('.price').inputmask({
@@ -628,13 +730,19 @@
 				'groupSeparator': ',',
 				'autoGroup': true,
 				'min': 1,
-				'max': 100000
+				'max': 100000,
+				'removeMaskOnSubmit': true,
+			}).bind('input change', function() {
+				if (service_type == 3) {
+					try_and_buy_total_price();
+				}
 			});
 
 			$('.weight').inputmask({
 				'alias': 'decimal',
 				'allowMinus': false,
 				'allowPlus': false,
+				'digits': 2,
 				'min': 0.1,
 				'max': 1000
 			});
@@ -645,7 +753,8 @@
 				'allowPlus': false,
 				'groupSeparator': ',',
 				'autoGroup': true,
-				'max': 1000000
+				'max': 1000000,
+				'removeMaskOnSubmit': true
 			});
 		});
 	</script>

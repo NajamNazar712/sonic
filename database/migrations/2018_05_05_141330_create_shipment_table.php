@@ -20,7 +20,7 @@ class CreateShipmentTable extends Migration
             $table->integer('booking_type_id');
             $table->integer('pickup_address_id');
             $table->boolean('information_display');
-            $table->integer('consignee_city_code');
+            $table->integer('consignee_city_id');
             $table->string('consignee_name');
             $table->string('consignee_address');
             $table->string('consignee_phone_number_1');
@@ -35,6 +35,7 @@ class CreateShipmentTable extends Migration
             $table->integer('amount');
             $table->integer('payment_mode_id');
             $table->string('tracking_number')->nullable()->default(NULL);
+            $table->integer('status_id');
         });
     }
 
