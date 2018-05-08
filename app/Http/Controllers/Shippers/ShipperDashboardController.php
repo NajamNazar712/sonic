@@ -162,8 +162,13 @@ class ShipperDashboardController extends Controller
 
         $shipment_item->quantity = $request->input('item_quantity');
 
-        if ($request->filled('item_price')) {
-          $shipment->price = $request->input('item_price');
+        if ($request->filled('insurance')) {
+          $shipment_item->price = $request->input('item_price');
+
+          $shipment_item->insurance = TRUE;
+        }
+        else {
+          $shipment_item->insurance = FALSE;
         }
 
         $shipment_item->type = 0;
@@ -182,11 +187,9 @@ class ShipperDashboardController extends Controller
 
         $shipment_item->quantity = $request->input('item_quantity');
 
-        if ($request->filled('item_price')) {
-          $shipment_item->price = $request->input('item_price');
-        }
-
         if ($request->filled('insurance')) {
+          $shipment_item->price = $request->input('item_price');
+
           $shipment_item->insurance = TRUE;
         }
         else {

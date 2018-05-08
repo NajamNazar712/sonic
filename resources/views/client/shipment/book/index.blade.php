@@ -132,12 +132,12 @@
 												<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
 											</div>
 
-											<div class="form-group input-group">
+											<div class="form-group input-group d-none">
 												<div class="input-group-prepend">
 													<span class="input-group-text">Rs</span>
 												</div>
 
-												<input type="text" name="item_price" class="form-control price" placeholder="Item Price" data-rule-required="false" data-msg-required="Item Price is required">
+												<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Item Price*" data-rule-required="true" data-msg-required="Item Price is required">
 											</div>
 
 											<div class="form-group text-center p-1 border border-light rounded">
@@ -196,7 +196,7 @@
 																	<span class="input-group-text">Rs</span>
 																</div>
 
-																<input type="text" name="item_price" class="form-control price" placeholder="Item Price*" data-rule-required="true" data-msg-required="Item Price is required">
+																<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Item Price*" data-rule-required="true" data-msg-required="Item Price is required">
 															</div>
 
 															<div class="form-group text-center p-1 border border-light rounded">
@@ -276,7 +276,7 @@
 												<span class="input-group-text">Rs</span>
 											</div>
 
-											<input type="text" name="amount" class="form-control amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">
+											<input type="text" name="amount" class="form-control rounded-right amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">
 										</div>
 
 										<div class="form-group">
@@ -553,10 +553,10 @@
 				var parent = $(this).parent('.form-group').prev('.form-group');
 
 				if (this.checked) {
-					parent.children('.price').attr('placeholder', 'Item Price*').attr('data-rule-required', true).rules('add', {'required': true});
+					parent.removeClass('d-none');
 				}
 				else {
-					parent.children('.price').attr('placeholder', 'Item Price').attr('data-rule-required', false).rules('remove');
+					parent.addClass('d-none');
 
 					parent.children('#item_price-error').remove();
 				}
@@ -615,8 +615,8 @@
 					$(this).find('.quantity').TouchSpin({
 						min: 1,
 						max: 1000,
-						buttonup_class: 'btn btn-primary',
-						buttondown_class: 'btn btn-primary',
+						buttondown_class: 'btn btn-primary rounded-left',
+						buttonup_class: 'btn btn-primary rounded-right',
 						buttondown_txt: '<i class="ft-minus"></i>',
 						buttonup_txt: '<i class="ft-plus"></i>'
 					}).bind('input change', function() {
@@ -709,8 +709,8 @@
 			$('.quantity').TouchSpin({
 				min: 1,
 				max: 1000,
-				buttonup_class: 'btn btn-primary',
-				buttondown_class: 'btn btn-primary',
+				buttondown_class: 'btn btn-primary rounded-left',
+				buttonup_class: 'btn btn-primary rounded-right',
 				buttondown_txt: '<i class="ft-minus"></i>',
 				buttonup_txt: '<i class="ft-plus"></i>'
 			}).bind('input change', function() {
