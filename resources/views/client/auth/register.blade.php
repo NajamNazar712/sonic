@@ -43,6 +43,10 @@
         .hide{
             display: none;
         }
+
+        .ps-theme-dark > .ps-scrollbar-y-rail {
+            opacity: 0.9 !important;
+        }
     </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded fixed-navbar"
@@ -132,10 +136,12 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
+                                                        <label for="ntn_no">NTN Number :</label>
                                                         <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('ntn_no') }}"  name="ntn_no">                                                    </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
+                                                        <label for="url">URL :</label>
                                                         <input type="text" class="form-control" value="{{ old('url') }}" name="url" placeholder="URL/Facebook Page">                                                    </div>
                                                 </div>
                                             </div>
@@ -161,8 +167,8 @@
                                         <!-- Step 2 -->
                                         <h6>Shipping Information</h6>
                                         <fieldset>
-                                            <div class="row vertical-scroll" id="shipInfo" style="max-height: 350px;overflow: scroll;">
-
+                                            <div class="row position-relative vertical-scroll" id="shipInfo" style="height: 385px;overflow: auto;">
+                                            
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="pickup_address">
@@ -387,7 +393,7 @@
                                                                 <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                     <option value="" selected>Select Bank City</option>
                                                                     @foreach($all_cities as $city)
-                                                                        <option value="{{$city->city_code}}"  {{ old('bank_city') == '$city->city_code' ? 'selected' : '' }} >{{$city->city_name}}</option>
+                                                                        <option value="{{$city->city_code}}"  {{ old('bank_city') == $city->city_code ? 'selected' : '' }} >{{$city->city_name}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -506,8 +512,8 @@
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-        // Vertical Scroll
-        $('.vertical-scroll').perfectScrollbar({
+
+        $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,
             theme: 'dark',
             wheelPropagation: true
@@ -550,9 +556,8 @@
                 $('#shipping_' + count + ' a[data-action="close"]').on('click',function(){
                   //  $(this).closest('.card').removeClass().slideUp('fast'); // comenting this because display none will allow values to be posted
                    $(this).closest('.card').remove();
-                $('#shipInfo').stop().animate({
-                  scrollTop: $('#shipInfo')[0].scrollHeight
-                }, 2000);
+
+                $('#shipInfo').perfectScrollbar('update');
 
                 });
                 count++;
