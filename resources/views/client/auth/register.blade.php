@@ -43,6 +43,10 @@
         .hide{
             display: none;
         }
+
+        .ps-theme-dark > .ps-scrollbar-y-rail {
+            opacity: 0.9 !important;
+        }
     </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded fixed-navbar"
@@ -163,8 +167,8 @@
                                         <!-- Step 2 -->
                                         <h6>Shipping Information</h6>
                                         <fieldset>
-                                            <div class="row vertical-scroll" id="shipInfo" style="max-height: 350px;overflow: scroll;">
-
+                                            <div class="row position-relative vertical-scroll" id="shipInfo" style="height: 385px;overflow: auto;">
+                                            
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="pickup_address">
@@ -508,8 +512,8 @@
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-        // Vertical Scroll
-        $('.vertical-scroll').perfectScrollbar({
+
+        $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,
             theme: 'dark',
             wheelPropagation: true
