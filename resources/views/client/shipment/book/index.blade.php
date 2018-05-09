@@ -172,7 +172,10 @@
 											<div class="repeater mb-1">
 												<div data-repeater-list="try_and_buy">
 													<div class="product mb-1" data-repeater-item>
-														<h4 class="text-center m-0 p-1 bg-dark white border border-dark rounded-top">Product #<span>1</span></h4>
+														<div class="d-flex justify-content-between align-items-center bg-dark border border-dark rounded-top">
+															<h4 class="m-1 white">Product #<span>1</span></h4>
+															<button data-repeater-delete type="button" class="btn btn-icon btn-danger btn-sm mr-1"><i class="ft-x"></i></button>
+														</div>
 
 														<div class="pt-1 pl-1 pr-1 border border-light rounded-bottom">
 															<div class="form-group">
@@ -203,10 +206,6 @@
 																<label class="d-block">Insurance</label>
 																<input type="checkbox" name="insurance" class="switch hidden insurance">
 															</div>
-
-															<div class="form-group">
-																<button data-repeater-delete type="button" class="btn btn-block btn-danger">Delete</button>
-															</div>
 														</div>
 													</div>
 												</div>
@@ -222,6 +221,13 @@
 
 											<div class="form-group">
 												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Price: Rs <span>0</span></p>
+											</div>
+
+											<div class="form-group">
+												<div class="form-group text-center p-1 border border-light rounded">
+													<label class="d-block">Type of Package</label>
+													<input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">
+												</div>
 											</div>
 										</div>
 
@@ -347,6 +353,7 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
 @endsection
 
 @section('js')
@@ -359,6 +366,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/repeater/jquery.repeater.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -396,7 +404,7 @@
 			function try_and_buy_product_numbering() {
 				setTimeout(function () {
 					$('#try_and_buy .repeater div .product').each(function(index) {
-						$(this).children('h4').children('span').html((index + 1));
+						$(this).children('div').children('h4').children('span').html((index + 1));
 					});
 				}, 500);
 			}
@@ -564,6 +572,8 @@
 
 			$('#try_and_buy .insurance').checkboxpicker();
 
+			$('#package_type').checkboxpicker();
+
 			$('#pickup_date').pickadate({
 				firstDay: 1,
 				clear: '',
@@ -636,8 +646,7 @@
 						'groupSeparator': ',',
 						'autoGroup': true,
 						'min': 1,
-						'max': 100000,
-						'removeMaskOnSubmit': true
+						'max': 100000
 					}).bind('input change', function() {
 						if (service_type == 3) {
 							try_and_buy_total_price();
@@ -653,13 +662,36 @@
 					try_and_buy_product_numbering();
 				},
 				hide: function(delete_element) {
-					var id = $(this).children('h4').children('span').html();
+					var id = $(this).children('div').children('h4').children('span').html();
 
-					if (confirm('Are you sure you want to delete this Product #' + id + '?')) {
-						$(this).slideUp(delete_element);
+					swal({
+						title: 'Are you sure?',
+						text: 'You want to delete Product #' + id + '?',
+						icon: 'warning',
+						buttons: {
+							cancel: {
+								text: 'Cancel',
+								value: null,
+								visible: true,
+								closeModal: true,
+							},
+							confirm: {
+								text: 'Delete',
+								value: true,
+								visible: true,
+								closeModal: true
+							}
+						},
+						closeOnClickOutside: false,
+						closeOnEsc: false,
+						dangerMode: true
+					}).then(function(confirm) {
+						if (confirm) {
+							$(this).slideUp(delete_element);
 
-						try_and_buy_product_numbering();
-					}
+							try_and_buy_product_numbering();
+						}
+					});
 				}
 			});
 
@@ -698,6 +730,20 @@
 				successClass: 'success',
 				errorPlacement: function(error, element) {
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					$(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+					swal({
+						title: 'Please Wait!',
+						text: 'Your shipment is being booked!',
+						icon: 'info',
+						buttons: false,
+						closeOnClickOutside: false,
+						closeOnEsc: false
+					});
+
+					form.submit();
 				}
 			});
 
@@ -730,8 +776,7 @@
 				'groupSeparator': ',',
 				'autoGroup': true,
 				'min': 1,
-				'max': 100000,
-				'removeMaskOnSubmit': true,
+				'max': 100000
 			}).bind('input change', function() {
 				if (service_type == 3) {
 					try_and_buy_total_price();
@@ -753,8 +798,7 @@
 				'allowPlus': false,
 				'groupSeparator': ',',
 				'autoGroup': true,
-				'max': 1000000,
-				'removeMaskOnSubmit': true
+				'max': 1000000
 			});
 		});
 	</script>
