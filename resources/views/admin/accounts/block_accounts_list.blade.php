@@ -1,7 +1,7 @@
 @extends('admin.layout.master')
 
 @section('content')
-    <h1>BLocked Accounts List</h1>
+    <h1>Blocked Accounts List</h1>
 
     <section>
         <div class="row">
@@ -18,11 +18,11 @@
                                     <tr>
                                         <th>Account ID</th>
                                         <th>Company Name</th>
-                                        <th>City</th>
+                                        <th>City Name</th>
                                         <th>Contact Person</th>
-                                        <th>Phone</th>
+                                        <th>Phone Number</th>
                                         <th>Address</th>
-                                        <th>Email</th>
+                                        <th>Email Address</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>

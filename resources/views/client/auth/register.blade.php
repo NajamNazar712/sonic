@@ -45,7 +45,7 @@
         }
     </style>
 </head>
-<body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded fixed-navbar"
+<body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
 
 
@@ -118,7 +118,7 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="cnic">CNIC:
+                                                        <label for="cnic">CNIC Number:
                                                             <span class="danger">*</span></label>
                                                         <input type="text" class="form-control required" placeholder="XXXXX-1234567-X" value="{{ old('cnic') }}"  name="cnic">
                                                     </div>
@@ -126,17 +126,22 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="shipper_phone2">Phone Number 2:</label>
-                                                        <input type="tel" class="form-control" placeholder="0345-9999999"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">                                                    </div>
+                                                        <input type="tel" class="form-control" placeholder="0345-9999999"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('ntn_no') }}"  name="ntn_no">                                                    </div>
+                                                        <label for="shipper_phone2">NTN Number:</label>
+                                                        <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('ntn_no') }}"  name="ntn_no">
+                                                    </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <input type="text" class="form-control" value="{{ old('url') }}" name="url" placeholder="URL/Facebook Page">                                                    </div>
+                                                        <label for="shipper_phone2">URL:</label>
+                                                        <input type="text" class="form-control" value="{{ old('url') }}" name="url" placeholder="Webiste / Facebook Page">
+                                                    </div>
                                                 </div>
                                             </div>
                                             <div class="row">
@@ -162,7 +167,6 @@
                                         <h6>Shipping Information</h6>
                                         <fieldset>
                                             <div class="row vertical-scroll" id="shipInfo" style="max-height: 350px;overflow: scroll;">
-
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="pickup_address">
@@ -176,15 +180,15 @@
                                                             Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('shipping_poc.0') }}"  name="shipping_poc[]">                                                    </div>
+                                                        <input type="text" class="form-control required" placeholder="Person Name" value="{{ old('shipping_poc.0') }}"  name="shipping_poc[]">
+                                                    </div>
                                                     <div class="form-group">
-
                                                         <label for="url">Product Type:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
                                                             <select name="product_type[]" id="product_select" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected disabled="">Select Product Type</option>
+                                                                <option value="" selected="">Select Product Type</option>
                                                                 @foreach($products as $product)
                                                                     <option value="{{$product->id}}" {{ (collect(old('product_type'))->contains($product->id)) ? 'selected' : '' }} >{{$product->product_name}}</option>
                                                                 @endforeach
@@ -198,13 +202,15 @@
                                                             Phone Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">                                                    </div>
+                                                        <input type="tel" class="form-control required" placeholder="0345-9999999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">
+                                                    </div>
                                                     <div class="form-group">
                                                         <label for="shipping_phone">
-                                                            Email:
+                                                            Email Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="email" name="shipping_email[]" value="{{ old('shipping_email.0') }}" class="form-control required">                                                    </div>
+                                                        <input type="email" name="shipping_email[]" placeholder="abc@example.com" value="{{ old('shipping_email.0') }}" class="form-control required"> 
+                                                    </div>
                                                     <div class="form-group">
 
                                                         <label for="shipping_city">Shipper City:
@@ -212,14 +218,13 @@
                                                         </label>
                                                         <div>
                                                             <select name="shipping_city[]" id="shipping_city" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected disabled="">Select Shipper City</option>
+                                                                <option value="" selected="">Select Shipper City</option>
                                                                 @foreach($cities as $city)
                                                                     <option value="{{$city->city_code}}" {{ (collect(old('shipping_city'))->contains($city->city_code)) ? 'selected' : '' }} >{{$city->city_name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
-
                                                 </div>
 
                                                 {{--Add more addresses--}}
@@ -250,21 +255,21 @@
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label for="pickup_address">
-                                                                    Pickup Address :
+                                                                    Pickup Address:
                                                                     <span class="danger">*</span>
                                                                 </label>
                                                                 <input type="text" class="form-control required" value="{{ old('pickup_address.'.$i) }}" name="pickup_address[]">
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="shipping_poc">
-                                                                    Person Of Contact :
+                                                                    Person of Contact:
                                                                     <span class="danger">*</span>
                                                                 </label>
                                                                 <input type="text" class="form-control required" value="{{ old('shipping_poc.'.$i) }}"  name="shipping_poc[]">
                                                             </div>
                                                             <div class="form-group">
 
-                                                                <label for="url">Product Type :
+                                                                <label for="url">Product Type:
                                                                     <span class="danger">*</span>
                                                                 </label>
                                                                 <div>
@@ -280,18 +285,18 @@
                                                         <div class="col-md-6">
                                                             <div class="form-group">
                                                                 <label for="shipping_phone">
-                                                                    Phone Number :
+                                                                    Phone Number:
                                                                     <span class="danger">*</span>
                                                                 </label>
                                                                 <input type="tel" class="form-control required" placeholder="(0345) 999-9999" value="{{ old('shipping_phone.'.$i) }}" name="shipping_phone[]">
                                                             </div>
                                                             <div class="form-group">
-                                                                <label for="shipping_email">Email :<span class="danger">*</span></label>
+                                                                <label for="shipping_email">Email Address:<span class="danger">*</span></label>
                                                                 <input type="email" name="shipping_email[]" class="form-control required" value="{{ old('shipping_email.'.$i) }}">
                                                             </div>
                                                             <div class="form-group">
 
-                                                                <label for="shipping_city">Shipper City :
+                                                                <label for="shipping_city">Shipper City:
                                                                     <span class="danger">*</span>
                                                                 </label>
                                                                 <div>
@@ -353,7 +358,7 @@
                                                         </label>
                                                         <div>
                                                         <select name="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value=""  selected disabled="">Select Mode of Payment</option>
+                                                            <option value=""  selected="">Select Mode of Payment</option>
                                                             <option value="ibft" {{ old('mode_of_payment') == 'ibft' ? 'selected' : '' }}>IBFT Reimbursements</option>
                                                             <option value="invoices" {{ old('mode_of_payment') == 'invoices' ? 'selected' : '' }}>Invoices</option>
                                                         </select>
@@ -399,7 +404,7 @@
                                                             </label>
                                                         <div>
                                                         <select name="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected disabled="">Select Cycle of Payment</option>
+                                                            <option value="" selected="">Select Cycle of Payment</option>
                                                             <option value="daily" {{ old('cycle_of_payment') == 'daily' ? 'selected' : '' }}>Daily</option>
                                                             <option value="weekly" {{ old('cycle_of_payment') == 'weekly' ? 'selected' : '' }}>Weekly</option>
                                                             <option value="fortnight" {{ old('cycle_of_payment') == 'fortnight' ? 'selected' : '' }}>Fortnight</option>
@@ -504,7 +509,7 @@
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')})
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
-        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
         // Vertical Scroll
         $('.vertical-scroll').perfectScrollbar({
@@ -564,8 +569,8 @@
         $('body').on('change','input[name="name"]',function () {
             var name = $(this).val();
             var error = 0;
-            var err0 = '<span name="cname" class="danger" for="name">Atleast 3 characters required.</span>';
-            var err = '<span name="cname" class="danger" for="name">company name already exists, select another name.</span>';
+            var err0 = '<span name="cname" class="danger" for="name">Atleast 3 Characters Required</span>';
+            var err = '<span name="cname" class="danger" for="name">Company Name Already Exists</span>';
             if(name.length < 3){
                 $(err0).insertAfter('input[name="name"]');
                 error = 1;
