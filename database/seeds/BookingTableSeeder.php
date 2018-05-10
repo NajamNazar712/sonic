@@ -14,7 +14,7 @@ class BookingTableSeeder extends Seeder
         DB::table('booking_types')->insert(array(
             array('booking_type'=>'Regular'),
             array('booking_type'=>'Replacement'),
-            array('booking_type'=>'Try And Buy'),
+            array('booking_type'=>'Try & Buy'),
 
         ));
     }

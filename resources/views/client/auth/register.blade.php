@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta name="description" content="Trax Logistics, Sonic Project">
     <meta name="keywords" content="Trax Logistics">
-    <meta name="author" content="Waqas">
+    <meta name="author" content="Trax - IT Department">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Sonic Login</title>
     <link rel="apple-touch-icon" href="{{asset('app-assets/images/ico/apple-icon-120.png')}}">
@@ -42,6 +42,10 @@
     <style>
         .hide{
             display: none;
+        }
+
+        .ps-theme-dark > .ps-scrollbar-y-rail {
+            opacity: 0.9 !important;
         }
     </style>
 </head>
@@ -133,17 +137,17 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="shipper_phone2">NTN Number:</label>
+                                                       <label for="ntn_no">NTN Number:</label>
                                                         <input type="text" class="form-control" placeholder="(e.g: 1234567-8)" value="{{ old('ntn_no') }}"  name="ntn_no">
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="shipper_phone2">URL:</label>
+                                                        <label for="url">URL:</label>
                                                         <input type="text" class="form-control" value="{{ old('url') }}" name="url" placeholder="Webiste / Facebook Page">
                                                     </div>
-                                                </div>
                                             </div>
+                                        </div>
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -166,7 +170,7 @@
                                         <!-- Step 2 -->
                                         <h6>Shipping Information</h6>
                                         <fieldset>
-                                            <div class="row vertical-scroll" id="shipInfo" style="max-height: 350px;overflow: scroll;">
+                                            <div class="row position-relative vertical-scroll" id="shipInfo" style="height: 385px;overflow: auto;">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="pickup_address">
@@ -183,6 +187,7 @@
                                                         <input type="text" class="form-control required" placeholder="Person Name" value="{{ old('shipping_poc.0') }}"  name="shipping_poc[]">
                                                     </div>
                                                     <div class="form-group">
+
                                                         <label for="url">Product Type:
                                                             <span class="danger">*</span>
                                                         </label>
@@ -202,14 +207,14 @@
                                                             Phone Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" placeholder="0345-9999999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">
+                                                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_phone">
                                                             Email Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="email" name="shipping_email[]" placeholder="abc@example.com" value="{{ old('shipping_email.0') }}" class="form-control required"> 
+                                                        <input type="email" name="shipping_email[]" placeholder="abc@example.com" value="{{ old('shipping_email.0') }}" class="form-control required">
                                                     </div>
                                                     <div class="form-group">
 
@@ -288,10 +293,11 @@
                                                                     Phone Number:
                                                                     <span class="danger">*</span>
                                                                 </label>
-                                                                <input type="tel" class="form-control required" placeholder="(0345) 999-9999" value="{{ old('shipping_phone.'.$i) }}" name="shipping_phone[]">
+                                                                <input type="tel" class="form-control required" placeholder="0345-9999999" value="{{ old('shipping_phone.'.$i) }}" name="shipping_phone[]">
                                                             </div>
                                                             <div class="form-group">
-                                                                <label for="shipping_email">Email Address:<span class="danger">*</span></label>
+                                                                <label for="shipping_email">Email Address:
+                                                                <span class="danger">*</span></label>
                                                                 <input type="email" name="shipping_email[]" class="form-control required" value="{{ old('shipping_email.'.$i) }}">
                                                             </div>
                                                             <div class="form-group">
@@ -392,7 +398,7 @@
                                                                 <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                     <option value="" selected>Select Bank City</option>
                                                                     @foreach($all_cities as $city)
-                                                                        <option value="{{$city->city_code}}"  {{ old('bank_city') == '$city->city_code' ? 'selected' : '' }} >{{$city->city_name}}</option>
+                                                                       <option value="{{$city->city_code}}"  {{ old('bank_city') == $city->city_code ? 'selected' : '' }} >{{$city->city_name}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -509,10 +515,9 @@
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')})
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
-        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
-        // Vertical Scroll
-        $('.vertical-scroll').perfectScrollbar({
+        $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,
             theme: 'dark',
             wheelPropagation: true
@@ -555,9 +560,7 @@
                 $('#shipping_' + count + ' a[data-action="close"]').on('click',function(){
                   //  $(this).closest('.card').removeClass().slideUp('fast'); // comenting this because display none will allow values to be posted
                    $(this).closest('.card').remove();
-                $('#shipInfo').stop().animate({
-                  scrollTop: $('#shipInfo')[0].scrollHeight
-                }, 2000);
+                $('#shipInfo').perfectScrollbar('update');
 
                 });
                 count++;
