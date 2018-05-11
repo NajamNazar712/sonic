@@ -1643,8 +1643,8 @@
                 }
                 else {
                     swal({
-                        title: 'No Option Selected!',
-                        text: 'Please select atleast one option!',
+                        title: 'No Shipping Mode Selected!',
+                        text: 'At-least one shipping mode is required!',
                         icon: 'warning'
                     });
 
