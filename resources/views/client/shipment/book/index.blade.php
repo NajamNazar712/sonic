@@ -50,7 +50,7 @@
 											</div>
 
 											<div class="form-group">
-												<input type="text" name="new_pickup_point_of_contact" class="form-control" placeholder="Point of Contact*" data-rule-required="true" data-msg-required="Point of Contact is required">
+												<input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required">
 											</div>
 
 											<div class="form-group">
@@ -312,7 +312,7 @@
 					</div>
 				</div>
 
-				<div class="modal fade" id="select_service_type" tabindex="-1" role="dialog" aria-labelledby="select_service_type_title" aria-hidden="true">
+				<div class="modal fade" id="select_service_type" role="dialog" aria-labelledby="select_service_type_title" aria-hidden="true">
 					<div class="modal-dialog modal-sm" role="document">
 						<div class="modal-content">
 							<form class="form-horizontal">
