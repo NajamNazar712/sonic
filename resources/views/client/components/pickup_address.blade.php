@@ -13,21 +13,21 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="pickup_address">
-                            Pickup Address :
+                            Pickup Address:
                             <span class="danger">*</span>
                         </label>
                         <input type="text" class="form-control required" value="{{ old('pickup_address[]') }}" name="temp_pickupaddress">
                     </div>
                     <div class="form-group">
                         <label for="shipping_poc">
-                            Person Of Contact :
+                            Person of Contact:
                             <span class="danger">*</span>
                         </label>
                         <input type="text" class="form-control required" value="{{ old('shipping_poc[]') }}"  name="temp_shipping_poc">
                     </div>
                     <div class="form-group">
 
-                        <label for="url">Product Type :
+                        <label for="url">Product Type:
                             <span class="danger">*</span>
                         </label>
                         <div>
@@ -43,18 +43,18 @@
                 <div class="col-md-6">
                     <div class="form-group">
                         <label for="shipping_phone">
-                            Phone Number :
+                            Phone Number:
                             <span class="danger">*</span>
                         </label>
-                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" value="{{ old('shipping_phone[]') }}" name="temp_shipping_phone">
+                        <input type="tel" class="form-control required" placeholder="0345-9999999" value="{{ old('shipping_phone[]') }}" name="temp_shipping_phone">
                     </div>
                     <div class="form-group">
-                        <label for="shipping_email">Email :<span class="danger">*</span></label>
+                        <label for="shipping_email">Email Address:<span class="danger">*</span></label>
                         <input type="email" name="temp_shipping_email" class="form-control required" value="{{ old('shipping_email[]') }}">
                     </div>
                     <div class="form-group">
 
-                        <label for="shipping_city">Shipper City :
+                        <label for="shipping_city">Shipper City:
                             <span class="danger">*</span>
                         </label>
                         <div>
