@@ -728,6 +728,9 @@
 			$('#booking_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
+				normalizer: function(value) {
+					return $.trim(value);
+				},
 				errorPlacement: function(error, element) {
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
