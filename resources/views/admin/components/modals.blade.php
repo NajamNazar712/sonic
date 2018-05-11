@@ -13,7 +13,7 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-info" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -33,7 +33,7 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline-info" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -54,7 +54,7 @@
 
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn grey btn-outline-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-outline" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
