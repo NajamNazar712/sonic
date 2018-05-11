@@ -14,10 +14,11 @@ use App\Http\Models\WeightCharge;
 use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\DiscountCharge;
+use App\Http\Models\RateStatus;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
-
+use Illuminate\Support\Facades\Auth;
 class AdminDashboardController extends Controller
 {
 
@@ -134,16 +135,39 @@ class AdminDashboardController extends Controller
 //            return redirect()->back()->with();
 //        }
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
-            $weightAlready = WeightCharge::where('user_id',$id)->where('shipping_mode_id',1)->get();
-            //dd($weightAlready);
-            if($weightAlready->isEmpty()) {
+        $ONRateAlready = RateStatus::where('user_id',$id)->where('shipping_mode_id',1)->get();
+
+            if($ONRateAlready->isEmpty()) {
+                RateStatus::create([
+                   'user_id'=>$id,
+                   'shipping_mode_id'=>1,
+                   'status'=> ($request->has('on_main_switch'))? 1:0,
+                   'cash_handling_charges'=> ($request->has('on_cash_handling_switch'))? 1:0,
+                   'insurance_charges'=> ($request->has('on_insurance_charges_switch'))? 1:0,
+                   'return_charges'=> ($request->has('on_return_switch'))? 1:0,
+                   'packaging_charges'=> ($request->has('on_packaging_switch'))? 1:0
+                ]);
                 $wa_switch = array();
                 $wa_spkg = array();
                 foreach ($request->on_wa_range_up as $index => $on_wa_range_up) {
-
-                    if(array_key_exists($index,$request->on_wa_switch)){ $wa_switch[] = 1;}else{$wa_switch[] =  0;};
-                    if(array_key_exists($index,$request->on_wa_spkg)){ $wa_spkg[] = $request->on_wa_spkg[$index];}else{$wa_spkg[] =  0;};
-
+                    if($request->has('on_wa_switch')) {
+                        if (array_key_exists($index, $request->on_wa_switch)) {
+                            $wa_switch[$index] = 1;
+                        } else {
+                            $wa_switch[$index] = 0;
+                        };
+                    }else{
+                        $wa_switch[$index] = 0;
+                    }
+                    if($request->has('on_wa_spkg')) {
+                        if (array_key_exists($index, $request->on_wa_spkg)) {
+                            $wa_spkg[$index] = $request->on_wa_spkg[$index];
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        };
+                    }else{
+                        $wa_spkg[$index] = 0;
+                    }
                     WeightCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
@@ -154,27 +178,27 @@ class AdminDashboardController extends Controller
                         'local_or_6hr' => $request->on_wa_local_charges[$index],
                         'national_or_sameday' => $request->on_wa_national_charges[$index]
                     ]);
-                }
 
+                }
 
                 //Replacement and Try and Buy charges
                 BookingTypeCharges::create([
-                   'user_id'=>$id,
-                   'shipping_mode_id'=>1,
-                   'replacement_charges'=>$request->on_replacement_charges,
-                   'try_and_buy_charges'=>$request->on_tnb_charges
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>1,
+                    'replacement_charges'=>$request->on_replacement_charges,
+                    'try_and_buy_charges'=>$request->on_tnb_charges
                 ]);
                 //Cash handling Charges
                 if($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on'){
-                foreach ($request->on_cash_range_up as $ind => $on_cash_range_up){
-                    CashHandlingCharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>1,
-                        'range_up'=> $request->on_cash_range_up[$ind],
-                        'range_down'=> $request->on_cash_range_down[$ind],
-                        'charges'=> $request->on_cash_charges[$ind]
-                    ]);
-                }
+                    foreach ($request->on_cash_range_up as $ind => $on_cash_range_up){
+                        CashHandlingCharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>1,
+                            'range_up'=> $request->on_cash_range_up[$ind],
+                            'range_down'=> $request->on_cash_range_down[$ind],
+                            'charges'=> $request->on_cash_charges[$ind]
+                        ]);
+                    }
                 }
                 //insurance charges
                 if($request->has('on_insurance_charges_switch') && $request->on_insurance_charges_switch == 'on'){
@@ -190,12 +214,12 @@ class AdminDashboardController extends Controller
                 }
                 //Return Charges
                 if($request->has('on_return_switch') && $request->on_return_switch == 'on'){
-                        ReturnCharge::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>1,
-                            'local'=> $request->on_return_local_charges,
-                            'national'=> $request->on_return_national_charges
-                        ]);
+                    ReturnCharge::create([
+                        'user_id'=>$id,
+                        'shipping_mode_id'=>1,
+                        'local'=> $request->on_return_local_charges,
+                        'national'=> $request->on_return_national_charges
+                    ]);
                 }
                 //Packaging Charges
                 if($request->has('on_packaging_switch') && $request->on_packaging_switch == 'on'){
@@ -245,31 +269,57 @@ class AdminDashboardController extends Controller
                     DiscountCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 1,
+                        'title'=> $request->on_discount_title,
                         'weight' => $discount_weight,
                         'cash' => $discount_cash,
                         'insurance' => $discount_insurance,
                         'return' => $discount_return,
                         'packaging' => $discount_packaging,
                         'to' => $to,
-                        'from' => $from
+                        'from' => $from,
+                        'added_by'=>Auth::id()
                     ]);
                 }
 
             }
-            
+            //dd($weightAlready);
         }
         //Overland
         if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
-            $weightAlready = WeightCharge::where('user_id',$id)->where('shipping_mode_id',2)->get();
-            //dd($weightAlready);
-            if($weightAlready->isEmpty()) {
+
+            $OLRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',2)->get();
+
+            if($OLRatePresent->isEmpty()) {
+                RateStatus::create([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>2,
+                    'status'=> ($request->has('ol_main_switch'))? 1:0,
+                    'cash_handling_charges'=> ($request->has('ol_cash_handling_switch'))? 1:0,
+                    'insurance_charges'=> ($request->has('ol_insurance_charges_switch'))? 1:0,
+                    'return_charges'=> ($request->has('ol_return_switch'))? 1:0,
+                    'packaging_charges'=> ($request->has('ol_packaging_switch'))? 1:0
+                ]);
                 $wa_switch_overland = array();
                 $wa_spkg_overland = array();
                 foreach ($request->ol_wa_range_up as $index => $ol_wa_range_up) {
-
-                    if(array_key_exists($index,$request->ol_wa_switch)){ $wa_switch_overland[] = 1;}else{$wa_switch_overland[] =  0;};
-                    if(array_key_exists($index,$request->ol_wa_spkg)){ $wa_spkg_overland[] = $request->ol_wa_spkg[$index];}else{$wa_spkg_overland[] =  0;};
-
+                    if($request->has('ol_wa_switch')) {
+                        if (array_key_exists($index, $request->ol_wa_switch)) {
+                            $wa_switch_overland[$index] = 1;
+                        } else {
+                            $wa_switch_overland[$index] = 0;
+                        };
+                    }else{
+                        $wa_switch_overland[$index] = 0;
+                    }
+                    if($request->has('ol_wa_spkg')) {
+                        if (array_key_exists($index, $request->ol_wa_spkg)) {
+                            $wa_spkg_overland[$index] = $request->ol_wa_spkg[$index];
+                        } else {
+                            $wa_spkg_overland[$index] = 0;
+                        };
+                    }else{
+                        $wa_spkg_overland[$index] = 0;
+                    }
                     WeightCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
@@ -371,13 +421,15 @@ class AdminDashboardController extends Controller
                     DiscountCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 2,
+                        'title'=> $request->ol_discount_title,
                         'weight' => $discount_weight,
                         'cash' => $discount_cash,
                         'insurance' => $discount_insurance,
                         'return' => $discount_return,
                         'packaging' => $discount_packaging,
                         'to' => $to,
-                        'from' => $from
+                        'from' => $from,
+                        'added_by'=>Auth::id()
                     ]);
                 }
 
@@ -385,17 +437,41 @@ class AdminDashboardController extends Controller
             
         }
         //Detain
-        if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
-            $weightAlready = WeightCharge::where('user_id',$id)->where('shipping_mode_id',3)->get();
-            //dd($weightAlready);
-            if($weightAlready->isEmpty()) {
+        if($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
+
+            $DetainRatePresent = RateStatus::where('user_id', $id)->where('shipping_mode_id', 3)->get();
+
+            if ($DetainRatePresent->isEmpty()) {
+                RateStatus::create([
+                    'user_id' => $id,
+                    'shipping_mode_id' => 3,
+                    'status' => ($request->has('detain_main_switch')) ? 1 : 0,
+                    'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
+                    'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
+                    'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
+                    'packaging_charges' => ($request->has('detain_packaging_switch')) ? 1 : 0
+                ]);
                 $wa_switch_detain = array();
                 $wa_spkg_detain = array();
                 foreach ($request->detain_wa_range_up as $index => $detain_wa_range_up) {
-
-                    if(array_key_exists($index,$request->detain_wa_switch)){ $wa_switch_detain[] = 1;}else{$wa_switch_detain[] =  0;};
-                    if(array_key_exists($index,$request->detain_wa_spkg)){ $wa_spkg_detain[] = $request->detain_wa_spkg[$index];}else{$wa_spkg_detain[] =  0;};
-
+                    if ($request->has('detain_wa_switch')) {
+                        if (array_key_exists($index, $request->detain_wa_switch)) {
+                            $wa_switch_detain[$index] = 1;
+                        } else {
+                            $wa_switch_detain[$index] = 0;
+                        };
+                    } else {
+                        $wa_switch_detain[$index] = 0;
+                    }
+                    if ($request->has('detain_wa_spkg')) {
+                        if (array_key_exists($index, $request->detain_wa_spkg)) {
+                            $wa_spkg_detain[$index] = $request->detain_wa_spkg[$index];
+                        } else {
+                            $wa_spkg_detain[$index] = 0;
+                        };
+                    } else {
+                        $wa_spkg_detain[$index] = 0;
+                    }
                     WeightCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
@@ -411,53 +487,53 @@ class AdminDashboardController extends Controller
 
                 //Replacement and Try and Buy charges
                 BookingTypeCharges::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>3,
-                    'replacement_charges'=>$request->detain_replacement_charges,
-                    'try_and_buy_charges'=>$request->detain_tnb_charges
+                    'user_id' => $id,
+                    'shipping_mode_id' => 3,
+                    'replacement_charges' => $request->detain_replacement_charges,
+                    'try_and_buy_charges' => $request->detain_tnb_charges
                 ]);
                 //Cash handling Charges
-                if($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on'){
-                    foreach ($request->detain_cash_range_up as $ind => $detain_cash_range_up){
+                if ($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on') {
+                    foreach ($request->detain_cash_range_up as $ind => $detain_cash_range_up) {
                         CashHandlingCharge::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>3,
-                            'range_up'=> $request->detain_cash_range_up[$ind],
-                            'range_down'=> $request->detain_cash_range_down[$ind],
-                            'charges'=> $request->detain_cash_charges[$ind]
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'range_up' => $request->detain_cash_range_up[$ind],
+                            'range_down' => $request->detain_cash_range_down[$ind],
+                            'charges' => $request->detain_cash_charges[$ind]
                         ]);
                     }
                 }
                 //insurance charges
-                if($request->has('detain_insurance_charges_switch') && $request->detain_insurance_charges_switch == 'on'){
-                    foreach ($request->detain_ins_range_up as $insurance => $detain_ins_range_up){
+                if ($request->has('detain_insurance_charges_switch') && $request->detain_insurance_charges_switch == 'on') {
+                    foreach ($request->detain_ins_range_up as $insurance => $detain_ins_range_up) {
                         InsuranceCharge::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>3,
-                            'range_up'=> $request->detain_ins_range_up[$insurance],
-                            'range_down'=> $request->detain_ins_range_down[$insurance],
-                            'charges'=> $request->detain_ins_charges[$insurance]
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'range_up' => $request->detain_ins_range_up[$insurance],
+                            'range_down' => $request->detain_ins_range_down[$insurance],
+                            'charges' => $request->detain_ins_charges[$insurance]
                         ]);
                     }
                 }
                 //Return Charges
-                if($request->has('detain_return_switch') && $request->detain_return_switch == 'on'){
+                if ($request->has('detain_return_switch') && $request->detain_return_switch == 'on') {
                     ReturnCharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>3,
-                        'local'=> $request->detain_return_local_charges,
-                        'national'=> $request->detain_return_national_charges
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'local' => $request->detain_return_local_charges,
+                        'national' => $request->detain_return_national_charges
                     ]);
                 }
                 //Packaging Charges
-                if($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on'){
+                if ($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on') {
                     PackagingCharge::create([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>3,
-                        'sm_flyer'=> $request->detain_flyer_sm,
-                        'md_flyer'=> $request->detain_flyer_md,
-                        'lg_flyer'=> $request->detain_flyer_lg,
-                        'box_flyer'=> $request->detain_flyer_box
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'sm_flyer' => $request->detain_flyer_sm,
+                        'md_flyer' => $request->detain_flyer_md,
+                        'lg_flyer' => $request->detain_flyer_lg,
+                        'box_flyer' => $request->detain_flyer_box
                     ]);
                 }
                 $discount_cash = null;
@@ -466,23 +542,23 @@ class AdminDashboardController extends Controller
                 $discount_return = null;
                 $discount_packaging = null;
 
-                if($request->has('detain_discount_weight_switch') && $request->detain_discount_weight_switch == 'on'){
+                if ($request->has('detain_discount_weight_switch') && $request->detain_discount_weight_switch == 'on') {
                     $discount_weight = $request->detain_discount_weight_rate != null ? $request->detain_discount_weight_rate : null;
 //                    $discount_weight = $request->detain_discount_weight_rate;
                 }
-                if($request->has('detain_discount_cash_switch') && $request->detain_discount_cash_switch == 'on'){
+                if ($request->has('detain_discount_cash_switch') && $request->detain_discount_cash_switch == 'on') {
                     $discount_cash = $request->detain_discount_cash_rate != null ? $request->detain_discount_cash_rate : null;
                 }
-                if($request->has('detain_discount_insurance_switch') && $request->detain_discount_insurance_switch == 'on'){
+                if ($request->has('detain_discount_insurance_switch') && $request->detain_discount_insurance_switch == 'on') {
                     $discount_insurance = $request->detain_discount_insurance_rate != null ? $request->detain_discount_insurance_rate : null;
                 }
-                if($request->has('detain_discount_return_switch') && $request->detain_discount_return_switch == 'on'){
+                if ($request->has('detain_discount_return_switch') && $request->detain_discount_return_switch == 'on') {
                     $discount_return = $request->detain_discount_return_rate != null ? $request->detain_discount_insurance_rate : null;
                 }
-                if($request->has('detain_discount_packaging_switch') && $request->detain_discount_packaging_switch == 'on'){
+                if ($request->has('detain_discount_packaging_switch') && $request->detain_discount_packaging_switch == 'on') {
                     $discount_packaging = $request->detain_discount_packaging_rate != null ? $request->detain_discount_packaging_rate : null;
                 }
-                if($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
+                if ($discount_weight != null || $discount_cash != null || $discount_insurance != null || $discount_return != null || $discount_packaging != null) {
 
 
                     $date_str = $request->detain_daterange;
@@ -490,38 +566,63 @@ class AdminDashboardController extends Controller
                     $to = str_replace('/', '-', $date_sep[0]);
                     $from = str_replace('/', '-', $date_sep[1]);
                     $nto = date_create($to);
-                    $to =date_format($nto,"Y-m-d H:i:s");
+                    $to = date_format($nto, "Y-m-d H:i:s");
                     $nfrom = date_create($from);
-                    $from =date_format($nfrom,"Y-m-d H:i:s");
+                    $from = date_format($nfrom, "Y-m-d H:i:s");
 
                     DiscountCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 3,
+                        'title' => $request->detain_discount_title,
                         'weight' => $discount_weight,
                         'cash' => $discount_cash,
                         'insurance' => $discount_insurance,
                         'return' => $discount_return,
                         'packaging' => $discount_packaging,
                         'to' => $to,
-                        'from' => $from
+                        'from' => $from,
+                        'added_by' => Auth::id()
                     ]);
                 }
 
             }
-            
+
         }
         //Sameday
         if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
-            $weightAlready = WeightCharge::where('user_id',$id)->where('shipping_mode_id',4)->get();
-            //dd($weightAlready);
-            if($weightAlready->isEmpty()) {
+
+            $SamedayRatePresent = RateStatus::where('user_id',$id)->where('shipping_mode_id',4)->get();
+            if($SamedayRatePresent->isEmpty()) {
+                RateStatus::create([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>4,
+                    'status'=> ($request->has('sameday_main_switch'))? 1:0,
+                    'cash_handling_charges'=> ($request->has('sameday_cash_handling_switch'))? 1:0,
+                    'insurance_charges'=> ($request->has('sameday_insurance_charges_switch'))? 1:0,
+                    'return_charges'=> ($request->has('sameday_return_switch'))? 1:0,
+                    'packaging_charges'=> ($request->has('sameday_packaging_switch'))? 1:0
+                ]);
                 $wa_switch_sameday = array();
                 $wa_spkg_sameday = array();
                 foreach ($request->sameday_wa_range_up as $index => $sameday_wa_range_up) {
-
-                    if(array_key_exists($index,$request->sameday_wa_switch)){ $wa_switch_sameday[] = 1;}else{$wa_switch_sameday[] =  0;};
-                    if(array_key_exists($index,$request->sameday_wa_spkg)){ $wa_spkg_sameday[] = $request->sameday_wa_spkg[$index];}else{$wa_spkg_sameday[] =  0;};
-
+                    if($request->has('sameday_wa_switch')) {
+                        if (array_key_exists($index, $request->sameday_wa_switch)) {
+                            $wa_switch_sameday[$index] = 1;
+                        } else {
+                            $wa_switch_sameday[$index] = 0;
+                        };
+                    }else{
+                        $wa_switch_sameday[$index] = 0;
+                    }
+                    if($request->has('sameday_wa_spkg')) {
+                        if (array_key_exists($index, $request->sameday_wa_spkg)) {
+                            $wa_spkg_sameday[$index] = $request->sameday_wa_spkg[$index];
+                        } else {
+                            $wa_spkg_sameday[$index] = 0;
+                        };
+                    }else{
+                        $wa_spkg_sameday[$index] = 0;
+                    }
                     WeightCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
@@ -623,20 +724,22 @@ class AdminDashboardController extends Controller
                     DiscountCharge::create([
                         'user_id' => $id,
                         'shipping_mode_id' => 4,
+                        'title'=> $request->sameday_discount_title,
                         'weight' => $discount_weight,
                         'cash' => $discount_cash,
                         'insurance' => $discount_insurance,
                         'return' => $discount_return,
                         'packaging' => $discount_packaging,
                         'to' => $to,
-                        'from' => $from
+                        'from' => $from,
+                        'added_by'=>Auth::id()
                     ]);
                 }
 
             }
-            
-        }
-        return redirect()->back()->with('info','All Rates Done');
+            }
+
+        return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
     public function activeAccountListAjax(){
 
