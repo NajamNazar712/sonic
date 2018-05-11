@@ -76,7 +76,7 @@
                                         <!-- Step 1 -->
                                         @csrf
                                         @method('post')
-                                        <h6>Personal Information</h6>
+                                        <h6>Profile Information</h6>
                                         @include('client.inc.messages')
                                         <fieldset>
                                             <div class="row">
@@ -115,7 +115,7 @@
                                                         <label for="shipper_phone">Phone Number 1:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" placeholder="0345-9999999" name="shipper_phone" value="{{ old('shipper_phone') }}">
+                                                        <input type="tel" class="form-control required" placeholder="0345-9999999 / 0213-9999999" name="shipper_phone" value="{{ old('shipper_phone') }}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -130,7 +130,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="shipper_phone2">Phone Number 2:</label>
-                                                        <input type="tel" class="form-control" placeholder="0345-9999999"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">
+                                                        <input type="tel" class="form-control" placeholder="0345-9999999 / 0213-9999999"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">
                                                     </div>
                                                 </div>
                                             </div>
@@ -207,7 +207,7 @@
                                                             Phone Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" placeholder="(0345) 999-9999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">
+                                                        <input type="tel" class="form-control required" placeholder="0345-9999999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_phone">
@@ -297,7 +297,8 @@
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="shipping_email">Email Address:
-                                                                <span class="danger">*</span></label>
+                                                                <span class="danger">*</span>
+                                                            </label>
                                                                 <input type="email" name="shipping_email[]" class="form-control required" value="{{ old('shipping_email.'.$i) }}">
                                                             </div>
                                                             <div class="form-group">
@@ -437,7 +438,7 @@
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="password">
-                                                            Password:
+                                                            Enter Password:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div class="form-group position-relative">
@@ -522,6 +523,7 @@
             theme: 'dark',
             wheelPropagation: true
         });
+        $('#shipInfo').perfectScrollbar('update');
 
 
         var count = {{$i}};
