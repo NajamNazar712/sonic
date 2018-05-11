@@ -10,7 +10,9 @@
         
        
         <!-- Active Orders -->
-       <h1>Dashboard</h1>
+       <h1>Welcome To Trax Logistics,
+       <span class="user-name text-bold-700 ">{{Auth::user()->name}}</span>
+     </h1>
         <!-- Active Orders -->
       </div>
     </div>

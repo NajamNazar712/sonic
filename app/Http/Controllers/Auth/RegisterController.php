@@ -50,10 +50,11 @@ class RegisterController extends Controller
     {
         $products = Product::all();
         $bank = CityInfo::all();
-//        return $cities;
-        $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
 
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$cities,'all_cities'=>$bank]);
+        // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
+        // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
+
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$bank,'all_cities'=>$bank]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -165,7 +166,10 @@ class RegisterController extends Controller
     }
     public function addressView(){
         $products = Product::all();
-        $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
+
+        // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
+        // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
+        $cities = CityInfo::all();
         return view('client.components.pickup_address')->with(['cities'=>$cities,'products'=>$products]);
     }
     public function checkCompanyName(Request $request){
