@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateInsuranceChargesTable extends Migration
+class CreateFuelSurchargesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,11 @@ class CreateInsuranceChargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('insurance_charges', function (Blueprint $table) {
+        Schema::create('fuel_surcharges', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('shipping_mode_id');
-            $table->decimal('range_up', 8, 2);
-            $table->decimal('range_down', 8, 2);
-            $table->string('charges');
+            $table->decimal('fuel_surcharge');
             $table->timestamps();
         });
     }
@@ -31,6 +29,6 @@ class CreateInsuranceChargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('insurance_charges');
+        Schema::dropIfExists('fuel_surcharges');
     }
 }

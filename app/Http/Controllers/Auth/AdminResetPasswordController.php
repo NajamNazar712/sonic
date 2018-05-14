@@ -4,6 +4,10 @@ namespace App\Http\Controllers\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\ResetsPasswords;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
+
 use Password;
 use Auth;
 class AdminResetPasswordController extends Controller
@@ -26,7 +30,7 @@ class AdminResetPasswordController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/admin/dashboard';
+    protected $redirectTo = '/admin/login';
 
     /**
      * Create a new controller instance.
@@ -50,5 +54,22 @@ class AdminResetPasswordController extends Controller
 
     public function broker(){
         return Password::broker('admins');
+    }
+    protected function resetPassword($user, $password)
+    {
+        $user->password = Hash::make($password);
+
+        $user->setRememberToken(Str::random(60));
+
+        $user->save();
+
+        event(new PasswordReset($user));
+        //return redirect(route('cod.login'))->with('success','Your password has reset!');
+        //$this->guard()->login($user);
+    }
+    protected function sendResetResponse($response)
+    {
+        return redirect($this->redirectPath())
+            ->with('success', trans($response));
     }
 }

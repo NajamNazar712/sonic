@@ -20,6 +20,6 @@
 </div>
 @include('admin.layout.footer')
 @include('admin.components.modals')
-@yield('customjs')
+
 </body>
 </html>
