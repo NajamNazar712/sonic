@@ -36,6 +36,7 @@ Route::prefix('cod')->group(function () {
     Route::get('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookView');
     Route::get('/shipment/book/order_id', 'Shippers\ShipperDashboardController@shipmentBookOrderID');
     Route::post('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookStore');
+    Route::post('/shipment/print_air_waybill', 'Shippers\ShipperDashboardController@printAirWaybill');
     Route::get('/logout','Auth\LoginController@logout')->name('cod.logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('cod.logout');

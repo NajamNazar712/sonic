@@ -50,7 +50,7 @@
 											</div>
 
 											<div class="form-group">
-												<input type="text" name="new_pickup_point_of_contact" class="form-control" placeholder="Point of Contact*" data-rule-required="true" data-msg-required="Point of Contact is required">
+												<input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required">
 											</div>
 
 											<div class="form-group">
@@ -137,7 +137,7 @@
 													<span class="input-group-text">Rs</span>
 												</div>
 
-												<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Item Price*" data-rule-required="true" data-msg-required="Item Price is required">
+												<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Price*" data-rule-required="true" data-msg-required="Price is required">
 											</div>
 
 											<div class="form-group text-center p-1 border border-light rounded">
@@ -199,7 +199,7 @@
 																	<span class="input-group-text">Rs</span>
 																</div>
 
-																<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Item Price*" data-rule-required="true" data-msg-required="Item Price is required">
+																<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Price*" data-rule-required="true" data-msg-required="Price is required">
 															</div>
 
 															<div class="form-group text-center p-1 border border-light rounded">
@@ -302,8 +302,8 @@
 								<div class="row mt-2">
 									<div class="col">
 										<div class="form-group text-center">
-											<button type="submit" class="btn btn-primary">Book</button>
-											<!-- <button type="submit" class="btn btn-primary ml-1">Book &amp; Print</button> -->
+											<button type="submit" name="book" class="btn btn-primary" value="Book">Book</button>
+											<button type="submit" name="book_and_print" class="btn btn-primary ml-1" value="Book & Print">Book &amp; Print</button>
 										</div>
 									</div>
 								</div>
@@ -312,7 +312,7 @@
 					</div>
 				</div>
 
-				<div class="modal fade" id="select_service_type" tabindex="-1" role="dialog" aria-labelledby="select_service_type_title" aria-hidden="true">
+				<div class="modal fade" id="select_service_type" role="dialog" aria-labelledby="select_service_type_title" aria-hidden="true">
 					<div class="modal-dialog modal-sm" role="document">
 						<div class="modal-content">
 							<form class="form-horizontal">
@@ -370,6 +370,26 @@
 
 	<script>
 		$(document).ready(function() {
+			@if (session('print'))
+				$.ajax({
+					url: '{!! url('cod/shipment/print_air_waybill') !!}',
+					method: 'POST',
+					data: {
+						'ids[]': '{{ session('print') }}',
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+				.done(function(data) {
+					var tab = window.open('', '_blank');
+
+					if (tab) {
+						tab.document.write(data);
+						tab.document.close();
+						tab.focus();
+					}
+				});
+			@endif
+
 			function shipping_mode_same_day(pickup_city, consignee_city) {
 				if (pickup_city != consignee_city) {
 					if ($('#shipping_mode').val() == 4) {
@@ -728,6 +748,9 @@
 			$('#booking_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
+				normalizer: function(value) {
+					return $.trim(value);
+				},
 				errorPlacement: function(error, element) {
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
