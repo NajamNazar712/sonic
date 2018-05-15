@@ -6,7 +6,7 @@
 
 
                 <!-- Active Orders -->
-                <h1>Pending booked Orders</h1>
+                <h1>Pending Booked Orders</h1>
                 <!-- Active Orders -->
 
 

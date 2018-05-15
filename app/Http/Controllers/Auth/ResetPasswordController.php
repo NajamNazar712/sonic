@@ -53,7 +53,7 @@ class ResetPasswordController extends Controller
         $user->save();
 
         event(new PasswordReset($user));
-
+        //return redirect(route('cod.login'))->with('success','Your password has reset!');
         //$this->guard()->login($user);
     }
 }
