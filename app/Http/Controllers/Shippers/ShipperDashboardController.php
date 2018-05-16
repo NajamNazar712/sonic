@@ -44,7 +44,7 @@ class ShipperDashboardController extends Controller
 
     public function shipmentBookView() {
       $booking_types = BookingType::all();
-      $user = User::find(Auth::id())->with('shipping.city')->first();
+      $user = User::with('shipping.city')->find(Auth::id());
       $cities = CityInfo::orderBy('city_name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_modes = ShippingMode::all();

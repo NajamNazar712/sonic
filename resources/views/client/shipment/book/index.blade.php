@@ -266,11 +266,13 @@
 										</div>
 
 										<div id="shipping_same-day" class="d-none">
-											<select name="same-day_timing" class="select2" id="same-day_timing" data-rule-required="true" data-msg-required="Same-day Timing is required">
-												@foreach($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
-													<option value="{{ $shipping_mode_same_day_timing->id }}">{{ $shipping_mode_same_day_timing->timing }}</option>
-												@endforeach
-											</select>
+											<div class="form-group">
+												<select name="same-day_timing" class="select2" id="same-day_timing" data-rule-required="true" data-msg-required="Same-day Timing is required">
+													@foreach($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
+														<option value="{{ $shipping_mode_same_day_timing->id }}">{{ $shipping_mode_same_day_timing->timing }}</option>
+													@endforeach
+												</select>
+											</div>
 										</div>
 									</div>
 
