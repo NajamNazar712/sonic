@@ -297,6 +297,16 @@ class ShipperDashboardController extends Controller
                     <title>Air Waybill</title>
 
                     <style>
+                      @page {
+                        size: auto;
+                        margin: 0mm;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
                       body {
                         background: none !important;
                         font-size: 0.9rem !important;
