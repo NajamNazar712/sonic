@@ -298,7 +298,7 @@ class ShipperDashboardController extends Controller
 
                     <style>
                       @page {
-                        size: auto;
+                        size: A4;
                         margin: 0mm;
                       }
 
@@ -359,7 +359,7 @@ class ShipperDashboardController extends Controller
                     </style>
                   </head>
                   <body>
-                    <div class="p-1">
+                    <div class="p-2">
       ';
 
       $shipment_details = '';
