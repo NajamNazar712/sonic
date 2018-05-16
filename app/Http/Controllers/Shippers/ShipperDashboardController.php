@@ -298,7 +298,7 @@ class ShipperDashboardController extends Controller
 
                     <style>
                       @page {
-                        size: A4;
+                        size: A4 portrait;
                         margin: 0mm;
                       }
 
