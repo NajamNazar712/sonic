@@ -21,7 +21,6 @@ class CreateRateStatusesTable extends Migration
             $table->boolean('cash_handling_charges')->default(0);
             $table->boolean('insurance_charges')->default(0);
             $table->boolean('return_charges')->default(0);
-            $table->boolean('fuel_charges')->default(0);
             $table->boolean('packaging_charges')->default(0);
             $table->timestamps();
         });

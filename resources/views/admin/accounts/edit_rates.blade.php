@@ -284,6 +284,7 @@
                                             </div>
                                         </div>
                                         <div class="insurance-charges-div-overnight slabs">
+                                            @if(isset($insuranceCharges[1]))
                                             @foreach($insuranceCharges[1] as $index => $insurance)
                                                 <div class="row" id="on_insurance_handle_0">
                                                     <div class="col-md-2 text-center">
@@ -309,6 +310,27 @@
                                                     @endif
                                                 </div>
                                             @endforeach
+                                            @else
+                                                <div class="row" id="on_insurance_handle_0">
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="on_ins_range_up[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="on_ins_range_down[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="">
+                                                        </fieldset>
+                                                    </div>
+
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="on_ins_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent"  value="">
+                                                        </fieldset>
+                                                    </div>
+                                                        <div class="col"></div>                                                    
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="insurance-charges-btn-overnight">
                                             <button id="addMoreSlabsInsurance" type="button" class="btn btn-outline-success mr-1" title="Add more slabs"><i class="la la-plus"></i></button>
@@ -779,6 +801,7 @@
                                             </div>
                                         </div>
                                         <div class="insurance-charges-div-overland slabs">
+                                            @if(isset($insuranceCharges[2]))
                                             @foreach($insuranceCharges[2] as $index => $ol_insurance)
                                                 <div class="row">
                                                     <div class="col-md-2 text-center">
@@ -804,6 +827,27 @@
                                                     </div>
                                                 </div>
                                             @endforeach
+                                            @else
+                                                <div class="row">
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="ol_ins_range_up[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="ol_ins_range_down[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        </fieldset>
+                                                    </div>
+
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="ol_ins_charges[0]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col"></div>
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="insurance-charges-btn-overland">
                                             <button id="oladdMoreSlabsInsurance" type="button" class="btn btn-outline-success mr-1" title="Add more slabs"><i class="la la-plus"></i></button>
@@ -1274,6 +1318,7 @@
                                             </div>
                                         </div>
                                         <div class="insurance-charges-div-detain slabs">
+                                            @if(isset($insuranceCharges[3]))
                                             @foreach($insuranceCharges[3] as $index => $det_insurance)
                                                 <div class="row">
                                                     <div class="col-md-2 text-center">
@@ -1299,6 +1344,27 @@
                                                     </div>
                                                 </div>
                                             @endforeach
+                                            @else
+                                                 <div class="row">
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="detain_ins_range_up[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="detain_ins_range_down[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        </fieldset>
+                                                    </div>
+
+                                                    <div class="col-md-2">
+                                                        <fieldset class="form-group">
+                                                            <input name="detain_ins_charges[0]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col"></div>
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="insurance-charges-btn-detain">
                                             <button id="detainaddMoreSlabsInsurance" type="button" class="btn btn-outline-success mr-1" title="Add more slabs"><i class="la la-plus"></i></button>
@@ -1770,6 +1836,7 @@
                                             </div>
                                         </div>
                                         <div class="insurance-charges-div-sameday slabs">
+                                            @if($insuranceCharges[4])
                                             @foreach($insuranceCharges[4] as $index => $same_insurance)
                                                 <div class="row">
                                                     <div class="col-md-2 text-center">
@@ -1795,6 +1862,27 @@
                                                     </div>
                                                 </div>
                                             @endforeach
+                                            @else
+                                                <div class="row">
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="sameday_ins_range_up[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="sameday_ins_range_down[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        </fieldset>
+                                                    </div>
+
+                                                    <div class="col-md-2 text-center">
+                                                        <fieldset class="form-group">
+                                                            <input name="sameday_ins_charges[0]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col"></div>
+                                                </div>
+                                            @endif
                                         </div>
                                         <div class="insurance-charges-btn-sameday">
                                             <button id="samedayaddMoreSlabsInsurance" type="button" class="btn btn-outline-success mr-1" title="Add more slabs"><i class="la la-plus"></i></button>

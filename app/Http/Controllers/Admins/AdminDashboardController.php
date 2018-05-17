@@ -137,10 +137,10 @@ class AdminDashboardController extends Controller
         $user = User::find($id);
         $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 //        return $switches[1][0]->status;
-        $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
-        $cash = '';
-        $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
-//        $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
+        $weight = WeightCharge::all()->groupBy('shipping_mode_id');
+//        $cash = '';
+        $bookingType = BookingTypeCharges::all()->groupBy('shipping_mode_id');
+        $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
         $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
         $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
         $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
