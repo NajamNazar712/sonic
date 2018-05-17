@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateFuelSurchargesTable extends Migration
+class CreateStandardFuelSurchargesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,10 @@ class CreateFuelSurchargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('fuel_surcharges', function (Blueprint $table) {
+        Schema::create('standard_fuel_surcharges', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
             $table->integer('shipping_mode_id');
-            $table->decimal('fuel_surcharge',10,2);
-            $table->timestamps();
+            $table->float('fuel_surcharge');
         });
     }
 
@@ -29,6 +27,6 @@ class CreateFuelSurchargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('fuel_surcharges');
+        Schema::dropIfExists('standard_fuel_surcharges');
     }
 }

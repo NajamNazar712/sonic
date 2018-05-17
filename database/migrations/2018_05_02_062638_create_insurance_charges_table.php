@@ -19,7 +19,7 @@ class CreateInsuranceChargesTable extends Migration
             $table->integer('shipping_mode_id');
             $table->decimal('range_up', 8, 2);
             $table->decimal('range_down', 8, 2);
-            $table->string('charges');
+            $table->decimal('charges');
             $table->timestamps();
         });
     }

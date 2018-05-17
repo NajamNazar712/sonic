@@ -2,6 +2,13 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\Admin\StandardCashHandlingCharge;
+use App\Http\Models\Admin\StandardInsuranceCharge;
+use App\Http\Models\Admin\StandardReturnCharge;
+use App\Http\Models\Admin\StandardPackagingCharge;
+use App\Http\Models\Admin\StandardFuelSurcharge;
+use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\InsuranceCharge;
@@ -16,6 +23,8 @@ use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\DiscountCharge;
 use App\Http\Models\RateStatus;
+//standard rates
+
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
@@ -112,9 +121,34 @@ class AdminDashboardController extends Controller
     }
     public function addRatesView($id){
         $user = User::find($id);
-        return view('admin.accounts.add_rates')->with('shipper',$user);
+        $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
+
+        $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
+        $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
+        $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
+        $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
+        $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
+        $packaging = StandardPackagingCharge::all()->groupBy('shipping_mode_id');
+//        return $weight[2];
+        return view('admin.accounts.add_rates')->with(['shipper'=>$user,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging]);
     }
 
+    public function editRatesView($id){
+        $user = User::find($id);
+        $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+//        return $switches[1][0]->status;
+        $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
+        $cash = '';
+        $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
+//        $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
+        $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
+        $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
+        $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
+        $packaging = StandardPackagingCharge::all()->groupBy('shipping_mode_id');
+//        return $weight[2];
+        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging]);
+
+    }
     /**
      * @param Request $request
      * @param $id
@@ -122,7 +156,6 @@ class AdminDashboardController extends Controller
      */
     public function addRates(Request $request, $id){
 
-//        return $request;
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
@@ -144,13 +177,13 @@ class AdminDashboardController extends Controller
             'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
             'on_cash_range_down.*.numeric' => 'The overnight cash range down field must be numeric.',
             'on_cash_charges.*.required_if' => 'The overnight cash charges field is required.',
-            'on_cash_charges.*.numeric' => 'The overnight cash charges field must be numeric or percentage.',
+            //'on_cash_charges.*.string' => 'The overnight cash charges field must be string.',
             'on_ins_range_up.*.required_if' => 'The overnight insurance range up field is required.',
             'on_ins_range_up.*.numeric' => 'The overnight insurance range up field must be numeric or percentage.',
             'on_ins_range_down.*.required_if' => 'The overnight insurance range down field is required.',
             'on_ins_range_down.*.numeric' => 'The overnight insurance range down field must be numeric or percentage.',
             'on_ins_charges.*.required_if' => 'The overnight insurance charges field is required.',
-            'on_ins_charges.*.numeric' => 'The overnight insurance charges field must be numeric or percentage.',
+            //'on_ins_charges.*.string' => 'The overnight insurance charges field must be string.',
             'on_return_local_charges.required_if' => 'The overnight return local charges field is required.',
             'on_return_local_charges.numeric' => 'The overnight return local charges field must be numeric or percentage.',
             'on_return_national_charges.required_if' => 'The overnight return national charges field is required.',
@@ -200,13 +233,13 @@ class AdminDashboardController extends Controller
             'ol_cash_range_down.*.required_if' => 'The overland cash range down field is required.',
             'ol_cash_range_down.*.numeric' => 'The overland cash range down field must be numeric.',
             'ol_cash_charges.*.required_if' => 'The overland cash charges field is required.',
-            'ol_cash_charges.*.numeric' => 'The overland cash charges field must be numeric or percentage.',
+            //'ol_cash_charges.*.numeric' => 'The overland cash charges field must be numeric or percentage.',
             'ol_ins_range_up.*.required_if' => 'The overland insurance range up field is required.',
             'ol_ins_range_up.*.numeric' => 'The overland insurance range up field must be numeric or percentage.',
             'ol_ins_range_down.*.required_if' => 'The overland insurance range down field is required.',
             'ol_ins_range_down.*.numeric' => 'The overland insurance range down field must be numeric or percentage.',
             'ol_ins_charges.*.required_if' => 'The overland insurance charges field is required.',
-            'ol_ins_charges.*.numeric' => 'The overland insurance charges field must be numeric or percentage.',
+            //'ol_ins_charges.*.numeric' => 'The overland insurance charges field must be numeric or percentage.',
             'ol_return_local_charges.required_if' => 'The overland return local charges field is required.',
             'ol_return_local_charges.numeric' => 'The overland return local charges field must be numeric or percentage.',
             'ol_return_national_charges.required_if' => 'The overland return national charges field is required.',
@@ -256,13 +289,13 @@ class AdminDashboardController extends Controller
             'detain_cash_range_down.*.required_if' => 'The detain cash range down field is required.',
             'detain_cash_range_down.*.numeric' => 'The detain cash range down field must be numeric.',
             'detain_cash_charges.*.required_if' => 'The detain cash charges field is required.',
-            'detain_cash_charges.*.numeric' => 'The detain cash charges field must be numeric or percentage.',
+            //'detain_cash_charges.*.numeric' => 'The detain cash charges field must be numeric or percentage.',
             'detain_ins_range_up.*.required_if' => 'The detain insurance range up field is required.',
             'detain_ins_range_up.*.numeric' => 'The detain insurance range up field must be numeric or percentage.',
             'detain_ins_range_down.*.required_if' => 'The detain insurance range down field is required.',
             'detain_ins_range_down.*.numeric' => 'The detain insurance range down field must be numeric or percentage.',
             'detain_ins_charges.*.required_if' => 'The detain insurance charges field is required.',
-            'detain_ins_charges.*.numeric' => 'The detain insurance charges field must be numeric or percentage.',
+            //'detain_ins_charges.*.numeric' => 'The detain insurance charges field must be numeric or percentage.',
             'detain_return_local_charges.required_if' => 'The detain return local charges field is required.',
             'detain_return_local_charges.numeric' => 'The detain return local charges field must be numeric or percentage.',
             'detain_return_national_charges.required_if' => 'The detain return national charges field is required.',
@@ -312,13 +345,13 @@ class AdminDashboardController extends Controller
             'sameday_cash_range_down.*.required_if' => 'The sameday cash range down field is required.',
             'sameday_cash_range_down.*.numeric' => 'The sameday cash range down field must be numeric.',
             'sameday_cash_charges.*.required_if' => 'The sameday cash charges field is required.',
-            'sameday_cash_charges.*.numeric' => 'The sameday cash charges field must be numeric or percentage.',
+           // 'sameday_cash_charges.*.numeric' => 'The sameday cash charges field must be numeric or percentage.',
             'sameday_ins_range_up.*.required_if' => 'The sameday insurance range up field is required.',
             'sameday_ins_range_up.*.numeric' => 'The sameday insurance range up field must be numeric or percentage.',
             'sameday_ins_range_down.*.required_if' => 'The sameday insurance range down field is required.',
             'sameday_ins_range_down.*.numeric' => 'The sameday insurance range down field must be numeric or percentage.',
             'sameday_ins_charges.*.required_if' => 'The sameday insurance charges field is required.',
-            'sameday_ins_charges.*.numeric' => 'The sameday insurance charges field must be numeric or percentage.',
+            //'sameday_ins_charges.*.numeric' => 'The sameday insurance charges field must be numeric or percentage.',
             'sameday_return_local_charges.required_if' => 'The sameday return local charges field is required.',
             'sameday_return_local_charges.numeric' => 'The sameday return local charges field must be numeric or percentage.',
             'sameday_return_national_charges.required_if' => 'The sameday return national charges field is required.',
@@ -358,8 +391,8 @@ class AdminDashboardController extends Controller
 
         if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
             $on_validations = [
-                'on_wa_range_up.*' => 'required|numeric|between:0,99.99',
-                'on_wa_range_down.*' => 'required|numeric|between:0,99.99',
+                'on_wa_range_up.*' => 'required|numeric|between:0,1000',
+                'on_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'on_wa_local_charges.*' => 'required|numeric',
                 'on_wa_national_charges.*' => 'required|numeric',
                 'on_wa_spkg.*'=>'numeric',
@@ -367,10 +400,10 @@ class AdminDashboardController extends Controller
                 'on_tnb_charges'=>'required|numeric',
                 'on_cash_range_up.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
                 'on_cash_range_down.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
-                'on_cash_charges.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
+                'on_cash_charges.*'=>'required_if:on_cash_handling_switch,==,on',
                 'on_ins_range_up.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
                 'on_ins_range_down.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
-                'on_ins_charges.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
+                'on_ins_charges.*'=>'required_if:on_insurance_charges_switch,==,on',
                 'on_return_local_charges.*'=>'required_if:on_return_switch,==,on|numeric',
                 'on_return_national_charges.*'=>'required_if:on_return_switch,==,on|numeric',
                 'overnight_fuel_surcharge'=>'required_if:overnight_fuel_switch,==,on|numeric',
@@ -390,8 +423,8 @@ class AdminDashboardController extends Controller
         //overland
         if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
             $ol_validations = [
-                'ol_wa_range_up.*' => 'required|numeric|between:0,99.99',
-                'ol_wa_range_down.*' => 'required|numeric|between:0,99.99',
+                'ol_wa_range_up.*' => 'required|numeric|between:0,1000',
+                'ol_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'ol_wa_local_charges.*' => 'required|numeric',
                 'ol_wa_national_charges.*' => 'required|numeric',
                 'ol_wa_spkg.*'=>'numeric',
@@ -399,10 +432,10 @@ class AdminDashboardController extends Controller
                 'ol_tnb_charges'=>'required|numeric',
                 'ol_cash_range_up.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
                 'ol_cash_range_down.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
-                'ol_cash_charges.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
+                'ol_cash_charges.*'=>'required_if:ol_cash_handling_switch,==,on',
                 'ol_ins_range_up.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
                 'ol_ins_range_down.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
-                'ol_ins_charges.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
+                'ol_ins_charges.*'=>'required_if:ol_insurance_charges_switch,==,on',
                 'ol_return_local_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
                 'ol_return_national_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
                 'overland_fuel_surcharge'=>'required_if:overland_fuel_switch,==,on|numeric',
@@ -422,8 +455,8 @@ class AdminDashboardController extends Controller
              //overland
         if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
             $detain_validations = [
-                'detain_wa_range_up.*' => 'required|numeric|between:0,99.99',
-                'detain_wa_range_down.*' => 'required|numeric|between:0,99.99',
+                'detain_wa_range_up.*' => 'required|numeric|between:0,1000',
+                'detain_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'detain_wa_local_charges.*' => 'required|numeric',
                 'detain_wa_national_charges.*' => 'required|numeric',
                 'detain_wa_spkg.*'=>'numeric',
@@ -431,10 +464,10 @@ class AdminDashboardController extends Controller
                 'detain_tnb_charges'=>'required|numeric',
                 'detain_cash_range_up.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
                 'detain_cash_range_down.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
-                'detain_cash_charges.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
+                'detain_cash_charges.*'=>'required_if:detain_cash_handling_switch,==,on',
                 'detain_ins_range_up.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
                 'detain_ins_range_down.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
-                'detain_ins_charges.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
+                'detain_ins_charges.*'=>'required_if:detain_insurance_charges_switch,==,on',
                 'detain_return_local_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
                 'detain_return_national_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
                 'detain_fuel_surcharge'=>'required_if:detain_fuel_switch,==,on|numeric',
@@ -454,8 +487,8 @@ class AdminDashboardController extends Controller
             //sameday
         if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
             $sameday_validations = [
-                'sameday_wa_range_up.*' => 'required|numeric|between:0,99.99',
-                'sameday_wa_range_down.*' => 'required|numeric|between:0,99.99',
+                'sameday_wa_range_up.*' => 'required|numeric|between:0,1000',
+                'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'sameday_wa_local_charges.*' => 'required|numeric',
                 'sameday_wa_national_charges.*' => 'required|numeric',
                 'sameday_wa_spkg.*'=>'numeric',
@@ -463,10 +496,10 @@ class AdminDashboardController extends Controller
                 'sameday_tnb_charges'=>'required|numeric',
                 'sameday_cash_range_up.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
                 'sameday_cash_range_down.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
-                'sameday_cash_charges.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
+                'sameday_cash_charges.*'=>'required_if:sameday_cash_handling_switch,==,on',
                 'sameday_ins_range_up.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
                 'sameday_ins_range_down.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
-                'sameday_ins_charges.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
+                'sameday_ins_charges.*'=>'required_if:sameday_insurance_charges_switch,==,on',
                 'sameday_return_local_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
                 'sameday_return_national_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
                 'sameday_fuel_surcharge'=>'required_if:sameday_fuel_switch,==,on|numeric',
@@ -505,6 +538,7 @@ class AdminDashboardController extends Controller
                    'cash_handling_charges'=> ($request->has('on_cash_handling_switch'))? 1:0,
                    'insurance_charges'=> ($request->has('on_insurance_charges_switch'))? 1:0,
                    'return_charges'=> ($request->has('on_return_switch'))? 1:0,
+//                   'fuel_charges'=> ($request->has('overnight_fuel_switch'))? 1:0,
                    'fuel_charges'=> ($request->has('overnight_fuel_switch'))? 1:0,
                    'packaging_charges'=> ($request->has('on_packaging_switch'))? 1:0
                 ]);
@@ -1170,7 +1204,7 @@ class AdminDashboardController extends Controller
 
                                             if (RateStatus::where('user_id', $result->id)->exists()) {
                                                 $dropdown .= "
-                                                        <a href='".route('admin.add.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> View Rates</a>
+                                                        <a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>
                                                 ";
                                             }
                                             else {
