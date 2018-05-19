@@ -312,6 +312,10 @@ class ShipperDashboardController extends Controller
                         font-size: 0.9rem !important;
                       }
 
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
                       table.table-bordered {
                         page-break-inside: avoid;
                       }
