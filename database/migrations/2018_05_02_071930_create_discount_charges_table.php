@@ -17,7 +17,6 @@ class CreateDiscountChargesTable extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('shipping_mode_id');
-            $table->string('title');
             $table->decimal('weight',8,2)->nullable();
             $table->decimal('cash',8,2)->nullable();
             $table->decimal('insurance',8,2)->nullable();
@@ -25,7 +24,6 @@ class CreateDiscountChargesTable extends Migration
             $table->decimal('packaging',8,2)->nullable();
             $table->timestamp('to');
             $table->timestamp('from');
-            $table->integer('added_by');
             $table->timestamps();
         });
     }

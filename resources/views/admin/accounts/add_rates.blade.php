@@ -1358,19 +1358,19 @@
                                             <div class="row">
                                                 <div class="col text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_up}}" name="sameday_wa_range_up[{$index}]">
+                                                        <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_up}}" name="sameday_wa_range_up[{{$index}}]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col text-center">
 
                                                     <fieldset class="form-group">
-                                                        <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_down}}" name="sameday_wa_range_down[{$index}]">
+                                                        <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_down}}" name="sameday_wa_range_down[{{$index}}]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col text-center">
 
                                                     <div class="form-group " style="padding-top: 8px;">
-                                                        <input type="checkbox" id="SamedaySwitch{{$index}}" class="switchery weightAdditionSameday" data-color="success" data-size="sm" name="sameday_wa_switch[{$index}]"/>
+                                                        <input type="checkbox" id="SamedaySwitch{{$index}}" class="switchery weightAdditionSameday" data-color="success" data-size="sm" name="sameday_wa_switch[{{$index}}]"/>
                                                     </div>
                                                 </div>
                                                 <div class="col text-center">
@@ -1378,18 +1378,18 @@
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm form-group">
                                                             <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0" disabled data-bts-button-down-class="btn btn-success"
-                                                                   data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg[{$index}]">
+                                                                   data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg[{{$index}}]">
                                                         </div>
                                                     </fieldset>
                                                 </div>
                                                 <div class="col text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_wa_local_charges[{$index}]">
+                                                        <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->local_or_6hr}}" name="sameday_wa_local_charges[{{$index}}]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col text-center">
                                                     <fieldset class="form-group">
-                                                        <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_or_sameday}}" name="sameday_wa_national_charges[{$index}]">
+                                                        <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_or_sameday}}" name="sameday_wa_national_charges[{{$index}}]">
                                                     </fieldset>
                                                 </div>
                                                 <div class="col">

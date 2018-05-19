@@ -2,7 +2,8 @@
 
 @section('content')
     @if(!empty($shipper))
-        @if(!empty($switches))
+
+        @if(count($switches) > 0)
     <h1>Edit Rates</h1>
 
     <section>
@@ -64,7 +65,8 @@
                                             </div>
                                             @if(isset($weight[1]))
                                             @foreach($weight[1] as $index => $onweight)
-                                                <div class="row" id="on_weight_row0">
+                                                <div class="row on_weight_row" id="on_weight_row{{$index}}">
+                                                    <input type="hidden" name="on_weight_record[{{$index}}]" value="{{$onweight->id}}">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_wa_range_up[{{$index}}]">
@@ -79,14 +81,14 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="OvernightSwitch{{$index}}" class="switchery weightAdditionOvernight" data-color="success" data-size="sm" name="on_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="OvernightSwitch{{$index}}" class="switchery weightAdditionOvernight" data-color="success" data-size="sm" name="on_wa_switch[{{$index}}]" {{ ($onweight->weight_addition == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color input-sm spkg" value="{{$onweight->spkg}}" {{ ($onweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="on_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
@@ -109,7 +111,8 @@
                                                 </div>
                                             @endforeach
                                                 @else
-                                                <div class="row" id="on_weight_row0">
+                                                <div class="row on_weight_row" id="on_weight_row0">
+                                                    <input type="hidden" name="on_weight_record[0]" value="">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_up[0]">
@@ -189,9 +192,18 @@
                                             <div class="col-md-2">
                                                 <h3 class="card-title">Cash Handling Charges</h3>
                                             </div>
+                                            @php
+                                                $on_cash_sw = '';
+                                             if((isset($switches[1][0]) && $switches[1][0]->cash_handling_charges == 1)){
+                                            $on_cash_sw = '';
+                                             }else{
+                                            $on_cash_sw = 'disabled';
+                                            }
+                                            @endphp
+
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="on_cash_handling_switch"  class="switchery cashChargesOvernight" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="on_cash_handling_switch"  class="switchery cashChargesOvernight" data-color="success" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->cash_handling_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -210,21 +222,22 @@
                                         <div class="cash-handling-div-overnight slabs">
                                             @if(isset($cashHandling[1]))
                                             @foreach($cashHandling[1] as $index => $cash)
-                                                <div class="row">
+                                                <div class="row on_cash_handling_row">
+                                                    <input type="hidden" name="on_cash_record[{{$index}}]" value="{{$cash->id}}">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_cash_range_up[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$cash->range_up}}">
+                                                            <input name="on_cash_range_up[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$cash->range_up}}" {{$on_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_cash_range_down[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$cash->range_down}}">
+                                                            <input name="on_cash_range_down[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$cash->range_down}}" {{$on_cash_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_cash_charges[{{$index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}">
+                                                            <input name="on_cash_charges[{{$index}}]" type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->charges}}" {{$on_cash_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     @if($index>0)
@@ -235,7 +248,8 @@
                                                 </div>
                                             @endforeach
                                             @else
-                                                 <div class="row">
+                                                 <div class="row on_cash_handling_row">
+                                                     <input type="hidden" name="on_cash_record[0]" value="">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="on_cash_range_up[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="">
@@ -266,9 +280,17 @@
                                             <div class="col-md-2">
                                                 <h3 class="card-title">Insurance Charges</h3>
                                             </div>
+                                            @php
+                                                $on_cash_sw = '';
+                                            if((isset($switches[1][0]) && $switches[1][0]->insurance_charges == 1)){
+                                            $on_ins_sw = '';
+                                             }else{
+                                            $on_ins_sw = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="on_insurance_charges_switch" class="switchery insuranceChargesOvernight" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="on_insurance_charges_switch" class="switchery insuranceChargesOvernight" data-color="success" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->insurance_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -286,21 +308,22 @@
                                         <div class="insurance-charges-div-overnight slabs">
                                             @if(isset($insuranceCharges[1]))
                                             @foreach($insuranceCharges[1] as $index => $insurance)
-                                                <div class="row" id="on_insurance_handle_0">
+                                                <div class="row on_insurance_row" id="on_insurance_handle_0">
+                                                    <input type="hidden" name="on_insurance_record[{{$index}}]" value="{{$insurance->id}}">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_ins_range_up[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$insurance->range_up}}">
+                                                            <input name="on_ins_range_up[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$insurance->range_up}}" {{$on_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_ins_range_down[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$insurance->range_down}}">
+                                                            <input name="on_ins_range_down[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="{{$insurance->range_down}}" {{$on_ins_sw}}>
                                                         </fieldset>
                                                     </div>
 
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
-                                                            <input name="on_ins_charges[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent"  value="{{$insurance->charges}}">
+                                                            <input name="on_ins_charges[{{$index}}]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent"  value="{{$insurance->charges}}" {{$on_ins_sw}}>
                                                         </fieldset>
                                                     </div>
                                                     @if($index>0)
@@ -311,7 +334,8 @@
                                                 </div>
                                             @endforeach
                                             @else
-                                                <div class="row" id="on_insurance_handle_0">
+                                                <div class="row on_insurance_row" id="on_insurance_handle_0">
+                                                    <input type="hidden" name="on_insurance_record[0]" value="">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="on_ins_range_up[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric"  value="">
@@ -340,26 +364,34 @@
                                             <div class="col-md-2">
                                                 <h3 class="card-title">Return Charges</h3>
                                             </div>
+                                            @php
+                                                $on_return_sw = '';
+                                            if((isset($switches[1][0]) && $switches[1][0]->return_charges == 1)){
+                                            $on_return_sw = '';
+                                             }else{
+                                            $on_return_sw = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="on_return_switch" class="switchery returnChargesOvernight" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="on_return_switch" class="switchery returnChargesOvernight" data-color="success" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->return_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="row return-charges-div-overnight">
-
+                                            <input type="hidden" name="on_return_record" value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->id != '')? $returnCharges[1][0]->id : ''}}">
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{$returnCharges[1][0]->local}}">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local != '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_national_charges"  value="{{$returnCharges[1][0]->national}}">
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_national_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national != '')? $returnCharges[1][0]->national : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -369,20 +401,28 @@
                                             <div class="col-md-2">
                                                 <h3 class="card-title">Fuel Surcharge</h3>
                                             </div>
+                                            @php
+                                                $on_fuel_sw = '';
+                                            if((isset($switches[1][0]) && $switches[1][0]->fuel_charges == 1)){
+                                            $on_fuel_sw = '';
+                                             }else{
+                                            $on_fuel_sw = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="overnight_fuel_switch" class="switchery fuelSurchargeOvernight" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="overnight_fuel_switch" class="switchery fuelSurchargeOvernight" data-color="success" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->fuel_charges == 1) ? 'checked' : '') }} />
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="row fuel-surcharge-div-overnight">
-
+                                            <input type="hidden" name="on_fuel_record" value="{{ (isset($fuelCharges[1][0]) && $fuelCharges[1][0]->id != '')? $fuelCharges[1][0]->id : ''}}">
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control " name="overnight_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{$fuelCharges[1][0]->fuel_surcharge}}">
+                                                        <input type="text"  class="form-control " name="overnight_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[1][0]) && $fuelCharges[1][0]->fuel_surcharge != '')? $fuelCharges[1][0]->fuel_surcharge : ''}}" {{$on_fuel_sw}}>
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -397,37 +437,46 @@
                                             <div class="col-md-2">
                                                 <h3 class="card-title">Packaging Charges</h3>
                                             </div>
+                                            @php
+                                                $on_packaging_sw = '';
+                                            if((isset($switches[1][0]) && $switches[1][0]->packaging_charges == 1)){
+                                            $on_packaging_sw = '';
+                                             }else{
+                                            $on_packaging_sw = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="on_packaging_switch" class="switchery packagingChargesOvernight" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="on_packaging_switch" class="switchery packagingChargesOvernight" data-color="success" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->packaging_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
 
                                         <div class="row packaging-charges-div-overnight">
+                                            <input type="hidden" name="on_packaging_record" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->id != '')? $packagingCharges[1][0]->id : ''}}">
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Small Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="on_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][0]->sm_flyer}}">
+                                                    <input name="on_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->sm_flyer != '')? $packagingCharges[1][0]->sm_flyer : ''}}" {{$on_packaging_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Medium Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="on_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][0]->md_flyer}}">
+                                                    <input name="on_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->md_flyer != '')? $packagingCharges[1][0]->md_flyer : ''}}" {{$on_packaging_sw}}>
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Large Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="on_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][0]->lg_flyer}}">
+                                                    <input name="on_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->lg_flyer != '')? $packagingCharges[1][0]->lg_flyer : ''}}" {{$on_packaging_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Box</label>
                                                 <fieldset class="form-group">
-                                                    <input name="on_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[1][0]->box_flyer}}">
+                                                    <input name="on_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[1][0]) && $packagingCharges[1][0]->box_flyer != '')? $packagingCharges[1][0]->box_flyer : ''}}" {{$on_packaging_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -436,18 +485,57 @@
                                         <div class="">
                                             <h3 class="card-title">Discount Rates</h3>
                                         </div>
+                                        @php
+                                            $on_discount_id = '';
+                                            if((isset($discountCharges[1][0])) && $discountCharges[1][0]->id != ''){
+                                            $on_discount_id = $discountCharges[1][0]->id;
+                                            }
+                                                    $on_discount_title_switch = '';
+                                                        $on_discount_title = '';
+                                                    if((isset($discountCharges[1][0]) && $discountCharges[1][0]->title != '')){
+                                                    $on_discount_title = $discountCharges[1][0]->title;
+                                                     }else{
+                                                    $on_discount_title = '';
+                                                    }
+                                                    if((isset($discountCharges[1][0]->cash)) || (isset($discountCharges[1][0]->weight)) || (isset($discountCharges[1][0]->insurance)) || (isset($discountCharges[1][0]->return)) || (isset($discountCharges[1][0]->packaging))){
+                                                        $on_discount_title_switch = '';
+                                                        }else{
+                                                        $on_discount_title_switch = 'disabled';
+                                                        }
+                                        @endphp
+                                        <input type="hidden" name="on_discount_record" value="{{$on_discount_id}}">
                                         <div class="row mt-1">
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" disabled name="on_discount_title"/>
+                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$on_discount_title_switch}} name="on_discount_title" value="{{$on_discount_title}}"/>
                                                 </div>
 
                                             </div>
+                                            @php
+                                                $on_discount_daterange = '';
+                                                $on_discount_daterange_switch = '';
+                                            if((isset($discountCharges[1][0]) && $discountCharges[1][0]->to != '')){
+
+                                            $to = date('m/d/Y', strtotime($discountCharges[1][0]->to));
+                                            $from = date('m/d/Y', strtotime($discountCharges[1][0]->from));
+
+                                            $on_discount_daterange = $to.' - '.$from;
+
+                                             }else{
+                                            $on_discount_daterange = '';
+
+                                            }
+                                            if((isset($discountCharges[1][0]->cash)) || (isset($discountCharges[1][0]->weight)) || (isset($discountCharges[1][0]->insurance)) || (isset($discountCharges[1][0]->return)) || (isset($discountCharges[1][0]->packaging))){
+                                            $on_discount_daterange_switch = '';
+                                            }else{
+                                            $on_discount_daterange_switch = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col-md-6">
-                                                <label class="">Apply [to - from]</label>
+                                                <label class="">Apply [to - from]{{$on_discount_daterange}}</label>
                                                 <div class='input-group form-group'>
-                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" disabled name="on_daterange"/>
+                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" {{$on_discount_daterange_switch}} name="on_daterange" value="{{$on_discount_daterange}}"/>
                                                     <div class="input-group-append">
                                                             <span class="input-group-text">
                                                               <span class="la la-calendar"></span>
@@ -457,6 +545,20 @@
 
                                             </div>
                                         </div>
+                                        @php
+                                            $on_discount_weight_sw = '';
+                                            $on_discount_weight_switch = '';
+                                            $on_discount_weight_disable = '';
+                                        if((isset($discountCharges[1][0]) && $discountCharges[1][0]->weight != '')){
+                                        $on_discount_weight_sw = $discountCharges[1][0]->weight;
+                                        $on_discount_weight_switch = 'checked';
+                                        $on_discount_weight_disable = '';
+                                         }else{
+                                        $on_discount_weight_sw = '';
+                                        $on_discount_weight_switch = '';
+                                        $on_discount_weight_disable = 'disabled';
+                                        }
+                                        @endphp
                                         <div class="row">
                                             <div class="col text-center">
                                                 <fieldset>
@@ -466,13 +568,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox" id="" class="switchery discountSwitchesOvernight" name="on_discount_weight_switch" data-size="xs" />
+                                                                <input type="checkbox" id="" class="switchery discountSwitchesOvernight" name="on_discount_weight_switch" data-size="xs" {{$on_discount_weight_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_weight_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_weight_rate" value="{{$on_discount_weight_sw}}" {{$on_discount_weight_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $on_discount_cash_sw = '';
+                                                $on_discount_cash_switch = '';
+                                                $on_discount_cash_disable = '';
+                                            if((isset($discountCharges[1][0]) && $discountCharges[1][0]->cash != '')){
+                                            $on_discount_cash_sw = $discountCharges[1][0]->cash;
+                                            $on_discount_cash_switch = 'checked';
+                                            $on_discount_cash_disable = '';
+                                             }else{
+                                            $on_discount_cash_sw = '';
+                                            $on_discount_cash_switch = '';
+                                            $on_discount_cash_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -481,13 +597,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
-                                                                <input type="checkbox" name="on_discount_cash_switch" class="switchery discountSwitchesOvernight" data-size="xs" />
+                                                                <input type="checkbox" name="on_discount_cash_switch" class="switchery discountSwitchesOvernight" data-size="xs" {{$on_discount_cash_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_cash_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_cash_rate" value="{{$on_discount_cash_sw}}" {{$on_discount_cash_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $on_discount_insurance_sw = '';
+                                                $on_discount_insurance_switch = '';
+                                                $on_discount_insurance_disable = '';
+                                            if((isset($discountCharges[1][0]) && $discountCharges[1][0]->insurance != '')){
+                                            $on_discount_insurance_sw = $discountCharges[1][0]->insurance;
+                                            $on_discount_insurance_switch = 'checked';
+                                            $on_discount_insurance_disable = '';
+                                             }else{
+                                            $on_discount_insurance_sw = '';
+                                            $on_discount_insurance_switch = '';
+                                            $on_discount_insurance_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -496,13 +626,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
-                                                                <input type="checkbox" name="on_discount_insurance_switch" class="switchery discountSwitchesOvernight" data-size="xs" />
+                                                                <input type="checkbox" name="on_discount_insurance_switch" class="switchery discountSwitchesOvernight" data-size="xs" {{$on_discount_insurance_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_insurance_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_insurance_rate" value="{{$on_discount_insurance_sw}}" {{$on_discount_insurance_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $on_discount_return_sw = '';
+                                                $on_discount_return_switch = '';
+                                                $on_discount_return_disable = '';
+                                            if((isset($discountCharges[1][0]) && $discountCharges[1][0]->return != '')){
+                                            $on_discount_return_sw = $discountCharges[1][0]->return;
+                                            $on_discount_return_switch = 'checked';
+                                            $on_discount_return_disable = '';
+                                             }else{
+                                            $on_discount_return_sw = '';
+                                            $on_discount_return_switch = '';
+                                            $on_discount_return_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -511,14 +655,28 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_return_switch"/>
+                                                                <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_return_switch" {{$on_discount_return_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_return_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_return_rate" value="{{$on_discount_return_sw}}" {{$on_discount_return_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $on_discount_packaging_sw = '';
+                                                $on_discount_packaging_switch = '';
+                                                $on_discount_packaging_disable = '';
+                                            if((isset($discountCharges[1][0]) && $discountCharges[1][0]->packaging != '')){
+                                            $on_discount_packaging_sw = $discountCharges[1][0]->packaging;
+                                            $on_discount_packaging_switch = 'checked';
+                                            $on_discount_packaging_disable = '';
 
+                                             }else{
+                                            $on_discount_packaging_sw = '';
+                                            $on_discount_packaging_switch = '';
+                                            $on_discount_packaging_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -527,10 +685,10 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch"/>
+                                                                <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch" {{$on_discount_packaging_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_packaging_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_packaging_rate" value="{{$on_discount_packaging_sw}}" {{$on_discount_packaging_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -585,7 +743,7 @@
                                             </div>
                                             @if(isset($weight[2]))
                                             @foreach($weight[2] as $index => $olweight)
-                                                <div class="row">
+                                                <div class="row ol_weight_row">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_wa_range_up[{{$index}}]">
@@ -600,14 +758,14 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="OverlandSwitch{{$index}}" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="ol_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="OverlandSwitch{{$index}}" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="ol_wa_switch[{{$index}}]" {{ ($olweight->weight_addition == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color input-sm spkg" value="{{$olweight->spkg}}" {{ ($olweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
@@ -630,7 +788,7 @@
                                                 </div>{{--Row--}}
                                             @endforeach
                                                 @else
-                                                <div class="row">
+                                                <div class="row ol_weight_row">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_up[0]">
@@ -652,7 +810,7 @@
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color input-sm spkg" value="" disabled data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[0]" data-rule-required="true" data-msg-required="This field is required">
                                                             </div>
                                                         </fieldset>
@@ -709,7 +867,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="ol_cash_handling_switch" class="switchery cashChargesOverland" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="ol_cash_handling_switch" class="switchery cashChargesOverland" data-color="success" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->cash_handling_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -728,7 +886,7 @@
                                         <div class="cash-handling-div-overland slabs">
                                             @if(isset($cashHandling[2]))
                                             @foreach($cashHandling[2] as $index => $cash)
-                                                <div class="row" id="ol_cash_handle_0">
+                                                <div class="row ol_cash_handling_row" id="ol_cash_handle_0">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="ol_cash_range_up[{{$index}}]" type="text" class="form-control  numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_up}}">
@@ -753,7 +911,7 @@
                                                 </div>
                                             @endforeach
                                             @else
-                                                <div class="row" id="ol_cash_handle_0">
+                                                <div class="row ol_cash_handling_row" id="ol_cash_handle_0">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="ol_cash_range_up[0]" type="text" class="form-control  numeric" data-rule-required="true" data-msg-required="This field is required" value="">
@@ -785,7 +943,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="ol_insurance_charges_switch" class="switchery insuranceChargesoverland" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="ol_insurance_charges_switch" class="switchery insuranceChargesoverland" data-color="success" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->insurance_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -803,7 +961,7 @@
                                         <div class="insurance-charges-div-overland slabs">
                                             @if(isset($insuranceCharges[2]))
                                             @foreach($insuranceCharges[2] as $index => $ol_insurance)
-                                                <div class="row">
+                                                <div class="row ol_insurance_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="ol_ins_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$ol_insurance->range_up}}">
@@ -828,7 +986,7 @@
                                                 </div>
                                             @endforeach
                                             @else
-                                                <div class="row">
+                                                <div class="row ol_insurance_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="ol_ins_range_up[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
@@ -859,7 +1017,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="ol_return_switch" class="switchery returnChargesOverland" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="ol_return_switch" class="switchery returnChargesOverland" data-color="success" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->return_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -869,14 +1027,14 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$returnCharges[2][0]->local}}">
+                                                    <input type="text" class="form-control amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local != '')? $returnCharges[2][0]->local : ''}}">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="ol_return_national_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$returnCharges[2][0]->national}}">
+                                                    <input type="text" class="form-control amount" name="ol_return_national_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->national != '')? $returnCharges[2][0]->national : ''}}">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -887,7 +1045,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="overland_fuel_switch" class="switchery fuelSurchargeOverland" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="overland_fuel_switch" class="switchery fuelSurchargeOverland" data-color="success" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->fuel_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -898,7 +1056,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control " name="overland_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{$fuelCharges[2][0]->fuel_surcharge}}">
+                                                        <input type="text"  class="form-control " name="overland_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->fuel_surcharge != '')? $fuelCharges[2][0]->fuel_surcharge : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -915,7 +1073,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="ol_packaging_switch" class="switchery packagingChargesOverland" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="ol_packaging_switch" class="switchery packagingChargesOverland" data-color="success" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->packaging_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -924,26 +1082,26 @@
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Small Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="ol_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[2][0]->sm_flyer}}">
+                                                    <input name="ol_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->sm_flyer != '')? $packagingCharges[2][0]->sm_flyer : ''}}">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Medium Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="ol_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[2][0]->md_flyer}}">
+                                                    <input name="ol_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->md_flyer != '')? $packagingCharges[2][0]->md_flyer : ''}}">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Large Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="ol_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[2][0]->lg_flyer}}">
+                                                    <input name="ol_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->lg_flyer != '')? $packagingCharges[2][0]->lg_flyer : ''}}">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Box</label>
                                                 <fieldset class="form-group">
-                                                    <input name="ol_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[2][0]->box_flyer}}">
+                                                    <input name="ol_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->box_flyer != '')? $packagingCharges[2][0]->box_flyer : ''}}">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -952,18 +1110,52 @@
                                         <div class="">
                                             <h3 class="card-title">Discount Rates</h3>
                                         </div>
+                                        @php
+                                            $ol_discount_title_switch = '';
+                                                $ol_discount_title = '';
+                                            if((isset($discountCharges[2][0]) && $discountCharges[2][0]->title != '')){
+                                            $ol_discount_title = $discountCharges[2][0]->title;
+                                             }else{
+                                            $ol_discount_title = '';
+                                            }
+                                            if((isset($discountCharges[2][0]->cash)) || (isset($discountCharges[2][0]->weight)) || (isset($discountCharges[2][0]->insurance)) || (isset($discountCharges[2][0]->return)) || (isset($discountCharges[2][0]->packaging))){
+                                                $ol_discount_title_switch = '';
+                                                }else{
+                                                $ol_discount_title_switch = 'disabled';
+                                                }
+                                        @endphp
                                         <div class="row mt-1">
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" disabled name="ol_discount_title"/>
+                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$ol_discount_title_switch}} name="ol_discount_title" value="{{$ol_discount_title}}" />
                                                 </div>
 
                                             </div>
+                                            @php
+                                                $ol_discount_daterange = '';
+                                                $ol_discount_daterange_switch = '';
+                                            if((isset($discountCharges[2][0]) && $discountCharges[2][0]->daterange != '')){
+
+                                            $to = date('d/m/Y', strtotime($discountCharges[2][0]->to));
+                                            $from = date('d/m/Y', strtotime($discountCharges[2][0]->from));
+
+                                            $ol_discount_daterange = $to.' - '.$from;
+
+                                             }else{
+                                            $ol_discount_daterange = '';
+
+                                            }
+                                            if((isset($discountCharges[2][0]->cash)) || (isset($discountCharges[2][0]->weight)) || (isset($discountCharges[2][0]->insurance)) || (isset($discountCharges[2][0]->return)) || (isset($discountCharges[2][0]->packaging))){
+                                            $ol_discount_daterange_switch = '';
+                                            }else{
+                                            $ol_discount_daterange_switch = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col-md-6">
                                                 <label class="">Apply [to - from]</label>
                                                 <div class='input-group form-group'>
-                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" disabled name="ol_daterange"/>
+                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" {{$ol_discount_daterange_switch}} name="ol_daterange" {{$ol_discount_daterange_switch}} value="{{$ol_discount_daterange}}" />
                                                     <div class="input-group-append">
                                                             <span class="input-group-text">
                                                               <span class="la la-calendar"></span>
@@ -972,6 +1164,20 @@
                                                 </div>
                                             </div>
                                         </div>
+                                         @php
+                                            $ol_discount_weight_sw = '';
+                                            $ol_discount_weight_switch = '';
+                                            $ol_discount_weight_disable = '';
+                                        if((isset($discountCharges[2][0]) && $discountCharges[2][0]->weight != '')){
+                                        $ol_discount_weight_sw = $discountCharges[2][0]->weight;
+                                        $ol_discount_weight_switch = 'checked';
+                                        $ol_discount_weight_disable = '';
+                                         }else{
+                                        $ol_discount_weight_sw = '';
+                                        $ol_discount_weight_switch = '';
+                                        $ol_discount_weight_disable = 'disabled';
+                                        }
+                                        @endphp
                                         <div class="row">
                                             <div class="col text-center">
                                                 <fieldset>
@@ -981,13 +1187,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox" id="" class="switchery discountSwitchesOverland" name="ol_discount_weight_switch" data-size="xs" />
+                                                                <input type="checkbox" id="" class="switchery discountSwitchesOverland" name="ol_discount_weight_switch" data-size="xs" {{$ol_discount_weight_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_weight_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_weight_rate" {{$ol_discount_weight_disable}} value="{{$ol_discount_weight_sw}}">
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $ol_discount_cash_sw = '';
+                                                $ol_discount_cash_switch = '';
+                                                $ol_discount_cash_disable = '';
+                                            if((isset($discountCharges[2][0]) && $discountCharges[2][0]->cash != '')){
+                                            $ol_discount_cash_sw = $discountCharges[2][0]->cash;
+                                            $ol_discount_cash_switch = 'checked';
+                                            $ol_discount_cash_disable = '';
+                                             }else{
+                                            $ol_discount_cash_sw = '';
+                                            $ol_discount_cash_switch = '';
+                                            $ol_discount_cash_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -996,13 +1216,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
-                                                                <input type="checkbox" name="ol_cash_weight_switch" class="switchery discountSwitchesOverland" data-size="xs" />
+                                                                <input type="checkbox" name="ol_cash_weight_switch" class="switchery discountSwitchesOverland" data-size="xs" {{$ol_discount_cash_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_cash_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_cash_rate" {{$ol_discount_cash_disable}} value="{{$ol_discount_cash_sw}}">
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $ol_discount_insurance_sw = '';
+                                                $ol_discount_insurance_switch = '';
+                                                $ol_discount_insurance_disable = '';
+                                            if((isset($discountCharges[2][0]) && $discountCharges[2][0]->insurance != '')){
+                                            $ol_discount_insurance_sw = $discountCharges[2][0]->insurance;
+                                            $ol_discount_insurance_switch = 'checked';
+                                            $ol_discount_insurance_disable = '';
+                                             }else{
+                                            $ol_discount_insurance_sw = '';
+                                            $ol_discount_insurance_switch = '';
+                                            $ol_discount_insurance_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -1011,13 +1245,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
-                                                                <input type="checkbox" name="ol_discount_insurance_switch" class="switchery discountSwitchesOverland" data-size="xs" />
+                                                                <input type="checkbox" name="ol_discount_insurance_switch" class="switchery discountSwitchesOverland" data-size="xs" {{$ol_discount_insurance_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_insurance_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_insurance_rate" value="{{$ol_discount_insurance_sw}}" {{$ol_discount_insurance_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $ol_discount_return_sw = '';
+                                                $ol_discount_return_switch = '';
+                                                $ol_discount_return_disable = '';
+                                            if((isset($discountCharges[2][0]) && $discountCharges[2][0]->return != '')){
+                                            $ol_discount_return_sw = $discountCharges[2][0]->return;
+                                            $ol_discount_return_switch = 'checked';
+                                            $ol_discount_return_disable = '';
+                                             }else{
+                                            $ol_discount_return_sw = '';
+                                            $ol_discount_return_switch = '';
+                                            $ol_discount_return_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -1026,14 +1274,28 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="radio-addon3">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_return_switch"/>
+                                                                <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_return_switch" {{$ol_discount_return_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_return_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_return_rate" value="{{$ol_discount_return_sw}}" {{$ol_discount_return_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $ol_discount_packaging_sw = '';
+                                                $ol_discount_packaging_switch = '';
+                                                $ol_discount_packaging_disable = '';
+                                            if((isset($discountCharges[2][0]) && $discountCharges[2][0]->packaging != '')){
+                                            $ol_discount_packaging_sw = $discountCharges[2][0]->packaging;
+                                            $ol_discount_packaging_switch = 'checked';
+                                            $ol_discount_packaging_disable = '';
 
+                                             }else{
+                                            $ol_discount_packaging_sw = '';
+                                            $ol_discount_packaging_switch = '';
+                                            $ol_discount_packaging_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -1042,10 +1304,10 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="radio-addon3">
-                                                                <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch"/>
+                                                                <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch" {{$ol_discount_packaging_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_packaging_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_packaging_rate" value="{{$ol_discount_packaging_sw}}" {{$ol_discount_packaging_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1100,7 +1362,7 @@
                                             </div>
                                             @if(isset($weight[3]))
                                             @foreach($weight[3] as $index => $detweight)
-                                                <div class="row">
+                                                <div class="row det_weight_row">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->range_up}}" name="detain_wa_range_up[{{$index}}]">
@@ -1115,14 +1377,14 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="DetainSwitch{{$index}}" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[{{$index}}]"/>
+                                                            <input type="checkbox" id="DetainSwitch{{$index}}" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[{{$index}}]" {{ ($detweight->weight_addition == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color input-sm spkg" value="{{$detweight->spkg}}" {{ ($detweight->weight_addition == 1) ? '' : 'disabled' }} data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="detain_wa_spkg[{{$index}}]">
                                                             </div>
                                                         </fieldset>
@@ -1146,7 +1408,7 @@
                                                 </div>{{--Row--}}
                                             @endforeach
                                                 @else
-                                                    <div class="row">
+                                                    <div class="row det_weight_row">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_up[0]">
@@ -1226,7 +1488,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="detain_cash_handling_switch"  class="switchery cashChargesDetain" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="detain_cash_handling_switch"  class="switchery cashChargesDetain" data-color="success" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->cash_handling_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1245,7 +1507,7 @@
                                         <div class="cash-handling-div-detain slabs">
                                              @if(isset($cashHandling[3]))
                                             @foreach($cashHandling[3] as $index => $cash)
-                                                <div class="row">
+                                                <div class="row det_cash_handling_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="detain_cash_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_up}}">
@@ -1270,7 +1532,7 @@
                                                 </div>
                                             @endforeach
                                             @else
-                                                <div class="row">
+                                                <div class="row det_cash_handling_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="detain_cash_range_up[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
@@ -1302,7 +1564,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="detain_insurance_charges_switch" class="switchery insuranceChargesdetain" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="detain_insurance_charges_switch" class="switchery insuranceChargesdetain" data-color="success" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->insurance_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1320,7 +1582,7 @@
                                         <div class="insurance-charges-div-detain slabs">
                                             @if(isset($insuranceCharges[3]))
                                             @foreach($insuranceCharges[3] as $index => $det_insurance)
-                                                <div class="row">
+                                                <div class="row det_insurance_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="detain_ins_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$det_insurance->range_up}}">
@@ -1345,7 +1607,7 @@
                                                 </div>
                                             @endforeach
                                             @else
-                                                 <div class="row">
+                                                 <div class="row det_insurance_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="detain_ins_range_up[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
@@ -1376,7 +1638,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="detain_return_switch" class="switchery returnChargesDetain" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="detain_return_switch" class="switchery returnChargesDetain" data-color="success" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->return_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1386,14 +1648,14 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$returnCharges[3][0]->local}}">
+                                                    <input type="text" class="form-control amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local != '')? $returnCharges[3][0]->local : ''}}">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-2">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="detain_return_national_charges" data-rule-required="true" data-msg-required="This field is required" value="{{$returnCharges[3][0]->national}}">
+                                                    <input type="text" class="form-control amount" name="detain_return_national_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->national != '')? $returnCharges[3][0]->national : ''}}">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1405,7 +1667,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="detain_fuel_switch" class="switchery fuelSurchargeDetain" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="detain_fuel_switch" class="switchery fuelSurchargeDetain" data-color="success" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->fuel_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1416,7 +1678,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control " name="detain_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{$fuelCharges[3][0]->fuel_surcharge}}">
+                                                        <input type="text"  class="form-control " name="detain_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[3][0]) && $fuelCharges[3][0]->fuel_surcharge != '')? $fuelCharges[3][0]->fuel_surcharge : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1433,7 +1695,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="detain_packaging_switch" class="switchery packagingChargesDetain" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="detain_packaging_switch" class="switchery packagingChargesDetain" data-color="success" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->packaging_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1442,26 +1704,26 @@
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Small Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="detain_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[3][0]->sm_flyer}}">
+                                                    <input name="detain_flyer_sm" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->sm_flyer != '')? $packagingCharges[3][0]->sm_flyer : ''}}">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Medium Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="detain_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[3][0]->md_flyer}}">
+                                                    <input name="detain_flyer_md" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->md_flyer != '')? $packagingCharges[3][0]->md_flyer : ''}}">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Large Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="detain_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[3][0]->lg_flyer}}">
+                                                    <input name="detain_flyer_lg" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->lg_flyer != '')? $packagingCharges[3][0]->lg_flyer : ''}}">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Box</label>
                                                 <fieldset class="form-group">
-                                                    <input name="detain_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$packagingCharges[3][0]->box_flyer}}">
+                                                    <input name="detain_flyer_box" type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($packagingCharges[3][0]) && $packagingCharges[3][0]->box_flyer != '')? $packagingCharges[3][0]->box_flyer : ''}}">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1470,18 +1732,52 @@
                                         <div class="">
                                             <h3 class="card-title">Discount Rates</h3>
                                         </div>
+                                        @php
+                                            $det_discount_title_switch = '';
+                                            $det_discount_title = '';
+                                            if((isset($discountCharges[3][0]) && $discountCharges[3][0]->title != '')){
+                                            $det_discount_title = $discountCharges[3][0]->title;
+                                             }else{
+                                            $det_discount_title = '';
+                                            }
+                                            if((isset($discountCharges[3][0]->cash)) || (isset($discountCharges[3][0]->weight)) || (isset($discountCharges[3][0]->insurance)) || (isset($discountCharges[3][0]->return)) || (isset($discountCharges[3][0]->packaging))){
+                                                $det_discount_title_switch = '';
+                                                }else{
+                                                $det_discount_title_switch = 'disabled';
+                                                }
+                                        @endphp
                                         <div class="row mt-1">
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" disabled name="detain_discount_title"/>
+                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$det_discount_title_switch}} name="detain_discount_title" {{$det_discount_title}}/>
                                                 </div>
 
                                             </div>
+                                            @php
+                                                $det_discount_daterange = '';
+                                                $det_discount_daterange_switch = '';
+                                            if((isset($discountCharges[3][0]) && $discountCharges[3][0]->daterange != '')){
+
+                                            $to = date('d/m/Y', strtotime($discountCharges[3][0]->to));
+                                            $from = date('d/m/Y', strtotime($discountCharges[3][0]->from));
+
+                                            $det_discount_daterange = $to.' - '.$from;
+
+                                             }else{
+                                            $det_discount_daterange = '';
+
+                                            }
+                                            if((isset($discountCharges[3][0]->cash)) || (isset($discountCharges[3][0]->weight)) || (isset($discountCharges[3][0]->insurance)) || (isset($discountCharges[3][0]->return)) || (isset($discountCharges[3][0]->packaging))){
+                                            $det_discount_daterange_switch = '';
+                                            }else{
+                                            $det_discount_daterange_switch = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col-md-6">
                                                 <label class="">Apply [to - from]</label>
                                                 <div class='input-group form-group'>
-                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" name="detain_daterange" disabled/>
+                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" name="detain_daterange" value="{{$det_discount_daterange}}"  {{$det_discount_daterange_switch}}/>
                                                     <div class="input-group-append">
                                                             <span class="input-group-text">
                                                               <span class="la la-calendar"></span>
@@ -1491,6 +1787,20 @@
 
                                             </div>
                                         </div>
+                                        @php
+                                            $det_discount_weight_sw = '';
+                                            $det_discount_weight_switch = '';
+                                            $det_discount_weight_disable = '';
+                                        if((isset($discountCharges[3][0]) && $discountCharges[3][0]->weight != '')){
+                                        $det_discount_weight_sw = $discountCharges[3][0]->weight;
+                                        $det_discount_weight_switch = 'checked';
+                                        $det_discount_weight_disable = '';
+                                         }else{
+                                        $det_discount_weight_sw = '';
+                                        $det_discount_weight_switch = '';
+                                        $det_discount_weight_disable = 'disabled';
+                                        }
+                                        @endphp
                                         <div class="row">
                                             <div class="col text-center">
                                                 <fieldset>
@@ -1500,13 +1810,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox" id="" class="switchery discountSwitchesDetain" name="detain_discount_weight_switch" data-size="xs" />
+                                                                <input type="checkbox" id="" class="switchery discountSwitchesDetain" name="detain_discount_weight_switch" data-size="xs" {{$det_discount_weight_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_weight_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_weight_rate" value="{{$det_discount_weight_sw}}" {{$det_discount_weight_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $det_discount_cash_sw = '';
+                                                $det_discount_cash_switch = '';
+                                                $det_discount_cash_disable = '';
+                                            if((isset($discountCharges[3][0]) && $discountCharges[3][0]->cash != '')){
+                                            $det_discount_cash_sw = $discountCharges[3][0]->cash;
+                                            $det_discount_cash_switch = 'checked';
+                                            $det_discount_cash_disable = '';
+                                             }else{
+                                            $det_discount_cash_sw = '';
+                                            $det_discount_cash_switch = '';
+                                            $det_discount_cash_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -1515,13 +1839,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
-                                                                <input type="checkbox" name="detain_cash_weight_switch" class="switchery discountSwitchesDetain" data-size="xs" />
+                                                                <input type="checkbox" name="detain_cash_weight_switch" class="switchery discountSwitchesDetain" data-size="xs" {{$det_discount_cash_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_cash_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_cash_rate" value="{{$det_discount_cash_sw}}" {{$det_discount_cash_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $det_discount_insurance_sw = '';
+                                                $det_discount_insurance_switch = '';
+                                                $det_discount_insurance_disable = '';
+                                            if((isset($discountCharges[3][0]) && $discountCharges[3][0]->insurance != '')){
+                                            $det_discount_insurance_sw = $discountCharges[3][0]->insurance;
+                                            $det_discount_insurance_switch = 'checked';
+                                            $det_discount_insurance_disable = '';
+                                             }else{
+                                            $det_discount_insurance_sw = '';
+                                            $det_discount_insurance_switch = '';
+                                            $det_discount_insurance_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -1530,13 +1868,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
-                                                                <input type="checkbox" name="detain_discount_insurance_switch" class="switchery discountSwitchesDetain" data-size="xs" />
+                                                                <input type="checkbox" name="detain_discount_insurance_switch" class="switchery discountSwitchesDetain" data-size="xs" {{$det_discount_insurance_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_insurance_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_insurance_rate" value="{{$det_discount_insurance_sw}}" {{$det_discount_insurance_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $det_discount_return_sw = '';
+                                                $det_discount_return_switch = '';
+                                                $det_discount_return_disable = '';
+                                            if((isset($discountCharges[3][0]) && $discountCharges[3][0]->return != '')){
+                                            $det_discount_return_sw = $discountCharges[3][0]->return;
+                                            $det_discount_return_switch = 'checked';
+                                            $det_discount_return_disable = '';
+                                             }else{
+                                            $det_discount_return_sw = '';
+                                            $det_discount_return_switch = '';
+                                            $det_discount_return_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -1545,14 +1897,28 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_return_switch"/>
+                                                                <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_return_switch" {{$det_discount_return_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_return_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_return_rate" value="{{$det_discount_return_sw}}" {{$det_discount_return_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $det_discount_packaging_sw = '';
+                                                $det_discount_packaging_switch = '';
+                                                $det_discount_packaging_disable = '';
+                                            if((isset($discountCharges[3][0]) && $discountCharges[3][0]->packaging != '')){
+                                            $det_discount_packaging_sw = $discountCharges[3][0]->packaging;
+                                            $det_discount_packaging_switch = 'checked';
+                                            $det_discount_packaging_disable = '';
 
+                                             }else{
+                                            $det_discount_packaging_sw = '';
+                                            $det_discount_packaging_switch = '';
+                                            $det_discount_packaging_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -1561,10 +1927,10 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch"/>
+                                                                <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch" {{$det_discount_packaging_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_packaging_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_packaging_rate" value="{{$det_discount_packaging_sw}}" {{$det_discount_packaging_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1620,7 +1986,7 @@
                                             </div>
                                             @if(isset($weight[4]))
                                             @foreach($weight[4] as $index => $sameweight)
-                                                <div class="row">
+                                                <div class="row same_weight_row">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->range_up}}" name="sameday_wa_range_up[{$index}]">
@@ -1635,14 +2001,14 @@
                                                     <div class="col text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="SamedaySwitch{{$index}}" class="switchery weightAdditionSameday" data-color="success" data-size="sm" name="sameday_wa_switch[{$index}]"/>
+                                                            <input type="checkbox" id="SamedaySwitch{{$index}}" class="switchery weightAdditionSameday" data-color="success" data-size="sm" name="sameday_wa_switch[{$index}]" {{ ($sameweight->weight_addition == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
                                                     <div class="col text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0" disabled data-bts-button-down-class="btn btn-success"
+                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->spkg}}" {{ ($sameweight->weight_addition == 1) ? 'checked' : '' }} data-bts-button-down-class="btn btn-success"
                                                                        data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg[{$index}]">
                                                             </div>
                                                         </fieldset>
@@ -1665,7 +2031,7 @@
                                                 </div>{{--Row--}}
                                             @endforeach
                                                 @else
-                                                <div class="row">
+                                                <div class="row same_weight_row">
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up[]">
@@ -1744,7 +2110,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="sameday_cash_handling_switch"  class="switchery cashChargesSameday" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="sameday_cash_handling_switch"  class="switchery cashChargesSameday" data-color="success" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->cash_handling_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1763,7 +2129,7 @@
                                         <div class="cash-handling-div-sameday slabs">
                                             @if(isset($cashHandling[4]))
                                             @foreach($cashHandling[4] as $index => $cash)
-                                                <div class="row">
+                                                <div class="row same_cash_handling_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="sameday_cash_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$cash->range_up}}">
@@ -1788,7 +2154,7 @@
                                                 </div>
                                             @endforeach
                                             @else
-                                                <div class="row">
+                                                <div class="row same_cash_handling_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="sameday_cash_range_up[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
@@ -1820,7 +2186,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="sameday_insurance_charges_switch" class="switchery insuranceChargessameday" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="sameday_insurance_charges_switch" class="switchery insuranceChargessameday" data-color="success" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->insurance_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1836,9 +2202,9 @@
                                             </div>
                                         </div>
                                         <div class="insurance-charges-div-sameday slabs">
-                                            @if($insuranceCharges[4])
+                                            @if(isset($insuranceCharges[4]))
                                             @foreach($insuranceCharges[4] as $index => $same_insurance)
-                                                <div class="row">
+                                                <div class="row same_insurance_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="sameday_ins_range_up[{{$index}}]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="{{$same_insurance->range_up}}">
@@ -1863,7 +2229,7 @@
                                                 </div>
                                             @endforeach
                                             @else
-                                                <div class="row">
+                                                <div class="row same_insurance_row">
                                                     <div class="col-md-2 text-center">
                                                         <fieldset class="form-group">
                                                             <input name="sameday_ins_range_up[0]" type="text" class="form-control numeric" data-rule-required="true" data-msg-required="This field is required" value="">
@@ -1894,7 +2260,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="sameday_return_switch" class="switchery returnChargesSameday" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="sameday_return_switch" class="switchery returnChargesSameday" data-color="success" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->return_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1904,14 +2270,14 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text"  class="form-control amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{$returnCharges[4][0]->local}}">
+                                                    <input type="text"  class="form-control amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local != '')? $returnCharges[4][0]->local : ''}}">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text"  class="form-control amount" name="sameday_return_national_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{$returnCharges[4][0]->national}}">
+                                                    <input type="text"  class="form-control amount" name="sameday_return_national_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->national != '')? $returnCharges[4][0]->national : ''}}">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1923,7 +2289,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="sameday_fuel_switch" class="switchery fuelSurchargeSameday" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="sameday_fuel_switch" class="switchery fuelSurchargeSameday" data-color="success" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->fuel_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1934,7 +2300,7 @@
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
                                                     <div class="input-group form-group">
-                                                        <input type="text"  class="form-control " name="sameday_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{$fuelCharges[4][0]->fuel_surcharge}}">
+                                                        <input type="text"  class="form-control " name="sameday_fuel_surcharge" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($fuelCharges[4][0]) && $fuelCharges[4][0]->fuel_surcharge != '')? $fuelCharges[4][0]->fuel_surcharge : ''}}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -1951,7 +2317,7 @@
                                             </div>
                                             <div class="col-md-2">
                                                 <div class="form-group ">
-                                                    <input type="checkbox" name="sameday_packaging_switch" class="switchery packagingChargesSameday" data-color="success" data-size="sm" checked/>
+                                                    <input type="checkbox" name="sameday_packaging_switch" class="switchery packagingChargesSameday" data-color="success" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->packaging_charges == 1) ? 'checked' : '') }}/>
                                                 </div>
                                             </div>
                                         </div>
@@ -1960,26 +2326,26 @@
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Small Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="sameday_flyer_sm" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{$packagingCharges[4][0]->sm_flyer}}">
+                                                    <input name="sameday_flyer_sm" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->sm_flyer != '')? $packagingCharges[4][0]->sm_flyer : ''}}">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Medium Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="sameday_flyer_md" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{$packagingCharges[4][0]->md_flyer}}">
+                                                    <input name="sameday_flyer_md" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->md_flyer != '')? $packagingCharges[4][0]->md_flyer : ''}}">
                                                 </fieldset>
                                             </div>
 
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Large Flyer</label>
                                                 <fieldset class="form-group">
-                                                    <input name="sameday_flyer_lg" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{$packagingCharges[4][0]->lg_flyer}}">
+                                                    <input name="sameday_flyer_lg" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->lg_flyer != '')? $packagingCharges[4][0]->lg_flyer : ''}}">
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Box</label>
                                                 <fieldset class="form-group">
-                                                    <input name="sameday_flyer_box" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{$packagingCharges[4][0]->box_flyer}}">
+                                                    <input name="sameday_flyer_box" type="text" class="form-control amount"  data-rule-required="true" data-msg-required="This field is required"  value="{{ (isset($packagingCharges[4][0]) && $packagingCharges[4][0]->box_flyer != '')? $packagingCharges[4][0]->box_flyer : ''}}">
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1988,18 +2354,52 @@
                                         <div class="">
                                             <h3 class="card-title">Discount Rates</h3>
                                         </div>
+                                        @php
+                                            $same_discount_title_switch = '';
+                                                $same_discount_title = '';
+                                            if((isset($discountCharges[4][0]) && $discountCharges[4][0]->title != '')){
+                                            $same_discount_title = $discountCharges[4][0]->title;
+                                             }else{
+                                            $same_discount_title = '';
+                                            }
+                                            if((isset($discountCharges[4][0]->cash)) || (isset($discountCharges[4][0]->weight)) || (isset($discountCharges[4][0]->insurance)) || (isset($discountCharges[4][0]->return)) || (isset($discountCharges[4][0]->packaging))){
+                                                $same_discount_title_switch = '';
+                                                }else{
+                                                $same_discount_title_switch = 'disabled';
+                                                }
+                                        @endphp
                                         <div class="row mt-1">
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" disabled name="sameday_discount_title"/>
+                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required"  name="sameday_discount_title" value="{{$same_discount_title}}" {{$same_discount_title_switch}}/>
                                                 </div>
 
                                             </div>
+                                            @php
+                                                $same_discount_daterange = '';
+                                                $same_discount_daterange_switch = '';
+                                            if((isset($discountCharges[4][0]) && $discountCharges[4][0]->daterange != '')){
+
+                                            $to = date('d/m/Y', strtotime($discountCharges[4][0]->to));
+                                            $from = date('d/m/Y', strtotime($discountCharges[4][0]->from));
+
+                                            $same_discount_daterange = $to.' - '.$from;
+
+                                             }else{
+                                            $same_discount_daterange = '';
+
+                                            }
+                                            if((isset($discountCharges[4][0]->cash)) || (isset($discountCharges[4][0]->weight)) || (isset($discountCharges[4][0]->insurance)) || (isset($discountCharges[4][0]->return)) || (isset($discountCharges[4][0]->packaging))){
+                                            $same_discount_daterange_switch = '';
+                                            }else{
+                                            $same_discount_daterange_switch = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col-md-6">
                                                 <label class="">Apply [to - from]</label>
                                                 <div class='input-group form-group'>
-                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" disabled name="sameday_daterange"/>
+                                                    <input type='text' class="form-control daterange" data-rule-required="true" data-msg-required="This field is required" {{$same_discount_daterange_switch}} name="sameday_daterange" value="{{$same_discount_daterange}}"/>
                                                     <div class="input-group-append">
                                                             <span class="input-group-text">
                                                               <span class="la la-calendar"></span>
@@ -2008,6 +2408,20 @@
                                                 </div>
                                             </div>
                                         </div>
+                                        @php
+                                            $same_discount_weight_sw = '';
+                                            $same_discount_weight_switch = '';
+                                            $same_discount_weight_disable = '';
+                                        if((isset($discountCharges[4][0]) && $discountCharges[4][0]->weight != '')){
+                                        $same_discount_weight_sw = $discountCharges[4][0]->weight;
+                                        $same_discount_weight_switch = 'checked';
+                                        $same_discount_weight_disable = '';
+                                         }else{
+                                        $same_discount_weight_sw = '';
+                                        $same_discount_weight_switch = '';
+                                        $same_discount_weight_disable = 'disabled';
+                                        }
+                                        @endphp
                                         <div class="row">
                                             <div class="col text-center">
                                                 <fieldset>
@@ -2017,13 +2431,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox" id="" class="switchery discountSwitchesSameday" name="sameday_discount_weight_switch" data-size="xs" />
+                                                                <input type="checkbox" id="" class="switchery discountSwitchesSameday" name="sameday_discount_weight_switch" data-size="xs" {{$same_discount_weight_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_weight_rate" disabled>
+                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_weight_rate" {{$same_discount_weight_disable}} value="{{$same_discount_weight_sw}}">
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $same_discount_cash_sw = '';
+                                                $same_discount_cash_switch = '';
+                                                $same_discount_cash_disable = '';
+                                            if((isset($discountCharges[4][0]) && $discountCharges[4][0]->cash != '')){
+                                            $same_discount_cash_sw = $discountCharges[4][0]->cash;
+                                            $same_discount_cash_switch = 'checked';
+                                            $same_discount_cash_disable = '';
+                                             }else{
+                                            $same_discount_cash_sw = '';
+                                            $same_discount_cash_switch = '';
+                                            $same_discount_cash_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -2032,13 +2460,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
-                                                                <input type="checkbox" name="sameday_cash_weight_switch" class="switchery discountSwitchesSameday" data-size="xs" />
+                                                                <input type="checkbox" name="sameday_cash_weight_switch" class="switchery discountSwitchesSameday" data-size="xs" {{$same_discount_cash_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_cash_rate" disabled>
+                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_cash_rate" value="{{$same_discount_cash_sw}}" {{$same_discount_cash_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $same_discount_insurance_sw = '';
+                                                $same_discount_insurance_switch = '';
+                                                $same_discount_insurance_disable = '';
+                                            if((isset($discountCharges[4][0]) && $discountCharges[4][0]->insurance != '')){
+                                            $same_discount_insurance_sw = $discountCharges[4][0]->insurance;
+                                            $same_discount_insurance_switch = 'checked';
+                                            $same_discount_insurance_disable = '';
+                                             }else{
+                                            $same_discount_insurance_sw = '';
+                                            $same_discount_insurance_switch = '';
+                                            $same_discount_insurance_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -2047,13 +2489,27 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text" id="">
-                                                                <input type="checkbox" name="sameday_discount_insurance_switch" class="switchery discountSwitchesSameday" data-size="xs" />
+                                                                <input type="checkbox" name="sameday_discount_insurance_switch" class="switchery discountSwitchesSameday" data-size="xs" {{$same_discount_insurance_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_insurance_rate" disabled>
+                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_insurance_rate" value="{{$same_discount_insurance_sw}}" {{$same_discount_insurance_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $same_discount_return_sw = '';
+                                                $same_discount_return_switch = '';
+                                                $same_discount_return_disable = '';
+                                            if((isset($discountCharges[4][0]) && $discountCharges[4][0]->return != '')){
+                                            $same_discount_return_sw = $discountCharges[4][0]->return;
+                                            $same_discount_return_switch = 'checked';
+                                            $same_discount_return_disable = '';
+                                             }else{
+                                            $same_discount_return_sw = '';
+                                            $same_discount_return_switch = '';
+                                            $same_discount_return_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -2062,14 +2518,28 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_return_switch"/>
+                                                                <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_return_switch" {{$same_discount_return_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_return_rate" disabled>
+                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_return_rate" value="{{$same_discount_return_sw}}" {{$same_discount_return_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
+                                            @php
+                                                $same_discount_packaging_sw = '';
+                                                $same_discount_packaging_switch = '';
+                                                $same_discount_packaging_disable = '';
+                                            if((isset($discountCharges[4][0]) && $discountCharges[4][0]->packaging != '')){
+                                            $same_discount_packaging_sw = $discountCharges[4][0]->packaging;
+                                            $same_discount_packaging_switch = 'checked';
+                                            $same_discount_packaging_disable = '';
 
+                                             }else{
+                                            $same_discount_packaging_sw = '';
+                                            $same_discount_packaging_switch = '';
+                                            $same_discount_packaging_disable = 'disabled';
+                                            }
+                                            @endphp
                                             <div class="col text-center">
                                                 <fieldset>
                                                     <div class="input-group input-group-sm form-group">
@@ -2078,10 +2548,10 @@
                                                         </div>
                                                         <div class="input-group-prepend">
                                                               <span class="input-group-text">
-                                                                <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch"/>
+                                                                <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch" {{$same_discount_packaging_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" disabled>
+                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" value="{{$same_discount_packaging_sw}}" {{$same_discount_packaging_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -2229,11 +2699,10 @@
         $('body').on('click','.on_weight_close',function () {
             $(this).parent().parent().remove();
         });
-        var count = 3;
+        var count = $('.on_weight_row').length;
         $('body').on('click','#waddition_btn',function () {
-            // let htmdiv = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'range_up\']"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'range_down\']"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa[][\'switch\']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa[][\'spkg\']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'local_charges\']"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'national_charges\']"></fieldset></div></div>';
-
-            let htmdiv = '<div class="row" id="on_weight_row'+count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_up['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_down['+count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa_switch['+count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa_spkg['+count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="on_wa_national_charges['+count+']"></fieldset></div><div class="col">\n' +
+            
+            let htmdiv = '<div class="row on_weight_row" id="on_weight_row'+count+'"><input type="hidden" name="on_weight_record['+count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_up['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_down['+count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa_switch['+count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa_spkg['+count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="on_wa_national_charges['+count+']"></fieldset></div><div class="col">\n' +
                 '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-overnight').append(htmdiv);
             var switches = document.querySelector('.switchery.weightAdditionOvernight'+count);
@@ -2271,9 +2740,9 @@
 
 
         //addMoreSlabs
-        var on_slab_count = 5;
+        var on_slab_count = $('.row.on_cash_handling_row').length;
         $('body').on('click','#addMoreSlabs',function () {
-            let htmdiv = '<div class="row" id="on_insurance_handle_'+on_slab_count+'">\n' +
+            let htmdiv = '<div class="row" id="on_insurance_handle_'+on_slab_count+'"><input type="hidden" name="on_cash_record['+on_slab_count+']" value="">\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <input name="on_cash_range_up['+on_slab_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric validated" >\n' +
@@ -2301,9 +2770,9 @@
             on_slab_count++;
         });
         //add more slabs insurance
-        var on_ins_count = 3;
+        var on_ins_count = $('.row.on_insurance_row').length;
         $('body').on('click','#addMoreSlabsInsurance',function () {
-            let htmdiv = '<div class="row" id="on_insurance_charge_'+on_ins_count+'">\n' +
+            let htmdiv = '<div class="row" id="on_insurance_charge_'+on_ins_count+'"><input type="hidden" name="on_insurance_record['+on_ins_count+']" value="">\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <input name="on_ins_range_up['+on_ins_count+']" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control numeric validated">\n' +
@@ -2419,11 +2888,10 @@
         //Overland
 
 
-        var overland_count = 1;
+        var overland_count = $('.ol_weight_row').length;
         $('body').on('click','#overland_weightadd',function () {
 
-            // let htmdiv1 = '<div class="row" id="ol_weight_row'+overland_count+'"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOverland'+overland_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+overland_count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+overland_count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_national_charges[]"></fieldset></div></div>';
-            let htmdiv1 = '<div class="row" id="ol_weight_row'+overland_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_up['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_down['+overland_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOverland'+overland_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+overland_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+overland_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_local_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_wa_national_charges['+overland_count+']"></fieldset></div><div class="col">\n' +
+            let htmdiv1 = '<div class="row ol_weight_row" id="ol_weight_row'+overland_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_up['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_down['+overland_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOverland'+overland_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+overland_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+overland_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_local_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_wa_national_charges['+overland_count+']"></fieldset></div><div class="col">\n' +
                 '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 ol_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-overland').append(htmdiv1);
             var ol_weight_switches = document.querySelector('.switchery.weightAdditionOverland'+overland_count);
@@ -2458,15 +2926,15 @@
         });
 
         //addMoreSlabs
-        $('body').on('click','#ol_weight_close',function () {
+        $('body').on('click','.ol_weight_close',function () {
             $(this).parent().parent().remove();
         });
         $('body').on('click','.ol_row_delete',function () {
             $(this).parent().parent().remove();
         });
-        var ol_slab_count = 5;
+        var ol_slab_count = $('.row.ol_cash_handling_row').length;
         $('body').on('click','#overlandaddMoreSlabs',function () {
-            let htmdiv = '<div class="row" id="ol_cash_handle_'+ol_slab_count+'">\n' +
+            let htmdiv = '<div class="row ol_cash_handling_row" id="ol_cash_handle_'+ol_slab_count+'">\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <input name="ol_cash_range_up['+ol_slab_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
@@ -2492,9 +2960,9 @@
 
         });
         //add more slabs insurance
-        var ol_ins_count = 3;
+        var ol_ins_count = $('.row.ol_insurance_row').length;
         $('body').on('click','#oladdMoreSlabsInsurance',function () {
-            let htmdiv = '<div class="row" id="ol_insurance_charge_'+ol_ins_count+'">\n' +
+            let htmdiv = '<div class="row ol_insurance_row" id="ol_insurance_charge_'+ol_ins_count+'">\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <input name="ol_ins_range_up['+ol_ins_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
@@ -2599,11 +3067,10 @@
         //detain
 
 
-        var detain_count = 1;
+        var detain_count = $('.det_weight_row').length;
         $('body').on('click','#detain_weightadd',function () {
 
-            // let htmdiv1 = '<div class="row" id="ol_weight_row'+detain_count+'"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+detain_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+detain_count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+detain_count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_national_charges[]"></fieldset></div></div>';
-            let htmdiv1 = '<div class="row" id="detain_weight_row'+detain_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_up['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_down['+detain_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+detain_count+'" data-color="success" data-size="sm" name="detain_wa_switch['+detain_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="detain_wa_spkg['+detain_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_local_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_wa_national_charges['+detain_count+']"></fieldset></div><div class="col">\n' +
+            let htmdiv1 = '<div class="row det_weight_row" id="detain_weight_row'+detain_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_up['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_down['+detain_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+detain_count+'" data-color="success" data-size="sm" name="detain_wa_switch['+detain_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="detain_wa_spkg['+detain_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_local_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_wa_national_charges['+detain_count+']"></fieldset></div><div class="col">\n' +
                 '<span id="detain_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-detain').append(htmdiv1);
             var detain_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+detain_count);
@@ -2644,9 +3111,9 @@
         $('body').on('click','.detain_row_delete',function () {
             $(this).parent().parent().remove();
         });
-        var detain_slab_count = 5;
+        var detain_slab_count = $('.row.det_cash_handling_row').length;
         $('body').on('click','#detainaddMoreSlabs',function () {
-            let htmdiv = '<div class="row" id="detain_cash_handle_'+detain_slab_count+'">\n' +
+            let htmdiv = '<div class="row det_cash_handling_row" id="detain_cash_handle_'+detain_slab_count+'">\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <input name="detain_cash_range_up['+detain_slab_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
@@ -2672,9 +3139,9 @@
 
         });
         //add more slabs insurance
-        var detain_ins_count = 3;
+        var detain_ins_count = $('.row.det_insurance_row').length;
         $('body').on('click','#detainaddMoreSlabsInsurance',function () {
-            let htmdiv = '<div class="row" id="detain_insurance_charge_'+detain_ins_count+'">\n' +
+            let htmdiv = '<div class="row det_insurance_row" id="detain_insurance_charge_'+detain_ins_count+'">\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <input name="detain_ins_range_up['+detain_ins_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
@@ -2780,11 +3247,9 @@
         //detain
 
 
-        var sameday_count = 3;
+        var sameday_count = $('.same_weight_row').length;
         $('body').on('click','#sameday_weightadd',function () {
-
-            // let htmdiv1 = '<div class="row" id="ol_weight_row'+sameday_count+'"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+sameday_count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_national_charges[]"></fieldset></div></div>';
-            let htmdiv1 = '<div class="row" id="sameday_weight_row'+sameday_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_down['+sameday_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch['+sameday_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_wa_national_charges['+sameday_count+']"></fieldset></div><div class="col">\n' +
+            let htmdiv1 = '<div class="row same_weight_row" id="sameday_weight_row'+sameday_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_down['+sameday_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch['+sameday_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_wa_national_charges['+sameday_count+']"></fieldset></div><div class="col">\n' +
                 '<span id="sameday_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-sameday').append(htmdiv1);
             var sameday_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+sameday_count);
@@ -2825,9 +3290,9 @@
         $('body').on('click','.sameday_row_delete',function () {
             $(this).parent().parent().remove();
         });
-        var sameday_slab_count = 5;
+        var sameday_slab_count = $('.row.same_cash_handling_row').length;
         $('body').on('click','#samedayaddMoreSlabs',function () {
-            let htmdiv = '<div class="row" id="sameday_cash_handle_'+sameday_slab_count+'">\n' +
+            let htmdiv = '<div class="row same_cash_handling_row" id="sameday_cash_handle_'+sameday_slab_count+'">\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <input name="sameday_cash_range_up['+sameday_slab_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +
@@ -2853,9 +3318,9 @@
 
         });
         //add more slabs insurance
-        var sameday_ins_count = 3;
+        var sameday_ins_count = $('.row.same_insurance_row').length;
         $('body').on('click','#samedayaddMoreSlabsInsurance',function () {
-            let htmdiv = '<div class="row" id="sameday_insurance_charge_'+sameday_ins_count+'">\n' +
+            let htmdiv = '<div class="row same_insurance_row" id="sameday_insurance_charge_'+sameday_ins_count+'">\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
                 '                                                        <input name="sameday_ins_range_up['+sameday_ins_count+']" type="text" class="form-control numeric validated" data-rule-required="true" data-msg-required="This field is required">\n' +

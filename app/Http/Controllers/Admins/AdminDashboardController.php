@@ -24,7 +24,7 @@ use App\Http\Models\ReturnCharge;
 use App\Http\Models\DiscountCharge;
 use App\Http\Models\RateStatus;
 //standard rates
-
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 use Illuminate\Database\Eloquent\Collection;
@@ -122,6 +122,7 @@ class AdminDashboardController extends Controller
     public function addRatesView($id){
         $user = User::find($id);
         $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
+//        return $weight;
 
         $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
         $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
@@ -129,25 +130,332 @@ class AdminDashboardController extends Controller
         $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
         $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
         $packaging = StandardPackagingCharge::all()->groupBy('shipping_mode_id');
-//        return $weight[2];
         return view('admin.accounts.add_rates')->with(['shipper'=>$user,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging]);
     }
 
     public function editRatesView($id){
         $user = User::find($id);
         $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
-//        return $switches[1][0]->status;
+//        return $switches;
+//        var_dump(empty($switches));exit();
         $weight = WeightCharge::all()->groupBy('shipping_mode_id');
 //        $cash = '';
         $bookingType = BookingTypeCharges::all()->groupBy('shipping_mode_id');
-        $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
-        $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
-        $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
-        $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-        $packaging = StandardPackagingCharge::all()->groupBy('shipping_mode_id');
-//        return $weight[2];
-        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging]);
+        $cash = CashHandlingCharge::all()->groupBy('shipping_mode_id');
+        $insurance = InsuranceCharge::all()->groupBy('shipping_mode_id');
+        $return = ReturnCharge::all()->groupBy('shipping_mode_id');
+        $fuel = FuelSurcharge::all()->groupBy('shipping_mode_id');
+        $packaging = PackagingCharge::all()->groupBy('shipping_mode_id');
+        $discount = DiscountCharge::all()->groupBy('shipping_mode_id');
+//        return $discount;
+        return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount]);
 
+    }
+    public function editRates(Request $request, $id){
+//        return $request;
+
+
+
+        RateStatus::where(['user_id'=>$id,'shipping_mode_id'=>1])
+            ->update([
+                'user_id'=>$id,
+                'shipping_mode_id'=>1,
+                'status'=> ($request->has('on_main_switch'))? 1:0,
+                'cash_handling_charges'=> ($request->has('on_cash_handling_switch'))? 1:0,
+                'insurance_charges'=> ($request->has('on_insurance_charges_switch'))? 1:0,
+                'return_charges'=> ($request->has('on_return_switch'))? 1:0,
+                'fuel_charges'=> ($request->has('overnight_fuel_switch'))? 1:0,
+                'packaging_charges'=> ($request->has('on_packaging_switch'))? 1:0
+            ]);
+        RateStatus::where(['user_id'=>$id,'shipping_mode_id'=>2])
+            ->update([
+                'user_id'=>$id,
+                'shipping_mode_id'=>2,
+                'status'=> ($request->has('ol_main_switch'))? 1:0,
+                'cash_handling_charges'=> ($request->has('ol_cash_handling_switch'))? 1:0,
+                'insurance_charges'=> ($request->has('ol_insurance_charges_switch'))? 1:0,
+                'return_charges'=> ($request->has('ol_return_switch'))? 1:0,
+                'fuel_charges'=> ($request->has('overland_fuel_switch'))? 1:0,
+                'packaging_charges'=> ($request->has('ol_packaging_switch'))? 1:0
+            ]);
+        RateStatus::where(['user_id'=>$id,'shipping_mode_id'=>3])
+            ->update([
+                'user_id'=>$id,
+                'shipping_mode_id'=>3,
+                'status'=> ($request->has('detain_main_switch'))? 1:0,
+                'cash_handling_charges'=> ($request->has('detain_cash_handling_switch'))? 1:0,
+                'insurance_charges'=> ($request->has('detain_insurance_charges_switch'))? 1:0,
+                'return_charges'=> ($request->has('detain_return_switch'))? 1:0,
+                'fuel_charges'=> ($request->has('detain_fuel_switch'))? 1:0,
+                'packaging_charges'=> ($request->has('detain_packaging_switch'))? 1:0
+            ]);
+        RateStatus::where(['user_id'=>$id,'shipping_mode_id'=>4])
+            ->update([
+                'user_id'=>$id,
+                'shipping_mode_id'=>4,
+                'status'=> ($request->has('sameday_main_switch'))? 1:0,
+                'cash_handling_charges'=> ($request->has('sameday_cash_handling_switch'))? 1:0,
+                'insurance_charges'=> ($request->has('sameday_insurance_charges_switch'))? 1:0,
+                'return_charges'=> ($request->has('sameday_return_switch'))? 1:0,
+                'fuel_charges'=> ($request->has('sameday_fuel_switch'))? 1:0,
+                'packaging_charges'=> ($request->has('sameday_packaging_switch'))? 1:0
+            ]);
+
+
+        if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
+            $ONRateAlready = RateStatus::where(['user_id'=>$id,'shipping_mode_id'=>1])->get();
+    //return $ONRateAlready;
+            if(!$ONRateAlready->isEmpty()) {
+
+                $wa_switch = array();
+                $wa_spkg = array();
+                WeightCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->whereNotIn('id', $request->on_weight_record)->delete();
+                foreach ($request->on_weight_record as $index => $on_weight_record) {
+                    if($request->has('on_wa_switch')) {
+                        if (array_key_exists($index, $request->on_wa_switch)) {
+                            $wa_switch[$index] = 1;
+                        } else {
+                            $wa_switch[$index] = 0;
+                        };
+                    }else{
+                        $wa_switch[$index] = 0;
+                    }
+                    if($request->has('on_wa_spkg')) {
+                        if (array_key_exists($index, $request->on_wa_spkg)) {
+                            $wa_spkg[$index] = $request->on_wa_spkg[$index];
+                        } else {
+                            $wa_spkg[$index] = 0;
+                        };
+                    }else{
+                        $wa_spkg[$index] = 0;
+                    }
+                    if($request->on_weight_record[$index] != null){
+
+                        $weight_row = WeightCharge::where('id',$request->on_weight_record[$index])
+                            ->update([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'range_up' => $request->on_wa_range_up[$index],
+                        'range_down' => $request->on_wa_range_down[$index],
+                        'weight_addition' => $wa_switch[$index],
+                        'spkg' => $wa_spkg[$index],
+                        'local_or_6hr' => $request->on_wa_local_charges[$index],
+                        'national_or_sameday' => $request->on_wa_national_charges[$index]
+                    ]);
+                    }
+                    if($request->on_weight_record[$index] == null){
+                        WeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'range_up' => $request->on_wa_range_up[$index],
+                        'range_down' => $request->on_wa_range_down[$index],
+                        'weight_addition' => $wa_switch[$index],
+                        'spkg' => $wa_spkg[$index],
+                        'local_or_6hr' => $request->on_wa_local_charges[$index],
+                        'national_or_sameday' => $request->on_wa_national_charges[$index]
+                    ]);
+                    }
+
+
+                }
+
+                //Replacement and Try and Buy charges
+                BookingTypeCharges::where(['user_id'=>$id,'shipping_mode_id'=>1])->update([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>1,
+                    'replacement_charges'=>$request->on_replacement_charges,
+                    'try_and_buy_charges'=>$request->on_tnb_charges
+                ]);
+
+                //Cash handling Charges
+                if($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on'){
+                    CashHandlingCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->whereNotIn('id', $request->on_cash_record)->delete();
+
+                    foreach ($request->on_cash_record as $index => $on_cash_record){
+                        if($request->on_cash_record[$index] != null){
+                        CashHandlingCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->update([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>1,
+                            'range_up'=> $request->on_cash_range_up[$index],
+                            'range_down'=> $request->on_cash_range_down[$index],
+                            'charges'=> $request->on_cash_charges[$index]
+                        ]);
+                        }
+                        if($request->on_cash_record[$index] == null){
+                            CashHandlingCharge::create([
+                                'user_id'=>$id,
+                                'shipping_mode_id'=>1,
+                                'range_up'=> $request->on_cash_range_up[$index],
+                                'range_down'=> $request->on_cash_range_down[$index],
+                                'charges'=> $request->on_cash_charges[$index]
+                            ]);
+                        }
+                    }
+                }
+                //insurance charges
+                if($request->has('on_insurance_charges_switch') && $request->on_insurance_charges_switch == 'on'){
+                    InsuranceCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->whereNotIn('id', $request->on_insurance_record)->delete();
+                    foreach ($request->on_insurance_record as $insurance => $on_insurance_record){
+                        if($request->on_insurance_record[$insurance] != null) {
+                            InsuranceCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'range_up' => $request->on_ins_range_up[$insurance],
+                                'range_down' => $request->on_ins_range_down[$insurance],
+                                'charges' => $request->on_ins_charges[$insurance]
+                            ]);
+                        }
+                        if($request->on_insurance_record[$insurance] == null){
+                            InsuranceCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'range_up' => $request->on_ins_range_up[$insurance],
+                                'range_down' => $request->on_ins_range_down[$insurance],
+                                'charges' => $request->on_ins_charges[$insurance]
+                            ]);
+                        }
+                    }
+                }
+                //Return Charges
+                if($request->has('on_return_switch') && $request->on_return_switch == 'on'){
+                    if($request->on_return_record != null){
+                        ReturnCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->update([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>1,
+                            'local'=> $request->on_return_local_charges,
+                            'national'=> $request->on_return_national_charges
+                        ]);
+                    }elseif ($request->on_return_record == null){
+                        ReturnCharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>1,
+                            'local'=> $request->on_return_local_charges,
+                            'national'=> $request->on_return_national_charges
+                        ]);
+                    }
+
+                }
+                //Return Charges
+                if($request->has('overnight_fuel_switch') && $request->overnight_fuel_switch == 'on'){
+                    if($request->on_fuel_record != null){
+                        FuelSurcharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->update([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>1,
+                            'fuel_surcharge'=> $request->overnight_fuel_surcharge
+                        ]);
+                    }elseif($request->on_fuel_record == null){
+                        FuelSurcharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>1,
+                            'fuel_surcharge'=> $request->overnight_fuel_surcharge
+                        ]);
+                    }
+
+                }
+                //Packaging Charges
+                if($request->has('on_packaging_switch') && $request->on_packaging_switch == 'on'){
+                    if($request->on_packaging_record != null){
+                        PackagingCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->update([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>1,
+                            'sm_flyer'=> $request->on_flyer_sm,
+                            'md_flyer'=> $request->on_flyer_md,
+                            'lg_flyer'=> $request->on_flyer_lg,
+                            'box_flyer'=> $request->on_flyer_box
+                        ]);
+                    }else{
+                        PackagingCharge::create([
+                            'user_id'=>$id,
+                            'shipping_mode_id'=>1,
+                            'sm_flyer'=> $request->on_flyer_sm,
+                            'md_flyer'=> $request->on_flyer_md,
+                            'lg_flyer'=> $request->on_flyer_lg,
+                            'box_flyer'=> $request->on_flyer_box
+                        ]);
+                    }
+
+                }
+                $discount_cash = 0;
+                $discount_weight = 0;
+                $discount_insurance = 0;
+                $discount_return = 0;
+                $discount_packaging = 0;
+
+                if($request->has('on_discount_weight_switch') && $request->on_discount_weight_switch == 'on'){
+                    $discount_weight = $request->on_discount_weight_rate != null ? $request->on_discount_weight_rate : 0;
+//                    $discount_weight = $request->on_discount_weight_rate;
+                }
+                if($request->has('on_discount_cash_switch') && $request->on_discount_cash_switch == 'on'){
+                    $discount_cash = $request->on_discount_cash_rate != null ? $request->on_discount_cash_rate : 0;
+                }
+                if($request->has('on_discount_insurance_switch') && $request->on_discount_insurance_switch == 'on'){
+                    $discount_insurance = $request->on_discount_insurance_rate != null ? $request->on_discount_insurance_rate : 0;
+                }
+                if($request->has('on_discount_return_switch') && $request->on_discount_return_switch == 'on'){
+                    $discount_return = $request->on_discount_return_rate != null ? $request->on_discount_insurance_rate : 0;
+                }
+                if($request->has('on_discount_packaging_switch') && $request->on_discount_packaging_switch == 'on'){
+                    $discount_packaging = $request->on_discount_packaging_rate != null ? $request->on_discount_packaging_rate : 0;
+                }
+                if($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0 || $discount_packaging != 0) {
+
+
+                    $date_str = $request->on_daterange;
+                    $date_sep = explode(' - ', $date_str);
+                    $date_to = explode('/', $date_sep[0]);
+                    $date_from = explode('/', $date_sep[1]);
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+////                    $nto = str_replace('/', '-', $date_sep[0]);
+////                    $nfrom = str_replace('/', '-', $date_sep[1]);
+//                    print_r($from);die();
+//                    $timestamp = strtotime($nto);
+//                    $newTo = date("Y-m-d H:i:s", $timestamp);
+//                    $nto = str_replace('"', '',$nto);
+//                    $nto = date_create($to);
+//                    $to =date_format($nto,"Y-m-d H:i:s");
+//                    $nfrom = date_create($from);
+//                    $from =date_format($nfrom,"Y-m-d H:i:s");
+//                    $to = Carbon::createFromFormat('Y-m-d', $nto);
+//                    $to = $to->format('Y-m-d H:i:s');
+//                    $from = DateTime::createFromFormat('Y-m-d', $nfrom);
+//                    $from = $from->format('Y-m-d H:i:s');
+                    if($request->on_discount_record != null){
+                        DiscountCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->update([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'title'=> $request->on_discount_title,
+                            'weight' => $discount_weight,
+                            'cash' => $discount_cash,
+                            'insurance' => $discount_insurance,
+                            'return' => $discount_return,
+                            'packaging' => $discount_packaging,
+                            'to' => $to,
+                            'from' => $from,
+                            'added_by'=>Auth::id()
+                        ]);
+                    }elseif ($request->on_discount_record == null){
+                        DiscountCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'title'=> $request->on_discount_title,
+                            'weight' => $discount_weight,
+                            'cash' => $discount_cash,
+                            'insurance' => $discount_insurance,
+                            'return' => $discount_return,
+                            'packaging' => $discount_packaging,
+                            'to' => $to,
+                            'from' => $from,
+                            'added_by'=>Auth::id()
+                        ]);
+                    }
+
+                }
+
+            }
+            //dd($weightAlready);
+        }
+                return redirect()->back();
     }
     /**
      * @param Request $request
@@ -155,7 +463,7 @@ class AdminDashboardController extends Controller
      * @return int
      */
     public function addRates(Request $request, $id){
-
+//    return $request;
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
             'on_wa_range_up.*.numeric' => 'The overnight range up field must be numeric or decimal.',
