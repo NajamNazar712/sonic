@@ -22,8 +22,8 @@ class CreateDiscountChargesTable extends Migration
             $table->decimal('insurance',8,2)->nullable();
             $table->decimal('return',8,2)->nullable();
             $table->decimal('packaging',8,2)->nullable();
-            $table->timestamp('to');
-            $table->timestamp('from');
+            $table->timestamp('to')->nullable();
+            $table->timestamp('from')->nullable();
             $table->timestamps();
         });
     }
