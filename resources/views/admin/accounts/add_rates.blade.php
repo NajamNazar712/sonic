@@ -2037,6 +2037,7 @@
         var insuranceChargesSwitchOverland = document.querySelector('.switchery.insuranceChargesoverland');
         var returnChargesSwitchOverland = document.querySelector('.switchery.returnChargesOverland');
         var packagingChargesSwitchOverland = document.querySelector('.switchery.packagingChargesOverland');
+        var fuelChargesSwitchOL = document.querySelector('.switchery.fuelSurchargeOverland');
 
         $('.weightAdditionOverland').on('change',function() {
             var wid = $(this).attr('id');
@@ -2200,7 +2201,16 @@
                 $('.return-charges-div-overland').find('input').prop('disabled',true);
 
             }
-        };// Packaging Charges Overnight
+        };
+        fuelChargesSwitchOL.onchange = function () {
+            if(fuelChargesSwitchOL.checked === true){
+                $('.fuel-surcharge-div-overland').find('input').prop('disabled',false);
+            }else if(fuelChargesSwitchOL.checked === false){
+                $('.fuel-surcharge-div-overland').find('input').prop('disabled',true);
+
+            }
+        };
+        // Packaging Charges Overnight
         packagingChargesSwitchOverland.onchange = function () {
             if(packagingChargesSwitchOverland.checked === true){
                 // $('.cash-handling-div').
@@ -2217,6 +2227,7 @@
         var insuranceChargesSwitchDetain = document.querySelector('.switchery.insuranceChargesdetain');
         var returnChargesSwitchDetain = document.querySelector('.switchery.returnChargesDetain');
         var packagingChargesSwitchDetain = document.querySelector('.switchery.packagingChargesDetain');
+        var fuelChargesSwitchDetain = document.querySelector('.switchery.fuelSurchargeDetain');
 
         $('.weightAdditionDetain').on('change',function() {
             var wid = $(this).attr('id');
@@ -2380,7 +2391,16 @@
                 $('.return-charges-div-detain').find('input').prop('disabled',true);
 
             }
-        };// Packaging Charges Overnight
+        };
+        fuelChargesSwitchDetain.onchange = function () {
+            if(fuelChargesSwitchDetain.checked === true){
+                $('.fuel-surcharge-div-detain').find('input').prop('disabled',false);
+            }else if(fuelChargesSwitchDetain.checked === false){
+                $('.fuel-surcharge-div-detain').find('input').prop('disabled',true);
+
+            }
+        };
+        // Packaging Charges Overnight
         packagingChargesSwitchDetain.onchange = function () {
             if(packagingChargesSwitchDetain.checked === true){
                 // $('.cash-handling-div').
@@ -2398,6 +2418,7 @@
         var insuranceChargesSwitchSameday = document.querySelector('.switchery.insuranceChargessameday');
         var returnChargesSwitchSameday = document.querySelector('.switchery.returnChargesSameday');
         var packagingChargesSwitchSameday = document.querySelector('.switchery.packagingChargesSameday');
+        var fuelChargesSwitchSameday = document.querySelector('.switchery.fuelSurchargeSameday');
 
         $('.weightAdditionSameday').on('change',function() {
             var wid = $(this).attr('id');
@@ -2561,14 +2582,21 @@
                 $('.return-charges-div-sameday').find('input').prop('disabled',true);
 
             }
-        };// Packaging Charges Overnight
+        };
+        fuelChargesSwitchSameday.onchange = function () {
+            if(fuelChargesSwitchSameday.checked === true){
+                $('.fuel-surcharge-div-sameday').find('input').prop('disabled',false);
+            }else if(fuelChargesSwitchSameday.checked === false){
+                $('.fuel-surcharge-div-sameday').find('input').prop('disabled',true);
+
+            }
+        };
+        // Packaging Charges Overnight
         packagingChargesSwitchSameday.onchange = function () {
             if(packagingChargesSwitchSameday.checked === true){
-                // $('.cash-handling-div').
                 $('.packaging-charges-div-sameday').find('input').prop('disabled',false);
             }else if(packagingChargesSwitchSameday.checked === false){
                 $('.packaging-charges-div-sameday').find('input').prop('disabled',true);
-
             }
         };
 
