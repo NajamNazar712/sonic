@@ -64,7 +64,7 @@ class ShipperReceivingSheetController extends Controller
         $receiving_sheet_shipment->save();
       }
 
-      return ['status' => 0, 'success' => 'Receiving Sheet has been created'];
+      return ['status' => 0, 'success' => 'Receiving Sheet has been created', 'receiving_sheet_id' => $receiving_sheet_id];
     }
 
     public function list() {
@@ -191,12 +191,26 @@ class ShipperReceivingSheetController extends Controller
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                    <title>Air Waybill</title>
+                    <title>Receiving Sheet</title>
 
                     <style>
+                      @page {
+                        size: A4 portrait;
+                        margin: 0mm;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
                       body {
                         background: none !important;
                         font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
                       }
 
                       table.table-bordered {
@@ -204,7 +218,6 @@ class ShipperReceivingSheetController extends Controller
                       }
 
                       table.table-bordered tbody tr td {
-                        width: 12.5% !important;
                         border: 1px solid #09262e !important;
                       }
 
@@ -224,30 +237,268 @@ class ShipperReceivingSheetController extends Controller
                         border: 1px solid #09262e !important;
                       }
 
-                      .border.twice {
-                        border-width: 2px !important;
+                      .w-200 {
+                        width: 200px;
                       }
 
-                      .border.twice-top {
-                        border-top-width: 2px !important;
+                      .line {
+                        border-bottom: 1px solid #09262e !important;
                       }
 
-                      .border.twice-bottom {
-                        border-bottom-width: 2px !important;
-                      }
-
-                      .border.twice-left {
-                        border-left-width: 2px !important;
-                      }
-
-                      .border.twice-right {
-                        border-right-width: 2px !important;
+                      .manual_form {
+                        page-break-inside: avoid;
                       }
                     </style>
                   </head>
                   <body>
                     <div class="p-1">
       ';
+
+      $receiving_sheet_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $request->id);
+
+      if ($receiving_sheet_shipments->exists()) {
+        $total_shipments = 0;
+        $total_cod = 0;
+
+        $shipment_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="color primary"><strong>S. No.</strong></td>
+                            <td class="color primary"><strong>Tracking No.</strong></td>
+                            <td class="color primary"><strong>Order ID</strong></td>
+                            <td class="color primary"><strong>Service Type</strong></td>
+                            <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
+                            <td class="color primary"><strong>Item Type</strong></td>
+                            <td class="color primary"><strong>Item Description</strong></td>
+                            <td class="color primary"><strong>Item Quantity</strong></td>
+                            <td class="color primary"><strong>Destination City</strong></td>
+                            <td class="color primary"><strong>COD Amount</strong></td>
+                          </tr>
+        ';
+
+        foreach ($receiving_sheet_shipments->get() as $receiving_sheet_shipment) {
+          $total_shipments++;
+
+          $shipment = Shipment::find($receiving_sheet_shipment->shipment_id);
+
+          if ($shipment->booking_type_id < 3) {
+            $shipment_details_row_start = '
+                          <tr>
+                            <td>' . $total_shipments . '</td>
+                            <td>' . $shipment->tracking_number . '</td>
+                            <td>' . $shipment->order_id . '</td>
+                            <td>' . $shipment->booking_type->booking_type . '</td>
+                            <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+            ';
+
+            $shipment_details_row_end = '
+                            <td>' . $shipment->consignee_city->city_name . '</td>
+                            <td>Rs ' . number_format($shipment->amount) . '</td>
+                          </tr>
+          ';
+          }
+          else {
+            $number_of_items = $shipment->items->count();
+
+            $shipment_details_row_start = '
+                          <tr>
+                            <td rowspan=' . $number_of_items . ' class="align-middle">' . $total_shipments . '</td>
+                            <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->tracking_number . '</td>
+                            <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->order_id . '</td>
+                            <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')</td>
+                            <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+            ';
+
+            $shipment_details_row_end = '
+                            <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_city->city_name . '</td>
+                            <td rowspan=' . $number_of_items . ' class="align-middle">Rs ' . number_format($shipment->amount) . '</td>
+                          </tr>
+            ';
+          }
+
+          if ($shipment->booking_type_id == 1) {
+            $shipment_details .= $shipment_details_row_start;
+
+            $item = $shipment->items->first();
+
+            $shipment_details .= '
+                            <td>' . $item->product->product_name . '</td>
+                            <td>' . $item->description . '</td>
+                            <td>' . $item->quantity . '</td>
+            ';
+
+            $shipment_details .= $shipment_details_row_end;
+          }
+          else if ($shipment->booking_type_id == 2) {
+            $shipment_details .= $shipment_details_row_start;
+
+            $item = $shipment->items()->where('type', 0)->first();
+
+            $shipment_details .= '
+                            <td>' . $item->product->product_name . '</td>
+                            <td>' . $item->description . '</td>
+                            <td>' . $item->quantity . '</td>
+            ';
+
+            $shipment_details .= $shipment_details_row_end;
+          }
+          else if ($shipment->booking_type_id == 3) {
+            $first = TRUE;
+
+            foreach ($shipment->items as $item) {
+              if ($first) {
+                $shipment_details .= $shipment_details_row_start;
+              }
+              else {
+                $shipment_details .= '
+                          <tr>
+                ';
+              }
+
+              $shipment_details .= '
+                            <td>' . $item->product->product_name . '</td>
+                            <td>' . $item->description . '</td>
+                            <td>' . $item->quantity . '</td>
+              ';
+
+              if ($first) {
+                $shipment_details .= $shipment_details_row_end;
+              }
+              else {
+                $shipment_details .= '
+                          </tr>
+                ';
+              }
+
+              $first = FALSE;
+            }
+          }
+
+          $total_cod += $shipment->amount;
+        }
+
+        $shipment_details .= '
+                        </tbody>
+                      </table>
+        ';
+
+        $first_shipment = $receiving_sheet_shipments->first();
+
+        $shipment = Shipment::find($first_shipment->shipment_id);
+
+        $main_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle color primary"><strong>Receiving Sheet</strong></td>
+                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Client Name</strong></td>
+                            <td>' . Auth::user()->name . '</td>
+                            <td rowspan="7" class="text-center align-middle">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Person of Contact</strong></td>
+                            <td>' . $shipment->pickup_address->poc . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Pickup Address</strong></td>
+                            <td>' . $shipment->pickup_address->pickup_address . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Phone Number</strong></td>
+                            <td>' . $shipment->pickup_address->phone . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Client City</strong></td>
+                            <td>' . $shipment->pickup_address->city->city_name  . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Shipments</strong></td>
+                            <td>' . $total_shipments . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total COD Amount</strong></td>
+                            <td>Rs ' . number_format($total_cod) . '</td>
+                          </tr>
+                        </tbody>
+                      </table>
+        ';
+
+        $html .= $main_details;
+
+        $html .= $shipment_details;
+
+        $html .= '
+                      <div class="mt-2 manual_form">
+                        <div class="row justify-content-between align-items-end">
+                          <div class="col">
+                            <div>
+                              <strong class="d-inline-block w-200">Total No. of Shipments:</strong>
+                              <span class="d-inline-block w-200 line"></span>
+                            </div>
+
+                            <div class="mt-2">
+                              <strong class="d-inline-block w-200">No. of Shipments Received:</strong>
+                              <span class="d-inline-block w-200 line"></span>
+                            </div>
+                          </div>
+
+                          <div class="col text-right">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Client Signature</strong>
+                            </div>
+                          </div>
+                        </div>
+
+                        <strong class="d-block text-center mt-2">For Office Use</strong>
+
+                        <hr>
+
+                        <div class="row justify-content-between align-items-end mt-2">
+                          <div class="col">
+                            <div>
+                              <strong class="d-inline-block w-200">Rider Name:</strong>
+                              <span class="d-inline-block w-200 line"></span>
+                            </div>
+
+                            <div class="mt-2">
+                              <strong class="d-inline-block w-200">Shipments picked at:</strong>
+                              <span class="d-inline-block w-200 line"></span>
+                            </div>
+                          </div>
+
+                          <div class="w-100"></div>
+
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Rider Signature</strong>
+                            </div>
+                          </div>
+
+                          <div class="col text-right">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Office Signature</strong>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="text-center mt-2">
+                          <span class="d-block">Plot No. 2, ST-3, Sector 23, Korangi Industrial Area, Karachi, Pakistan.</span>
+                          <span class="d-block">Phone: 03-111-555-065 | Email: info@trax.pk | URL: www.trax.pk</span>
+                        </div>
+                      </div>
+        ';
+      }
 
       $html .= '
                     </div>
