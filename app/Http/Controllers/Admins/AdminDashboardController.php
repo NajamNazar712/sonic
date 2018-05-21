@@ -1638,7 +1638,7 @@ class AdminDashboardController extends Controller
         }
         if($request->authorize == 1){
             User::where('id',$id)->update(['status'=>2]);
-
+            return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
         }
 
                 return redirect()->back()->with('success','All Rates are updated');
@@ -2760,6 +2760,10 @@ class AdminDashboardController extends Controller
                                         })
                                       ->make(true);
 
+    }
+
+    public function cityView(){
+        return view('admin.management.city_management');
     }
 
 }

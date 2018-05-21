@@ -79,7 +79,8 @@ Route::prefix('admin')->group(function () {
     //ajax request
     Route::post('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('admin.account.status');
     //new address
-
+    //Management
+    Route::get('/management/city','Admins\AdminDashboardController@cityView');
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
