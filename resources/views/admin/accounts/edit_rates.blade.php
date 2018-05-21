@@ -2815,7 +2815,6 @@
                                     @if($shipper->status == 1)
                                     <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
                                     @endif
-                                    <input type="checkbox" id="pick">
                                 </div>
 
                             </div>
