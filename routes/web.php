@@ -22,23 +22,35 @@ Auth::routes();
 Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/ecommerce', 'Shippers\ShipperDashboardController@ecommerce');
 
-//Route::get('/shipperDashboard', 'Shippers\ShipperDashboardController@index');
-Route::prefix('cod')->group(function () {
-    Route::get('/login','Auth\LoginController@showLoginForm')->name('cod.login');
-    Route::post('/login','Auth\LoginController@login')->name('cod.login.submit');
-    Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('cod.register');
-    Route::post('/register','Auth\RegisterController@register')->name('cod.register.submit');
-    Route::get('/new/address','Auth\RegisterController@addressView')->name('cod.new.address');
-//    Route::post('/reset','Auth\RegisterController@register')->name('cod.register.submit');
-    Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('cod.dashboard');
+Route::prefix('cod')->name('cod.')->group(function () {
+    Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
+    Route::post('/login','Auth\LoginController@login')->name('login.submit');
+    Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('register');
+    Route::post('/register','Auth\RegisterController@register')->name('register.submit');
+    Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
+    Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('dashboard');
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
     Route::get('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookView');
     Route::get('/shipment/book/order_id', 'Shippers\ShipperDashboardController@shipmentBookOrderID');
     Route::post('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookStore');
-    Route::get('/logout','Auth\LoginController@logout')->name('cod.logout');
+    Route::post('/shipment/print_air_waybill', 'Shippers\ShipperDashboardController@printAirWaybill');
+
+    Route::prefix('shipment')->name('shipment.')->group(function () {
+        Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
+            Route::get('list', 'Shippers\ShipperReceivingSheetController@list')->name('list');
+            Route::get('all', 'Shippers\ShipperReceivingSheetController@all')->name('all');
+            Route::put('add', 'Shippers\ShipperReceivingSheetController@add')->name('add');
+            Route::put('void', 'Shippers\ShipperReceivingSheetController@void')->name('void');
+            Route::post('print', 'Shippers\ShipperReceivingSheetController@print')->name('print');
+        });
+
+        Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
+    });
+
+    Route::get('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
-    Route::post('/logout','Auth\LoginController@logout')->name('cod.logout');
+    Route::post('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
 });
 
