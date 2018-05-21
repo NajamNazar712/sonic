@@ -106,7 +106,7 @@
 					}
 				})
 				.done(function(data) {
-					var tab = window.open('','_blank');
+					var tab = window.open('', '_blank');
 
 					if(!tab || tab.outerHeight === 0) {
 						swal({
@@ -124,6 +124,7 @@
 					}
 				});
 			}
+
 			var selected_rows = [];
 
 			var table = $('.datatable').DataTable({
