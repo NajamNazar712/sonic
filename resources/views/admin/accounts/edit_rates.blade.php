@@ -1916,7 +1916,7 @@
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$det_discount_title_switch}} name="detain_discount_title" {{$det_discount_title}}/>
+                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$det_discount_title_switch}} name="detain_discount_title" value="{{$det_discount_title}}"/>
                                                 </div>
 
                                             </div>
@@ -2812,7 +2812,9 @@
                                 <div class="form-group">
 
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
+                                    @if($shipper->authorize == 0)
                                     <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
+                                    @endif
                                 </div>
 
                             </div>

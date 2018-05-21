@@ -73,7 +73,8 @@
                 </button>
             </div>
             <div class="modal-body confirmation text-center">
-                <form action="{{route('admin.account.status')}}" method="post">
+                <h3>Are you sure you want to perform this action?</h3>
+                <form action="{{route('admin.account.status')}}" method="post" class="mt-2">
                     {{csrf_field()}}
                     <input type="hidden" name="shid" id="shid">
                     <input type="hidden" name="status" id="shstatus">

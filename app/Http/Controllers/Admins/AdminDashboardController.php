@@ -62,20 +62,32 @@ class AdminDashboardController extends Controller
     }
     public function UserStatus(Request $request){
 //        dd($request);
-        $id = $request->shid;
+        $id = $request->shid; //shipper id
         $status = $request->status;
-//        $active = User::where('id',$id)->s
-        if($status == 'unblock'){
-            $user = User::where('id',$id)->where('blacklist',1)->update(['blacklist'=>0]);
-            $active = User::find($id)->first()->active;
-            if($user == 1){
-                if($active == 1){
-                    return redirect()->route('admin.accounts.active');
-                }elseif($active == 0){
-                    return redirect()->route('admin.accounts.pending');
-                }
+        if($status == 'active'){
+            $user = User::find($id);
+            if($user->active == 0 && $user->authorize == 1){
+               $action = User::where('id',$id)->update(['active'=>1]);
+               if($action == 1){
+                   return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
+               }else{
+                   return back()->with('danger', 'There is some problem please try again.');
+               }
+            }else{
+                return back()->with('danger', 'This user\'s rates are not set.');
             }
         }
+//        if($status == 'unblock'){
+//            $user = User::where('id',$id)->where('blacklist',1)->update(['blacklist'=>0]);
+//            $active = User::find($id)->first()->active;
+//            if($user == 1){
+//                if($active == 1){
+//                    return redirect()->route('admin.accounts.active');
+//                }elseif($active == 0){
+//                    return redirect()->route('admin.accounts.pending');
+//                }
+//            }
+//        }
     }
     /**
      * @return \Illuminate\Http\JsonResponse
@@ -111,15 +123,7 @@ class AdminDashboardController extends Controller
         $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
         return response()->json($returnHTML);
     }
-    public function pickup(){
-//        $cit = CityInfo::all()->where('city_code','202');
-        $cit = PickupType::find(1)->cities()->orderBy('city_name')->get();
-//        $cite = $cit->cities()->get();
-//        return $cite;
 
-
-//    return $cit;
-    }
     public function addRatesView($id){
         $user = User::find($id);
         $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
@@ -139,15 +143,15 @@ class AdminDashboardController extends Controller
         $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
-        $weight = WeightCharge::all()->groupBy('shipping_mode_id');
+        $weight = WeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 //        $cash = '';
-        $bookingType = BookingTypeCharges::all()->groupBy('shipping_mode_id');
-        $cash = CashHandlingCharge::all()->groupBy('shipping_mode_id');
-        $insurance = InsuranceCharge::all()->groupBy('shipping_mode_id');
-        $return = ReturnCharge::all()->groupBy('shipping_mode_id');
-        $fuel = FuelSurcharge::all()->groupBy('shipping_mode_id');
-        $packaging = PackagingCharge::all()->groupBy('shipping_mode_id');
-        $discount = DiscountCharge::all()->groupBy('shipping_mode_id');
+        $bookingType = BookingTypeCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $cash = CashHandlingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $insurance = InsuranceCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $return = ReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $packaging = PackagingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 //        return $discount;
         return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount]);
 
@@ -2696,7 +2700,7 @@ class AdminDashboardController extends Controller
 
     public function pendingAccountListAjax(){
         $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('active',0)->where('blacklist',0);
+            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address','users.authorize', 'users.email'])->where(['active'=>0,'blacklist'=>0]);
          //$isRate = RateStatus::where('user_id',$users->id);
 
         return Datatables::of($users)->addColumn("action", function ($result) {
@@ -2707,7 +2711,10 @@ class AdminDashboardController extends Controller
                                                     <div class='dropdown-menu open-left arrow'>
                                                       <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
                                                       <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>";
+                                                    if($result->active == 0 && $result->authorize == 1){
+                                                        $dropdown .= "<a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='active' data-toggle='modal' data-target='#ConfirmModal'><i class='ft-plus-circle primary'></i> Active Account</a>";
 
+                                                    }
                                             if (RateStatus::where('user_id', $result->id)->exists()) {
                                                 $dropdown .= "
                                                         <a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>
