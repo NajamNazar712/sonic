@@ -66,8 +66,8 @@ class AdminDashboardController extends Controller
         $status = $request->status;
         if($status == 'active'){
             $user = User::find($id);
-            if($user->active == 0 && $user->authorize == 1){
-               $action = User::where('id',$id)->update(['active'=>1]);
+            if($user->status == 2){
+               $action = User::where('id',$id)->update(['status'=>3]);
                if($action == 1){
                    return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
                }else{
@@ -1637,7 +1637,7 @@ class AdminDashboardController extends Controller
             //dd($weightAlready);
         }
         if($request->authorize == 1){
-            User::where('id',$id)->update(['authorize'=>1]);
+            User::where('id',$id)->update(['status'=>2]);
 
         }
 
@@ -2675,12 +2675,13 @@ class AdminDashboardController extends Controller
 
             }
             }
+            User::where('id',$id)->update(['status'=>1]);
 
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
     public function activeAccountListAjax(){
        $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('active',1)->where('blacklist',0);
+            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('status',3)->where('blacklist',0);
 
         return Datatables::of($users)->addColumn("action", function ($result) {
                                             return " <span class='dropdown'>
@@ -2700,10 +2701,17 @@ class AdminDashboardController extends Controller
 
     public function pendingAccountListAjax(){
         $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address','users.authorize', 'users.email'])->where(['active'=>0,'blacklist'=>0]);
+            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at'])->whereIn('status',[0,1,2])->where('blacklist',0);
          //$isRate = RateStatus::where('user_id',$users->id);
 
-        return Datatables::of($users)->addColumn("action", function ($result) {
+        return Datatables::of($users)
+            ->editColumn('created_at', function ($users) {
+                return $users->created_at ? with(new Carbon($users->created_at))->format('d/m/Y H:i:s A') : '';
+            })
+            ->editColumn('status', function ($users) {
+                return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
+            })
+            ->addColumn("action", function ($result) {
                                             $dropdown = "
                                                 <span class='dropdown'>
                                                     <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
@@ -2711,8 +2719,8 @@ class AdminDashboardController extends Controller
                                                     <div class='dropdown-menu open-left arrow'>
                                                       <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
                                                       <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>";
-                                                    if($result->active == 0 && $result->authorize == 1){
-                                                        $dropdown .= "<a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='active' data-toggle='modal' data-target='#ConfirmModal'><i class='ft-plus-circle primary'></i> Active Account</a>";
+                                                    if($result->status == 2){
+                                                        $dropdown .= "<a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='active' data-toggle='modal' data-target='#ConfirmModal'><i class='ft-plus-circle primary'></i> Activate Account</a>";
 
                                                     }
                                             if (RateStatus::where('user_id', $result->id)->exists()) {

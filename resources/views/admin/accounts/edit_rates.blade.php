@@ -2812,9 +2812,10 @@
                                 <div class="form-group">
 
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
-                                    @if($shipper->authorize == 0)
+                                    @if($shipper->status == 1)
                                     <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
                                     @endif
+                                    <input type="checkbox" id="pick">
                                 </div>
 
                             </div>

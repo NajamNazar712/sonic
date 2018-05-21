@@ -17,12 +17,14 @@
                                 <thead>
                                     <tr>
                                         <th>Account ID</th>
-                                        <th>Company Name</th>
-                                        <th>City Name</th>
+                                        <th>Company</th>
+                                        <th>City</th>
                                         <th>Contact Person</th>
-                                        <th>Phone Number</th>
+                                        <th>Phone No.</th>
                                         <th>Address</th>
                                         <th>Email Address</th>
+                                        <th>Created At</th>
+                                        <th>Status</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>
@@ -63,6 +65,8 @@
                 {data: 'phone', name: 'phone', class: 'phone'},
                 {data: 'address', name: 'address', class: 'address'},
                 {data: 'email', name: 'email', class: 'email'},
+                {data: 'created_at', name: 'created_at', class: 'created'},
+                {data: 'status', name: 'status', class: 'status'},
                 {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
             ],
             initComplete: function() {
