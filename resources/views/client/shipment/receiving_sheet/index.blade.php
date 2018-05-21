@@ -106,16 +106,24 @@
 					}
 				})
 				.done(function(data) {
-					var tab = window.open('', '_blank');
+					var tab = window.open('','_blank');
 
-					if (tab) {
+					if(!tab || tab.outerHeight === 0) {
+						swal({
+							title: 'Popup Blocker Enabled!',
+							text: 'Please add this site to your exception list.',
+							icon: 'error',
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+					}
+					else {
 						tab.document.write(data);
 						tab.document.close();
 						tab.focus();
 					}
 				});
 			}
-
 			var selected_rows = [];
 
 			var table = $('.datatable').DataTable({
