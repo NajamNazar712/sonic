@@ -36,6 +36,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
             Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
+
+            Route::prefix('excel')->name('excel_')->group(function () {
+                Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
+                Route::post('', 'Shippers\ShipperShipmentBookController@excel_store')->name('store');
+            });
         });
 
         Route::resource('book', 'Shippers\ShipperShipmentBookController');

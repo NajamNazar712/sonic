@@ -616,5 +616,17 @@ class ShipperShipmentBookController extends Controller
       return $html;
     }
 
-    public function excel_index() {}
+    public function excel_index() {
+      $booking_types = BookingType::all();
+      $pickup_addresses = UserShippingInfo::with('city')->where('user_id', Auth::id())->get();
+      $cities = CityInfo::orderBy('city_name')->get();
+      $products = Product::orderBy('product_name')->get();
+      $shipping_modes = ShippingMode::all();
+      $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
+      $payment_modes = PaymentMode::all();
+
+      return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes]);
+    }
+
+    public function excel_store(Request $request) {}
 }
