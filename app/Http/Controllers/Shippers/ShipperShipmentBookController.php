@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Shippers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
@@ -83,6 +83,8 @@ class ShipperShipmentBookController extends Controller
       $shipment->save();
 
       $shipment_id = $shipment->id;
+
+      AdminPickupsController::generate($shipment_id);
 
       ShipmentsJourneyController::add($shipment_id, 1, 1, 'Shipment has been Booked!', Auth::id(), NULL);
 
