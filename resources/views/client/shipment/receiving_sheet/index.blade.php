@@ -192,7 +192,7 @@
 					{data: 'origin_city', name: 'oc.city_name', class: 'align-middle origin_city'},
 					{data: 'destination_city', name: 'dc.city_name', class: 'align-middle destination_city'},
 					{data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
-					{data: 'receiving_sheet', name: 'rs.id', class: 'text-center align-middle receiving_sheet p-1'},
+					{data: 'receiving_sheet', name: 'receiving_sheet', class: 'text-center align-middle receiving_sheet p-1'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -220,7 +220,7 @@
 						}
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
-							column.search($(this).val(), false, false, true).draw();
+								column.search($(this).val(), false, false, true).draw();
 							}).wrap(td).after(icon);
 
 							if (column.search()) {

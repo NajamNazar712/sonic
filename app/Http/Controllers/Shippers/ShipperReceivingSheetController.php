@@ -100,7 +100,18 @@ class ShipperReceivingSheetController extends Controller
         else {
           return '<button class="btn btn-sm btn-primary add">Add</button>';
         }
-      })->make(true);
+      })
+      ->filterColumn('receiving_sheet', function($query, $keyword) {
+        $keyword = intval($keyword);
+
+        if ($keyword != 0) {
+          $query->where('rs.id', '=', $keyword);
+        }
+        else {
+          $query->whereNotNull('rs.id');
+        }
+      })
+      ->make(true);
     }
 
     public function all() {
