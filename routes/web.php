@@ -31,12 +31,20 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('dashboard');
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
-    Route::get('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookView');
-    Route::get('/shipment/book/order_id', 'Shippers\ShipperDashboardController@shipmentBookOrderID');
-    Route::post('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookStore');
-    Route::post('/shipment/print_air_waybill', 'Shippers\ShipperDashboardController@printAirWaybill');
 
     Route::prefix('shipment')->name('shipment.')->group(function () {
+        Route::prefix('book')->name('book.')->group(function () {
+            Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
+            Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
+
+            Route::prefix('excel')->name('excel_')->group(function () {
+                Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
+                Route::post('', 'Shippers\ShipperShipmentBookController@excel_store')->name('store');
+            });
+        });
+
+        Route::resource('book', 'Shippers\ShipperShipmentBookController');
+
         Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
             Route::get('list', 'Shippers\ShipperReceivingSheetController@list')->name('list');
             Route::get('all', 'Shippers\ShipperReceivingSheetController@all')->name('all');
