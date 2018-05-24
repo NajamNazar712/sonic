@@ -80,6 +80,9 @@ Route::prefix('admin')->group(function () {
     //add rates view
     Route::get('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRatesView')->name('admin.add.rates');
     Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('admin.add.rates.submit');
+    //edit rates
+    Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('admin.edit.rates');
+    Route::post('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('admin.edit.rates.submit');
 
     //ajax request
     Route::post('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('admin.account.status');

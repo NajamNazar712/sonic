@@ -56,4 +56,9 @@ class ResetPasswordController extends Controller
         //return redirect(route('cod.login'))->with('success','Your password has reset!');
         //$this->guard()->login($user);
     }
+    protected function sendResetResponse($response)
+    {
+        return redirect($this->redirectPath())
+            ->with('success', trans($response));
+    }
 }
