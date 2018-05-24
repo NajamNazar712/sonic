@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\ShipmentJourneyController;
+use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
@@ -83,7 +83,7 @@ class ShipperShipmentBookController extends Controller
 
       $shipment_id = $shipment->id;
 
-      ShipmentJourneyController::add($shipment_id, 1, 1, 'Shipment has been Booked!');
+      ShipmentsJourneyController::add($shipment_id, 1, 1, 'Shipment has been Booked!', Auth::id(), NULL);
 
       return $shipment_id;
     }
