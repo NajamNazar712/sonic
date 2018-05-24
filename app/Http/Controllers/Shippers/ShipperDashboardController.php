@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Shippers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use App\Http\Controllers\Admins\AdminPickupsController;
+
 use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -274,6 +276,8 @@ class ShipperDashboardController extends Controller
         else {
           $print = FALSE;
         }
+
+        AdminPickupsController::generate_pickup_request($shipment_id);
 
         return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $shipment->tracking_number, 'print' => $print]);
       }
