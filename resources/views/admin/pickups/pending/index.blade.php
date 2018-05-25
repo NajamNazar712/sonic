@@ -49,8 +49,6 @@
 									<h4 class="modal-title" id="assign_to_rider_title">Assign to Rider</h4>
 								</div>
 								<div class="modal-body">
-									<input type="hidden" name="pickup_ids" class="pickup_ids">
-
 									<div class="form-group m-0">
 										<select name="rider" class="select2 rider" data-rule-required="true" data-msg-required="Rider is required"></select>
 									</div>
@@ -133,8 +131,6 @@
 					className: 'btn btn-primary assign',
 					enabled: false,
 					action: function (e, dt, node, config) {
-						$('#assign_to_rider input.pickup_ids').val(JSON.stringify(selected_rows));
-
 						//Get Riders and Fill Select
 						var options = [];
 
@@ -189,7 +185,7 @@
 									url: '{!! route('admin.pickups.pending.multiple_cancel') !!}',
 									method: 'PUT',
 									data: {
-										'pickup_ids': selected_rows,
+										'pickup_request_ids': selected_rows,
 										'_token': '{{ csrf_token() }}'
 									}
 								})
@@ -237,18 +233,18 @@
 				order: [[1, 'asc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-					{data: 'id', name: 'pickups.id', class: "align-middle id"},
-					{data: 'requested_at', name: 'pickups.created_at', class: 'align-middle requested_at'},
+					{data: 'id', name: 'pickup_requests.id', class: "align-middle id"},
+					{data: 'requested_at', name: 'pickup_requests.created_at', class: 'align-middle requested_at'},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
 					{data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
 					{data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
 					{data: 'city', name: 'ci.city_name', class: 'align-middle city'},
-					{data: 'bookings', name: 'pickups.bookings', class: 'align-middle bookings'},
-					{data: 'pending_bookings', name: 'pickups.pending_bookings', class: 'align-middle pending_bookings'},
-					{data: 'total_estimated_weight', name: 'pickups.total_estimated_weight', class: 'align-middle total_estimated_weight'},
+					{data: 'bookings', name: 'pickup_requests.bookings', class: 'align-middle bookings'},
+					{data: 'pending_bookings', name: 'pickup_requests.pending_bookings', class: 'align-middle pending_bookings'},
+					{data: 'total_estimated_weight', name: 'pickup_requests.total_estimated_weight', class: 'align-middle total_estimated_weight'},
 					{data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},
-					{data: 'pickup_date', name: 'pickups.pickup_date', class: 'align-middle pickup_date'},
+					{data: 'pickup_date', name: 'pickup_requests.pickup_date', class: 'align-middle pickup_date'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -312,14 +308,13 @@
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
-					var pickup_ids = parseInt($(form).find('input.pickup_ids').val());
 					var rider_id = parseInt($(form).find('select.rider').val());
 
 					$.ajax({
 						url: '{!! route('admin.pickups.pending.assign') !!}',
 						method: 'PUT',
 						data: {
-							'pickup_ids': pickup_ids,
+							'pickup_request_ids': selected_rows,
 							'rider_id': rider_id,
 							'_token': '{{ csrf_token() }}'
 						}
@@ -349,10 +344,10 @@
 			});
 
 			$('.datatable tbody').on('click', 'tr td.action button.cancel', function() {
-				var pickup_id = $(this).parents('tr').attr('id');
+				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
 
 				swal({
-					title: pickup_id,
+					title: pickup_request_id,
 					text: 'Are you sure, you want to Cancel this Pickup?',
 					icon: 'warning',
 					buttons: {
@@ -378,7 +373,7 @@
 							url: '{!! route('admin.pickups.pending.cancel') !!}',
 							method: 'PUT',
 							data: {
-								'pickup_id': pickup_id,
+								'pickup_request_id': pickup_request_id,
 								'_token': '{{ csrf_token() }}'
 							}
 						})
@@ -390,7 +385,7 @@
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
 
-							var index = $.inArray(pickup_id, selected_rows);
+							var index = $.inArray(pickup_request_id, selected_rows);
 
 							if (index !== -1) {
 								selected_rows.splice(index, 1);

@@ -4,7 +4,7 @@ namespace App\Http\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Pickup extends Model
+class PickupRequest extends Model
 {
 	//
 }
