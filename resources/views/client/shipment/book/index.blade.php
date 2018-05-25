@@ -384,7 +384,7 @@
 				.done(function(data) {
 					var tab = window.open('', '_blank');
 
-					if(!tab || tab.outerHeight === 0) {
+					if(!tab) {
 						swal({
 							title: 'Popup Blocker Enabled!',
 							text: 'Please add this site to your exception list.',

@@ -113,7 +113,7 @@ class AdminPickupsController extends Controller
       return $datatables->make(true);
     }
 
-    public function pending_store(Request $request) {
+    public function pending_assign(Request $request) {
       $pickup_ids = $request->input('pickup_ids');
       $rider_id = $request->input('rider_id');
 

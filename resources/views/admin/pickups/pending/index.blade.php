@@ -316,8 +316,8 @@
 					var rider_id = parseInt($(form).find('select.rider').val());
 
 					$.ajax({
-						url: '{!! route('admin.pickups.pending.store') !!}',
-						method: 'POST',
+						url: '{!! route('admin.pickups.pending.assign') !!}',
+						method: 'PUT',
 						data: {
 							'pickup_ids': pickup_ids,
 							'rider_id': rider_id,

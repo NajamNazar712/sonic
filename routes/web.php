@@ -92,7 +92,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\AdminPickupsController@pending_index')->name('index');
             Route::get('/list', 'Admins\AdminPickupsController@pending_list')->name('list');
-            Route::post('', 'Admins\AdminPickupsController@pending_store')->name('store');
+            Route::put('assign', 'Admins\AdminPickupsController@pending_assign')->name('assign');
             Route::put('multiple_cancel', 'Admins\AdminPickupsController@pending_multiple_cancel')->name('multiple_cancel');
             Route::put('cancel', 'Admins\AdminPickupsController@pending_cancel')->name('cancel');
         });
