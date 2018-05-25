@@ -26,6 +26,7 @@
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Pickups</span></a>
               <ul class="menu-content">
                 <li><a class="menu-item" href="{{ route('admin.pickups.pending.index') }}">Pending</a></li>
+                <li><a class="menu-item" href="{{ route('admin.pickups.assigned.index') }}">Assigned</a></li>
               </ul>
             </li>
 
