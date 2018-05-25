@@ -47,6 +47,9 @@ $(document).ready(function () {
         //     });
 
     });
+
+
+
     $('body').on('click','#confirmAction',function () {
        var uid = $('#shid').val();
        var status = $('#shstatus').val();

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\City;
+use App\CityDelivery;
+use App\CityHub;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\StandardCashHandlingCharge;
 use App\Http\Models\Admin\StandardInsuranceCharge;
@@ -9,8 +12,10 @@ use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\Admin\StandardBookingTypeCharge;
+use App\Http\Models\BookingType;
 use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\HubInfo;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
 use Illuminate\Http\Request;
@@ -23,7 +28,7 @@ use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\DiscountCharge;
 use App\Http\Models\RateStatus;
-
+use App\Http\Models\ShippingMode;
 //standard rates
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
@@ -77,6 +82,7 @@ class AdminDashboardController extends Controller
                 return back()->with('danger', 'This user\'s rates are not set.');
             }
         }
+
 //        if($status == 'unblock'){
 //            $user = User::where('id',$id)->where('blacklist',1)->update(['blacklist'=>0]);
 //            $active = User::find($id)->first()->active;
@@ -2763,7 +2769,138 @@ class AdminDashboardController extends Controller
     }
 
     public function cityView(){
+//        $hubs = City::where('hub',1)->get();
+//        return $hubs[0]->id;
         return view('admin.management.city_management');
     }
+    public function cityListAjax(){
+        $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
+        ->select(['cities.id','cities.name' ,'h.name as hub','cities.hub_id','cities.status']);
+        return Datatables::of($cities)
+        ->editColumn('status', function ($cities) {
+            return $cities->status == 0? 'Inactive': 'Active';
+        })
+        ->addColumn("action", function ($result) {
+            $dropdown = "<span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update City Status</a>";
+                                              if($result->status == 1) {
+                                                  $dropdown .= "<a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='cityInactive' data-toggle='modal' data-target='#ConfirmModalCity'><i class='ft-plus-circle primary'></i> Deactivate City</a>";
+                                              }else {
+                                                  $dropdown .= " <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='cityactive' data-toggle='modal' data-target='#ConfirmModalCity'><i class='ft-plus-circle primary'></i> Activate City</a>";
+                                              }
+                                            $dropdown .="</div></span>";
+                                              return $dropdown;
+        })
+            ->make(true);
+    }
+    public function getCityForm(){
+        $hubs = City::where('hub',1)->get();
+        $shippingMode = ShippingMode::all();
+        $booking = BookingType::all();
+        return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'booking'=>$booking]);
+    }
+    public function getEditCityForm(Request $request,$id){
+//        return $id;
+        $city = City::find($id);
+        if($city->hub == 1){
+            $cityhub = City::find($city->hub_id);
+            $isHub = 1;
+        }else{
+            $isHub = 0;
+            $cityhub = '';
+        }
+        $delivery = CityDelivery::where('city_id',$city->id)->groupBy('booking_type_id')->get();
+        $hubs = City::where('hub',1)->get();
+        $shippingMode = ShippingMode::all();
+        $booking = BookingType::all();
+        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'booking'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
 
+    }
+    public function addCityHub(Request $request){
+
+        if($request->postType == 'city'){
+
+            $city = City::create([
+                'name'=>$request->cityName,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'status'=>1
+            ]);
+
+            foreach ($request->delivery as $booking_type_id => $shipping_modes) {
+                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+                    CityDelivery::create([
+                        'city_id'=>$city->id,
+                        'booking_type_id'=>$booking_type_id,
+                        'shipping_mode_id'=>$shipping_mode_id,
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('success','city added successfully');
+        }elseif($request->postType == 'hub'){
+            $city = City::create([
+                'name'=>$request->cityName,
+                'hub'=>1,
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'status'=>1
+            ]);
+            City::where('id',$city->id)->update(['hub_id'=>$city->id]);
+
+            foreach ($request->delivery as $booking_type_id => $shipping_modes) {
+                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+                    CityDelivery::create([
+                        'city_id'=>$city->id,
+                        'booking_type_id'=>$booking_type_id,
+                        'shipping_mode_id'=>$shipping_mode_id,
+                    ]);
+                }
+            }
+            return redirect()->back()->with('success','Hub city added successfully');
+        }
+    }
+
+    public function CityStatus(Request $request){
+        $id = $request->cid; //city id
+        $status = $request->status;
+        if($status == 'cityInactive'){
+            $city = City::find($id);
+            if($city->status == 1 && $city->hub == 1){
+                $citylist = City::where(['hub_id'=>$city->id,''])->get();
+                if(count($citylist) > 1){
+
+                    return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
+                }elseif (count($citylist) == 1){
+                    $action = City::where('id',$city->id)->update(['status'=>0]);
+                    return redirect()->route('admin.management.city')->with('danger', 'There is some problem please try again.');
+                }
+            }elseif ($city->status == 1){
+                $action = City::where('id',$city->id)->update(['status'=>0]);
+                if($action == 1){
+                    return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
+                }else{
+                    return redirect()->route('admin.management.city')->with('danger', 'There is some problem please try again.');
+                }
+
+            }
+        }elseif($status == 'cityactive'){
+            $city = City::find($id);
+            if($city->status == 0){
+                $action = City::where('id',$city->id)->update(['status'=>1]);
+                if($action == 1){
+                    return redirect()->route('admin.management.city')->with('success', 'City is active now.');
+                }else{
+                    return redirect()->route('admin.management.city')->with('danger', 'There is some problem please try again.');
+                }
+            }else{
+                return redirect()->route('admin.management.city')->with('danger', 'This city is already inactive.');
+
+            }
+        }
+        return redirect()->route('admin.management.city')->with('danger', 'This city is already inactive.');
+    }
 }

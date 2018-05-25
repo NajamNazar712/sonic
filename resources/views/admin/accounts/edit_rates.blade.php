@@ -20,6 +20,8 @@
                     <div class="card-content">
                         <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.edit.rates.submit',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
                             @csrf
+                            <input type="hidden" name="_method" value="PUT"/>
+
                             <div id="headingCollapse61" class="card-header border-success">
                                 <div class="row">
                                     <div class="col-md-6">

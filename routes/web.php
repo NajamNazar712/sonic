@@ -74,13 +74,19 @@ Route::prefix('admin')->group(function () {
     Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('admin.add.rates.submit');
     //edit rates
     Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('admin.edit.rates');
-    Route::post('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('admin.edit.rates.submit');
+    Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('admin.edit.rates.submit');
 
     //ajax request
-    Route::post('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('admin.account.status');
+    Route::put('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('admin.account.status');
     //new address
     //Management
-    Route::get('/management/city','Admins\AdminDashboardController@cityView');
+    Route::get('/management/city','Admins\AdminDashboardController@cityView')->name('admin.management.city');
+    Route::get('/management/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('admin.management.city.ajax');
+    Route::get('/management/city/form','Admins\AdminDashboardController@getCityForm');
+    Route::get('/management/city/{id}/edit/form','Admins\AdminDashboardController@getEditCityForm')->name('admin.management.city.edit');
+    Route::post('/management/city','Admins\AdminDashboardController@addCityHub')->name('admin.management.city');
+    Route::put('/management/city/status', 'Admins\AdminDashboardController@CityStatus')->name('admin.management.city.status');
+
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
