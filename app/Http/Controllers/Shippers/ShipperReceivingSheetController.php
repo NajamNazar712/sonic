@@ -100,7 +100,18 @@ class ShipperReceivingSheetController extends Controller
         else {
           return '<button class="btn btn-sm btn-primary add">Add</button>';
         }
-      })->make(true);
+      })
+      ->filterColumn('receiving_sheet', function($query, $keyword) {
+        $keyword = intval($keyword);
+
+        if ($keyword != 0) {
+          $query->where('rs.id', '=', $keyword);
+        }
+        else {
+          $query->whereNotNull('rs.id');
+        }
+      })
+      ->make(true);
     }
 
     public function all() {
@@ -117,9 +128,24 @@ class ShipperReceivingSheetController extends Controller
           if ($receiving_sheet->status == 0) {
             $first_receiving_sheet_shipment = ReceivingSheetShipment::where('receiving_sheet_id', $request->input('receiving_sheet_id'))->first();
 
-            $first_shipment = Shipment::find($first_receiving_sheet_shipment->shipment_id);
+            if ($first_receiving_sheet_shipment) {
+              $first_shipment = Shipment::find($first_receiving_sheet_shipment->shipment_id);
 
-            if ($shipment->pickup_address_id == $first_shipment->pickup_address_id) {
+              if ($shipment->pickup_address_id == $first_shipment->pickup_address_id) {
+                $receiving_sheet_shipment = new ReceivingSheetShipment();
+
+                $receiving_sheet_shipment->shipment_id = $request->input('shipment_id');
+                $receiving_sheet_shipment->receiving_sheet_id = $request->input('receiving_sheet_id');
+
+                $receiving_sheet_shipment->save();
+
+                return ['status' => 0, 'success' => 'Shipment has been Added to the Receiving Sheet'];
+              }
+              else {
+                return ['status' => 1, 'error' => 'Given Shipment\'s Pickup Address is different from the other Shipments of the selected Receiving Sheet'];
+              }
+            }
+            else {
               $receiving_sheet_shipment = new ReceivingSheetShipment();
 
               $receiving_sheet_shipment->shipment_id = $request->input('shipment_id');
@@ -128,9 +154,6 @@ class ShipperReceivingSheetController extends Controller
               $receiving_sheet_shipment->save();
 
               return ['status' => 0, 'success' => 'Shipment has been Added to the Receiving Sheet'];
-            }
-            else {
-              return ['status' => 1, 'error' => 'Given Shipment\'s Pickup Address is different from the other Shipments of the selected Receiving Sheet'];
             }
           }
           else {

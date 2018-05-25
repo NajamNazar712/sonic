@@ -144,7 +144,7 @@
 
             var action = $invoker.attr('rel');
             var id = $(e.relatedTarget).data('target-id');
-            console.log(id);
+
             if(action == 'editcity'){
                 $.get( "/admin/management/city/"+id+"/edit/form", function( data ) {
                     $("#editCityDiv").html(data);
@@ -152,12 +152,54 @@
             }
 
         });
+        $('body').on('click','.deactivate',function (e) {
+            var id = $(this).data('target-id');
+            var rel = $(this).attr('rel');
+            var isHub = $(this).attr('hub');
+            if(isHub == 0){
+                $('.modal-body #cid').val(id);
+                $('.modal-body #cstatus').val(rel);
+                $('#ConfirmModalCity').modal('show');
+            }else if(isHub == 1){
+                $.ajax({
+                    url:'/admin/management/city/'+id+'/status/ajax',
+                    type:'GET',
+                    dataType:'json',
+                    success:function (data) {
+                        var name = [];
+                        if(data.length > 0){
+                            $.each(data, function (index, value) {
+                                name += value.name+' , ';
+
+                            });
+                            swal({
+                                title: 'Please remove following cities from hub!',
+                                text: name,
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: true,
+                                closeOnEsc: true
+                            });
+
+                        }else{
+                            $('.modal-body #cid').val(id);
+                            $('.modal-body #cstatus').val(rel);
+                            $('#ConfirmModalCity').modal('show');
+                            console.log('no cities');
+                        }
+                        
+                    }
+                });
+            }
+
+        });
         $("#ConfirmModalCity").on("show.bs.modal", function(e) {
-            var id = $(e.relatedTarget).data('target-id');
-            var rel = $(e.relatedTarget).attr('rel');
-            console.log('here');
-            $('#cid').val(id);
-            $('#cstatus').val(rel);
+            // var id = $(e.relatedTarget).data('target-id');
+            // var rel = $(e.relatedTarget).attr('rel');
+            // var isHub = $(e.relatedTarget).attr('hub');
+            //
+            // $('#cid').val(id);
+            // $('#cstatus').val(rel);
 
 
         });

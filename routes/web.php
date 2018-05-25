@@ -31,12 +31,20 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('dashboard');
     Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
-    Route::get('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookView');
-    Route::get('/shipment/book/order_id', 'Shippers\ShipperDashboardController@shipmentBookOrderID');
-    Route::post('/shipment/book', 'Shippers\ShipperDashboardController@shipmentBookStore');
-    Route::post('/shipment/print_air_waybill', 'Shippers\ShipperDashboardController@printAirWaybill');
 
     Route::prefix('shipment')->name('shipment.')->group(function () {
+        Route::prefix('book')->name('book.')->group(function () {
+            Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
+            Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
+
+            Route::prefix('excel')->name('excel_')->group(function () {
+                Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
+                Route::post('', 'Shippers\ShipperShipmentBookController@excel_store')->name('store');
+            });
+        });
+
+        Route::resource('book', 'Shippers\ShipperShipmentBookController');
+
         Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
             Route::get('list', 'Shippers\ShipperReceivingSheetController@list')->name('list');
             Route::get('all', 'Shippers\ShipperReceivingSheetController@all')->name('all');
@@ -54,49 +62,59 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
 });
 
-Route::prefix('admin')->group(function () {
-    Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('admin.login');
-    Route::post('/login','Auth\AdminLoginController@login')->name('admin.login.submit');
-    Route::get('/dashboard', 'Admins\AdminDashboardController@index')->name('admin.dashboard');
+Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('login');
+    Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
+    Route::get('/dashboard', 'Admins\AdminDashboardController@index')->name('dashboard');
     Route::get('/order/management', 'Admins\AdminDashboardController@orderList');
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
-    Route::get('/accounts/pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('admin.accounts.pending');
+    Route::get('/accounts/pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('accounts.pending');
    
    //Datatables data using ajax calls
-    Route::get('/accounts/active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('admin.accounts.active.ajax');
-    Route::get('/accounts/pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('admin.accounts.pending.ajax');
-    Route::get('/accounts/block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('admin.accounts.block.ajax');
+    Route::get('/accounts/active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('accounts.active.ajax');
+    Route::get('/accounts/pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('accounts.pending.ajax');
+    Route::get('/accounts/block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('accounts.block.ajax');
 
-    Route::get('/accounts/active', 'Admins\AdminDashboardController@activeAccountsList')->name('admin.accounts.active');
+    Route::get('/accounts/active', 'Admins\AdminDashboardController@activeAccountsList')->name('accounts.active');
     Route::get('/accounts/block', 'Admins\AdminDashboardController@blockAccountsList');
     //add rates view
-    Route::get('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRatesView')->name('admin.add.rates');
-    Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('admin.add.rates.submit');
+    Route::get('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRatesView')->name('add.rates');
+    Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('add.rates.submit');
     //edit rates
-    Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('admin.edit.rates');
-    Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('admin.edit.rates.submit');
+    Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('edit.rates');
+    Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
 
     //ajax request
-    Route::put('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('admin.account.status');
+    Route::put('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('account.status');
     //new address
-    //Management
-    Route::get('/management/city','Admins\AdminDashboardController@cityView')->name('admin.management.city');
-    Route::get('/management/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('admin.management.city.ajax');
+
+    Route::get('/management/city','Admins\AdminDashboardController@cityView')->name('management.city');
+    Route::get('/management/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('management.city.ajax');
     Route::get('/management/city/form','Admins\AdminDashboardController@getCityForm');
-    Route::get('/management/city/{id}/edit/form','Admins\AdminDashboardController@getEditCityForm')->name('admin.management.city.edit');
-    Route::post('/management/city','Admins\AdminDashboardController@addCityHub')->name('admin.management.city');
-    Route::put('/management/city/status', 'Admins\AdminDashboardController@CityStatus')->name('admin.management.city.status');
+    Route::get('/management/city/{id}/edit/form','Admins\AdminDashboardController@getEditCityForm')->name('management.city.edit');
+    Route::put('/management/city/{id}/edit/form','Admins\AdminDashboardController@updateCity')->name('management.city.edit');
+    Route::post('/management/city','Admins\AdminDashboardController@addCityHub')->name('management.city');
+    Route::put('/management/city/status', 'Admins\AdminDashboardController@CityStatus')->name('management.city.status');
+    Route::get('/management/city/{id}/status/ajax','Admins\AdminDashboardController@CityStatusCheck')->name('management.city.status.ajax');
 
+	Route::prefix('pickups')->name('pickups.')->group(function () {
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('', 'Admins\AdminPickupsController@pending_index')->name('index');
+            Route::get('/list', 'Admins\AdminPickupsController@pending_list')->name('list');
+            Route::put('assign', 'Admins\AdminPickupsController@pending_assign')->name('assign');
+            Route::put('multiple_cancel', 'Admins\AdminPickupsController@pending_multiple_cancel')->name('multiple_cancel');
+            Route::put('cancel', 'Admins\AdminPickupsController@pending_cancel')->name('cancel');
+        });
+    });
 
-    Route::get('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
-    Route::post('/logout','Auth\AdminLoginController@logout')->name('admin.logout');
+    Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
+    Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');
     Route::get('/accounts/pending/{id}/shipping' ,'Admins\AdminDashboardController@viewShippingInfo');
     Route::get('/accounts/pending/{id}/rates' ,'Admins\AdminDashboardController@viewShipperRates');
-//    Route::get('/pickup', 'Admins\AdminDashboardController@pickup');
     //Reset Password
-    Route::post('password/email','Auth\AdminForgotPasswordController@sendResetLinkEmail')->name('admin.password.email');
-    Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('admin.password.request');
+    Route::post('password/email','Auth\AdminForgotPasswordController@sendResetLinkEmail')->name('password.email');
+    Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset');
-    Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('admin.password.reset');
+    Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
 });

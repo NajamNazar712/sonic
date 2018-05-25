@@ -26,7 +26,7 @@
         <div class="col-6">
             <fieldset class="form-group">
                 <select name="hubs" id="hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    <option value="" selected>Select a hub</option>
+                    <option value="{{(isset($cityhub[0])? $cityhub[0]->id:'')}}" selected>{{(isset($cityhub[0])? $cityhub[0]->name:'')}}</option>
                     @foreach($hubs as $hub)
                         <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
                     @endforeach
@@ -36,41 +36,52 @@
     </div>
 
     <div class="row">
-        <div class="col-4">
+        <div class="col">
             <h2 class="card-title"><U>Services</U></h2>
         </div>
-        <div class="col-8">
-            <fieldset class="mt-1">
-                <input type="checkbox" name="pickup" class="icheckbox">
+
+    </div>
+    <div class="row mb-2">
+        <div class="col-3">
+            <h4 class="card-title font-weight-bold">Pickup</h4>
+        </div>
+        <div class="col">
+            <fieldset class="">
+                <input type="checkbox" name="pickup" class="icheckbox" {{($city->pickup == 1)? 'checked':''}}>
                 <label for="pickup" class="">Pickup</label>
             </fieldset>
         </div>
-    </div>
-    <div class="row mb-2">
-
         <div class="col-12">
-            <h4 class="card-title">Delivery</h4>
+            <h4 class="card-title font-weight-bold">Delivery</h4>
 
             @foreach($booking as $index => $booking)
-                @php
-                $booktypeid = '';
-                    if(isset($delivery->booking_type_id)){
-                        if($delivery->booking_type_id == $booking->id){
-                            $booktypeid = 'checked';
-                        }
-                    }
-                @endphp
-                <div class="bs-callout-primary callout-border-left callout-square p-1">
-                    <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" rel="{{(isset($delivery->booking_type_id)? (($delivery->booking_type_id == $booking->id)? $delivery->booking_type_id:''):'')}}" {{(isset($delivery->booking_type_id) && ($delivery->booking_type_id == $booking->id))? 'checked': ''}} class="icheckbox bookingtype"></strong>
-                    <div class="mt-1">
-                        @foreach($shippingMode as $shipping)
 
+                <div class="bs-callout-primary callout-border-left callout-square p-1">
+                    <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" rel="" {{isset($delivery[$booking->id])? 'checked':''}} class="icheckbox bookingtype"></strong>
+                    <div class="mt-1">
+
+                        @foreach($shippingMode as $sindex => $shipping)
+                            @php
+                            $checked = '';
+                            $mode_id = '';
+                            if(isset($delivery[$booking->id])){
+                                if(in_array($shipping->id, $delivery[$booking->id]['mode'])){
+                                    $checked = 'checked';
+                                    $mode_id = $sindex;
+                                }else{
+                                    $checked = '';
+                                    $mode_id = '';
+                                }
+                            }
+                            @endphp
                             <fieldset class="checkbox-inline mr-1">
-                                <input type="checkbox" name="delivery[{{$booking->id}}][{{$shipping->id}}]" class="icheckbox shippingmode" disabled>
-                                <label for="delivery[{{$booking->id}}][{{$shipping->id}}]" class="">{{ucfirst($shipping->mode)}}</label>
+                                <input type="checkbox" name="delivery[{{$booking->id}}][{{$shipping->id}}]" {{$checked}}  class="icheckbox shippingmode" {{isset($delivery[$booking->id])? '':'disabled'}}>
+                                <input type="hidden" name="delivery_key[{{$booking->id}}][{{$shipping->id}}]" value="{{$mode_id}}" class="deliverykey">
+                                <label for="delivery[{{$booking->id}}][{{$shipping->id}}]" class="">{{ucfirst($shipping->mode)}}-{{$mode_id}}</label>
                             </fieldset>
 
                         @endforeach
+
                     </div>
                 </div>
 
@@ -78,14 +89,12 @@
 
         </div>
     </div>
-<div>
+    <div>
 
-    <pre>
-        @foreach($delivery as $d)
-            {{$d}}
-            @endforeach
-    </pre>
-</div>
+        <pre>
+            @json($delivery)
+        </pre>
+    </div>
 
     <div class="modal-footer">
         <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Add City</button>
@@ -141,6 +150,13 @@
 
             $(shippingmode).iCheck('disable');
         });
+
+        $('input.shippingmode').on('ifUnchecked',function () {
+            var delivery_key = $(this).parent().next().closest('input.deliverykey');
+            delivery_key.val('');
+
+        });
+
 
         $( "#editCityHubForm" ).validate({
             errorClass:"danger",
