@@ -4,7 +4,7 @@ namespace App\Http\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class PickupsJourney extends Model
+class PickupNote extends Model
 {
-	protected $table = 'pickups_journey';
+	//
 }
