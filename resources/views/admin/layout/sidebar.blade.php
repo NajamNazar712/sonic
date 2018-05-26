@@ -22,6 +22,7 @@
                     <li><a class="menu-item" href="/admin/accounts/block" data-i18n="nav.dash.ecommerce">Block Accounts List</a></li>
                 </ul>
             </li>
+			<li class=" nav-item"><a href="/admin/management/city"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">City Management</span></a></li>
 
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Pickups</span></a>
               <ul class="menu-content">

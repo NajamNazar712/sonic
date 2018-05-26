@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\City;
+use App\CityDelivery;
+use App\CityHub;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\StandardCashHandlingCharge;
 use App\Http\Models\Admin\StandardInsuranceCharge;
@@ -9,8 +12,10 @@ use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\Admin\StandardBookingTypeCharge;
+use App\Http\Models\BookingType;
 use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\FuelSurcharge;
+use App\Http\Models\HubInfo;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
 use Illuminate\Http\Request;
@@ -23,7 +28,7 @@ use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\DiscountCharge;
 use App\Http\Models\RateStatus;
-
+use App\Http\Models\ShippingMode;
 //standard rates
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
@@ -62,20 +67,33 @@ class AdminDashboardController extends Controller
     }
     public function UserStatus(Request $request){
 //        dd($request);
-        $id = $request->shid;
+        $id = $request->shid; //shipper id
         $status = $request->status;
-//        $active = User::where('id',$id)->s
-        if($status == 'unblock'){
-            $user = User::where('id',$id)->where('blacklist',1)->update(['blacklist'=>0]);
-            $active = User::find($id)->first()->active;
-            if($user == 1){
-                if($active == 1){
-                    return redirect()->route('admin.accounts.active');
-                }elseif($active == 0){
-                    return redirect()->route('admin.accounts.pending');
-                }
+        if($status == 'active'){
+            $user = User::find($id);
+            if($user->status == 2){
+               $action = User::where('id',$id)->update(['status'=>3]);
+               if($action == 1){
+                   return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
+               }else{
+                   return back()->with('danger', 'There is some problem please try again.');
+               }
+            }else{
+                return back()->with('danger', 'This user\'s rates are not set.');
             }
         }
+
+//        if($status == 'unblock'){
+//            $user = User::where('id',$id)->where('blacklist',1)->update(['blacklist'=>0]);
+//            $active = User::find($id)->first()->active;
+//            if($user == 1){
+//                if($active == 1){
+//                    return redirect()->route('admin.accounts.active');
+//                }elseif($active == 0){
+//                    return redirect()->route('admin.accounts.pending');
+//                }
+//            }
+//        }
     }
     /**
      * @return \Illuminate\Http\JsonResponse
@@ -111,15 +129,7 @@ class AdminDashboardController extends Controller
         $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
         return response()->json($returnHTML);
     }
-    public function pickup(){
-//        $cit = CityInfo::all()->where('city_code','202');
-        $cit = PickupType::find(1)->cities()->orderBy('city_name')->get();
-//        $cite = $cit->cities()->get();
-//        return $cite;
 
-
-//    return $cit;
-    }
     public function addRatesView($id){
         $user = User::find($id);
         $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
@@ -139,15 +149,15 @@ class AdminDashboardController extends Controller
         $switches = RateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
-        $weight = WeightCharge::all()->groupBy('shipping_mode_id');
+        $weight = WeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 //        $cash = '';
-        $bookingType = BookingTypeCharges::all()->groupBy('shipping_mode_id');
-        $cash = CashHandlingCharge::all()->groupBy('shipping_mode_id');
-        $insurance = InsuranceCharge::all()->groupBy('shipping_mode_id');
-        $return = ReturnCharge::all()->groupBy('shipping_mode_id');
-        $fuel = FuelSurcharge::all()->groupBy('shipping_mode_id');
-        $packaging = PackagingCharge::all()->groupBy('shipping_mode_id');
-        $discount = DiscountCharge::all()->groupBy('shipping_mode_id');
+        $bookingType = BookingTypeCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $cash = CashHandlingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $insurance = InsuranceCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $return = ReturnCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $fuel = FuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $packaging = PackagingCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $discount = DiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
 //        return $discount;
         return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount]);
 
@@ -1633,8 +1643,8 @@ class AdminDashboardController extends Controller
             //dd($weightAlready);
         }
         if($request->authorize == 1){
-            User::where('id',$id)->update(['authorize'=>1]);
-
+            User::where('id',$id)->update(['status'=>2]);
+            return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
         }
 
                 return redirect()->back()->with('success','All Rates are updated');
@@ -2671,12 +2681,13 @@ class AdminDashboardController extends Controller
 
             }
             }
+            User::where('id',$id)->update(['status'=>1]);
 
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
     public function activeAccountListAjax(){
        $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('active',1)->where('blacklist',0);
+            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('status',3)->where('blacklist',0);
 
         return Datatables::of($users)->addColumn("action", function ($result) {
                                             return " <span class='dropdown'>
@@ -2696,10 +2707,17 @@ class AdminDashboardController extends Controller
 
     public function pendingAccountListAjax(){
         $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('active',0)->where('blacklist',0);
+            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at'])->whereIn('status',[0,1,2])->where('blacklist',0);
          //$isRate = RateStatus::where('user_id',$users->id);
 
-        return Datatables::of($users)->addColumn("action", function ($result) {
+        return Datatables::of($users)
+            ->editColumn('created_at', function ($users) {
+                return $users->created_at ? with(new Carbon($users->created_at))->format('d/m/Y H:i:s A') : '';
+            })
+            ->editColumn('status', function ($users) {
+                return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
+            })
+            ->addColumn("action", function ($result) {
                                             $dropdown = "
                                                 <span class='dropdown'>
                                                     <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
@@ -2707,7 +2725,10 @@ class AdminDashboardController extends Controller
                                                     <div class='dropdown-menu open-left arrow'>
                                                       <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
                                                       <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>";
+                                                    if($result->status == 2){
+                                                        $dropdown .= "<a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='active' data-toggle='modal' data-target='#ConfirmModal'><i class='ft-plus-circle primary'></i> Activate Account</a>";
 
+                                                    }
                                             if (RateStatus::where('user_id', $result->id)->exists()) {
                                                 $dropdown .= "
                                                         <a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>
@@ -2747,4 +2768,213 @@ class AdminDashboardController extends Controller
 
     }
 
+    public function cityView(){
+//        $hubs = City::where('hub',1)->get();
+//        return $hubs[0]->id;
+        return view('admin.management.city_management');
+    }
+    public function cityListAjax(){
+        $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
+        ->select(['cities.id','cities.name' ,'h.name as hub','cities.hub_id','cities.hub as isHub','cities.status']);
+        return Datatables::of($cities)
+        ->editColumn('status', function ($cities) {
+            return $cities->status == 0? 'Inactive': 'Active';
+        })
+        ->addColumn("action", function ($result) {
+            $dropdown = "<span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update City Status</a>";
+                                              if($result->status == 1) {
+                                                  $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='cityInactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Deactivate City</a>";
+                                              }else {
+                                                  $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='cityactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Activate City</a>";
+                                              }
+                                            $dropdown .="</div></span>";
+                                              return $dropdown;
+        })
+            ->make(true);
+    }
+    public function getCityForm(){
+        $hubs = City::where('hub',1)->get();
+        $shippingMode = ShippingMode::all();
+        $booking = BookingType::all();
+        return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'booking'=>$booking]);
+    }
+    public function getEditCityForm($id){
+//        return $id;
+        $city = City::find($id);
+        if($city->hub == 1){
+            $cityhub = '';
+            $isHub = 1;
+        }else{
+            $cityhub = City::select(['id','name'])->where('id',$city->hub_id)->get();
+            $isHub = 0;
+
+        }
+        $delivery_array = CityDelivery::where('city_id',$city->id)->select(['id','booking_type_id','shipping_mode_id'])->get();
+        $delivery_row_id = CityDelivery::where('city_id',$city->id)->select('id')->get();
+        $delivery = array();
+        foreach ($delivery_array as $delivery_details) {
+            $delivery[$delivery_details['booking_type_id']]['mode'][] = $delivery_details['shipping_mode_id'];
+            $delivery[$delivery_details['booking_type_id']]['id'][] = $delivery_details['id'];
+        }
+
+
+        $hubs = City::where('hub',1)->get();
+        $shippingMode = ShippingMode::all();
+        $booking = BookingType::all();
+        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'booking'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
+
+    }
+
+    public function updateCity(Request $request,$id){
+        if($request->postType == 'city'){
+//            return $request;
+
+            $city = City::where('id',$id)->update([
+                'name'=>$request->cityName,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'status'=>1
+            ]);
+
+            foreach ($request->delivery as $booking_type_id => $shipping_modes) {
+                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+                    CityDelivery::where('city_id',$id)->update([
+                        'booking_type_id'=>$booking_type_id,
+                        'shipping_mode_id'=>$shipping_mode_id,
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('success','city added successfully');
+        }elseif($request->postType == 'hub'){
+//            return $request;
+            $city = City::where('id',$id)->update([
+                'name'=>$request->cityName,
+                'hub'=>1,
+                'hub_id'=>$id,
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'status'=>1
+            ]);
+            $delivery_id = array();
+            foreach ($request->delivery_key as $rid) {
+                foreach ($rid as $row_id => $row_value){
+                    if($row_value != null){
+                        $delivery_id[] = $row_value;
+
+                    }
+                }
+            }
+
+            CityDelivery::where('city_id',$id)->whereNotIn('id',$delivery_id)->delete();
+            return $delivery_id;
+//            foreach ($request->delivery as $booking_type_id => $shipping_modes) {
+//                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+//                    CityDelivery::where('city_id',$id)->update([
+//                        'booking_type_id'=>$booking_type_id,
+//                        'shipping_mode_id'=>$shipping_mode_id,
+//                    ]);
+//                }
+//            }
+            return redirect()->back()->with('success','Hub city added successfully');
+        }
+    }
+    //update city end
+    public function addCityHub(Request $request){
+
+        if($request->postType == 'city'){
+
+            $city = City::create([
+                'name'=>$request->cityName,
+                'hub'=>0,
+                'hub_id'=>$request->hubs,
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'status'=>1
+            ]);
+
+            foreach ($request->delivery as $booking_type_id => $shipping_modes) {
+                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+                    CityDelivery::create([
+                        'city_id'=>$city->id,
+                        'booking_type_id'=>$booking_type_id,
+                        'shipping_mode_id'=>$shipping_mode_id,
+                    ]);
+                }
+            }
+
+            return redirect()->back()->with('success','city added successfully');
+        }elseif($request->postType == 'hub'){
+            $city = City::create([
+                'name'=>$request->cityName,
+                'hub'=>1,
+                'pickup'=>($request->has('pickup'))? 1:0,
+                'status'=>1
+            ]);
+            City::where('id',$city->id)->update(['hub_id'=>$city->id]);
+
+            foreach ($request->delivery as $booking_type_id => $shipping_modes) {
+                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+                    CityDelivery::create([
+                        'city_id'=>$city->id,
+                        'booking_type_id'=>$booking_type_id,
+                        'shipping_mode_id'=>$shipping_mode_id,
+                    ]);
+                }
+            }
+            return redirect()->back()->with('success','Hub city added successfully');
+        }
+    }
+
+
+    public function CityStatus(Request $request){
+        $id = $request->cid; //city id
+        $status = $request->status;
+        if($status == 'cityInactive'){
+            $city = City::find($id);
+            if($city->status == 1 && $city->hub == 1){
+                $citylist = City::where('hub_id',$id)->where('id','!=',$id)->get();
+                if(count($citylist) > 0){
+
+                    return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
+                }elseif (count($citylist) == 0){
+                    $action = City::where('id',$city->id)->update(['status'=>0]);
+                    return redirect()->route('admin.management.city')->with('danger', 'There is some problem please try again.');
+                }
+            }elseif ($city->status == 1){
+                $action = City::where('id',$city->id)->update(['status'=>0]);
+                if($action == 1){
+                    return redirect()->route('admin.management.city')->with('success', 'City is inactive now.');
+                }else{
+                    return redirect()->route('admin.management.city')->with('danger', 'There is some problem please try again.');
+                }
+
+            }
+        }elseif($status == 'cityactive'){
+            $city = City::find($id);
+            if($city->status == 0){
+                $action = City::where('id',$city->id)->update(['status'=>1]);
+                if($action == 1){
+                    return redirect()->route('admin.management.city')->with('success', 'City is active now.');
+                }else{
+                    return redirect()->route('admin.management.city')->with('danger', 'There is some problem please try again.');
+                }
+            }else{
+                return redirect()->route('admin.management.city')->with('danger', 'This city is already inactive.');
+
+            }
+        }
+        return redirect()->route('admin.management.city')->with('danger', 'This city is already inactive.');
+    }
+
+    public function CityStatusCheck($id){
+        $hubs = City::select('name')->where('hub_id',$id)->where('id','!=',$id)->get();
+//        $cities_name = $hubs;
+
+//        return $hubs;
+        return response()->json($hubs);
+    }
 }

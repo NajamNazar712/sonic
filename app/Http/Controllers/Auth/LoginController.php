@@ -46,7 +46,7 @@ class LoginController extends Controller
         if ($user->blacklist) {
             auth()->logout();
             return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
-        }elseif (!$user->active) {
+        }elseif ($user->status != 3) {
             auth()->logout();
             return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
         }

@@ -2231,7 +2231,6 @@
 
         $('.weightAdditionDetain').on('change',function() {
             var wid = $(this).attr('id');
-            console.log(wid);
             var wswitch = document.querySelector('#' + wid);
             if (wswitch.checked === true) {
 

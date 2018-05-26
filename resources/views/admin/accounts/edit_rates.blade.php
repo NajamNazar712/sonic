@@ -20,6 +20,8 @@
                     <div class="card-content">
                         <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.edit.rates.submit',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
                             @csrf
+                            <input type="hidden" name="_method" value="PUT"/>
+
                             <div id="headingCollapse61" class="card-header border-success">
                                 <div class="row">
                                     <div class="col-md-6">
@@ -1916,7 +1918,7 @@
                                             <div class="col-md-6">
                                                 <label class="">Title</label>
                                                 <div class='form-group'>
-                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$det_discount_title_switch}} name="detain_discount_title" {{$det_discount_title}}/>
+                                                    <input type='text' class="form-control" data-rule-required="true" data-msg-required="This field is required" {{$det_discount_title_switch}} name="detain_discount_title" value="{{$det_discount_title}}"/>
                                                 </div>
 
                                             </div>
@@ -2812,7 +2814,9 @@
                                 <div class="form-group">
 
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
+                                    @if($shipper->status == 1)
                                     <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
+                                    @endif
                                 </div>
 
                             </div>

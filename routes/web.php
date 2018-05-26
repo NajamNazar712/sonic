@@ -82,13 +82,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('add.rates.submit');
     //edit rates
     Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('edit.rates');
-    Route::post('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
+    Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
 
     //ajax request
-    Route::post('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('account.status');
+    Route::put('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('account.status');
     //new address
 
-    Route::prefix('pickups')->name('pickups.')->group(function () {
+    Route::get('/management/city','Admins\AdminDashboardController@cityView')->name('management.city');
+    Route::get('/management/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('management.city.ajax');
+    Route::get('/management/city/form','Admins\AdminDashboardController@getCityForm');
+    Route::get('/management/city/{id}/edit/form','Admins\AdminDashboardController@getEditCityForm')->name('management.city.edit');
+    Route::put('/management/city/{id}/edit/form','Admins\AdminDashboardController@updateCity')->name('management.city.edit');
+    Route::post('/management/city','Admins\AdminDashboardController@addCityHub')->name('management.city');
+    Route::put('/management/city/status', 'Admins\AdminDashboardController@CityStatus')->name('management.city.status');
+    Route::get('/management/city/{id}/status/ajax','Admins\AdminDashboardController@CityStatusCheck')->name('management.city.status.ajax');
+
+	Route::prefix('pickups')->name('pickups.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\AdminPickupsController@pending_index')->name('index');
             Route::get('/list', 'Admins\AdminPickupsController@pending_list')->name('list');
@@ -110,7 +119,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');
     Route::get('/accounts/pending/{id}/shipping' ,'Admins\AdminDashboardController@viewShippingInfo');
     Route::get('/accounts/pending/{id}/rates' ,'Admins\AdminDashboardController@viewShipperRates');
-    Route::get('/pickup', 'Admins\AdminDashboardController@pickup');
     //Reset Password
     Route::post('password/email','Auth\AdminForgotPasswordController@sendResetLinkEmail')->name('password.email');
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
