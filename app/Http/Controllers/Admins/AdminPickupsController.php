@@ -8,6 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Shipment;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\PickupNote;
+use App\Http\Models\PickupNoteRequest;
+use App\Http\Models\PickupNoteStatus;
 use App\Http\Models\PickupNotesJourney;
 
 use Auth;
@@ -27,7 +29,7 @@ class AdminPickupsController extends Controller
       $pickup_request = PickupRequest::whereDate('pickup_date', $shipment->pickup_date)->where('pickup_address_id', $shipment->pickup_address_id)->where('status', 0);
 
       if ($pickup_request->exists()) {
-        $pickup_request = $pickup_request->first();
+        $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
 
         $bookings = $pickup_request->bookings + 1;
         $total_estimated_weight = $pickup_request->total_estimated_weight + $shipment->estimated_weight;
@@ -139,7 +141,6 @@ class AdminPickupsController extends Controller
 
       $pickup_note = new PickupNote();
 
-      $pickup_note->pickup_request_id = $pickup_request_id;
       $pickup_note->rider_id = $rider_id;
       $pickup_note->pickups = $pickups;
       $pickup_note->bookings = $bookings;
@@ -153,11 +154,22 @@ class AdminPickupsController extends Controller
       }
 
       $pickup_note->assigned_by_user_id = Auth::id();
-      $pickup_note->status_id = 0;
+      $pickup_note->status_id = 1;
 
       $pickup_note->save();
 
-      PickupNotesJourneyController::add($pickup_note->id, 0, 'Pickup Note has been Created!', Auth::id());
+      $pickup_note_id = $pickup_note->id;
+
+      foreach ($pickup_request_ids as $pickup_request_id) {
+        $pickup_note_request = new PickupNoteRequest();
+
+        $pickup_note_request->pickup_note_id = $pickup_note_id;
+        $pickup_note_request->pickup_request_id = $pickup_request_id;
+
+        $pickup_note_request->save();
+      }
+
+      PickupNotesJourneyController::add($pickup_note_id, 0, 'Pickup Note has been Created!', Auth::id());
 
       return ['status' => 0, 'success' => 'Pickup Request(s) has been Assigned to the Rider'];
     }
@@ -206,20 +218,35 @@ class AdminPickupsController extends Controller
     }
 
     public function assigned_list(Request $request) {
-      $pickup_notes = PickupNote::join('users as u', 'pickup_notes.assigned_by_user_id', '=', 'u.id')
-      ->select('pickup_notes.id', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'u.name as assigned_by', 'pickup_notes.status_id as status')
-      ->where('pickup_notes.status_id', 0);
+      $pickup_notes = PickupNote::join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
+      ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
+      ->select('pickup_notes.id', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
+      ->where('pickup_notes.status_id', '<', 3);
 
       $datatables = Datatables::of($pickup_notes)
-      ->editColumn('assigned_date', function($pickup_notes) {
-        return Carbon::parse($pickup_notes->assigned_date)->format('d/m/Y H:i A');
+      ->editColumn('assigned_date', function($pickup_note) {
+        return Carbon::parse($pickup_note->assigned_date)->format('d/m/Y H:i A');
       })
       ->editColumn('total_estimated_weight', '{{ floatval($total_estimated_weight) }}')
       ->editColumn('pickup_type', function($pickup_note) {
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
       })
-      ->addColumn('action', function($pickup_notes) {
-        return '<button class="btn btn-sm btn-danger cancel">Cancel</button>';
+      ->addColumn('pickup_note_no', function($pickup_note) {
+        return ($pickup_note->status_id == 2) ? $pickup_note->id : '';
+      })
+      ->addColumn('action', function($pickup_note) {
+        $cancel_button = '<button class="btn btn-sm btn-danger d-block mx-auto cancel">Cancel</button>';
+        $view_details_button = '<button class="btn btn-sm btn-info d-block mx-auto mt-1 view_details">View Details</button>';
+        $generate_pickup_note_button = '<button class="btn btn-sm btn-primary d-block mx-auto mt-1 generate_pickup_note">Generate Pickup Note</button>';
+        $print_pickup_note_button = '<button class="btn btn-sm btn-primary d-block mx-auto mt-1 print_pickup_note">Print Pickup Note</button>';
+        $sms_rider_button = '<button class="btn btn-sm btn-primary d-block mx-auto mt-1 sms_rider">SMS Rider</button>';
+
+        if ($pickup_note->status_id == 1) {
+          return $cancel_button . $view_details_button . $generate_pickup_note_button;
+        }
+        else {
+          return $cancel_button . $view_details_button . $print_pickup_note_button . $sms_rider_button;
+        }
       })
       ->filterColumn('pickup_type', function($query, $keyword) {
         $keyword = strtolower($keyword);
@@ -233,8 +260,71 @@ class AdminPickupsController extends Controller
         else {
           $query->whereRaw('false');
         }
+      })
+      ->filterColumn('pickup_note_no', function($query, $keyword) {
+        $query->where('pickup_notes.status_id', '=', 2)->where('pickup_notes.id', '=', $keyword);
       });
 
       return $datatables->make(true);
+    }
+
+    public function assigned_cancel(Request $request) {
+      $pickup_note_id = $request->input('pickup_note_id');
+
+      $pickup_note = PickupNote::find($pickup_note_id);
+
+      if ($pickup_note->status_id == 1) {
+        $pickup_note->status_id = 5;
+
+        $pickup_note->save();
+
+        foreach (PickupNote::find($pickup_note_id)->pickup_note_requests as $pickup_note_request) {
+          $pickup_request = $pickup_note_request->pickup_request;
+
+          $pickup_request->status = 0;
+
+          $pickup_request->pending_bookings = $pickup_request->bookings;
+
+          $pickup_request->save();
+        }
+
+        PickupNotesJourneyController::add($pickup_note_id, 5, 'Pickup Note has been Cancelled!', Auth::id());
+
+        return ['status' => 0, 'success' => 'Pickup has been Cancelled'];
+      }
+      else {
+        return ['status' => 1, 'error' => 'Selected Pickup has already been modified'];
+      }
+    }
+
+    public function assigned_view_details(Request $request) {
+      $pickup_note_id = $request->input('pickup_note_id');
+
+      $pickup_note = PickupNote::find($pickup_note_id);
+
+      $pickup_note_requests = $pickup_note->pickup_note_requests;
+
+      $details = array();
+
+      foreach ($pickup_note_requests as $pickup_note_request) {
+        $pickup_request = $pickup_note_request->pickup_request;
+
+        $shipper = $pickup_request->shipper;
+        $pickup_address = $pickup_request->pickup_address;
+
+        $detail = array();
+
+        $detail['shipper'] = $shipper->name;
+        $detail['contact_person'] = $pickup_address['poc'];
+        $detail['contact_number'] = $pickup_address['phone'];
+        $detail['address'] = $pickup_address['pickup_address'];
+        $detail['bookings'] = $pickup_request['bookings'];
+        $detail['total_estimated_weight'] = floatval($pickup_request['total_estimated_weight']);
+        $detail['pickup_type'] = ($pickup_request['pickup_type'] == 0) ? 'Light' : 'Heavy';
+
+        $details[] = $detail;
+      }
+
+      return $details;
     }
 }
