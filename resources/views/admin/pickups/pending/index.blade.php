@@ -122,6 +122,12 @@
 
 	<script>
 		$(document).ready(function() {
+			$('#assign_to_rider').modal({
+				backdrop: 'static',
+				keyboard: false,
+				show: false
+			});
+
 			var selected_rows = [];
 
 			var table = $('#datatable').DataTable({

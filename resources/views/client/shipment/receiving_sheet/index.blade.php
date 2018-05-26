@@ -125,6 +125,12 @@
 				});
 			}
 
+			$('#add_in_receiving_sheet').modal({
+				backdrop: 'static',
+				keyboard: false,
+				show: false
+			});
+
 			var selected_rows = [];
 
 			var table = $('.datatable').DataTable({
