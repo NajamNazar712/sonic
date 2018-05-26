@@ -29,7 +29,7 @@ class AdminPickupsController extends Controller
       $pickup_request = PickupRequest::whereDate('pickup_date', $shipment->pickup_date)->where('pickup_address_id', $shipment->pickup_address_id)->where('status', 0);
 
       if ($pickup_request->exists()) {
-        $pickup_request = $pickup_request->first();
+        $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
 
         $bookings = $pickup_request->bookings + 1;
         $total_estimated_weight = $pickup_request->total_estimated_weight + $shipment->estimated_weight;
@@ -278,13 +278,15 @@ class AdminPickupsController extends Controller
 
         $pickup_note->save();
 
-        $pickup_request = PickupRequest::find($pickup_note->pickup_request_id);
+        foreach (PickupNote::find($pickup_note_id)->pickup_note_requests as $pickup_note_request) {
+          $pickup_request = $pickup_note_request->pickup_request;
 
-        $pickup_request->status = 0;
+          $pickup_request->status = 0;
 
-        $pickup_request->pending_bookings = $pickup_request->bookings;
+          $pickup_request->pending_bookings = $pickup_request->bookings;
 
-        $pickup_request->save();
+          $pickup_request->save();
+        }
 
         PickupNotesJourneyController::add($pickup_note_id, 5, 'Pickup Note has been Cancelled!', Auth::id());
 

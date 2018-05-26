@@ -265,11 +265,9 @@
 
 								if (selected_rows.length > 0) {
 									table.button(0).enable();
-									table.button(1).enable();
 								}
 								else {
 									table.button(0).disable();
-									table.button(1).disable();
 								}
 
 								table.ajax.reload();
