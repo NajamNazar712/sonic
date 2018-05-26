@@ -13,7 +13,7 @@ class ShippingModeSameDayTimingTableSeeder extends Seeder
     {
         DB::table('shipping_mode_same_day_timings')->insert(array(
             array('timing'=>'6 Hours'),
-            array('mode'=>'Same-day')
+            array('timing'=>'Same-day')
         ));
     }
 }
