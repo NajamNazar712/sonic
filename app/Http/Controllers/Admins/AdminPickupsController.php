@@ -273,7 +273,7 @@ class AdminPickupsController extends Controller
 
       $pickup_note = PickupNote::find($pickup_note_id);
 
-      if ($pickup_note->status_id == 1) {
+      if ($pickup_note->status_id < 3) {
         $pickup_note->status_id = 5;
 
         $pickup_note->save();
@@ -326,5 +326,181 @@ class AdminPickupsController extends Controller
       }
 
       return $details;
+    }
+
+    public function assigned_generate_pickup_note(Request $request) {
+      $pickup_note_id = $request->input('pickup_note_id');
+
+      $pickup_note = PickupNote::find($pickup_note_id);
+
+      if ($pickup_note->status_id == 1) {
+        $pickup_note->status_id = 2;
+
+        $pickup_note->save();
+
+        return ['status' => 0, 'success' => 'Pickup Note has been Generated'];
+      }
+      else {
+        return ['status' => 1, 'error' => 'Selected Pickup has already been modified'];
+      }
+    }
+
+    public function assigned_print(Request $request) {
+      $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+      $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Pickup Note</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                        margin: 0mm;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color {
+                        color: #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="p-1">
+      ';
+
+      foreach($request->ids as $id) {
+        $pickup_note = PickupNote::find($id);
+
+        //Integrate with Rider Information
+        $html .= '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle color primary"><strong>Pickup Note</strong></td>
+                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Rider Name</strong></td>
+                            <td>Temporary Rider</td>
+                            <td rowspan="7" class="text-center align-middle">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Category</strong></td>
+                            <td>-</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Route</strong></td>
+                            <td>-</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Pickups</strong></td>
+                            <td>-</td>
+                          </tr>
+                        </tbody>
+                      </table>
+        ';
+
+        $html .= '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="color primary"><strong>S. No.</strong></td>
+                            <td class="color primary"><strong>Company Name</strong></td>
+                            <td class="color primary"><strong>Contact Person</strong></td>
+                            <td class="color primary"><strong>Contact Number</strong></td>
+                            <td class="color primary"><strong>Pickup Address</strong></td>
+                            <td class="color primary"><strong>Bookings</strong></td>
+                          </tr>
+      ';
+
+        $serial_number = 1;
+
+        $pickup_note_requests = $pickup_note->pickup_note_requests;
+
+        foreach ($pickup_note_requests as $pickup_note_request) {
+          $pickup_request = $pickup_note_request->pickup_request;
+
+          $shipper = $pickup_request->shipper;
+          $pickup_address = $pickup_request->pickup_address;
+
+          $html .= '
+                          <tr>
+                            <td>' . $serial_number . '</td>
+                            <td>' . $shipper->name . '</td>
+                            <td>' . $pickup_address['poc'] . '</td>
+                            <td>' . $pickup_address['phone'] . '</td>
+                            <td>' . $pickup_address['pickup_address'] . '</td>
+                            <td>' . $pickup_request['bookings'] . '</td>
+                          </tr>
+          ';
+
+          $serial_number++;
+        }
+
+        $html .= '
+                        </tbody>
+                      </table>
+
+                      <hr>
+        ';
+      }
+
+      $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+      return $html;
     }
 }

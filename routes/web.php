@@ -108,9 +108,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('assigned')->name('assigned.')->group(function () {
             Route::get('', 'Admins\AdminPickupsController@assigned_index')->name('index');
-            Route::get('/list', 'Admins\AdminPickupsController@assigned_list')->name('list');
+            Route::get('list', 'Admins\AdminPickupsController@assigned_list')->name('list');
             Route::put('cancel', 'Admins\AdminPickupsController@assigned_cancel')->name('cancel');
             Route::post('view_details', 'Admins\AdminPickupsController@assigned_view_details')->name('view_details');
+            Route::put('generate_pickup_note', 'Admins\AdminPickupsController@assigned_generate_pickup_note')->name('generate_pickup_note');
+            Route::post('print', 'Admins\AdminPickupsController@assigned_print')->name('print');
         });
     });
 
