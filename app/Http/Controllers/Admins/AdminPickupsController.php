@@ -424,8 +424,8 @@ class AdminPickupsController extends Controller
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>Temporary Rider</td>
                             <td rowspan="7" class="text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($id, 12, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
                           <tr>
@@ -454,6 +454,7 @@ class AdminPickupsController extends Controller
                             <td class="color primary"><strong>Contact Number</strong></td>
                             <td class="color primary"><strong>Pickup Address</strong></td>
                             <td class="color primary"><strong>Bookings</strong></td>
+                            <td class="color primary"><strong>Pickup Date</strong></td>
                           </tr>
       ';
 
@@ -475,6 +476,7 @@ class AdminPickupsController extends Controller
                             <td>' . $pickup_address['phone'] . '</td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['bookings'] . '</td>
+                            <td>' . Carbon::parse($pickup_request['pickup_date'])->format('d/m/Y') . '</td>
                           </tr>
           ';
 

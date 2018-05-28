@@ -19,7 +19,7 @@
 								<thead>
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
-										<th class="border-primary border-darken-1">ID</th>
+										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Requested at</th>
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Contact Person</th>
@@ -165,7 +165,6 @@
 					enabled: false,
 					action: function (e, dt, node, config) {
 						swal({
-							title: selected_rows.join(', '),
 							text: 'Are you sure, you want to Cancel these Pickup(s)?',
 							icon: 'warning',
 							buttons: {
@@ -236,10 +235,10 @@
 				serverSide: true,
 				ajax: '{{ route('admin.pickups.pending.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[2, 'asc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-					{data: 'id', name: 'pickup_requests.id', class: "align-middle id"},
+					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'requested_at', name: 'pickup_requests.created_at', class: 'align-middle requested_at'},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
@@ -254,6 +253,10 @@
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
+					var info = table.page.info();
+
+					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
 					if ($.inArray(data.id, selected_rows) !== -1) {
 						table.row(row).select();
 					}
@@ -269,7 +272,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else {
@@ -353,7 +356,6 @@
 				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
 
 				swal({
-					title: pickup_request_id,
 					text: 'Are you sure, you want to Cancel this Pickup?',
 					icon: 'warning',
 					buttons: {

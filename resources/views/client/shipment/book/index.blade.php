@@ -701,7 +701,7 @@
 						icon: 'warning',
 						buttons: {
 							cancel: {
-								text: 'Cancel',
+								text: 'Close',
 								value: null,
 								visible: true,
 								closeModal: true,

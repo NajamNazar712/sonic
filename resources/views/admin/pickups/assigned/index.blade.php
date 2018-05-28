@@ -19,7 +19,7 @@
 								<thead>
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
-										<th class="border-primary border-darken-1">ID</th>
+										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Pickup(s)</th>
 										<th class="border-primary border-darken-1">Booking(s)</th>
 										<th class="border-primary border-darken-1">Total Estimated Weight (kg)</th>
@@ -173,7 +173,7 @@
 					selector: 'td.select-checkbox',
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
-				lengthMenu: [[25, 50, 100], [25, 50, 100]],
+				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
 				pageLength: 25,
 				stateSave: true,
 				pagingType: 'full_numbers',
@@ -181,10 +181,10 @@
 				serverSide: true,
 				ajax: '{{ route('admin.pickups.assigned.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[6, 'asc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-					{data: 'id', name: 'pickup_notes.id', class: 'align-middle id'},
+					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'pickups', name: 'pickup_notes.pickups', class: 'align-middle pickups'},
 					{data: 'bookings', name: 'pickup_notes.bookings', class: 'align-middle bookings'},
 					{data: 'total_estimated_weight', name: 'pickup_notes.total_estimated_weight', class: 'align-middle total_estimated_weight'},
@@ -196,6 +196,10 @@
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
+					var info = table.page.info();
+
+					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
 					if (data.status_id == 2) {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
@@ -215,7 +219,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else {
@@ -256,7 +260,6 @@
 
 				if ($(this).hasClass('cancel')) {
 					swal({
-						title: pickup_note_id,
 						text: 'Are you sure, you want to Cancel this Pickup?',
 						icon: 'warning',
 						buttons: {
@@ -347,7 +350,6 @@
 				}
 				else if ($(this).hasClass('generate_pickup_note')) {
 					swal({
-						title: pickup_note_id,
 						text: 'Are you sure, you want to Generate Pickup Note?',
 						icon: 'warning',
 						buttons: {
