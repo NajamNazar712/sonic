@@ -95,6 +95,10 @@
 			text-shadow: none;
 		}
 
+		.dropdown .dropdown-menu .dropdown-item {
+			white-space: normal;
+		}
+
 		#toast-bottom-center.toast-container {
 			text-align: center;
 		}
@@ -255,7 +259,7 @@
 				}
 			});
 
-			$('.datatable tbody').on('click', 'tr td.action button', function() {
+			$('.datatable tbody').on('click', 'tr td.action .dropdown .dropdown-menu .dropdown-item', function() {
 				var pickup_note_id = parseInt($(this).parents('tr').attr('id'));
 
 				if ($(this).hasClass('cancel')) {

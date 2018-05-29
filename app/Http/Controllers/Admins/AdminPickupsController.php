@@ -139,26 +139,55 @@ class AdminPickupsController extends Controller
         $total_estimated_weight += $pickup_request->total_estimated_weight;
       }
 
-      $pickup_note = new PickupNote();
+      $existing_pickup_note = FALSE;
 
-      $pickup_note->rider_id = $rider_id;
-      $pickup_note->pickups = $pickups;
-      $pickup_note->bookings = $bookings;
-      $pickup_note->total_estimated_weight = $total_estimated_weight;
+      $pickup_note = PickupNote::where('rider_id', $rider_id)->where('status_id', '=', 1);
 
-      if ($total_estimated_weight < 10) {
-        $pickup_note->pickup_type = 0;
+      if ($pickup_note->exists()) {
+        $pickup_note = $pickup_note->first();
+
+        $pickup_note->pickups += $pickups;
+        $pickup_note->bookings += $bookings;
+
+        $pickup_note->total_estimated_weight += $total_estimated_weight;
+
+        if ($total_estimated_weight < 10) {
+          $pickup_note->pickup_type = 0;
+        }
+        else {
+          $pickup_note->pickup_type = 1;
+        }
+
+        $pickup_note->save();
+
+        $pickup_note_id = $pickup_note->id;
+
+        PickupNotesJourneyController::add($pickup_note_id, $pickup_note->status_id, 'Pickup Request(s) has been added into the Pickup Note!', Auth::id());
       }
       else {
-        $pickup_note->pickup_type = 1;
+        $pickup_note = new PickupNote();
+
+        $pickup_note->rider_id = $rider_id;
+        $pickup_note->pickups = $pickups;
+        $pickup_note->bookings = $bookings;
+        $pickup_note->total_estimated_weight = $total_estimated_weight;
+
+        if ($total_estimated_weight < 10) {
+          $pickup_note->pickup_type = 0;
+        }
+        else {
+          $pickup_note->pickup_type = 1;
+        }
+
+        $pickup_note->assigned_by_user_id = Auth::id();
+        $pickup_note->status_id = 1;
+
+        $pickup_note->save();
+
+        $pickup_note_id = $pickup_note->id;
+
+        PickupNotesJourneyController::add($pickup_note_id, 0, 'Pickup Note has been Created!', Auth::id());
       }
-
-      $pickup_note->assigned_by_user_id = Auth::id();
-      $pickup_note->status_id = 1;
-
-      $pickup_note->save();
-
-      $pickup_note_id = $pickup_note->id;
 
       foreach ($pickup_request_ids as $pickup_request_id) {
         $pickup_note_request = new PickupNoteRequest();
@@ -168,8 +197,6 @@ class AdminPickupsController extends Controller
 
         $pickup_note_request->save();
       }
-
-      PickupNotesJourneyController::add($pickup_note_id, 0, 'Pickup Note has been Created!', Auth::id());
 
       return ['status' => 0, 'success' => 'Pickup Request(s) has been Assigned to the Rider'];
     }
@@ -235,17 +262,30 @@ class AdminPickupsController extends Controller
         return ($pickup_note->status_id == 2) ? $pickup_note->id : '';
       })
       ->addColumn('action', function($pickup_note) {
-        $cancel_button = '<button class="btn btn-sm btn-danger d-block mx-auto cancel">Cancel</button>';
-        $view_details_button = '<button class="btn btn-sm btn-info d-block mx-auto mt-1 view_details">View Details</button>';
-        $generate_pickup_note_button = '<button class="btn btn-sm btn-primary d-block mx-auto mt-1 generate_pickup_note">Generate Pickup Note</button>';
-        $print_pickup_note_button = '<button class="btn btn-sm btn-primary d-block mx-auto mt-1 print_pickup_note">Print Pickup Note</button>';
-        $sms_rider_button = '<button class="btn btn-sm btn-primary d-block mx-auto mt-1 sms_rider">SMS Rider</button>';
+        $cancel_button = '<button type="button" class="dropdown-item cancel"><i class="ft-plus-circle primary"></i> Cancel</button>';
+        $view_details_button = '<button type="button" class="dropdown-item view_details"><i class="ft-plus-circle primary"></i> View Details</button>';
+        $generate_pickup_note_button = '<button type="button" class="dropdown-item generate_pickup_note"><i class="ft-plus-circle primary"></i> Generate Pickup Note</button>';
+        $print_pickup_note_button = '<button type="button" class="dropdown-item print_pickup_note"><i class="ft-plus-circle primary"></i> Print Pickup Note</button>';
+        $sms_rider_button = '<button type="button" class="dropdown-item sms_rider"><i class="ft-plus-circle primary"></i> SMS Rider</button>';
 
         if ($pickup_note->status_id == 1) {
-          return $cancel_button . $view_details_button . $generate_pickup_note_button;
+          return '<span class="dropdown">
+                    <button type="button" class="btn btn-icon btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ft-settings"></i></button>
+                    <div class="dropdown-menu">
+                      ' . $cancel_button . $view_details_button . $generate_pickup_note_button . '
+                    </div>
+                  </span>
+          ';
         }
         else {
-          return $cancel_button . $view_details_button . $print_pickup_note_button . $sms_rider_button;
+          return '<span class="dropdown">
+                    <button type="button" class="btn btn-icon btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ft-settings"></i></button>
+                    <div class="dropdown-menu">
+                      ' . $cancel_button . $view_details_button . $print_pickup_note_button . $sms_rider_button . '
+                    </div>
+                  </span>
+
+          ';
         }
       })
       ->filterColumn('pickup_type', function($query, $keyword) {
@@ -337,6 +377,8 @@ class AdminPickupsController extends Controller
         $pickup_note->status_id = 2;
 
         $pickup_note->save();
+
+        PickupNotesJourneyController::add($pickup_note_id, 2, 'Pickup Note has been Generated!', Auth::id());
 
         return ['status' => 0, 'success' => 'Pickup Note has been Generated'];
       }
