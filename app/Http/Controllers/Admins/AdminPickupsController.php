@@ -139,26 +139,55 @@ class AdminPickupsController extends Controller
         $total_estimated_weight += $pickup_request->total_estimated_weight;
       }
 
-      $pickup_note = new PickupNote();
+      $existing_pickup_note = FALSE;
 
-      $pickup_note->rider_id = $rider_id;
-      $pickup_note->pickups = $pickups;
-      $pickup_note->bookings = $bookings;
-      $pickup_note->total_estimated_weight = $total_estimated_weight;
+      $pickup_note = PickupNote::where('rider_id', $rider_id)->where('status_id', '=', 1);
 
-      if ($total_estimated_weight < 10) {
-        $pickup_note->pickup_type = 0;
+      if ($pickup_note->exists()) {
+        $pickup_note = $pickup_note->first();
+
+        $pickup_note->pickups += $pickups;
+        $pickup_note->bookings += $bookings;
+
+        $pickup_note->total_estimated_weight += $total_estimated_weight;
+
+        if ($total_estimated_weight < 10) {
+          $pickup_note->pickup_type = 0;
+        }
+        else {
+          $pickup_note->pickup_type = 1;
+        }
+
+        $pickup_note->save();
+
+        $pickup_note_id = $pickup_note->id;
+
+        PickupNotesJourneyController::add($pickup_note_id, $pickup_note->status_id, 'Pickup Request(s) has been added into the Pickup Note!', Auth::id());
       }
       else {
-        $pickup_note->pickup_type = 1;
+        $pickup_note = new PickupNote();
+
+        $pickup_note->rider_id = $rider_id;
+        $pickup_note->pickups = $pickups;
+        $pickup_note->bookings = $bookings;
+        $pickup_note->total_estimated_weight = $total_estimated_weight;
+
+        if ($total_estimated_weight < 10) {
+          $pickup_note->pickup_type = 0;
+        }
+        else {
+          $pickup_note->pickup_type = 1;
+        }
+
+        $pickup_note->assigned_by_user_id = Auth::id();
+        $pickup_note->status_id = 1;
+
+        $pickup_note->save();
+
+        $pickup_note_id = $pickup_note->id;
+
+        PickupNotesJourneyController::add($pickup_note_id, 0, 'Pickup Note has been Created!', Auth::id());
       }
-
-      $pickup_note->assigned_by_user_id = Auth::id();
-      $pickup_note->status_id = 1;
-
-      $pickup_note->save();
-
-      $pickup_note_id = $pickup_note->id;
 
       foreach ($pickup_request_ids as $pickup_request_id) {
         $pickup_note_request = new PickupNoteRequest();
@@ -168,8 +197,6 @@ class AdminPickupsController extends Controller
 
         $pickup_note_request->save();
       }
-
-      PickupNotesJourneyController::add($pickup_note_id, 0, 'Pickup Note has been Created!', Auth::id());
 
       return ['status' => 0, 'success' => 'Pickup Request(s) has been Assigned to the Rider'];
     }
@@ -235,17 +262,30 @@ class AdminPickupsController extends Controller
         return ($pickup_note->status_id == 2) ? $pickup_note->id : '';
       })
       ->addColumn('action', function($pickup_note) {
-        $cancel_button = '<button class="btn btn-sm btn-danger d-block mx-auto cancel">Cancel</button>';
-        $view_details_button = '<button class="btn btn-sm btn-info d-block mx-auto mt-1 view_details">View Details</button>';
-        $generate_pickup_note_button = '<button class="btn btn-sm btn-primary d-block mx-auto mt-1 generate_pickup_note">Generate Pickup Note</button>';
-        $print_pickup_note_button = '<button class="btn btn-sm btn-primary d-block mx-auto mt-1 print_pickup_note">Print Pickup Note</button>';
-        $sms_rider_button = '<button class="btn btn-sm btn-primary d-block mx-auto mt-1 sms_rider">SMS Rider</button>';
+        $cancel_button = '<button type="button" class="dropdown-item cancel"><i class="ft-plus-circle primary"></i> Cancel</button>';
+        $view_details_button = '<button type="button" class="dropdown-item view_details"><i class="ft-plus-circle primary"></i> View Details</button>';
+        $generate_pickup_note_button = '<button type="button" class="dropdown-item generate_pickup_note"><i class="ft-plus-circle primary"></i> Generate Pickup Note</button>';
+        $print_pickup_note_button = '<button type="button" class="dropdown-item print_pickup_note"><i class="ft-plus-circle primary"></i> Print Pickup Note</button>';
+        $sms_rider_button = '<button type="button" class="dropdown-item sms_rider"><i class="ft-plus-circle primary"></i> SMS Rider</button>';
 
         if ($pickup_note->status_id == 1) {
-          return $cancel_button . $view_details_button . $generate_pickup_note_button;
+          return '<span class="dropdown">
+                    <button type="button" class="btn btn-icon btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ft-settings"></i></button>
+                    <div class="dropdown-menu">
+                      ' . $cancel_button . $view_details_button . $generate_pickup_note_button . '
+                    </div>
+                  </span>
+          ';
         }
         else {
-          return $cancel_button . $view_details_button . $print_pickup_note_button . $sms_rider_button;
+          return '<span class="dropdown">
+                    <button type="button" class="btn btn-icon btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ft-settings"></i></button>
+                    <div class="dropdown-menu">
+                      ' . $cancel_button . $view_details_button . $print_pickup_note_button . $sms_rider_button . '
+                    </div>
+                  </span>
+
+          ';
         }
       })
       ->filterColumn('pickup_type', function($query, $keyword) {
@@ -273,7 +313,7 @@ class AdminPickupsController extends Controller
 
       $pickup_note = PickupNote::find($pickup_note_id);
 
-      if ($pickup_note->status_id == 1) {
+      if ($pickup_note->status_id < 3) {
         $pickup_note->status_id = 5;
 
         $pickup_note->save();
@@ -326,5 +366,185 @@ class AdminPickupsController extends Controller
       }
 
       return $details;
+    }
+
+    public function assigned_generate_pickup_note(Request $request) {
+      $pickup_note_id = $request->input('pickup_note_id');
+
+      $pickup_note = PickupNote::find($pickup_note_id);
+
+      if ($pickup_note->status_id == 1) {
+        $pickup_note->status_id = 2;
+
+        $pickup_note->save();
+
+        PickupNotesJourneyController::add($pickup_note_id, 2, 'Pickup Note has been Generated!', Auth::id());
+
+        return ['status' => 0, 'success' => 'Pickup Note has been Generated'];
+      }
+      else {
+        return ['status' => 1, 'error' => 'Selected Pickup has already been modified'];
+      }
+    }
+
+    public function assigned_print(Request $request) {
+      $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+      $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Pickup Note</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                        margin: 0mm;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color {
+                        color: #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="p-1">
+      ';
+
+      foreach($request->ids as $id) {
+        $pickup_note = PickupNote::find($id);
+
+        //Integrate with Rider Information
+        $html .= '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle color primary"><strong>Pickup Note</strong></td>
+                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Rider Name</strong></td>
+                            <td>Temporary Rider</td>
+                            <td rowspan="7" class="text-center align-middle">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Category</strong></td>
+                            <td>-</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Route</strong></td>
+                            <td>-</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Pickups</strong></td>
+                            <td>-</td>
+                          </tr>
+                        </tbody>
+                      </table>
+        ';
+
+        $html .= '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="color primary"><strong>S. No.</strong></td>
+                            <td class="color primary"><strong>Company Name</strong></td>
+                            <td class="color primary"><strong>Contact Person</strong></td>
+                            <td class="color primary"><strong>Contact Number</strong></td>
+                            <td class="color primary"><strong>Pickup Address</strong></td>
+                            <td class="color primary"><strong>Bookings</strong></td>
+                            <td class="color primary"><strong>Pickup Date</strong></td>
+                          </tr>
+      ';
+
+        $serial_number = 1;
+
+        $pickup_note_requests = $pickup_note->pickup_note_requests;
+
+        foreach ($pickup_note_requests as $pickup_note_request) {
+          $pickup_request = $pickup_note_request->pickup_request;
+
+          $shipper = $pickup_request->shipper;
+          $pickup_address = $pickup_request->pickup_address;
+
+          $html .= '
+                          <tr>
+                            <td>' . $serial_number . '</td>
+                            <td>' . $shipper->name . '</td>
+                            <td>' . $pickup_address['poc'] . '</td>
+                            <td>' . $pickup_address['phone'] . '</td>
+                            <td>' . $pickup_address['pickup_address'] . '</td>
+                            <td>' . $pickup_request['bookings'] . '</td>
+                            <td>' . Carbon::parse($pickup_request['pickup_date'])->format('d/m/Y') . '</td>
+                          </tr>
+          ';
+
+          $serial_number++;
+        }
+
+        $html .= '
+                        </tbody>
+                      </table>
+
+                      <hr>
+        ';
+      }
+
+      $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+      return $html;
     }
 }
