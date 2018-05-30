@@ -22,7 +22,13 @@
                     <li><a class="menu-item" href="/admin/accounts/block" data-i18n="nav.dash.ecommerce">Block Accounts List</a></li>
                 </ul>
             </li>
-			<li class=" nav-item"><a href="/admin/management/city"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">City Management</span></a></li>
+			<li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Network Management</span></a>
+                <ul class="menu-content">
+                    <li><a class="menu-item" href="{{route('admin.management.city.index')}}" data-i18n="nav.dash.ecommerce">City Management</a></li>
+                    <li><a class="menu-item" href="{{route('admin.management.route.index')}}" data-i18n="nav.dash.ecommerce">Route Management</a></li>
+
+                </ul>
+            </li>
 
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Pickups</span></a>
               <ul class="menu-content">

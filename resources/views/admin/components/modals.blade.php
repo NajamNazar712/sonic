@@ -152,3 +152,21 @@
     </div>
 </div>
 <!--Confirm Modal City-->
+<!--Route Add Model -->
+<div class="modal fade text-left" id="addRoute" tabindex="-1" role="dialog" aria-labelledby="addRoute"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white" id="myModalLabel8">Add Route</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="addRouteDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--Route Add Model end-->

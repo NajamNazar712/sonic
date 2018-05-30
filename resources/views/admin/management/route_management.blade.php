@@ -12,7 +12,7 @@
     </style>
 @endsection
 @section('content')
-    <h1>City Management</h1>
+    <h1>Route Management</h1>
 
     <section>
         <div class="row">
@@ -20,8 +20,8 @@
                 <div class="card">
 
                     <div class="card-header">
-                        <span class="font-large-1 card-title">Cities List</span>
-                        <button type="button" rel="addcity" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addCity" data-toggle="modal">Add City</button>
+                        <span class="font-large-1 card-title">Routes List</span>
+                        <button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRoute" data-toggle="modal">Add Route</button>
 
                         <div class="mt-1">
                             @include('admin.inc.messages')
@@ -34,11 +34,13 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable">
                                 <thead>
                                 <tr>
-                                    <th>S No.</th>
+                                    {{--<th>S No.</th>--}}
                                     <th>City Name</th>
-                                    <th>City Code</th>
-                                    <th>Hub Name</th>
-                                    <th>Hub Code</th>
+                                    <th>Route Code</th>
+                                    <th>Start Point</th>
+                                    <th>End Point</th>
+                                    <th>Junction</th>
+                                    <th>Added Date/Time</th>
                                     <th>Status</th>
                                     {{--<th>Services Available</th>--}}
                                     <th>Action</th>
@@ -58,13 +60,11 @@
     <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/forms/checkbox-radio.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-
-    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
-           var tab =  $('.datatable').DataTable({
+            var tab =  $('.datatable').DataTable({
                 dom: 'ltipr',
                 fixedHeader: {
                     header: true,
@@ -77,13 +77,15 @@
                 processing: true,
                 serverSide: true,
 
-                ajax: '{{ route('admin.management.city.ajax') }}',
+                ajax: '{{ route('admin.management.route.ajax') }}',
                 columns: [
-                    {data:'id', defaultContent:''},
+                    // {data:'id', defaultContent:''},
                     {data: 'name', name: 'name', class: 'city'},
-                    {data: 'id', name: 'id', class: 'city_id'},
-                    {data: 'hub', name: 'hub', class: 'hub'},
-                    {data: 'hub_id', name: 'hub_id', class: 'hub_id'},
+                    {data: 'code', name: 'code', class: 'code'},
+                    {data: 'start', name: 'start', class: 'start'},
+                    {data: 'end', name: 'end', class: 'end'},
+                    {data: 'junction', name: 'junction', class: 'junction'},
+                    {data: 'created_at', name: 'created_at', class: 'created_at'},
                     {data: 'status', name: 'status', class: 'status'},
                     {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
                 ],
@@ -189,14 +191,12 @@
                             $('#ConfirmModalCity').modal('show');
                             console.log('no cities');
                         }
-                        
+
                     }
                 });
             }
 
         });
-
-
 
     </script>
 
