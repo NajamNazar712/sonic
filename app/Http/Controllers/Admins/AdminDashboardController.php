@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\City;
-use App\CityDelivery;
-use App\CityHub;
+
+use App\Http\Models\CityDelivery;
+use App\Http\Models\CityHub;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\StandardCashHandlingCharge;
 use App\Http\Models\Admin\StandardInsuranceCharge;
@@ -14,6 +14,7 @@ use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\BookingType;
 use App\Http\Models\CashHandlingCharge;
+use App\Http\Models\City;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\HubInfo;
 use App\Http\Models\InsuranceCharge;
@@ -2993,7 +2994,7 @@ class AdminDashboardController extends Controller
     }
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
-            ->select(['cities.name','routes.code','routes.start','routes.end','routes.junction','routes.status','routes.created_at']);
+            ->select(['cities.name','routes.id','routes.code','routes.start','routes.end','routes.junction','routes.status','routes.created_at']);
         return Datatables::of($routes)
             ->editColumn('status', function ($cities) {
                 return ($cities->status == 0)? 'Inactive': 'Active';
@@ -3019,16 +3020,93 @@ class AdminDashboardController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update Route</a>";
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editroute' data-toggle='modal' data-target='#editRoute'><i class='ft-plus-circle primary'></i> Update Route</a>";
                 if($result->status == 1) {
-                    $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeInactive'  ><i class='ft-plus-circle primary'></i> Deactivate Route</a>";
+                    $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeInactive'  data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Deactivate Route</a>";
                 }else {
-                    $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeactive'  ><i class='ft-plus-circle primary'></i> Activate Route</a>";
+                    $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeActive' data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Activate Route</a>";
                 }
                 $dropdown .="</div></span>";
                 return $dropdown;
             })
             ->make(true);
     }
+    public function addRouteView(){
+       $city = City::select(['id','name'])->where('status',1)->get();
+        return view('admin.management.add_route_form')->with('cities',$city);
+    }
+    public function addRouteDetails(Request $request){
+//        return $request;
+        $validations = [
+            'city_id'=>'required|numeric',
+            'route_code'=>'required',
+            'start'=>'required',
+            'end'=>'required',
+            'junction'=>'required'
+        ];
+        $validate = Validator::make($request->all(), $validations);
 
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
+        Route::create([
+            'city_id'=>$request->city_id,
+            'code'=>$request->route_code,
+            'start'=>$request->start,
+            'end'=>$request->end,
+            'junction'=>$request->junction,
+            'status'=>1
+        ]);
+        return redirect()->back()->with('success','Route added successfully');
+    }
+    public function editRouteView($id){
+        $citylist = City::select(['id','name'])->where('status',1)->get();
+        $route = Route::find($id);
+
+        return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route]);
+    }
+    public function editRouteDetails(Request $request, $id){
+        $validations = [
+            'city_id'=>'required|numeric',
+            'route_code'=>'required',
+            'start'=>'required',
+            'end'=>'required',
+            'junction'=>'required'
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
+        Route::where('id',$id)->update([
+            'city_id'=>$request->city_id,
+            'code'=>$request->route_code,
+            'start'=>$request->start,
+            'end'=>$request->end,
+            'junction'=>$request->junction,
+            'status'=>1
+        ]);
+        return redirect()->back()->with('success','Route updated successfully');
+    }
+    public function routeStatus(Request $request){
+        $id = $request->cid;
+        $status = $request->status;
+//        return $id;
+        if($status == 'routeActive'){
+           $route = Route::where('id',$id)->update(['status'=>1]);
+           if($route){
+               return redirect()->back()->with('success','Route is activated successfully');
+           }
+        }else if($status == 'routeInactive'){
+            Route::where('id',$id)->update(['status'=>0]);
+            return redirect()->back()->with('success','Route is now inactive');
+
+        }
+
+    }
+    public function riderView(){
+        return view('admin.management.rider_management');
+    }
 }

@@ -100,8 +100,17 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
-        Route::get('','Admins\AdminDashboardController@routeView')->name('index');
+        Route::get('/','Admins\AdminDashboardController@routeView')->name('index');
         Route::get('ajax', 'Admins\AdminDashboardController@routeListAjax')->name('ajax');
+        Route::get('/add', 'Admins\AdminDashboardController@addRouteView')->name('add');
+        Route::post('/add', 'Admins\AdminDashboardController@addRouteDetails')->name('add');
+        Route::get('{id}/edit', 'Admins\AdminDashboardController@editRouteView')->name('edit');
+        Route::put('{id}/edit', 'Admins\AdminDashboardController@editRouteDetails')->name('edit');
+        Route::put('/status', 'Admins\AdminDashboardController@routeStatus')->name('status');
+        });
+        Route::prefix('rider')->name('rider.')->group(function (){
+            Route::get('','Admins\AdminDashboardController@riderView')->name('index');
+
         });
     });
 	Route::prefix('pickups')->name('pickups.')->group(function () {

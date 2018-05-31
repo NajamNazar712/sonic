@@ -1,15 +1,8 @@
 @extends('admin.layout.master')
 
 @section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 
-    <style type="text/css">
-        .radio-inline,.checkbox-inline{
-            display:inline;
-        }
-    </style>
 @endsection
 @section('content')
     <h1>Route Management</h1>
@@ -34,7 +27,7 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable">
                                 <thead>
                                 <tr>
-                                    {{--<th>S No.</th>--}}
+                                    <th>S No.</th>
                                     <th>City Name</th>
                                     <th>Route Code</th>
                                     <th>Start Point</th>
@@ -57,14 +50,18 @@
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/js/scripts/forms/checkbox-radio.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function() {
-            var tab =  $('.datatable').DataTable({
+            var t =  $('.datatable').DataTable({
+                "columnDefs": [ {
+                    "searchable": false,
+                    "orderable": false,
+                    "targets": 0
+                } ],
+                "order": [[ 1, 'asc' ]],
                 dom: 'ltipr',
                 fixedHeader: {
                     header: true,
@@ -79,7 +76,7 @@
 
                 ajax: '{{ route('admin.management.route.ajax') }}',
                 columns: [
-                    // {data:'id', defaultContent:''},
+                    {data:'', defaultContent:''},
                     {data: 'name', name: 'name', class: 'city'},
                     {data: 'code', name: 'code', class: 'code'},
                     {data: 'start', name: 'start', class: 'start'},
@@ -117,87 +114,40 @@
                     });
                 }
             });
-            if (tab.data().length != 0) {
-                tab.on('order.dt search.dt', function () {
-                    tab.column(0, {search: 'false', order: 'applied'}).nodes().each(function (cell, i) {
+            if (t.data().length != 0) {
+                t.on('order.dt search.dt', function () {
+                    t.column(0, {search: 'false', order: 'applied'}).nodes().each(function (cell, i) {
                         cell.innerHTML = i + 1;
-                        tab.cell(cell).invalidate('dom');
+                        t.cell(cell).invalidate('dom');
                     });
                 }).draw();
             }
 
-            $('input.icheck').iCheck({
-                checkboxClass: 'icheckbox_squaret-red',
-                radioClass: 'iradio_square-red'
-            });
-        });
 
-        $("#addCity").on("show.bs.modal", function(e) {
-            var $invoker = $(e.relatedTarget);
-            var action = $invoker.attr('rel');
-
-            if(action == 'addcity'){
-                $.get( "/admin/management/city/form", function( data ) {
-                    $("#addCityDiv").html(data);
+        $("#addRoute").on("show.bs.modal", function(e) {
+                $.get( "/admin/management/route/add", function( data ) {
+                    $("#addRouteDiv").html(data);
                 });
-            }
-
         });
-        $("#editCity").on("show.bs.modal", function(e) {
-            var $invoker = $(e.relatedTarget);
+        $("#editRoute").on("show.bs.modal", function(e) {
 
-            var action = $invoker.attr('rel');
             var id = $(e.relatedTarget).data('target-id');
 
-            if(action == 'editcity'){
-                $.get( "/admin/management/city/"+id+"/edit/form", function( data ) {
-                    $("#editCityDiv").html(data);
-                });
-            }
+            $.get( "/admin/management/route/"+id+"/edit", function( data ) {
+                $("#editRouteDiv").html(data);
+            });
+
         });
 
         $('body').on('click','.deactivate',function (e) {
             var id = $(this).data('target-id');
             var rel = $(this).attr('rel');
-            var isHub = $(this).attr('hub');
-            if(isHub == 0){
-                $('.modal-body #cid').val(id);
-                $('.modal-body #cstatus').val(rel);
-                $('#ConfirmModalCity').modal('show');
-            }else if(isHub == 1){
-                $.ajax({
-                    url:'/admin/management/city/'+id+'/status/ajax',
-                    type:'GET',
-                    dataType:'json',
-                    success:function (data) {
-                        var name = [];
-                        if(data.length > 0){
-                            $.each(data, function (index, value) {
-                                name += value.name+' , ';
 
-                            });
-                            swal({
-                                title: 'Please remove following cities from hub!',
-                                text: name,
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: true,
-                                closeOnEsc: true
-                            });
-
-                        }else{
-                            $('.modal-body #cid').val(id);
-                            $('.modal-body #cstatus').val(rel);
-                            $('#ConfirmModalCity').modal('show');
-                            console.log('no cities');
-                        }
-
-                    }
-                });
-            }
+            $('.routeConfirmation #cid').val(id);
+            $('.routeConfirmation #cstatus').val(rel);
 
         });
-
+    });
     </script>
 
 @endsection

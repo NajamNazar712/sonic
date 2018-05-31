@@ -170,3 +170,49 @@
     </div>
 </div>
 <!--Route Add Model end-->
+<!--Route edit Model -->
+<div class="modal fade text-left" id="editRoute" tabindex="-1" role="dialog" aria-labelledby="editRoute"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white" id="myModalLabel8">Edit Route</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editRouteDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--Route edit Model end-->
+<!--Confirm Modal City-->
+<div class="modal fade text-left" id="ConfirmModalRoute" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRoute"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white" id="myModalLabel8">Please Confirm</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body routeConfirmation text-center">
+                <h3>Are you sure you want to perform this action?</h3>
+                <form action="{{route('admin.management.route.status')}}" method="post" class="mt-2">
+                    {{csrf_field()}}
+                    <input type="hidden" name="_method" value="PUT">
+                    <input type="hidden" name="cid" id="cid">
+                    <input type="hidden" name="status" id="cstatus">
+                    <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
+                    <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Confirm Modal City-->

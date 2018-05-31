@@ -117,7 +117,9 @@
         radioClass: 'iradio_flat-red',
         increaseArea: '20%' // optional
     });
-    $('.select2').select2();
+        $('.select2').select2({
+            dropdownParent: $("#addCity")
+        });
 
     $("input[type='radio'][name='city-radio']").on('ifChecked', function(event){
                var rtype = $(this).attr('rel');
