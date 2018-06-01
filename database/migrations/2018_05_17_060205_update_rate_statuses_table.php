@@ -26,7 +26,7 @@ class UpdateRateStatusesTable extends Migration
     public function down()
     {
         Schema::table('rate_statuses', function (Blueprint $table) {
-            //
+            $table->dropColumn('fuel_charges');
         });
     }
 }

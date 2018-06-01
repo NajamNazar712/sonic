@@ -19,7 +19,7 @@
 								<thead>
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
-										<th class="border-primary border-darken-1">ID</th>
+										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Tracking Number</th>
 										<th class="border-primary border-darken-1">Order ID</th>
 										<th class="border-primary border-darken-1">Service Type</th>
@@ -72,6 +72,28 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 	<style>
+		table.dataTable {
+			font-size: 12px;
+		}
+
+		table.dataTable thead tr th {
+			padding-left: 0.5em;
+			white-space: normal;
+			word-wrap: break-word;
+		}
+
+		table.dataTable thead tr th:before,
+		table.dataTable thead tr th:after {
+			height: 20px;
+			margin-bottom: -10px;
+			bottom: 50% !important;
+		}
+
+		table.dataTable tbody tr td {
+			padding-left: 0.5em;
+			padding-right: 0.5em;
+		}
+
 		table.dataTable tbody tr td.select-checkbox:before {
 			top: 50%;
 			border-color: #666EE8;
@@ -80,6 +102,16 @@
 		table.dataTable tbody tr.selected td.select-checkbox:after {
 			top: 50%;
 			text-shadow: none;
+		}
+
+		#toast-bottom-center.toast-container {
+			text-align: center;
+		}
+
+		#toast-bottom-center.toast-container .toast {
+			display: table;
+			width: auto !important;
+			text-align: left;
 		}
 	</style>
 @endsection
@@ -108,7 +140,7 @@
 				.done(function(data) {
 					var tab = window.open('', '_blank');
 
-					if(!tab || tab.outerHeight === 0) {
+					if(!tab) {
 						swal({
 							title: 'Popup Blocker Enabled!',
 							text: 'Please add this site to your exception list.',
@@ -124,6 +156,12 @@
 					}
 				});
 			}
+
+			$('#add_in_receiving_sheet').modal({
+				backdrop: 'static',
+				keyboard: false,
+				show: false
+			});
 
 			var selected_rows = [];
 
@@ -182,10 +220,10 @@
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[7, 'asc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-					{data: 'id', name: 'id', class: "align-middle id"},
+					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
 					{data: 'order_id', name: 'order_id', class: 'align-middle order_id'},
 					{data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
@@ -196,6 +234,10 @@
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
+					var info = table.page.info();
+
+					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
 					if (!data.receiving_sheet) {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
@@ -215,7 +257,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else {
@@ -359,7 +401,7 @@
 						icon: 'warning',
 						buttons: {
 							cancel: {
-								text: 'Cancel',
+								text: 'Close',
 								value: null,
 								visible: true,
 								closeModal: true,

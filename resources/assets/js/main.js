@@ -1,5 +1,5 @@
 $(document).ready(function () {
-    let axios = require('axios');
+    //let axios = require('axios');
     $("#BankInfoModal").on("show.bs.modal", function(e) {
         var id = $(e.relatedTarget).data('target-id');
 
@@ -47,22 +47,25 @@ $(document).ready(function () {
         //     });
 
     });
-// $('body').on('click','#confirmAction',function () {
-//    var uid = $('#shid').val();
-//    var status = $('#shstatus').val();
-//    axios.post('/account/status',{
-//        params:{
-//            uid: uid,
-//            status: status
-//        }
-//    })
-//        .then(function (response) {
-//             console.log(response);
-//        })
-//        .catch(function(error){
-//
-//        });
-// });
+
+
+
+    $('body').on('click','#confirmAction',function () {
+       var uid = $('#shid').val();
+       var status = $('#shstatus').val();
+       axios.post('/account/status',{
+           params:{
+               uid: uid,
+               status: status
+           }
+       })
+           .then(function (response) {
+                console.log(response);
+           })
+           .catch(function(error){
+
+           });
+    });
 //     $(".touchspin-color").TouchSpin();
 
 

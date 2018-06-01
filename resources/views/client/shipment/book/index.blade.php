@@ -17,7 +17,7 @@
 						<div class="card-body">
 							@include('client.inc.messages')
 
-							<form id="booking_form" class="form-horizontal" method="POST" action="{{ url('cod/shipment/book') }}" novalidate="novalidate">
+							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.store') }}" novalidate="novalidate">
 								{{ csrf_field() }}
 
 								<input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') }}">
@@ -112,7 +112,7 @@
 										<h4 class="form-section mb-2 text-center">Order Information</h4>
 
 										<div class="form-group">
-											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ url('cod/shipment/book/order_id') }}" data-msg-remote="Order ID must be unique">
+											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
 										</div>
 
 										<div id="regular">
@@ -374,7 +374,7 @@
 		$(document).ready(function() {
 			@if (session('print'))
 				$.ajax({
-					url: '{!! url('cod/shipment/print_air_waybill') !!}',
+					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
 					method: 'POST',
 					data: {
 						'ids[]': '{{ session('print') }}',
@@ -384,7 +384,7 @@
 				.done(function(data) {
 					var tab = window.open('', '_blank');
 
-					if(!tab || tab.outerHeight === 0) {
+					if(!tab) {
 						swal({
 							title: 'Popup Blocker Enabled!',
 							text: 'Please add this site to your exception list.',
@@ -701,7 +701,7 @@
 						icon: 'warning',
 						buttons: {
 							cancel: {
-								text: 'Cancel',
+								text: 'Close',
 								value: null,
 								visible: true,
 								closeModal: true,
