@@ -263,7 +263,7 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <div class="modal-body routeConfirmation text-center">
+            <div class="modal-body riderConfirmation text-center">
                 <h3>Are you sure you want to perform this action?</h3>
                 <form action="{{route('admin.management.rider.status')}}" method="post" class="mt-2">
                     @csrf

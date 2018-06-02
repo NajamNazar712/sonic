@@ -3237,7 +3237,7 @@ class AdminDashboardController extends Controller
     public function riderStatus(Request $request){
         $id = $request->cid;
         $status = $request->status;
-
+//        return $request;
         if($status == 'riderActive'){
             $rider = Rider::where('id',$id)->update(['status'=>1]);
             if($rider){
