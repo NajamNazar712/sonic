@@ -157,14 +157,13 @@
                     });
                 }
             });
-            if (tab.data().length != 0) {
+
                 tab.on('order.dt search.dt', function () {
                     tab.column(0, {search: 'false', order: 'applied'}).nodes().each(function (cell, i) {
                         cell.innerHTML = i + 1;
                         tab.cell(cell).invalidate('dom');
                     });
                 }).draw();
-            }
 
             $('input.icheck').iCheck({
                 checkboxClass: 'icheckbox_squaret-red',

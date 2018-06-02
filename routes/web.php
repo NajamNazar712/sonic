@@ -149,5 +149,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::post('password/reset','Auth\AdminResetPasswordController@reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
 
-    
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::prefix('pickup')->name('pickup.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@pickup_index')->name('index');
+            Route::post('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+            Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+        });
+    });
 });
