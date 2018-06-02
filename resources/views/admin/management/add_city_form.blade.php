@@ -56,7 +56,7 @@
             <h4 class="card-title font-weight-bold">Delivery</h4>
             @foreach($bookings as $booking)
             <div class="bs-callout-primary callout-border-left callout-square p-1">
-                <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" class="icheckbox bookingtype{{$booking->id}}" {{($booking->id == 1)? 'checked':''}}></strong>
+                <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" class="icheckbox bookingtype{{$booking->id}}" {{($booking->id == 1)? 'checked required':''}}></strong>
                 <div class="mt-1 form-group">
                 @foreach($shippingMode as $shipping)
                     <fieldset class="checkbox-inline mr-1 ">

@@ -2814,7 +2814,7 @@ class AdminDashboardController extends Controller
             ->make(true);
     }
     public function getCityForm(){
-        $hubs = City::where('hub',1)->get();
+        $hubs = City::where('hub',1)->where('status',1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::all();
         return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'bookings'=>$booking]);
@@ -2838,7 +2838,7 @@ class AdminDashboardController extends Controller
         }
 
 
-        $hubs = City::where('hub',1)->get();
+        $hubs = City::where('hub',1)->where('status',1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::all();
         return view('admin.management.edit_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
@@ -3162,7 +3162,7 @@ class AdminDashboardController extends Controller
     }
     public function categoryListAjax(Request $request){
         $city_id = $request->id;
-        $route = Route::select(['id','code','start','end'])->where('city_id',$city_id)->get();
+        $route = Route::select(['id','code','start','end'])->where('city_id',$city_id)->where('status',1)->get();
 
         return response()->json($route);
     }
