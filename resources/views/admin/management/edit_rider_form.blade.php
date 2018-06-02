@@ -5,18 +5,6 @@
  {{--* Time: 1:19 PM--}}
  {{--*/--}}
 
-{{--/**--}}
-{{--* Created by PhpStorm.--}}
-{{--* User: WaqasTrax--}}
-{{--* Date: 6/1/2018--}}
-{{--* Time: 8:16 AM--}}
-{{--*/--}}
-{{--/**--}}
-{{--* Created by PhpStorm.--}}
-{{--* User: WaqasTrax--}}
-{{--* Date: 5/30/2018--}}
-{{--* Time: 12:00 PM--}}
-{{--*/--}}
 <style>
     textarea#address {
         resize: none;

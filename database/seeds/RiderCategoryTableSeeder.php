@@ -12,10 +12,10 @@ class RiderCategoryTableSeeder extends Seeder
     public function run()
     {
         DB::table('rider_categories')->insert(array(
-            array('name'=>'Light Rider'),
-            array('name'=>'Heavy Rider'),
-            array('name'=>'Pickup Rider'),
-            array('name'=>'Express Rider'),
+            array('name'=>'Light'),
+            array('name'=>'Heavy'),
+            array('name'=>'Pickup'),
+            array('name'=>'Express'),
             array('name'=>'Other'),
 
         ));

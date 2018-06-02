@@ -3171,8 +3171,8 @@ class AdminDashboardController extends Controller
         $validations = [
             'city_id'=>'required|numeric',
             'rider_name'=>'required|max:255',
-            'phone'=>'required|numeric|max:255',
-            'cnic'=>'required|numeric|max:255',
+            'phone'=>'required|max:255',
+            'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric'
@@ -3208,8 +3208,8 @@ class AdminDashboardController extends Controller
         $validations = [
             'city_id'=>'required|numeric',
             'rider_name'=>'required|max:255',
-            'phone'=>'required|numeric|max:255',
-            'cnic'=>'required|numeric|max:255',
+            'phone'=>'required|max:255',
+            'cnic'=>'required|max:255',
             'address'=>'required|max:255',
             'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric'
