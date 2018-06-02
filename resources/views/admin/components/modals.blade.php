@@ -216,3 +216,67 @@
     </div>
 </div>
 <!--Confirm Modal City-->
+<!--Route Add Model -->
+<div class="modal fade text-left" id="addRider" tabindex="-1" role="dialog" aria-labelledby="addRider"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white" id="myModalLabel8">Add Rider</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="addRiderDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--Route Add Model end-->
+<!--Route Edit Model -->
+<div class="modal fade text-left" id="editRider" tabindex="-1" role="dialog" aria-labelledby="editRider"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white" id="myModalLabel8">Edit Rider</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="editRiderDiv">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--Route Edit Model end-->
+<!--Confirm Modal City-->
+<div class="modal fade text-left" id="ConfirmModalRider" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRider"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white" id="myModalLabel8">Please Confirm</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body routeConfirmation text-center">
+                <h3>Are you sure you want to perform this action?</h3>
+                <form action="{{route('admin.management.rider.status')}}" method="post" class="mt-2">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="cid" id="cid">
+                    <input type="hidden" name="status" id="cstatus">
+                    <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
+                    <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+
+
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Confirm Modal City-->

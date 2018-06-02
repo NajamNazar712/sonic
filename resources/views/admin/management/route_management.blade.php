@@ -8,6 +8,7 @@
     <h1>Route Management</h1>
 
     <section>
+
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -53,15 +54,12 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 
+    {{--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMo9kqvMhqVAe_GCXZXOfzfAZ_oeBapkQ&v=3.exp&libraries=places"></script>--}}
+
     <script type="text/javascript">
         $(document).ready(function() {
+
             var t =  $('.datatable').DataTable({
-                "columnDefs": [ {
-                    "searchable": false,
-                    "orderable": false,
-                    "targets": 0
-                } ],
-                "order": [[ 1, 'asc' ]],
                 dom: 'ltipr',
                 fixedHeader: {
                     header: true,
@@ -76,7 +74,7 @@
 
                 ajax: '{{ route('admin.management.route.ajax') }}',
                 columns: [
-                    {data:'', defaultContent:''},
+                    {data:'id', defaultContent:''},
                     {data: 'name', name: 'name', class: 'city'},
                     {data: 'code', name: 'code', class: 'code'},
                     {data: 'start', name: 'start', class: 'start'},
@@ -114,14 +112,11 @@
                     });
                 }
             });
-            if (t.data().length != 0) {
-                t.on('order.dt search.dt', function () {
-                    t.column(0, {search: 'false', order: 'applied'}).nodes().each(function (cell, i) {
-                        cell.innerHTML = i + 1;
-                        t.cell(cell).invalidate('dom');
-                    });
-                }).draw();
-            }
+            t.on( 'order.dt search.dt', function () {
+                t.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
+                    cell.innerHTML = i+1;
+                } );
+            } ).draw();
 
 
         $("#addRoute").on("show.bs.modal", function(e) {

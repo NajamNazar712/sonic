@@ -19,6 +19,8 @@ use App\Http\Models\FuelSurcharge;
 use App\Http\Models\HubInfo;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
+use App\Http\Models\Rider;
+use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -3108,5 +3110,146 @@ class AdminDashboardController extends Controller
     }
     public function riderView(){
         return view('admin.management.rider_management');
+    }
+    public function riderListAjax(){
+        $rider = Rider::join('cities','riders.city_id','=','cities.id')
+            ->join('routes','routes.id','=','riders.route_id')
+            ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
+            ->select(['cities.name as city','riders.id','riders.name','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status','riders.created_at']);
+        return Datatables::of($rider)
+            ->editColumn('status', function ($rider) {
+                return ($rider->status == 0)? 'Inactive': 'Active';
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if (strpos('inactive', $keyword) !== FALSE) {
+                    $query->where('riders.status', '=', 0);
+                }
+                else if (strpos('active', $keyword) !== FALSE) {
+                    $query->where('riders.status', '=', 1);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->editColumn('route', function ($rider) {
+                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->editColumn('created_at', function ($rider) {
+                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+            })
+            ->addColumn("action", function ($result) {
+                $dropdown = "<span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editRider' data-toggle='modal' data-target='#editRider'><i class='ft-plus-circle primary'></i> Update Rider</a>";
+                if($result->status == 1) {
+                    $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='riderInactive'  data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Deactivate Rider</a>";
+                }else {
+                    $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='riderActive' data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Activate Rider</a>";
+                }
+                $dropdown .="</div></span>";
+                return $dropdown;
+            })
+            ->make(true);
+    }
+    public function addRiderView(){
+        $city = City::select(['id','name'])->where('status',1)->get();
+        $category = RiderCategory::all();
+        return view('admin.management.add_rider_form')->with(['cities'=>$city,'categories'=>$category]);
+    }
+    public function categoryListAjax(Request $request){
+        $city_id = $request->id;
+        $route = Route::select(['id','code','start','end'])->where('city_id',$city_id)->get();
+
+        return response()->json($route);
+    }
+    public function addRiderDetails(Request $request){
+
+        $validations = [
+            'city_id'=>'required|numeric',
+            'rider_name'=>'required|max:255',
+            'phone'=>'required|numeric|max:255',
+            'cnic'=>'required|numeric|max:255',
+            'address'=>'required|max:255',
+            'route_id'=>'required|numeric',
+            'rider_category'=>'required|numeric'
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
+        $rider = Rider::create([
+           'city_id'=>$request->city_id,
+            'name'=>$request->rider_name,
+            'phone'=>$request->phone,
+            'cnic'=>$request->cnic,
+            'address'=>$request->address,
+            'route_id'=>$request->route_id,
+            'rider_category_id'=>$request->rider_category,
+            'status'=>1
+        ]);
+        if($rider){
+            return redirect()->back()->with('success','Rider added successfully');
+        }
+
+    }
+    public function editRiderView($id){
+        $city = City::select(['id','name'])->where('status',1)->get();
+        $category = RiderCategory::all();
+        $rider = Rider::find($id);
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider]);
+    }
+    public function editRiderDetails(Request $request,$id){
+        $validations = [
+            'city_id'=>'required|numeric',
+            'rider_name'=>'required|max:255',
+            'phone'=>'required|numeric|max:255',
+            'cnic'=>'required|numeric|max:255',
+            'address'=>'required|max:255',
+            'route_id'=>'required|numeric',
+            'rider_category'=>'required|numeric'
+        ];
+        $validate = Validator::make($request->all(), $validations);
+
+        if ($validate->fails()) {
+            return redirect()->back()
+                ->withErrors($validate);
+        }
+        $rider = Rider::where('id',$id)->update([
+            'city_id'=>$request->city_id,
+            'name'=>$request->rider_name,
+            'phone'=>$request->phone,
+            'cnic'=>$request->cnic,
+            'address'=>$request->address,
+            'route_id'=>$request->route_id,
+            'rider_category_id'=>$request->rider_category
+        ]);
+        if($rider){
+            return redirect()->back()->with('success','Rider updated successfully');
+        }
+    }
+
+    public function riderStatus(Request $request){
+        $id = $request->cid;
+        $status = $request->status;
+
+        if($status == 'riderActive'){
+            $rider = Rider::where('id',$id)->update(['status'=>1]);
+            if($rider){
+                return redirect()->back()->with('success','Rider is activated successfully');
+            }
+        }else if($status == 'riderInactive'){
+            $rider =Rider::where('id',$id)->update(['status'=>0]);
+            if($rider){
+                return redirect()->back()->with('success','Route is now inactive');
+            }
+
+        }
+
     }
 }

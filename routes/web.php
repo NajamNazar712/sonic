@@ -110,7 +110,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('rider')->name('rider.')->group(function (){
             Route::get('','Admins\AdminDashboardController@riderView')->name('index');
-
+            Route::get('ajax', 'Admins\AdminDashboardController@riderListAjax')->name('ajax');
+            Route::get('/add', 'Admins\AdminDashboardController@addRiderView')->name('add');
+            Route::get('categoryAjax', 'Admins\AdminDashboardController@categoryListAjax')->name('category.ajax');
+            Route::post('/add', 'Admins\AdminDashboardController@addRiderDetails')->name('add');
+            Route::get('{id}/edit', 'Admins\AdminDashboardController@editRiderView')->name('edit');
+            Route::put('{id}/edit', 'Admins\AdminDashboardController@editRiderDetails')->name('edit');
+            Route::put('/status', 'Admins\AdminDashboardController@riderStatus')->name('status');
         });
     });
 	Route::prefix('pickups')->name('pickups.')->group(function () {
@@ -142,4 +148,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
+
+    
 });
