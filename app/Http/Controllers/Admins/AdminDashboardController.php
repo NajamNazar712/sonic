@@ -18,6 +18,7 @@ use App\Http\Models\FuelSurcharge;
 use App\Http\Models\HubInfo;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
+use App\Http\Models\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
@@ -2778,7 +2779,20 @@ class AdminDashboardController extends Controller
         ->select(['cities.id','cities.name' ,'h.name as hub','cities.hub_id','cities.hub as isHub','cities.status']);
         return Datatables::of($cities)
         ->editColumn('status', function ($cities) {
-            return $cities->status == 0? 'Inactive': 'Active';
+            return ($cities->status == 0)? 'Inactive': 'Active';
+        })
+        ->filterColumn('status', function($query, $keyword) {
+            $keyword = strtolower($keyword);
+
+            if (strpos('inactive', $keyword) !== FALSE) {
+                $query->where('cities.status', '=', 0);
+            }
+            else if (strpos('active', $keyword) !== FALSE) {
+                $query->where('cities.status', '=', 1);
+            }
+            else {
+                $query->whereRaw('false');
+            }
         })
         ->addColumn("action", function ($result) {
             $dropdown = "<span class='dropdown'>
@@ -2800,7 +2814,7 @@ class AdminDashboardController extends Controller
         $hubs = City::where('hub',1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::all();
-        return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'booking'=>$booking]);
+        return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'bookings'=>$booking]);
     }
     public function getEditCityForm($id){
 //        return $id;
@@ -2813,19 +2827,18 @@ class AdminDashboardController extends Controller
             $isHub = 0;
 
         }
-        $delivery_array = CityDelivery::where('city_id',$city->id)->select(['id','booking_type_id','shipping_mode_id'])->get();
-        $delivery_row_id = CityDelivery::where('city_id',$city->id)->select('id')->get();
+        $delivery_array = CityDelivery::where('city_id',$city->id)->select(['booking_type_id','shipping_mode_id'])->get();
+//        $delivery_row_id = CityDelivery::where('city_id',$city->id)->select('id')->get();
         $delivery = array();
         foreach ($delivery_array as $delivery_details) {
-            $delivery[$delivery_details['booking_type_id']]['mode'][] = $delivery_details['shipping_mode_id'];
-            $delivery[$delivery_details['booking_type_id']]['id'][] = $delivery_details['id'];
+            $delivery[$delivery_details['booking_type_id']][] = $delivery_details['shipping_mode_id'];
         }
 
 
         $hubs = City::where('hub',1)->get();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::all();
-        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'booking'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
+        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
 
     }
 
@@ -2840,17 +2853,19 @@ class AdminDashboardController extends Controller
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
             ]);
+            CityDelivery::where('city_id',$id)->delete();
 
-            foreach ($request->delivery as $booking_type_id => $shipping_modes) {
+            foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
                 foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
-                    CityDelivery::where('city_id',$id)->update([
+                    CityDelivery::create([
+                        'city_id'=>$id,
                         'booking_type_id'=>$booking_type_id,
                         'shipping_mode_id'=>$shipping_mode_id,
                     ]);
                 }
             }
 
-            return redirect()->back()->with('success','city added successfully');
+            return redirect()->back()->with('success','city updated successfully');
         }elseif($request->postType == 'hub'){
 //            return $request;
             $city = City::where('id',$id)->update([
@@ -2860,26 +2875,21 @@ class AdminDashboardController extends Controller
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
             ]);
-            $delivery_id = array();
-            foreach ($request->delivery_key as $rid) {
-                foreach ($rid as $row_id => $row_value){
-                    if($row_value != null){
-                        $delivery_id[] = $row_value;
 
-                    }
+
+            CityDelivery::where('city_id',$id)->delete();
+
+            foreach ($request->updatedelivery as $booking_type_id => $shipping_modes) {
+                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
+                    CityDelivery::create([
+                        'city_id'=>$id,
+                        'booking_type_id'=>$booking_type_id,
+                        'shipping_mode_id'=>$shipping_mode_id,
+                    ]);
                 }
             }
 
-            CityDelivery::where('city_id',$id)->whereNotIn('id',$delivery_id)->delete();
-            return $delivery_id;
-//            foreach ($request->delivery as $booking_type_id => $shipping_modes) {
-//                foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
-//                    CityDelivery::where('city_id',$id)->update([
-//                        'booking_type_id'=>$booking_type_id,
-//                        'shipping_mode_id'=>$shipping_mode_id,
-//                    ]);
-//                }
-//            }
+
             return redirect()->back()->with('success','Hub city added successfully');
         }
     }
@@ -2977,4 +2987,48 @@ class AdminDashboardController extends Controller
 //        return $hubs;
         return response()->json($hubs);
     }
+    //route management
+    public function routeView(){
+        return view('admin.management.route_management');
+    }
+    public function routeListAjax(){
+        $routes = Route::join('cities','routes.city_id','=','cities.id')
+            ->select(['cities.name','routes.code','routes.start','routes.end','routes.junction','routes.status','routes.created_at']);
+        return Datatables::of($routes)
+            ->editColumn('status', function ($cities) {
+                return ($cities->status == 0)? 'Inactive': 'Active';
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if (strpos('inactive', $keyword) !== FALSE) {
+                    $query->where('cities.status', '=', 0);
+                }
+                else if (strpos('active', $keyword) !== FALSE) {
+                    $query->where('cities.status', '=', 1);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->editColumn('created_at', function ($routes) {
+                return $routes->created_at ? with(new Carbon($routes->created_at))->format('d/m/Y H:i:s A') : '';
+            })
+            ->addColumn("action", function ($result) {
+                $dropdown = "<span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update Route</a>";
+                if($result->status == 1) {
+                    $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeInactive'  ><i class='ft-plus-circle primary'></i> Deactivate Route</a>";
+                }else {
+                    $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeactive'  ><i class='ft-plus-circle primary'></i> Activate Route</a>";
+                }
+                $dropdown .="</div></span>";
+                return $dropdown;
+            })
+            ->make(true);
+    }
+
 }

@@ -16,7 +16,7 @@ class UpdateActiveUsersTable extends Migration
         Schema::table('users', function (Blueprint $table) {
             $table->smallInteger('active')->default(0)->change();
             $table->renameColumn('active', 'status');
-            $table->dropColumn('authorize');
+            
         });
     }
 
@@ -28,7 +28,7 @@ class UpdateActiveUsersTable extends Migration
     public function down()
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->boolean('active')->default(0);
+            $table->renameColumn('status','active')->default(0);
         });
     }
 }

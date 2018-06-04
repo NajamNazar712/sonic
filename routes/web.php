@@ -87,16 +87,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
     //ajax request
     Route::put('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('account.status');
     //new address
+    Route::prefix('management')->name('management.')->group(function () {
 
-    Route::get('/management/city','Admins\AdminDashboardController@cityView')->name('management.city');
-    Route::get('/management/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('management.city.ajax');
-    Route::get('/management/city/form','Admins\AdminDashboardController@getCityForm');
-    Route::get('/management/city/{id}/edit/form','Admins\AdminDashboardController@getEditCityForm')->name('management.city.edit');
-    Route::put('/management/city/{id}/edit/form','Admins\AdminDashboardController@updateCity')->name('management.city.edit');
-    Route::post('/management/city','Admins\AdminDashboardController@addCityHub')->name('management.city');
-    Route::put('/management/city/status', 'Admins\AdminDashboardController@CityStatus')->name('management.city.status');
-    Route::get('/management/city/{id}/status/ajax','Admins\AdminDashboardController@CityStatusCheck')->name('management.city.status.ajax');
+        Route::get('/city', 'Admins\AdminDashboardController@cityView')->name('city.index');
+        Route::get('/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('city.ajax');
+        Route::get('/city/form', 'Admins\AdminDashboardController@getCityForm');
+        Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
+        Route::put('/city/{id}/edit/form', 'Admins\AdminDashboardController@updateCity')->name('city.edit');
+        Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
+        Route::put('/city/status', 'Admins\AdminDashboardController@CityStatus')->name('city.status');
+        Route::get('/city/{id}/status/ajax', 'Admins\AdminDashboardController@CityStatusCheck')->name('city.status.ajax');
 
+        //Route
+        Route::prefix('route')->name('route.')->group(function () {
+        Route::get('','Admins\AdminDashboardController@routeView')->name('index');
+        Route::get('ajax', 'Admins\AdminDashboardController@routeListAjax')->name('ajax');
+        });
+    });
 	Route::prefix('pickups')->name('pickups.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\AdminPickupsController@pending_index')->name('index');

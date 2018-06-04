@@ -35,11 +35,16 @@
     </div>
 
     <div class="row">
-        <div class="col-4">
+        <div class="col">
             <h2 class="card-title"><U>Services</U></h2>
         </div>
-        <div class="col-8">
-            <fieldset class="mt-1">
+    </div>
+    <div class="row">
+        <div class="col-3">
+            <h4 class="card-title font-weight-bold">Pickup</h4>
+        </div>
+        <div class="col">
+            <fieldset class="">
                 <input type="checkbox" name="pickup" class="icheckbox">
                 <label for="pickup" class="">Pickup</label>
             </fieldset>
@@ -48,18 +53,20 @@
     <div class="row mb-2">
 
         <div class="col-12">
-            <h4 class="card-title">Delivery</h4>
-            @foreach($booking as $booking)
+            <h4 class="card-title font-weight-bold">Delivery</h4>
+            @foreach($bookings as $booking)
             <div class="bs-callout-primary callout-border-left callout-square p-1">
-                <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" class="icheckbox bookingtype"></strong>
-                <div class="mt-1">
+                <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" class="icheckbox bookingtype{{$booking->id}}" {{($booking->id == 1)? 'checked':''}}></strong>
+                <div class="mt-1 form-group">
                 @foreach($shippingMode as $shipping)
-                    <fieldset class="checkbox-inline mr-1">
-                        <input type="checkbox" name="delivery[{{$booking->id}}][{{$shipping->id}}]" class="icheckbox shippingmode" disabled>
+                    <fieldset class="checkbox-inline mr-1 ">
+                        <input type="checkbox" id="delivery[{{$booking->id}}][{{$shipping->id}}]" name="delivery[{{$booking->id}}][{{$shipping->id}}]" class="icheckbox shippingmode booking_{{$booking->id}}_shipping_mode" {{($booking->id == 1)? '':'disabled'}} {{($booking->id == 1) && ($shipping->id == 1)? 'checked':''}}>
                         <label for="delivery[{{$booking->id}}][{{$shipping->id}}]" class="">{{ucfirst($shipping->mode)}}</label>
                     </fieldset>
                     @endforeach
+                <p class="text-danger" id="shipping_error{{$booking->id}}" style="display:none;">Please select atleast one option</p>
                 </div>
+
             </div>
             @endforeach
 
@@ -79,7 +86,28 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
+        var errors = 0;
+        function checkAtleastOne(targ,id) {
+            if($(targ).is(':checked') === true ){
 
+                if ($('.booking_'+id+'_shipping_mode:checked').length === 0) {
+                    $('#shipping_error'+id+'').css('display','block');
+                    errors = 1;
+                }else{
+                    errors = 0;
+
+                    $('#shipping_error'+id+'').css('display','none');
+
+                }
+
+            }else{
+                errors = 0;
+
+                $('#shipping_error'+id+'').css('display','none');
+
+            }
+
+        }
     $('input.icheck').iCheck({
         checkboxClass: 'icheckbox_square-red',
         radioClass: 'iradio_square-red'
@@ -111,25 +139,62 @@
                }
     });
 
-    $('input.bookingtype').on('ifChecked',function () {
-        var shippingmode = $(this).parent().parent().next().find('input.shippingmode');
-
-        $(shippingmode).iCheck('enable');
-    });
-        $('input.bookingtype').on('ifUnchecked',function () {
+        @foreach($bookings as $booking)
+        $('input.bookingtype{{$booking->id}}').on('ifChecked',function () {
             var shippingmode = $(this).parent().parent().next().find('input.shippingmode');
-
+            checkAtleastOne($(this),{{$booking->id}});
+            $(shippingmode).iCheck('enable');
+        });
+        $('input.bookingtype{{$booking->id}}').on('ifUnchecked',function () {
+            var shippingmode = $(this).parent().parent().next().find('input.shippingmode');
+            checkAtleastOne($(this),{{$booking->id}});
             $(shippingmode).iCheck('disable');
         });
+        @endforeach
+
+        @foreach($bookings as $booking)
+        $('input.booking_{{$booking->id}}_shipping_mode').on('ifChecked',function () {
+
+            if ($('.booking_{{$booking->id}}_shipping_mode:checked').length === 0) {
+                $('#shipping_error{{$booking->id}}').css('display','block');
+                errors = 1;
+            }else{
+                errors = 0;
+
+                $('#shipping_error{{$booking->id}}').css('display','none');
+
+            }
+
+        });
+        $('input.booking_{{$booking->id}}_shipping_mode').on('ifUnchecked',function () {
+
+            if ($('.booking_{{$booking->id}}_shipping_mode:checked').length === 0) {
+                $('#shipping_error{{$booking->id}}').css('display','block');
+                errors = 1;
+            }else{
+                errors = 0;
+
+                $('#shipping_error{{$booking->id}}').css('display','none');
+
+            }
+
+
+        });
+        @endforeach
 
         $( "#addCityHubForm" ).validate({
+
+
+
             errorClass:"danger",
             errorPlacement: function(error, element) {
-                error.addClass('w-100').appendTo(element.parent('.form-group'));
+                error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
             submitHandler: function(form) {
-                $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
+                if(errors === 1){
+                    return false;
+                }else{
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     swal({
                         title: 'Please Wait!',
                         text: 'City/Hub is being added!',
@@ -140,10 +205,11 @@
                     });
 
                     form.submit();
+                }
+
 
             }
         });
-
 
     });
 </script>

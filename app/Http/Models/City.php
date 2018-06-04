@@ -10,6 +10,9 @@ class City extends Model
         'name','hub','hub_id','pickup','status'
     ];
     public function hub(){
-        $this->belongsTo(self::class, 'hub_id');
+       return $this->belongsTo(self::class, 'hub_id');
+    }
+    public function routes(){
+        return $this->hasMany('App\Http\Models\Route');
     }
 }
