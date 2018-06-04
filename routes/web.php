@@ -100,8 +100,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
-        Route::get('','Admins\AdminDashboardController@routeView')->name('index');
+        Route::get('/','Admins\AdminDashboardController@routeView')->name('index');
         Route::get('ajax', 'Admins\AdminDashboardController@routeListAjax')->name('ajax');
+        Route::get('/add', 'Admins\AdminDashboardController@addRouteView')->name('add');
+        Route::post('/add', 'Admins\AdminDashboardController@addRouteDetails')->name('add');
+        Route::get('{id}/edit', 'Admins\AdminDashboardController@editRouteView')->name('edit');
+        Route::put('{id}/edit', 'Admins\AdminDashboardController@editRouteDetails')->name('edit');
+        Route::put('/status', 'Admins\AdminDashboardController@routeStatus')->name('status');
+        });
+        Route::prefix('rider')->name('rider.')->group(function (){
+            Route::get('','Admins\AdminDashboardController@riderView')->name('index');
+            Route::get('ajax', 'Admins\AdminDashboardController@riderListAjax')->name('ajax');
+            Route::get('/add', 'Admins\AdminDashboardController@addRiderView')->name('add');
+            Route::get('categoryAjax', 'Admins\AdminDashboardController@categoryListAjax')->name('category.ajax');
+            Route::post('/add', 'Admins\AdminDashboardController@addRiderDetails')->name('add');
+            Route::get('{id}/edit', 'Admins\AdminDashboardController@editRiderView')->name('edit');
+            Route::put('{id}/edit', 'Admins\AdminDashboardController@editRiderDetails')->name('edit');
+            Route::put('/status', 'Admins\AdminDashboardController@riderStatus')->name('status');
         });
     });
 	Route::prefix('pickups')->name('pickups.')->group(function () {
@@ -150,4 +165,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
+
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::prefix('pickup')->name('pickup.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@pickup_index')->name('index');
+            Route::post('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+            Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+        });
+    });
 });
