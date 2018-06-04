@@ -31,7 +31,7 @@
 										<th class="border-primary border-darken-1">Total Estimated Weight (kg)</th>
 										<th class="border-primary border-darken-1">Pickup Type</th>
 										<th class="border-primary border-darken-1">Pickup Date</th>
-										<th class="border-primary border-darken-1">Action</th>
+										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
 							</table>
@@ -101,6 +101,10 @@
 		table.dataTable tbody tr.selected td.select-checkbox:after {
 			top: 50%;
 			text-shadow: none;
+		}
+
+		.btn-group .dropdown-menu .dropdown-item {
+			white-space: normal;
 		}
 
 		#toast-bottom-center.toast-container {
@@ -352,7 +356,7 @@
 				}
 			});
 
-			$('.datatable tbody').on('click', 'tr td.action button.cancel', function() {
+			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.cancel', function() {
 				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
 
 				swal({

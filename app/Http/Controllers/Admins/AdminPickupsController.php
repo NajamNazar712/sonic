@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admins;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\Shipment;
+use App\Http\Models\ReceivingSheetShipment;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupNoteRequest;
@@ -92,7 +94,13 @@ class AdminPickupsController extends Controller
         return Carbon::parse($pickup_request->pickup_date)->format('d/m/Y');
       })
       ->addColumn('action', function($receiving_sheet) {
-        return '<button class="btn btn-sm btn-danger cancel">Cancel</button>';
+        return '<div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>
+                  </div>
+                </div>
+        ';
       })
       ->filterColumn('pickup_type', function($query, $keyword) {
         $keyword = strtolower($keyword);
@@ -258,32 +266,32 @@ class AdminPickupsController extends Controller
       ->editColumn('pickup_type', function($pickup_note) {
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
       })
-      ->addColumn('pickup_note_no', function($pickup_note) {
+      ->editColumn('pickup_note_no', function($pickup_note) {
         return ($pickup_note->status_id == 2) ? $pickup_note->id : '';
       })
       ->addColumn('action', function($pickup_note) {
-        $cancel_button = '<button type="button" class="dropdown-item cancel"><i class="ft-plus-circle primary"></i> Cancel</button>';
-        $view_details_button = '<button type="button" class="dropdown-item view_details"><i class="ft-plus-circle primary"></i> View Details</button>';
-        $generate_pickup_note_button = '<button type="button" class="dropdown-item generate_pickup_note"><i class="ft-plus-circle primary"></i> Generate Pickup Note</button>';
-        $print_pickup_note_button = '<button type="button" class="dropdown-item print_pickup_note"><i class="ft-plus-circle primary"></i> Print Pickup Note</button>';
-        $sms_rider_button = '<button type="button" class="dropdown-item sms_rider"><i class="ft-plus-circle primary"></i> SMS Rider</button>';
+        $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
+        $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
+        $generate_pickup_note_button = '<button type="button" class="dropdown-item generate_pickup_note"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-target"></i></div><div class="col-9 offset-1">Generate Pickup Note</div></div></button>';
+        $print_pickup_note_button = '<button type="button" class="dropdown-item print_pickup_note"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print Pickup Note</div></button>';
+        $sms_rider_button = '<button type="button" class="dropdown-item sms_rider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-message-circle"></i></div><div class="col-9 offset-1">SMS Rider</div></button>';
 
         if ($pickup_note->status_id == 1) {
-          return '<span class="dropdown">
-                    <button type="button" class="btn btn-icon btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ft-settings"></i></button>
-                    <div class="dropdown-menu">
+          return '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
                       ' . $cancel_button . $view_details_button . $generate_pickup_note_button . '
                     </div>
-                  </span>
+                  </div>
           ';
         }
         else {
-          return '<span class="dropdown">
-                    <button type="button" class="btn btn-icon btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true"><i class="ft-settings"></i></button>
-                    <div class="dropdown-menu">
+          return '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
                       ' . $cancel_button . $view_details_button . $print_pickup_note_button . $sms_rider_button . '
                     </div>
-                  </span>
+                  </div>
 
           ';
         }
@@ -314,7 +322,7 @@ class AdminPickupsController extends Controller
       $pickup_note = PickupNote::find($pickup_note_id);
 
       if ($pickup_note->status_id < 3) {
-        $pickup_note->status_id = 5;
+        $pickup_note->status_id = 6;
 
         $pickup_note->save();
 
@@ -328,7 +336,7 @@ class AdminPickupsController extends Controller
           $pickup_request->save();
         }
 
-        PickupNotesJourneyController::add($pickup_note_id, 5, 'Pickup Note has been Cancelled!', Auth::id());
+        PickupNotesJourneyController::add($pickup_note_id, 6, 'Pickup Note has been Cancelled!', Auth::id());
 
         return ['status' => 0, 'success' => 'Pickup has been Cancelled'];
       }
@@ -498,7 +506,7 @@ class AdminPickupsController extends Controller
                             <td class="color primary"><strong>Bookings</strong></td>
                             <td class="color primary"><strong>Pickup Date</strong></td>
                           </tr>
-      ';
+        ';
 
         $serial_number = 1;
 
@@ -531,6 +539,10 @@ class AdminPickupsController extends Controller
 
                       <hr>
         ';
+
+        $pickup_note->status_id = 3;
+
+        $pickup_note->save();
       }
 
       $html .= '
@@ -547,4 +559,308 @@ class AdminPickupsController extends Controller
 
       return $html;
     }
+
+    public function receive_index() {
+      return view('admin.pickups.receive.index');
+    }
+
+    public function receive_list(Request $request) {
+      $pickup_notes = PickupNote::join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
+      ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
+      ->select('pickup_notes.id', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
+      ->where('pickup_notes.status_id', [3, 4]);
+
+      $datatables = Datatables::of($pickup_notes)
+      ->editColumn('pickup_type', function($pickup_note) {
+        return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
+      })
+      ->editColumn('assigned_date', function($pickup_note) {
+        return Carbon::parse($pickup_note->assigned_date)->format('d/m/Y H:i A');
+      })
+      ->addColumn('action', function($pickup_note) {
+        $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
+        $view_button = '<button type="button" class="dropdown-item summary"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-target"></i></div><div class="col-9 offset-1">Summary</div></button>';
+
+        if ($pickup_note->status_id == 3) {
+          return '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                      ' . $receive_button . '
+                    </div>
+                  </div>
+          ';
+        }
+        else {
+          return '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                      ' . $receive_button . $view_button . '
+                    </div>
+                  </div>
+          ';
+        }
+      })
+      ->filterColumn('pickup_type', function($query, $keyword) {
+        $keyword = strtolower($keyword);
+
+        if (strpos('light', $keyword) !== FALSE) {
+          $query->where('pickup_notes.pickup_type', '=', 0);
+        }
+        else if (strpos('heavy', $keyword) !== FALSE) {
+          $query->where('pickup_notes.pickup_type', '=', 1);
+        }
+        else {
+          $query->whereRaw('false');
+        }
+      });
+
+      return $datatables->make(true);
+    }
+
+    public function receive_pickup_note(Request $request) {
+      if ($request->has('pickup_note_no')) {
+        $pickup_note = PickupNote::find($request->get('pickup_note_no'));
+
+        if ($pickup_note) {
+          if ($pickup_note->status_id == 3 || $pickup_note->status_id == 4) {
+            return redirect()->route('admin.pickups.receive.arrival_of_shipments.index')->with('pickup_receive_pickup_note_id', $request->get('pickup_note_no'));
+          }
+          else {
+            return back()->withErrors('Given Pickup Note has already been modified!');
+          }
+        }
+        else {
+          return back()->withErrors('Invalid Pickup Note!');
+        }
+      }
+      else {
+        return back()->withErrors('Missing Pickup Note ID!');
+      }
+    }
+
+    public function receive_arrival_of_shipments_index() {
+      if (session('pickup_receive_pickup_note_id')) {
+        return view('admin.pickups.receive.arrival_of_shipments');
+      }
+      else {
+        return redirect()->route('admin.pickups.receive.index')->withErrors('Kindly reselect a Pickup Note!');
+      }
+    }
+
+    public function receive_shipment_details(Request $request) {
+      $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+      if ($shipment->exists()) {
+        $shipment = $shipment->first();
+
+        if ($shipment->shipper_status_id == 1) {
+          $exists = FALSE;
+
+          $pickup_note = PickupNote::find($request->pickup_receive_pickup_note_id);
+
+          foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
+            $pickup_request = $pickup_note_request->pickup_request;
+
+            if ($pickup_request->seller_id == $shipment->seller_id) {
+              $exists = TRUE;
+
+              break;
+            }
+          }
+
+          if ($exists) {
+            if (empty($request->weight)) {
+              $shipment->actual_weight = (($request->length * $request->breadth * $request->height) / 5000);
+              $shipment->length = $request->length;
+              $shipment->breadth = $request->breadth;
+              $shipment->height = $request->height;
+            }
+            else {
+              $shipment->actual_weight = $request->weight;
+            }
+
+            $shipment->save();
+
+            $details = array();
+
+            $details['id'] = $shipment->id;
+            $details['tracking_number'] = $shipment->tracking_number;
+            $details['receiving_sheet_no'] = ($shipment->receiving_sheet_shipment) ? str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 12, "0", STR_PAD_LEFT) : '';
+            $details['order_id'] = $shipment->order_id;
+            $details['destination'] = $shipment->consignee_city->city_name;
+            $details['cod_amount'] = $shipment->amount;
+            $details['estimated_weight'] = floatval($shipment->estimated_weight);
+            $details['actual_weight'] = floatval($shipment->actual_weight);
+
+            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+          }
+          else {
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to the Selected Pickup Note'];
+          }
+        }
+        else {
+          return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+        }
+      }
+      else {
+        return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+      }
+    }
+
+    public function receive_arrival_of_shipments_store(Request $request) {
+      // $pickup_note = PickupNote::find($request->pickup_receive_pickup_note_id);
+
+      // $pickup_request_ids = array();
+
+      // foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
+      //   $pickup_request = $pickup_note_request->pickup_request;
+
+      //   $pickup_request_ids[] = $pickup_request->id;
+      // }
+
+      // $receiving_sheet_shipment_ids = array();
+      // $over_received_shipment_ids = array();
+
+      // foreach ($request->shipment_ids as $shipment_id) {
+      //   $shipment = Shipment::find($shipment_id);
+
+      //   if ($shipment->receiving_sheet_shipment) {
+      //     $receiving_sheet_shipment_ids[$shipment->receiving_sheet_shipment->receiving_sheet_id][] = $shipment_id;
+      //   }
+      //   else {
+      //     $over_received_shipment_ids[] = $shipment_id;
+      //   }
+
+      //   $shipment->status_id = 2;
+      //   $shipment->save();
+
+      //   ShipmentsJourneyController::add($shipment_id, 2, 2, 'Shipment has Arrived!', NULL, Auth::id());
+      // }
+
+      // $pickup_requests_receiving_sheets = array();
+
+      // if (!empty($receiving_sheet_shipment_ids)) {
+      //   foreach ($receiving_sheet_shipment_ids as $receiving_sheet_id => $receiving_sheet_shipments) {
+      //     foreach ($receiving_sheet_shipments as $shipment_id) {
+      //       $shipment = Shipment::find($shipment_id);
+
+      //       foreach ($pickup_request_ids as $pickup_request_id) {
+      //         $pickup_request = PickupRequest::find($pickup_request_id);
+
+      //         if ($shipment->user_id == $pickup_request->shipper_id && $shipment->pickup_address_id == $pickup_request->pickup_address_id) {
+      //           $receiving_sheet_shipments_count = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->count();
+
+      //           if ($pickup_request->received) {
+      //             $pickup_request->received = $pickup_request->received + 1;
+      //           }
+      //           else {
+      //             $pickup_request->received = 1;
+      //           }
+
+      //           if ($pickup_request->short_received) {
+      //             if (in_array($receiving_sheet_id, $pickup_requests_receiving_sheets)) {
+      //               $pickup_request->short_received = $pickup_request->short_received - 1;
+      //             }
+      //             else {
+      //               $pickup_request->short_received = $pickup_request->short_received - 1 + $receiving_sheet_shipments_count;
+      //             }
+      //           }
+      //           else {
+      //             $pickup_request->short_received = $receiving_sheet_shipments_count - 1;
+      //           }
+
+      //           $pickup_request->save();
+
+      //           $pickup_requests_receiving_sheets[] = $receiving_sheet_id;
+      //         }
+      //       }
+      //     }
+      //   }
+      // }
+
+      // if (!empty($over_received_shipment_ids)) {
+      //   foreach ($over_received_shipment_ids as $shipment_id) {
+      //     $shipment = Shipment::find($shipment_id);
+
+      //       foreach ($pickup_request_ids as $pickup_request_id) {
+      //         $pickup_request = PickupRequest::find($pickup_request_id);
+
+      //         if ($shipment->user_id == $pickup_request->shipper_id && $shipment->pickup_address_id == $pickup_request->pickup_address_id) {
+      //           if ($pickup_request->received) {
+      //             $pickup_request->received = $pickup_request->received + 1;
+      //           }
+      //           else {
+      //             $pickup_request->received = 1;
+      //           }
+
+      //           $pickup_request->save();
+      //         }
+      //       }
+      //   }
+      // }
+
+      // $pickup_note->status_id = 4;
+      // $pickup_note->save();
+
+      // PickupNotesJourneyController::add($pickup_note->id, $pickup_note->status_id, 'Pickup Note has been Received!', Auth::id());
+
+      return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->pickup_receive_pickup_note_id);
+    }
+
+    public function receive_summary_index() {
+      if (session('pickup_receive_pickup_note_id')) {
+        return view('admin.pickups.receive.summary');
+      }
+      else {
+        return redirect()->route('admin.pickups.receive.index')->withErrors('Kindly reselect a Pickup Note!');
+      }
+    }
+
+    public function receive_summary_list(Request $request) {
+      $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
+      ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
+      ->join('city_infos AS ci', 'usi.city_code', '=', 'ci.city_code')
+      ->join('pickup_note_requests as pnr', 'pickup_requests.id', '=', 'pnr.pickup_request_id')
+      ->join('pickup_notes as pn', 'pnr.pickup_note_id', '=', 'pn.id')
+      ->join('admins as a', 'pn.assigned_by_user_id', '=', 'a.id')
+      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.city_name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
+      ->where('pn.id', $request->pickup_receive_pickup_note_id);
+
+      $datatables = Datatables::of($pickup_requests)
+      ->editColumn('pickup_type', function($pickup_request) {
+        return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
+      })
+      ->editColumn('booking_date', function($pickup_request) {
+        return Carbon::parse($pickup_request->booking_date)->format('d/m/Y H:i A');
+      })
+      ->editColumn('assigned_date', function($pickup_request) {
+        return Carbon::parse($pickup_request->assigned_date)->format('d/m/Y H:i A');
+      })
+      ->addColumn('action', function($pickup_request) {
+        return '<div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>
+                    <button type="button" class="dropdown-item update_status"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-refresh-ccw"></i></div><div class="col-9 offset-1">Update Status</div></button>
+                  </div>
+                </div>
+        ';
+      })
+      ->filterColumn('pickup_type', function($query, $keyword) {
+        $keyword = strtolower($keyword);
+
+        if (strpos('light', $keyword) !== FALSE) {
+          $query->where('pickup_requests.pickup_type', '=', 0);
+        }
+        else if (strpos('heavy', $keyword) !== FALSE) {
+          $query->where('pickup_requests.pickup_type', '=', 1);
+        }
+        else {
+          $query->whereRaw('false');
+        }
+      });
+
+      return $datatables->make(true);
+    }
+
 }

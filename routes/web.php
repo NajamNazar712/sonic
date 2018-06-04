@@ -121,6 +121,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('generate_pickup_note', 'Admins\AdminPickupsController@assigned_generate_pickup_note')->name('generate_pickup_note');
             Route::post('print', 'Admins\AdminPickupsController@assigned_print')->name('print');
         });
+
+        Route::prefix('receive')->name('receive.')->group(function () {
+            Route::get('', 'Admins\AdminPickupsController@receive_index')->name('index');
+            Route::get('list', 'Admins\AdminPickupsController@receive_list')->name('list');
+            Route::post('pickup_note', 'Admins\AdminPickupsController@receive_pickup_note')->name('pickup_note');
+            Route::post('shipment_details', 'Admins\AdminPickupsController@receive_shipment_details')->name('shipment_details');
+
+            Route::prefix('arrival_of_shipments')->name('arrival_of_shipments.')->group(function () {
+                Route::get('', 'Admins\AdminPickupsController@receive_arrival_of_shipments_index')->name('index');
+                Route::post('', 'Admins\AdminPickupsController@receive_arrival_of_shipments_store')->name('store');
+            });
+
+            Route::prefix('summary')->name('summary.')->group(function () {
+                Route::get('', 'Admins\AdminPickupsController@receive_summary_index')->name('index');
+                Route::get('list', 'Admins\AdminPickupsController@receive_summary_list')->name('list');
+            });
+        });
     });
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');

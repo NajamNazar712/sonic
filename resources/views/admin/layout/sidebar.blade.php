@@ -34,6 +34,7 @@
               <ul class="menu-content">
                 <li><a class="menu-item" href="{{ route('admin.pickups.pending.index') }}">Pending</a></li>
                 <li><a class="menu-item" href="{{ route('admin.pickups.assigned.index') }}">Assigned</a></li>
+                <li><a class="menu-item" href="{{ route('admin.pickups.receive.index') }}">Receive</a></li>
               </ul>
             </li>
 

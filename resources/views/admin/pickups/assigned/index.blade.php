@@ -28,7 +28,7 @@
 										<th class="border-primary border-darken-1">Assigned By</th>
 										<th class="border-primary border-darken-1">Pickup Note No.</th>
 										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1">Action</th>
+										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
 							</table>
@@ -51,7 +51,7 @@
 							<div class="modal-footer">
 								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 							</div>
-					</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -95,7 +95,7 @@
 			text-shadow: none;
 		}
 
-		.dropdown .dropdown-menu .dropdown-item {
+		.btn-group .dropdown-menu .dropdown-item {
 			white-space: normal;
 		}
 
@@ -259,7 +259,7 @@
 				}
 			});
 
-			$('.datatable tbody').on('click', 'tr td.action .dropdown .dropdown-menu .dropdown-item', function() {
+			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var pickup_note_id = parseInt($(this).parents('tr').attr('id'));
 
 				if ($(this).hasClass('cancel')) {

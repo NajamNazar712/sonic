@@ -29,4 +29,8 @@ class Shipment extends Model
 	public function payment_mode() {
 		return $this->belongsTo('App\Http\Models\PaymentMode');
 	}
+
+	public function receiving_sheet_shipment() {
+		return $this->hasOne('App\Http\Models\ReceivingSheetShipment');
+	}
 }
