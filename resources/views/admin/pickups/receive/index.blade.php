@@ -31,6 +31,10 @@
 								<thead>
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1">S. No.</th>
+										<th class="border-primary border-darken-1">Rider</th>
+										<th class="border-primary border-darken-1">Rider Type</th>
+										<th class="border-primary border-darken-1">Route</th>
+										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Pickup(s)</th>
 										<th class="border-primary border-darken-1">Booking(s)</th>
 										<th class="border-primary border-darken-1">Pickup Type</th>
@@ -145,6 +149,10 @@
 				order: [[4, 'asc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'rider', name: 'rider', class: 'align-middle rider'},
+					{data: 'rider_type', name: 'rc.name', class: 'align-middle rider_type'},
+					{data: 'route', name: 'route', class: 'align-middle route'},
+					{data: 'city', name: 'c.name', class: 'align-middle city'},
 					{data: 'pickups', name: 'pickup_notes.pickups', class: 'align-middle pickups'},
 					{data: 'bookings', name: 'pickup_notes.bookings', class: 'align-middle bookings'},
 					{data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},

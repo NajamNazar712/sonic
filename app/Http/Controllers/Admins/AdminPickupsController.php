@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 
+use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
@@ -73,7 +74,9 @@ class AdminPickupsController extends Controller
     }
 
     public function pending_index() {
-      return view('admin.pickups.pending.index');
+      $riders = Rider::all(['id', 'name']);
+
+      return view('admin.pickups.pending.index')->with(['riders' => $riders]);
     }
 
     public function pending_list(Request $request) {
@@ -254,12 +257,22 @@ class AdminPickupsController extends Controller
     }
 
     public function assigned_list(Request $request) {
-      $pickup_notes = PickupNote::join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
+      $pickup_notes = PickupNote::join('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
+      ->join('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
+      ->join('routes as ro', 'r.route_id', '=', 'ro.id')
+      ->join('cities as c', 'r.city_id', '=', 'c.id')
+      ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
-      ->select('pickup_notes.id', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
+      ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
       ->where('pickup_notes.status_id', '<', 3);
 
       $datatables = Datatables::of($pickup_notes)
+      ->addColumn('rider', function($pickup_note) {
+        return $pickup_note->rider_name . '<br/>' . $pickup_note->rider_phone;
+      })
+      ->addColumn('route', function($pickup_note) {
+        return $pickup_note->route_code . ' (' . $pickup_note->route_start . ' to ' . $pickup_note->route_end . ')';
+      })
       ->editColumn('assigned_date', function($pickup_note) {
         return Carbon::parse($pickup_note->assigned_date)->format('d/m/Y H:i A');
       })
@@ -296,6 +309,12 @@ class AdminPickupsController extends Controller
 
           ';
         }
+      })
+      ->filterColumn('rider', function($query, $keyword) {
+        $query->where('r.name', 'like', '%' . $keyword . '%')->orWhere('r.phone', 'like', '%' . $keyword . '%');
+      })
+      ->filterColumn('route', function($query, $keyword) {
+        $query->where('ro.code', 'like', '%' . $keyword . '%')->orWhere('ro.start', 'like', '%' . $keyword . '%')->orWhere('ro.end', 'like', '%' . $keyword . '%');
       })
       ->filterColumn('pickup_type', function($query, $keyword) {
         $keyword = strtolower($keyword);
@@ -462,7 +481,9 @@ class AdminPickupsController extends Controller
       foreach($request->ids as $id) {
         $pickup_note = PickupNote::find($id);
 
-        //Integrate with Rider Information
+        $rider = Rider::find($pickup_note->rider_id);
+        $route = $rider->route;
+
         $html .= '
                       <table class="table table-sm table-bordered border">
                         <tbody>
@@ -473,7 +494,7 @@ class AdminPickupsController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
-                            <td>Temporary Rider</td>
+                            <td>' . $rider->name . '</td>
                             <td rowspan="7" class="text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($id, 12, '0', STR_PAD_LEFT) . '</strong></span>
@@ -481,15 +502,15 @@ class AdminPickupsController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Category</strong></td>
-                            <td>-</td>
+                            <td>' . $rider->rider_category->name . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Route</strong></td>
-                            <td>-</td>
+                            <td> ' . $route->code . ' (' . $route->start . ' to ' . $route->end . ')</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Total Pickups</strong></td>
-                            <td>-</td>
+                            <td>' . $pickup_note->pickups . '</td>
                           </tr>
                         </tbody>
                       </table>
@@ -566,12 +587,22 @@ class AdminPickupsController extends Controller
     }
 
     public function receive_list(Request $request) {
-      $pickup_notes = PickupNote::join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
+      $pickup_notes = PickupNote::join('riders as r', 'pickup_notes.rider_id', '=', 'r.id')
+      ->join('rider_categories as rc', 'r.rider_category_id', '=', 'rc.id')
+      ->join('routes as ro', 'r.route_id', '=', 'ro.id')
+      ->join('cities as c', 'r.city_id', '=', 'c.id')
+      ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
-      ->select('pickup_notes.id', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
+      ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
       ->where('pickup_notes.status_id', [3, 4]);
 
       $datatables = Datatables::of($pickup_notes)
+      ->addColumn('rider', function($pickup_note) {
+        return $pickup_note->rider_name . '<br/>' . $pickup_note->rider_phone;
+      })
+      ->addColumn('route', function($pickup_note) {
+        return $pickup_note->route_code . ' (' . $pickup_note->route_start . ' to ' . $pickup_note->route_end . ')';
+      })
       ->editColumn('pickup_type', function($pickup_note) {
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
       })
@@ -600,6 +631,12 @@ class AdminPickupsController extends Controller
                   </div>
           ';
         }
+      })
+      ->filterColumn('rider', function($query, $keyword) {
+        $query->where('r.name', 'like', '%' . $keyword . '%')->orWhere('r.phone', 'like', '%' . $keyword . '%');
+      })
+      ->filterColumn('route', function($query, $keyword) {
+        $query->where('ro.code', 'like', '%' . $keyword . '%')->orWhere('ro.start', 'like', '%' . $keyword . '%')->orWhere('ro.end', 'like', '%' . $keyword . '%');
       })
       ->filterColumn('pickup_type', function($query, $keyword) {
         $keyword = strtolower($keyword);
