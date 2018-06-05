@@ -3,12 +3,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
   <meta name="description" content="Trax Shippers Dashboard">
   <meta name="keywords" content="Trax logistics,trax,trax logistics,delivery">
-  <meta name="author" content="Waqas">
+  <meta name="author" content="Trax">
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <title>Shipper Dashboard
   </title>
-  <link rel="apple-touch-icon" href="{{asset('app-assets/images/ico/apple-icon-120.png')}}">
-  <link rel="shortcut icon" type="image/x-icon" href="{{asset('app-assets/images/ico/favicon.ico')}}">
+  <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('img/apple-touch-icon.png') }}">
+  <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon-32x32.png') }} ">
+  <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon-16x16.png') }}">
+  <link rel="shortcut icon" type="image/x-icon" href="{{  asset('img/favicon.ico') }}">
   <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
   rel="stylesheet">
   <link href="https://maxcdn.icons8.com/fonts/line-awesome/1.1/css/line-awesome.min.css"
