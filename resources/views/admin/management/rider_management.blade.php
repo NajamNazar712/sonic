@@ -1,24 +1,68 @@
+{{--/**--}}
+ {{--* Created by PhpStorm.--}}
+ {{--* User: WaqasTrax--}}
+ {{--* Date: 5/31/2018--}}
+ {{--* Time: 10:21 AM--}}
+ {{--*/--}}
 @extends('admin.layout.master')
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <style>
+        table.dataTable {
+            font-size: 12px;
+        }
 
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #666EE8;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+    </style>
 @endsection
 @section('content')
-
-    <h1>Route Management</h1>
+    <h1>Rider Management</h1>
 
     <section>
-
         <div class="row">
             <div class="col-12">
                 <div class="card">
-                    {{--<div class="card">--}}
-                        {{--<div id="map"></div>--}}
-                    {{--</div>--}}
+
                     <div class="card-header">
-                        <span class="font-large-1 card-title">Routes List</span>
-                        <button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRoute" data-toggle="modal">Add Route</button>
+                        <span class="font-large-1 card-title">Riders List</span>
+                        <button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRider" data-toggle="modal">Add Rider</button>
 
                         <div class="mt-1">
                             @include('admin.inc.messages')
@@ -32,14 +76,15 @@
                                 <thead>
                                 <tr>
                                     <th>S No.</th>
-                                    <th>City Name</th>
-                                    <th>Route Code</th>
-                                    <th>Start Point</th>
-                                    <th>End Point</th>
-                                    <th>Junction</th>
-                                    <th>Added Date/Time</th>
+                                    <th>City</th>
+                                    <th>Name</th>
+                                    <th>Phone No</th>
+                                    <th>CNIC</th>
+                                    <th>Address</th>
+                                    <th>Route</th>
+                                    <th>Category</th>
+                                    <th>Added On</th>
                                     <th>Status</th>
-                                    {{--<th>Services Available</th>--}}
                                     <th>Action</th>
                                 </tr>
                                 </thead>
@@ -53,40 +98,13 @@
     </section>
 @endsection
 
+
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-    {{--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBu-916DdpKAjTmJNIgngS6HL_kDIKU0aU&callback=myMap"></script>--}}
-    {{--<script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBMo9kqvMhqVAe_GCXZXOfzfAZ_oeBapkQ"></script>--}}
-    {{--<script src = "https://maps.googleapis.com/maps/api/js"></script>--}}
-    <script type="text/javascript">
-        // document.addEventListener('DOMContentLoaded', function () {
-        //     if (document.querySelectorAll('#map').length > 0)
-        //     {
-        //         if (document.querySelector('html').lang)
-        //             lang = document.querySelector('html').lang;
-        //         else
-        //             lang = 'en';
-        //
-        //         var js_file = document.createElement('script');
-        //         js_file.type = 'text/javascript';
-        //         js_file.src = 'https://maps.googleapis.com/maps/api/js?callback=initMap&signed_in=true&key=AIzaSyBu-916DdpKAjTmJNIgngS6HL_kDIKU0aU&language=' + lang;
-        //         document.getElementsByTagName('head')[0].appendChild(js_file);
-        //     }
-        // });
-        // var map;
-        //
-        // function initMap() {
-        //     map = new google.maps.Map(document.getElementById('map'), {
-        //         center: {lat: -34.397, lng: 150.644},
-        //         zoom: 8
-        //     });
-        // }
-        // setTimeout(function () {
-        //     initMap();
-        // },5000);
-        $(document).ready(function() {
 
+    <script type="text/javascript">
+        $(document).ready(function() {
             var t =  $('.datatable').DataTable({
                 dom: 'ltipr',
                 fixedHeader: {
@@ -100,14 +118,16 @@
                 processing: true,
                 serverSide: true,
 
-                ajax: '{{ route('admin.management.route.ajax') }}',
+                ajax: '{{ route('admin.management.rider.ajax') }}',
                 columns: [
                     {data:'id', defaultContent:''},
-                    {data: 'name', name: 'name', class: 'city'},
-                    {data: 'code', name: 'code', class: 'code'},
-                    {data: 'start', name: 'start', class: 'start'},
-                    {data: 'end', name: 'end', class: 'end'},
-                    {data: 'junction', name: 'junction', class: 'junction'},
+                    {data: 'city', name: 'city', class: 'city'},
+                    {data: 'name', name: 'name', class: 'name'},
+                    {data: 'phone', name: 'phone', class: 'phone'},
+                    {data: 'cnic', name: 'cnic', class: 'cnic'},
+                    {data: 'address', name: 'address', class: 'address'},
+                    {data: 'route', name: 'route', class: 'route'},
+                    {data: 'category', name: 'category', class: 'category'},
                     {data: 'created_at', name: 'created_at', class: 'created_at'},
                     {data: 'status', name: 'status', class: 'status'},
                     {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
@@ -147,30 +167,30 @@
             } ).draw();
 
 
-        $("#addRoute").on("show.bs.modal", function(e) {
-                $.get( "/admin/management/route/add", function( data ) {
-                    $("#addRouteDiv").html(data);
+            $("#addRider").on("show.bs.modal", function(e) {
+                $.get( "/admin/management/rider/add", function( data ) {
+                    $("#addRiderDiv").html(data);
                 });
-        });
-        $("#editRoute").on("show.bs.modal", function(e) {
+            });
+            $("#editRider").on("show.bs.modal", function(e) {
 
-            var id = $(e.relatedTarget).data('target-id');
+                var id = $(e.relatedTarget).data('target-id');
 
-            $.get( "/admin/management/route/"+id+"/edit", function( data ) {
-                $("#editRouteDiv").html(data);
+                $.get( "/admin/management/rider/"+id+"/edit", function( data ) {
+                    $("#editRiderDiv").html(data);
+                });
+
             });
 
+            $('body').on('click','.deactivate',function (e) {
+                var id = $(this).data('target-id');
+                var rel = $(this).attr('rel');
+
+                $('.riderConfirmation #cid').val(id);
+                $('.riderConfirmation #cstatus').val(rel);
+
+            });
         });
-
-        $('body').on('click','.deactivate',function (e) {
-            var id = $(this).data('target-id');
-            var rel = $(this).attr('rel');
-
-            $('.routeConfirmation #cid').val(id);
-            $('.routeConfirmation #cstatus').val(rel);
-
-        });
-    });
     </script>
 
 @endsection

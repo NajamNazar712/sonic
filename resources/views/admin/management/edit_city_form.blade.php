@@ -57,7 +57,7 @@
             @foreach($bookings as $index => $booking)
 
                 <div class="bs-callout-primary callout-border-left callout-square p-1">
-                    <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" {{isset($delivery[$booking->id])? 'checked':''}} class="icheckbox bookingtype{{$booking->id}}"></strong>
+                    <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" readonly name="booking[{{$booking->id}}]" {{isset($delivery[$booking->id])? 'checked':''}} class="icheckbox bookingtype{{$booking->id}}"></strong>
                     <div class="mt-1 form-group">
 
                         @foreach($shippingMode as $sindex => $shipping)
@@ -135,7 +135,9 @@
             radioClass: 'iradio_flat-red',
             increaseArea: '20%' // optional
         });
-        $('.select2').select2();
+        $('.select2').select2({
+            dropdownParent: $("#editCity")
+        });
 
         $("input[type='radio'][name='city-radio']").on('ifChecked', function(event){
             var rtype = $(this).attr('rel');
