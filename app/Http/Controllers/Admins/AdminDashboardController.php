@@ -2847,8 +2847,6 @@ class AdminDashboardController extends Controller
 
     public function updateCity(Request $request,$id){
         if($request->postType == 'city'){
-//            return $request;
-
             $city = City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>0,
@@ -2870,7 +2868,6 @@ class AdminDashboardController extends Controller
 
             return redirect()->back()->with('success','city updated successfully');
         }elseif($request->postType == 'hub'){
-//            return $request;
             $city = City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>1,
@@ -2891,7 +2888,6 @@ class AdminDashboardController extends Controller
                     ]);
                 }
             }
-
 
             return redirect()->back()->with('success','Hub city added successfully');
         }
@@ -2941,7 +2937,6 @@ class AdminDashboardController extends Controller
             return redirect()->back()->with('success','Hub city added successfully');
         }
     }
-
 
     public function CityStatus(Request $request){
         $id = $request->cid; //city id
@@ -3237,7 +3232,6 @@ class AdminDashboardController extends Controller
     public function riderStatus(Request $request){
         $id = $request->cid;
         $status = $request->status;
-//        return $request;
         if($status == 'riderActive'){
             $rider = Rider::where('id',$id)->update(['status'=>1]);
             if($rider){

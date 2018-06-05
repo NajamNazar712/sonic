@@ -12,6 +12,7 @@ class StandardInsuranceChargesTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('standard_insurance_charges')->truncate();
         DB::table('standard_insurance_charges')->insert(array(
             array('shipping_mode_id'=>1,'range_up'=>0,'range_down'=>1500,'charges'=>50),
             array('shipping_mode_id'=>1,'range_up'=>1501,'range_down'=>3000,'charges'=>100),

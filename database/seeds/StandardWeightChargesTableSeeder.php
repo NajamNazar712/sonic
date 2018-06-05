@@ -12,6 +12,7 @@ class StandardWeightChargesTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('standard_weight_charges')->truncate();
         DB::table('standard_weight_charges')->insert(array(
             array('shipping_mode_id'=>1,'range_up'=>0.01,'range_down'=>0.25,'local_or_6hr'=>150,'national_or_sameday'=>165),
             array('shipping_mode_id'=>1,'range_up'=>0.251,'range_down'=>0.5,'local_or_6hr'=>165,'national_or_sameday'=>180),
