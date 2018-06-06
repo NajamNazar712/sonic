@@ -248,6 +248,8 @@
 										if (data.status == 0) {
 											toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+											table.ajax.reload();
+
 											if (data.complete) {
 												setTimeout(function() {
 													window.location.href = '{{ route('admin.pickups.receive.index') }}';
@@ -256,9 +258,9 @@
 										}
 										else {
 											toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-										}
 
-										table.ajax.reload();
+											table.ajax.reload();
+										}
 									});
 								}
 							});
