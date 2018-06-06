@@ -20,6 +20,10 @@
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
+										<th class="border-primary border-darken-1">Rider</th>
+										<th class="border-primary border-darken-1">Rider Type</th>
+										<th class="border-primary border-darken-1">Route</th>
+										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Pickup(s)</th>
 										<th class="border-primary border-darken-1">Booking(s)</th>
 										<th class="border-primary border-darken-1">Total Estimated Weight (kg)</th>
@@ -189,6 +193,10 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'rider', name: 'rider', class: 'align-middle rider'},
+					{data: 'rider_type', name: 'rc.name', class: 'align-middle rider_type'},
+					{data: 'route', name: 'route', class: 'align-middle route'},
+					{data: 'city', name: 'c.name', class: 'align-middle city'},
 					{data: 'pickups', name: 'pickup_notes.pickups', class: 'align-middle pickups'},
 					{data: 'bookings', name: 'pickup_notes.bookings', class: 'align-middle bookings'},
 					{data: 'total_estimated_weight', name: 'pickup_notes.total_estimated_weight', class: 'align-middle total_estimated_weight'},
@@ -398,6 +406,21 @@
 				}
 				else if ($(this).hasClass('print_pickup_note')) {
 					print([pickup_note_id]);
+
+					var index = $.inArray(pickup_note_id, selected_rows);
+
+					if (index !== -1) {
+						selected_rows.splice(index, 1);
+					}
+
+					if (selected_rows.length > 0) {
+						table.button(0).enable();
+					}
+					else {
+						table.button(0).disable();
+					}
+
+					table.ajax.reload();
 				}
 			});
 		});
