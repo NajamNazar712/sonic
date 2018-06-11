@@ -30,5 +30,8 @@ class DatabaseSeeder extends Seeder
         $this->call(StandardPackagingChargesTableSeeder::class);
         $this->call(StandardBookingTypeChargesTableSeeder::class);
         $this->call(PickupNoteStatusTableSeeder::class);
+        $this->call(ShipmentStatusTableSeeder::class);
+        $this->call(ShipmentStatusReasonTableSeeder::class);
+        $this->call(ShipmentStatusShipmentStatusReasonTableSeeder::class);
     }
 }
