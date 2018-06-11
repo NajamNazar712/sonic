@@ -27,6 +27,7 @@ class DeliveryController extends Controller
         return view('admin.delivery.pending.index');
     }
     public function pending_list(Request $request){
+        $status = array(2,4,6,7,8,9,12,15);
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -34,10 +35,15 @@ class DeliveryController extends Controller
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
-//            ->join('shipments_journey sj','shipments.id','=','sj.shipment_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+//            ->leftJoin('shipments_journey as sj', function ($join) {
+//                $join->on('sj.shipment_id', '=', 'shipments.id')
+//                    ->where('sj.id')->latest();
+//            })
+//            ->leftJoin('shipments_journey as sj','sj.shipment_id','=','shipments.id')
+                ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status')
+            ->whereIn('shipments.shipper_status_id',$status)
 
-            ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type')
-            ->where(['shipper_status_id'=>1,'consignee_status_id'=>1])
             ->get();
         return Datatables::of($shipments)
             ->addColumn("action", function ($result) {
@@ -45,10 +51,8 @@ class DeliveryController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> Dispute</a>
-                                            
-                                            </div>
-                                            </span>";
+                                              <a href='#' class='dropdown-item' data-target-id='' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> Dispute</a>                                         
+                                            </div></span>";
             })
             ->make(true);
     }
@@ -130,10 +134,10 @@ class DeliveryController extends Controller
                     'delivery_note_id'=>$note->id,
                     'shipment_id'=>$shipment
                 ]);
-                Shipment::where('id',$shipment)->update(['shipper_status_id'=>2,'consignee_status_id'=>2]);
+                Shipment::where('id',$shipment)->update(['shipper_status_id'=>5]);
             }
         }
-        return $request;
+        return redirect()->route('admin.delivery.receive.index');
     }
     public function delivery_note_receive_index(){
         return view('admin.delivery.receive.index');
@@ -144,9 +148,15 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
-            ->select(['delivery_notes.id as delivery_note','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount','delivery_notes.shipments_count'])
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount','delivery_notes.shipments_count'])
             ->get();
         return Datatables::of($deliveries)
+
+
+            ->editColumn('delivery_note', function ($deliveries) {
+                //$printreceive = route('admin.delivery.receive.print');
+                return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a>";
+            })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
             })
@@ -221,10 +231,179 @@ class DeliveryController extends Controller
                 $count = $count-1;
                 $cod = $cod - $parcel->amount;
                 DeliveryNote::where('id',$delivery_note)->update(['shipments_count'=>$count,'total_cod_amount'=>$cod]);
+                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>4]);
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
+            }else{
+                return ['status' => 1, 'error' => 'Something went wrong'];
             }
         }else{
             return ['status' => 1, 'error' => 'Something went wrong'];
         }
+    }
+    public function received_print(Request $request) {
+        //$generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+//       return $request->ids;
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Pickup Note</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                        margin: 0mm;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color {
+                        color: #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="p-1">
+      ';
+
+//        foreach($request->ids as $id) {
+//            $pickup_note = PickupNote::find($id);
+//
+//            $rider = Rider::find($pickup_note->rider_id);
+//            $route = $rider->route;
+//
+//            $html .= '
+//                      <table class="table table-sm table-bordered border">
+//                        <tbody>
+//                          <tr>
+//                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+//                            <td class="text-center align-middle color primary"><strong>Pickup Note</strong></td>
+//                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+//                          </tr>
+//                          <tr>
+//                            <td class="color secondary"><strong>Rider Name</strong></td>
+//                            <td>' . $rider->name . '</td>
+//                            <td rowspan="7" class="text-center align-middle">
+//                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+//                              <span><strong>' . str_pad($id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+//                            </td>
+//                          </tr>
+//                          <tr>
+//                            <td class="color secondary"><strong>Category</strong></td>
+//                            <td>' . $rider->rider_category->name . '</td>
+//                          </tr>
+//                          <tr>
+//                            <td class="color secondary"><strong>Route</strong></td>
+//                            <td> ' . $route->code . ' (' . $route->start . ' to ' . $route->end . ')</td>
+//                          </tr>
+//                          <tr>
+//                            <td class="color secondary"><strong>Total Pickups</strong></td>
+//                            <td>' . $pickup_note->pickups . '</td>
+//                          </tr>
+//                        </tbody>
+//                      </table>
+//        ';
+//
+//            $html .= '
+//                      <table class="table table-sm table-bordered border">
+//                        <tbody>
+//                          <tr>
+//                            <td class="color primary"><strong>S. No.</strong></td>
+//                            <td class="color primary"><strong>Company Name</strong></td>
+//                            <td class="color primary"><strong>Contact Person</strong></td>
+//                            <td class="color primary"><strong>Contact Number</strong></td>
+//                            <td class="color primary"><strong>Pickup Address</strong></td>
+//                            <td class="color primary"><strong>Bookings</strong></td>
+//                            <td class="color primary"><strong>Pickup Date</strong></td>
+//                          </tr>
+//        ';
+//
+//            $serial_number = 1;
+//
+//            $pickup_note_requests = $pickup_note->pickup_note_requests;
+//
+//            foreach ($pickup_note_requests as $pickup_note_request) {
+//                $pickup_request = $pickup_note_request->pickup_request;
+//
+//                $shipper = $pickup_request->shipper;
+//                $pickup_address = $pickup_request->pickup_address;
+//
+//                $html .= '
+//                          <tr>
+//                            <td>' . $serial_number . '</td>
+//                            <td>' . $shipper->name . '</td>
+//                            <td>' . $pickup_address['poc'] . '</td>
+//                            <td>' . $pickup_address['phone'] . '</td>
+//                            <td>' . $pickup_address['pickup_address'] . '</td>
+//                            <td>' . $pickup_request['bookings'] . '</td>
+//                            <td>' . Carbon::parse($pickup_request['pickup_date'])->format('d/m/Y') . '</td>
+//                          </tr>
+//          ';
+//
+//                $serial_number++;
+//            }
+//
+//            $html .= '
+//                        </tbody>
+//                      </table>
+//
+//                      <hr>
+//        ';
+//
+//            $pickup_note->status_id = 3;
+//
+//            $pickup_note->save();
+//        }
+
+        $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
     }
 }

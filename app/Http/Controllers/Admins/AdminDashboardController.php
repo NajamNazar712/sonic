@@ -25,7 +25,6 @@ use App\Http\Models\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
-use App\Http\Models\CityInfo;
 use App\Http\Models\PickupType;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\BookingTypeCharges;
@@ -2690,8 +2689,8 @@ class AdminDashboardController extends Controller
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
     public function activeAccountListAjax(){
-       $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('status',3)->where('blacklist',0);
+       $users = User::join('cities', 'users.city_id', '=', 'cities.id')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email'])->where('users.status',3)->where('blacklist',0);
 
         return Datatables::of($users)->addColumn("action", function ($result) {
                                             return " <span class='dropdown'>
@@ -2710,8 +2709,8 @@ class AdminDashboardController extends Controller
     //->join('rate_statuses','users.id','=','rate_statuses.user_id')
 
     public function pendingAccountListAjax(){
-        $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at'])->whereIn('status',[0,1,2])->where('blacklist',0);
+        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
          //$isRate = RateStatus::where('user_id',$users->id);
 
         return Datatables::of($users)
@@ -2754,8 +2753,8 @@ class AdminDashboardController extends Controller
 
     }
     public function blockAccountListAjax(){
-        $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('blacklist',1);
+        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email'])->where('blacklist',1);
 
         return Datatables::of($users)->addColumn("action", function ($result) {
                                             return " <span class='dropdown'>

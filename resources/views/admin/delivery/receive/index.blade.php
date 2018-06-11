@@ -127,7 +127,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.receive.list') }}',
-                rowId: 'delivery_note',
+                rowId: 'delivery_note_id',
                 order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -212,6 +212,40 @@
                         .draw();
                     input.val('');
                 }
+            });
+
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            $('body').on('click','.printdeliverynote',function () {
+                var deliverynote = $(this).parents('tr').attr('id');
+                // console.log(deliverynote);
+                print(deliverynote);
             });
         });
     </script>

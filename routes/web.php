@@ -179,6 +179,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/update','Admins\DeliveryController@receive_delivery_update')->name('update');
             Route::get('{id}/update/list','Admins\DeliveryController@receive_delivery_notes_list')->name('update.list');
             Route::get('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
+            Route::post('print','Admins\DeliveryController@received_print')->name('print');
         });
     });
 

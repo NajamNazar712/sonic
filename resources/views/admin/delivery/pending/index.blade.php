@@ -27,7 +27,7 @@
                                     <th class="border-primary border-darken-1">COD Amount</th>
                                     <th class="border-primary border-darken-1">Shipping Mode</th>
                                     <th class="border-primary border-darken-1">Service Type</th>
-                                    {{--<th class="border-primary border-darken-1">Status</th>--}}
+                                    <th class="border-primary border-darken-1">Status</th>
                                     {{--<th class="border-primary border-darken-1">Reason</th>--}}
                                     {{--<th class="border-primary border-darken-1">Remarks</th>--}}
                                     <th class="border-primary border-darken-1">Action</th>
@@ -131,6 +131,8 @@
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                 {data: 'mode', name: 'sm.mode', class: 'align-middle mode'},
                 {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
+                {data: 'status', name: 'status', class: 'align-middle status'},
+                // {data: 'remarks', name: 'remarks', class: 'align-middle remarks'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
             ],
