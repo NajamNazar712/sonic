@@ -22,11 +22,34 @@
                     <li><a class="menu-item" href="/admin/accounts/block" data-i18n="nav.dash.ecommerce">Block Accounts List</a></li>
                 </ul>
             </li>
+			<li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Network Management</span></a>
+                <ul class="menu-content">
+                    <li><a class="menu-item" href="{{route('admin.management.city.index')}}" data-i18n="nav.dash.ecommerce">City Management</a></li>
+                    <li><a class="menu-item" href="{{route('admin.management.route.index')}}" data-i18n="nav.dash.ecommerce">Route Management</a></li>
+                    <li><a class="menu-item" href="{{route('admin.management.rider.index')}}" data-i18n="nav.dash.ecommerce">Rider Management</a></li>
+
+                </ul>
+            </li>
+
+            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Pickups</span></a>
+              <ul class="menu-content">
+                <li><a class="menu-item" href="{{ route('admin.pickups.pending.index') }}">Pending</a></li>
+                <li><a class="menu-item" href="{{ route('admin.pickups.assigned.index') }}">Assigned</a></li>
+                <li><a class="menu-item" href="{{ route('admin.pickups.receive.index') }}">Receive</a></li>
+              </ul>
+            </li>
+
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Profile Update</span></a></li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Excel Upload</span></a></li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Finance</span></a></li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a></li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a></li>
+            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
+                <ul class="menu-content">
+                    <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}" data-i18n="nav.dash.ecommerce">Pickup Weight Settings</a></li>
+
+                </ul>
+            </li>
         </ul>
     </div>
 </div>

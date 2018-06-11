@@ -5,8 +5,8 @@
           <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
           <li class="nav-item">
             <a class="navbar-brand" href="{{route('cod.dashboard')}}">
-              <img class="brand-logo" alt="modern admin logo" src="{{asset('app-assets/images/logo/logo.png')}}">
-              <h3 class="brand-text">Sonic Shipper</h3>
+              <img class="brand-logo" alt="modern logo" src="{{ asset('img/logo.png') }}">
+              <h3 class="brand-text">Sonic</h3>
             </a>
           </li>
           <li class="nav-item d-md-none">

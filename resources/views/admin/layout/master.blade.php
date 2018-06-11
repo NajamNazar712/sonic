@@ -18,7 +18,8 @@
         </div>
     </div>
 </div>
-@include('admin.layout.footer')
 @include('admin.components.modals')
+@include('admin.layout.footer')
+
 </body>
 </html>

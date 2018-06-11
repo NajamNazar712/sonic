@@ -22,5 +22,13 @@ class DatabaseSeeder extends Seeder
         $this->call(ShippingModeTableSeeder::class);
         $this->call(ShippingModeSameDayTimingTableSeeder::class);
         $this->call(PaymentModeTableSeeder::class);
+        $this->call(StandardWeightChargesTableSeeder::class);
+        $this->call(StandardCashHandlingChargesTableSeeder::class);
+        $this->call(StandardInsuranceChargesTableSeeder::class);
+        $this->call(StandardReturnChargesTableSeeder::class);
+        $this->call(StandardFuelSurchargesTableSeeder::class);
+        $this->call(StandardPackagingChargesTableSeeder::class);
+        $this->call(StandardBookingTypeChargesTableSeeder::class);
+        $this->call(PickupNoteStatusTableSeeder::class);
     }
 }

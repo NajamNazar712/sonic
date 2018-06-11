@@ -1,6 +1,6 @@
 <footer class="footer footer-static footer-light navbar-border navbar-shadow">
     <p class="clearfix blue-grey lighten-2 text-sm-center mb-0 px-2">
-        <span class="float-md-left d-block d-md-inline-block">Copyright &copy; 2018 by <a class="text-bold-800 grey darken-2" href="#">Trax </a>, All rights reserved. </span>
+        <span class="float-md-left d-block d-md-inline-block">Copyright &copy; 2018 By <a class="text-bold-800 grey darken-2" href="#">Trax Logistics </a>, All Rights Reserved. </span>
         <span class="float-md-right d-block d-md-inline-blockd-none d-lg-block">Made with <i class="ft-heart pink"></i></span>
     </p>
 </footer>
@@ -20,6 +20,7 @@
 <!-- END MODERN JS-->
 
 <!-- BEGIN PAGE LEVEL JS-->
+<script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
 {{--<script src="{{asset('app-assets/js/scripts/forms/form-login-register.js')}}" type="text/javascript"></script>--}}
 {{--Datatables javascript--}}
 {{--This needs to be moved--}}

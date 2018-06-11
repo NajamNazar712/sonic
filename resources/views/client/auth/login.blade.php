@@ -87,7 +87,7 @@
                                             @endif
                                         </fieldset>
                                         <fieldset class="form-group position-relative has-icon-left">
-                                            <input type="password" name="password" class="form-control {{ $errors->has('password') ? ' is-invalid' : '' }}" id="password" placeholder="Password"
+                                            <input type="password" name="password" class="form-control {{ $errors->has('password') ? ' is-invalid' : '' }}" id="password" placeholder="Enter Password"
                                                    required>
                                             <div class="form-control-position">
                                                 <i class="la la-key"></i>
@@ -102,19 +102,19 @@
                                             <div class="col-md-6 col-12 text-center text-sm-left">
                                                 <fieldset>
                                                     <input type="checkbox" id="remember-me" class="chk-remember" {{ old('remember') ? 'checked' : '' }}>
-                                                    <label for="remember-me"> Remember Me</label>
+                                                    <label for="remember-me">Remember Me</label>
                                                 </fieldset>
                                             </div>
-                                            <div class="col-md-6 col-12 float-sm-left text-center text-sm-right"><a href="{{ route('password.request') }}" class="card-link">Forgot Password?</a></div>
+                                            <div class="col-md-6 col-12 float-sm-left text-center text-sm-right"><a href="{{ route('password.request') }}" class="card-link">Forgot Password</a></div>
                                         </div>
                                         <button type="submit" class="btn btn-outline-info btn-block"><i class="ft-unlock"></i> Login</button>
                                     </form>
                                 </div>
                                 <p class="card-subtitle line-on-side text-muted text-center font-small-3 mx-2 my-1">
-                                    <span>New To Trax ?</span>
+                                    <span>New To Trax?</span>
                                 </p>
                                 <div class="card-body">
-                                    <a href="{{route('cod.register')}}" class="btn btn-outline-danger btn-block"><i class="ft-user"></i> Register</a>
+                                    <a href="{{route('cod.register')}}" class="btn btn-outline-danger btn-block"><i class="ft-user"></i>Register</a>
                                 </div>
                             </div>
                         </div>

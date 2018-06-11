@@ -9,6 +9,8 @@
                 <div class="card">
                     <div class="card-header">
                         <h4>Active Accounts</h4>
+                        @include('admin.inc.messages')
+
                     </div>
 
                     <div class="card-content">
@@ -18,11 +20,11 @@
                                     <tr>
                                         <th>Account ID</th>
                                         <th>Company Name</th>
-                                        <th>City</th>
+                                        <th>City Name</th>
                                         <th>Contact Person</th>
-                                        <th>Phone</th>
+                                        <th>Phone Number</th>
                                         <th>Address</th>
-                                        <th>Email</th>
+                                        <th>Email Address</th>
                                         <th>Action</th>
                                     </tr>
                                 </thead>

@@ -17,7 +17,7 @@
 						<div class="card-body">
 							@include('client.inc.messages')
 
-							<form id="booking_form" class="form-horizontal" method="POST" action="{{ url('cod/shipment/book') }}" novalidate="novalidate">
+							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.store') }}" novalidate="novalidate">
 								{{ csrf_field() }}
 
 								<input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') }}">
@@ -50,7 +50,7 @@
 											</div>
 
 											<div class="form-group">
-												<input type="text" name="new_pickup_point_of_contact" class="form-control" placeholder="Point of Contact*" data-rule-required="true" data-msg-required="Point of Contact is required">
+												<input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required">
 											</div>
 
 											<div class="form-group">
@@ -112,7 +112,7 @@
 										<h4 class="form-section mb-2 text-center">Order Information</h4>
 
 										<div class="form-group">
-											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ url('cod/shipment/book/order_id') }}" data-msg-remote="Order ID must be unique">
+											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
 										</div>
 
 										<div id="regular">
@@ -137,7 +137,7 @@
 													<span class="input-group-text">Rs</span>
 												</div>
 
-												<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Item Price*" data-rule-required="true" data-msg-required="Item Price is required">
+												<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Price*" data-rule-required="true" data-msg-required="Price is required">
 											</div>
 
 											<div class="form-group text-center p-1 border border-light rounded">
@@ -199,7 +199,7 @@
 																	<span class="input-group-text">Rs</span>
 																</div>
 
-																<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Item Price*" data-rule-required="true" data-msg-required="Item Price is required">
+																<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Price*" data-rule-required="true" data-msg-required="Price is required">
 															</div>
 
 															<div class="form-group text-center p-1 border border-light rounded">
@@ -266,11 +266,13 @@
 										</div>
 
 										<div id="shipping_same-day" class="d-none">
-											<select name="same-day_timing" class="select2" id="same-day_timing" data-rule-required="true" data-msg-required="Same-day Timing is required">
-												@foreach($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
-													<option value="{{ $shipping_mode_same_day_timing->id }}">{{ $shipping_mode_same_day_timing->timing }}</option>
-												@endforeach
-											</select>
+											<div class="form-group">
+												<select name="same-day_timing" class="select2" id="same-day_timing" data-rule-required="true" data-msg-required="Same-day Timing is required">
+													@foreach($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
+														<option value="{{ $shipping_mode_same_day_timing->id }}">{{ $shipping_mode_same_day_timing->timing }}</option>
+													@endforeach
+												</select>
+											</div>
 										</div>
 									</div>
 
@@ -302,8 +304,8 @@
 								<div class="row mt-2">
 									<div class="col">
 										<div class="form-group text-center">
-											<button type="submit" class="btn btn-primary">Book</button>
-											<!-- <button type="submit" class="btn btn-primary ml-1">Book &amp; Print</button> -->
+											<button type="submit" name="book" class="btn btn-primary" value="Book">Book</button>
+											<button type="submit" name="book_and_print" class="btn btn-primary ml-1" value="Book & Print">Book &amp; Print</button>
 										</div>
 									</div>
 								</div>
@@ -312,7 +314,7 @@
 					</div>
 				</div>
 
-				<div class="modal fade" id="select_service_type" tabindex="-1" role="dialog" aria-labelledby="select_service_type_title" aria-hidden="true">
+				<div class="modal fade" id="select_service_type" role="dialog" aria-labelledby="select_service_type_title" aria-hidden="true">
 					<div class="modal-dialog modal-sm" role="document">
 						<div class="modal-content">
 							<form class="form-horizontal">
@@ -370,6 +372,35 @@
 
 	<script>
 		$(document).ready(function() {
+			@if (session('print'))
+				$.ajax({
+					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+					method: 'POST',
+					data: {
+						'ids[]': '{{ session('print') }}',
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+				.done(function(data) {
+					var tab = window.open('', '_blank');
+
+					if(!tab) {
+						swal({
+							title: 'Popup Blocker Enabled!',
+							text: 'Please add this site to your exception list.',
+							icon: 'error',
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+					}
+					else {
+						tab.document.write(data);
+						tab.document.close();
+						tab.focus();
+					}
+				});
+			@endif
+
 			function shipping_mode_same_day(pickup_city, consignee_city) {
 				if (pickup_city != consignee_city) {
 					if ($('#shipping_mode').val() == 4) {
@@ -670,7 +701,7 @@
 						icon: 'warning',
 						buttons: {
 							cancel: {
-								text: 'Cancel',
+								text: 'Close',
 								value: null,
 								visible: true,
 								closeModal: true,
@@ -728,6 +759,9 @@
 			$('#booking_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
+				normalizer: function(value) {
+					return $.trim(value);
+				},
 				errorPlacement: function(error, element) {
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
