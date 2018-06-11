@@ -14,7 +14,7 @@ class UpdateShipmentJourneyTableShipmentStatusReasonId extends Migration
     public function up()
     {
         Schema::table('shipments_journey', function (Blueprint $table) {
-            $table->integer('shipment_status_reason_id')->nullable()->default(NULL)->after('consignee_status_id');
+            $table->integer('status_reason_id')->nullable()->default(NULL)->after('consignee_status_id');
         });
     }
 
@@ -26,7 +26,7 @@ class UpdateShipmentJourneyTableShipmentStatusReasonId extends Migration
     public function down()
     {
         Schema::table('shipments_journey', function (Blueprint $table) {
-            $table->dropColumn('shipment_status_reason_id');
+            $table->dropColumn('status_reason_id');
         });
     }
 }
