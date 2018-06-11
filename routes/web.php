@@ -151,6 +151,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('summary')->name('summary.')->group(function () {
                 Route::get('', 'Admins\AdminPickupsController@receive_summary_index')->name('index');
                 Route::get('list', 'Admins\AdminPickupsController@receive_summary_list')->name('list');
+
+                Route::prefix('request')->name('request.')->group(function () {
+                    Route::post('short_received', 'Admins\AdminPickupsController@receive_summary_request_short_received')->name('short_received');
+                    Route::put('done', 'Admins\AdminPickupsController@receive_summary_request_done')->name('done');
+                    Route::put('not_done', 'Admins\AdminPickupsController@receive_summary_request_not_done')->name('not_done');
+                });
             });
         });
     });

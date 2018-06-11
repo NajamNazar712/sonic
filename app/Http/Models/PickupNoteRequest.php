@@ -6,9 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 
 class PickupNoteRequest extends Model
 {
-    public $timestamps = FALSE;
+	protected $primaryKey = 'pickup_note_id';
 
-    public function pickup_request() {
+	public $timestamps = FALSE;
+
+	public function pickup_request() {
 		return $this->belongsTo('App\Http\Models\PickupRequest');
+	}
+
+	public function pickup_note() {
+		return $this->belongsTo('App\Http\Models\PickupNote');
 	}
 }

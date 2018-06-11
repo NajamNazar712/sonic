@@ -13,4 +13,8 @@ class PickupRequest extends Model
 	public function pickup_address() {
 		return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo');
 	}
+
+	public function pickup_note_request() {
+		return $this->hasOne('App\Http\Models\PickupNoteRequest');
+	}
 }

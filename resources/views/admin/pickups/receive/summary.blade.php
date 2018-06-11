@@ -115,7 +115,6 @@
 				},
 				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
 				pageLength: 25,
-				// stateSave: true,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
@@ -181,6 +180,145 @@
 
 				if ($(this).hasClass('receive')) {
 					$('#receive_pickup_note_form').submit();
+				}
+				else if ($(this).hasClass('done')) {
+					$.ajax({
+						url: '{!! route('admin.pickups.receive.summary.request.short_received') !!}',
+						method: 'POST',
+						data: {
+							'pickup_request_id': pickup_request_id,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
+					.done(function(data) {
+						if (data.status == 0) {
+							if (data.short_received) {
+								var html = 'There are shipments that are short received from:<br/>';
+
+								$.each(data.short_received, function(receiving_sheet_id, shipments) {
+									var receiving_sheet_number = receiving_sheet_id.toString();
+
+									while (receiving_sheet_number.length < 12) {
+										receiving_sheet_number = '0' + receiving_sheet_number;
+									}
+
+									html += receiving_sheet_number + ': ' + shipments.join(' - ') + '<br/>';
+								});
+
+								html += 'Are you sure, you want to mark this Pickup Done?';
+							}
+							else {
+								var html = 'Are you sure, you want to mark this Pickup Done?';
+							}
+
+							content = document.createElement('div');
+							content.innerHTML = html;
+
+							swal({
+								content: content,
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'Close',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Done',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									$.ajax({
+										url: '{!! route('admin.pickups.receive.summary.request.done') !!}',
+										method: 'PUT',
+										data: {
+											'pickup_request_id': pickup_request_id,
+											'_token': '{{ csrf_token() }}'
+										}
+									})
+									.done(function(data) {
+										if (data.status == 0) {
+											toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+											table.ajax.reload();
+
+											if (data.complete) {
+												setTimeout(function() {
+													window.location.href = '{{ route('admin.pickups.receive.index') }}';
+												}, 5000);
+											}
+										}
+										else {
+											toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+											table.ajax.reload();
+										}
+									});
+								}
+							});
+						}
+						else {
+							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+					});
+				}
+				else if ($(this).hasClass('not_done')) {
+					swal({
+						text: 'Are you sure, you want to mark this Pickup Not Done?',
+						icon: 'warning',
+						buttons: {
+							cancel: {
+								text: 'Close',
+								value: null,
+								visible: true,
+								closeModal: true,
+							},
+							confirm: {
+								text: 'Not Done',
+								value: true,
+								visible: true,
+								closeModal: true
+							}
+						},
+						closeOnClickOutside: false,
+						closeOnEsc: false,
+						dangerMode: true
+					}).then(function(confirm) {
+						if (confirm) {
+							$.ajax({
+								url: '{!! route('admin.pickups.receive.summary.request.not_done') !!}',
+								method: 'PUT',
+								data: {
+									'pickup_request_id': pickup_request_id,
+									'_token': '{{ csrf_token() }}'
+								}
+							})
+							.done(function(data) {
+								if (data.status == 0) {
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+									if (data.complete) {
+										setTimeout(function() {
+											window.location.href = '{{ route('admin.pickups.receive.index') }}';
+										}, 5000);
+									}
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+
+								table.ajax.reload();
+							});
+						}
+					});
 				}
 			});
 		});

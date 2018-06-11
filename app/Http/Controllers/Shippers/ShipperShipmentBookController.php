@@ -86,7 +86,7 @@ class ShipperShipmentBookController extends Controller
 
       AdminPickupsController::generate($shipment_id);
 
-      ShipmentsJourneyController::add($shipment_id, 1, 1, 'Shipment has been Booked!', Auth::id(), NULL);
+      ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Booked!', Auth::id(), NULL);
 
       return $shipment_id;
     }

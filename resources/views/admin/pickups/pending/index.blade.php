@@ -50,7 +50,11 @@
 								</div>
 								<div class="modal-body">
 									<div class="form-group m-0">
-										<select name="rider" class="select2 rider" data-rule-required="true" data-msg-required="Rider is required"></select>
+										<select name="rider" class="select2 rider" data-rule-required="true" data-msg-required="Rider is required">
+											@foreach($riders as $rider)
+												<option value="{{ $rider->id }}">{{ $rider->name }}</option>
+											@endforeach
+										</select>
 									</div>
 								</div>
 								<div class="modal-footer">
@@ -141,11 +145,6 @@
 					className: 'btn btn-primary assign',
 					enabled: false,
 					action: function (e, dt, node, config) {
-						//Get Riders and Fill Select
-						var options = [];
-
-						options.push({id: 1, text: 'Temporary Rider'});
-
 						if ($('#assign_to_rider .rider').hasClass('select2-hidden-accessible')) {
 							$('#assign_to_rider .rider').empty();
 							$('#assign_to_rider .rider').select2('destroy');
@@ -153,13 +152,12 @@
 
 						$('#assign_to_rider .rider').select2({
 							width: '100%',
-							placeholder: 'Rider*',
-							data: options
+							placeholder: 'Rider*'
 						}).bind('change', function() {
 							if ($(this).hasClass('danger')) {
 								$(this).valid();
 							}
-						}).val(null).trigger('change');
+						});
 
 						$('#assign_to_rider').modal('show');
 					}
