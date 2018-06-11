@@ -10,7 +10,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
-use App\Http\Models\CityInfo;
+use App\Http\Models\City;
 use App\Http\Models\Product;
 use App\Http\Models\ShippingMode;
 use App\Http\Models\ShippingModeSameDayTiming;
@@ -34,7 +34,7 @@ class ShipperShipmentBookController extends Controller
       session(['service_type_name' => $service_type->booking_type]);
     }
 
-    private function add_pickup_address($address, $person_of_contact, $phone_number, $email_address, $city_code) {
+    private function add_pickup_address($address, $person_of_contact, $phone_number, $email_address, $id) {
       $user_shipping_info = new UserShippingInfo();
 
       $user_shipping_info->user_id = Auth::id();
@@ -43,7 +43,7 @@ class ShipperShipmentBookController extends Controller
       $user_shipping_info->phone = $phone_number;
       $user_shipping_info->email = $email_address;
 
-      $user_shipping_info->city_code = $city_code;
+      $user_shipping_info->id = $id;
 
       $user_shipping_info->save();
 
@@ -91,10 +91,10 @@ class ShipperShipmentBookController extends Controller
       return $shipment_id;
     }
 
-    private function generate_tracking_number($shipment_id, $pickup_city_code, $consignee_city_code) {
+    private function generate_tracking_number($shipment_id, $pickup_id, $consignee_id) {
       $shipment = Shipment::find($shipment_id);
 
-      $tracking_number = $pickup_city_code . $consignee_city_code . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
+      $tracking_number = $pickup_id . $consignee_id . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
 
       $shipment->tracking_number = $tracking_number;
 
@@ -124,7 +124,7 @@ class ShipperShipmentBookController extends Controller
     public function index() {
       $booking_types = BookingType::all();
       $user = User::with('shipping.city')->find(Auth::id());
-      $cities = CityInfo::orderBy('city_name')->get();
+      $cities = City::orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_modes = ShippingMode::all();
       $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
@@ -147,16 +147,16 @@ class ShipperShipmentBookController extends Controller
         $this->set_service_type($service_type_id);
 
         if ($request->input('pickup_address') == 0) {
-          $pickup_city_code = CityInfo::find($request->input('new_pickup_city'))->value('city_code');
+          $pickup_id = City::find($request->input('new_pickup_city'))->value('id');
 
-          $pickup_address_id = $this->add_pickup_address($request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_code);
+          $pickup_address_id = $this->add_pickup_address($request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_id);
         }
         else {
           $pickup_address_id = $request->input('pickup_address');
 
           $user_shipping_info = UserShippingInfo::find($pickup_address_id);
 
-          $pickup_city_code = $user_shipping_info->city_code;
+          $pickup_id = $user_shipping_info->id;
         }
 
         if ($request->filled('information_display')) {
@@ -223,9 +223,9 @@ class ShipperShipmentBookController extends Controller
 
         $shipment_id = $this->book($service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id);
 
-        $consignee_city_code = CityInfo::find($consignee_city_id)->value('city_code');
+        $consignee_id = City::find($consignee_city_id)->value('id');
 
-        $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_code, $consignee_city_code);
+        $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_id, $consignee_id);
 
         if ($service_type_id == 1) {
           $product_type_id = $request->input('product_type');
@@ -456,9 +456,9 @@ class ShipperShipmentBookController extends Controller
                           </tr>
                           <tr>
                             <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
-                            <td class="border twice-bottom">' . $shipment->pickup_address->city->city_name . '</td>
+                            <td class="border twice-bottom">' . $shipment->pickup_address->city->name . '</td>
                             <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                            <td class="border twice-bottom">' . $shipment->consignee_city->city_name . '</td>
+                            <td class="border twice-bottom">' . $shipment->consignee_city->name . '</td>
                           </tr>
                           <tr>
                             <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>
@@ -622,7 +622,7 @@ class ShipperShipmentBookController extends Controller
     public function excel_index() {
       $booking_types = BookingType::all();
       $pickup_addresses = UserShippingInfo::with('city')->where('user_id', Auth::id())->get();
-      $cities = CityInfo::orderBy('city_name')->get();
+      $cities = City::orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_modes = ShippingMode::all();
       $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();

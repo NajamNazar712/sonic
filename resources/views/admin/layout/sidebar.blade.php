@@ -39,6 +39,13 @@
               </ul>
             </li>
 
+            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
+                <ul class="menu-content">
+                    <li><a class="menu-item" href="{{ route('admin.delivery.pending.index') }}">Pending</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.delivery.note.index') }}">Create Note</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.delivery.receive.index') }}">Receive</a></li>
+                </ul>
+            </li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Profile Update</span></a></li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Excel Upload</span></a></li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Finance</span></a></li>

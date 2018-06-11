@@ -42,8 +42,8 @@
                                         @php
                                         $pickup_weight = '';
                                         if($settings->isEmpty() == false){
-                                            if(isset($settings[0]->pickup_weight_threshold)){
-                                                $pickup_weight = $settings[0]->pickup_weight_threshold;
+                                            if(isset($settings[0]->setting_value)){
+                                                $pickup_weight = $settings[0]->setting_value;
                                             }else{
                                                 $pickup_weight = '';
                                             }

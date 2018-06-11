@@ -154,6 +154,27 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
     });
+    Route::prefix('delivery')->name('delivery.')->group(function(){
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('','Admins\DeliveryController@pending_delivery_index')->name('index');
+            Route::get('list','Admins\DeliveryController@pending_list')->name('list');
+        });
+        Route::prefix('note')->name('note.')->group(function () {
+            Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
+            Route::get('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
+            Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
+
+        });
+        Route::prefix('receive')->name('receive.')->group(function (){
+            Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
+            Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
+            Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
+            Route::get('tracking/search','Admins\DeliveryController@receive_delivery_search')->name('tracking.search');
+            Route::get('{id}/update','Admins\DeliveryController@receive_delivery_update')->name('update');
+            Route::get('{id}/update/list','Admins\DeliveryController@receive_delivery_notes_list')->name('update.list');
+            Route::get('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
+        });
+    });
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
