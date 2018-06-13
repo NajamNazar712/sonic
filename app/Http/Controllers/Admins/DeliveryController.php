@@ -440,15 +440,15 @@ class DeliveryController extends Controller
                 foreach ($statuses as $status){
                     $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
                 }
-                $select = '<select class="form-control select2 statusDrop" name="status_drop['.$deliveries->shId.']"><option selected>Select a status</option>'.$drops.'</select>';
+                $select = '<select class="form-control select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status"><option></option>'.$drops.'</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                $reason = '<select class="form-control select2 reasonDrop"><option selected>Select a reason</option></select>';
+                $reason = '<select class="form-control select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" placeholder="Select a Reason"><option></option></select>';
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {
-                $reason = '<input class="form-control" name="remarks[]" placeholder="Enter Remarks">';
+                $reason = '<input class="form-control" name="remarks['.$deliveries->shId.']" placeholder="Enter Remarks">';
                 return $reason;
             })
             ->make(true);
@@ -464,4 +464,59 @@ class DeliveryController extends Controller
         }
 
     }
+    public function receive_delivery_status_submit(Request $request){
+//        return $request;
+        $shipments = explode(',',$request->shipment_ids);
+        $delivery_note_id = $request->delivery_note_id;
+        if($delivery_note_id != ''){
+            foreach ($shipments as $shipment){
+                if($request->status_drop[$shipment] != null && $request->reason_drop[$shipment] != null && $request->remarks[$shipment] != null){
+                    if($request->status_drop[$shipment] == 6 || $request->status_drop[$shipment] == 18){
+                        ShipmentsJourney::create([
+                            'shipment_id'=>$shipment,
+                            'shipper_status_id'=>$request->status_drop[$shipment],
+                            'consignee_status_id'=>null,
+                            'status_reason_id'=>$request->reason_drop[$shipment],
+                            'remarks'=>$request->remarks[$shipment],
+                            'admin_id'=>Auth::id()
+                        ]);
+                    }else{
+                        ShipmentsJourney::create([
+                            'shipment_id'=>$shipment,
+                            'shipper_status_id'=>$request->status_drop[$shipment],
+                            'consignee_status_id'=>$request->status_drop[$shipment],
+                            'status_reason_id'=>$request->reason_drop[$shipment],
+                            'remarks'=>$request->remarks[$shipment],
+                            'admin_id'=>Auth::id()
+                        ]);
+                    }
+                }elseif($request->status_drop[$shipment] != null){
+                    if($request->status_drop[$shipment] == 6 || $request->status_drop[$shipment] == 18){
+                        ShipmentsJourney::create([
+                            'shipment_id'=>$shipment,
+                            'shipper_status_id'=>$request->status_drop[$shipment],
+                            'consignee_status_id'=>null,
+                            'status_reason_id'=>$request->reason_drop[$shipment],
+                            'remarks'=>$request->remarks[$shipment],
+                            'admin_id'=>Auth::id()
+                        ]);
+                    }else{
+                        ShipmentsJourney::create([
+                            'shipment_id'=>$shipment,
+                            'shipper_status_id'=>$request->status_drop[$shipment],
+                            'consignee_status_id'=>$request->status_drop[$shipment],
+                            'status_reason_id'=>$request->reason_drop[$shipment],
+                            'remarks'=>$request->remarks[$shipment],
+                            'admin_id'=>Auth::id()
+                        ]);
+                    }
+                }
+
+            }
+            return redirect()->back()->with('success','Statuses updated successfully!');
+        }else{
+            return redirect()->back()->with('error','Delivery note not found!');
+        }
+    }
+
 }

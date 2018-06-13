@@ -10,9 +10,10 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
-                <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note">
-
+                <form id="status_update_form" action="{{route('admin.delivery.receive.add.status')}}" method="post">
+                    @csrf
+                <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
+                    <input type="hidden" name="shipment_ids" id="shipment_ids">
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -31,8 +32,11 @@
                     </thead>
                 </table>
                 <div class="row justify-content-center">
-                    <button type="submit" class="btn btn-primary btn-block">Update Status</button>
+                    <div class="col-2">
+                        <button type="submit" class="btn btn-primary btn-block">Update Status</button>
+                    </div>
                 </div>
+                </form>
             </div>
         </div>
     </div>
@@ -50,7 +54,9 @@
         table.dataTable {
             font-size: 12px;
         }
-
+        .select2 li.select2-results__option{
+            font-size: 12px !important;
+        }
         table.dataTable thead tr th {
             padding-left: 0.5em;
             white-space: normal;
@@ -116,7 +122,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',
-                rowId: 'delivery_note_id',
+                rowId: 'shId',
                 order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -137,7 +143,14 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                    $('.select2').select2();
+                    $(".reasonDrop").select2({
+                        placeholder: "Select a Reason",
+                        width:'100%'
+                    });
+                    $(".statusDrop").select2({
+                        placeholder: "Select a Status",
+                        width:'100%'
+                    });
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -202,6 +215,19 @@
 
                     }
                 });
+            });
+            var shipments = [];
+            $('#status_update_form').bind('submit', function(event) {
+                var shipment = $('#shipment_ids');
+                event.preventDefault();
+                var id = '';
+                var count = table.data().count()
+                for(var i = 0;i<count;i++){
+                    id = table.row( i ).id();
+                    shipments.push(id);
+                }
+                shipment.val(shipments);
+                this.submit();
             });
         });
     </script>
