@@ -82,7 +82,7 @@ class AdminPickupsController extends Controller
     public function pending_list(Request $request) {
       $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
       ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
-      ->join('cities AS ci', 'usi.city_id', '=', 'ci.city_id')
+      ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
       ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.pending_bookings', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
       ->where('pickup_requests.status', 0);
 
@@ -858,7 +858,7 @@ class AdminPickupsController extends Controller
     public function receive_summary_list(Request $request) {
       $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
       ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
-      ->join('cities AS ci', 'usi.city_id', '=', 'ci.city_id')
+      ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
       ->join('pickup_note_requests as pnr', 'pickup_requests.id', '=', 'pnr.pickup_request_id')
       ->join('pickup_notes as pn', 'pnr.pickup_note_id', '=', 'pn.id')
       ->join('admins as a', 'pn.assigned_by_user_id', '=', 'a.id')

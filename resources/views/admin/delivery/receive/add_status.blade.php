@@ -33,7 +33,7 @@
                 </table>
                 <div class="row justify-content-center">
                     <div class="col-2">
-                        <button type="submit" class="btn btn-primary btn-block">Update Status</button>
+                        <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
                     </div>
                 </div>
                 </form>
@@ -188,6 +188,7 @@
                 }
             });
             $('body').on('change','.statusOnChange .statusDrop',function (e) {
+                $('#statusSubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
