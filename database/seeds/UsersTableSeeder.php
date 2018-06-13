@@ -37,7 +37,7 @@ class UsersTableSeeder extends Seeder
                 'account_no' => $faker->bankAccountNumber(),
                 'account_title' => $faker->firstName(),
                 'iban' => $faker->bankAccountNumber(),
-                'city_code' => 202,
+                'city_id' => 202,
                 'payment_mode' => 'ibft',
                 'payment_cycle' => 'daily'
             ]);
@@ -48,7 +48,7 @@ class UsersTableSeeder extends Seeder
                 'poc' => $faker->name(),
                 'phone' => $faker->phoneNumber(),
                 'email' => $faker->email(),
-                'city_code' => 202
+                'city_id' => 202
             ]);
         }
 
