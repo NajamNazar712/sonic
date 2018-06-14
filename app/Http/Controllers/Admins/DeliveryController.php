@@ -28,12 +28,16 @@ class DeliveryController extends Controller
 
         return view('admin.delivery.pending.index');
     }
-    public function pending_list(Request $request){
-        $status = array(2,4,6,7,8,9,12,15,36); //for pending deliveries
+    public function pending_list(Request $request)
+    {
+        $status = array(2, 4, 6, 7, 8, 9, 12, 15, 36); //for pending deliveries
 //        $latest = DB::raw('(select remarks as latest_remarks,status_reason_id as latest_reason from shipments_journey leftjoin shipments on shipments.id = shipments_journey.shipment_id where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)');
 
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('user_shipping_infos AS usi', function ($join) {
+                $join->on('shipments.pickup_address_id', '=', 'usi.id')
+                ->on('shipments.consignee_city_id', '=', 'usi.city_id');
+            })
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
@@ -41,22 +45,21 @@ class DeliveryController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
-                $join->on('shipments_journey.shipment_id','=',
-                    DB::raw('(select shipments_journey.shipment_id from shipments_journey where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)'));
+                $join->on('shipments_journey.created_at','=',
+                    DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)'));
 
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-                ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','shipments_journey.remarks as remarks')
+                ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks')
             ->whereIn('shipments.shipper_status_id',$status)
-            ->groupBy('shipments.id')
-            ->get();
+            ->groupBy('shipments.id');
         return Datatables::of($shipments)
             ->addColumn("action", function ($result) {
                 return " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> Dispute</a>                                         
+                                              <a href='#' class='dropdown-item' data-target-id=''><i class='ft-plus-circle primary'></i> Dispute</a>                                         
                                             </div></span>";
             })
             ->make(true);
@@ -139,7 +142,7 @@ class DeliveryController extends Controller
                     'delivery_note_id'=>$note->id,
                     'shipment_id'=>$shipment
                 ]);
-                Shipment::where('id',$shipment)->update(['shipper_status_id'=>5]);
+                Shipment::where('id',$shipment)->update(['shipper_status_id'=>5,'consignee_status_id'=>5]);
                 ShipmentsJourney::create([
                     'shipment_id'=>$shipment,
                     'shipper_status_id'=>5,
@@ -175,13 +178,13 @@ class DeliveryController extends Controller
             })
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.receive.update',['note'=>$result->delivery_note]);
-                $statusUpdate = route('admin.delivery.receive.add.status',['note'=>$result->delivery_note]);
+                $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
                 $dropdown = "<span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
                                               <a href='{$statusUpdate}' class='dropdown-item' data-target-id='{$result->delivery_note}' class=''><i class='ft-plus-circle primary'></i> Receive</a>
-                                              <a href='{$route}' class='dropdown-item deliverynoteupdate' data-target-id='{$result->delivery_note}'><i class='ft-plus-circle primary'></i> Shift Shipment to other DN</a>
+                                              <a href='{$route}' class='dropdown-item deliverynoteupdate' data-target-id='{$result->delivery_note}'><i class='ft-plus-circle primary'></i> Shift Shipment</a>
                                               <a href='#' class='dropdown-item' data-target-id='{$result->id}'><i class='ft-plus-circle primary'></i> Verify Statuses</a>";
 
                 $dropdown .="</div></span>";
@@ -427,7 +430,8 @@ class DeliveryController extends Controller
             ->join('users','shipments.user_id','=','users.id')
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','delivery_notes.total_cod_amount as amount','users.name as shipper','bt.booking_type as service_type'])
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','delivery_notes.total_cod_amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
             ->where('delivery_notes.id',$id)
             ->get();
 
@@ -440,16 +444,24 @@ class DeliveryController extends Controller
                 foreach ($statuses as $status){
                     $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
                 }
-                $select = '<select class="form-control select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status"><option></option>'.$drops.'</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status"><option></option>'.$drops.'</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                $reason = '<select class="form-control select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" placeholder="Select a Reason"><option></option></select>';
+                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" placeholder="Select a Reason"><option></option></select>';
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {
-                $reason = '<input class="form-control" name="remarks['.$deliveries->shId.']" placeholder="Enter Remarks">';
+                $reason = '<input class="form-control form-control-sm" name="remarks['.$deliveries->shId.']" placeholder="Enter Remarks">';
                 return $reason;
+            })
+            ->addColumn('action',function($deliveries){
+                return " <span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
+                                            </div></span>";
             })
             ->make(true);
     }
@@ -460,7 +472,7 @@ class DeliveryController extends Controller
         if(!$statuses->isEmpty()){
             return response()->json(['status'=>0,'reasons'=>$statuses]);
         }else{
-            return ['status'=>1,'error'=>'No reasons are defined'];
+            return ['status'=>1,'error'=>'No reasons are defined for this status!'];
         }
 
     }
@@ -480,6 +492,7 @@ class DeliveryController extends Controller
                             'remarks'=>$request->remarks[$shipment],
                             'admin_id'=>Auth::id()
                         ]);
+                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment]]);
                     }else{
                         ShipmentsJourney::create([
                             'shipment_id'=>$shipment,
@@ -489,6 +502,7 @@ class DeliveryController extends Controller
                             'remarks'=>$request->remarks[$shipment],
                             'admin_id'=>Auth::id()
                         ]);
+                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment]]);
                     }
                 }elseif($request->status_drop[$shipment] != null){
                     if($request->status_drop[$shipment] == 6 || $request->status_drop[$shipment] == 18){
@@ -500,6 +514,7 @@ class DeliveryController extends Controller
                             'remarks'=>$request->remarks[$shipment],
                             'admin_id'=>Auth::id()
                         ]);
+                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment]]);
                     }else{
                         ShipmentsJourney::create([
                             'shipment_id'=>$shipment,
@@ -509,6 +524,7 @@ class DeliveryController extends Controller
                             'remarks'=>$request->remarks[$shipment],
                             'admin_id'=>Auth::id()
                         ]);
+                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment]]);
                     }
                 }
 
@@ -518,5 +534,23 @@ class DeliveryController extends Controller
             return redirect()->back()->with('error','Delivery note not found!');
         }
     }
-
+    public function receive_delivery_status_delivered(Request $request){
+//        return $request->shipment_ids;
+        if(!empty($request->shipment_ids)){
+            foreach ($request->shipment_ids as $shipment){
+                Shipment::where('id',$shipment)->update(['shipper_status_id'=>13]);
+                ShipmentsJourney::create([
+                    'shipment_id'=>$shipment,
+                    'shipper_status_id'=>13,
+                    'consignee_status_id'=>13,
+                    'status_reason_id'=>null,
+                    'remarks'=>null,
+                    'admin_id'=>Auth::id()
+                ]);
+            }
+            return ['status'=>0,'success'=>'Shipments status Delivered updated!'];
+        }else{
+            return ['status'=>1,'error'=>'No Shipments selected'];
+        }
+    }
 }

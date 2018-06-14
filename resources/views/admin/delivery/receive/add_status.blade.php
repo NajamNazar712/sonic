@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Receive Deliveries(Delivery Note)
+        Receive Deliveries(Delivery Note: {{$delivery_note_id}})
     </h1>
 
     <div class="card">
@@ -17,17 +17,20 @@
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
+                        <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Consignee</th>
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Remarks/ReceivedBy</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Current Status</th>
                         <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Clear</th>
                     </tr>
                     </thead>
                 </table>
@@ -54,9 +57,7 @@
         table.dataTable {
             font-size: 12px;
         }
-        .select2 li.select2-results__option{
-            font-size: 12px !important;
-        }
+
         table.dataTable thead tr th {
             padding-left: 0.5em;
             white-space: normal;
@@ -85,6 +86,13 @@
             text-shadow: none;
         }
 
+        table.dataTable tbody tr td.status,
+        table.dataTable tbody tr td.reason,
+        table.dataTable tbody tr td.remarks {
+            min-width: 110px !important;
+            max-width: 150px !important;
+        }
+
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
@@ -108,12 +116,66 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
+            var selected_rows = [];
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [{
+                    text: 'Delivered',
+                    className: 'btn btn-primary delivered',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                        if(selected_rows != ''){
+                            $.ajax({
+                                url: '{!! route('admin.delivery.receive.delivered') !!}',
+                                method: 'POST',
+                                data: {
+                                    'shipment_ids': selected_rows,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                if(data.status == 0){
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                }
+                                $.each(selected_rows, function(index, id) {
+                                    table.row($('#datatable tbody tr#' + id)).deselect();
+                                });
+                                selected_rows = [];
+                                table.button(0).disable();
+                                table.ajax.reload();
+                                $('.reasonDrop','.statusDrop').select2('destroy');
+                                setTimeout(function () {
+                                    $(".reasonDrop").select2({
+                                        placeholder: "Select a Reason",
+                                        width:'100%'
+                                    });
+                                    $(".statusDrop").select2({
+                                        placeholder: "Select a Status",
+                                        width:'100%'
+                                    });
+                                },2000);
+
+                            });
+                        }else{
+                            var error = "Something went wrong please refresh page and try again!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }
+                    }
+
+                }],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
+                },
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
@@ -125,7 +187,8 @@
                 rowId: 'shId',
                 order: [[2, 'asc']],
                 columns: [
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
                     {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
                     {data:'amount',name: 'amount', class: 'align-middle amount'},
@@ -135,12 +198,17 @@
                     {data:'address',name: 'address', class: 'align-middle address'},
                     {data:'destination',name: 'destination', class: 'align-middle destination'},
                     {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
+                    {data:'current_status',name: 'current_status', class: 'align-middle current_status'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
+                    {data:'action',name: 'action', class: 'align-middle action'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
                 },
                 initComplete: function() {
                     $(".reasonDrop").select2({
@@ -161,18 +229,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
-                            $(td).appendTo($(search));
-                        }else if($(header).is('.action')){
-                            $(td).appendTo($(search));
-                        }
-                        else if($(header).is('.status')){
-                            $(td).appendTo($(search));
-                        }
-                        else if($(header).is('.reason')){
-                            $(td).appendTo($(search));
-                        }
-                        else if($(header).is('.remarks')){
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -187,13 +244,35 @@
                     });
                 }
             });
-            $('body').on('change','.statusOnChange .statusDrop',function (e) {
+
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button(0).enable();
+                    // table.button(1).enable();
+                }
+                else {
+                    table.button(0).disable();
+                    // table.button(1).disable();
+                }
+            });
+
+            $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
                 $('#statusSubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
-                // console.log();
-                // console.log(status);
+
                 $.ajax({
                     url:'{!! route('admin.delivery.receive.reason') !!}',
                     type:'POST',
@@ -204,25 +283,30 @@
                     }
                 }).done(function (data) {
                     if(data.status == 0){
-                        // opt = '<option>2342342</option>';
-                        // reason.append(opt);
-
                         $.each(data.reasons,function (key,value) {
                             var newOption = new Option(value.name, value.id, false, false);
                             reason.append(newOption).trigger('change');
                         });
                     }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
+                        toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
+            });
+            $('body').on('click','.clear',function () {
+                // console.log();
+               var status = $(this).parents().closest('tr').find('.statusDrop');
+               var reason = $(this).parents().closest('tr').find('.reasonDrop');
+               status.val('').trigger("change");
+               reason.val('').trigger("change");
+               $('.remarks input').val('');
+                // $('.reasonDrop').val('').trigger("change");
             });
             var shipments = [];
             $('#status_update_form').bind('submit', function(event) {
                 var shipment = $('#shipment_ids');
                 event.preventDefault();
                 var id = '';
-                var count = table.data().count()
+                var count = table.data().count();
                 for(var i = 0;i<count;i++){
                     id = table.row( i ).id();
                     shipments.push(id);

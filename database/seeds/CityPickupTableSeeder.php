@@ -11,6 +11,8 @@ class CityPickupTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('city_pickup')->truncate();
+
         DB::table('city_pickup')->insert(array(
             array('pickup_type_id'=>1,'city_code'=>101),
             array('pickup_type_id'=>1,'city_code'=>102),

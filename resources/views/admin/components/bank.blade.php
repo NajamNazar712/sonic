@@ -6,7 +6,7 @@
     <p><b>Account Number:</b> {{$bank->account_no}}</p>
     <p><b>Account Title:</b> {{$bank->account_title}}</p>
     <p><b>IBAN Number:</b> {{$bank->iban}}</p>
-    <p><b>City Name:</b> {{$bank->city->city_name}}</p>
+    <p><b>City Name:</b> {{$bank->city->name}}</p>
     <p><b>Payment Mode:</b> {{$bank->payment_mode}}</p>
     <p><b>Payment Cycle:</b> {{$bank->payment_cycle}}</p>
 </div>

@@ -11,6 +11,8 @@ class PaymentModeTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('payment_modes')->truncate();
+
         DB::table('payment_modes')->insert(array(
             array('mode'=>'COD'),
             array('mode'=>'Card'),

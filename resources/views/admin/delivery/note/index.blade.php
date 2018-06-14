@@ -158,6 +158,7 @@
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,
             pagingType: 'full_numbers',
+            order: [[1, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {name: 'tracking_number', class: 'align-middle tracking_number'},
@@ -205,7 +206,6 @@
         });
 
 
-            // var table = $('#datatable').DataTable();
             $('.select2').select2();
             $('#rider_name').on('change',function () {
                 var route = $(this).find(":selected").data("id");
@@ -326,7 +326,7 @@
                 }
                 if(table.rows().count() == 0){
                     errors = 1;
-                    error = 'No Shipments added in the list!, Please add atleast one shipment in the list.';
+                    error = 'No Shipments added in the list!, Please add at-least one shipment in the list.';
                     toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                 }
 

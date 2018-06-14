@@ -6,6 +6,6 @@
 	    <p><b>Person of Contact:</b> {{$shipping_details->poc}}</p>
 	    <p><b>Phone Number:</b> {{$shipping_details->phone}}</p>
 	    <p><b>Email Address:</b> {{$shipping_details->email}}</p>
-	    <p><b>City Name:</b> {{$shipping_details->city->city_name}}</p>
+	    <p><b>City Name:</b> {{$shipping_details->city->name}}</p>
 	</div>
 @endforeach

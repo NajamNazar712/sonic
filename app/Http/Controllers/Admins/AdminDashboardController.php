@@ -105,6 +105,7 @@ class AdminDashboardController extends Controller
     public function viewBankInfo($id){
         $user = User::find($id);
         $bank = $user->bank;
+//        return $bank;
         $returnHTML = view('admin/components/bank')->with(['bank'=>$bank,'user'=>$user])->render();
         return response()->json($returnHTML);
     }
@@ -2865,7 +2866,7 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success','city updated successfully');
+            return redirect()->back()->with('success','City updated successfully');
         }elseif($request->postType == 'hub'){
             $city = City::where('id',$id)->update([
                 'name'=>$request->cityName,
@@ -2888,7 +2889,7 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success','Hub city added successfully');
+            return redirect()->back()->with('success','Hub/city updated successfully');
         }
     }
     //update city end
@@ -2914,7 +2915,7 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success','city added successfully');
+            return redirect()->back()->with('success','City added successfully');
         }elseif($request->postType == 'hub'){
             $city = City::create([
                 'name'=>$request->cityName,

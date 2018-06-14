@@ -119,7 +119,7 @@
             rowId: 'shId',
             // order: [[0, 'asc']],
             columns: [
-                {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle'},
+                {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                 {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'origin', name: 'on.name', class: 'align-middle origin'},
@@ -149,7 +149,7 @@
                     var header = column.header();
 
 
-                    if ($(header).is('.action')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number')) {
                         $(td).appendTo($(search));
                     }
                     else {
