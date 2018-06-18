@@ -172,6 +172,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('cargo')->name('cargo.')->group(function () {
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@pending_index')->name('index');
+            Route::get('/list', 'Admins\AdminCargoController@pending_list')->name('list');
+        });
+    });
+
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');
