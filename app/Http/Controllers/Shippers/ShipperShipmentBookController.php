@@ -437,8 +437,8 @@ class ShipperShipmentBookController extends Controller
                       <table class="table table-sm table-bordered border twice">
                         <tbody>
                           <tr>
-                            <td rowspan="3" colspan="2" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="250" class="d-block mx-auto"></td>
-                            <td rowspan="3" colspan="2" class="text-center align-middle border twice-bottom twice-left twice-right">
+                            <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td rowspan="3" colspan="3" class="text-center align-middle border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>

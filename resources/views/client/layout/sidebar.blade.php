@@ -17,6 +17,7 @@
             <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Book by Order Form</a></li>
             <li><a class="menu-item" href="{{ route('cod.shipment.book.excel_index') }}">Book by Excel Sheet</a></li>
             <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Receiving Sheet</a></li>
+            <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">Receiving Sheet History</a></li>
           </ul>
         </li>
 
