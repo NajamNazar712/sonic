@@ -10,6 +10,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
+use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupNoteRequest;
@@ -594,7 +595,7 @@ class AdminPickupsController extends Controller
       ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
       ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
-      ->where('pickup_notes.status_id', [3, 4]);
+      ->whereIn('pickup_notes.status_id', [3, 4]);
 
       $datatables = Datatables::of($pickup_notes)
       ->addColumn('rider', function($pickup_note) {
@@ -611,7 +612,8 @@ class AdminPickupsController extends Controller
       })
       ->addColumn('action', function($pickup_note) {
         $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
-        $view_button = '<button type="button" class="dropdown-item summary"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-target"></i></div><div class="col-9 offset-1">Summary</div></button>';
+        // $view_button = '<button type="button" class="dropdown-item summary"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-target"></i></div><div class="col-9 offset-1">Summary</div></button>';
+        $view_button = '';
 
         if ($pickup_note->status_id == 3) {
           return '<div class="btn-group">
@@ -763,10 +765,31 @@ class AdminPickupsController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         if ($shipment->receiving_sheet_shipment) {
-          $receiving_sheet_shipment_ids[$shipment->receiving_sheet_shipment->receiving_sheet_id][] = $shipment_id;
+          $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+
+          $receiving_sheet_shipment_ids[$receiving_sheet_id][] = $shipment_id;
+
+          $receiving_sheet_received = new ReceivingSheetReceived();
+
+          $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+          $receiving_sheet_received->user_id = $shipment->user_id;
+          $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+          $receiving_sheet_received->shipment_id = $shipment_id;
+          $receiving_sheet_received->status = 0;
+
+          $receiving_sheet_received->save();
         }
         else {
           $over_received_shipment_ids[] = $shipment_id;
+
+          $receiving_sheet_received = new ReceivingSheetReceived();
+
+          $receiving_sheet_received->user_id = $shipment->user_id;
+          $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+          $receiving_sheet_received->shipment_id = $shipment_id;
+          $receiving_sheet_received->status = 0;
+
+          $receiving_sheet_received->save();
         }
 
         $shipment->shipper_status_id = 2;
@@ -780,6 +803,12 @@ class AdminPickupsController extends Controller
 
       if (!empty($receiving_sheet_shipment_ids)) {
         foreach ($receiving_sheet_shipment_ids as $receiving_sheet_id => $receiving_sheet_shipments) {
+          $receiving_sheet = ReceivingSheet::find($receiving_sheet_id);
+
+          $receiving_sheet->status = 1;
+
+          $receiving_sheet->save();
+
           foreach ($receiving_sheet_shipments as $shipment_id) {
             $shipment = Shipment::find($shipment_id);
 
@@ -921,7 +950,7 @@ class AdminPickupsController extends Controller
 
       $pickup_request = PickupRequest::find($pickup_request_id);
 
-      $receiving_sheets = ReceivingSheet::where('user_id', $pickup_request->shipper_id)->where('status', 0);
+      $receiving_sheets = ReceivingSheet::where('user_id', $pickup_request->shipper_id)->where('status', 1);
 
       $short_shipments = array();
 

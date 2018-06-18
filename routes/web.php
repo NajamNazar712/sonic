@@ -54,6 +54,17 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
 
         Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
+
+        Route::prefix('receiving_sheet_history')->name('receiving_sheet_history.')->group(function () {
+            Route::get('list', 'Shippers\ShipperReceivingSheetHistoryController@list')->name('list');
+            Route::post('booked_shipments', 'Shippers\ShipperReceivingSheetHistoryController@booked_shipments')->name('booked_shipments');
+            Route::post('received_shipments', 'Shippers\ShipperReceivingSheetHistoryController@received_shipments')->name('received_shipments');
+            Route::post('short_received_shipments', 'Shippers\ShipperReceivingSheetHistoryController@short_received_shipments')->name('short_received_shipments');
+            Route::put('void', 'Shippers\ShipperReceivingSheetHistoryController@void')->name('void');
+            Route::post('create', 'Shippers\ShipperReceivingSheetHistoryController@create')->name('create');
+        });
+
+        Route::resource('receiving_sheet_history', 'Shippers\ShipperReceivingSheetHistoryController');
     });
 
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
