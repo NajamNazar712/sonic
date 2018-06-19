@@ -46,4 +46,8 @@ class AdminCargoController extends Controller
       return $datatables->make(true);
     }
 
+    public function create_index() {
+      return view('admin.cargo.create');
+    }
+
 }
