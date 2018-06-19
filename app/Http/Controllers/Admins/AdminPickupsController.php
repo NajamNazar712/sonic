@@ -892,9 +892,7 @@ class AdminPickupsController extends Controller
       ->join('pickup_notes as pn', 'pnr.pickup_note_id', '=', 'pn.id')
       ->join('admins as a', 'pn.assigned_by_user_id', '=', 'a.id')
       ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
-      ->where('pn.id', $request->pickup_receive_pickup_note_id)
-      ->groupBy('pickup_requests.shipper_id')
-      ->groupBy('pickup_requests.pickup_address_id');
+      ->where('pn.id', $request->pickup_receive_pickup_note_id);
 
       $datatables = Datatables::of($pickup_requests)
       ->editColumn('pickup_type', function($pickup_request) {
