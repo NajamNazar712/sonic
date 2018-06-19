@@ -19,7 +19,7 @@ class ShipmentStatusTableSeeder extends Seeder
 			array('id' => 3, 'code' => 'S-IT', 'name' => 'Shipment - In Transit', 'description' => 'Shipment is on forwarded towards the destination'),
 			array('id' => 4, 'code' => 'S-ADC', 'name' => 'Shipment - Arrived at Destination Center', 'description' => 'Shipment is received at the destination office of TRAX'),
 			array('id' => 5, 'code' => 'S-OD', 'name' => 'Shipment - Out for Delivery', 'description' => 'Shipment is now dispatched for delivery'),
-			array('id' => 6, 'code' => 'S-RE', 'name' => 'Shipment - Rider Exchange', 'description' => 'Shipment not pertain\'s to assigned rider\'s route')
+			array('id' => 6, 'code' => 'S-RE', 'name' => 'Shipment - Rider Exchange', 'description' => 'Shipment not pertain\'s to assigned rider\'s route'),
 			array('id' => 7, 'code' => 'S-NA', 'name' => 'Shipment - Not Attempted', 'description' => 'Shipment was dispatched for delivery but not attempted on route'),
 			array('id' => 8, 'code' => 'S-AF', 'name' => 'Shipment - Attempt Failed', 'description' => 'Shipment was attempted for delivery but could not be delivered'),
 			array('id' => 9, 'code' => 'S-OH', 'name' => 'Shipment - On Hold', 'description' => 'Shipment was attempted for delivery but is held by the consignee'),
