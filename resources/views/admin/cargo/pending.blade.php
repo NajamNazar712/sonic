@@ -106,13 +106,13 @@
 				},
 				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
 				pageLength: 25,
-				// stateSave: true,
+				stateSave: true,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
 				ajax: '{{ route('admin.cargo.pending.list') }}',
 				rowId: 'id',
-				// order: [[6, 'asc']],
+				order: [[10, 'asc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
@@ -124,7 +124,7 @@
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
 					{data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
-					{data: 'booked_at', name: 'shipping_modes.name', class: 'align-middle booked_at'},
+					{data: 'booked_at', name: 'shipments.created_at', class: 'align-middle booked_at'},
 					{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'}
 				],
 				rowCallback: function(row, data, index) {
