@@ -30,8 +30,8 @@ class ShipperReceivingSheetHistoryController extends Controller
       $receiving_sheet_received = ReceivingSheetReceived::leftjoin('receiving_sheet_shipments as rss', 'receiving_sheet_received.receiving_sheet_id', '=', 'rss.receiving_sheet_id')
       ->leftjoin('receiving_sheets as rs', 'receiving_sheet_received.receiving_sheet_id', '=', 'rs.id')
       ->join('user_shipping_infos as usi', 'receiving_sheet_received.pickup_address_id', '=', 'usi.id')
-      ->join('city_infos as ci', 'usi.city_code', '=', 'ci.city_code')
-      ->select('receiving_sheet_received.receiving_sheet_id as id', 'receiving_sheet_received.receiving_sheet_id as receiving_sheet', DB::raw('count(receiving_sheet_received.receiving_sheet_id) as booked'), DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'ci.city_name as origin', 'rs.created_at AS booking_date', 'receiving_sheet_received.pickup_address_id')
+      ->join('cities as c', 'usi.city_id', '=', 'c.id')
+      ->select('receiving_sheet_received.receiving_sheet_id as id', 'receiving_sheet_received.receiving_sheet_id as receiving_sheet', DB::raw('count(receiving_sheet_received.receiving_sheet_id) as booked'), DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'c.name as origin', 'rs.created_at AS booking_date', 'receiving_sheet_received.pickup_address_id')
       ->where('receiving_sheet_received.status', 0)
       ->where('receiving_sheet_received.user_id', Auth::id())
       ->groupBy('receiving_sheet_received.receiving_sheet_id')
@@ -55,7 +55,14 @@ class ShipperReceivingSheetHistoryController extends Controller
         }
       })
       ->editColumn('received', function($receiving_sheet_received) {
-        return '<button class="btn btn-sm btn-outline-info align-middle" data-id="' . $receiving_sheet_received->pickup_address_id . '">' . $receiving_sheet_received->received . '</button>';
+        if ($receiving_sheet_received->receiving_sheet) {
+          $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', Auth::id())->where('status', 0)->count();
+
+          return '<button class="btn btn-sm btn-outline-info align-middle" data-id="' . $receiving_sheet_received->pickup_address_id . '">' . $received . '</button>';
+        }
+        else {
+          return '<button class="btn btn-sm btn-outline-info align-middle" data-id="' . $receiving_sheet_received->pickup_address_id . '">' . $receiving_sheet_received->received . '</button>';
+        }
       })
       ->editColumn('booking_date', function($receiving_sheet_received) {
         if ($receiving_sheet_received->booking_date) {

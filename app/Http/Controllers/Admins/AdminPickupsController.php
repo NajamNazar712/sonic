@@ -975,7 +975,7 @@ class AdminPickupsController extends Controller
         }
       }
       else {
-        return ['status' => 1, 'error' => 'No Receiving Sheet exists for given Pickup Request'];
+        return ['status' => 0, 'success' => 'No Receiving Sheet', 'short_received' => FALSE];
       }
     }
 
