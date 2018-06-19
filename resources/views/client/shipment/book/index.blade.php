@@ -372,11 +372,12 @@
 
 	<script>
 		$(document).ready(function() {
+			@if (session('print'))
 				$.ajax({
 					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
 					method: 'POST',
 					data: {
-						'ids[]': 2,
+						'ids[]': '{{ session('print') }}',
 						'_token': '{{ csrf_token() }}'
 					}
 				})
@@ -398,6 +399,7 @@
 						tab.focus();
 					}
 				});
+			@endif
 
 			function shipping_mode_same_day(pickup_city, consignee_city) {
 				if (pickup_city != consignee_city) {

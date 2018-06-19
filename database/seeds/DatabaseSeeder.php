@@ -33,5 +33,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ShipmentStatusTableSeeder::class);
         $this->call(ShipmentStatusReasonTableSeeder::class);
         $this->call(ShipmentStatusShipmentStatusReasonTableSeeder::class);
+        $this->call(NewCityTableSeeder::class);
     }
 }

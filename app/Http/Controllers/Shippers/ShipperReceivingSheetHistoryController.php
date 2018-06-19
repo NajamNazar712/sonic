@@ -30,7 +30,7 @@ class ShipperReceivingSheetHistoryController extends Controller
       $receiving_sheet_received = ReceivingSheetReceived::leftjoin('receiving_sheet_shipments as rss', 'receiving_sheet_received.receiving_sheet_id', '=', 'rss.receiving_sheet_id')
       ->leftjoin('receiving_sheets as rs', 'receiving_sheet_received.receiving_sheet_id', '=', 'rs.id')
       ->join('user_shipping_infos as usi', 'receiving_sheet_received.pickup_address_id', '=', 'usi.id')
-      ->join('city_infos as ci', 'usi.city_code', '=', 'ci.city_code')
+      ->join('city_infos as ci', 'usi.city_id', '=', 'ci.id')
       ->select('receiving_sheet_received.receiving_sheet_id as id', 'receiving_sheet_received.receiving_sheet_id as receiving_sheet', DB::raw('count(receiving_sheet_received.receiving_sheet_id) as booked'), DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'ci.city_name as origin', 'rs.created_at AS booking_date', 'receiving_sheet_received.pickup_address_id')
       ->where('receiving_sheet_received.status', 0)
       ->where('receiving_sheet_received.user_id', Auth::id())
