@@ -25,7 +25,6 @@ use App\Http\Models\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
-use App\Http\Models\CityInfo;
 use App\Http\Models\PickupType;
 use App\Http\Models\WeightCharge;
 use App\Http\Models\BookingTypeCharges;
@@ -106,6 +105,7 @@ class AdminDashboardController extends Controller
     public function viewBankInfo($id){
         $user = User::find($id);
         $bank = $user->bank;
+//        return $bank;
         $returnHTML = view('admin/components/bank')->with(['bank'=>$bank,'user'=>$user])->render();
         return response()->json($returnHTML);
     }
@@ -2690,10 +2690,12 @@ class AdminDashboardController extends Controller
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
     public function activeAccountListAjax(){
-       $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('status',3)->where('blacklist',0);
+       $users = User::join('cities', 'users.city_id', '=', 'cities.id')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email'])->where('users.status',3)->where('blacklist',0);
 
-        return Datatables::of($users)->addColumn("action", function ($result) {
+        return Datatables::of($users)
+
+            ->addColumn("action", function ($result) {
                                             return " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
@@ -2710,8 +2712,8 @@ class AdminDashboardController extends Controller
     //->join('rate_statuses','users.id','=','rate_statuses.user_id')
 
     public function pendingAccountListAjax(){
-        $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at'])->whereIn('status',[0,1,2])->where('blacklist',0);
+        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
          //$isRate = RateStatus::where('user_id',$users->id);
 
         return Datatables::of($users)
@@ -2720,6 +2722,22 @@ class AdminDashboardController extends Controller
             })
             ->editColumn('status', function ($users) {
                 return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if (strpos('request received', $keyword) !== FALSE) {
+                    $query->where('users.status', '=', 0);
+                }
+                else if (strpos('rates added', $keyword) !== FALSE) {
+                    $query->where('users.status', '=', 1);
+                }
+                else if (strpos('pending for activation', $keyword) !== FALSE) {
+                    $query->where('users.status', '=', 2);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->addColumn("action", function ($result) {
                                             $dropdown = "
@@ -2754,8 +2772,8 @@ class AdminDashboardController extends Controller
 
     }
     public function blockAccountListAjax(){
-        $users = User::join('city_infos', 'users.city_code', '=', 'city_infos.city_code')
-            ->select(['users.id', 'users.name', 'city_infos.city_name' ,'users.poc','users.phone','users.address', 'users.email'])->where('blacklist',1);
+        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email'])->where('blacklist',1);
 
         return Datatables::of($users)->addColumn("action", function ($result) {
                                             return " <span class='dropdown'>
@@ -2779,19 +2797,19 @@ class AdminDashboardController extends Controller
     }
     public function cityListAjax(){
         $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
-        ->select(['cities.id','cities.name' ,'h.name as hub','cities.hub_id','cities.hub as isHub','cities.status']);
+        ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','cities.hub as isHub','cities.status as status']);
         return Datatables::of($cities)
         ->editColumn('status', function ($cities) {
-            return ($cities->status == 0)? 'Inactive': 'Active';
+            return ($cities->status == 1)? 'Active': 'Inactive';
         })
         ->filterColumn('status', function($query, $keyword) {
             $keyword = strtolower($keyword);
 
-            if (strpos('inactive', $keyword) !== FALSE) {
-                $query->where('cities.status', '=', 0);
-            }
-            else if (strpos('active', $keyword) !== FALSE) {
+            if (strpos('active', $keyword) !== FALSE) {
                 $query->where('cities.status', '=', 1);
+            }
+            else if (strpos('inactive', $keyword) !== FALSE) {
+                $query->where('cities.status', '=', 0);
             }
             else {
                 $query->whereRaw('false');
@@ -2847,8 +2865,6 @@ class AdminDashboardController extends Controller
 
     public function updateCity(Request $request,$id){
         if($request->postType == 'city'){
-//            return $request;
-
             $city = City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>0,
@@ -2868,9 +2884,8 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success','city updated successfully');
+            return redirect()->back()->with('success','City updated successfully');
         }elseif($request->postType == 'hub'){
-//            return $request;
             $city = City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>1,
@@ -2892,8 +2907,7 @@ class AdminDashboardController extends Controller
                 }
             }
 
-
-            return redirect()->back()->with('success','Hub city added successfully');
+            return redirect()->back()->with('success','Hub/city updated successfully');
         }
     }
     //update city end
@@ -2919,7 +2933,7 @@ class AdminDashboardController extends Controller
                 }
             }
 
-            return redirect()->back()->with('success','city added successfully');
+            return redirect()->back()->with('success','City added successfully');
         }elseif($request->postType == 'hub'){
             $city = City::create([
                 'name'=>$request->cityName,
@@ -2941,7 +2955,6 @@ class AdminDashboardController extends Controller
             return redirect()->back()->with('success','Hub city added successfully');
         }
     }
-
 
     public function CityStatus(Request $request){
         $id = $request->cid; //city id
@@ -2996,19 +3009,19 @@ class AdminDashboardController extends Controller
     }
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
-            ->select(['cities.name','routes.id','routes.code','routes.start','routes.end','routes.junction','routes.status','routes.created_at']);
+            ->select(['cities.name as city','routes.id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at']);
         return Datatables::of($routes)
-            ->editColumn('status', function ($cities) {
-                return ($cities->status == 0)? 'Inactive': 'Active';
+            ->editColumn('status', function ($routes) {
+                return ($routes->status == 0)? 'Inactive': 'Active';
             })
             ->filterColumn('status', function($query, $keyword) {
                 $keyword = strtolower($keyword);
 
-                if (strpos('inactive', $keyword) !== FALSE) {
-                    $query->where('cities.status', '=', 0);
+                if (strpos('active', $keyword) !== FALSE) {
+                    $query->where('routes.status', '=', 1);
                 }
-                else if (strpos('active', $keyword) !== FALSE) {
-                    $query->where('cities.status', '=', 1);
+                else if (strpos('inactive', $keyword) !== FALSE) {
+                    $query->where('routes.status', '=', 0);
                 }
                 else {
                     $query->whereRaw('false');
@@ -3115,7 +3128,7 @@ class AdminDashboardController extends Controller
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
-            ->select(['cities.name as city','riders.id','riders.name','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status','riders.created_at']);
+            ->select(['cities.name as city','riders.id as rider_id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
         return Datatables::of($rider)
             ->editColumn('status', function ($rider) {
                 return ($rider->status == 0)? 'Inactive': 'Active';
@@ -3123,11 +3136,11 @@ class AdminDashboardController extends Controller
             ->filterColumn('status', function($query, $keyword) {
                 $keyword = strtolower($keyword);
 
-                if (strpos('inactive', $keyword) !== FALSE) {
-                    $query->where('riders.status', '=', 0);
-                }
-                else if (strpos('active', $keyword) !== FALSE) {
+                if (strpos('active', $keyword) !== FALSE) {
                     $query->where('riders.status', '=', 1);
+                }
+                else if (strpos('inactive', $keyword) !== FALSE) {
+                    $query->where('riders.status', '=', 0);
                 }
                 else {
                     $query->whereRaw('false');
@@ -3135,6 +3148,16 @@ class AdminDashboardController extends Controller
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
@@ -3237,7 +3260,6 @@ class AdminDashboardController extends Controller
     public function riderStatus(Request $request){
         $id = $request->cid;
         $status = $request->status;
-//        return $request;
         if($status == 'riderActive'){
             $rider = Rider::where('id',$id)->update(['status'=>1]);
             if($rider){

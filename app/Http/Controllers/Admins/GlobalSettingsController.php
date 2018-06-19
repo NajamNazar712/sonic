@@ -18,13 +18,13 @@ class GlobalSettingsController extends Controller
     }
     public function add_pickup_weight(Request $request){
 
-//        $result = GlobalSettings::updateOrCreate(['pickup_weight_threshold'=>$request->pickup_weight,'type'=>'pickup_weight']);
+//        $result = GlobalSettings::updateOrCreate(['setting_value'=>$request->pickup_weight,'type'=>'pickup_weight']);
 //        if($result){
 //            return redirect()->back()->with('success','Pickup request weight added/updated');
 //        }
         if($request->isMethod('post')){
             $result = GlobalSettings::create([
-                'pickup_weight_threshold'=>$request->pickup_weight,
+                'setting_value'=>$request->pickup_weight,
                 'type'=>'pickup_weight'
             ]);
             if($result){
@@ -33,7 +33,7 @@ class GlobalSettingsController extends Controller
         }else{
            $record = GlobalSettings::where('type','pickup_weight')->get();
             $result = GlobalSettings::where('id',$record[0]->id)->update([
-                'pickup_weight_threshold'=>$request->pickup_weight,
+                'setting_value'=>$request->pickup_weight,
                 'type'=>'pickup_weight'
             ]);
             if($result){

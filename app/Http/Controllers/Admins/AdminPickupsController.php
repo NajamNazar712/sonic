@@ -83,8 +83,8 @@ class AdminPickupsController extends Controller
     public function pending_list(Request $request) {
       $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
       ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
-      ->join('city_infos AS ci', 'usi.city_code', '=', 'ci.city_code')
-      ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.city_name AS city', 'pickup_requests.bookings', 'pickup_requests.pending_bookings', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
+      ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
+      ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.pending_bookings', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
       ->where('pickup_requests.status', 0);
 
       $datatables = Datatables::of($pickup_requests)
@@ -727,7 +727,7 @@ class AdminPickupsController extends Controller
             $details['tracking_number'] = $shipment->tracking_number;
             $details['receiving_sheet_no'] = ($shipment->receiving_sheet_shipment) ? str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 12, "0", STR_PAD_LEFT) : '';
             $details['order_id'] = $shipment->order_id;
-            $details['destination'] = $shipment->consignee_city->city_name;
+            $details['destination'] = $shipment->consignee_city->name;
             $details['cod_amount'] = $shipment->amount;
             $details['estimated_weight'] = floatval($shipment->estimated_weight);
             $details['actual_weight'] = floatval($shipment->actual_weight);
@@ -887,11 +887,11 @@ class AdminPickupsController extends Controller
     public function receive_summary_list(Request $request) {
       $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
       ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
-      ->join('city_infos AS ci', 'usi.city_code', '=', 'ci.city_code')
+      ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
       ->join('pickup_note_requests as pnr', 'pickup_requests.id', '=', 'pnr.pickup_request_id')
       ->join('pickup_notes as pn', 'pnr.pickup_note_id', '=', 'pn.id')
       ->join('admins as a', 'pn.assigned_by_user_id', '=', 'a.id')
-      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.city_name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
+      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
       ->where('pn.id', $request->pickup_receive_pickup_note_id);
 
       $datatables = Datatables::of($pickup_requests)

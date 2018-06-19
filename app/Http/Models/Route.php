@@ -15,4 +15,7 @@ class Route extends Model
     public function rider(){
         return $this->hasMany('App\Http\Models\Rider');
     }
+    public function deliverynotes(){
+        return $this->hasMany('App\Http\Models\Route');
+    }
 }

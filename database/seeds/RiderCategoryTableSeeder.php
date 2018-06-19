@@ -11,6 +11,7 @@ class RiderCategoryTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('rider_categories')->truncate();
         DB::table('rider_categories')->insert(array(
             array('name'=>'Light'),
             array('name'=>'Heavy'),

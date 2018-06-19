@@ -165,7 +165,7 @@
 											@foreach ($pickup_addresses as $pickup_address)
 												<tr role="row">
 													<td class="text-center">{{ $pickup_address->id }}</td>
-													<td>{{ $pickup_address->pickup_address }}, {{ $pickup_address->city->city_name }}</td>
+													<td>{{ $pickup_address->pickup_address }}, {{ $pickup_address->city->name }}</td>
 												</tr>
 											@endforeach
 										</tbody>
@@ -209,7 +209,7 @@
 											@foreach ($cities as $city)
 												<tr role="row">
 													<td class="text-center">{{ $city->id }}</td>
-													<td>{{ $city->city_name }}</td>
+													<td>{{ $city->name }}</td>
 												</tr>
 											@endforeach
 										</tbody>

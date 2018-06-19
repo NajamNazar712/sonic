@@ -19,7 +19,7 @@ class Shipment extends Model
 	}
 
 	public function consignee_city() {
-		return $this->belongsTo('App\Http\Models\CityInfo', 'consignee_city_id', 'id');
+		return $this->belongsTo('App\Http\Models\City', 'consignee_city_id', 'id');
 	}
 
 	public function user() {

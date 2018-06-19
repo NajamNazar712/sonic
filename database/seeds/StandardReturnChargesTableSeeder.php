@@ -11,6 +11,7 @@ class StandardReturnChargesTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('standard_return_charges')->truncate();
         DB::table('standard_return_charges')->insert(array(
             array('shipping_mode_id'=>1,'local'=>50,'national'=>100),
             array('shipping_mode_id'=>2,'local'=>50,'national'=>100),

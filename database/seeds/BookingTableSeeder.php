@@ -11,6 +11,7 @@ class BookingTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('booking_types')->truncate();
         DB::table('booking_types')->insert(array(
             array('booking_type'=>'Regular'),
             array('booking_type'=>'Replacement'),

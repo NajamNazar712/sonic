@@ -171,6 +171,40 @@ Route::prefix('admin')->name('admin.')->group(function () {
             });
         });
     });
+    Route::prefix('delivery')->name('delivery.')->group(function(){
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('','Admins\DeliveryController@pending_delivery_index')->name('index');
+            Route::get('list','Admins\DeliveryController@pending_list')->name('list');
+        });
+        Route::prefix('note')->name('note.')->group(function () {
+            Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
+            Route::get('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
+            Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
+
+        });
+        Route::prefix('receive')->name('receive.')->group(function (){
+            Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
+            Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
+            Route::get('tracking/search','Admins\DeliveryController@receive_delivery_search')->name('tracking.search');
+            Route::get('{id}/update','Admins\DeliveryController@receive_delivery_update')->name('update');
+            Route::get('{id}/update/list','Admins\DeliveryController@receive_delivery_notes_list')->name('update.list');
+            Route::get('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
+            Route::post('print','Admins\DeliveryController@received_print')->name('print');
+            Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
+            Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
+            Route::post('dn/verify','Admins\DeliveryController@receive_delivery_note_verify')->name('dn.verify');
+
+            Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
+            Route::post('reason','Admins\DeliveryController@receive_delivery_reason')->name('reason');
+            Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
+            Route::post('shipmentstatuscheck','Admins\DeliveryController@receive_delivery_status_check')->name('shipmentstatuscheck');
+            Route::post('replacements','Admins\DeliveryController@receive_delivery_get_replacements')->name('replacements');
+            Route::put('replacements.submit','Admins\DeliveryController@receive_delivery_replacements_submit')->name('replacements.submit');
+        });
+        Route::prefix('completed')->name('completed.')->group(function(){
+            Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');
+        });
+    });
 
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {

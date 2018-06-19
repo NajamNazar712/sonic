@@ -1,5 +1,5 @@
 <!-- Modal -->
-<div class="modal fade text-left" id="BankInfoModal" tabindex="-1" role="dialog" aria-labelledby="BankInfoModal"
+<div class="modal fade text-left" id="BankInfoModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="BankInfoModal"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -19,7 +19,7 @@
     </div>
 </div>
 <!-- Modal -->
-<div class="modal fade text-left" id="ShippingInfoModal" tabindex="-1" role="dialog" aria-labelledby="ShippingInfoModal"
+<div class="modal fade text-left" id="ShippingInfoModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ShippingInfoModal"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -40,7 +40,7 @@
 </div>
 
 <!--Rates Modal -->
-<div class="modal fade text-left" id="RatesModal" tabindex="-1" role="dialog" aria-labelledby="RatesModal"
+<div class="modal fade text-left" id="RatesModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RatesModal"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -62,7 +62,7 @@
 
 
 <!--Confirm Modal -->
-<div class="modal fade text-left" id="ConfirmModal" tabindex="-1" role="dialog" aria-labelledby="ConfirmModal"
+<div class="modal fade text-left" id="ConfirmModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModal"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -89,7 +89,7 @@
     </div>
 </div>
 <!--Confirm Modal -->
-<div class="modal fade text-left" id="addCity" tabindex="-1" role="dialog" aria-labelledby="addCity"
+<div class="modal fade text-left" id="addCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="addCity"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -107,7 +107,7 @@
 </div>
 
 <!--Confirm Modal -->
-<div class="modal fade text-left" id="editCity" tabindex="-1" role="dialog" aria-labelledby="editCity"
+<div class="modal fade text-left" id="editCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editCity"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -125,7 +125,7 @@
 </div>
 
 <!--Confirm Modal City-->
-<div class="modal fade text-left" id="ConfirmModalCity" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalCity"
+<div class="modal fade text-left" id="ConfirmModalCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalCity"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -153,7 +153,7 @@
 </div>
 <!--Confirm Modal City-->
 <!--Route Add Model -->
-<div class="modal fade text-left" id="addRoute" tabindex="-1" role="dialog" aria-labelledby="addRoute"
+<div class="modal fade text-left" id="addRoute" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="addRoute"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -171,7 +171,7 @@
 </div>
 <!--Route Add Model end-->
 <!--Route edit Model -->
-<div class="modal fade text-left" id="editRoute" tabindex="-1" role="dialog" aria-labelledby="editRoute"
+<div class="modal fade text-left" id="editRoute" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRoute"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -189,7 +189,7 @@
 </div>
 <!--Route edit Model end-->
 <!--Confirm Modal City-->
-<div class="modal fade text-left" id="ConfirmModalRoute" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRoute"
+<div class="modal fade text-left" id="ConfirmModalRoute" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRoute"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -217,7 +217,7 @@
 </div>
 <!--Confirm Modal City-->
 <!--Route Add Model -->
-<div class="modal fade text-left" id="addRider" tabindex="-1" role="dialog" aria-labelledby="addRider"
+<div class="modal fade text-left" id="addRider" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="addRider"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -235,7 +235,7 @@
 </div>
 <!--Route Add Model end-->
 <!--Route Edit Model -->
-<div class="modal fade text-left" id="editRider" tabindex="-1" role="dialog" aria-labelledby="editRider"
+<div class="modal fade text-left" id="editRider" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="editRider"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -253,7 +253,7 @@
 </div>
 <!--Route Edit Model end-->
 <!--Confirm Modal City-->
-<div class="modal fade text-left" id="ConfirmModalRider" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRider"
+<div class="modal fade text-left" id="ConfirmModalRider" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRider"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">

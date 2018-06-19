@@ -11,6 +11,7 @@ class StandardBookingTypeChargesTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('standard_booking_type_charges')->truncate();
         DB::table('standard_booking_type_charges')->insert(array(
             array('shipping_mode_id'=>1,'replacement_charges'=>200,'try_and_buy_charges'=>250),
             array('shipping_mode_id'=>2,'replacement_charges'=>450,'try_and_buy_charges'=>450),

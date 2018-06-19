@@ -132,7 +132,7 @@
 					{data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
 					{data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
 					{data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
-					{data: 'city', name: 'ci.city_name', class: 'align-middle city'},
+					{data: 'city', name: 'ci.name', class: 'align-middle city'},
 					{data: 'bookings', name: 'pickup_requests.bookings', class: 'align-middle bookings'},
 					{data: 'received', name: 'pickup_requests.received', class: 'align-middle received'},
 					{data: 'short_received', name: 'pickup_requests.short_received', class: 'align-middle short_received'},

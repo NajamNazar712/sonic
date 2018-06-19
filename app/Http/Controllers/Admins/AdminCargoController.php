@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admins;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use App\Http\Models\Shipment;
+
 use Auth;
+use DB;
 
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
@@ -32,13 +35,13 @@ class AdminCargoController extends Controller
       ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
       ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
       ->join('shipments_journey', function ($join) {
-        $join->on('shipments_journey.id', '=', 'shipments.id')
-        ->on('shipments_journey.shipper_status_id', '=', 2);
+        $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+        ->on('shipments_journey.shipper_status_id', '=', DB::raw(2));
       })
-      ->select('shipments.tracking_number', 'shipments.order_id', 'bt.name as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'shipping_modes.name as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at')
-      ->whereIn('shipments.shipper_status_id', [2, 14, 17, 20, 26]);
+      ->select('shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at');
+      // ->whereIn('shipments.shipper_status_id', [2, 14, 17, 20, 26]);
 
-      $datatables = Datatables::of($pickup_requests);
+      $datatables = Datatables::of($shipments);
 
       return $datatables->make(true);
     }

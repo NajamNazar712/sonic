@@ -234,7 +234,7 @@
 					{data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
 					{data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
 					{data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
-					{data: 'city', name: 'ci.city_name', class: 'align-middle city'},
+					{data: 'city', name: 'ci.name', class: 'align-middle city'},
 					{data: 'bookings', name: 'pickup_requests.bookings', class: 'align-middle bookings'},
 					{data: 'pending_bookings', name: 'pickup_requests.pending_bookings', class: 'align-middle pending_bookings'},
 					{data: 'total_estimated_weight', name: 'pickup_requests.total_estimated_weight', class: 'align-middle total_estimated_weight'},

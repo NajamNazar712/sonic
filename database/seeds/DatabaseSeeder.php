@@ -14,7 +14,6 @@ class DatabaseSeeder extends Seeder
     {
         //$this->call(UsersTableSeeder::class);
         $this->call(AdminsTableSeeder::class);
-        $this->call(CityTableSeeder::class);
         $this->call(CityPickupTableSeeder::class);
         $this->call(ProductsTableSeeder::class);
         $this->call(BookingTableSeeder::class);
@@ -22,6 +21,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ShippingModeTableSeeder::class);
         $this->call(ShippingModeSameDayTimingTableSeeder::class);
         $this->call(PaymentModeTableSeeder::class);
+        $this->call(RiderCategoryTableSeeder::class);
         $this->call(StandardWeightChargesTableSeeder::class);
         $this->call(StandardCashHandlingChargesTableSeeder::class);
         $this->call(StandardInsuranceChargesTableSeeder::class);
@@ -33,5 +33,6 @@ class DatabaseSeeder extends Seeder
         $this->call(ShipmentStatusTableSeeder::class);
         $this->call(ShipmentStatusReasonTableSeeder::class);
         $this->call(ShipmentStatusShipmentStatusReasonTableSeeder::class);
+        $this->call(NewCityTableSeeder::class);
     }
 }

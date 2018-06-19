@@ -70,11 +70,11 @@ class ShipperReceivingSheetController extends Controller
     public function list() {
       $shipments = Shipment::join('booking_types AS bt', 'shipments.booking_type_id', '=', 'bt.id')
       ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-      ->join('city_infos AS oc', 'usi.city_code', '=', 'oc.city_code')
-      ->join('city_infos AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+      ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+      ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
       ->leftjoin('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
       ->leftjoin('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
-      ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'oc.city_name AS origin_city', 'dc.city_name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet')
+      ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet')
       ->where('shipments.user_id', Auth::id())
       ->where('shipments.shipper_status_id', 1)
       ->where(function ($query) {
@@ -316,7 +316,7 @@ class ShipperReceivingSheetController extends Controller
             ';
 
             $shipment_details_row_end = '
-                            <td>' . $shipment->consignee_city->city_name . '</td>
+                            <td>' . $shipment->consignee_city->name . '</td>
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
           ';
@@ -334,7 +334,7 @@ class ShipperReceivingSheetController extends Controller
             ';
 
             $shipment_details_row_end = '
-                            <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_city->city_name . '</td>
+                            <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_city->name . '</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
             ';
@@ -440,7 +440,7 @@ class ShipperReceivingSheetController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Client City</strong></td>
-                            <td>' . $shipment->pickup_address->city->city_name  . '</td>
+                            <td>' . $shipment->pickup_address->city->name  . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Total Shipments</strong></td>

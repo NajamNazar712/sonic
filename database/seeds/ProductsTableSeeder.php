@@ -11,6 +11,7 @@ class ProductsTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('products')->truncate();
         DB::table('products')->insert(array(
             array('product_name'=>'Apparel'),
             array('product_name'=>'Automotive Parts'),

@@ -11,6 +11,7 @@ class StandardCashHandlingChargesTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('standard_cash_handling_charges')->truncate();
         DB::table('standard_cash_handling_charges')->insert(array(
             array('shipping_mode_id'=>1,'range_up'=>0,'range_down'=>3000,'charges'=>0),
             array('shipping_mode_id'=>1,'range_up'=>3001,'range_down'=>5000,'charges'=>100),
