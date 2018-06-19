@@ -1,5 +1,49 @@
 @extends('admin.layout.master')
 
+
+@section('content')
+    <h1>City Management</h1>
+
+    <section>
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+
+                    <div class="card-header">
+                        <span class="font-large-1 card-title">Cities List</span>
+                        <button type="button" rel="addcity" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addCity" data-toggle="modal">Add City</button>
+
+                        <div class="mt-1">
+                            @include('admin.inc.messages')
+                        </div>
+                    </div>
+
+
+                    <div class="card-content">
+                        <div class="card-body card-dashboard">
+                            <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
+                                <thead>
+                                <tr class="bg-primary white">
+                                    <th>S No.</th>
+                                    <th>City Name</th>
+                                    <th>City Code</th>
+                                    <th>Hub Name</th>
+                                    <th>Hub Code</th>
+                                    <th>Status</th>
+                                    {{--<th>Services Available</th>--}}
+                                    <th>Action</th>
+                                </tr>
+                                </thead>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </section>
+@endsection
+
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
@@ -7,8 +51,7 @@
 
 
     <style>
-        .radio-inline,.checkbox-inline{
-            display:inline;
+          display:inline;
         }
         table.dataTable {
             font-size: 12px;
@@ -53,49 +96,6 @@
         }
     </style>
 @endsection
-@section('content')
-    <h1>City Management</h1>
-
-    <section>
-        <div class="row">
-            <div class="col-12">
-                <div class="card">
-
-                    <div class="card-header">
-                        <span class="font-large-1 card-title">Cities List</span>
-                        <button type="button" rel="addcity" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addCity" data-toggle="modal">Add City</button>
-
-                        <div class="mt-1">
-                            @include('admin.inc.messages')
-                        </div>
-                    </div>
-
-
-                    <div class="card-content">
-                        <div class="card-body card-dashboard">
-                            <table class="table table-stripped table-bordered datatable" id="datatable">
-                                <thead>
-                                <tr>
-                                    <th>S No.</th>
-                                    <th>City Name</th>
-                                    <th>City Code</th>
-                                    <th>Hub Name</th>
-                                    <th>Hub Code</th>
-                                    <th>Status</th>
-                                    {{--<th>Services Available</th>--}}
-                                    <th>Action</th>
-                                </tr>
-                                </thead>
-                            </table>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </section>
-@endsection
-
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/forms/checkbox-radio.js')}}" type="text/javascript"></script>
@@ -106,7 +106,7 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-           var tab =  $('.datatable').DataTable({
+           var table =  $('.datatable').DataTable({
                 dom: 'ltipr',
                 fixedHeader: {
                     header: true,
@@ -121,49 +121,45 @@
 
                 ajax: '{{ route('admin.management.city.ajax') }}',
                 columns: [
-                    {data:'id', defaultContent:''},
-                    {data: 'name', name: 'name', class: 'city'},
-                    {data: 'id', name: 'id', class: 'city_id'},
-                    {data: 'hub', name: 'hub', class: 'hub'},
-                    {data: 'hub_id', name: 'hub_id', class: 'hub_id'},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'name', name: 'cities.name', class: 'city'},
+                    {data: 'city_id', name: 'cities.id', class: 'city_id'},
+                    {data: 'hub', name: 'h.name', class: 'hub'},
+                    {data: 'hub_id', name: 'cities.hub_id', class: 'hub_id'},
                     {data: 'status', name: 'status', class: 'status'},
                     {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
                 ],
+               rowCallback: function(row, data, index) {
+                   var info = table.page.info();
 
-                initComplete: function() {
-                    var search = $('<tr role="row" class="search"></tr>').appendTo(this.api().table().header());
+                   $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
-                    var td = '<td style="padding:0;"></td>';
-                    var input = '<input type="text" placeholder="Search" style="width:100%;" />';
-                    var select = '<select style="width:100%;"><option value=""></option></select>';
+               },
+               initComplete: function() {
+                   var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
+                   var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                   var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                   var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                   this.api().columns().every(function(column_id) {
+                       var column = this;
+                       var header = column.header();
 
+                       if ($(header).is('.serial_number') || $(header).is('.action')) {
+                           $(td).appendTo($(search));
+                       }
+                       else {
+                           var current = $(input).appendTo($(search)).on('change', function() {
+                               column.search($(this).val(), false, false, true).draw();
+                           }).wrap(td).after(icon);
 
-                        if ($(header).is('.action')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('keyup change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-                }
+                           if (column.search()) {
+                               current.val(column.search());
+                           }
+                       }
+                   });
+               }
             });
-
-                tab.on('order.dt search.dt', function () {
-                    tab.column(0, {search: 'false', order: 'applied'}).nodes().each(function (cell, i) {
-                        cell.innerHTML = i + 1;
-                        tab.cell(cell).invalidate('dom');
-                    });
-                }).draw();
 
             $('input.icheck').iCheck({
                 checkboxClass: 'icheckbox_squaret-red',

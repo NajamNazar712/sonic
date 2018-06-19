@@ -28,12 +28,11 @@
                                         <h3 class="card-title lead success">Overnight</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#overnight" aria-expanded="false" aria-controls="overnight"
-                                           class="pull-right"><input name="on_main_switch" type="checkbox" id="" class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a href="#" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox" id="" class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
                             </div>
-                            <div id="overnight" role="tabpanel"  class="card-collapse collapse multi-collapse  border-success {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'show' : '') }}"
+                            <div id="overnight" class="card  border-success {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? '' : 'hide') }}"
                                  aria-expanded="true">
                                 <input type="hidden" name="on_rate_record" value="{{ ((isset($switches[1][0]) && $switches[1][0]->id != '') ? $switches[1][0]->id : '') }}">
                                 <div class="card-content">
@@ -722,13 +721,12 @@
                                         <h3 class="card-title lead success">Overland</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#overland" aria-expanded="false" aria-controls="collapse62"
-                                           class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a href="#" class="pull-right" id="ol_main_switch"><input name="ol_main_switch" type="checkbox" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="overland" role="tabpanel" class="border-success no-border-top card-collapse collapse multi-collapse {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'show' : '') }}"
+                            <div id="overland" class="border-success no-border-top card {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? '' : 'hide') }}"
                                  aria-expanded="false">
                                  <input type="hidden" name="ol_rate_record" value="{{ ((isset($switches[2][0]) && $switches[2][0]->id != '') ? $switches[2][0]->id : '') }}">
                                 <div class="card-content">
@@ -1414,13 +1412,12 @@
                                         <h3 class="card-title lead success">Detain</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#detain" aria-expanded="false"
-                                           class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a id="detain_main_switch" href="#" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="detain" role="tabpanel" class="border-success no-border-top card-collapse collapse multi-collapse {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'show' : '') }}"
+                            <div id="detain" class="border-success no-border-top card {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? '' : 'hide') }}"
                                  aria-expanded="false">
                                  <input type="hidden" name="det_rate_record" value="{{ ((isset($switches[3][0]) && $switches[3][0]->id != '') ? $switches[3][0]->id : '') }}">
                                 <div class="card-content">
@@ -2113,13 +2110,12 @@
                                         <h3 class="card-title lead success">Sameday</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#sameday" aria-expanded="false"
-                                           class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a id="sameday_main_switch" href="#" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="sameday" role="tabpanel" class="border-success no-border-top card-collapse multi-collapse collapse {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'show' : '') }}"
+                            <div id="sameday" class="border-success no-border-top card {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? '' : 'hide') }}"
                                  aria-expanded="false" >
                                  <input type="hidden" name="same_rate_record" value="{{ ((isset($switches[4][0]) && $switches[4][0]->id != '') ? $switches[4][0]->id : '') }}">
                                 <div class="card-content">
@@ -2837,13 +2833,69 @@
         <h1>Shipper does not exist.</h1>
     @endif
 @endsection
+@section('css')
+    <style type="text/css">
+        .hide{
+            display:none;
+        }
+    </style>
 
+
+@endsection
 @section('js')
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+        $(document).ready(function () {
+            // var on_main_switch = document.querySelector('#on_main_switch');
+            $('#on_main_switch').on('change',function(){
 
+                var onmainswitch = document.querySelector('.switchery.on-main-switch');
+                if (onmainswitch.checked === true) {
+                    $('#overnight').slideDown('slow');
+
+                } else if (onmainswitch.checked === false) {
+                    $('#overnight').slideUp('slow');
+
+
+                }
+            });
+            $('#ol_main_switch').on('change',function(){
+
+                var olmainswitch = document.querySelector('.switchery.ol-main-switch');
+                if (olmainswitch.checked === true) {
+                    $('#overland').slideDown('slow');
+
+                } else if (olmainswitch.checked === false) {
+                    $('#overland').slideUp('slow');
+
+
+                }
+            });
+            $('#detain_main_switch').on('change',function(){
+                var detainmainswitch = document.querySelector('.switchery.detain-main-switch');
+                if (detainmainswitch.checked === true) {
+                    $('#detain').slideDown('slow');
+
+                } else if (detainmainswitch.checked === false) {
+                    $('#detain').slideUp('slow');
+
+
+                }
+            });
+            $('#sameday_main_switch').on('change',function(){
+                var samedaymainswitch = document.querySelector('.switchery.sameday-main-switch');
+                if (samedaymainswitch.checked === true) {
+                    $('#sameday').slideDown('slow');
+
+                } else if (samedaymainswitch.checked === false) {
+                    $('#sameday').slideUp('slow');
+
+
+                }
+            });
+        });
         $('#accountActiveSubmit').on('click',function(){
             $('#authorize').val(1);
             // console.log('ddd');

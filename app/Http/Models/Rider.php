@@ -18,4 +18,7 @@ class Rider extends Model
     public function rider_category(){
         return $this->belongsTo('App\Http\Models\RiderCategory');
     }
+    public function deliverynotes(){
+        return $this->hasMany('App\Http\Models\Admin\DeliveryNote');
+    }
 }

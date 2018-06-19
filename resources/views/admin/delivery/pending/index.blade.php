@@ -30,6 +30,7 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Remarks</th>
+                                    <th class="border-primary border-darken-1">Status Date</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
                                 </thead>
@@ -117,7 +118,7 @@
             serverSide: true,
             ajax: '{{ route('admin.delivery.pending.list') }}',
             rowId: 'shId',
-            // order: [[0, 'asc']],
+            order: [[1, 'asc']],
             columns: [
                 {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                 {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
@@ -133,7 +134,8 @@
                 {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'reason', name: 'reason', class: 'align-middle reason'},
-                {data: 'remarks', name: 'remarks', class: 'align-middle remarks'},
+                {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
+                {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
             ],

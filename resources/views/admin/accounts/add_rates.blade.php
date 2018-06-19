@@ -17,18 +17,17 @@
                     <div class="card-content">
                         <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.add.rates.submit',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
                             @csrf
-                            <div id="headingCollapse61" class="card-header border-success">
+                            <div id="" class="card-header border-success">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="card-title lead success">Overnight</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#overnight" aria-expanded="false" aria-controls="overnight"
-                                           class="pull-right"><input name="on_main_switch" type="checkbox" id="" class="switchery on-main-switch" data-size="sm" /></a>
+                                        <a href="#" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" /></a>
                                     </div>
                                 </div>
                             </div>
-                            <div id="overnight" role="tabpanel"  class="card-collapse collapse multi-collapse  border-success"
+                            <div id="overnight" class="card border-success hide"
                                  aria-expanded="true">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -454,13 +453,12 @@
                                         <h3 class="card-title lead success">Overland</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#overland" aria-expanded="false" aria-controls="collapse62"
-                                           class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm"/></a>
+                                        <a id="ol_main_switch" href="#" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="overland" role="tabpanel" class="border-success no-border-top card-collapse collapse multi-collapse"
+                            <div id="overland"  class="border-success no-border-top card hide"
                                  aria-expanded="false">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -883,13 +881,12 @@
                                         <h3 class="card-title lead success">Detain</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#detain" aria-expanded="false"
-                                           class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm"/></a>
+                                        <a id="detain_main_switch" href="#" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="detain" role="tabpanel" class="border-success no-border-top card-collapse collapse multi-collapse"
+                            <div id="detain"  class="border-success no-border-top card hide"
                                  aria-expanded="false">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -1315,14 +1312,12 @@
                                         <h3 class="card-title lead success">Sameday</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#sameday" aria-expanded="false"
-                                           class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm"/></a>
+                                        <a id="sameday_main_switch" href="#" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="sameday" role="tabpanel" class="border-success no-border-top card-collapse collapse multi-collapse"
-                                 aria-expanded="false" style="height: 0px;">
+                            <div id="sameday" class="border-success no-border-top card hide">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="weight-addition-sameday">
@@ -1760,12 +1755,70 @@
 
 
 @endsection
+@section('css')
+    <style type="text/css">
+        .hide{
+            display:none;
+        }
+    </style>
+
+
+@endsection
 
 @section('js')
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+        $(document).ready(function () {
+            // var on_main_switch = document.querySelector('#on_main_switch');
+            $('#on_main_switch').on('change',function(){
+
+                var onmainswitch = document.querySelector('.switchery.on-main-switch');
+                if (onmainswitch.checked === true) {
+                    $('#overnight').slideDown('slow');
+
+                } else if (onmainswitch.checked === false) {
+                    $('#overnight').slideUp('slow');
+
+
+                }
+            });
+            $('#ol_main_switch').on('change',function(){
+
+                var olmainswitch = document.querySelector('.switchery.ol-main-switch');
+                if (olmainswitch.checked === true) {
+                    $('#overland').slideDown('slow');
+
+                } else if (olmainswitch.checked === false) {
+                    $('#overland').slideUp('slow');
+
+
+                }
+            });
+            $('#detain_main_switch').on('change',function(){
+                var detainmainswitch = document.querySelector('.switchery.detain-main-switch');
+                if (detainmainswitch.checked === true) {
+                    $('#detain').slideDown('slow');
+
+                } else if (detainmainswitch.checked === false) {
+                    $('#detain').slideUp('slow');
+
+
+                }
+            });
+            $('#sameday_main_switch').on('change',function(){
+                var samedaymainswitch = document.querySelector('.switchery.sameday-main-switch');
+                if (samedaymainswitch.checked === true) {
+                    $('#sameday').slideDown('slow');
+
+                } else if (samedaymainswitch.checked === false) {
+                    $('#sameday').slideUp('slow');
+
+
+                }
+            });
+        });
         $('.decimal').inputmask({
             'alias': 'decimal',
             'allowMinus': false,
