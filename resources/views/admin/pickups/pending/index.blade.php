@@ -145,19 +145,7 @@
 					className: 'btn btn-primary assign',
 					enabled: false,
 					action: function (e, dt, node, config) {
-						if ($('#assign_to_rider .rider').hasClass('select2-hidden-accessible')) {
-							$('#assign_to_rider .rider').empty();
-							$('#assign_to_rider .rider').select2('destroy');
-						}
-
-						$('#assign_to_rider .rider').select2({
-							width: '100%',
-							placeholder: 'Rider*'
-						}).bind('change', function() {
-							if ($(this).hasClass('danger')) {
-								$(this).valid();
-							}
-						});
+						$('#assign_to_rider .rider').val(null).trigger('change');
 
 						$('#assign_to_rider').modal('show');
 					}
@@ -309,6 +297,15 @@
 				else {
 					table.button(0).disable();
 					table.button(1).disable();
+				}
+			});
+
+			$('#assign_to_rider .rider').select2({
+				width: '100%',
+				placeholder: 'Rider*'
+			}).bind('change', function() {
+				if ($(this).hasClass('danger')) {
+					$(this).valid();
 				}
 			});
 
