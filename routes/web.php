@@ -200,6 +200,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipmentstatuscheck','Admins\DeliveryController@receive_delivery_status_check')->name('shipmentstatuscheck');
             Route::post('replacements','Admins\DeliveryController@receive_delivery_get_replacements')->name('replacements');
             Route::put('replacements.submit','Admins\DeliveryController@receive_delivery_replacements_submit')->name('replacements.submit');
+            Route::put('trybuys.submit','Admins\DeliveryController@receive_delivery_trybuys_submit')->name('trybuys.submit');
         });
         Route::prefix('completed')->name('completed.')->group(function(){
             Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');

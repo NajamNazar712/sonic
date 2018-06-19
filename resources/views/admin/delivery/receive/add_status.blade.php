@@ -88,19 +88,40 @@
     </div>
     <!--Replacement Modal -->
     <!--Try&Buy Modal -->
-    <div class="modal fade text-left" id="TryAndBuyModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TryAndBuyModal"
+    <div class="modal fade text-left" id="TryBuyModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TryBuyModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Update Try &amp; Buy Delivery <span id="try_id"></span></h4>
+                    <h4 class="modal-title white">Update Try &amp; Buy Delivery</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body  text-center">
+                    <form id="trybuy_form" action="{{route('admin.delivery.receive.trybuys.submit')}}" method="post">
+                        <table class="table table-bordered datatable" id="trybuytable" style="z-index: 3;">
+                            <thead>
+                            @csrf
+                            @method('PUT')
+                            <tr role="row" class="bg-primary white">
 
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Product Type</th>
+                                <th class="border-primary border-darken-1">Product Description</th>
+                                <th class="border-primary border-darken-1">Item Price</th>
+                                <th class="border-primary border-darken-1">Receiving</th>
 
+                            </tr>
+                            </thead>
+                        </table>
+                        <input type="hidden" name="trybuy_id_list" id="trybuy_id_list">
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="TrybuyUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -196,6 +217,7 @@
                                 }
                             }).done(function (data) {
                                 if(data.status == 0){
+                                    checkShipmentStatuses();
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                 }else{
