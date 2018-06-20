@@ -115,7 +115,13 @@
                             </tr>
                             </thead>
                         </table>
+                        <div class="row justify-content-center mb-2">
+                            <div class="col">
+                                <h4><U>Total Cod Amount:</U> Rs: <span id="cod"></span></h4>
+                            </div>
+                        </div>
                         <input type="hidden" name="trybuy_id_list" id="trybuy_id_list">
+                        <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
                                 <button id="TrybuyUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
@@ -217,9 +223,9 @@
                                 }
                             }).done(function (data) {
                                 if(data.status == 0){
-                                    checkShipmentStatuses();
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    checkShipmentStatuses();
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
@@ -411,6 +417,7 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
+
                     shipments_count = shipments_count-1;
                     if(shipments_count>0) {
                         if (data.status == 1) {
@@ -436,11 +443,6 @@
                                 pageLength: 25,
                                 stateSave: true,
                                 pagingType: 'full_numbers',
-                                {{--processing: true,--}}
-                                {{--serverSide: true,--}}
-                                {{--ajax: '{{ route('admin.delivery.receive.replacements',['replacement_ids'=>$delivery_note_id]) }}',--}}
-                                // rowId: 'shId',
-                                // order: [[2, 'asc']],
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                                     {name: 'tracking_number', class: 'align-middle tracking_number'},
@@ -495,7 +497,6 @@
                             }).done(function (data) {
                                 if(data.status == 0){
                                     var rowNo = repl.rows().count();
-                                    console.log(data)
                                     $.each(data.data,function (key,value) {
                                         var inp = "<input class='form-control' name='weight["+value.id+"]' placeholder='Enter Weight'>";
                                         // console.log(value.tracking_number)
@@ -508,13 +509,6 @@
                                     //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
                             });
-                            // checkShipmentStatuses();
-                            // console.log('Count: '+ shipments_count);
-                            // var replacement = [];
-                            // $.each(data.replacement,function (key,value) {
-                            //     replacement.push(value)
-                            // });
-                            // console.log('replacement: '+replacement);
 
                         } else if (data.status == 3) {
                             toastr.success(data.success, 'Success!', {
@@ -522,9 +516,64 @@
                                 containerId: 'toast-bottom-center'
                             });
 
-                            $('#TryAndBuyModal').modal('show');
+                            $('#TryBuyModal').modal('show');
                             // checkShipmentStatuses();
-                            console.log(shipments_count);
+                            console.log(data);
+
+                            var trybuy = $('#trybuytable').DataTable({
+                                dom: 'ltipr',
+                                fixedHeader: {
+                                    header: true,
+                                    headerOffset: $('.header-navbar').height()
+                                },
+                                lengthMenu: [[25, 50, 100], [25, 50, 100]],
+                                pageLength: 25,
+                                stateSave: true,
+                                pagingType: 'full_numbers',
+
+                                columns: [
+                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {name: 'product_type', class: 'align-middle product_type'},
+                                    {name: 'product_description', class: 'align-middle product_description'},
+                                    {name: 'item_price', class: 'align-middle item_price'},
+                                    {name: 'receiving', class: 'align-middle receiving'},
+
+                                ],
+                                rowCallback: function(row, data, index) {
+                                    var info = trybuy.page.info();
+
+                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                                    if ($.inArray(data.id, selected_rows) !== -1) {
+                                        trybuy.row(row).select();
+                                    }
+                                }
+                            });
+                            $.ajax({
+                                url:'{!! route('admin.delivery.receive.trybuys') !!}',
+                                type:'POST',
+                                dataType:'json',
+                                data: {
+                                    'trybuy':data.try,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+
+                                if(data.status == 0){
+                                    var rowNo = trybuy.rows().count();
+                                    $.each(data.data,function (key,value) {
+                                        var inp = "<input type='checkbox' checked class='form-control' name='bought["+value.pid+"]' id='bought_"+value.pid+"'>";
+                                        // console.log(value.tracking_number)
+                                        trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
+                                        trybuy.draw(false);
+                                        // shipment_id_list.push(value.id);
+                                        $('#cod').text(data.total_cod);
+                                    });
+
+                                }else{
+                                    //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                            });
+
 
                         } else if (data.status == 0) {
                             console.log(data.error);
@@ -536,6 +585,13 @@
             }
             checkShipmentStatuses();
 
+            $('body').on('click','.receiving input:checkbox',function () {
+                var check = $(this);
+                var price = $(this).parents('tr').find('td.item_price').text();
+                if($.isNumeric(price)){
+
+                }
+            });
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
                 e.preventDefault();

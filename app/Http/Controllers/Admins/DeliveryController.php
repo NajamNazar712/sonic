@@ -9,6 +9,7 @@ use App\Http\Models\City;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
@@ -702,8 +703,6 @@ class DeliveryController extends Controller
                 $data = $shipment_data->first();
                 if($data->booking_type_id == 2){
                     $replacement_ids[] = $data->id;
-//                    DeliveryNoteShipment::where(['delivery_note_id'=>$note_id,'shipment_id'=>$data->id,'status'=>1])->update(['status'=>3]);
-//                    return ['status'=>2,'success'=>'Shipment is replacement!','booking_type'=>2];
                 }
             }
             $trybuy = DeliveryNoteShipment::where(['delivery_note_id'=>$note_id,'status'=>3])->get();
@@ -711,16 +710,15 @@ class DeliveryController extends Controller
                 $try_data =Shipment::where('id',$try->shipment_id);
                 $trydata = $try_data->first();
                 if($trydata->booking_type_id == 3){
-                    $trybuy_ids[] = $trydata->id;
-//                    DeliveryNoteShipment::where(['delivery_note_id'=>$note_id,'shipment_id'=>$data->id,'status'=>1])->update(['status'=>4]);
-//                    return ['status'=>3,'success'=>'Shipment is try & buy!','booking_type'=>3];
-
+                    if(!isset($trybuy_id)){
+                        $trybuy_id = $trydata->id;
+                    }
                 }
             }
             if(!empty($replacement_ids)){
                 return ['status'=>2,'success'=>'Shipment is replacement!','booking_type'=>2,'replacement'=>$replacement_ids];
-            }elseif(!empty($trybuy_ids)){
-                return ['status'=>3,'success'=>'Shipment is try and buy!','booking_type'=>3,'try'=>$trybuy_ids];
+            }elseif(!empty($trybuy_id)){
+                return ['status'=>3,'success'=>'Shipment is try and buy!','booking_type'=>3,'try'=>$trybuy_id];
             }
         }else{
             return ['status'=>0,'error'=>'No shipments updated!'];
@@ -748,6 +746,21 @@ class DeliveryController extends Controller
         return redirect()->back()->with(['success'=>'Selected Replacement\'s weight updated!']);
     }
     //try buy modal
+    public function receive_delivery_get_trybuys(Request $request){
+        $shipment = $request->trybuy;
+        if(isset($shipment)) {
+            $product = array();
+            $amount = Shipment::where('id',$shipment)->select('amount')->first();
+            $parcel = ShipmentItem::where('shipment_id', $shipment)->get();
+            foreach ($parcel as $item) {
+                $product[] = ['pid'=>$item->id,'type'=>$item->product->product_name,'description'=>($item->description == '')? ' - ':$item->description ,'price'=>$item->price];
+//
+            }
+            return ['status'=>0,'data'=>$product,'total_cod'=>$amount->amount];
+        }else{
+            return ['status'=>1,'error'=>'No Shipment found'];
+        }
+    }
     public function receive_delivery_trybuys_submit(Request $request){
 
     }
@@ -755,4 +768,5 @@ class DeliveryController extends Controller
     public function completed_deliveries_index(){
         return view('admin.delivery.complete.index');
     }
+
 }
