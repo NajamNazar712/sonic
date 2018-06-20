@@ -12,34 +12,34 @@
                 @include('admin.inc.messages')
                 <form id="status_update_form" action="{{route('admin.delivery.receive.add.status')}}" method="post">
                     @csrf
-                <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
-                <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
+                    <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
+                    <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                    <thead>
-                    <tr role="row" class="bg-primary white">
-                        <th class="border-primary border-darken-1"></th>
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Consignee</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Current Status</th>
-                        <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Clear</th>
-                    </tr>
-                    </thead>
-                </table>
-                <div class="row justify-content-center">
-                    <div class="col-2">
-                        <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
+                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1"></th>
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Tracking No.</th>
+                            <th class="border-primary border-darken-1">Consignee</th>
+                            <th class="border-primary border-darken-1">COD Amount</th>
+                            <th class="border-primary border-darken-1">Status</th>
+                            <th class="border-primary border-darken-1">Reason</th>
+                            <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Address</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Shipper</th>
+                            <th class="border-primary border-darken-1">Current Status</th>
+                            <th class="border-primary border-darken-1">Service Type</th>
+                            <th class="border-primary border-darken-1">Clear</th>
+                        </tr>
+                        </thead>
+                    </table>
+                    <div class="row justify-content-center">
+                        <div class="col-2">
+                            <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
+                        </div>
                     </div>
-                </div>
                 </form>
             </div>
         </div>
@@ -61,26 +61,26 @@
                 </div>
                 <div class="modal-body  text-center">
                     <form id="replacement_form" action="{{route('admin.delivery.receive.replacements.submit')}}" method="post">
-                    <table class="table table-bordered datatable" id="replacementtable" style="z-index: 3;">
-                        <thead>
-                        @csrf
-                        @method('PUT')
-                        <tr role="row" class="bg-primary white">
+                        <table class="table table-bordered datatable" id="replacementtable" style="z-index: 3;">
+                            <thead>
+                            @csrf
+                            @method('PUT')
+                            <tr role="row" class="bg-primary white">
 
-                            <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Tracking No.</th>
-                            <th class="border-primary border-darken-1">Service Type</th>
-                            <th class="border-primary border-darken-1">Weight Of Shipment</th>
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Tracking No.</th>
+                                <th class="border-primary border-darken-1">Service Type</th>
+                                <th class="border-primary border-darken-1">Weight Of Shipment</th>
 
-                        </tr>
-                        </thead>
-                    </table>
+                            </tr>
+                            </thead>
+                        </table>
                         <input type="hidden" name="shipment_id_list" id="shipment_id_list">
-                    <div class="row justify-content-center">
-                        <div class="col-3">
-                            <button id="ReplacementUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="ReplacementUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                            </div>
                         </div>
-                    </div>
                     </form>
                 </div>
             </div>
@@ -274,7 +274,7 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',
+                ajax: '{{ route('admin.delivery.receive.verify.status.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
                 order: [[2, 'asc']],
                 columns: [
@@ -385,11 +385,11 @@
             });
             $('body').on('click','.clear',function () {
                 // console.log();
-               var status = $(this).parents().closest('tr').find('.statusDrop');
-               var reason = $(this).parents().closest('tr').find('.reasonDrop');
-               status.val('').trigger("change");
-               reason.val('').trigger("change");
-               $('.remarks input').val('');
+                var status = $(this).parents().closest('tr').find('.statusDrop');
+                var reason = $(this).parents().closest('tr').find('.reasonDrop');
+                status.val('').trigger("change");
+                reason.val('').trigger("change");
+                $('.remarks input').val('');
                 // $('.reasonDrop').val('').trigger("change");
             });
             var shipments = [];
@@ -423,11 +423,14 @@
                     shipments_count = shipments_count-1;
                     if(shipments_count>0) {
                         if (data.status == 1) {
+
                             toastr.success(data.success, 'Success!', {
                                 positionClass: 'toast-bottom-center',
                                 containerId: 'toast-bottom-center'
                             });
                             checkShipmentStatuses();
+                            console.log(shipments_count);
+
                         } else if (data.status == 2) {
 
                             $('#ReplacementModal').modal('show');

@@ -71,24 +71,7 @@ class DeliveryController extends Controller
         $routes = Route::all()->where('status',1);
         return view('admin.delivery.note.index')->with(['riders'=>$riders,'routes'=>$routes]);
     }
-//    public function get_shipment_info(Request $request){
-////        return $request->tracking;
-//        if($request->tracking != ''){
-//            $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-////                ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-////                ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-//                ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-//                ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-////                ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
-//                ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
-////            ->join('shipments_journey sj','shipments.id','=','sj.shipment_id')
-//
-//                ->select('shipments.id as shId','shipments.tracking_number','dc.name as destination','h.id as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','shipments.amount','bt.booking_type as service_type')
-//                ->where('shipments.tracking_number',$request->tracking)
-//                ->get();
-//            return response()->json($shipments);
-//        }
-//    }
+
     public function get_shipment_details(Request $request){
         if($request->tracking != ''){
             $shipment = Shipment::where('tracking_number', $request->tracking);
@@ -182,6 +165,7 @@ class DeliveryController extends Controller
             })
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.receive.update',['note'=>$result->delivery_note]);
+                $verifyStatus = route('admin.delivery.receive.status.verify',['note'=>$result->delivery_note]);
                 $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
                 $dropdown = "<span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
@@ -192,7 +176,7 @@ class DeliveryController extends Controller
                 $statusCheck = DeliveryNoteShipment::where(['delivery_note_id'=>$result->delivery_note,'status'=>0])->get();
                 if($statusCheck->isEmpty()){
 
-                    $dropdown .= "<a href='#' class='dropdown-item verifyDeliveryNote' data-target-id='{$result->id}'><i class='ft-plus-circle primary'></i> Verify Statuses</a>";
+                    $dropdown .= "<a href='{$verifyStatus}' class='dropdown-item' data-target-id='{$result->id}'><i class='ft-plus-circle primary'></i> Verify Statuses</a>";
                 }
 
                 $dropdown .="</div></span>";
@@ -558,7 +542,7 @@ class DeliveryController extends Controller
                                     'admin_id'=>Auth::id()
                                 ]);
                                 Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>37,'consignee_status_id'=>37]);
-                                DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>3]);
+                                DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>5]);
                             }else{
                                 ShipmentsJourney::create([
                                     'shipment_id'=>$shipment,
@@ -667,29 +651,7 @@ class DeliveryController extends Controller
         }
     }
 
-    //delivery note verify
-    public function receive_delivery_note_verify(Request $request){
-        $note_id = $request->note_id;
-        $dn = DeliveryNote::where('id',$note_id);
-        if($dn->exists()){
-           $shipmentStatus =  DeliveryNoteShipment::where(['delivery_note_id'=>$note_id,'status'=>0])->get();
-            if($shipmentStatus->isEmpty()){
-               $result = DeliveryNote::where('id',$note_id)->update(['status'=>1]);
-               if($result){
-                   return ['status'=>0,'success'=>'Delivery note verified!'];
-               }else{
-                   return ['status'=>1,'error'=>'Something went wrong try again!'];
 
-               }
-            }else{
-                return ['status'=>1,'error'=>'All shipments are not updated yet, try again later!'];
-
-            }
-        }else{
-            return ['status'=>1,'error'=>'Delivery note doesn\'t exist!','delivery_note_id'=>$note_id];
-
-        }
-    }
     //ajax function
     //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy
     public function receive_delivery_status_check(Request $request){
@@ -775,6 +737,83 @@ class DeliveryController extends Controller
         }
 
     }
+    //verify delivery page
+    public function receive_delivery_note_verify_view(Request $request,$id){
+
+        $shipments_count = DeliveryNote::where('id',$id)->select('shipments_count')->first();
+//        return $shipments_count;
+        return view('admin.delivery.receive.verify_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$shipments_count->shipments_count]);
+    }
+    public function receive_delivery_verify_status_list(Request $request,$id){
+        $deliveries = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
+            ->join('shipments','shipments.id','=','dns.shipment_id')
+            ->join('users','shipments.user_id','=','users.id')
+            ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','delivery_notes.total_cod_amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
+            ->where('delivery_notes.id',$id)
+            ->get();
+
+        return Datatables::of($deliveries)
+
+            ->addColumn('status', function ($deliveries) {
+                $where = array(7,8,9,10,11,12,14,15,16,18);
+                $statuses = ShipmentStatus::whereIn('id',$where)->get();
+                $drops = '';
+                $shipment_data = Shipment::find($deliveries->shId);
+                $status_id = $shipment_data->shipment_journey()->latest()->first();
+//                $status = ShipmentStatus::where()
+//                $verifyStatus = ShipmentsJourney::where('shipment_id',$deliveries->shId)->orderBy('created_at','desc')->first();
+                foreach ($statuses as $status){
+                    $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
+                }
+                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status"><option>'.$status_id.'</option>'.$drops.'</select>';
+                return $select;
+            })
+            ->addColumn('reason', function ($deliveries) {
+                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" placeholder="Select a Reason"><option></option></select>';
+                return $reason;
+            })
+            ->addColumn('remarks', function ($deliveries) {
+                $reason = '<input class="form-control form-control-sm" name="remarks['.$deliveries->shId.']" placeholder="Enter Remarks">';
+                return $reason;
+            })
+            ->addColumn('action',function($deliveries){
+                return " <span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
+                                            </div></span>";
+            })
+            ->make(true);
+    }
+
+        //delivery note verify
+    public function receive_delivery_note_verify(Request $request){
+    $note_id = $request->note_id;
+    $dn = DeliveryNote::where('id',$note_id);
+    if($dn->exists()){
+        $shipmentStatus =  DeliveryNoteShipment::where(['delivery_note_id'=>$note_id,'status'=>0])->get();
+        if($shipmentStatus->isEmpty()){
+            $result = DeliveryNote::where('id',$note_id)->update(['status'=>1]);
+            if($result){
+                return ['status'=>0,'success'=>'Delivery note verified!'];
+            }else{
+                return ['status'=>1,'error'=>'Something went wrong try again!'];
+
+            }
+        }else{
+            return ['status'=>1,'error'=>'All shipments are not updated yet, try again later!'];
+
+        }
+    }else{
+        return ['status'=>1,'error'=>'Delivery note doesn\'t exist!','delivery_note_id'=>$note_id];
+
+    }
+    }
+
     //completed deliveries
     public function completed_deliveries_index(){
         return view('admin.delivery.complete.index');

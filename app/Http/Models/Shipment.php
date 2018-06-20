@@ -34,4 +34,7 @@ class Shipment extends Model
 	public function receiving_sheet_shipment() {
 		return $this->hasOne('App\Http\Models\ReceivingSheetShipment');
 	}
+	public function shipment_journey(){
+	    return $this->hasMany('App\Http\Models\ShipmentsJourney');
+    }
 }

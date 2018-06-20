@@ -23,7 +23,7 @@
 
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="rider_name" id="rider_name" class="form-control select2">
+                            <select name="rider_name" id="rider_name" class="form-control select2" required >
                                 <option value="">Select a rider</option>
                                 @foreach($riders as $rider)
                                     <option value="{{$rider->id}}" data-id="{{$rider->route_id}}">{{$rider->name}}</option>
@@ -34,7 +34,7 @@
                     </div>
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="route" id="route" class="form-control select2">
+                            <select name="route" id="route" class="form-control select2" required>
                                 <option value="">Select a route</option>
                                 @foreach($routes as $route)
                                     <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
@@ -308,27 +308,26 @@
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
-                if(rider == ''){
-                    errors = 1;
-                    $('#rider_error').css('display','block');
-                }else{
+                if(rider != ''){
+
                     $('#rider_error').css('display','none');
-
-                    errors = 0;
-                }
-                if(route == ''){
-                    errors = 1;
-                    $('#route_error').css('display','block');
                 }else{
-                    $('#route_error').css('display','none');
 
+                    $('#rider_error').css('display','block');
+                }
+                if(route != ''){
+
+                    $('#route_error').css('display','none');
+                }else{
+
+                    $('#route_error').css('display','block');
+                }
+                if(rider != '' && route != ''){
                     errors = 0;
-                }
-                if(table.rows().count() == 0){
+                }else{
                     errors = 1;
-                    error = 'No Shipments added in the list!, Please add at-least one shipment in the list.';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                 }
+
 
                 if(errors == 0){
                     $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);

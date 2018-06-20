@@ -202,6 +202,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('replacements.submit','Admins\DeliveryController@receive_delivery_replacements_submit')->name('replacements.submit');
             Route::post('trybuys','Admins\DeliveryController@receive_delivery_get_trybuys')->name('trybuys');
             Route::put('trybuys.submit','Admins\DeliveryController@receive_delivery_trybuys_submit')->name('trybuys.submit');
+            Route::get('{id}/status/verify','Admins\DeliveryController@receive_delivery_note_verify_view')->name('status.verify');
+            Route::get('{id}/verify/status/list','Admins\DeliveryController@receive_delivery_verify_status_list')->name('verify.status.list');
+
         });
         Route::prefix('completed')->name('completed.')->group(function(){
             Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');
