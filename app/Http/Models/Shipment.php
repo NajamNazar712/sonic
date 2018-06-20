@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shipment extends Model
 {
+
 	public function items() {
 		return $this->hasMany('App\Http\Models\ShipmentItem');
 	}

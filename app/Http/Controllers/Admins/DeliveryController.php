@@ -762,6 +762,17 @@ class DeliveryController extends Controller
         }
     }
     public function receive_delivery_trybuys_submit(Request $request){
+        if(!empty($request->trybuy_id_list)){
+            $cod = $request->trybuy_cod;
+            $item_ids = explode(',',$request->trybuy_id_list);
+            foreach ($item_ids as $item_id) {
+                $product = ShipmentItem::where('id',$item_id)->first();
+                Shipment::where('id',$product->id)->update(['received_amount'=>$cod]);
+                ShipmentItem::where('id',$item_id)->update(['bought'=>1]);
+                DeliveryNoteShipment::where('shipment_id', $product->id)->update(['status' => 5]);
+            }
+            return redirect()->back()->with('success','Try & Buy shipment updated');
+        }
 
     }
     //completed deliveries

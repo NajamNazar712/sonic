@@ -121,6 +121,7 @@
                             </div>
                         </div>
                         <input type="hidden" name="trybuy_id_list" id="trybuy_id_list">
+                        <input type="hidden" name="trybuy_cod" id="trybuy_cod">
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
@@ -405,6 +406,7 @@
                 this.submit();
             });
             //on page load ajax
+            var trybuy_ids = [];
             var shipment_id_list = [];
             var shipments_count = $('#shipments_count').val();
             function checkShipmentStatuses(){
@@ -518,9 +520,9 @@
 
                             $('#TryBuyModal').modal('show');
                             // checkShipmentStatuses();
-                            console.log(data);
 
-                            var trybuy = $('#trybuytable').DataTable({
+
+                            trybuy = $('#trybuytable').DataTable({
                                 dom: 'ltipr',
                                 fixedHeader: {
                                     header: true,
@@ -561,13 +563,15 @@
                                 if(data.status == 0){
                                     var rowNo = trybuy.rows().count();
                                     $.each(data.data,function (key,value) {
-                                        var inp = "<input type='checkbox' checked class='form-control' name='bought["+value.pid+"]' id='bought_"+value.pid+"'>";
+                                        trybuy_ids.push(value.pid);
+                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
                                         // console.log(value.tracking_number)
                                         trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
                                         trybuy.draw(false);
                                         // shipment_id_list.push(value.id);
                                         $('#cod').text(data.total_cod);
                                     });
+
 
                                 }else{
                                     //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -587,15 +591,36 @@
 
             $('body').on('click','.receiving input:checkbox',function () {
                 var check = $(this);
+                var id = parseInt($(this).parents('tr').attr('id'));
                 var price = $(this).parents('tr').find('td.item_price').text();
+                var total_cod = $('#cod').text();
+                var newcod = '';
                 if($.isNumeric(price)){
+                    if(check.is(':checked')){
+                        newcod = parseInt(total_cod) + parseInt(price);
+                        $('#cod').text(newcod);
+                        trybuy_ids.push(id);
 
+                    }else{
+                        trybuy_ids.splice( $.inArray(id, trybuy_ids), 1 );
+                        newcod = parseInt(total_cod) - parseInt(price);
+                        $('#cod').text(newcod);
+                    }
                 }
             });
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
                 e.preventDefault();
                 $('#shipment_id_list').val(shipment_id_list);
+                this.submit();
+            });
+            $('#trybuy_form').bind('submit',function (e) {
+                e.preventDefault();
+                var total = $('#cod').text();
+                total = parseInt(total);
+                $('#trybuy_cod').val(total);
+                $('#trybuy_id_list').val(trybuy_ids);
+
                 this.submit();
             });
         });
