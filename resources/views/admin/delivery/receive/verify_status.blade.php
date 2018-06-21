@@ -3,22 +3,23 @@
 
 @section('content')
     <h1 class="mb-1">
-        Receive Deliveries(Delivery Note: {{$delivery_note_id}})
+        Verify Deliveries(Delivery Note: {{$delivery_note_id}})
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="status_update_form" action="{{route('admin.delivery.receive.add.status')}}" method="post">
+                <form id="status_update_form" action="{{route('admin.delivery.receive.verify.status.submit')}}" method="post">
                     @csrf
+                    @method('PUT')
                     <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
                     <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
                         <tr role="row" class="bg-primary white">
-                            <th class="border-primary border-darken-1"></th>
+
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Consignee</th>
@@ -29,16 +30,19 @@
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Shipper</th>
-                            <th class="border-primary border-darken-1">Current Status</th>
                             <th class="border-primary border-darken-1">Service Type</th>
-                            <th class="border-primary border-darken-1">Clear</th>
                         </tr>
                         </thead>
                     </table>
                     <div class="row justify-content-center">
                         <div class="col-2">
-                            <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
+                            <button id="statusSubmit" type="submit" class="btn btn-primary btn-block">Verify Status</button>
                         </div>
+                        @if($delivery_note_status == 1)
+                            <div class="col-2">
+                                <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
+                            </div>
+                        @endif
                     </div>
                 </form>
             </div>
@@ -48,92 +52,7 @@
 
     </div>
 
-    <!--Replacement Modal -->
-    <div class="modal fade text-left" id="ReplacementModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ReplacementModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Update Replacement Shipment Weight</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body  text-center">
-                    <form id="replacement_form" action="{{route('admin.delivery.receive.replacements.submit')}}" method="post">
-                        <table class="table table-bordered datatable" id="replacementtable" style="z-index: 3;">
-                            <thead>
-                            @csrf
-                            @method('PUT')
-                            <tr role="row" class="bg-primary white">
 
-                                <th class="border-primary border-darken-1">S. No.</th>
-                                <th class="border-primary border-darken-1">Tracking No.</th>
-                                <th class="border-primary border-darken-1">Service Type</th>
-                                <th class="border-primary border-darken-1">Weight Of Shipment</th>
-
-                            </tr>
-                            </thead>
-                        </table>
-                        <input type="hidden" name="shipment_id_list" id="shipment_id_list">
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="ReplacementUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--Replacement Modal -->
-    <!--Try&Buy Modal -->
-    <div class="modal fade text-left" id="TryBuyModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TryBuyModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-xl" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Update Try &amp; Buy Delivery</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body  text-center">
-                    <form id="trybuy_form" action="{{route('admin.delivery.receive.trybuys.submit')}}" method="post">
-                        <table class="table table-bordered datatable" id="trybuytable" style="z-index: 3;">
-                            <thead>
-                            @csrf
-                            @method('PUT')
-                            <tr role="row" class="bg-primary white">
-
-                                <th class="border-primary border-darken-1">S. No.</th>
-                                <th class="border-primary border-darken-1">Product Type</th>
-                                <th class="border-primary border-darken-1">Product Description</th>
-                                <th class="border-primary border-darken-1">Item Price</th>
-                                <th class="border-primary border-darken-1">Receiving</th>
-
-                            </tr>
-                            </thead>
-                        </table>
-                        <div class="row justify-content-center mb-2">
-                            <div class="col">
-                                <h4><U>Total Cod Amount:</U> Rs: <span id="cod"></span></h4>
-                            </div>
-                        </div>
-                        <input type="hidden" name="trybuy_id_list" id="trybuy_id_list">
-                        <input type="hidden" name="trybuy_cod" id="trybuy_cod">
-                        <hr>
-                        <div class="row justify-content-center">
-                            <div class="col-3">
-                                <button id="TrybuyUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--Try&Buy Modal -->
 
 @endsection
 
@@ -207,66 +126,10 @@
             var selected_rows = [];
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
-                    text: 'Delivered',
-                    className: 'btn btn-primary delivered',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        if(selected_rows != ''){
-                            $.ajax({
-                                url: '{!! route('admin.delivery.receive.delivered') !!}',
-                                method: 'POST',
-                                data: {
-                                    'shipment_ids': selected_rows,
-                                    'delivery_note_id': note_id,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                if(data.status == 0){
-
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    checkShipmentStatuses();
-                                }else{
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                }
-                                $.each(selected_rows, function(index, id) {
-                                    table.row($('#datatable tbody tr#' + id)).deselect();
-                                });
-                                selected_rows = [];
-                                table.button(0).disable();
-                                table.ajax.reload();
-                                $('.reasonDrop','.statusDrop').select2('destroy');
-                                setTimeout(function () {
-                                    $(".reasonDrop").select2({
-                                        placeholder: "Select a Reason",
-                                        width:'100%'
-                                    });
-                                    $(".statusDrop").select2({
-                                        placeholder: "Select a Status",
-                                        width:'100%'
-                                    });
-                                },2000);
-
-                            });
-                        }else{
-                            var error = "Something went wrong please refresh page and try again!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                        }
-                    }
-
-                }],
+                dom: 'ltipr',
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
-                },
-                select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
@@ -278,8 +141,7 @@
                 rowId: 'shId',
                 order: [[2, 'asc']],
                 columns: [
-                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
-                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
                     {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
                     {data:'amount',name: 'amount', class: 'align-middle amount'},
@@ -289,14 +151,12 @@
                     {data:'address',name: 'address', class: 'align-middle address'},
                     {data:'destination',name: 'destination', class: 'align-middle destination'},
                     {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
-                    {data:'current_status',name: 'current_status', class: 'align-middle current_status'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
-                    {data:'action',name: 'action', class: 'align-middle action'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
@@ -379,6 +239,7 @@
                             reason.append(newOption).trigger('change');
                         });
                     }else{
+                        $('.reasonDrop').empty();
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
@@ -403,226 +264,229 @@
                     shipments.push(id);
                 }
                 shipment.val(shipments);
+                $('#statusSubmit').prop('disabled',true);
                 this.submit();
             });
-            //on page load ajax
-            var trybuy_ids = [];
-            var shipment_id_list = [];
-            var shipments_count = $('#shipments_count').val();
-            function checkShipmentStatuses(){
-                var delivery_note = $('#delivery_note').val();
+
+            function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.delivery.receive.shipmentstatuscheck') !!}',
+                    url: '{!! route('admin.delivery.receive.dncc.print') !!}',
                     method: 'POST',
                     data: {
-                        'delivery_note_id': delivery_note,
+                        'id': id,
                         '_token': '{{ csrf_token() }}'
                     }
-                }).done(function (data) {
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
 
-                    shipments_count = shipments_count-1;
-                    if(shipments_count>0) {
-                        if (data.status == 1) {
-
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
                             });
-                            checkShipmentStatuses();
-                            console.log(shipments_count);
-
-                        } else if (data.status == 2) {
-
-                            $('#ReplacementModal').modal('show');
-
-                            var repl = $('#replacementtable').DataTable({
-                                dom: 'ltipr',
-                                fixedHeader: {
-                                    header: true,
-                                    headerOffset: $('.header-navbar').height()
-                                },
-                                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                                pageLength: 25,
-                                stateSave: true,
-                                pagingType: 'full_numbers',
-                                columns: [
-                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                                    {name: 'tracking_number', class: 'align-middle tracking_number'},
-                                    {name: 'service_type', class: 'align-middle service_type'},
-                                    {name: 'weight', class: 'align-middle weight'},
-
-                                ],
-                                rowCallback: function(row, data, index) {
-                                    var info = repl.page.info();
-
-                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                                    if ($.inArray(data.id, selected_rows) !== -1) {
-                                        repl.row(row).select();
-                                    }
-                                },
-                                initComplete: function() {
-
-                                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                                    this.api().columns().every(function(column_id) {
-                                        var column = this;
-                                        var header = column.header();
-
-                                        if ($(header).is('.serial_number') || $(header).is('.weight')) {
-                                            $(td).appendTo($(search));
-                                        }
-                                        else {
-                                            var current = $(input).appendTo($(search)).on('change', function() {
-                                                column.search($(this).val(), false, false, true).draw();
-                                            }).wrap(td).after(icon);
-
-                                            if (column.search()) {
-                                                current.val(column.search());
-                                            }
-                                        }
-                                    });
-                                }
-                            });
-
-                            $.ajax({
-                                url:'{!! route('admin.delivery.receive.replacements') !!}',
-                                type:'POST',
-                                dataType:'json',
-                                data: {
-                                    'replacements':data.replacement,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                if(data.status == 0){
-                                    var rowNo = repl.rows().count();
-                                    $.each(data.data,function (key,value) {
-                                        var inp = "<input class='form-control' name='weight["+value.id+"]' placeholder='Enter Weight'>";
-                                        // console.log(value.tracking_number)
-                                        repl.row.add([rowNo+1,value.tracking_number,value.booking_type_id,inp]).node().id = value.id;
-                                        repl.draw(false);
-                                        shipment_id_list.push(value.id);
-                                    });
-
-                                }else{
-                                    //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                            });
-
-                        } else if (data.status == 3) {
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-
-                            $('#TryBuyModal').modal('show');
-                            // checkShipmentStatuses();
-
-
-                            trybuy = $('#trybuytable').DataTable({
-                                dom: 'ltipr',
-                                fixedHeader: {
-                                    header: true,
-                                    headerOffset: $('.header-navbar').height()
-                                },
-                                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                                pageLength: 25,
-                                stateSave: true,
-                                pagingType: 'full_numbers',
-
-                                columns: [
-                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                                    {name: 'product_type', class: 'align-middle product_type'},
-                                    {name: 'product_description', class: 'align-middle product_description'},
-                                    {name: 'item_price', class: 'align-middle item_price'},
-                                    {name: 'receiving', class: 'align-middle receiving'},
-
-                                ],
-                                rowCallback: function(row, data, index) {
-                                    var info = trybuy.page.info();
-
-                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                                    if ($.inArray(data.id, selected_rows) !== -1) {
-                                        trybuy.row(row).select();
-                                    }
-                                }
-                            });
-                            $.ajax({
-                                url:'{!! route('admin.delivery.receive.trybuys') !!}',
-                                type:'POST',
-                                dataType:'json',
-                                data: {
-                                    'trybuy':data.try,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-
-                                if(data.status == 0){
-                                    var rowNo = trybuy.rows().count();
-                                    $.each(data.data,function (key,value) {
-                                        trybuy_ids.push(value.pid);
-                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
-                                        // console.log(value.tracking_number)
-                                        trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
-                                        trybuy.draw(false);
-                                        // shipment_id_list.push(value.id);
-                                        $('#cod').text(data.total_cod);
-                                    });
-
-
-                                }else{
-                                    //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                }
-                            });
-
-
-                        } else if (data.status == 0) {
-                            console.log(data.error);
-                            console.log(shipments_count);
-
                         }
-                    }
-                });
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
             }
-            checkShipmentStatuses();
 
-            $('body').on('click','.receiving input:checkbox',function () {
-                var check = $(this);
-                var id = parseInt($(this).parents('tr').attr('id'));
-                var price = $(this).parents('tr').find('td.item_price').text();
-                var total_cod = $('#cod').text();
-                var newcod = '';
-                if($.isNumeric(price)){
-                    if(check.is(':checked')){
-                        newcod = parseInt(total_cod) + parseInt(price);
-                        $('#cod').text(newcod);
-                        trybuy_ids.push(id);
+            $('#printDNCC').on('click',function () {
+                var note_id = $('#delivery_note').val();
+                print(note_id);
+            });
+            //on page load ajax
+            // var trybuy_ids = [];
+            // var shipment_id_list = [];
+            // var shipments_count = $('#shipments_count').val();
+            {{--function checkShipmentStatuses(){--}}
+                {{--var delivery_note = $('#delivery_note').val();--}}
+                {{--$.ajax({--}}
+                    {{--url: '{!! route('admin.delivery.receive.shipmentstatuscheck') !!}',--}}
+                    {{--method: 'POST',--}}
+                    {{--data: {--}}
+                        {{--'delivery_note_id': delivery_note,--}}
+                        {{--'_token': '{{ csrf_token() }}'--}}
+                    {{--}--}}
+                {{--}).done(function (data) {--}}
 
-                    }else{
-                        trybuy_ids.splice( $.inArray(id, trybuy_ids), 1 );
-                        newcod = parseInt(total_cod) - parseInt(price);
-                        $('#cod').text(newcod);
-                    }
-                }
-            });
-            //replacement modal bind
-            $('#replacement_form').bind('submit',function (e) {
-                e.preventDefault();
-                $('#shipment_id_list').val(shipment_id_list);
-                this.submit();
-            });
-            $('#trybuy_form').bind('submit',function (e) {
-                e.preventDefault();
-                var total = $('#cod').text();
-                total = parseInt(total);
-                $('#trybuy_cod').val(total);
-                $('#trybuy_id_list').val(trybuy_ids);
+                    {{--shipments_count = shipments_count-1;--}}
+                    {{--if(shipments_count>0) {--}}
+                        {{--if (data.status == 1) {--}}
 
-                this.submit();
-            });
+                            {{--toastr.success(data.success, 'Success!', {--}}
+                                {{--positionClass: 'toast-bottom-center',--}}
+                                {{--containerId: 'toast-bottom-center'--}}
+                            {{--});--}}
+                            {{--checkShipmentStatuses();--}}
+                            {{--console.log(shipments_count);--}}
+
+                        {{--} else if (data.status == 2) {--}}
+
+                            {{--$('#ReplacementModal').modal('show');--}}
+
+                            {{--var repl = $('#replacementtable').DataTable({--}}
+                                {{--dom: 'ltipr',--}}
+                                {{--fixedHeader: {--}}
+                                    {{--header: true,--}}
+                                    {{--headerOffset: $('.header-navbar').height()--}}
+                                {{--},--}}
+                                {{--lengthMenu: [[25, 50, 100], [25, 50, 100]],--}}
+                                {{--pageLength: 25,--}}
+                                {{--stateSave: true,--}}
+                                {{--pagingType: 'full_numbers',--}}
+                                {{--columns: [--}}
+                                    {{--{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},--}}
+                                    {{--{name: 'tracking_number', class: 'align-middle tracking_number'},--}}
+                                    {{--{name: 'service_type', class: 'align-middle service_type'},--}}
+                                    {{--{name: 'weight', class: 'align-middle weight'},--}}
+
+                                {{--],--}}
+                                {{--rowCallback: function(row, data, index) {--}}
+                                    {{--var info = repl.page.info();--}}
+
+                                    {{--$('td:eq(0)', row).html(index + 1 + info.page * info.length);--}}
+                                    {{--if ($.inArray(data.id, selected_rows) !== -1) {--}}
+                                        {{--repl.row(row).select();--}}
+                                    {{--}--}}
+                                {{--},--}}
+                                {{--initComplete: function() {--}}
+
+                                    {{--var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());--}}
+
+                                    {{--var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';--}}
+                                    {{--var input = '<input type="text" class="form-control form-control-sm input-sm primary">';--}}
+                                    {{--var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';--}}
+
+                                    {{--this.api().columns().every(function(column_id) {--}}
+                                        {{--var column = this;--}}
+                                        {{--var header = column.header();--}}
+
+                                        {{--if ($(header).is('.serial_number') || $(header).is('.weight')) {--}}
+                                            {{--$(td).appendTo($(search));--}}
+                                        {{--}--}}
+                                        {{--else {--}}
+                                            {{--var current = $(input).appendTo($(search)).on('change', function() {--}}
+                                                {{--column.search($(this).val(), false, false, true).draw();--}}
+                                            {{--}).wrap(td).after(icon);--}}
+
+                                            {{--if (column.search()) {--}}
+                                                {{--current.val(column.search());--}}
+                                            {{--}--}}
+                                        {{--}--}}
+                                    {{--});--}}
+                                {{--}--}}
+                            {{--});--}}
+
+                            {{--$.ajax({--}}
+                                {{--url:'{!! route('admin.delivery.receive.replacements') !!}',--}}
+                                {{--type:'POST',--}}
+                                {{--dataType:'json',--}}
+                                {{--data: {--}}
+                                    {{--'replacements':data.replacement,--}}
+                                    {{--'_token': '{{ csrf_token() }}'--}}
+                                {{--}--}}
+                            {{--}).done(function (data) {--}}
+                                {{--if(data.status == 0){--}}
+                                    {{--var rowNo = repl.rows().count();--}}
+                                    {{--$.each(data.data,function (key,value) {--}}
+                                        {{--var inp = "<input class='form-control' name='weight["+value.id+"]' placeholder='Enter Weight'>";--}}
+                                        {{--// console.log(value.tracking_number)--}}
+                                        {{--repl.row.add([rowNo+1,value.tracking_number,value.booking_type_id,inp]).node().id = value.id;--}}
+                                        {{--repl.draw(false);--}}
+                                        {{--shipment_id_list.push(value.id);--}}
+                                    {{--});--}}
+
+                                {{--}else{--}}
+                                    {{--//toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                                {{--}--}}
+                            {{--});--}}
+
+                        {{--} else if (data.status == 3) {--}}
+                            {{--toastr.success(data.success, 'Success!', {--}}
+                                {{--positionClass: 'toast-bottom-center',--}}
+                                {{--containerId: 'toast-bottom-center'--}}
+                            {{--});--}}
+
+                            {{--$('#TryBuyModal').modal('show');--}}
+                            {{--// checkShipmentStatuses();--}}
+
+
+                            {{--trybuy = $('#trybuytable').DataTable({--}}
+                                {{--dom: 'ltipr',--}}
+                                {{--fixedHeader: {--}}
+                                    {{--header: true,--}}
+                                    {{--headerOffset: $('.header-navbar').height()--}}
+                                {{--},--}}
+                                {{--lengthMenu: [[25, 50, 100], [25, 50, 100]],--}}
+                                {{--pageLength: 25,--}}
+                                {{--stateSave: true,--}}
+                                {{--pagingType: 'full_numbers',--}}
+
+                                {{--columns: [--}}
+                                    {{--{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},--}}
+                                    {{--{name: 'product_type', class: 'align-middle product_type'},--}}
+                                    {{--{name: 'product_description', class: 'align-middle product_description'},--}}
+                                    {{--{name: 'item_price', class: 'align-middle item_price'},--}}
+                                    {{--{name: 'receiving', class: 'align-middle receiving'},--}}
+
+                                {{--],--}}
+                                {{--rowCallback: function(row, data, index) {--}}
+                                    {{--var info = trybuy.page.info();--}}
+
+                                    {{--$('td:eq(0)', row).html(index + 1 + info.page * info.length);--}}
+                                    {{--if ($.inArray(data.id, selected_rows) !== -1) {--}}
+                                        {{--trybuy.row(row).select();--}}
+                                    {{--}--}}
+                                {{--}--}}
+                            {{--});--}}
+                            {{--$.ajax({--}}
+                                {{--url:'{!! route('admin.delivery.receive.trybuys') !!}',--}}
+                                {{--type:'POST',--}}
+                                {{--dataType:'json',--}}
+                                {{--data: {--}}
+                                    {{--'trybuy':data.try,--}}
+                                    {{--'_token': '{{ csrf_token() }}'--}}
+                                {{--}--}}
+                            {{--}).done(function (data) {--}}
+
+                                {{--if(data.status == 0){--}}
+                                    {{--var rowNo = trybuy.rows().count();--}}
+                                    {{--$.each(data.data,function (key,value) {--}}
+                                        {{--trybuy_ids.push(value.pid);--}}
+                                        {{--var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";--}}
+                                        {{--// console.log(value.tracking_number)--}}
+                                        {{--trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;--}}
+                                        {{--trybuy.draw(false);--}}
+                                        {{--// shipment_id_list.push(value.id);--}}
+                                        {{--$('#cod').text(data.total_cod);--}}
+                                    {{--});--}}
+
+
+                                {{--}else{--}}
+                                    {{--//toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                                {{--}--}}
+                            {{--});--}}
+
+
+                        {{--} else if (data.status == 0) {--}}
+                            {{--console.log(data.error);--}}
+                            {{--console.log(shipments_count);--}}
+
+                        {{--}--}}
+                    {{--}--}}
+                {{--});--}}
+            {{--}--}}
+            {{--checkShipmentStatuses();--}}
+
+
+
         });
     </script>
 @endsection

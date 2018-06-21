@@ -15,14 +15,14 @@
 
                 <div class="row mb-2 justify-content-center">
 
-                    <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Scan Delivery Note Number" id="scan_tracking">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
-                        </fieldset>
-                    </div>
+                    {{--<div class="col-3">--}}
+                        {{--<fieldset class="position-relative has-icon-left">--}}
+                            {{--<input type="text" class="form-control" placeholder="Scan Delivery Note Number" id="scan_tracking">--}}
+                            {{--<div class="form-control-position">--}}
+                                {{--<i class="ft-search"></i>--}}
+                            {{--</div>--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
                             <input type="text" class="form-control" placeholder="Search By Tracking Number" id="search_tracking">
@@ -49,7 +49,6 @@
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Total COD</th>
-                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -135,7 +134,7 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.delivery.receive.list') }}',
+                ajax: '{{ route('admin.delivery.completed.list') }}',
                 rowId: 'delivery_note_id',
                 order: [[2, 'asc']],
                 columns: [
@@ -148,7 +147,6 @@
                     { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
                     { data:'amount' ,name: 'amount', class: 'align-middle amount'},
-                    {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -167,8 +165,6 @@
                         var header = column.header();
 
                         if ($(header).is('.serial_number')) {
-                            $(td).appendTo($(search));
-                        }else if($(header).is('.action')){
                             $(td).appendTo($(search));
                         }
                         else {
@@ -270,26 +266,6 @@
                     scan.val('');
                 }
             });
-            {{--$('body').on('click','.verifyDeliveryNote',function () {--}}
-                {{--var note_id = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--$.ajax({--}}
-                    {{--url: '{!! route('admin.delivery.receive.dn.verify') !!}',--}}
-                    {{--method: 'POST',--}}
-                    {{--data: {--}}
-                        {{--'note_id': note_id,--}}
-                        {{--'_token': '{{ csrf_token() }}'--}}
-                    {{--}--}}
-                {{--}).done(function (data) {--}}
-                    {{--if(data.status == 0){--}}
-                        {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                        {{--table.ajax.reload();--}}
-                    {{--}else{--}}
-                        {{--// console.log(data.delivery_note_id);--}}
-                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                    {{--}--}}
-                {{--});--}}
-
-            {{--});--}}
 
         });
     </script>

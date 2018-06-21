@@ -39,6 +39,11 @@
                     <div class="col-2">
                         <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
                     </div>
+                    @if($delivery_note_status == 1)
+                        <div class="col-2">
+                            <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
+                        </div>
+                    @endif
                 </div>
                 </form>
             </div>
@@ -122,6 +127,10 @@
                         </div>
                         <input type="hidden" name="trybuy_id_list" id="trybuy_id_list">
                         <input type="hidden" name="trybuy_cod" id="trybuy_cod">
+                        <input type="hidden" name="item_checked" id="item_checked">
+                        <input type="hidden" name="item_unchecked" id="item_unchecked">
+                        <input type="hidden" name="delivery_note_trybuy" id="delivery_note_trybuy">
+                        <input type="hidden" name="trybuy_shipment_id" id="trybuy_shipment_id">
                         <hr>
                         <div class="row justify-content-center">
                             <div class="col-3">
@@ -379,6 +388,7 @@
                             reason.append(newOption).trigger('change');
                         });
                     }else{
+                        $('.reasonDrop').empty();
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
@@ -420,7 +430,7 @@
                     }
                 }).done(function (data) {
 
-                    shipments_count = shipments_count-1;
+
                     if(shipments_count>0) {
                         if (data.status == 1) {
                             toastr.success(data.success, 'Success!', {
@@ -547,6 +557,9 @@
                                     }
                                 }
                             });
+
+                            //trybuy shipment id for modal
+                            $('#trybuy_shipment_id').val(data.try);
                             $.ajax({
                                 url:'{!! route('admin.delivery.receive.trybuys') !!}',
                                 type:'POST',
@@ -582,9 +595,45 @@
 
                         }
                     }
+                    shipments_count = shipments_count-1;
                 });
             }
             checkShipmentStatuses();
+
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
+            $('#printDNCC').on('click',function () {
+                var note_id = $('#delivery_note').val();
+                print(note_id);
+            });
+
 
             $('body').on('click','.receiving input:checkbox',function () {
                 var check = $(this);
@@ -615,10 +664,21 @@
                 e.preventDefault();
                 var total = $('#cod').text();
                 total = parseInt(total);
+                var deliverynote_id = $('#delivery_note').val();
                 $('#trybuy_cod').val(total);
                 $('#trybuy_id_list').val(trybuy_ids);
+                var checkbox_count = $('.bought:checked').length;
+                var uncheckbox_count = $('input:checkbox.bought').length;
+                $('#item_checked').val(checkbox_count);
+                $('#item_unchecked').val(uncheckbox_count);
+                $('#delivery_note_trybuy').val(deliverynote_id);
+                if(checkbox_count > 0){
 
-                this.submit();
+                    this.submit();
+                }else{
+                        var error = "Select at-least one item!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                }
             });
         });
     </script>

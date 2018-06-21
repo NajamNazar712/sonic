@@ -204,10 +204,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('trybuys.submit','Admins\DeliveryController@receive_delivery_trybuys_submit')->name('trybuys.submit');
             Route::get('{id}/status/verify','Admins\DeliveryController@receive_delivery_note_verify_view')->name('status.verify');
             Route::get('{id}/verify/status/list','Admins\DeliveryController@receive_delivery_verify_status_list')->name('verify.status.list');
+            Route::put('verify/status/submit','Admins\DeliveryController@receive_delivery_verify_status_submit')->name('verify.status.submit');
+            Route::post('dncc/print','Admins\DeliveryController@dncc_print')->name('dncc.print');
 
         });
         Route::prefix('completed')->name('completed.')->group(function(){
             Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');
+            Route::get('list','Admins\DeliveryController@completed_receive_deliveries_list')->name('list');
+
         });
     });
 

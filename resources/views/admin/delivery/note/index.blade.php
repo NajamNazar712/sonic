@@ -73,7 +73,7 @@
                         <input type="hidden" name="selected_rider_id" id="selected_rider_id">
                         <input type="hidden" name="selected_route_id" id="selected_route_id">
                         <div class="col-3">
-                        <button type="submit" class="btn btn-primary btn-block">Submit &amp; Print</button>
+                        <button type="submit" class="btn btn-primary btn-block ">Submit &amp; Print</button>
 
                     </div>
 
@@ -297,8 +297,6 @@
                 table.row( $(this).parents('tr') ).remove().draw();
                 shipment_ids.splice( $.inArray(rid, shipment_ids), 1 );
             });
-
-
 
 
             $('#create_delivery_note_form').bind('submit', function(event) {
