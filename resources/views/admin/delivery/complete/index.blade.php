@@ -1,4 +1,3 @@
-
 @extends('admin.layout.master')
 
 @section('content')
@@ -34,12 +33,16 @@
 
 
                 </div>
-
+                <form id="post_delivery_note_ids_form" action="{{route('admin.delivery.completed.deposit.dncc')}}" method="post">
+                    @csrf
+                    <input type="hidden" name="delivery_note_ids" id="delivery_note_ids">
+                </form>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
 
+                        <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -122,11 +125,39 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var selected_rows = [];
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [{
+                    text: 'Deposit DNCC',
+                    className: 'btn btn-primary delivered',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                        if(selected_rows != ''){
+                            $('#delivery_note_ids').val(selected_rows);
+                            var delivery_note_ids = $('#delivery_note_ids').val();
+                            // console.log(delivery_note_ids)
+                            if(delivery_note_ids != ''){
+                                $('#post_delivery_note_ids_form').submit();
+                            }
+
+                        }else{
+                            var error = "Something went wrong please refresh page and try again!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }
+                    }
+
+                }],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
+                },
+                select: {
+                    info: false,
+                    style: 'multi',
+                    selector: 'td.select-checkbox',
+                    className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
@@ -138,8 +169,9 @@
                 rowId: 'delivery_note_id',
                 order: [[2, 'asc']],
                 columns: [
+                    {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_note_id', class: 'align-middle delivery_note'},
+                    { data:'delivery_note' ,name: 'delivery_note_id', class: 'align-middle text-center delivery_note'},
                     { data:'hub' ,name: 'hub', class: 'align-middle hub'},
                     { data:'rider' ,name: 'rider', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
@@ -151,7 +183,10 @@
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
-                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    if ($.inArray(data.id, selected_rows) !== -1) {
+                        table.row(row).select();
+                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -164,7 +199,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -179,6 +214,55 @@
                     });
                 }
             });
+            var hub_ids = [];
+            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
+
+                var id = parseInt($(this).parent('tr').attr('id'));
+                var hub_id = $(this).parents('tr').data('hub');
+                if(hub_ids.length == 0){
+                    hub_ids.push(hub_id);
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index === -1) {
+                        selected_rows.push(id);
+                    }
+                    else {
+                        selected_rows.splice(index, 1);
+                    }
+
+                    if (selected_rows.length > 0) {
+                        table.button(0).enable();
+                    }
+                    else {
+                        table.button(0).disable();
+                    }
+                }else{
+                    if(hub_ids[0] == hub_id){
+                        var index = $.inArray(id, selected_rows);
+
+                        if (index === -1) {
+                            selected_rows.push(id);
+                        }
+                        else {
+                            selected_rows.splice(index, 1);
+                        }
+
+                        if (selected_rows.length > 0) {
+                            table.button(0).enable();
+                        }
+                        else {
+                            table.button(0).disable();
+                        }
+                    }else{
+                        var error = "Selected hubs should be the same!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        return false;
+                    }
+
+                }
+
+            });
+
             $('#search_tracking').on('change',function () {
                 var input = $(this);
                 var tracking = $(this).val();
@@ -251,6 +335,39 @@
                 var deliverynote = $(this).parents('tr').attr('id');
                 // console.log(deliverynote);
                 print(deliverynote);
+            });
+            function printDNCC(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
+            $('body').on('click','.printDNCC',function () {
+                var note_id = $(this).parents('tr').attr('id');
+                printDNCC(note_id);
             });
 
             $('#scan_tracking').on('change',function () {

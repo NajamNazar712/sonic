@@ -71,7 +71,6 @@
                         @csrf
                         @method('PUT')
                         <tr role="row" class="bg-primary white">
-
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Service Type</th>
@@ -208,11 +207,22 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    {{-- <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('.decimal').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 3,
+                'min': 0.00,
+                'max': 1000
+            });
+
             var selected_rows = [];
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
@@ -507,11 +517,20 @@
                                 if(data.status == 0){
                                     var rowNo = repl.rows().count();
                                     $.each(data.data,function (key,value) {
-                                        var inp = "<input class='form-control' name='weight["+value.id+"]' placeholder='Enter Weight'>";
+                                        var inp = "<input class='form-control decimal' name='weight["+value.id+"]' placeholder='Enter Weight'>";
                                         // console.log(value.tracking_number)
                                         repl.row.add([rowNo+1,value.tracking_number,value.booking_type_id,inp]).node().id = value.id;
                                         repl.draw(false);
                                         shipment_id_list.push(value.id);
+                                        $('.decimal').inputmask({
+                                            'alias': 'decimal',
+                                            'allowMinus': false,
+                                            'allowPlus': false,
+                                            'rightAlign': false,
+                                            'digits': 3,
+                                            'min': 0.00,
+                                            'max': 1000
+                                        });
                                     });
 
                                 }else{

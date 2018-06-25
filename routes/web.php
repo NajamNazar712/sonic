@@ -211,7 +211,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('completed')->name('completed.')->group(function(){
             Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');
             Route::get('list','Admins\DeliveryController@completed_receive_deliveries_list')->name('list');
-
+            Route::post('deposit/dncc','Admins\DeliveryController@completed_deliveries_selected_dncc')->name('deposit.dncc');
+            Route::get('sdn/create','Admins\DeliveryController@create_sdn_view')->name('sdn.create');
+            Route::post('sdn/create','Admins\DeliveryController@create_sdn_submit')->name('sdn.create.submit');
+            Route::get('dncc/list','Admins\DeliveryController@get_sdn_list')->name('dncc.list');
+        });
+        Route::prefix('sdn')->name('sdn.')->group(function (){
+           Route::get('','Admins\DeliveryController@sdn_view')->name('index');
+           Route::get('','Admins\DeliveryController@sdn_view')->name('index');
         });
     });
 

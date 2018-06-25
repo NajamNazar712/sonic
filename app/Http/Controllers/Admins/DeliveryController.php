@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
@@ -161,6 +163,16 @@ class DeliveryController extends Controller
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
@@ -909,7 +921,12 @@ class DeliveryController extends Controller
                     }//main if condition
 
                 }
-                DeliveryNote::where('id',$delivery_note_id)->update(['status'=>1]);
+                $dncc_status = array(14,16,30,36,37);
+                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$delivery_note_id)->select('shipment_id')->get();
+                $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereIn('shipper_status_id',$dncc_status);
+                $dncc_amount = $filtered_shipments->sum('received_amount');
+                $delivered_shipments = $filtered_shipments->count();
+                DeliveryNote::where('id',$delivery_note_id)->update(['delivered_shipments'=>$delivered_shipments,'received_cod_amount'=>$dncc_amount,'status'=>1]);
                 return redirect()->back()->with('success','Delivery Note verified and updated successfully!');
             }else{
                 return redirect()->back()->with('error','Delivery note not found!');
@@ -1118,22 +1135,120 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
-            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
             ->where('delivery_notes.status',1)
+            ->where('delivery_notes.dncc_status',1)
             ->get();
         return Datatables::of($deliveries)
 
 
             ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a>";
+                return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='#' class='printDNCC'><u>DNCC</u></a>";
             })
+            ->setRowAttr([
+                'data-hub' => function($deliveries) {
+                    return $deliveries->hub_id;
+                },
+            ])
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
             })
             ->make(true);
+
+    }
+    //for ajax select dncc
+    public function completed_deliveries_selected_dncc(Request $request){
+
+        $note_ids = explode(',',$request->delivery_note_ids);
+        session(['dncc_ids'=> $note_ids]);
+//        return session('dncc_ids');
+        $delivery_note = DeliveryNote::find($note_ids[0]);
+        $hub_name = $delivery_note->hub->name;
+        return view('admin.delivery.complete.sdn_create')->with(['hub_name'=>$hub_name,'dncc_ids'=>session('dncc_ids')]);
+    }
+    public function get_sdn_list(Request $request){
+        $dncc_ids = session('dncc_ids');
+        $deliveries = DeliveryNote::
+        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->join('admins','admins.id','=','delivery_notes.admin_id')
+            ->select(['delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','delivery_notes.received_cod_amount','delivery_notes.shipments_count','delivery_notes.delivered_shipments'])
+            ->whereIn('delivery_notes.id',$dncc_ids)
+            ->get();
+        return Datatables::of($deliveries)
+            ->setRowAttr([
+                'data-hub' => function($deliveries) {
+                    return $deliveries->hub_id;
+                },
+            ])
+            ->editColumn('route', function ($rider) {
+                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->editColumn('expense',function($deliveries){
+                return "<input id='expense' class='form-control expense numeric' placeholder='Expense' name='expense[{$deliveries->delivery_note_id}]'>";
+            })
+            ->editColumn('net_amount',function($deliveries){
+                return "<input class='form-control net_amount' readonly placeholder='Net Amount' name='net_amount[{$deliveries->delivery_note_id}]'>";
+            })
+            ->addColumn('remarks', function ($deliveries) {
+                $reason = '<input class="form-control" name="remarks['.$deliveries->delivery_note_id.']" placeholder="Enter Remarks" data-rule-required="true" data-msg-required="This field is required">';
+                return $reason;
+            })
+            ->make(true);
+    }
+    public function create_sdn_submit(Request $request){
+        if($request->sdn_hub_id){
+                $dncc_ids = explode(',',$request->sdn_dncc_ids);
+//                return $request;
+               $sdn_id = StationDepositNote::create([
+                    'hub_id'=>$request->sdn_hub_id,
+                    'dncc_count'=>$request->sdn_count,
+                    'sdn_delivered_shipments'=>$request->sdn_delivered_shipments,
+                    'sdn_amount'=>$request->total_dncc_amount,
+                    'sdn_expense'=>$request->total_expenses,
+                    'sdn_net_amount'=>$request->total_amount,
+                    'deposited_by'=>Auth::id(),
+                    'banks_list_id'=>$request->bank_select
+                ]);
+               foreach ($dncc_ids as $dncc){
+                   DeliveryNoteStationDepositNote::create([
+                       'station_deposit_note_id'=>$sdn_id->id,
+                       'delivery_note_id'=>$dncc
+                   ]);
+                   DeliveryNote::where('id',$dncc)->update(['expense'=>$request->expense[$dncc],'net_amount'=>$request->net_amount[$dncc],'remarks'=>$request->remarks[$dncc],'dncc_status'=>1]);
+               }
+
+               return redirect(route('admin.delivery.sdn.index'));
+            }
+    }
+    public function sdn_view(Request $request){
+        return view('admin.delivery.sdn.index');
+    }
+    public function sdn_list(){
 
     }
 }
