@@ -60,6 +60,15 @@ class DeliveryController extends Controller
             ->whereIn('shipments.shipper_status_id',$status)
             ->groupBy('shipments.id');
         return Datatables::of($shipments)
+            ->editColumn('status_date',function ($shipments){
+                if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
+                    $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                    return "<span class='danger font-weight-bold'>$older</span>";
+                }else{
+                    return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                }
+//                return $Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+            })
             ->addColumn("action", function ($result) {
                 return " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
