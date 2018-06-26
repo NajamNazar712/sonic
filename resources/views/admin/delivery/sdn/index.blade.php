@@ -61,7 +61,7 @@
                             @csrf
                             <input type="hidden" name="sdn_id" id="sdn_id"/>
                     <fieldset class="form-group">
-                        <input type="file" class="form-control-file" id="deposit_slip" name="deposit_slip">
+                        <input type="file" class="form-control-file" id="deposit_slip" name="deposit_slip" accept="image/x-png,image/jpeg">
                     </fieldset>
 
                     <hr>
