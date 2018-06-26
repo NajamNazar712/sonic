@@ -93,7 +93,7 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request){
         if($request->tracking != ''){
-            $shipment = Shipment::where('tracking_number', $request->tracking);
+            $shipment = Shipment::where('tracking_number', $request->tracking)->where('shipper_status_id','!=',5);
 
             if($shipment->exists()){
                 $shipment = $shipment->first();
@@ -103,7 +103,9 @@ class DeliveryController extends Controller
                         $destination = $shipment->consignee_city->name;
                         $hub = City::find($shipment->consignee_city->hub_id)->name;
                         $service = $shipment->booking_type->booking_type;
-                        return response()->json(['status'=>0,'shId'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'destination'=>$destination,'hub'=>$hub,'consignee_name'=>$shipment->consignee_name,'phone'=>$shipment->consignee_phone_number_1,'address'=>$shipment->consignee_address,'amount'=>$shipment->amount,'service_type'=>$service]);
+                        $shipment_journey = ShipmentsJourney::where('shipment_id',$shipment->id)->select('shipper_status_id','remarks')->latest();
+                        $remarks = ($shipment_journey->remarks)? $shipment_journey->remarks:' - ';
+                        return response()->json(['status'=>0,'shId'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'destination'=>$destination,'hub'=>$hub,'consignee_name'=>$shipment->consignee_name,'phone'=>$shipment->consignee_phone_number_1,'address'=>$shipment->consignee_address,'amount'=>$shipment->amount,'service_type'=>$service,'remarks'=>$remarks]);
 
                     }else{
                         return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!','hub_old'=>$request->hub_id,'newHub'=>$hub_id];
@@ -113,10 +115,23 @@ class DeliveryController extends Controller
                     $destination = $shipment->consignee_city->name;
                     $hub = City::find($shipment->consignee_city->hub_id)->id;
                     $service = $shipment->booking_type->booking_type;
-                    return response()->json(['status'=>0,'shId'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'destination'=>$destination,'hub'=>$hub,'consignee_name'=>$shipment->consignee_name,'phone'=>$shipment->consignee_phone_number_1,'address'=>$shipment->consignee_address,'amount'=>$shipment->amount,'service_type'=>$service]);
+                    $shipment_journey = ShipmentsJourney::where('shipment_id',$shipment->id)->select('shipper_status_id','remarks')->latest()->first();
+                    if(!empty($shipment_journey)){
+
+                        $remarks = ($shipment_journey->remarks)? $shipment_journey->remarks:' - ';
+                        $status_id = ($shipment_journey->shipper_status_id)? $shipment_journey->shipper_status_id: '';
+                        if($status_id != ''){
+                            $status_name = ShipmentStatus::where('id',$status_id)->select('name')->first();
+                            $status = $status_name->name;
+                        }else{
+                            $status = ' - ';
+                        }
+                    }
+
+                    return response()->json(['status'=>0,'shId'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'destination'=>$destination,'hub'=>$hub,'consignee_name'=>$shipment->consignee_name,'phone'=>$shipment->consignee_phone_number_1,'address'=>$shipment->consignee_address,'amount'=>$shipment->amount,'service_type'=>$service,'status'=>$status,'remarks'=>$remarks]);
                 }
             }else{
-                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
+                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present | This shipment\'s delivery note is already been created.'];
             }
 
 
@@ -126,13 +141,10 @@ class DeliveryController extends Controller
         $shipments = explode(',',$request->shipment_ids);
         $count = count($shipments);
         $cod = Shipment::whereIn('id',$shipments)->sum('amount');
-//        $dt = new \DateTime();
+
         $admin = Auth::id();
-//        $deliveryno = $dt->format('YdmHs');
-//        $deliveryno = $deliveryno.$admin;
-//        return $request;
+
        $note = DeliveryNote::create([
-//            'delivery_note_no'=>$deliveryno,
             'hub_id'=>$request->hub_id,
             'rider_id'=>$request->selected_rider_id,
             'route_id'=>$request->selected_route_id,

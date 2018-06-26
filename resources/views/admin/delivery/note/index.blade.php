@@ -59,14 +59,14 @@
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
                 <form id="create_delivery_note_form" class="" method="post" action="{{ route('admin.delivery.note.create') }}">
                 <div class="row justify-content-center">
-
-
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
@@ -168,6 +168,8 @@
                 {name: 'address', class: 'align-middle address'},
                 {name: 'amount', class: 'align-middle amount'},
                 {name: 'service_type', class: 'align-middle service_type'},
+                {name: 'status', class: 'align-middle status'},
+                {name: 'remarks', class: 'align-middle remarks'},
                 {name: 'action', class: 'align-middle action'}
             ],
             rowCallback: function(row, data, index) {
@@ -235,7 +237,7 @@
                         }else{
                             var rowNo = table.rows().count();
                             var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                            table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,remove]).node().id = data.shId;
+                            table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.status,data.remarks,remove]).node().id = data.shId;
                             table.draw(false);
                             shipment_ids.push(data.shId);
                             $('#hub_id').val(data.hub);
