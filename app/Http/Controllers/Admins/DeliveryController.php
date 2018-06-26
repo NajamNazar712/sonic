@@ -53,10 +53,13 @@ class DeliveryController extends Controller
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.created_at','=',
                     DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)'));
-
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.created_at','=',
+                    DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-                ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date')
+                ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
             ->whereIn('shipments.shipper_status_id',$status)
             ->groupBy('shipments.id');
         return Datatables::of($shipments)
@@ -68,6 +71,9 @@ class DeliveryController extends Controller
                     return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
                 }
 //                return $Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+            })
+            ->editColumn('arrival',function($shipments){
+                return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
             })
             ->addColumn("action", function ($result) {
                 return " <span class='dropdown'>

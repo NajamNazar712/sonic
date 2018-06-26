@@ -30,6 +30,7 @@
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Reason</th>
                                     <th class="border-primary border-darken-1">Remarks</th>
+                                    <th class="border-primary border-darken-1">Arrival Date</th>
                                     <th class="border-primary border-darken-1">Status Date</th>
                                     <th class="border-primary border-darken-1">Action</th>
                                 </tr>
@@ -135,6 +136,7 @@
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'reason', name: 'reason', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
+                {data: 'arrival', name: 'arrival', class: 'align-middle arrival'},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
