@@ -218,7 +218,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('sdn')->name('sdn.')->group(function (){
            Route::get('','Admins\DeliveryController@sdn_view')->name('index');
-           Route::get('','Admins\DeliveryController@sdn_view')->name('index');
+           Route::get('list','Admins\DeliveryController@sdn_list')->name('list');
+           Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
+           Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');
+           Route::post('slip','Admins\DeliveryController@sdn_deposit_slip')->name('slip');
+           Route::post('print','Admins\DeliveryController@sdn_deposit_slip_print')->name('print');
+
         });
     });
 

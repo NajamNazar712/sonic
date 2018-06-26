@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Yajra\Datatables\Datatables;
 
 class DeliveryController extends Controller
@@ -1248,7 +1249,290 @@ class DeliveryController extends Controller
     public function sdn_view(Request $request){
         return view('admin.delivery.sdn.index');
     }
-    public function sdn_list(){
+    public function sdn_list(Request $request){
+        $sdn = StationDepositNote::
+        join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
+            ->join('admins','admins.id','=','station_deposit_notes.deposited_by')
+            ->join('banks_lists','banks_lists.id','=','station_deposit_notes.banks_list_id')
+            ->select(['station_deposit_notes.id as sdn','station_deposit_notes.id as sdn_id','oc.name as hub','station_deposit_notes.dncc_count','station_deposit_notes.sdn_delivered_shipments','station_deposit_notes.sdn_amount','station_deposit_notes.sdn_expense','station_deposit_notes.sdn_net_amount','admins.name as deposited_by','station_deposit_notes.created_at','station_deposit_notes.deposit_slip','station_deposit_notes.status','banks_lists.name as bank'])
+            ->get();
+        return Datatables::of($sdn)
+            ->editColumn('sdn', function ($sdn) {
+                return "<a href='#' class='printSDN'><u>{$sdn->sdn_id}</u></a>";
+            })
+            ->editColumn('created_at', function ($sdn) {
+                return $sdn->created_at ? with(new Carbon($sdn->created_at))->format('d/m/Y H:i:s A') : '';
+            })
+            ->addColumn('deposit_slip',function ($sdn){
+                if($sdn->deposit_slip != null){
+                    $img = asset('uploads/sdn/' . $sdn->deposit_slip);
+                    return "<a href='{$img}' target='_blank'>Deposit Slip</a>";
 
+                }else{
+                    return "-";
+                }
+            })
+            ->addColumn("action", function ($result) {
+                $route = route('admin.delivery.sdn.details',['id'=>$result->sdn_id]);
+//                $verifyStatus = route('admin.delivery.receive.status.verify',['note'=>$result->delivery_note]);
+//                $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
+                $dropdown = "<span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='{$route}' class='dropdown-item' data-target-id='{$result->sdn_id}' class=''><i class='ft-plus-circle primary'></i> Details</a>";
+                if($result->status == 0){
+
+                    $dropdown .=  "<a href='#' class='dropdown-item' data-target-id='{$result->sdn_id}' class='' data-target='#uploadDepositSlip' data-toggle='modal'><i class='ft-plus-circle primary'></i> Upload Deposit Slip</a></div></span>";
+                }
+
+                return $dropdown;
+            })
+            ->editColumn('status', function ($sdn) {
+                return ($sdn->status == 1)? 'Deposited': 'Created';
+            })
+            ->filterColumn('status', function($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if (strpos('deposited', $keyword) !== FALSE) {
+                    $query->where('station_deposit_notes.status', '=', 1);
+                }
+                else if (strpos('created', $keyword) !== FALSE) {
+                    $query->where('station_deposit_notes.status', '=', 0);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->make(true);
     }
+    public function sdn_details(Request $request,$id){
+        return view('admin.delivery.sdn.details')->with('sdn_id',$id);
+    }
+    public function sdn_details_ajax(Request $request,$id){
+        $deliveries = StationDepositNote::
+        join('delivery_note_station_deposit_notes as dnsdn','dnsdn.station_deposit_note_id','=','station_deposit_notes.id')
+            ->join('delivery_notes','delivery_notes.id','=','dnsdn.delivery_note_id')
+            ->join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->select(['delivery_notes.id as dncc','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','delivery_notes.received_cod_amount','delivery_notes.shipments_count','delivery_notes.delivered_shipments','delivery_notes.expense','delivery_notes.net_amount','delivery_notes.remarks'])
+            ->where('station_deposit_notes.id',$id)
+            ->get();
+        return Datatables::of($deliveries)
+
+            ->editColumn('route', function ($rider) {
+                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->make(true);
+    }
+    public function sdn_deposit_slip(Request $request){
+        $validate = Validator::make($request->all(), [
+            'deposit_slip' => 'max:2000',
+        ]);
+        if ($validate->fails()) {
+            return response()->json(['status' => 0, 'error' => 'Image size exceeds 2Mb!']);
+        }
+        if($request->has('deposit_slip')){
+        $image = $request->file('deposit_slip');
+        $imageName = $image->getClientOriginalName();
+        $image_size = $image->getClientSize();
+
+        $imageName = explode('.', $imageName);
+        $random = rand(1000, 100000);
+        $now = Carbon::now();
+        $time = $now->year . '_' . $now->month;
+        $slip = $time . $random . Auth::id() . '.' . $imageName[1];
+        $image->move(public_path('uploads/sdn'), $slip);
+
+        $imageUpload = StationDepositNote::find($request->sdn_id);
+        $imageUpload->deposit_slip = $slip;
+        $imageUpload->status = 1;
+        $imageUpload->save();
+        return response()->json(['status' => 1, 'success' => 'Deposit Slip uploaded successfully']);
+        }else{
+            return response()->json(['status' => 0, 'error' => 'No image selected!']);
+        }
+    }
+    public function sdn_deposit_slip_print(Request $request){
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Delivery Note</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                        margin: 0mm;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color {
+                        color: #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div class="p-1">
+      ';
+
+        $sdn = StationDepositNote::where('id',$request->id);
+        if($sdn->exists()) {
+            $total_dncc = 0;
+
+//            $shipments = DeliveryNoteShipment::where('delivery_note_id',$request->id)->select('shipment_id')->get();
+            $dncc_ids = DeliveryNoteStationDepositNote::where('station_deposit_note_id',$request->id)->select('delivery_note_id')->get();
+            $shipment_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="color primary"><strong>S. No.</strong></td>
+                            <td class="color primary"><strong>DN No.</strong></td>
+                            <td class="color primary"><strong>Rider Name</strong></td>
+                            <td class="color primary"><strong>Route</strong></td>
+                            <td class="color primary"><strong>Total No of Shipments</strong></td>
+                            <td class="color primary"><strong>No of Delivered Shipments</strong></td>
+                            <td class="color primary"><strong>Collected Amount</strong></td>
+                            <td class="color primary"><strong>Expense</strong></td>
+                            <td class="color primary"><strong>Net Amount</strong></td>
+                          </tr>
+        ';
+
+
+            foreach ($dncc_ids as $dncc) {
+                $total_dncc++;
+                $dncc_note = DeliveryNote::find($dncc->delivery_note_id);
+
+                $shipment_details_row_start = '
+                          <tr>
+                            <td>' . $total_dncc . '</td>
+                            <td>' . $dncc_note->id . '</td>
+                            <td>' . $dncc_note->rider->name. '</td>
+                            <td>' . $dncc_note->route->code .'( '.$dncc_note->route->start.' to '.$dncc_note->route->end.' )' . '</td>
+                            <td>' . $dncc_note->shipments_count . '</td>
+                            <td>' . $dncc_note->delivered_shipments . '</td>
+                            <td>Rs ' . number_format($dncc_note->received_cod_amount) . '</td>
+                            <td>Rs ' . number_format($dncc_note->expense) . '</td>
+                            <td>Rs ' . number_format($dncc_note->net_amount) . '</td>
+                            
+                          </tr>
+            ';
+
+                $shipment_details .= $shipment_details_row_start;
+            }
+            $shipment_details .= '
+                        </tbody>
+                      </table>
+        ';
+            $station_note_details = StationDepositNote::where('id',$request->id)->first();
+            $city_name = $station_note_details->hub->name;
+            $main_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle color primary"><strong>Station Deposit Note</strong></td>
+                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Rider Name</strong></td>
+                            <td>' . $city_name . '</td>
+                            <td rowspan="7" class="text-center align-middle">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>                         
+                          <tr>
+                            <td class="color secondary"><strong>Total DNCC Amount</strong></td>
+                            <td>Rs ' . number_format($station_note_details->sdn_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Expenses</strong></td>
+                            <td>' . number_format($station_note_details->sdn_expense) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Net Amount</strong></td>
+                            <td>' . number_format($station_note_details->sdn_net_amount) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Bank Name</strong></td>
+                            <td>' . $station_note_details->bank->name . '</td>
+                          </tr>
+                        </tbody>
+                      </table>
+        ';
+            $html .= $main_details;
+            $html .= $shipment_details;
+
+        }
+
+//        return $shipments;
+
+
+        $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
+    }
+
 }
