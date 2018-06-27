@@ -23,7 +23,7 @@
 
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="rider_name" id="rider_name" class="form-control select2">
+                            <select name="rider_name" id="rider_name" class="form-control select2" required >
                                 <option value="">Select a rider</option>
                                 @foreach($riders as $rider)
                                     <option value="{{$rider->id}}" data-id="{{$rider->route_id}}">{{$rider->name}}</option>
@@ -34,7 +34,7 @@
                     </div>
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="route" id="route" class="form-control select2">
+                            <select name="route" id="route" class="form-control select2" required>
                                 <option value="">Select a route</option>
                                 @foreach($routes as $route)
                                     <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
@@ -59,21 +59,21 @@
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
                 <form id="create_delivery_note_form" class="" method="post" action="{{ route('admin.delivery.note.create') }}">
                 <div class="row justify-content-center">
-
-
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
                         <input type="hidden" name="selected_rider_id" id="selected_rider_id">
                         <input type="hidden" name="selected_route_id" id="selected_route_id">
                         <div class="col-3">
-                        <button type="submit" class="btn btn-primary btn-block">Submit &amp; Print</button>
+                        <button type="submit" class="btn btn-primary btn-block ">Submit &amp; Print</button>
 
                     </div>
 
@@ -168,6 +168,8 @@
                 {name: 'address', class: 'align-middle address'},
                 {name: 'amount', class: 'align-middle amount'},
                 {name: 'service_type', class: 'align-middle service_type'},
+                {name: 'status', class: 'align-middle status'},
+                {name: 'remarks', class: 'align-middle remarks'},
                 {name: 'action', class: 'align-middle action'}
             ],
             rowCallback: function(row, data, index) {
@@ -235,7 +237,7 @@
                         }else{
                             var rowNo = table.rows().count();
                             var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                            table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,remove]).node().id = data.shId;
+                            table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.status,data.remarks,remove]).node().id = data.shId;
                             table.draw(false);
                             shipment_ids.push(data.shId);
                             $('#hub_id').val(data.hub);
@@ -265,7 +267,7 @@
                             }else{
                                 var rowNo = table.rows().count();
                                 var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,remove]).node().id = data.shId;
+                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 scan.val('');
@@ -299,8 +301,6 @@
             });
 
 
-
-
             $('#create_delivery_note_form').bind('submit', function(event) {
                 event.preventDefault();
                 // riderFormValid();
@@ -308,27 +308,26 @@
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
-                if(rider == ''){
-                    errors = 1;
-                    $('#rider_error').css('display','block');
-                }else{
+                if(rider != ''){
+
                     $('#rider_error').css('display','none');
-
-                    errors = 0;
-                }
-                if(route == ''){
-                    errors = 1;
-                    $('#route_error').css('display','block');
                 }else{
-                    $('#route_error').css('display','none');
 
+                    $('#rider_error').css('display','block');
+                }
+                if(route != ''){
+
+                    $('#route_error').css('display','none');
+                }else{
+
+                    $('#route_error').css('display','block');
+                }
+                if(rider != '' && route != ''){
                     errors = 0;
-                }
-                if(table.rows().count() == 0){
+                }else{
                     errors = 1;
-                    error = 'No Shipments added in the list!, Please add at-least one shipment in the list.';
-                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                 }
+
 
                 if(errors == 0){
                     $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);

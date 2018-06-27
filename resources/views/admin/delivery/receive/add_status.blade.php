@@ -39,6 +39,11 @@
                     <div class="col-2">
                         <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
                     </div>
+                    @if($delivery_note_status == 1)
+                        <div class="col-2">
+                            <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
+                        </div>
+                    @endif
                 </div>
                 </form>
             </div>
@@ -66,7 +71,6 @@
                         @csrf
                         @method('PUT')
                         <tr role="row" class="bg-primary white">
-
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Service Type</th>
@@ -88,19 +92,51 @@
     </div>
     <!--Replacement Modal -->
     <!--Try&Buy Modal -->
-    <div class="modal fade text-left" id="TryAndBuyModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TryAndBuyModal"
+    <div class="modal fade text-left" id="TryBuyModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TryBuyModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Update Try &amp; Buy Delivery <span id="try_id"></span></h4>
+                    <h4 class="modal-title white">Update Try &amp; Buy Delivery</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body  text-center">
+                    <form id="trybuy_form" action="{{route('admin.delivery.receive.trybuys.submit')}}" method="post">
+                        <table class="table table-bordered datatable" id="trybuytable" style="z-index: 3;">
+                            <thead>
+                            @csrf
+                            @method('PUT')
+                            <tr role="row" class="bg-primary white">
 
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Product Type</th>
+                                <th class="border-primary border-darken-1">Product Description</th>
+                                <th class="border-primary border-darken-1">Item Price</th>
+                                <th class="border-primary border-darken-1">Receiving</th>
 
+                            </tr>
+                            </thead>
+                        </table>
+                        <div class="row justify-content-center mb-2">
+                            <div class="col">
+                                <h4><U>Total Cod Amount:</U> Rs: <span id="cod"></span></h4>
+                            </div>
+                        </div>
+                        <input type="hidden" name="trybuy_id_list" id="trybuy_id_list">
+                        <input type="hidden" name="trybuy_cod" id="trybuy_cod">
+                        <input type="hidden" name="item_checked" id="item_checked">
+                        <input type="hidden" name="item_unchecked" id="item_unchecked">
+                        <input type="hidden" name="delivery_note_trybuy" id="delivery_note_trybuy">
+                        <input type="hidden" name="trybuy_shipment_id" id="trybuy_shipment_id">
+                        <hr>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="TrybuyUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                            </div>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -171,11 +207,22 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    {{-- <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('.decimal').inputmask({
+                'alias': 'decimal',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'digits': 3,
+                'min': 0.00,
+                'max': 1000
+            });
+
             var selected_rows = [];
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
@@ -196,29 +243,32 @@
                                 }
                             }).done(function (data) {
                                 if(data.status == 0){
+
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                 }
-                                $.each(selected_rows, function(index, id) {
-                                    table.row($('#datatable tbody tr#' + id)).deselect();
-                                });
-                                selected_rows = [];
-                                table.button(0).disable();
-                                table.ajax.reload();
-                                $('.reasonDrop','.statusDrop').select2('destroy');
-                                setTimeout(function () {
-                                    $(".reasonDrop").select2({
-                                        placeholder: "Select a Reason",
-                                        width:'100%'
-                                    });
-                                    $(".statusDrop").select2({
-                                        placeholder: "Select a Status",
-                                        width:'100%'
-                                    });
-                                },2000);
+                                location.reload();
+                                // $.each(selected_rows, function(index, id) {
+                                //     table.row($('#datatable tbody tr#' + id)).deselect();
+                                // });
+                                // checkShipmentStatuses();
+                                // selected_rows = [];
+                                // table.button(0).disable();
+                                // table.ajax.reload();
+                                // $('.reasonDrop','.statusDrop').select2('destroy');
+                                // setTimeout(function () {
+                                //     $(".reasonDrop").select2({
+                                //         placeholder: "Select a Reason",
+                                //         width:'100%'
+                                //     });
+                                //     $(".statusDrop").select2({
+                                //         placeholder: "Select a Status",
+                                //         width:'100%'
+                                //     });
+                                // },2000);
 
                             });
                         }else{
@@ -350,6 +400,7 @@
                             reason.append(newOption).trigger('change');
                         });
                     }else{
+                        $('.reasonDrop').empty();
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
@@ -377,6 +428,7 @@
                 this.submit();
             });
             //on page load ajax
+            var trybuy_ids = [];
             var shipment_id_list = [];
             var shipments_count = $('#shipments_count').val();
             function checkShipmentStatuses(){
@@ -389,17 +441,15 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
-                    shipments_count = shipments_count-1;
+
+
                     if(shipments_count>0) {
                         if (data.status == 1) {
-
                             toastr.success(data.success, 'Success!', {
                                 positionClass: 'toast-bottom-center',
                                 containerId: 'toast-bottom-center'
                             });
                             checkShipmentStatuses();
-                            console.log(shipments_count);
-
                         } else if (data.status == 2) {
 
                             $('#ReplacementModal').modal('show');
@@ -414,11 +464,6 @@
                                 pageLength: 25,
                                 stateSave: true,
                                 pagingType: 'full_numbers',
-                                {{--processing: true,--}}
-                                {{--serverSide: true,--}}
-                                {{--ajax: '{{ route('admin.delivery.receive.replacements',['replacement_ids'=>$delivery_note_id]) }}',--}}
-                                // rowId: 'shId',
-                                // order: [[2, 'asc']],
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                                     {name: 'tracking_number', class: 'align-middle tracking_number'},
@@ -473,26 +518,27 @@
                             }).done(function (data) {
                                 if(data.status == 0){
                                     var rowNo = repl.rows().count();
-                                    console.log(data)
                                     $.each(data.data,function (key,value) {
-                                        var inp = "<input class='form-control' name='weight["+value.id+"]' placeholder='Enter Weight'>";
+                                        var inp = "<input class='form-control decimal' name='weight["+value.id+"]' placeholder='Enter Weight'>";
                                         // console.log(value.tracking_number)
                                         repl.row.add([rowNo+1,value.tracking_number,value.booking_type_id,inp]).node().id = value.id;
                                         repl.draw(false);
                                         shipment_id_list.push(value.id);
+                                        $('.decimal').inputmask({
+                                            'alias': 'decimal',
+                                            'allowMinus': false,
+                                            'allowPlus': false,
+                                            'rightAlign': false,
+                                            'digits': 3,
+                                            'min': 0.00,
+                                            'max': 1000
+                                        });
                                     });
 
                                 }else{
                                     //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 }
                             });
-                            // checkShipmentStatuses();
-                            // console.log('Count: '+ shipments_count);
-                            // var replacement = [];
-                            // $.each(data.replacement,function (key,value) {
-                            //     replacement.push(value)
-                            // });
-                            // console.log('replacement: '+replacement);
 
                         } else if (data.status == 3) {
                             toastr.success(data.success, 'Success!', {
@@ -500,9 +546,69 @@
                                 containerId: 'toast-bottom-center'
                             });
 
-                            $('#TryAndBuyModal').modal('show');
+                            $('#TryBuyModal').modal('show');
                             // checkShipmentStatuses();
-                            console.log(shipments_count);
+
+
+                            trybuy = $('#trybuytable').DataTable({
+                                dom: 'ltipr',
+                                fixedHeader: {
+                                    header: true,
+                                    headerOffset: $('.header-navbar').height()
+                                },
+                                lengthMenu: [[25, 50, 100], [25, 50, 100]],
+                                pageLength: 25,
+                                stateSave: true,
+                                pagingType: 'full_numbers',
+
+                                columns: [
+                                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                                    {name: 'product_type', class: 'align-middle product_type'},
+                                    {name: 'product_description', class: 'align-middle product_description'},
+                                    {name: 'item_price', class: 'align-middle item_price'},
+                                    {name: 'receiving', class: 'align-middle receiving'},
+
+                                ],
+                                rowCallback: function(row, data, index) {
+                                    var info = trybuy.page.info();
+
+                                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                                    if ($.inArray(data.id, selected_rows) !== -1) {
+                                        trybuy.row(row).select();
+                                    }
+                                }
+                            });
+
+                            //trybuy shipment id for modal
+                            $('#trybuy_shipment_id').val(data.try);
+                            $.ajax({
+                                url:'{!! route('admin.delivery.receive.trybuys') !!}',
+                                type:'POST',
+                                dataType:'json',
+                                data: {
+                                    'trybuy':data.try,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+
+                                if(data.status == 0){
+                                    var rowNo = trybuy.rows().count();
+                                    $.each(data.data,function (key,value) {
+                                        trybuy_ids.push(value.pid);
+                                        var inp = "<input type='checkbox' checked class='form-control bought' name='bought["+value.pid+"]'>";
+                                        // console.log(value.tracking_number)
+                                        trybuy.row.add([rowNo+1,value.type,value.description,value.price,inp]).node().id = value.pid;
+                                        trybuy.draw(false);
+                                        // shipment_id_list.push(value.id);
+                                        $('#cod').text(data.total_cod);
+                                    });
+
+
+                                }else{
+                                    //toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
+                            });
+
 
                         } else if (data.status == 0) {
                             console.log(data.error);
@@ -510,15 +616,90 @@
 
                         }
                     }
+                    shipments_count = shipments_count-1;
                 });
             }
             checkShipmentStatuses();
 
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
+            $('#printDNCC').on('click',function () {
+                var note_id = $('#delivery_note').val();
+                print(note_id);
+            });
+
+
+            $('body').on('click','.receiving input:checkbox',function () {
+                var check = $(this);
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var price = $(this).parents('tr').find('td.item_price').text();
+                var total_cod = $('#cod').text();
+                var newcod = '';
+                if($.isNumeric(price)){
+                    if(check.is(':checked')){
+                        newcod = parseInt(total_cod) + parseInt(price);
+                        $('#cod').text(newcod);
+                        trybuy_ids.push(id);
+
+                    }else{
+                        trybuy_ids.splice( $.inArray(id, trybuy_ids), 1 );
+                        newcod = parseInt(total_cod) - parseInt(price);
+                        $('#cod').text(newcod);
+                    }
+                }
+            });
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
                 e.preventDefault();
                 $('#shipment_id_list').val(shipment_id_list);
                 this.submit();
+            });
+            $('#trybuy_form').bind('submit',function (e) {
+                e.preventDefault();
+                var total = $('#cod').text();
+                total = parseInt(total);
+                var deliverynote_id = $('#delivery_note').val();
+                $('#trybuy_cod').val(total);
+                $('#trybuy_id_list').val(trybuy_ids);
+                var checkbox_count = $('.bought:checked').length;
+                var uncheckbox_count = $('input:checkbox.bought').length;
+                $('#item_checked').val(checkbox_count);
+                $('#item_unchecked').val(uncheckbox_count);
+                $('#delivery_note_trybuy').val(deliverynote_id);
+                if(checkbox_count > 0){
+
+                    this.submit();
+                }else{
+                        var error = "Select at-least one item!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                }
             });
         });
     </script>

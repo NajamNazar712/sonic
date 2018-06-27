@@ -253,7 +253,6 @@
             }
             $('body').on('click','.printdeliverynote',function () {
                 var deliverynote = $(this).parents('tr').attr('id');
-                // console.log(deliverynote);
                 print(deliverynote);
             });
 
@@ -262,9 +261,10 @@
                 var tracking = $(this).val();
                 var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
                 if(numberRegex.test(tracking)) {
+
                     var url = "{{route("admin.delivery.receive.status","id")}}";
                     url = url.replace('id',tracking);
-                    // console.log(url);
+
                     window.location.href = url;
                 }else{
                     scan.val('');

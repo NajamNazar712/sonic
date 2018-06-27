@@ -3128,7 +3128,7 @@ class AdminDashboardController extends Controller
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
             ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
-            ->select(['cities.name as city','riders.id as rider_id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
+            ->select(['cities.name as city','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
         return Datatables::of($rider)
             ->editColumn('status', function ($rider) {
                 return ($rider->status == 0)? 'Inactive': 'Active';
@@ -3162,16 +3162,16 @@ class AdminDashboardController extends Controller
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
             })
-            ->addColumn("action", function ($result) {
+            ->addColumn("action", function ($rider) {
                 $dropdown = "<span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editRider' data-toggle='modal' data-target='#editRider'><i class='ft-plus-circle primary'></i> Update Rider</a>";
-                if($result->status == 1) {
-                    $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='riderInactive'  data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Deactivate Rider</a>";
+                                              <a href='#' class='dropdown-item' data-target-id='{$rider->id}' rel='editRider' data-toggle='modal' data-target='#editRider'><i class='ft-plus-circle primary'></i> Update Rider</a>";
+                if($rider->status == 1) {
+                    $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderInactive'  data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Deactivate Rider</a>";
                 }else {
-                    $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='riderActive' data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Activate Rider</a>";
+                    $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderActive' data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Activate Rider</a>";
                 }
                 $dropdown .="</div></span>";
                 return $dropdown;

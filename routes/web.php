@@ -200,12 +200,41 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipmentstatuscheck','Admins\DeliveryController@receive_delivery_status_check')->name('shipmentstatuscheck');
             Route::post('replacements','Admins\DeliveryController@receive_delivery_get_replacements')->name('replacements');
             Route::put('replacements.submit','Admins\DeliveryController@receive_delivery_replacements_submit')->name('replacements.submit');
+            Route::post('trybuys','Admins\DeliveryController@receive_delivery_get_trybuys')->name('trybuys');
+            Route::put('trybuys.submit','Admins\DeliveryController@receive_delivery_trybuys_submit')->name('trybuys.submit');
+            Route::get('{id}/status/verify','Admins\DeliveryController@receive_delivery_note_verify_view')->name('status.verify');
+            Route::get('{id}/verify/status/list','Admins\DeliveryController@receive_delivery_verify_status_list')->name('verify.status.list');
+            Route::put('verify/status/submit','Admins\DeliveryController@receive_delivery_verify_status_submit')->name('verify.status.submit');
+            Route::post('dncc/print','Admins\DeliveryController@dncc_print')->name('dncc.print');
+
         });
         Route::prefix('completed')->name('completed.')->group(function(){
             Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');
+            Route::get('list','Admins\DeliveryController@completed_receive_deliveries_list')->name('list');
+            Route::post('deposit/dncc','Admins\DeliveryController@completed_deliveries_selected_dncc')->name('deposit.dncc');
+            Route::get('sdn/create','Admins\DeliveryController@create_sdn_view')->name('sdn.create');
+            Route::post('sdn/create','Admins\DeliveryController@create_sdn_submit')->name('sdn.create.submit');
+            Route::get('dncc/list','Admins\DeliveryController@get_sdn_list')->name('dncc.list');
+        });
+        Route::prefix('sdn')->name('sdn.')->group(function (){
+           Route::get('','Admins\DeliveryController@sdn_view')->name('index');
+           Route::get('list','Admins\DeliveryController@sdn_list')->name('list');
+           Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
+           Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');
+           Route::post('slip','Admins\DeliveryController@sdn_deposit_slip')->name('slip');
+           Route::post('print','Admins\DeliveryController@sdn_deposit_slip_print')->name('print');
+
         });
     });
-
+    Route::prefix('return')->name('return.')->group(function (){
+        Route::get('','Admins\ReturnController@return_view')->name('index');
+        Route::get('list','Admins\ReturnController@return_marked_list')->name('list');
+        Route::post('marked/status','Admins\ReturnController@return_marked_status')->name('marked.status');
+        Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
+        Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
+        Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
+        Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
+    });
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@pending_index')->name('index');

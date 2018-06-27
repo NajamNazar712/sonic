@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shipment extends Model
 {
+
 	public function items() {
 		return $this->hasMany('App\Http\Models\ShipmentItem');
 	}
@@ -37,4 +38,7 @@ class Shipment extends Model
 	public function receiving_sheet_shipment() {
 		return $this->hasOne('App\Http\Models\ReceivingSheetShipment');
 	}
+	public function shipment_journey(){
+	    return $this->hasMany('App\Http\Models\ShipmentsJourney');
+    }
 }
