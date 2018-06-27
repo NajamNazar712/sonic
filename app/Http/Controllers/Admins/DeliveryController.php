@@ -640,13 +640,13 @@ class DeliveryController extends Controller
 
                     ShipmentsJourney::create([
                         'shipment_id'=>$shipment,
-                        'shipper_status_id'=>29,
-                        'consignee_status_id'=>29,
+                        'shipper_status_id'=>30,
+                        'consignee_status_id'=>30,
                         'status_reason_id'=>null,
                         'remarks'=>null,
                         'admin_id'=>Auth::id()
                     ]);
-                    Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>29,'consignee_status_id'=>29]);
+                    Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>30,'consignee_status_id'=>30]);
                     DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>2]);
                 }elseif($parcel->booking_type_id == 3){
                     if($parcel->package_type == 0){
@@ -1222,7 +1222,7 @@ class DeliveryController extends Controller
         session(['dncc_ids'=> $note_ids]);
         $delivery_note = DeliveryNote::find($note_ids[0]);
         $hub_name = $delivery_note->hub->name;
-        $banks_list = BanksList::where('affiliate',1)->select('id','name')->get();
+        $banks_list = BanksList::where(['affiliate'=>1,'status'=>1])->select('id','name')->get();
         return view('admin.delivery.complete.sdn_create')->with(['hub_name'=>$hub_name,'banks_list'=>$banks_list,'dncc_ids'=>session('dncc_ids')]);
     }
     public function get_sdn_list(Request $request){

@@ -2,7 +2,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Return Marked Shipments
+        Return Confirmed Shipments
     </h1>
 
     <div class="card">
@@ -10,6 +10,19 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
+                <div class="row mb-2 justify-content-center">
+                
+                    <div class="col-3">
+                        <fieldset class="position-relative has-icon-left">
+                            <select name="select-type" class="form-control select" id="">
+                                <option value="1">Same City</option>
+                                <option value="2">Different City</option>
+                            </select>
+                        </fieldset>
+                    </div>
+
+
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -33,7 +46,6 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
-                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -105,78 +117,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var selected_rows = [];
+
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX:true,
-                buttons: [{
-                    text: 'Confirm',
-                    className: 'btn btn-primary confirm',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        if(selected_rows != ''){
-                            $.ajax({
-                                url:"{{route('admin.return.marked.status')}}",
-                                method:'POST',
-                                data:{
-                                    'shipment_ids':selected_rows,
-                                    '_token':'{{ csrf_token() }}',
-                                    'action': 'confirm'
-                                }
-                            }).done(function (data) {
-                                $.each(selected_rows, function(index, id) {
-                                    table.row($('#datatable tbody tr#' + id)).deselect();
-                                });
-                                selected_rows = [];
-                                table.button(0).disable();
-                                table.button(1).disable();
-                                table.ajax.reload();
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                            });
-
-                        }else{
-                            var error = "Not selected any shipments!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-                    }
-                    }, {
-                        text: 'Re-Attempt',
-                        className: 'btn btn-primary re-attempt',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-                                $.ajax({
-                                    url:"{{route('admin.return.marked.status')}}",
-                                    method:'POST',
-                                    data:{
-                                        'shipment_ids':selected_rows,
-                                        '_token':'{{ csrf_token() }}',
-                                        'action': 'reattempt'
-                                    }
-                                }).done(function (data) {
-                                    selected_rows = [];
-                                    table.button(0).disable();
-                                    table.button(1).disable();
-                                    table.ajax.reload();
-                                    $.each(selected_rows, function(index, id) {
-                                        table.row($('#datatable tbody tr#' + id)).deselect();
-                                    });
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                });
-                            }
-                        }
-                }],
+                dom: 'ltipr',
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
-                },
-                select: {
-                    info: false,
-                    style: 'multi',
-                    selector: 'td.select-checkbox',
-                    className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
@@ -184,9 +130,9 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.return.list') }}',
+                ajax: '{{ route('admin.return.confirmed.list') }}',
                 rowId: 'shId',
-                order: [[2, 'asc']],
+                // order: [[2, 'asc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
@@ -207,16 +153,12 @@
                     {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                     {data: 'arrival', name: 'arrival', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -244,84 +186,7 @@
                     });
                 }
             });
-            var hub_ids = [];
-            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
-                var id = parseInt($(this).parent('tr').attr('id'));
-                var hub_id = $(this).parents('tr').data('hub');
-                if(hub_ids.length == 0){
-                    hub_ids.push(hub_id);
-                    var index = $.inArray(id, selected_rows);
-
-                    if (index === -1) {
-                        selected_rows.push(id);
-                    }
-                    else {
-                        selected_rows.splice(index, 1);
-                    }
-
-                    if (selected_rows.length > 0) {
-                        table.button(0).enable();
-                        table.button(1).enable();
-                    }
-                    else {
-                        table.button(0).disable();
-                        table.button(1).disable();
-                    }
-                }else{
-                    if(hub_ids[0] == hub_id){
-                        var index = $.inArray(id, selected_rows);
-
-                        if (index === -1) {
-                            selected_rows.push(id);
-                        }
-                        else {
-                            selected_rows.splice(index, 1);
-                        }
-
-                        if (selected_rows.length > 0) {
-                            table.button(0).enable();
-                            table.button(1).enable();
-                        }
-                        else {
-                            table.button(0).disable();
-                            table.button(1).disable();
-                        }
-                    }else{
-                        var error = "Selected hubs should be the same!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        return false;
-                    }
-
-                }
-
-            });
-            $('body').on('click','.returnMarkStatus',function () {
-                var action = $(this).data('action');
-                var row_id = $(this).parents('tr').attr('id');
-                if(row_id != '' && action != ''){
-                        $.ajax({
-                            url:"{{route('admin.return.marked.status.single')}}",
-                            method:'POST',
-                            data:{
-                                'shipment_id':row_id,
-                                '_token':'{{ csrf_token() }}',
-                                'action': action
-                            }
-                        }).done(function (data) {
-                           if(data.status == 1){
-                               table.ajax.reload();
-                               toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                           }else{
-                               toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                           }
-
-                        });
-
-                }
-            });
         });
     </script>
 @endsection

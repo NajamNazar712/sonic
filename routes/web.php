@@ -230,6 +230,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('','Admins\ReturnController@return_view')->name('index');
         Route::get('list','Admins\ReturnController@return_marked_list')->name('list');
         Route::post('marked/status','Admins\ReturnController@return_marked_status')->name('marked.status');
+        Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
+        Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
+        Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
     });
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {

@@ -245,28 +245,30 @@
                                 if(data.status == 0){
 
                                     toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                                    checkShipmentStatuses();
+
                                 }else{
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                 }
-                                $.each(selected_rows, function(index, id) {
-                                    table.row($('#datatable tbody tr#' + id)).deselect();
-                                });
-                                selected_rows = [];
-                                table.button(0).disable();
-                                table.ajax.reload();
-                                $('.reasonDrop','.statusDrop').select2('destroy');
-                                setTimeout(function () {
-                                    $(".reasonDrop").select2({
-                                        placeholder: "Select a Reason",
-                                        width:'100%'
-                                    });
-                                    $(".statusDrop").select2({
-                                        placeholder: "Select a Status",
-                                        width:'100%'
-                                    });
-                                },2000);
+                                location.reload();
+                                // $.each(selected_rows, function(index, id) {
+                                //     table.row($('#datatable tbody tr#' + id)).deselect();
+                                // });
+                                // checkShipmentStatuses();
+                                // selected_rows = [];
+                                // table.button(0).disable();
+                                // table.ajax.reload();
+                                // $('.reasonDrop','.statusDrop').select2('destroy');
+                                // setTimeout(function () {
+                                //     $(".reasonDrop").select2({
+                                //         placeholder: "Select a Reason",
+                                //         width:'100%'
+                                //     });
+                                //     $(".statusDrop").select2({
+                                //         placeholder: "Select a Status",
+                                //         width:'100%'
+                                //     });
+                                // },2000);
 
                             });
                         }else{

@@ -55,7 +55,8 @@
             </li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Return</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.return.index') }}">Marked</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.return.index') }}">Mark</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.return.confirmed') }}">Confirmed</a></li>
                 </ul>
             </li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Profile Update</span></a></li>
