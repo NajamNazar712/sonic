@@ -208,43 +208,7 @@
                 }
             });
 
-            // Dropzone.options.dropzone =
-            //     {
-            //         maxFilesize: 2,
-            //         maxFiles: 1,
-            //         acceptedFiles: ".jpeg,.jpg,.png,.gif",
-            //         addRemoveLinks: true,
-            //         timeout: 5000,
-            //         init: function() {
-            //             this.on("maxfilesexceeded", function(file) {
-            //                 this.removeAllFiles();
-            //                 this.addFile(file);
-            //             });
-            //         }
-            //     };
-            $('body').on('click','#DepositSlipButton',function () {
-                var token = "{!! csrf_token() !!}";
-                {{--var url = '{!! route('admin.delivery.sdn.slip') !!}';--}}
 
-                {{--var imagefile = $('#deposit_slip').val();--}}
-
-                {{--if(!imagefile){--}}
-                    {{--error = "Please select a deposit slip first!";--}}
-                    {{--toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                {{--}else{--}}
-                    {{--console.log('i was here');--}}
-                    {{--$.ajax({--}}
-                        {{--type:'post',--}}
-                        {{--url:url,--}}
-                        {{--data:new FormData($("#sdn_upload_form")[0]),--}}
-
-
-                    {{--}).done(function (data) {--}}
-
-                    {{--});--}}
-                {{--}--}}
-
-            });
             $('#sdn_upload_form').bind('submit',function (e) {
                 e.preventDefault();
 
@@ -266,6 +230,7 @@
                         data: new FormData($(this)[0])
                     }).done(function (data) {
                         if(data.status == 1){
+                            table.ajax.reload();
                             $('#deposit_slip').val('');
                             $('#uploadDepositSlip').modal('hide');
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -284,61 +249,6 @@
                 var id = event.relatedTarget;
                 var sdn = $(id).data('target-id');
                 $('#sdn_id').val($(id).data('target-id'));
-                // Dropzone.autoDiscover = false;
-
-
-                {{--Dropzone.options.dropzoneFileUpload = {--}}
-                    {{--url: url,--}}
-                    {{--paramName: "file",--}}
-                    {{--maxFilesize: 2,--}}
-                    {{--params: {--}}
-                        {{--_token: token,--}}
-                        {{--'sdn_id': sdn--}}
-                    {{--},--}}
-                    {{--init: function() {--}}
-                        {{--this.on("addedfile", function(file) {--}}
-                            {{--alert("Added file.");--}}
-                        {{--}),--}}
-                            {{--this.on("success", function(file, response) {--}}
-                                {{--console.log(response);--}}
-                            {{--})--}}
-                    {{--}--}}
-                {{--};--}}
-                {{--$('#dropzoneFileUpload').dropzone();--}}
-
-
-                // Dropzone.options.dropzone =
-                //     {
-                //         maxFilesize: 2,
-                //         maxFiles:1,
-                //         acceptedFiles: ".jpeg,.jpg,.png,.gif",
-                //         addRemoveLinks: true,
-                //         timeout: 5000,
-
-                        // success: function(file, response)
-                        // {
-                        //     console.log(response);
-                        //     $('#uploadDepositSlip').modal('hide');
-                        //     if(response.status == 1){
-                        //         toastr.success(response.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        //
-                        //     }else{
-                        //         Dropzone.options.dpzRemoveThumb = {
-                        //             paramName: "file", // The name that will be used to transfer the file
-                        //             maxFilesize: 1, // MB
-                        //             addRemoveLinks: true,
-                        //             dictRemoveFile: " Trash"
-                        //         }
-                        //         error = "Something went wrong, try again!";
-                        //         toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        //
-                        //     }
-                        // },
-                        // error: function(file, response)
-                        // {
-                        //     return false;
-                        // }
-                    // };
 
             });
 

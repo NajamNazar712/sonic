@@ -37,13 +37,9 @@ class DeliveryController extends Controller
     public function pending_list(Request $request)
     {
         $status = array(2, 4, 6, 7, 8, 9, 13, 15); //for pending deliveries
-//        $latest = DB::raw('(select remarks as latest_remarks,status_reason_id as latest_reason from shipments_journey leftjoin shipments on shipments.id = shipments_journey.shipment_id where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)');
-
+        $normal = 2;
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
-            ->join('user_shipping_infos AS usi', function ($join) {
-                $join->on('shipments.pickup_address_id', '=', 'usi.id')
-                ->on('shipments.consignee_city_id', '=', 'usi.city_id');
-            })
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
@@ -60,20 +56,30 @@ class DeliveryController extends Controller
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
                 ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
+
+            ->whereRaw('IF (shipments.shipper_status_id = 2, (shipments.consignee_city_id = usi.city_id), TRUE)')
             ->whereIn('shipments.shipper_status_id',$status)
             ->groupBy('shipments.id');
+
         return Datatables::of($shipments)
             ->editColumn('status_date',function ($shipments){
-                if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                    $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
-                    return "<span class='danger font-weight-bold'>$older</span>";
+                if($shipments->status_date) {
+                    if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
+                        $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                        return "<span class='danger font-weight-bold'>$older</span>";
+                    } else {
+                        return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                    }
                 }else{
-                    return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                    return " - ";
                 }
-//                return $Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
             })
             ->editColumn('arrival',function($shipments){
-                return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
+                if($shipments->arrival){
+                    return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
+                }else{
+                    return " - ";
+                }
             })
             ->addColumn("action", function ($result) {
                 return " <span class='dropdown'>
@@ -443,7 +449,6 @@ class DeliveryController extends Controller
 
             }
 
-//        return $shipments;
 
 
         $html .= '
@@ -463,8 +468,12 @@ class DeliveryController extends Controller
 
     public function receive_delivery_status_view(Request $request,$id){
         $note_data = DeliveryNote::where('id',$id)->first();
-//        return $shipments_count;
-        return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status]);
+        if($note_data){
+
+            return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status]);
+        }else{
+            return redirect()->back()->with('error','Delivery note not found!');
+        }
     }
     public function receive_delivery_status_list(Request $request,$id){
         $deliveries = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
@@ -766,7 +775,7 @@ class DeliveryController extends Controller
             }elseif($checked == $unchecked){
                 Shipment::where('id',$request->trybuy_shipment_id)->update(['received_amount'=>$cod,'shipper_status_id'=>36,'consignee_status_id'=>36]);
             }
-//            $product = ShipmentItem::where('id',$item_ids[0])->first();
+
             DeliveryNoteShipment::where(['shipment_id'=>$request->trybuy_shipment_id,'delivery_note_id'=>$request->delivery_note_trybuy])->update(['status' => 5]);
 
             return redirect()->back()->with('success','Try & Buy shipment updated');
@@ -777,7 +786,7 @@ class DeliveryController extends Controller
     public function receive_delivery_note_verify_view(Request $request,$id){
 
         $note_data = DeliveryNote::where('id',$id)->first();
-//        return $shipments_count;
+
         return view('admin.delivery.receive.verify_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status]);
     }
     public function receive_delivery_verify_status_list(Request $request,$id){
@@ -801,8 +810,6 @@ class DeliveryController extends Controller
                 $shipment_data = Shipment::find($deliveries->shId);
                 $status_id = $shipment_data->shipment_journey()->latest()->first();
                 $status_data = ShipmentStatus::where('id',$status_id->shipper_status_id)->select('id','name')->first();
-
-//                $verifyStatus = ShipmentsJourney::where('shipment_id',$deliveries->shId)->orderBy('created_at','desc')->first();
                 foreach ($statuses as $status){
                     $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
                 }
@@ -1165,7 +1172,7 @@ class DeliveryController extends Controller
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
             ->where('delivery_notes.status',1)
-            ->where('delivery_notes.dncc_status',1)
+            ->where('delivery_notes.dncc_status',0)
             ->get();
         return Datatables::of($deliveries)
 
@@ -1202,7 +1209,6 @@ class DeliveryController extends Controller
 
         $note_ids = explode(',',$request->delivery_note_ids);
         session(['dncc_ids'=> $note_ids]);
-//        return session('dncc_ids');
         $delivery_note = DeliveryNote::find($note_ids[0]);
         $hub_name = $delivery_note->hub->name;
         return view('admin.delivery.complete.sdn_create')->with(['hub_name'=>$hub_name,'dncc_ids'=>session('dncc_ids')]);
@@ -1301,8 +1307,6 @@ class DeliveryController extends Controller
             })
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.sdn.details',['id'=>$result->sdn_id]);
-//                $verifyStatus = route('admin.delivery.receive.status.verify',['note'=>$result->delivery_note]);
-//                $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
                 $dropdown = "<span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>

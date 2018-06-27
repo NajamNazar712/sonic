@@ -226,7 +226,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         });
     });
-
+    Route::prefix('return')->name('return.')->group(function (){
+        Route::get('','Admins\ReturnController@return_view')->name('index');
+    });
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@pending_index')->name('index');

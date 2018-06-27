@@ -105,7 +105,7 @@
 
     <script type="text/javascript">
         var table = $('#datatable').DataTable({
-            "scrollX": true,
+            // "scrollX": true,
             dom: 'ltipr',
             fixedHeader: {
                 header: true,
@@ -173,6 +173,6 @@
                 cell.innerHTML = i + 1;
                 table.cell(cell).invalidate('dom');
             });
-        }).draw();
+        });
     </script>
 @endsection
