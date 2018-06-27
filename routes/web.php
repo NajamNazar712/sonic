@@ -233,6 +233,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
         Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
+        Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
     });
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {

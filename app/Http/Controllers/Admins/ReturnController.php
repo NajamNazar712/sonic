@@ -173,4 +173,7 @@ class ReturnController extends Controller
             })
             ->make(true);
     }
+    public function return_confirmed_search(Request $request){
+        return $request;
+    }
 }

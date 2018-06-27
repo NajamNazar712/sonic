@@ -9,20 +9,23 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
+                <form class="form" method="post" action="{{route('admin.return.confirmed.search')}}">
                 <div class="row mb-2 justify-content-center">
-                
+
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <select name="select-type" class="form-control select" id="">
+                            <select name="select-type" class="form-control select2" id="select_type" style="width:100%;">
                                 <option value="1">Same City</option>
                                 <option value="2">Different City</option>
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-3">
+                        <button type="button" class="btn btn-primary btn-block">Search</button>
+                    </div>
 
-
-                </div>
+            </div>
+                </form>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -117,7 +120,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-
+            $('#select_type').select2();
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 fixedHeader: {
