@@ -72,7 +72,7 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">Total Emergency Amount</span>
                                 </div>
-                                <input type="text" class="form-control" name="total_expenses" id="total_expense" readonly placeholder="Total Emergency Amount">
+                                <input type="text" class="form-control" name="total_expenses" value="0" id="total_expense" readonly placeholder="Total Emergency Amount">
                             </div>
                         </fieldset>
                     </div>
@@ -82,13 +82,15 @@
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">Total Net Amount</span>
                                 </div>
-                                <input type="text" class="form-control" name="total_amount" id="total_amount" readonly placeholder="Total Net Amount">
+                                <input type="text" class="form-control" name="total_amount" value="0" id="total_amount" readonly placeholder="Total Net Amount">
                             </div>
                         </fieldset>
                     </div>
                     <div class="col-3">
                         <select name="bank_select" class="form-control select2" id="banks_list">
-                            <option value="1">HBL</option>
+                            @foreach($banks_list as $banks)
+                            <option value="{{$banks->id}}">{{$banks->name}}</option>
+                            @endforeach
                         </select>
                     </div>
                 </div>

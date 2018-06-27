@@ -19,8 +19,10 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
 
+                        <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
+                        <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -116,16 +118,56 @@
                     className: 'btn btn-primary confirm',
                     enabled: false,
                     action: function (e, dt, node, config) {
+                        console.log(selected_rows);
+                        if(selected_rows != ''){
+                            $.ajax({
+                                url:"{{route('admin.return.marked.status')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_ids':selected_rows,
+                                    '_token':'{{ csrf_token() }}',
+                                    'action': 'confirm'
+                                }
+                            }).done(function (data) {
+                                $.each(selected_rows, function(index, id) {
+                                    table.row($('#datatable tbody tr#' + id)).deselect();
+                                });
+                                selected_rows = [];
+                                table.button(0).disable();
+                                table.button(1).disable();
+                                table.ajax.reload();
+                            });
 
+                        }else{
+                            var error = "Not selected any shipments!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
                     }
                     }, {
                         text: 'Re-Attempt',
                         className: 'btn btn-primary re-attempt',
                         enabled: false,
                         action: function (e, dt, node, config) {
-
-                        },
-
+                            if(selected_rows != ''){
+                                $.ajax({
+                                    url:"{{route('admin.return.marked.status')}}",
+                                    method:'POST',
+                                    data:{
+                                        'shipment_ids':selected_rows,
+                                        '_token':'{{ csrf_token() }}',
+                                        'action': 'reattempt'
+                                    }
+                                }).done(function (data) {
+                                    selected_rows = [];
+                                    table.button(0).disable();
+                                    table.button(1).disable();
+                                    table.ajax.reload();
+                                    $.each(selected_rows, function(index, id) {
+                                        table.row($('#datatable tbody tr#' + id)).deselect();
+                                    });
+                                });
+                            }
+                        }
                 }],
                 fixedHeader: {
                     header: true,
@@ -143,13 +185,14 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.delivery.completed.list') }}',
-                rowId: 'delivery_note_id',
+                ajax: '{{ route('admin.return.list') }}',
+                rowId: 'shId',
                 order: [[2, 'asc']],
                 columns: [
-                    {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'origin', name: 'on.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
@@ -187,7 +230,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -220,9 +263,11 @@
 
                     if (selected_rows.length > 0) {
                         table.button(0).enable();
+                        table.button(1).enable();
                     }
                     else {
                         table.button(0).disable();
+                        table.button(1).disable();
                     }
                 }else{
                     if(hub_ids[0] == hub_id){
@@ -237,9 +282,11 @@
 
                         if (selected_rows.length > 0) {
                             table.button(0).enable();
+                            table.button(1).enable();
                         }
                         else {
                             table.button(0).disable();
+                            table.button(1).disable();
                         }
                     }else{
                         var error = "Selected hubs should be the same!";

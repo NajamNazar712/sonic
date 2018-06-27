@@ -2,8 +2,14 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Yajra\Datatables\Datatables;
 
 class ReturnController extends Controller
 {
@@ -12,11 +18,10 @@ class ReturnController extends Controller
         $this->middleware('auth:admin');
     }
     public function return_view(){
+
         return view('admin.return.index');
     }
-    public function return_marked_list(Request $request){
-        $status = array(2, 4, 6, 7, 8, 9, 13, 15); //for pending deliveries
-        $normal = 2;
+    public function return_marked_list(Request $request){ //status 12 shipments
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -34,9 +39,7 @@ class ReturnController extends Controller
                     DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
-
-//            ->whereRaw('IF (shipments.shipper_status_id = 2, (shipments.consignee_city_id = usi.city_id), TRUE)')
+            ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
             ->where('shipments.shipper_status_id',12)
             ->groupBy('shipments.id');
 
@@ -65,9 +68,38 @@ class ReturnController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id=''><i class='ft-plus-circle primary'></i> Dispute</a>                                         
+                                              <a href='#' class='dropdown-item' data-target-id=''><i class='ft-plus-circle primary'></i> Confirm</a>                                         
+                                              <a href='#' class='dropdown-item' data-target-id=''><i class='ft-plus-circle primary'></i> Re-Attempt</a>                                         
                                             </div></span>";
             })
             ->make(true);
+    }
+    public function return_marked_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
+        $shipment_ids = $request->shipment_ids;
+        $admin = Auth::id();
+        if($request->action == 'confirm'){
+            foreach ($shipment_ids as $shipment){
+                Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+                ShipmentsJourney::create([
+                    'shipment_id'=>$shipment,
+                    'shipper_status_id'=>20,
+                    'consignee_status_id'=>20,
+                    'admin_id'=>$admin
+                ]);
+            }
+            return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
+        }elseif($request->action == 'reattempt'){
+            foreach ($shipment_ids as $shipment){
+                Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
+                ShipmentsJourney::create([
+                    'shipment_id'=>$shipment,
+                    'shipper_status_id'=>13,
+                    'consignee_status_id'=>13,
+                    'admin_id'=>$admin
+                ]);
+            }
+            return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];
+
+        }
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\StationDepositNote;
+use App\Http\Models\BanksList;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
@@ -100,7 +101,7 @@ class DeliveryController extends Controller
     public function get_shipment_details(Request $request){
         if($request->tracking != ''){
             $shipment = Shipment::where('tracking_number', $request->tracking)->where('shipper_status_id','!=',5);
-
+            $remarks = '';$status = '';
             if($shipment->exists()){
                 $shipment = $shipment->first();
                 if($request->has('hub_id') ){
@@ -109,9 +110,20 @@ class DeliveryController extends Controller
                         $destination = $shipment->consignee_city->name;
                         $hub = City::find($shipment->consignee_city->hub_id)->name;
                         $service = $shipment->booking_type->booking_type;
-                        $shipment_journey = ShipmentsJourney::where('shipment_id',$shipment->id)->select('shipper_status_id','remarks')->latest();
-                        $remarks = ($shipment_journey->remarks)? $shipment_journey->remarks:' - ';
-                        return response()->json(['status'=>0,'shId'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'destination'=>$destination,'hub'=>$hub,'consignee_name'=>$shipment->consignee_name,'phone'=>$shipment->consignee_phone_number_1,'address'=>$shipment->consignee_address,'amount'=>$shipment->amount,'service_type'=>$service,'remarks'=>$remarks]);
+                        $shipment_journey = ShipmentsJourney::where('shipment_id',$shipment->id);
+                        if($shipment_journey->exists()){
+                            $shipment_journey = ShipmentsJourney::where('shipment_id',$shipment->id)->select('shipper_status_id','remarks')->latest()->first();
+
+                            $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
+                            $status_id = ($shipment_journey->shipper_status_id)? $shipment_journey->shipper_status_id: '';
+                            if($status_id != ''){
+                                $status_name = ShipmentStatus::where('id',$status_id)->select('name')->first();
+                                $status = $status_name->name;
+                            }else{
+                                $status = ' - ';
+                            }
+                        }
+                        return response()->json(['status'=>0,'shId'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'destination'=>$destination,'hub'=>$hub,'consignee_name'=>$shipment->consignee_name,'phone'=>$shipment->consignee_phone_number_1,'address'=>$shipment->consignee_address,'amount'=>$shipment->amount,'service_type'=>$service,'status'=>$status,'remarks'=>$remarks]);
 
                     }else{
                         return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!','hub_old'=>$request->hub_id,'newHub'=>$hub_id];
@@ -121,10 +133,11 @@ class DeliveryController extends Controller
                     $destination = $shipment->consignee_city->name;
                     $hub = City::find($shipment->consignee_city->hub_id)->id;
                     $service = $shipment->booking_type->booking_type;
-                    $shipment_journey = ShipmentsJourney::where('shipment_id',$shipment->id)->select('shipper_status_id','remarks')->latest()->first();
-                    if(!empty($shipment_journey)){
+                    $shipment_journey = ShipmentsJourney::where('shipment_id',$shipment->id);
+                    if($shipment_journey->exists()){
+                        $shipment_journey = $shipment_journey->select('shipper_status_id','remarks')->latest()->first();
 
-                        $remarks = ($shipment_journey->remarks)? $shipment_journey->remarks:' - ';
+                        $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
                         $status_id = ($shipment_journey->shipper_status_id)? $shipment_journey->shipper_status_id: '';
                         if($status_id != ''){
                             $status_name = ShipmentStatus::where('id',$status_id)->select('name')->first();
@@ -1209,7 +1222,8 @@ class DeliveryController extends Controller
         session(['dncc_ids'=> $note_ids]);
         $delivery_note = DeliveryNote::find($note_ids[0]);
         $hub_name = $delivery_note->hub->name;
-        return view('admin.delivery.complete.sdn_create')->with(['hub_name'=>$hub_name,'dncc_ids'=>session('dncc_ids')]);
+        $banks_list = BanksList::where('affiliate',1)->select('id','name')->get();
+        return view('admin.delivery.complete.sdn_create')->with(['hub_name'=>$hub_name,'banks_list'=>$banks_list,'dncc_ids'=>session('dncc_ids')]);
     }
     public function get_sdn_list(Request $request){
         $dncc_ids = session('dncc_ids');
