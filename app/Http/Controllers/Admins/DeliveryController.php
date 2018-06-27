@@ -1175,8 +1175,6 @@ class DeliveryController extends Controller
             ->where('delivery_notes.dncc_status',0)
             ->get();
         return Datatables::of($deliveries)
-
-
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='#' class='printDNCC'><u>DNCC</u></a>";
             })
