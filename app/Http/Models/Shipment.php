@@ -14,6 +14,10 @@ class Shipment extends Model
 		return $this->belongsTo('App\Http\Models\BookingType');
 	}
 
+	public function shipping_mode() {
+		return $this->belongsTo('App\Http\Models\ShippingMode');
+	}
+
 	public function pickup_address() {
 		return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo');
 	}

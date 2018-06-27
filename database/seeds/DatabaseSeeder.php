@@ -34,5 +34,8 @@ class DatabaseSeeder extends Seeder
         $this->call(ShipmentStatusReasonTableSeeder::class);
         $this->call(ShipmentStatusShipmentStatusReasonTableSeeder::class);
         $this->call(NewCityTableSeeder::class);
+        $this->call(CargoConsignmentStatusTableSeeder::class);
+        $this->call(TransportModeTableSeeder::class);
+        $this->call(TransportModeVendorTableSeeder::class);
     }
 }

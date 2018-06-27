@@ -7,13 +7,27 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Pending Shipments for Cargo
+					Create Cargo
 				</h1>
 
 				<div class="card">
 					<div class="card-content" aria-expanded="true">
 						<div class="card-body">
 							@include('admin.inc.messages')
+
+							<form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+								<div class="form-group">
+									<input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+								</div>
+
+								<div class="form-group ml-1">
+									<button type="submit" name="add" class="btn btn-primary" value="Add">Add</button>
+								</div>
+							</form>
+
+							<div id="information" class="information text-center">
+								Hub: <span class="hub">None</span> | Scanned: <span class="scanned">0</span>/<span class="total">0</span>
+							</div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
@@ -22,17 +36,155 @@
 										<th class="border-primary border-darken-1">Tracking Number</th>
 										<th class="border-primary border-darken-1">Order ID</th>
 										<th class="border-primary border-darken-1">Service Type</th>
-										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1">Origin</th>
 										<th class="border-primary border-darken-1">Destination</th>
-										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Amount</th>
 										<th class="border-primary border-darken-1">Shipping Mode</th>
-										<th class="border-primary border-darken-1">Booked At</th>
-										<th class="border-primary border-darken-1">Arrival At</th>
 									</tr>
 								</thead>
 							</table>
+
+							<button type="submit" class="btn btn-primary d-block mx-auto" id="cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
+
+							<div class="modal fade" id="cargo_consignment" role="dialog" aria-labelledby="cargo_consignment_title" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<form class="form-horizontal" method="POST" action="{{ route('admin.cargo.create.store') }}" novalidate="novalidate">
+											{{ csrf_field() }}
+
+											<input type="hidden" name="cargo_type" class="cargo_type">
+
+											<input type="hidden" name="shipment_ids" class="shipment_ids">
+
+											<div class="modal-header">
+												<h4 class="modal-title" id="cargo_consignment_title">Cargo Consignment</h4>
+											</div>
+											<div class="modal-body">
+												<div class="row">
+													<div class="col-12">
+														<h4 class="form-section mb-2 text-center">Shipper Information</h4>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<input type="hidden" name="origin_city_id" class="origin_city_id">
+
+															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 origin"></p>
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<input type="hidden" name="destination_city_id" class="destination_city_id">
+
+															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 destination"></p>
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<select name="junction_1" class="select2 junction_1" data-rule-required="true" data-msg-required="Junction 1 is required">
+															</select>
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<select name="junction_2" class="select2 junction_2" data-rule-required="true" data-msg-required="Junction 2 is required">
+															</select>
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<input type="hidden" name="hub_id" class="hub_id">
+
+															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 hub"></p>
+														</div>
+													</div>
+
+													<div class="w-100"></div>
+
+													<div class="col">
+														<div class="form-group">
+															<select name="shipping_mode" class="select2 shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
+															</select>
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<select name="transport_mode" class="select2 transport_mode" data-rule-required="true" data-msg-required="Transport Mode is required">
+															</select>
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<select name="transport_mode_vendor" class="select2 transport_mode_vendor" data-rule-required="true" data-msg-required="Vendor is required">
+															</select>
+														</div>
+													</div>
+
+													<div id="new_vendor" class="col d-none">
+														<div class="form-group">
+															<input type="text" name="vendor_name" class="form-control vendor_name" placeholder="Vendor Name*" data-rule-required="true" data-msg-required="Vendor Name is required">
+														</div>
+													</div>
+
+													<div class="w-100"></div>
+
+													<div class="col">
+														<div class="form-group">
+															<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<input type="text" name="actual_weight" class="form-control rounded-right actual_weight" placeholder="Actual Weight*" data-rule-required="true" data-msg-required="Actual Weight is required">
+														</div>
+													</div>
+
+													<div class="col-12">
+														<h4 class="form-section mb-2 text-center">Sender Information</h4>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<input type="hidden" name="sender_id" class="sender_id">
+
+															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_username"></p>
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_hub">Hub</p>
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<select name="receiver_id" class="select2 receiver_id">
+															</select>
+														</div>
+													</div>
+
+													<div class="col">
+														<div class="form-group">
+															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 receiver_hub">Hub</p>
+														</div>
+													</div>
+												</div>
+											</div>
+											<div class="modal-footer text-center justify-content-around">
+												<button type="submit" name="submit" class="btn btn-primary" value="submit">Submit</button>
+												<button type="submit" name="submit_and_print" class="btn btn-primary" value="submit_and_print">Submit &amp; Print</button>
+											</div>
+										</form>
+								</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -42,6 +194,7 @@
 @endsection
 
 @section('css')
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 	<style>
@@ -94,70 +247,247 @@
 @endsection
 
 @section('js')
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
-			// var table = $('#datatable').DataTable({
-			// 	dom: 'ltipr',
-			// 	fixedHeader: {
-			// 		header: true,
-			// 		headerOffset: $('.header-navbar').height()
-			// 	},
-			// 	lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-			// 	pageLength: 25,
-			// 	stateSave: true,
-			// 	pagingType: 'full_numbers',
-			// 	processing: true,
-			// 	serverSide: true,
-			// 	ajax: '{{ route('admin.cargo.pending.list') }}',
-			// 	rowId: 'id',
-			// 	order: [[10, 'asc']],
-			// 	columns: [
-			// 		{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-			// 		{data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-			// 		{data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-			// 		{data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-			// 		{data: 'status', name: 'ss.name', class: 'align-middle status'},
-			// 		{data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-			// 		{data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-			// 		{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-			// 		{data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-			// 		{data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
-			// 		{data: 'booked_at', name: 'shipments.created_at', class: 'align-middle booked_at'},
-			// 		{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'}
-			// 	],
-			// 	rowCallback: function(row, data, index) {
-			// 		var info = table.page.info();
+			var shipment_ids = [];
 
-			// 		$('td:eq(0)', row).html(index + 1 + info.page * info.length);
-			// 	},
-			// 	initComplete: function() {
-			// 		var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+			var hub_id = 0;
+			var cargo_type = 0;
 
-			// 		var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-			// 		var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-			// 		var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+			var table = $('#datatable').DataTable({
+				dom: 'ltipr',
+				fixedHeader: {
+					header: true,
+					headerOffset: $('.header-navbar').height()
+				},
+				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
+				pageLength: 25,
+				pagingType: 'full_numbers',
+				columns: [
+					{name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{name: 'tracking_number', class: 'align-middle tracking_number'},
+					{name: 'order_id', class: 'align-middle order_id'},
+					{name: 'service_type', class: 'align-middle service_type'},
+					{name: 'destination', class: 'align-middle destination'},
+					{name: 'amount', class: 'align-middle amount'},
+					{name: 'shipping_mode', class: 'align-middle shipping_mode'}
+				],
+				rowCallback: function(row, data, index) {
+					var info = table.page.info();
 
-			// 		this.api().columns().every(function(column_id) {
-			// 			var column = this;
-			// 			var header = column.header();
+					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+				}
+			});
 
-			// 			if ($(header).is('.serial_number')) {
-			// 				$(td).appendTo($(search));
-			// 			}
-			// 			else {
-			// 				var current = $(input).appendTo($(search)).on('change', function() {
-			// 					column.search($(this).val(), false, false, true).draw();
-			// 				}).wrap(td).after(icon);
+			$('#add_shipment_form input.tracking_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
 
-			// 				if (column.search()) {
-			// 					current.val(column.search());
-			// 				}
-			// 			}
-			// 		});
-			// 	}
-			// });
+			$('#add_shipment_form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parents('form'));
+				},
+				submitHandler: function(form) {
+					var tracking_number = $(form).find('input.tracking_number').val();
+
+					if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
+						$.ajax({
+							url: '{!! route('admin.cargo.create.shipment_details') !!}',
+							method: 'POST',
+							data: {
+								'tracking_number': tracking_number,
+								'hub_id': hub_id,
+								'cargo_type': cargo_type,
+								'_token': '{{ csrf_token() }}'
+							}
+						})
+						.done(function(data) {
+							form.reset();
+
+							if (data.status == 0) {
+								table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount, data.details.shipping_mode]);
+								table.draw(false);
+
+								shipment_ids.push(data.details.id);
+
+								$('#information .scanned').html(shipment_ids.length);
+
+								if (hub_id == 0) {
+									hub_id = data.details.hub.id;
+
+									$('#information .hub').html(data.details.hub.name);
+
+									$('#information .total').html(data.details.total);
+								}
+
+								if (cargo_type == 0) {
+									cargo_type = data.details.cargo_type;
+								}
+
+								$('#cargo_consignment_confirm').prop('disabled', false);
+
+								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
+							else {
+								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
+						});
+					}
+					else {
+						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+					}
+
+					return false;
+				}
+			});
+
+			$('#cargo_consignment_confirm').bind('click', function() {
+				$.ajax({
+					url: '{!! route('admin.cargo.create.consignment_details') !!}',
+					method: 'POST',
+					data: {
+						'shipment_ids': shipment_ids,
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+				.done(function(data) {
+					$('#cargo_consignment form .cargo_type').val(cargo_type);
+					$('#cargo_consignment form .shipment_ids').val(shipment_ids);
+
+					$('#cargo_consignment form .origin_city_id').val(data.origin.id);
+					$('#cargo_consignment form .origin').html(data.origin.name);
+
+					$('#cargo_consignment form .destination_city_id').val(data.destination.id);
+					$('#cargo_consignment form .destination').html(data.destination.name);
+
+					$.each(data.junctions, function(index, junction) {
+						$('#cargo_consignment form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+
+						$('#cargo_consignment form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+					});
+
+					$('#cargo_consignment form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
+						width: '100%',
+						placeholder: 'Junction 1*'
+					}).bind('change', function() {
+						$(this).valid();
+					});
+
+					$('#cargo_consignment form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
+						width: '100%',
+						placeholder: 'Junction 2*'
+					}).bind('change', function() {
+						$(this).valid();
+					});
+
+					$('#cargo_consignment form .hub_id').val(data.hub.id);
+					$('#cargo_consignment form .hub').html(data.hub.name);
+
+					$('#cargo_consignment form input.seal_number').inputmask({
+						'alias': 'integer',
+						'allowMinus': false,
+						'allowPlus': false
+					});
+
+					$('#cargo_consignment form input.actual_weight').inputmask({
+						'alias': 'decimal',
+						'allowMinus': false,
+						'allowPlus': false,
+						'digits': 2,
+						'min': 0.1,
+						'max': 10000
+					});
+
+					$.each(data.shipping_modes, function(index, shipping_mode) {
+						$('#cargo_consignment form .shipping_mode').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
+					});
+
+					$('#cargo_consignment form .shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+						width: '100%',
+						placeholder: 'Shipment Mode*'
+					}).bind('change', function() {
+						$(this).valid();
+					});
+
+					$.each(data.transport_modes, function(index, transport_mode) {
+						$('#cargo_consignment form .transport_mode').append('<option value="' + transport_mode.id + '">' + transport_mode.name + '</option>');
+					});
+
+					$('#cargo_consignment form .transport_mode').prepend('<option value="" selected="selected"></option>').select2({
+						width: '100%',
+						placeholder: 'Transport Mode*'
+					}).bind('change', function() {
+						$(this).valid();
+
+						$('#cargo_consignment form .transport_mode_vendor').html('');
+
+						$.each(transport_mode_vendors[this.value], function(index, vendor) {
+							var option = new Option(vendor.name, vendor.id, false, false);
+							$('#cargo_consignment form .transport_mode_vendor').append(option);
+						});
+
+						var option = new Option('Others', 0, false, false);
+						$('#cargo_consignment form .transport_mode_vendor').append(option);
+
+						$('#cargo_consignment form .transport_mode_vendor').val(null).trigger('change');
+					});
+
+					transport_mode_vendors = data.transport_mode_vendors;
+
+					$('#cargo_consignment form .transport_mode_vendor').prepend('<option value="" selected="selected"></option>').select2({
+						width: '100%',
+						placeholder: 'Vendor*'
+					}).bind('change', function() {
+						if (this.value) {
+							$(this).valid();
+						}
+
+						if (this.value && this.value == 0) {
+							$('#cargo_consignment #new_vendor').removeClass('d-none');
+						}
+						else {
+							$('#cargo_consignment #new_vendor').addClass('d-none');
+
+							$('#cargo_consignment #vendor_name-error').remove();
+						}
+					});
+
+					$('#cargo_consignment form .sender_id').val(data.sender.id);
+					$('#cargo_consignment form .sender_username').html(data.sender.username);
+
+					$.each(data.receivers, function(index, receiver) {
+						$('#cargo_consignment form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.username + '</option>');
+					});
+
+					$('#cargo_consignment form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
+						width: '100%',
+						placeholder: 'Receiver Username',
+						allowClear: true
+					}).bind('change', function() {
+						$(this).valid();
+					});
+
+					$('#cargo_consignment form').validate({
+						errorClass: 'danger',
+						successClass: 'success',
+						errorPlacement: function(error, element) {
+							error.addClass('w-100').appendTo(element.parent('.form-group'));
+						},
+						normalizer: function(value) {
+							return $.trim(value);
+						}
+					});
+				});
+			});
 		});
 	</script>
 @endsection

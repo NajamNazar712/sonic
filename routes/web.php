@@ -209,7 +209,33 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@pending_index')->name('index');
-            Route::get('/list', 'Admins\AdminCargoController@pending_list')->name('list');
+            Route::get('list', 'Admins\AdminCargoController@pending_list')->name('list');
+        });
+
+        Route::prefix('create')->name('create.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@create_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminCargoController@create_shipment_details')->name('shipment_details');
+            Route::post('consignment_details', 'Admins\AdminCargoController@create_consignment_details')->name('consignment_details');
+            Route::post('', 'Admins\AdminCargoController@create_store')->name('store');
+        });
+
+        Route::prefix('in_transit')->name('in_transit.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@in_transit_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@in_transit_list')->name('list');
+            Route::post('print', 'Admins\AdminCargoController@in_transit_print')->name('print');
+            Route::post('junctions', 'Admins\AdminCargoController@in_transit_junctions')->name('junctions');
+            Route::post('details', 'Admins\AdminCargoController@in_transit_details')->name('details');
+            Route::post('receive_at_link', 'Admins\AdminCargoController@in_transit_receive_at_link')->name('receive_at_link');
+            Route::post('forwarding_details', 'Admins\AdminCargoController@in_transit_forwarding_details')->name('forwarding_details');
+            Route::post('update', 'Admins\AdminCargoController@in_transit_update')->name('update');
+            Route::post('receive', 'Admins\AdminCargoController@in_transit_receive')->name('receive');
+        });
+
+        Route::prefix('receive')->name('receive.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@receive_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminCargoController@receive_shipment_details')->name('shipment_details');
+            Route::post('short_received', 'Admins\AdminCargoController@receive_short_received')->name('short_received');
+            Route::post('', 'Admins\AdminCargoController@receive_store')->name('store');
         });
     });
 
