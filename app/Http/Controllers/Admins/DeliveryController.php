@@ -1170,7 +1170,7 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
-            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
             ->where('delivery_notes.status',1)
             ->where('delivery_notes.dncc_status',0)
             ->get();

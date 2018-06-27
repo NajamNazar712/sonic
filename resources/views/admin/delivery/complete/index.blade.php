@@ -49,6 +49,7 @@
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
+                        <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Total COD</th>
@@ -174,6 +175,7 @@
                     { data:'rider' ,name: 'rider', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
+                    { data:'delivered_shipments' ,name: 'delivered_shipments', class: 'align-middle delivered_shipments'},
                     { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
                     { data:'amount' ,name: 'amount', class: 'align-middle amount'},

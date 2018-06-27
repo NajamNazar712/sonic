@@ -228,6 +228,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
+        Route::get('list','Admins\ReturnController@return_marked_list')->name('list');
     });
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
