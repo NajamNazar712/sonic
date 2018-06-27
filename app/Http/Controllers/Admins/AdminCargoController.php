@@ -718,8 +718,6 @@ class AdminCargoController extends Controller
     }
 
     public function receive_index() {
-      session(['cargo_consignment_id' => 2]); //To be Removed
-
       if (session('cargo_consignment_id')) {
         $total = CargoConsignmentShipment::where('cargo_consignment_id', session('cargo_consignment_id'))->count();
 
