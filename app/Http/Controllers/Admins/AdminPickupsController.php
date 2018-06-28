@@ -796,7 +796,16 @@ class AdminPickupsController extends Controller
         $shipment->consignee_status_id = 2;
         $shipment->save();
 
-        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, 'Shipment has Arrived!', NULL, Auth::id());
+        $reference_1_id = $request->pickup_receive_pickup_note_id;
+
+        if ($shipment->receiving_sheet_shipment) {
+          $reference_2_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+        }
+        else {
+          $reference_2_id = NULL;
+        }
+
+        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, 'Shipment has Arrived!', NULL, Auth::id(), $reference_1_id, $reference_2_id);
       }
 
       $pickup_requests_receiving_sheets = array();
