@@ -231,4 +231,7 @@ class ReturnController extends Controller
             return $shipments;
         }
     }
+    public function return_create_index(){
+
+    }
 }

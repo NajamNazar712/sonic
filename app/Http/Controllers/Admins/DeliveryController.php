@@ -183,7 +183,9 @@ class DeliveryController extends Controller
                     'shipment_id'=>$shipment,
                     'shipper_status_id'=>5,
                     'consignee_status_id'=>6,
-                    'admin_id'=>$admin
+                    'admin_id'=>$admin,
+                    'reference_1_id'=>$note->id,
+                    'reference_2_id'=>$note->rider_id
                 ]);
             }
         }
