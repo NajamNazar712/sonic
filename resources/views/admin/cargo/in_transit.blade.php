@@ -601,7 +601,7 @@
 				errorClass: 'danger',
 				successClass: 'success',
 				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
+					error.addClass('w-100').appendTo(element.parents('form'));
 				},
 				submitHandler: function(form) {
 					var seal_number = $(form).find('.seal_number').val();
@@ -645,7 +645,7 @@
 				errorClass: 'danger',
 				successClass: 'success',
 				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
+					error.addClass('w-100').insertAfter(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
 					var junction = $(form).find('.junction').val();
