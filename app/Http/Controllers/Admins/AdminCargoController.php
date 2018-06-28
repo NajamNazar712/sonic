@@ -255,10 +255,34 @@ class AdminCargoController extends Controller
 
         $shipment = Shipment::find($shipment_id);
 
-        $shipment->shipper_status_id = 3;
-        $shipment->consignee_status_id = 3;
+        $shipper_status_id = NULL;
+        $consignee_status_id = NULL;
+
+        if ($request->input('cargo_type') == 1) {
+          $shipper_status_id = 3;
+          $consignee_status_id = 3;
+        }
+        else {
+          if ($shipment->booking_type_id == 1) {
+            $shipper_status_id = 21;
+            $consignee_status_id = 21;
+          }
+          else if ($shipment->booking_type_id == 2) {
+            $shipper_status_id = 26;
+            $consignee_status_id = 26;
+          }
+          else {
+            $shipper_status_id = 32;
+            $consignee_status_id = 32;
+          }
+        }
+
+        $shipment->shipper_status_id = $shipper_status_id;
+        $shipment->consignee_status_id = $consignee_status_id;
 
         $shipment->save();
+
+        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Destination Centre!', NULL, Auth::id(), $cargo_consignment->id, $cargo_consignment->builty_number);
       }
 
       if ($request->filled('submit_and_print')) {
@@ -847,12 +871,34 @@ class AdminCargoController extends Controller
 
         $shipment = Shipment::find($shipment_id);
 
-        $shipment->shipper_status_id = 4;
-        $shipment->consignee_status_id = 4;
+        $shipper_status_id = NULL;
+        $consignee_status_id = NULL;
+
+        if ($cargo_consignment->type == 1) {
+          $shipper_status_id = 4;
+          $consignee_status_id = 4;
+        }
+        else {
+          if ($shipment->booking_type_id == 1) {
+            $shipper_status_id = 22;
+            $consignee_status_id = 22;
+          }
+          else if ($shipment->booking_type_id == 2) {
+            $shipper_status_id = 27;
+            $consignee_status_id = 27;
+          }
+          else {
+            $shipper_status_id = 33;
+            $consignee_status_id = 33;
+          }
+        }
+
+        $shipment->shipper_status_id = $shipper_status_id;
+        $shipment->consignee_status_id = $consignee_status_id;
 
         $shipment->save();
 
-        ShipmentsJourneyController::add($shipment_id, 4, 4, NULL, 'Shipment has Arrived at Destination Centre!', NULL, Auth::id());
+        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Destination Centre!', NULL, Auth::id());
       }
 
       return redirect()->route('admin.cargo.in_transit.index')->with('success', 'Cargo No# ' . $cargo_consignment_id . ' has been Received');
