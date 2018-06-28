@@ -845,7 +845,13 @@ class AdminCargoController extends Controller
     }
 
     public function receive_store(Request $request) {
-      $cargo_consignment = CargoConsignment::find($request->cargo_consignment_id);
+      $cargo_consignment_id = $request->cargo_consignment_id;
+
+      $shipment_ids = explode(',', $request->shipment_ids);
+
+      $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
+
+      $cargo_consignment->received_shipments = count($shipment_ids);
 
       if ($request->short_received) {
         $cargo_consignment->status_id = 4;
@@ -856,8 +862,8 @@ class AdminCargoController extends Controller
 
       $cargo_consignment->save();
 
-      foreach (explode(',', $request->shipment_ids) as $shipment_id) {
-        $cargo_consignment_shipment = CargoConsignmentShipment::where('cargo_consignment_id', $request->cargo_consignment_id)->where('shipment_id', $shipment_id)->first();
+      foreach ($shipment_ids as $shipment_id) {
+        $cargo_consignment_shipment = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('shipment_id', $shipment_id)->first();
 
         $cargo_consignment_shipment->status = 1;
 
@@ -895,7 +901,7 @@ class AdminCargoController extends Controller
         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Destination Centre!', NULL, Auth::id());
       }
 
-      return redirect()->route('admin.cargo.in_transit.index')->with('success', 'Cargo No# ' . $request->cargo_consignment_id . ' has been Received');
+      return redirect()->route('admin.cargo.in_transit.index')->with('success', 'Cargo No# ' . $cargo_consignment_id . ' has been Received');
     }
 
 }
