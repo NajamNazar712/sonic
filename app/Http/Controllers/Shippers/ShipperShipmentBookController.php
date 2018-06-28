@@ -146,7 +146,7 @@ class ShipperShipmentBookController extends Controller
         $this->set_service_type($service_type_id);
 
         if ($request->input('pickup_address') == 0) {
-          $pickup_city_id = City::find($request->input('new_pickup_city'))->value('id');
+          $pickup_city_id = $request->input('new_pickup_city');
 
           $pickup_address_id = $this->add_pickup_address($request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
         }
