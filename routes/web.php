@@ -234,6 +234,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
+        Route::prefix('create')->name('create.')->group(function(){
+            Route::get('','Admins\ReturnController@return_create_index')->name('index');
+        });
     });
     Route::prefix('cargo')->name('cargo.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
