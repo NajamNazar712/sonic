@@ -147,11 +147,14 @@ class ReturnController extends Controller
                     DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
+            ->select('shipments.id as shipment_id','shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
             ->where('shipments.shipper_status_id',20)
             ->groupBy('shipments.id');
 
         return Datatables::of($shipments)
+            ->editColumn('shipment_id',function ($shipment){
+                    return "<a href='#'>{$shipment->shId}</a>";
+            })
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
@@ -174,6 +177,58 @@ class ReturnController extends Controller
             ->make(true);
     }
     public function return_confirmed_search(Request $request){
-        return $request;
+        $type = $request->select_type;
+        if($type == 1){
+            $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+                ->join('user_shipping_infos AS usi', function ($join) {
+                    $join->on('shipments.pickup_address_id', '=', 'usi.id')
+                        ->on('shipments.consignee_city_id', '=', 'usi.city_id');
+                })
+                ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+                ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+                ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+                ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+                ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+                ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+                ->leftJoin('shipments_journey', function ($join) {
+                    $join->on('shipments_journey.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)'));
+                })
+                ->leftJoin('shipments_journey as sj', function ($join) {
+                    $join->on('sj.created_at','=',
+                        DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                })
+                ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
+                ->select('shipments.id as shipment_id','shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
+                ->where('shipments.shipper_status_id',20)
+                ->groupBy('shipments.id')->get();
+            return $shipments;
+        }elseif($type == 2){
+            $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+//                ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                ->join('user_shipping_infos AS usi', function ($join) {
+                    $join->on('shipments.pickup_address_id', '=', 'usi.id')
+                        ->on('shipments.consignee_city_id', '!=', 'usi.city_id');
+                })
+                ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+                ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+                ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+                ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+                ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+                ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+                ->leftJoin('shipments_journey', function ($join) {
+                    $join->on('shipments_journey.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)'));
+                })
+                ->leftJoin('shipments_journey as sj', function ($join) {
+                    $join->on('sj.created_at','=',
+                        DB::raw('(select created_at from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                })
+                ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
+                ->select('shipments.id as shipment_id','shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
+                ->where('shipments.shipper_status_id',20)
+                ->groupBy('shipments.id')->get();
+            return $shipments;
+        }
     }
 }
