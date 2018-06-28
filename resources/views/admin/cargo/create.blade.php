@@ -299,6 +299,8 @@
 				submitHandler: function(form) {
 					var tracking_number = $(form).find('input.tracking_number').val();
 
+					form.reset();
+
 					if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
 						$.ajax({
 							url: '{!! route('admin.cargo.create.shipment_details') !!}',
@@ -311,8 +313,6 @@
 							}
 						})
 						.done(function(data) {
-							form.reset();
-
 							if (data.status == 0) {
 								table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount, data.details.shipping_mode]);
 								table.draw(false);
