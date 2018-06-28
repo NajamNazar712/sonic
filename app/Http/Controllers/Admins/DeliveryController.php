@@ -58,7 +58,7 @@ class DeliveryController extends Controller
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
                 ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
 
-            ->whereRaw('IF (shipments.shipper_status_id = 2, (shipments.consignee_city_id = usi.city_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id = 2, (oc.hub_id = dc.hub_id), TRUE)')
             ->whereIn('shipments.shipper_status_id',$status)
             ->groupBy('shipments.id');
 
@@ -183,7 +183,9 @@ class DeliveryController extends Controller
                     'shipment_id'=>$shipment,
                     'shipper_status_id'=>5,
                     'consignee_status_id'=>6,
-                    'admin_id'=>$admin
+                    'admin_id'=>$admin,
+                    'reference_1_id'=>$note->id,
+                    'reference_2_id'=>$note->rider_id
                 ]);
             }
         }
@@ -495,7 +497,7 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','delivery_notes.total_cod_amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
+            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
             ->where('delivery_notes.id',$id)
             ->get();
 

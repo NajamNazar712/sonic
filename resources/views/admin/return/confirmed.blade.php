@@ -9,28 +9,28 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form class="form" method="post" action="{{route('admin.return.confirmed.search')}}">
+                <form id="search_type_form" class="form" method="post" action="{{route('admin.return.confirmed.search')}}">
+                    @csrf
                 <div class="row mb-2 justify-content-center">
 
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <select name="select-type" class="form-control select2" id="select_type" style="width:100%;">
-                                <option value="1">Same City</option>
-                                <option value="2">Different City</option>
+                            <select name="select_type" class="form-control select2" id="select_type">
+                                <option></option>
+                                {{--<option value="1">Same City</option>--}}
+                                {{--<option value="2">Different City</option>--}}
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
-                        <button type="button" class="btn btn-primary btn-block">Search</button>
+                    <div class="col-2">
+                        <button id="search_button" type="submit" class="btn btn-primary btn-block" disabled>Search</button>
                     </div>
 
-            </div>
+                </div>
                 </form>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
-
-                        <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
@@ -120,7 +120,20 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#select_type').select2();
+            var data = [
+                {
+                    id: 1,
+                    text: 'Same City'
+                },
+                {
+                    id: 2,
+                    text: 'Different City'
+                }
+            ];
+            $('#select_type').select2({
+                placeholder: "Select Return Type",
+                data:data
+            });
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 fixedHeader: {
@@ -137,7 +150,6 @@
                 rowId: 'shId',
                 // order: [[2, 'asc']],
                 columns: [
-                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
@@ -160,8 +172,7 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
-                    $('td:eq(1)', row).html(index + 1 + info.page * info.length);
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -174,7 +185,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -189,7 +200,17 @@
                     });
                 }
             });
-
+        $('#select_type').on('change',function () {
+            $('#search_button').removeAttr('disabled');
+        });
+        $('#search_type_form').bind('submit',function (e) {
+            e.preventDefault();
+            var search =$('#select_type').find('option:selected').val();
+            console.log(search)
+            if(search != ''){
+                this.submit();
+            }
+        });
         });
     </script>
 @endsection
