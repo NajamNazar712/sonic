@@ -15,6 +15,17 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
+							<form id="shipment_type_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+								<div class="form-group">
+									<select name="shipment_type" class="select2" id="shipment_type">
+										<option value="" selected="selected"></option>
+										<option value="0">All</option>
+										<option value="1">Normal</option>
+										<option value="2">Return</option>
+									</select>
+								</div>
+							</form>
+
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
@@ -42,6 +53,7 @@
 @endsection
 
 @section('css')
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 	<style>
@@ -94,6 +106,7 @@
 @endsection
 
 @section('js')
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
@@ -110,7 +123,12 @@
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
-				ajax: '{{ route('admin.cargo.pending.list') }}',
+				ajax: {
+					url: '{{ route('admin.cargo.pending.list') }}',
+					data: function (d) {
+						d.shipment_type = $('#shipment_type_search_form #shipment_type').val();
+					}
+				},
 				rowId: 'id',
 				order: [[10, 'asc']],
 				columns: [
@@ -157,6 +175,13 @@
 						}
 					});
 				}
+			});
+
+			$('#shipment_type_search_form #shipment_type').select2({
+				width: '150px',
+				placeholder: 'Shipment Type'
+			}).bind('change', function() {
+				table.draw();
 			});
 		});
 	</script>
