@@ -159,13 +159,19 @@ class AdminCargoController extends Controller
 
       $origin = $shipment->pickup_address->city;
 
-      $details['origin']['id'] = $origin->id;
-      $details['origin']['name'] = $origin->name;
+      $origin_details = array();
+
+      $origin_details['id'] = $origin->id;
+      $origin_details['name'] = $origin->name;
 
       $destination = $shipment->consignee_city;
 
-      $details['destination']['id'] = $destination->id;
-      $details['destination']['name'] = $destination->name;
+      $destination_details = array();
+
+      $destination_details['id'] = $destination->id;
+      $destination_details['name'] = $destination->name;
+
+      $details = array();
 
       $details['junctions'] = City::select(['id', 'name'])->where('hub', 1)->where('status', 1)->get();
 
@@ -190,10 +196,24 @@ class AdminCargoController extends Controller
       foreach ($request->shipment_ids as $shipment_id) {
         $shipment = Shipment::find($shipment_id);
 
-        if ($shipment->consignee_city->id != $details['destination']['id']) {
-          $details['destination']['id'] = 0;
-          $details['destination']['name'] = 'Multiple';
+        if ($shipment->consignee_city->id != $details['origin']['id']) {
+          $origin_details['id'] = 1;
+          $origin_details['name'] = 'Multiple';
         }
+
+        if ($shipment->consignee_city->id != $details['destination']['id']) {
+          $destination_details['id'] = 1;
+          $destination_details['name'] = 'Multiple';
+        }
+      }
+
+      if ($request->cargo_type == 1) {
+        $details['origin'] = $origin_details;
+        $details['destination'] = $destination_details;
+      }
+      else {
+        $details['origin'] = $destination_details;
+        $details['destination'] = $origin_details;
       }
 
       return $details;
