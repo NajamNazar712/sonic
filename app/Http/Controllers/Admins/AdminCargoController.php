@@ -79,65 +79,75 @@ class AdminCargoController extends Controller
       if ($shipment->exists()) {
         $shipment = $shipment->first();
 
-        $hub = City::find($shipment->consignee_city->hub_id);
+        if ($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) {
+          $hub = City::find($shipment->consignee_city->hub_id);
 
-        if ($request->hub_id == 0 || $request->hub_id == $shipment->consignee_city->hub_id) {
-          if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37])) {
-            $details = array();
+          if ($request->hub_id == 0 || $request->hub_id == $shipment->consignee_city->hub_id) {
+            if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37])) {
+              $details = array();
 
-            if ($request->cargo_type != 0) {
-              if ($request->cargo_type == 1) {
-                if ($shipment->shipper_status_id != 2) {
-                  return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
+              if ($request->cargo_type != 0) {
+                if ($request->cargo_type == 1) {
+                  if ($shipment->shipper_status_id != 2) {
+                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
+                  }
+                }
+                else {
+                  if (!in_array($shipment->shipper_status_id, [20, 30, 36, 37])) {
+                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
+                  }
                 }
               }
               else {
-                if (!in_array($shipment->shipper_status_id, [20, 30, 36, 37])) {
-                  return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
+                if ($shipment->shipper_status_id == 2) {
+                  $details['cargo_type'] = 1;
+                }
+                else {
+                  $details['cargo_type'] = 2;
                 }
               }
+
+              $details['id'] = $shipment->id;
+              $details['tracking_number'] = $shipment->tracking_number;
+              $details['order_id'] = $shipment->order_id;
+              $details['service_type'] = $shipment->booking_type->booking_type;
+              $details['destination'] = $shipment->consignee_city->name;
+              $details['amount'] = $shipment->amount;
+              $details['shipping_mode'] = $shipment->shipping_mode->mode;
+
+              $hub = City::find($shipment->consignee_city->hub_id);
+
+              $details['hub']['id'] = $hub->id;
+              $details['hub']['name'] = $hub->name;
+
+              if ($request->hub_id == 0) {
+                $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+                ->join('cities as dc', function($join) {
+                  $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                  ->on('oc.hub_id', '!=', 'dc.hub_id');
+                })
+                ->select(DB::raw('count(shipments.id) as count'))
+                ->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37])
+                ->where('dc.hub_id', $hub->id)
+                ->first();
+
+                $details['total'] = $shipments->count;
+              }
+
+              return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
             }
             else {
-              if ($shipment->shipper_status_id == 2) {
-                $details['cargo_type'] = 1;
-              }
-              else {
-                $details['cargo_type'] = 2;
-              }
+              return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
             }
-
-            $details['id'] = $shipment->id;
-            $details['tracking_number'] = $shipment->tracking_number;
-            $details['order_id'] = $shipment->order_id;
-            $details['service_type'] = $shipment->booking_type->booking_type;
-            $details['destination'] = $shipment->consignee_city->name;
-            $details['amount'] = $shipment->amount;
-            $details['shipping_mode'] = $shipment->shipping_mode->mode;
-
-            $hub = City::find($shipment->consignee_city->hub_id);
-
-            $details['hub']['id'] = $hub->id;
-            $details['hub']['name'] = $hub->name;
-
-            if ($request->hub_id == 0) {
-              $shipments = Shipment::join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
-              ->select(DB::raw('count(shipments.id) as count'))
-              ->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37])
-              ->where('dc.hub_id', $hub->id)
-              ->first();
-
-              $details['total'] = $shipments->count;
-            }
-
-            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
           }
           else {
-            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
           }
         }
         else {
-          return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
-        }
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
+          }
       }
       else {
         return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
@@ -449,7 +459,7 @@ class AdminCargoController extends Controller
                               <td>' . $cargo_consignment->transport_mode_vendor->name . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Flight No. / Train Time / Coach</strong></td>
+                              <td class="color secondary"><strong>Builty Number</strong></td>
                               <td>' . $cargo_consignment->builty_number . '</td>
                             </tr>
                             <tr>

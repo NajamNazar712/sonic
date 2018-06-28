@@ -7,7 +7,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Create Cargo
+					Receive Cargo
 				</h1>
 
 				<div class="card">
@@ -236,12 +236,12 @@
 								html += tracking_number + '<br/>';
 							});
 
-							html += 'Are you sure, you want to mark this Cargo?';
+							html += 'Are you sure, you want to confirm this Cargo received?';
 
 							$('#receive_form input.short_received').val(1);
 						}
 						else {
-							var html = 'Are you sure, you want to confirm Cargo No#' + cargo_consignment_id + '?';
+							var html = 'Are you sure, you want to confirm Cargo No#' + cargo_consignment_id + ' as received?';
 
 							$('#receive_form input.short_received').val(0);
 						}
