@@ -356,6 +356,7 @@
 					method: 'POST',
 					data: {
 						'shipment_ids': shipment_ids,
+						'cargo_type': cargo_type,
 						'_token': '{{ csrf_token() }}'
 					}
 				})

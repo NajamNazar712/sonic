@@ -13,6 +13,7 @@ class NewCityTableSeeder extends Seeder
     {
         DB::table('cities')->truncate();
         DB::table('cities')->insert(array(
+            array('id'=>1,'name'=>'Multiple','hub'=>1,'hub_id'=>0,'pickup'=>1,'status'=>1),
             array('id'=>101,'name'=>'Abbottabad','hub'=>1,'hub_id'=>101,'pickup'=>1,'status'=>1),
             array('id'=>102,'name'=>'Abdul Hakim','hub'=>0,'hub_id'=>251,'pickup'=>1,'status'=>1),
             array('id'=>103,'name'=>'Ahmed Pur East','hub'=>0,'hub_id'=>110,'pickup'=>1,'status'=>1),
