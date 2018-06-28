@@ -35,13 +35,13 @@ class AdminCargoController extends Controller
     public function pending_list(Request $request) {
       $shipments = Shipment::join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
       ->join('shipment_status as ss', 'shipments.shipper_status_id', '=', 'ss.id')
-      ->join('user_shipping_infos as usi', function($join) {
-        $join->on('shipments.pickup_address_id', '=', 'usi.id')
-        ->on('shipments.consignee_city_id', '!=', 'usi.city_id');
-      })
+      ->join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
       ->join('users as u', 'shipments.user_id', '=', 'u.id')
       ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-      ->join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+      ->join('cities as dc', function($join) {
+        $join->on('shipments.consignee_city_id', '=', 'dc.id')
+        ->on('oc.hub_id', '!=', 'dc.hub_id');
+      })
       ->join('shipping_modes as sm', 'shipments.shipping_mode_id', '=', 'sm.id')
       ->join('shipments_journey', function ($join) {
         $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
