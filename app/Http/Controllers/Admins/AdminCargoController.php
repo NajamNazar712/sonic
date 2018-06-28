@@ -196,12 +196,12 @@ class AdminCargoController extends Controller
       foreach ($request->shipment_ids as $shipment_id) {
         $shipment = Shipment::find($shipment_id);
 
-        if ($shipment->consignee_city->id != $details['origin']['id']) {
+        if ($shipment->pickup_address->city->id != $origin_details['id']) {
           $origin_details['id'] = 1;
           $origin_details['name'] = 'Multiple';
         }
 
-        if ($shipment->consignee_city->id != $details['destination']['id']) {
+        if ($shipment->consignee_city->id != $destination_details['id']) {
           $destination_details['id'] = 1;
           $destination_details['name'] = 'Multiple';
         }
@@ -743,6 +743,9 @@ class AdminCargoController extends Controller
 
       if ($request->filled('receiver_id')) {
         $cargo_consignment->receiver_id = $request->input('receiver_id');
+      }
+      else {
+        $cargo_consignment->receiver_id = NULL;
       }
 
       $cargo_consignment->save();
