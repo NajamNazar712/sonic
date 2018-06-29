@@ -30,17 +30,6 @@ class ShipperTrackingController extends Controller
     	$tracking = array();
 
     	foreach ($tracking_numbers as $tracking_number) {
-            //Only allow wn shipments
-
-
-
-
-
-
-
-
-
-
     		$shipment = Shipment::where('tracking_number', $tracking_number);
 
     		if ($shipment->exists()) {
