@@ -25,7 +25,8 @@
          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Excel Upload</span></a></li>
          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Finance</span></a></li>
          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a></li>
-         <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Tracking</span></a></li>
+
+         <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><i class="la la-home"></i><span class="menu-title">Tracking</span></a></li>
       </ul>
     </div>
   </div>
