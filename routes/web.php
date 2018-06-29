@@ -271,6 +271,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('tracking')->name('tracking.')->group(function () {
+        Route::get('', 'Admins\AdminTrackingController@index')->name('index');
+        Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
+    });
+
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');

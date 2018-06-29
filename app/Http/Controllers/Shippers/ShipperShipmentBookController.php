@@ -117,7 +117,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function __construct() {
-      $this->middleware('auth');
+      $this->middleware('auth')->except('print_air_waybill');
     }
 
     public function index() {
@@ -429,7 +429,7 @@ class ShipperShipmentBookController extends Controller
       foreach($request->ids as $id) {
         $shipment = Shipment::find($id);
 
-        if (Auth::id() == $shipment->user_id) { //Allow Admin as Well
+        if ($request->has('admin') || Auth::id() == $shipment->user_id) {
           $table_start = '
                       <table class="table table-sm table-bordered border twice">
                         <tbody>
