@@ -67,6 +67,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::resource('receiving_sheet_history', 'Shippers\ShipperReceivingSheetHistoryController');
     });
 
+    Route::prefix('tracking')->name('tracking.')->group(function () {
+        Route::get('', 'Shippers\ShipperTrackingController@index')->name('index');
+        Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
+    });
+
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
