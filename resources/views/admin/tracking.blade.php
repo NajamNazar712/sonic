@@ -24,6 +24,9 @@
 									<button type="submit" name="track" class="btn btn-primary" value="Track">Track</button>
 								</div>
 							</form>
+
+							<div class="tracking" id="tracking">
+							</div>
 						</div>
 					</div>
 				</div>
@@ -37,40 +40,40 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 	<style>
+		table.table.table-sm td {
+			padding: .3rem;
+		}
+
 		table.dataTable {
-			font-size: 12px;
+			margin: 0 !important;
 		}
 
 		table.dataTable thead tr th {
-			padding-left: 0.5em;
+			padding-left: 0.3em !important;
 			white-space: normal;
 			word-wrap: break-word;
+			border: 0 !important;
 		}
 
 		table.dataTable thead tr th:before,
 		table.dataTable thead tr th:after {
 			height: 20px;
 			margin-bottom: -10px;
+			top: auto !important;
 			bottom: 50% !important;
 		}
 
+		table.dataTable thead tr th:before {
+			right: 0.65em !important;
+		}
+
+		table.dataTable thead tr th:after {
+			right: 0.3em !important;
+		}
+
 		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
+			padding-left: 0.3em;
+			padding-right: 0.3em;
 		}
 
 		#toast-bottom-center.toast-container {
@@ -81,19 +84,6 @@
 			display: table;
 			width: auto !important;
 			text-align: left;
-		}
-
-		.select2-hidden {
-			display: none;
-		}
-
-		.tagging .tag {
-			display: inline-block;
-		}
-
-		.tagging .type-zone {
-			border: 0;
-			outline: 0;
 		}
 
 		.selectize-control {
@@ -118,6 +108,36 @@
 
 	<script>
 		$(document).ready(function() {
+			function print(id) {
+				$.ajax({
+					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+					method: 'POST',
+					data: {
+						'ids[]': id,
+						'admin': true,
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+				.done(function(data) {
+					var tab = window.open('', '_blank');
+
+					if(!tab) {
+						swal({
+							title: 'Popup Blocker Enabled!',
+							text: 'Please add this site to your exception list.',
+							icon: 'error',
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+					}
+					else {
+						tab.document.write(data);
+						tab.document.close();
+						tab.focus();
+					}
+				});
+			}
+
 			var select = $('#track_form .tracking_numbers').selectize({
 				placeholder: 'Tracking Number(s)*',
 				delimiter: ',',
@@ -166,19 +186,188 @@
 						}
 					})
 					.done(function(data) {
-						console.log(data);
+						select[0].selectize.clear();
 
-						// select[0].selectize.clear();
+						$('#tracking').html('');
 
 						if (data.invalid !== undefined) {
-							var message = data.invalid.join(', ') + ' are invalid tracking number(s)';
+							var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
 
 							toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+
+
+						if (data.shipments != undefined) {
+							$.each(data.shipments, function(id, details) {
+								var shipment = '';
+
+								shipment += '<div class="mt-4 border-primary">';
+								shipment += '<div class="d-flex align-items-center bg-primary">';
+								shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + '</div>';
+								shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + '>Print</button>';
+								shipment += '</div>';
+
+								shipment += '<div class="p-1">';
+								shipment += '<div class="row justify-content-between">';
+
+								shipment += '<div class="col-5 mt-1">';
+								shipment += '<h4><u>Shipper Information</u></h4>';
+								shipment += '<div class="border">';
+								shipment += '<table class="table table-sm table-borderless mb-0">';
+								shipment += '<tbody>';
+								shipment += '<tr>';
+								shipment += '<td><strong>Shipper</strong></td>';
+								shipment += '<td>' + details.shipper.name + '</td>';
+								shipment += '<td><strong>Account No.</strong></td>';
+								shipment += '<td>' + details.shipper.account_number + '</td>';
+								shipment += '</tr>';
+								shipment += '<tr>';
+								shipment += '<td><strong>Phone No(s).</strong></td>';
+
+								if (!details.shipper.phone_number_2) {
+									shipment += '<td>' + details.shipper.phone_number_1 + '</td>';
+								}
+								else {
+									shipment += '<td>' + details.shipper.phone_number_1 + '<br/>' + details.shipper.phone_number_2 + '</td>';
+								}
+
+								shipment += '<td><strong>Origin</strong></td>';
+								shipment += '<td>' + details.shipper.origin + '</td>';
+								shipment += '</tr>';
+								shipment += '<tr>';
+								shipment += '<td><strong>Address</strong></td>';
+								shipment += '<td colspan="3">' + details.shipper.address + '</td>';
+								shipment += '</tr>';
+								shipment += '</tbody>';
+								shipment += '</table>';
+								shipment += '</div>';
+								shipment += '</div>';
+
+								shipment += '<div class="col-5 mt-1">';
+								shipment += '<h4><u>Consignee Information</u></h4>';
+								shipment += '<div class="border">';
+								shipment += '<table class="table table-sm table-borderless mb-0">';
+								shipment += '<tbody>';
+								shipment += '<tr>';
+								shipment += '<td><strong>Consignee</strong></td>';
+								shipment += '<td>' + details.consignee.name + '</td>';
+								shipment += '<td><strong>Origin</strong></td>';
+								shipment += '<td>' + details.consignee.destination + '</td>';
+								shipment += '</tr>';
+								shipment += '<tr>';
+								shipment += '<td><strong>Phone No(s).</strong></td>';
+
+								if (!details.consignee.phone_number_2) {
+									shipment += '<td>' + details.consignee.phone_number_1 + '</td>';
+								}
+								else {
+									shipment += '<td>' + details.consignee.phone_number_1 + '<br/>' + details.consignee.phone_number_2 + '</td>';
+								}
+
+								shipment += '<td colspan="2"></td>';
+								shipment += '</tr>';
+								shipment += '<tr>';
+								shipment += '<td><strong>Address</strong></td>';
+								shipment += '<td colspan="3">' + details.consignee.address + '</td>';
+								shipment += '</tr>';
+								shipment += '</tbody>';
+								shipment += '</table>';
+								shipment += '</div>';
+								shipment += '</div>';
+
+								shipment += '<div class="col-12 mt-2">';
+								shipment += '<h4><u>Order Information</u></h4>';
+								shipment += '<div class="border">';
+								shipment += '<table class="table table-sm table-borderless mb-0">';
+								shipment += '<tbody>';
+
+								$.each(details.order_information.items, function(index, item) {
+									shipment += '<tr>';
+									shipment += '<td><strong>Product Type</strong></td>';
+									shipment += '<td>' + item.product_type + '</td>';
+									shipment += '<td><strong>Description</strong></td>';
+									shipment += '<td>' + ((item.description) ? item.description : '-') + '</td>';
+									shipment += '<td><strong>Quantity</strong></td>';
+									shipment += '<td>' + item.quantity + '</td>';
+									shipment += '</tr>';
+								});
+
+								shipment += '<tr>';
+								shipment += '<td><strong>Weight</strong></td>';
+								shipment += '<td>' + details.order_information.weight + ' kg</td>';
+								shipment += '<td><strong>Instruction</strong></td>';
+								shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
+								shipment += '</tr>';
+
+								shipment += '</tbody>';
+								shipment += '</table>';
+								shipment += '</div>';
+								shipment += '</div>';
+
+								shipment += '<div class="col-12 mt-2">';
+								shipment += '<h4><u>Tracking History</u></h4>';
+								shipment += '<div class="border">';
+
+								shipment += '<table class="table table-sm table-borderless datatable">';
+								shipment += '<thead>';
+								shipment += '<tr role="row">';
+								shipment += '<th><strong>Date / Time</strong></th>';
+								shipment += '<th><strong>Status</strong></th>';
+								shipment += '<th><strong>Reason</strong></th>';
+								shipment += '<th><strong>Remarks</strong></th>';
+								shipment += '<th><strong>User</strong></th>';
+								shipment += '</tr>';
+								shipment += '</thead>';
+								shipment += '<tbody>';
+
+								$.each(details.tracking_history, function(index, history) {
+									shipment += '<tr>';
+									shipment += '<td>' + history.date_time + '</td>';
+									shipment += '<td>' + history.status + '</td>';
+									shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
+									shipment += '<td>' + history.remarks + '</td>';
+									shipment += '<td>' + history.user + '</td>';
+									shipment += '</tr>';
+								});
+
+								shipment += '</tbody>';
+								shipment += '</thead>';
+								shipment += '</table>';
+
+								shipment += '</div>';
+								shipment += '</div>';
+
+								shipment += '</div>';
+								shipment += '</div>';
+
+
+								shipment += '</div>';
+
+								$('#tracking').append(shipment);
+							});
+
+							$('#tracking table.datatable').DataTable({
+								dom: 't',
+								order: [[0, 'desc']],
+								columns: [
+									{name: 'date_time', class: 'align-middle date_time'},
+									{name: 'status', class: 'align-middle status'},
+									{name: 'reason', class: 'align-middle reason'},
+									{name: 'remarks', class: 'align-middle remarks'},
+									{name: 'user', class: 'align-middle user'}
+								]
+							});
 						}
 					});
 
 					return false;
 				}
+			});
+
+			$('#tracking').on('click', '.print', function() {
+				id = $(this).attr('id');
+
+				print(id);
 			});
 		});
 	</script>

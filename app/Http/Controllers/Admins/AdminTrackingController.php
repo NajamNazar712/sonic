@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentJourney;
+use App\Http\Models\CargoConsignment;
 
 use Auth;
 
@@ -36,6 +37,8 @@ class AdminTrackingController extends Controller
 
     			$details = array();
 
+                $details['tracking_number'] = $tracking_number;
+
     			$shipper = $shipment->user;
 
     			$details['shipper']['name'] = $shipper->name;
@@ -61,7 +64,7 @@ class AdminTrackingController extends Controller
     				$details['order_information']['items'][] = $item_details;
     			}
 
-    			$details['order_information']['weight'] = ($shipment->actual_weight) ? $shipment->actual_weight : $shipment->estimated_weight;
+    			$details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
     			$details['order_information']['instructions'] = $shipment->special_instructions;
 
     			foreach ($shipment->shipment_journey as $journey) {
@@ -76,6 +79,11 @@ class AdminTrackingController extends Controller
     					if ($journey->reference_2_id) {
     						$journey_details['status'] .= ' | ' . $journey->reference_2_id;
     					}
+                        else if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
+                            $cargo_consignment = CargoConsignment::find($journey->reference_1_id);
+
+                            $journey_details['status'] .= ' | ' . $cargo_consignment->builty_number;
+                        }
 
     					$journey_details['status'] .= ')';
     				}
