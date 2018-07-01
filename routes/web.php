@@ -236,6 +236,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
+            Route::get('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
+            Route::post('note/submit','Admins\ReturnController@return_create_note')->name('note.submit');
+        });
+        Route::prefix('receive')->name('receive.')->group(function (){
+            Route::get('','Admins\ReturnController@return_receive_deliveries_view')->name('index');
+            Route::get('list','Admins\ReturnController@return_receive_deliveries_list')->name('list');
+            Route::get('{id}/update','Admins\ReturnController@return_receive_update')->name('update');
+            Route::get('{id}/update/list','Admins\ReturnController@return_receive_update_list')->name('update.list');
+            Route::get('update/remove','Admins\ReturnController@return_receive_update_remove')->name('update.remove');
+            Route::get('{id}/status','Admins\ReturnController@return_receive_status')->name('status');
+            Route::post('status/submit','Admins\ReturnController@receive_return_status_submit')->name('status.submit');
+            Route::post('status/delivered','Admins\ReturnController@return_status_delivered')->name('status.delivered');
+            Route::get('status/list','Admins\ReturnController@return_receive_status_list')->name('status.list');
+            Route::post('reason','Admins\ReturnController@receive_return_reason')->name('reason');
+            Route::post('rn.print','Admins\ReturnController@rrd_print')->name('rn.print');
+
         });
     });
     Route::prefix('cargo')->name('cargo.')->group(function () {

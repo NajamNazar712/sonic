@@ -1,8 +1,9 @@
+
 @extends('admin.layout.master')
 
 @section('content')
     <h1 class="mb-1">
-        Return Confirmed Shipments
+        Update Receive Return Deliveries
     </h1>
 
     <div class="card">
@@ -10,42 +11,20 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
+                <input type="hidden" value="{{$return_note_id}}" id="return_note">
 
-                    <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <select name="select_type" class="form-control select2" id="select_type">
-                                <option></option>
-                            </select>
-                        </fieldset>
-                    </div>
-                    {{--<div class="col-2">--}}
-                        {{--<button id="search_button" type="submit" class="btn btn-primary btn-block" disabled>Search</button>--}}
-                    {{--</div>--}}
-
-                </div>
-                </form>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
+
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
-                        <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
-                        <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -54,6 +33,8 @@
         </div>
     </div>
 
+
+    </div>
 
 @endsection
 
@@ -117,26 +98,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var data = [
-                {
-                    id: 0,
-                    text: 'All'
-                },
-                {
-                    id: 1,
-                    text: 'Same City'
-                },
-                {
-                    id: 2,
-                    text: 'Different City'
-                }
-            ];
-            $('#select_type').select2({
-                placeholder: "Select Return Type",
-                data:data
-            }).bind('change', function() {
-                table.draw();
-            });
+            var shipment_ids = [];
+            // var delivery_note = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 fixedHeader: {
@@ -145,41 +108,24 @@
                 },
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
-                stateSave: true,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax:{
-                    url:'{{ route('admin.return.confirmed.list') }}',
-                    data: function (d) {
-                        d.select_type = $('#select_type').val();
-                    }
-                },
+                ajax: '{{ route('admin.return.receive.update.list',['id'=>$return_note_id]) }}',
                 rowId: 'shId',
-                // order: [[2, 'asc']],
                 columns: [
-                    {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'origin', name: 'on.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'mode', name: 'sm.mode', class: 'align-middle mode'},
-                    {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'reason', name: 'reason', class: 'align-middle reason'},
-                    {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
-                    {data: 'arrival', name: 'arrival', class: 'align-middle arrival'},
-                    {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
+                    {data:'destination',name: 'destination', class: 'align-middle destination'},
+                    {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
+                    {data:'phone',name: 'phone', class: 'align-middle phone'},
+                    {data:'address',name: 'address', class: 'align-middle address'},
+                    {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
+                    {data:'action',name: 'action', class: 'align-middle action'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
+
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
@@ -196,6 +142,9 @@
                         if ($(header).is('.serial_number')) {
                             $(td).appendTo($(search));
                         }
+                        else if ($(header).is('.action')) {
+                            $(td).appendTo($(search));
+                        }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
                                 column.search($(this).val(), false, false, true).draw();
@@ -208,17 +157,34 @@
                     });
                 }
             });
-        // $('#select_type').on('change',function () {
-        //     $('#search_button').removeAttr('disabled');
-        // });
-        // $('#search_type_form').bind('submit',function (e) {
-        //     e.preventDefault();
-        //     var search =$('#select_type').find('option:selected').val();
-        //     console.log(search)
-        //     if(search != ''){
-        //         this.submit();
-        //     }
-        // });
+
+            $('body').on('click','a.returnnoterow',function () {
+                var shipment_id = $(this).parents('tr').attr('id');
+                var note_id = $('#return_note').val();
+                $.ajax({
+                    url:'{{route('admin.return.receive.update.remove')}}',
+                    type:'GET',
+                    dataType:'JSON',
+                    data: {
+                        'shipment_id':shipment_id,
+                        'return_note_id':note_id
+                    }
+                }).done(function (data) {
+                    if(data.status == 0){
+                        table.row( $(this).parents('tr') ).remove().draw();
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+                });
+
+
+            });
+
+
+
+
         });
     </script>
 @endsection
