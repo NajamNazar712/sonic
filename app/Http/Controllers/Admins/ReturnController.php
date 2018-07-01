@@ -662,6 +662,7 @@ class ReturnController extends Controller
     }
     public function return_receive_status(Request $request,$id){
         $return = ReturnNote::where('id',$id)->select('shipments_count')->first();
+        $shipment = Shipment::where('id',30)->first();
         return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count]);
     }
     public function return_receive_status_list(Request $request){
@@ -730,15 +731,27 @@ class ReturnController extends Controller
 //                }else if($parcel->booking_type_id == 3){
 //
 //                }
-                ShipmentsJourney::create([
-                    'shipment_id'=>$shipment,
-                    'shipper_status_id'=>$request->status_drop[$shipment],
-                    'consignee_status_id'=>$request->status_drop[$shipment],
-                    'status_reason_id'=>$request->reason_drop[$shipment],
-                    'remarks'=>$request->remarks[$shipment],
-                    'admin_id'=>Auth::id()
-                ]);
-                Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment],'consignee_status_id'=>$request->status_drop[$shipment]]);
+                if($request->status_drop[$shipment] == 24 || $request->status_drop[$shipment] == 29 || $request->status_drop[$shipment] == 35){
+                    ShipmentsJourney::create([
+                        'shipment_id'=>$shipment,
+                        'shipper_status_id'=>$request->status_drop[$shipment],
+                        'status_reason_id'=>$request->reason_drop[$shipment],
+                        'remarks'=>$request->remarks[$shipment],
+                        'admin_id'=>Auth::id()
+                    ]);
+                    Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment]]);
+                }else{
+                    ShipmentsJourney::create([
+                        'shipment_id'=>$shipment,
+                        'shipper_status_id'=>$request->status_drop[$shipment],
+                        'consignee_status_id'=>$request->status_drop[$shipment],
+                        'status_reason_id'=>$request->reason_drop[$shipment],
+                        'remarks'=>$request->remarks[$shipment],
+                        'admin_id'=>Auth::id()
+                    ]);
+                    Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment],'consignee_status_id'=>$request->status_drop[$shipment]]);
+                }
+
                 ReturnNoteShipment::where(['return_note_id'=>$return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
 
 
@@ -755,6 +768,7 @@ class ReturnController extends Controller
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id',$shipment)->first();
                 if($parcel->booking_type_id == 1){
+
                     ShipmentsJourney::create([
                         'shipment_id'=>$shipment,
                         'shipper_status_id'=>25,
@@ -874,7 +888,7 @@ class ReturnController extends Controller
                             <td class="color primary"><strong>Contact Person</strong></td>
                             <td class="color primary"><strong>Contact Person Phone</strong></td>
                             <td class="color primary"><strong>Client Address</strong></td>
-                            <td class="color primary"><strong>No. of Shipments</strong></td>
+                            <td class="color primary"><strong>No. of items</strong></td>
                             <td class="color primary"><strong>Sign</strong></td>
                           </tr>
         ';
@@ -890,7 +904,7 @@ class ReturnController extends Controller
                             <td>' . $shipment->pickup_address->poc . '</td>
                             <td>' . $shipment->pickup_address->phone . '</td>
                             <td>' . $shipment->pickup_address->pickup_address . '</td>
-                            <td>' . $shipment->shipments_count . '</td>
+                            <td>' . $shipment->items->sum('quantity') . '</td>
                             <td></td>
 
                           </tr>
