@@ -3,15 +3,13 @@
 
 @section('content')
     <h1 class="mb-1">
-        Create Delivery Note
+        Create Return Note
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
-
                 <div class="row justify-content-center mb-2">
                     <div class="col-3">
                         <fieldset>
@@ -60,24 +58,23 @@
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
-                <form id="create_delivery_note_form" class="" method="post" action="{{ route('admin.delivery.note.create') }}">
-                <div class="row justify-content-center">
+                <form id="create_return_note_form" class="" method="post" action="{{ route('admin.return.create.note.submit') }}">
+                    <div class="row justify-content-center">
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
-                        <input type="hidden" name="selected_rider_id" id="selected_rider_id">
-                        <input type="hidden" name="selected_route_id" id="selected_route_id">
+                        <input type="hidden" name="rider_id" id="selected_rider_id">
+                        <input type="hidden" name="route_id" id="selected_route_id">
                         <div class="col-3">
-                        <button type="submit" class="btn btn-primary btn-block ">Submit &amp; Print</button>
+                            <button type="submit" name="submit_and_print" value="submit_and_print" class="btn btn-primary btn-block ">Submit &amp; Print</button>
+
+                        </div>
 
                     </div>
-
-                </div>
                 </form>
             </div>
         </div>
@@ -143,7 +140,7 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-{{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -153,7 +150,7 @@
             print(pid);
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.delivery.receive.print') !!}',
+                    url: '{!! route('admin.return.receive.rn.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -179,47 +176,45 @@
                         }
                     });
             }
-            @endif
-
+                    @endif
             var shipment_ids = [];
-        var table = $('#datatable').DataTable({
-            dom: 'ltipr',
-            fixedHeader: {
-                header: true,
-                headerOffset: $('.header-navbar').height()
-            },
-            lengthMenu: [[25, 50, 100], [25, 50, 100]],
-            pageLength: 25,
-            pagingType: 'full_numbers',
-            order: [[1, 'desc']],
-            columns: [
-                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {name: 'tracking_number', class: 'align-middle tracking_number'},
-                {name: 'destination', class: 'align-middle destination'},
-                {name: 'consignee_name', class: 'align-middle consignee_name'},
-                {name: 'phone', class: 'align-middle phone'},
-                {name: 'address', class: 'align-middle address'},
-                {name: 'amount', class: 'align-middle amount'},
-                {name: 'service_type', class: 'align-middle service_type'},
-                {name: 'status', class: 'align-middle status'},
-                {name: 'remarks', class: 'align-middle remarks'},
-                {name: 'action', class: 'align-middle action'}
-            ],
-            rowCallback: function(row, data, index) {
-                var info = table.page.info();
+            var table = $('#datatable').DataTable({
+                dom: 'ltipr',
+                fixedHeader: {
+                    header: true,
+                    headerOffset: $('.header-navbar').height()
+                },
+                lengthMenu: [[25, 50, 100], [25, 50, 100]],
+                pageLength: 25,
+                pagingType: 'full_numbers',
+                order: [[1, 'desc']],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {name: 'tracking_number', class: 'align-middle tracking_number'},
+                    {name: 'destination', class: 'align-middle destination'},
+                    {name: 'consignee_name', class: 'align-middle consignee_name'},
+                    {name: 'phone', class: 'align-middle phone'},
+                    {name: 'address', class: 'align-middle address'},
+                    {name: 'amount', class: 'align-middle amount'},
+                    {name: 'service_type', class: 'align-middle service_type'},
+                    {name: 'status', class: 'align-middle status'},
+                    {name: 'action', class: 'align-middle action'}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
 
-                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-            },
-            initComplete: function() {
-                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
 
 
-            }
-        });
+                }
+            });
 
 
             $('.select2').select2();
@@ -235,90 +230,86 @@
 
                 if(table.row().count() == 0) {
                     $.ajax({
-                        url:'{{route('admin.delivery.note.shipment.info')}}',
-                        type:'GET',
-                        dataType:'JSON',
+                        url: '{{route('admin.return.create.shipment_details')}}',
+                        type: 'GET',
+                        dataType: 'JSON',
                         data: {
-                            'tracking':tracking
+                            'tracking': tracking
                         }
                     }).done(function (data) {
 
-                        if(data.status == 1){
+                        if (data.status == 1) {
 
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
                             scan.val('');
                             $('input#scan_tracking').focus();
-                        }else{
+                        } else {
                             var rowNo = table.rows().count();
                             var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                            table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.status,data.remarks,remove]).node().id = data.shId;
+                            table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
                             table.draw(false);
                             shipment_ids.push(data.shId);
                             $('#hub_id').val(data.hub);
+
                             scan.val('');
                             $('input#scan_tracking').focus();
                         }
                     });
-                } else {
+                }else {
+                    if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1) {
 
-                    if(table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1){
-                        // $('#hub_id').val('');
                         $.ajax({
-                            url:'{{route('admin.delivery.note.shipment.info')}}',
-                            type:'GET',
-                            dataType:'JSON',
+                            url: '{{route('admin.return.create.shipment_details')}}',
+                            type: 'GET',
+                            dataType: 'JSON',
                             data: {
-                                'tracking':tracking,
+                                'tracking': tracking,
                                 'hub_id':hub_id
                             }
                         }).done(function (data) {
 
-                            if(data.status == 1){
+                            if (data.status == 1) {
 
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                toastr.error(data.error, 'Error!', {
+                                    positionClass: 'toast-bottom-center',
+                                    containerId: 'toast-bottom-center'
+                                });
                                 scan.val('');
                                 $('input#scan_tracking').focus();
-                            }else{
+                            } else {
                                 var rowNo = table.rows().count();
                                 var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.status,data.remarks,remove]).node().id = data.shId;
+                                table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 scan.val('');
                                 $('input#scan_tracking').focus();
                             }
                         });
-                    }else{
+                    } else {
                         var error = 'Tracking Number already scanned!';
-                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        toastr.error(error, 'Error!', {
+                            positionClass: 'toast-bottom-center',
+                            containerId: 'toast-bottom-center'
+                        });
                         scan.val('');
                         $('input#scan_tracking').focus();
                     }
                 }
-
-                // var ack = table.fnFilter( tracking );
-                // console.log(ack);
-                // if(table.columns(2).search( tracking ) == true){
-                //     console.log('yes');
-                // }else{
-                //     console.log(table.columns(2).search( tracking ).length);
-                //
-                // }
-
-
             });
             $('body').on('click','a.deliverynoterow',function () {
-               var rid = $(this).parents('tr').attr('id');
+                var rid = $(this).parents('tr').attr('id');
 
                 table.row( $(this).parents('tr') ).remove().draw();
                 shipment_ids.splice( $.inArray(rid, shipment_ids), 1 );
             });
 
 
-            $('#create_delivery_note_form').bind('submit', function(event) {
+            $('#create_return_note_form').bind('submit', function(event) {
                 event.preventDefault();
-                // riderFormValid();
-                $('button[type="submit"]').prop('disabled');
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
@@ -344,9 +335,18 @@
 
 
                 if(errors == 0){
-                    $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                    $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                    $('#create_delivery_note_form input#selected_route_id').val(route);
+                    $('#create_return_note_form button[type="submit"]').attr('disabled','disabled');
+                     swal({
+                        title: 'Please Wait!',
+                        text: 'Return Shipments are being submited!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+                    $('#create_return_note_form input#shipment_ids').val(shipment_ids);
+                    $('#create_return_note_form input#selected_rider_id').val(rider);
+                    $('#create_return_note_form input#selected_route_id').val(route);
 
                     this.submit();
 

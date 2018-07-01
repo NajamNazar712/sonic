@@ -56,7 +56,10 @@ class ShipmentStatusTableSeeder extends Seeder
 			array('id' => 40, 'code' => 'P-PA', 'name' => 'Payment - Paid', 'description' => 'Payment reimbursed to the shipper'),
 			array('id' => 41, 'code' => 'P-RE', 'name' => 'Payment - Reverted', 'description' => 'Payment is reverted from the bank\'s end'),
 			array('id' => 42, 'code' => 'P-AD', 'name' => 'Payment - Adjusted', 'description' => 'Shipment is wrongly paid and the amount is adjusted in next payment'),
-			array('id' => 43, 'code' => 'P-CD', 'name' => 'Payment - Charges Deducted', 'description' => 'Charges have been deducted of the Return Shipment')
+			array('id' => 43, 'code' => 'P-CD', 'name' => 'Payment - Charges Deducted', 'description' => 'Charges have been deducted of the Return Shipment'),
+			array('id' => 44, 'code' => 'R-RE', 'name' => 'Return - Rider Exchange', 'description' => 'Return shipment not pertain\'s to assigned rider\'s route'),
+			array('id' => 45, 'code' => 'RP-RE', 'name' => 'Replacement - Rider Exchange', 'description' => 'Replacement shipment not pertain\'s to assigned rider\'s route'),
+			array('id' => 46, 'code' => 'TB-RE', 'name' => 'Try & Buy - Rider Exchange', 'description' => 'Try & Buy shipment not pertain\'s to assigned rider\'s route'),
         ));
     }
 }

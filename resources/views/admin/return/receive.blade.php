@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Receive Deliveries
+        Receive Return Deliveries
     </h1>
 
     <div class="card">
@@ -17,7 +17,7 @@
 
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Scan Delivery Note Number" name="scan_delivery_note" id="scan_delivery_note">
+                            <input type="text" class="form-control" placeholder="Scan Return Note Number" name="scan_return_note" id="scan_return_note">
                             <div class="form-control-position">
                                 <i class="ft-search"></i>
                             </div>
@@ -41,14 +41,12 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Delivery Note No.</th>
+                        <th class="border-primary border-darken-1">Return Note No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
-                        <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
-                        <th class="border-primary border-darken-1">Total COD</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -56,9 +54,6 @@
 
             </div>
         </div>
-    </div>
-
-
     </div>
 
 @endsection
@@ -138,24 +133,22 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.delivery.receive.list') }}',
+                    url: '{{ route('admin.return.receive.list') }}',
                     data: function (d) {
-                        d.delivery_note_number = $('#scan_delivery_note').val();
+                        d.return_note_number = $('#scan_return_note').val();
                         d.search_tracking = $('#search_tracking').val();
                     }
                 },
-                rowId: 'delivery_note_id',
+                rowId: 'return_note_id',
                 order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_note_id', class: 'align-middle delivery_note'},
+                    { data:'return_note' ,name: 'return_note_id', class: 'align-middle return_note'},
                     { data:'hub' ,name: 'hub', class: 'align-middle hub'},
                     { data:'rider' ,name: 'rider', class: 'align-middle rider'},
-                    { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
                     { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
-                    { data:'amount' ,name: 'amount', class: 'align-middle amount'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -202,56 +195,17 @@
                 }
             });
 
-            $('#scan_delivery_note').inputmask({
+            $('#scan_return_note').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
             }).bind('input', function() {
                 table.draw();
             });
-            {{--$('#search_tracking').on('change',function () {--}}
-                {{--var input = $(this);--}}
-                {{--var tracking = $(this).val();--}}
-                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
-
-                {{--if(numberRegex.test(tracking)) {--}}
-                    {{--$.ajax({--}}
-                        {{--url:'{{route('admin.delivery.receive.tracking.search')}}',--}}
-                        {{--type:'GET',--}}
-                        {{--dataType:'JSON',--}}
-                        {{--data: {--}}
-                            {{--'tracking':tracking--}}
-                        {{--}--}}
-                    {{--}).done(function(data){--}}
-                        {{--if(data.status == 0){--}}
-                            {{--console.log(data);--}}
-                            {{--table--}}
-                                {{--.columns( 1 )--}}
-                                {{--.search( data.delivery_note )--}}
-                                {{--.draw();--}}
-                            {{--// input.val('');--}}
-                        {{--}else{--}}
-                            {{--table--}}
-                                {{--.columns( 1 )--}}
-                                {{--.search( 0 )--}}
-                                {{--.draw();--}}
-                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-                        {{--}--}}
-
-                    {{--});--}}
-                {{--}else{--}}
-                    {{--table--}}
-                        {{--.columns( 1 )--}}
-                        {{--.search( 0 )--}}
-                        {{--.draw();--}}
-                    {{--input.val('');--}}
-                {{--}--}}
-            {{--});--}}
 
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.delivery.receive.print') !!}',
+                    url: '{!! route('admin.return.receive.rn.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -277,45 +231,46 @@
                         }
                     });
             }
-            $('body').on('click','.printdeliverynote',function () {
-                var deliverynote = $(this).parents('tr').attr('id');
-                print(deliverynote);
+            $('body').on('click','.printreturnnote',function () {
+                var returnnote = $(this).parents('tr').attr('id');
+                print(returnnote);
+                // console.log(returnnote)
             });
 
             {{--$('#scan_tracking').on('change',function () {--}}
-                {{--var scan = $(this);--}}
-                {{--var tracking = $(this).val();--}}
-                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
-                {{--if(numberRegex.test(tracking)) {--}}
+            {{--var scan = $(this);--}}
+            {{--var tracking = $(this).val();--}}
+            {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
+            {{--if(numberRegex.test(tracking)) {--}}
 
-                    {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
-                    {{--url = url.replace('id',tracking);--}}
+            {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
+            {{--url = url.replace('id',tracking);--}}
 
-                    {{--window.location.href = url;--}}
-                {{--}else{--}}
-                    {{--scan.val('');--}}
-                {{--}--}}
+            {{--window.location.href = url;--}}
+            {{--}else{--}}
+            {{--scan.val('');--}}
+            {{--}--}}
             {{--});--}}
-            $('body').on('click','.verifyDeliveryNote',function () {
-                var note_id = parseInt($(this).parents('tr').attr('id'));
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.dn.verify') !!}',
-                    method: 'POST',
-                    data: {
-                        'note_id': note_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                        if(data.status == 0){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            table.ajax.reload();
-                        }else{
-                            // console.log(data.delivery_note_id);
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-                });
+            {{--$('body').on('click','.verifyDeliveryNote',function () {--}}
+                {{--var note_id = parseInt($(this).parents('tr').attr('id'));--}}
+                {{--$.ajax({--}}
+                    {{--url: '{!! route('admin.delivery.receive.dn.verify') !!}',--}}
+                    {{--method: 'POST',--}}
+                    {{--data: {--}}
+                        {{--'note_id': note_id,--}}
+                        {{--'_token': '{{ csrf_token() }}'--}}
+                    {{--}--}}
+                {{--}).done(function (data) {--}}
+                    {{--if(data.status == 0){--}}
+                        {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                        {{--table.ajax.reload();--}}
+                    {{--}else{--}}
+                        {{--// console.log(data.delivery_note_id);--}}
+                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                    {{--}--}}
+                {{--});--}}
 
-            });
+            {{--});--}}
 
         });
     </script>

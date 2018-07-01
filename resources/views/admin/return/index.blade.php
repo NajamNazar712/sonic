@@ -23,7 +23,6 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
-                        <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -197,7 +196,6 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.mode', class: 'align-middle mode'},
