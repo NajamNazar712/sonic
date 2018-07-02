@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Models\City;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
@@ -12,7 +13,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Foundation\Auth\RegistersUsers;
 use App\Http\Models\Product;
-use App\Http\Models\CityInfo;
 use App\Http\Models\PickupType;
 class RegisterController extends Controller
 {
@@ -49,12 +49,12 @@ class RegisterController extends Controller
     public function showRegistrationForm()
     {
         $products = Product::all();
-        $bank = CityInfo::all();
-
+        $city_list = City::all();
+        $pickup_city_list = City::where('pickup',1)->get();
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
 
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$bank,'all_cities'=>$bank]);
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -169,7 +169,7 @@ class RegisterController extends Controller
 
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
-        $cities = CityInfo::all();
+        $cities = City::where('pickup',1)->get();
         return view('client.components.pickup_address')->with(['cities'=>$cities,'products'=>$products]);
     }
     public function checkCompanyName(Request $request){
