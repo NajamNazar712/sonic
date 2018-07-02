@@ -189,22 +189,21 @@ class DeliveryController extends Controller
                 ]);
             }
         }
-        return redirect()->route('admin.delivery.receive.index');
+        return redirect()->back()->with(['success'=>'Delivery note created successfully','print'=>$note->id]);
     }
     public function delivery_note_receive_index(){
 
         return view('admin.delivery.receive.index');
     }
-    public function receive_deliveries_list(){
+    public function receive_deliveries_list(Request $request){
         $deliveries = DeliveryNote::
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
-            ->where('delivery_notes.status',0)
-            ->get();
-        return Datatables::of($deliveries)
+            ->where('delivery_notes.status',0);
+        $datatables = Datatables::of($deliveries)
 
 
             ->editColumn('delivery_note', function ($deliveries) {
@@ -244,8 +243,17 @@ class DeliveryController extends Controller
 
                 $dropdown .="</div></span>";
                 return $dropdown;
-            })
-            ->make(true);
+            });
+
+            if ($tracking_number = $request->get('search_tracking')) {
+                $datatables->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+                    ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking_number);
+            }
+            if ($delivery_note_number = $request->get('delivery_note_number')) {
+                $datatables->where('delivery_notes.id', '=', $delivery_note_number);
+            }
+            return $datatables->make(true);
 
     }
     public function receive_delivery_search(Request $request){
@@ -274,8 +282,7 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','delivery_notes.total_cod_amount as amount','bt.booking_type as service_type'])
-            ->where('delivery_notes.id',$id)
-            ->get();
+            ->where('delivery_notes.id',$id);
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
                return "<a href='#' class='deliverynoterow'>Remove</a>";
@@ -498,8 +505,7 @@ class DeliveryController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
-            ->where('delivery_notes.id',$id)
-            ->get();
+            ->where('delivery_notes.id',$id);
 
         return Datatables::of($deliveries)
 
@@ -811,9 +817,8 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','delivery_notes.total_cod_amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
-            ->where('delivery_notes.id',$id)
-            ->get();
+            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
+            ->where('delivery_notes.id',$id);
 
         return Datatables::of($deliveries)
 
@@ -1187,8 +1192,7 @@ class DeliveryController extends Controller
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
             ->where('delivery_notes.status',1)
-            ->where('delivery_notes.dncc_status',0)
-            ->get();
+            ->where('delivery_notes.dncc_status',0);
         return Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='#' class='printDNCC'><u>DNCC</u></a>";
@@ -1235,8 +1239,7 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->select(['delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','delivery_notes.received_cod_amount','delivery_notes.shipments_count','delivery_notes.delivered_shipments'])
-            ->whereIn('delivery_notes.id',$dncc_ids)
-            ->get();
+            ->whereIn('delivery_notes.id',$dncc_ids);
         return Datatables::of($deliveries)
             ->setRowAttr([
                 'data-hub' => function($deliveries) {
@@ -1301,8 +1304,7 @@ class DeliveryController extends Controller
         join('cities AS oc', 'station_deposit_notes.hub_id', '=', 'oc.id')
             ->join('admins','admins.id','=','station_deposit_notes.deposited_by')
             ->join('banks_lists','banks_lists.id','=','station_deposit_notes.banks_list_id')
-            ->select(['station_deposit_notes.id as sdn','station_deposit_notes.id as sdn_id','oc.name as hub','station_deposit_notes.dncc_count','station_deposit_notes.sdn_delivered_shipments','station_deposit_notes.sdn_amount','station_deposit_notes.sdn_expense','station_deposit_notes.sdn_net_amount','admins.name as deposited_by','station_deposit_notes.created_at','station_deposit_notes.deposit_slip','station_deposit_notes.status','banks_lists.name as bank'])
-            ->get();
+            ->select(['station_deposit_notes.id as sdn','station_deposit_notes.id as sdn_id','oc.name as hub','station_deposit_notes.dncc_count','station_deposit_notes.sdn_delivered_shipments','station_deposit_notes.sdn_amount','station_deposit_notes.sdn_expense','station_deposit_notes.sdn_net_amount','admins.name as deposited_by','station_deposit_notes.created_at','station_deposit_notes.deposit_slip','station_deposit_notes.status','banks_lists.name as bank']);
         return Datatables::of($sdn)
             ->editColumn('sdn', function ($sdn) {
                 return "<a href='#' class='printSDN'><u>{$sdn->sdn_id}</u></a>";
@@ -1362,8 +1364,7 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->select(['delivery_notes.id as dncc','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','delivery_notes.received_cod_amount','delivery_notes.shipments_count','delivery_notes.delivered_shipments','delivery_notes.expense','delivery_notes.net_amount','delivery_notes.remarks'])
-            ->where('station_deposit_notes.id',$id)
-            ->get();
+            ->where('station_deposit_notes.id',$id);
         return Datatables::of($deliveries)
 
             ->editColumn('route', function ($rider) {
