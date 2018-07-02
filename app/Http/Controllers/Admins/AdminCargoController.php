@@ -933,7 +933,7 @@ class AdminCargoController extends Controller
 
         $shipment->save();
 
-        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Destination Centre!', NULL, Auth::id());
+        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Origin Centre!', NULL, Auth::id());
       }
 
       return redirect()->route('admin.cargo.in_transit.index')->with('success', 'Cargo No# ' . $cargo_consignment_id . ' has been Received');
