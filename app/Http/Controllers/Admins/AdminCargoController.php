@@ -794,9 +794,11 @@ class AdminCargoController extends Controller
         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
 
         if ($cargo_consignment_shipment->exists()) {
-          $cargo_consignment_shipment = $cargo_consignment_shipment->first();
+          $cargo_consignment_shipment = $cargo_consignment_shipment->where('cargo_consignment_id', $request->cargo_consignment_id);
 
-          if ($cargo_consignment_shipment->cargo_consignment_id == $request->cargo_consignment_id) {
+          if ($cargo_consignment_shipment->exists()) {
+            $cargo_consignment_shipment = $cargo_consignment_shipment->first();
+
             $details = array();
 
             $details['id'] = $shipment->id;
