@@ -71,6 +71,25 @@ class DisputeController extends Controller
 
     }
     public function dispute_create(Request $request){
+//        $shipments = explode(',',$request->tracking_number);
+//        print_r($shipments);
+        if(!empty($request->tracking_number)) {
+            $count = count($request->tracking_number);
+            $dispute = Dispute::create([
+               'description'=>$request->description,
+                'admin_id'=>Auth::id(),
+                'city_id'=>$request->city_select,
+                'dispute_type_id'=>$request->dispute_type_select,
+                'shipments_count'=>$count
+            ]);
+            foreach ($request->tracking_number as $tracking) {
+                DisputeShipment::create([
+                    'dispute_id'=>$dispute->id,
+                    'shipment_id'=>$tracking
+                ]);
+            }
+            return redirect()->back()->with('success','Shipment successfully created!');
+        }
 
     }
 

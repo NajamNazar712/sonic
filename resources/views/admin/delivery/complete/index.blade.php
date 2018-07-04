@@ -44,6 +44,8 @@
                         <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
+                        <th class="border-primary border-darken-1">Updated By</th>
+                        <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">Total COD</th>
                     </tr>
                     </thead>
@@ -170,6 +172,8 @@
                     { data:'delivered_shipments' ,name: 'delivered_shipments', class: 'align-middle delivered_shipments'},
                     { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
+                    { data:'updated_by' ,name: 'updated_by', class: 'align-middle updated_by'},
+                    { data:'updated_at' ,name: 'updated_at', class: 'align-middle updated_at'},
                     { data:'amount' ,name: 'amount', class: 'align-middle amount'},
                 ],
                 rowCallback: function(row, data, index) {
