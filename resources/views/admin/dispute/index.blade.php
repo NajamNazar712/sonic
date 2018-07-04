@@ -50,7 +50,7 @@
                         @csrf
                         <div class="row mb-2">
                             <div class="col">
-                                <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;">
+                                <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                     <option></option>
                                     @foreach($cities as $city)
                                         <option value="{{$city->id}}">{{$city->name}}</option>
@@ -58,7 +58,7 @@
                                 </select>
                             </div>
                             <div class="col">
-                                <select name="dispute_type_select" id="dispute_type_select" class="select2 form-control" style="width:100%;">
+                                <select name="dispute_type_select" id="dispute_type_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                     <option></option>
                                 @foreach($dispute_types as $dispute)
                                         <option value="{{$dispute->id}}">{{$dispute->type}}</option>
@@ -68,12 +68,14 @@
                         </div>
                         <div class="row mb-2 justify-content-center">
                             <div class="col-6">
-                                <input type="text" name="tracking_number" class="text-center form-control" placeholder="Enter Tracking No.">
+                                {{--<input name="tracking_number" id="tracking_number" class="select2 form-control" style="width: 100%;">--}}
+                                <select name="tracking_number" id="tracking_number" class="select2 form-control text-center" multiple style="width: 100%;" data-rule-required="true" data-msg-required="This field is required">
+                                </select>
                             </div>
                         </div>
                         <div class="row mb-2 justify-content-center">
                             <div class="col-6">
-                                <textarea name="description" id="description" class="form-control" cols="30" rows="3" placeholder="Enter Description"></textarea>
+                                <textarea name="description" id="description" class="form-control" cols="30" rows="3" placeholder="Enter Description" data-rule-required="true" data-msg-required="This field is required"></textarea>
                             </div>
                         </div>
                         <div class="row justify-content-center">
@@ -158,6 +160,13 @@
             placeholder:'Select a Dispute type',
             dropdownParent:$('#dispute_form')
         });
+        $('#tracking_number').select2({
+            placeholder:'Enter Tracking Number',
+            dropdownParent:$('#dispute_form'),
+            tags: true,
+            tokenSeparators: ['/',',',';'," "]
+        });
+
         var table = $('#datatable').DataTable({
             // "scrollX": true,
             dom: '<"d-inline-block"l><"pull-right"B>tipr',

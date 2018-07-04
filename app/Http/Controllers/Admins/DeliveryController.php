@@ -867,9 +867,9 @@ class DeliveryController extends Controller
     $note_id = $request->note_id;
     $dn = DeliveryNote::where('id',$note_id);
         if($dn->exists()){
-            $shipmentStatus =  DeliveryNoteShipment::where(['delivery_note_id'=>$note_id,'status'=>0])->get();
-            if($shipmentStatus->isEmpty()){
-                $result = DeliveryNote::where('id',$note_id)->update(['status'=>1]);
+            $shipmentStatus =  DeliveryNoteShipment::where(['delivery_note_id'=>$note_id,'status'=>0]);
+            if($shipmentStatus->exists()){
+                $result = DeliveryNote::where('id',$note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
                 if($result){
                     return ['status'=>0,'success'=>'Delivery note verified!'];
                 }else{
