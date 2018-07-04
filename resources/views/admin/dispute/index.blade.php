@@ -49,7 +49,7 @@
                     <form id="dispute_form" action="{{route('admin.dispute.create')}}" method="post">
                         @csrf
                         <div class="row mb-2">
-                            <div class="col">
+                            <div class="col form-group">
                                 <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                     <option></option>
                                     @foreach($cities as $city)
@@ -57,7 +57,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col">
+                            <div class="col form-group">
                                 <select name="dispute_type_select" id="dispute_type_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                     <option></option>
                                 @foreach($dispute_types as $dispute)
@@ -67,14 +67,14 @@
                             </div>
                         </div>
                         <div class="row mb-2 justify-content-center">
-                            <div class="col-6">
+                            <div class="col-6 form-group">
                                 {{--<input name="tracking_number" id="tracking_number" class="select2 form-control" style="width: 100%;">--}}
-                                <select name="tracking_number" id="tracking_number" class="select2 form-control text-center" multiple style="width: 100%;" data-rule-required="true" data-msg-required="This field is required">
+                                <select name="tracking_number[]" id="tracking_number" class="select2 form-control text-center numeric" multiple style="width: 100%;" data-rule-required="true" data-msg-required="This field is required">
                                 </select>
                             </div>
                         </div>
                         <div class="row mb-2 justify-content-center">
-                            <div class="col-6">
+                            <div class="col-6 form-group">
                                 <textarea name="description" id="description" class="form-control" cols="30" rows="3" placeholder="Enter Description" data-rule-required="true" data-msg-required="This field is required"></textarea>
                             </div>
                         </div>
@@ -95,6 +95,8 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
+
 
     <style>
         table.dataTable {
@@ -149,6 +151,7 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -166,6 +169,14 @@
             tags: true,
             tokenSeparators: ['/',',',';'," "]
         });
+            $('.numeric').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 0,
+                'max': 1000000
+            });
 
         var table = $('#datatable').DataTable({
             // "scrollX": true,
@@ -239,6 +250,31 @@
         $('.dispute_modal').on('click',function () {
             $('#DisputeModal').modal('show');
         });
+
+            $( "#dispute_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Dispute is being created!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+
+                        form.submit();
+                    // console.log('here')
+                    }
+
+
+            });
     });
 
     </script>
