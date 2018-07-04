@@ -35,6 +35,10 @@ class Admin extends Authenticatable
     {
         $this->notify(new AdminResetPasswordNotification($token));
     }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
     public function city(){
         return $this->belongsTo('App\Http\Models\City');
     }

@@ -17,6 +17,7 @@ class CreateDisputesTable extends Migration
             $table->increments('id');
             $table->string('description')->nullable();
             $table->integer('admin_id');//need to add city_id after user management id done
+            $table->integer('city_id');
             $table->integer('dispute_type_id');
             $table->integer('shipments_count');
             $table->integer('status')->default(0);

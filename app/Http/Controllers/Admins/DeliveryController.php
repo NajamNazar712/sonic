@@ -1383,11 +1383,20 @@ class DeliveryController extends Controller
             ->make(true);
     }
     public function sdn_deposit_slip(Request $request){
-        $validate = Validator::make($request->all(), [
-            'deposit_slip' => 'required | mimes:jpeg,jpg,png | max:2000',
-        ]);
+//        return $request;
+        $messages = [
+            'deposit_slip.required' => 'No Image file selected!.',
+            'deposit_slip.mimes' => 'Image file not supported!.',
+            'deposit_slip.size' => 'Image file size exceded!.',
+            'deposit_slip.image' => 'No Image file selected!.',
+            ];
+        $validation = [
+            'deposit_slip' => 'required | image |mimes:jpg,png,jpeg | max:2048',
+        ];
+        $validate = Validator::make($request->all(),$validation,$messages);
+
         if ($validate->fails()) {
-            return response()->json(['status' => 0, 'error' => 'Image not selected | Image file not supported | Image size exceeds 2Mb!']);
+            return response()->json(['status' => 0, 'error' => $validate->errors()]);
         }
         if($request->has('deposit_slip')){
         $image = $request->file('deposit_slip');
