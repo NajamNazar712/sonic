@@ -291,6 +291,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\AdminCargoController@receive_store')->name('store');
         });
     });
+    Route::prefix('dispute')->name('dispute.')->group(function (){
+       Route::get('','Admins\DisputeController@dispute_index')->name('index');
+       Route::get('list','Admins\DisputeController@dispute_list')->name('list');
+       Route::post('create','Admins\DisputeController@dispute_create')->name('create');
+
+    });
 
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@index')->name('index');

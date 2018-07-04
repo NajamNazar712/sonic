@@ -1011,7 +1011,29 @@ class AdminPickupsController extends Controller
             break;
           }
         }
+          //for dispute start
+          $receiving_sheets = ReceivingSheet::where('user_id', $pickup_request->shipper_id)->where('status', 1);
 
+          $short_shipments = array();
+
+          if ($receiving_sheets->exists()) {
+              $receiving_sheets = $receiving_sheets->get();
+
+              foreach ($receiving_sheets as $receiving_sheet) {
+                  foreach ($receiving_sheet->receiving_sheet_shipments as $receiving_sheet_shipment) {
+                      $shipment = $receiving_sheet_shipment->shipment;
+
+                      if ($shipment->shipper_status_id == 1 && $pickup_request->pickup_address_id == $shipment->pickup_address_id) {
+                          $short_shipments[] = $shipment->tracking_number;
+                      }
+                  }
+              }
+              $count = count($short_shipments);
+              foreach ($short_shipments as $short_shipment) {
+                  DisputeController::add_short_received_shipments($short_shipment, $count);
+              }
+          }
+          //dispute end
         if ($completed) {
           $pickup_note->status_id = 5;
           $pickup_note->save();
@@ -1071,5 +1093,6 @@ class AdminPickupsController extends Controller
         return ['status' => 1, 'error' => 'Selected Pickup has already been modified'];
       }
     }
+
 
 }

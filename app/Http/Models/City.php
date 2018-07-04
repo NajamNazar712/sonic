@@ -18,4 +18,7 @@ class City extends Model
     public function riders(){
         return $this->hasMany('App\Http\Models\Rider');
     }
+    public function admins(){
+        return $this->hasMany('App\Http\Models\Admin\Admin');
+    }
 }

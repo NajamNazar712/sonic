@@ -301,19 +301,18 @@
                 var netamount = exp.parents('tr').find('td.net_amount input.net_amount');
                 var net = dncc_amount - expense;
                 netamount.val(net);
-
-                $(this).parents('tr').find('td.expense input').each(function() {
+                var sum_expense = 0;
+                $(this).parents('tbody').find('tr td.expense input').each(function() {
                     var exp_val = parseInt($(this).val()) || 0;
-                    sum = sum+exp_val;
+                    sum_expense += exp_val;
                 });
-                $('#total_expense').val(sum);
-
-                $(this).parents('tr').find('td.net_amount input').each(function() {
+                $('#total_expense').val(sum_expense);
+                var sum_net_amount = 0;
+                $(this).parents('tbody').find('tr td.net_amount input').each(function() {
                     var net_val = parseInt($(this).val()) || 0;
-                    total_net_amount = total_net_amount+net_val;
+                    sum_net_amount += net_val;
                 });
-                $('#total_amount').val(total_net_amount);
-
+                $('#total_amount').val(sum_net_amount);
             });
             function number_format(n){
                 var value = n.toLocaleString(
