@@ -295,6 +295,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
        Route::get('','Admins\DisputeController@dispute_index')->name('index');
        Route::get('list','Admins\DisputeController@dispute_list')->name('list');
        Route::post('create','Admins\DisputeController@dispute_create')->name('create');
+       Route::post('get/shipments','Admins\DisputeController@get_shipments')->name('get.shipments');
+       Route::post('resolve','Admins\DisputeController@resolve_dispute')->name('resolve');
+       Route::post('update','Admins\DisputeController@update_dispute_view')->name('update');
+       Route::put('update.submit','Admins\DisputeController@update_dispute')->name('update.submit');
 
     });
 

@@ -5,11 +5,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\City;
 use App\Http\Models\Dispute;
+use App\Http\Models\DisputeComment;
 use App\Http\Models\DisputeShipment;
 use App\Http\Models\DisputeType;
+use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
 class DisputeController extends Controller
@@ -27,8 +30,12 @@ class DisputeController extends Controller
         $dispute = Dispute::join('admins','disputes.admin_id','=','admins.id')
             ->join('cities','cities.id','=','disputes.city_id')
             ->join('dispute_types as dt','dt.id','=','disputes.dispute_type_id')
-            ->leftjoin('dispute_comments as dc','dc.dispute_id','=','disputes.id')
-            ->select(['disputes.id as dispute_id','disputes.created_at as created_at','disputes.description','cities.name as originated_at','dt.type as dispute_type','disputes.shipments_count as no_of_shipments','admins.name as launched_by','dc.admin_id as updated_by','disputes.status as status']);
+//            ->join('dispute_comments as dc','dc.dispute_id','=','disputes.id')
+            ->leftJoin('dispute_comments', function ($join) {
+                $join->on('dispute_comments.id', '=',
+                    DB::raw('(select admin_id from dispute_comments join admins on admins.id = dispute_comments.admin_id where dispute_comments.dispute_id = disputes.id order by dispute_comments.id desc limit 1)'));
+                    })
+            ->select(['disputes.id as dispute_id','disputes.created_at as created_at','disputes.description','cities.name as originated_at','dt.type as dispute_type','disputes.shipments_count as no_of_shipments','admins.name as launched_by','dispute_comments.admin_id as updated_by','disputes.status as status']);
         return Datatables::of($dispute)
 
             ->editColumn('created_at', function ($dispute) {
@@ -37,6 +44,9 @@ class DisputeController extends Controller
             ->editColumn('status',function($dispute){
                 return $dispute->status == 0? 'Dispute Launched': ($dispute->status == 1? 'Dispute Updated' : ($dispute->status == 2? 'Dispute Resolved':''));
 
+            })
+            ->editColumn('no_of_shipments',function($dispute){
+                return "<a class='font-weight-bold shipment_count' href='#'>{$dispute->no_of_shipments}</a>";
             })
             ->addColumn("action", function ($dispute) {
                 return " <span class='dropdown'>
@@ -74,26 +84,111 @@ class DisputeController extends Controller
 //        $shipments = explode(',',$request->tracking_number);
 //        print_r($shipments);
         if(!empty($request->tracking_number)) {
-            $count = count($request->tracking_number);
+            $count = 0;
             $dispute = Dispute::create([
                'description'=>$request->description,
                 'admin_id'=>Auth::id(),
                 'city_id'=>$request->city_select,
-                'dispute_type_id'=>$request->dispute_type_select,
-                'shipments_count'=>$count
+                'dispute_type_id'=>$request->dispute_type_select
             ]);
             foreach ($request->tracking_number as $tracking) {
-                DisputeShipment::create([
-                    'dispute_id'=>$dispute->id,
-                    'shipment_id'=>$tracking
-                ]);
+                $shipment = Shipment::where('tracking_number',$tracking);
+                if($shipment->exists()){
+                    $shipment = $shipment->first();
+                    DisputeShipment::create([
+                        'dispute_id'=>$dispute->id,
+                        'shipment_id'=>$shipment->id
+                    ]);
+                    $count++;
+                }
             }
+            Dispute::where('id',$dispute->id)->update(['shipments_count'=>$count]);
             return redirect()->back()->with('success','Shipment successfully created!');
         }
 
     }
+    public function get_shipments(Request $request){
+        $dispute_id = $request->id;
+        $trackings = array();
+        $dispute = DisputeShipment::where('dispute_id',$dispute_id)->select('shipment_id');
+        if($dispute->exists()){
+            $dispute_shipment_ids = $dispute->get();
+            $trackings = Shipment::whereIn('id',$dispute_shipment_ids)->select('tracking_number')->get();
 
+            return response()->json(['status'=>1,'shipments'=>$trackings]);
+        }else{
+            return response()->json(['status'=>0,'error'=>"No shipments exist!"]);
+        }
+    }
+    public function resolve_dispute(Request $request){
+        $dispute = Dispute::where('id',$request->id);
+        if($dispute->exists()){
+            $dispute->update(['status'=>2,'updated_by'=>Auth::id()]);
+            return response()->json(['status'=>1,'success'=>"Dispute resolved successfully!"]);
+        }else{
+            return response()->json(['status'=>0,'error'=>"Dispute not found!"]);
+        }
 
+    }
+    public function update_dispute_view(Request $request){
+        $dispute_id = $request->id;
+        $dispute = Dispute::where('id',$dispute_id);
+        $trackings = array();
+        if($dispute->exists()){
+            $dispute = $dispute->first();
+            $cities = City::all();
+            $dispute_types = DisputeType::all();
+            $comments = $dispute->comments;
+            $dispute_cns = DisputeShipment::where('dispute_id',$dispute_id)->get();
+            foreach ($dispute_cns as $shipment){
+                $trackings[] = Shipment::where('id',$shipment->shipment_id)->select('tracking_number')->first();
+            }
+            $returnHTML = view('admin.dispute.update')->with(['dispute'=>$dispute,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipments'=>$trackings,'comments'=>$comments])->render();
+            return response()->json(['status'=>1,'view'=>$returnHTML]);
+        }else{
+            return response()->json(['status'=>0,'error'=>"No shipments exist!"]);
+        }
+    }
+    public function update_dispute(Request $request){
+        if($request->dispute_id != ''){
+            $dispute = Dispute::where('id',$request->dispute_id);
+            if($dispute->exists()){
+                $dispute_details = $dispute->first();
+                $shipment_count = $dispute_details->shipments_count;
+                $city_id = $dispute_details->city_id;
+                $dispute_type = $dispute_details->dispute_type_id;
+                if($city_id !== $request->city_select){
+                        $dispute->update(['city_id'=>$request->city_select]);
+                }
+                if($dispute_type !== $request->dispute_type_select){
+                    $dispute->update(['dispute_type_id'=>$request->dispute_type_select]);
+                }
+                if(!empty($request->update_tracking_number)){
+                    foreach ($request->update_tracking_number as $tracking){
+                        $shipment = Shipment::where('tracking_number',$tracking);
+                        if($shipment->exists()){
+                            $shipment = $shipment->first();
+                            DisputeShipment::create([
+                                'dispute_id'=>$dispute_details->id,
+                                'shipment_id'=>$shipment->id
+                            ]);
+                            $shipment_count++;
+                        }
+                    }
+                    $dispute->update(['shipments_count'=>$shipment_count]);
+                }
+                DisputeComment::create([
+                    'dispute_id'=>$dispute_details->id,
+                    'comment'=>$request->dispute_comment,
+                    'admin_id'=>Auth::id()
+                ]);
+                return redirect()->back()->with('success',"Dispute updated successfully!");
+            }else{
+                return redirect()->back()->with('error','Dispute not found!');
+            }
+        }
+        return $request;
+    }
     //for dispute start
 //          $receiving_sheets = ReceivingSheet::where('user_id', $pickup_request->shipper_id)->where('status', 1);
 //

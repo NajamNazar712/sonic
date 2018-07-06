@@ -19,6 +19,6 @@ class Dispute extends Model
         return $this->belongsTo('App\Http\Models\City');
     }
     public function dispute_types(){
-        return $this->belongsTo('App\Http\Models\DisputeType');
+        return $this->belongsTo('App\Http\Models\DisputeType','dispute_type_id','id');
     }
 }

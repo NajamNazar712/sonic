@@ -1094,7 +1094,7 @@ class DeliveryController extends Controller
                             
                           </tr>
             ';
-                    $total_cod_amount +=$shipment->amount;
+                    $total_cod_amount +=$shipment->received_amount;
                     $shipment_details .= $shipment_details_row_start;
                 }
                 $shipment_details .= '
@@ -1150,7 +1150,7 @@ class DeliveryController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>DNCC Amount</strong></td>
-                            <td>Rs ' . number_format($delivery_note_details->total_cod_amount) . '</td>
+                            <td>Rs ' . number_format($total_cod_amount) . '</td>
                           </tr>
                         </tbody>
                       </table>

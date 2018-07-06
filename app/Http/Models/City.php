@@ -21,4 +21,7 @@ class City extends Model
     public function admins(){
         return $this->hasMany('App\Http\Models\Admin\Admin');
     }
+    public function disputes(){
+        return $this->hasMany('App\Http\Models\Dispute');
+    }
 }
