@@ -74,7 +74,8 @@ class AdminFinanceController extends Controller
         ->join('riders as ri', 'dn.rider_id', '=', 'ri.id')
         ->join('routes as ro', 'dn.route_id', '=', 'ro.id')
         ->join('admins as a', 'dn.admin_id', '=', 'a.id')
-        ->select('dn.id', 'dn.id as delivery_note_number', 'h.name as hub', 'ri.name as rider', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'dn.shipments_count as shipments', 'dn.delivered_shipments', 'a.name as assigned_by', 'dn.created_at as assigned_at', 'a.name as updated_by', 'dn.updated_at', 'dn.received_cod_amount as dncc_amount', 'dn.expense');
+        ->join('admins as au', 'dn.updated_by', '=', 'a.id')
+        ->select('dn.id', 'dn.id as delivery_note_number', 'h.name as hub', 'ri.name as rider', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'dn.shipments_count as shipments', 'dn.delivered_shipments', 'a.name as assigned_by', 'dn.created_at as assigned_at', 'au.name as updated_by', 'dn.updated_at', 'dn.received_cod_amount as dncc_amount', 'dn.expense');
 
         if ($request->has('id')) {
            $delivery_notes->where('station_deposit_notes.id', $request->id);
