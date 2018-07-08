@@ -15,7 +15,7 @@ class User extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name', 'email', 'password','address','poc','phone','phone2','cnic','ntn_no','url','city_code','active',
+        'name', 'email', 'password','address','poc','phone','phone2','cnic','ntn_no','url','city_code','status','blacklist'
     ];
 
     /**
@@ -30,7 +30,7 @@ class User extends Authenticatable
         return $this->belongsToMany('App\Http\Models\Product')->withTimestamps();
     }
     public function city(){
-        return $this->belongsTo('App\Http\Models\CityInfo','city_code','city_code');
+        return $this->belongsTo('App\Http\Models\City');
     }
 
     public function bank(){

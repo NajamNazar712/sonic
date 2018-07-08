@@ -36,8 +36,8 @@ $factory->define(App\Http\Models\Shipper\User::class,function(Faker $faker){
                 'cnic' => '4258384858483',
                 'ntn_no' => '1234567',
                 'url' => $faker->url(),
-                'city_code' => '202',
-                'active' => '1'
+                'city_id' => '202',
+                'status' => '0'
 
         ];
 });

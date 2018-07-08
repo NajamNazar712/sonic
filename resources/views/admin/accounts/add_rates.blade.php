@@ -17,18 +17,17 @@
                     <div class="card-content">
                         <form id="ratesAdditionForm" class="card-body card-dashboard" action="{{route('admin.add.rates.submit',['id'=>$shipper->id])}}" method="post" novalidate="novalidate">
                             @csrf
-                            <div id="headingCollapse61" class="card-header border-success">
+                            <div id="" class="card-header border-success">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <h3 class="card-title lead success">Overnight</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#overnight" aria-expanded="false" aria-controls="overnight"
-                                           class="pull-right"><input name="on_main_switch" type="checkbox" id="" class="switchery on-main-switch" data-size="sm" /></a>
+                                        <a href="#" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" /></a>
                                     </div>
                                 </div>
                             </div>
-                            <div id="overnight" role="tabpanel"  class="card-collapse collapse multi-collapse  border-success"
+                            <div id="overnight" class="card border-success hide"
                                  aria-expanded="true">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -454,13 +453,12 @@
                                         <h3 class="card-title lead success">Overland</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#overland" aria-expanded="false" aria-controls="collapse62"
-                                           class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm"/></a>
+                                        <a id="ol_main_switch" href="#" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="overland" role="tabpanel" class="border-success no-border-top card-collapse collapse multi-collapse"
+                            <div id="overland"  class="border-success no-border-top card hide"
                                  aria-expanded="false">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -883,13 +881,12 @@
                                         <h3 class="card-title lead success">Detain</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#detain" aria-expanded="false"
-                                           class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm"/></a>
+                                        <a id="detain_main_switch" href="#" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="detain" role="tabpanel" class="border-success no-border-top card-collapse collapse multi-collapse"
+                            <div id="detain"  class="border-success no-border-top card hide"
                                  aria-expanded="false">
                                 <div class="card-content">
                                     <div class="card-body">
@@ -1315,14 +1312,12 @@
                                         <h3 class="card-title lead success">Sameday</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a data-toggle="collapse" href="#sameday" aria-expanded="false"
-                                           class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm"/></a>
+                                        <a id="sameday_main_switch" href="#" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
                             </div>
-                            <div id="sameday" role="tabpanel" class="border-success no-border-top card-collapse collapse multi-collapse"
-                                 aria-expanded="false" style="height: 0px;">
+                            <div id="sameday" class="border-success no-border-top card hide">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="weight-addition-sameday">
@@ -1760,12 +1755,70 @@
 
 
 @endsection
+@section('css')
+    <style type="text/css">
+        .hide{
+            display:none;
+        }
+    </style>
+
+
+@endsection
 
 @section('js')
     <script src="{{asset('/app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+        $(document).ready(function () {
+            // var on_main_switch = document.querySelector('#on_main_switch');
+            $('#on_main_switch').on('change',function(){
+
+                var onmainswitch = document.querySelector('.switchery.on-main-switch');
+                if (onmainswitch.checked === true) {
+                    $('#overnight').slideDown('slow');
+
+                } else if (onmainswitch.checked === false) {
+                    $('#overnight').slideUp('slow');
+
+
+                }
+            });
+            $('#ol_main_switch').on('change',function(){
+
+                var olmainswitch = document.querySelector('.switchery.ol-main-switch');
+                if (olmainswitch.checked === true) {
+                    $('#overland').slideDown('slow');
+
+                } else if (olmainswitch.checked === false) {
+                    $('#overland').slideUp('slow');
+
+
+                }
+            });
+            $('#detain_main_switch').on('change',function(){
+                var detainmainswitch = document.querySelector('.switchery.detain-main-switch');
+                if (detainmainswitch.checked === true) {
+                    $('#detain').slideDown('slow');
+
+                } else if (detainmainswitch.checked === false) {
+                    $('#detain').slideUp('slow');
+
+
+                }
+            });
+            $('#sameday_main_switch').on('change',function(){
+                var samedaymainswitch = document.querySelector('.switchery.sameday-main-switch');
+                if (samedaymainswitch.checked === true) {
+                    $('#sameday').slideDown('slow');
+
+                } else if (samedaymainswitch.checked === false) {
+                    $('#sameday').slideUp('slow');
+
+
+                }
+            });
+        });
         $('.decimal').inputmask({
             'alias': 'decimal',
             'allowMinus': false,
@@ -1877,7 +1930,6 @@
         });
         var count = 3;
         $('body').on('click','#waddition_btn',function () {
-            // let htmdiv = '<div class="row"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'range_up\']"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'range_down\']"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa[][\'switch\']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa[][\'spkg\']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'local_charges\']"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" id="" value="" name="on_wa[][\'national_charges\']"></fieldset></div></div>';
 
             let htmdiv = '<div class="row" id="on_weight_row'+count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_up['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_down['+count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa_switch['+count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa_spkg['+count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="on_wa_national_charges['+count+']"></fieldset></div><div class="col">\n' +
                 '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
@@ -2052,24 +2104,13 @@
 
             }
         });
-        // weightAdditionOverland.onchange = function () {
-        //     if (weightAdditionOverland.checked === true) {
-        //         // $(this).next('.spkg').attr('disabled','');
-        //         // $(this).closest('div.col-md-2').find('input.spkg').attr('disabled','');
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-        //
-        //     } else if (weightAdditionOverland.checked === false) {
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-        //
-        //     }
-        // };
+
         //Overland
 
 
         var overland_count = 1;
         $('body').on('click','#overland_weightadd',function () {
 
-            // let htmdiv1 = '<div class="row" id="ol_weight_row'+overland_count+'"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOverland'+overland_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+overland_count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+overland_count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_national_charges[]"></fieldset></div></div>';
             let htmdiv1 = '<div class="row" id="ol_weight_row'+overland_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_up['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_down['+overland_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOverland'+overland_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+overland_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+overland_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_local_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_wa_national_charges['+overland_count+']"></fieldset></div><div class="col">\n' +
                 '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 ol_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-overland').append(htmdiv1);
@@ -2241,24 +2282,13 @@
 
             }
         });
-        // weightAdditionDetain.onchange = function () {
-        //     if (weightAdditionDetain.checked === true) {
-        //         // $(this).next('.spkg').attr('disabled','');
-        //         // $(this).closest('div.col-md-2').find('input.spkg').attr('disabled','');
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', false);
-        //
-        //     } else if (weightAdditionDetain.checked === false) {
-        //         $(this).parent().parent().next().children().find('input.spkg').prop('disabled', true);
-        //
-        //     }
-        // };
+
         //detain
 
 
         var detain_count = 1;
         $('body').on('click','#detain_weightadd',function () {
 
-            // let htmdiv1 = '<div class="row" id="ol_weight_row'+detain_count+'"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+detain_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+detain_count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+detain_count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_national_charges[]"></fieldset></div></div>';
             let htmdiv1 = '<div class="row" id="detain_weight_row'+detain_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_up['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_down['+detain_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+detain_count+'" data-color="success" data-size="sm" name="detain_wa_switch['+detain_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="detain_wa_spkg['+detain_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_local_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_wa_national_charges['+detain_count+']"></fieldset></div><div class="col">\n' +
                 '<span id="detain_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-detain').append(htmdiv1);

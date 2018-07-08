@@ -33,11 +33,11 @@ class UpdateDiscountChargesTable extends Migration
     {
         Schema::table('discount_charges', function (Blueprint $table) {
             $table->dropColumn('title');
-            $table->decimal('weight',8,2)->nullable();
-            $table->decimal('cash',8,2)->nullable();
-            $table->decimal('insurance',8,2)->nullable();
-            $table->decimal('return',8,2)->nullable();
-            $table->decimal('packaging',8,2)->nullable();
+            $table->decimal('weight',8,2)->nullable()->change();
+            $table->decimal('cash',8,2)->nullable()->change();
+            $table->decimal('insurance',8,2)->nullable()->change();
+            $table->decimal('return',8,2)->nullable()->change();
+            $table->decimal('packaging',8,2)->nullable()->change();
             $table->dropColumn('added_by');
         });
     }

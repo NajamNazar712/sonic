@@ -159,7 +159,7 @@
                                                             <select name="shipper_city" id="shipper_city" class="select2 form-control required" style="width: 100%">
                                                                 <option value="" selected>Select City</option>
                                                                 @foreach($all_cities as $city)
-                                                                    <option value="{{$city->city_code}}" {{ old('shipper_city') == $city->city_code ? 'selected' : '' }} >{{$city->city_name}}</option>
+                                                                    <option value="{{$city->id}}" {{ old('shipper_city') == $city->id ? 'selected' : '' }} >{{$city->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -225,7 +225,7 @@
                                                             <select name="shipping_city[]" id="shipping_city" class="select2 form-control required" style="width: 100%">
                                                                 <option value="" selected="">Select Shipper City</option>
                                                                 @foreach($cities as $city)
-                                                                    <option value="{{$city->city_code}}" {{ (collect(old('shipping_city'))->contains($city->city_code)) ? 'selected' : '' }} >{{$city->city_name}}</option>
+                                                                    <option value="{{$city->id}}" {{ (collect(old('shipping_city'))->contains($city->id)) ? 'selected' : '' }} >{{$city->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -309,8 +309,8 @@
                                                                 <div>
                                                                     <select name="shipping_city[]" class="select2 form-control required" style="width: 100%">
                                                                         <option value="" selected>Select Shipper City</option>
-                                                                        @foreach($cities as $city)
-                                                                            <option value="{{$city->city_code}}" {{ (collect(old('shipping_city.'.$i))->contains($city->city_code)) ? 'selected' : '' }} >{{$city->city_name}}</option>
+                                                                        @foreach($pickup_city_list as $city)
+                                                                            <option value="{{$city->id}}" {{ (collect(old('shipping_city.'.$i))->contains($city->id)) ? 'selected' : '' }} >{{$city->name}}</option>
                                                                         @endforeach
                                                                     </select>
                                                                 </div>
@@ -399,7 +399,7 @@
                                                                 <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
                                                                     <option value="" selected>Select Bank City</option>
                                                                     @foreach($all_cities as $city)
-                                                                       <option value="{{$city->city_code}}"  {{ old('bank_city') == $city->city_code ? 'selected' : '' }} >{{$city->city_name}}</option>
+                                                                       <option value="{{$city->id}}"  {{ old('bank_city') == $city->id ? 'selected' : '' }} >{{$city->name}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -591,13 +591,13 @@
                     success: function(data) {
                         if(data.status == 0){
                             $(err).insertAfter('input[name="name"]');
-                            console.log(data.status);
+
                         }else if(data.status == 1){
                             $('span[name="cname"]').css('display','none');
-                            console.log(data.status);
+
 
                         }
-                        console.log(data.status);
+
                     }
                 });
             }

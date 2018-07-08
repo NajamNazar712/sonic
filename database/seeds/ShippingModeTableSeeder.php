@@ -11,6 +11,7 @@ class ShippingModeTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('shipping_modes')->truncate();
         DB::table('shipping_modes')->insert(array(
             array('mode'=>'Overnight'),
             array('mode'=>'Overland'),

@@ -12,11 +12,14 @@ class AdminsTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('admins')->truncate();
+
         Admin::create([
             'name' => 'admin',
             'email' => 'admin@email.com',
             'username' => 'admin',
             'department' => 'Admin Department',
+            'city_id'=>17,
             'password' => bcrypt('password')
         ]);
 

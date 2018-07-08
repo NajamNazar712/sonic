@@ -31,7 +31,7 @@
 										<th class="border-primary border-darken-1">Total Estimated Weight (kg)</th>
 										<th class="border-primary border-darken-1">Pickup Type</th>
 										<th class="border-primary border-darken-1">Pickup Date</th>
-										<th class="border-primary border-darken-1">Action</th>
+										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
 							</table>
@@ -50,7 +50,11 @@
 								</div>
 								<div class="modal-body">
 									<div class="form-group m-0">
-										<select name="rider" class="select2 rider" data-rule-required="true" data-msg-required="Rider is required"></select>
+										<select name="rider" class="select2 rider" data-rule-required="true" data-msg-required="Rider is required">
+											@foreach($riders as $rider)
+												<option value="{{ $rider->id }}">{{ $rider->name }}</option>
+											@endforeach
+										</select>
 									</div>
 								</div>
 								<div class="modal-footer">
@@ -103,6 +107,10 @@
 			text-shadow: none;
 		}
 
+		.btn-group .dropdown-menu .dropdown-item {
+			white-space: normal;
+		}
+
 		#toast-bottom-center.toast-container {
 			text-align: center;
 		}
@@ -137,25 +145,7 @@
 					className: 'btn btn-primary assign',
 					enabled: false,
 					action: function (e, dt, node, config) {
-						//Get Riders and Fill Select
-						var options = [];
-
-						options.push({id: 1, text: 'Temporary Rider'});
-
-						if ($('#assign_to_rider .rider').hasClass('select2-hidden-accessible')) {
-							$('#assign_to_rider .rider').empty();
-							$('#assign_to_rider .rider').select2('destroy');
-						}
-
-						$('#assign_to_rider .rider').select2({
-							width: '100%',
-							placeholder: 'Rider*',
-							data: options
-						}).bind('change', function() {
-							if ($(this).hasClass('danger')) {
-								$(this).valid();
-							}
-						}).val(null).trigger('change');
+						$('#assign_to_rider .rider').val(null).trigger('change');
 
 						$('#assign_to_rider').modal('show');
 					}
@@ -244,7 +234,7 @@
 					{data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
 					{data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
 					{data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
-					{data: 'city', name: 'ci.city_name', class: 'align-middle city'},
+					{data: 'city', name: 'ci.name', class: 'align-middle city'},
 					{data: 'bookings', name: 'pickup_requests.bookings', class: 'align-middle bookings'},
 					{data: 'pending_bookings', name: 'pickup_requests.pending_bookings', class: 'align-middle pending_bookings'},
 					{data: 'total_estimated_weight', name: 'pickup_requests.total_estimated_weight', class: 'align-middle total_estimated_weight'},
@@ -310,6 +300,15 @@
 				}
 			});
 
+			$('#assign_to_rider .rider').select2({
+				width: '100%',
+				placeholder: 'Rider*'
+			}).bind('change', function() {
+				if ($(this).hasClass('danger')) {
+					$(this).valid();
+				}
+			});
+
 			$('#assign_to_rider form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
@@ -352,7 +351,7 @@
 				}
 			});
 
-			$('.datatable tbody').on('click', 'tr td.action button.cancel', function() {
+			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.cancel', function() {
 				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
 
 				swal({

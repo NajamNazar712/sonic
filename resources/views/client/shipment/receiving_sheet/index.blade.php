@@ -227,8 +227,8 @@
 					{data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
 					{data: 'order_id', name: 'order_id', class: 'align-middle order_id'},
 					{data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-					{data: 'origin_city', name: 'oc.city_name', class: 'align-middle origin_city'},
-					{data: 'destination_city', name: 'dc.city_name', class: 'align-middle destination_city'},
+					{data: 'origin_city', name: 'oc.name', class: 'align-middle origin_city'},
+					{data: 'destination_city', name: 'dc.name', class: 'align-middle destination_city'},
 					{data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
 					{data: 'receiving_sheet', name: 'receiving_sheet', class: 'text-center align-middle receiving_sheet p-1'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

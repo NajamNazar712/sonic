@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Shipment extends Model
 {
+
 	public function items() {
 		return $this->hasMany('App\Http\Models\ShipmentItem');
 	}
@@ -14,12 +15,16 @@ class Shipment extends Model
 		return $this->belongsTo('App\Http\Models\BookingType');
 	}
 
+	public function shipping_mode() {
+		return $this->belongsTo('App\Http\Models\ShippingMode');
+	}
+
 	public function pickup_address() {
 		return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo');
 	}
 
 	public function consignee_city() {
-		return $this->belongsTo('App\Http\Models\CityInfo', 'consignee_city_id', 'id');
+		return $this->belongsTo('App\Http\Models\City', 'consignee_city_id', 'id');
 	}
 
 	public function user() {
@@ -29,4 +34,11 @@ class Shipment extends Model
 	public function payment_mode() {
 		return $this->belongsTo('App\Http\Models\PaymentMode');
 	}
+
+	public function receiving_sheet_shipment() {
+		return $this->hasOne('App\Http\Models\ReceivingSheetShipment');
+	}
+	public function shipment_journey(){
+	    return $this->hasMany('App\Http\Models\ShipmentsJourney');
+    }
 }

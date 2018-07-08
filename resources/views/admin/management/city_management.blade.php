@@ -1,16 +1,6 @@
 @extends('admin.layout.master')
 
-@section('css')
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 
-    <style type="text/css">
-        .radio-inline,.checkbox-inline{
-            display:inline;
-        }
-    </style>
-@endsection
 @section('content')
     <h1>City Management</h1>
 
@@ -31,9 +21,9 @@
 
                     <div class="card-content">
                         <div class="card-body card-dashboard">
-                            <table class="table table-stripped table-bordered datatable" id="datatable">
+                            <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
-                                <tr>
+                                <tr class="bg-primary white">
                                     <th>S No.</th>
                                     <th>City Name</th>
                                     <th>City Code</th>
@@ -54,6 +44,58 @@
     </section>
 @endsection
 
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+
+
+    <style>
+          display:inline;
+        }
+        table.dataTable {
+            font-size: 12px;
+        }
+
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #666EE8;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+    </style>
+@endsection
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/forms/checkbox-radio.js')}}" type="text/javascript"></script>
@@ -64,7 +106,7 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
-           var tab =  $('.datatable').DataTable({
+           var table =  $('.datatable').DataTable({
                 dom: 'ltipr',
                 fixedHeader: {
                     header: true,
@@ -79,50 +121,45 @@
 
                 ajax: '{{ route('admin.management.city.ajax') }}',
                 columns: [
-                    {data:'id', defaultContent:''},
-                    {data: 'name', name: 'name', class: 'city'},
-                    {data: 'id', name: 'id', class: 'city_id'},
-                    {data: 'hub', name: 'hub', class: 'hub'},
-                    {data: 'hub_id', name: 'hub_id', class: 'hub_id'},
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data: 'name', name: 'cities.name', class: 'city'},
+                    {data: 'city_id', name: 'cities.id', class: 'city_id'},
+                    {data: 'hub', name: 'h.name', class: 'hub'},
+                    {data: 'hub_id', name: 'cities.hub_id', class: 'hub_id'},
                     {data: 'status', name: 'status', class: 'status'},
                     {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
                 ],
+               rowCallback: function(row, data, index) {
+                   var info = table.page.info();
 
-                initComplete: function() {
-                    var search = $('<tr role="row" class="search"></tr>').appendTo(this.api().table().header());
+                   $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
-                    var td = '<td style="padding:0;"></td>';
-                    var input = '<input type="text" placeholder="Search" style="width:100%;" />';
-                    var select = '<select style="width:100%;"><option value=""></option></select>';
+               },
+               initComplete: function() {
+                   var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
+                   var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                   var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                   var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                   this.api().columns().every(function(column_id) {
+                       var column = this;
+                       var header = column.header();
 
+                       if ($(header).is('.serial_number') || $(header).is('.action')) {
+                           $(td).appendTo($(search));
+                       }
+                       else {
+                           var current = $(input).appendTo($(search)).on('change', function() {
+                               column.search($(this).val(), false, false, true).draw();
+                           }).wrap(td).after(icon);
 
-                        if ($(header).is('.action')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('keyup change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-                }
+                           if (column.search()) {
+                               current.val(column.search());
+                           }
+                       }
+                   });
+               }
             });
-            if (tab.data().length != 0) {
-                tab.on('order.dt search.dt', function () {
-                    tab.column(0, {search: 'false', order: 'applied'}).nodes().each(function (cell, i) {
-                        cell.innerHTML = i + 1;
-                        tab.cell(cell).invalidate('dom');
-                    });
-                }).draw();
-            }
 
             $('input.icheck').iCheck({
                 checkboxClass: 'icheckbox_squaret-red',

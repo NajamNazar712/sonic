@@ -39,7 +39,7 @@
 												<option value="0">New</option>
 
 												@foreach($user->shipping as $shipping_information)
-													<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['city_name'] }}</option>
+													<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
 												@endforeach
 											</select>
 										</div>
@@ -64,7 +64,7 @@
 											<div class="form-group">
 												<select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
 													@foreach($cities as $city)
-														<option value="{{ $city->id }}">{{ $city->city_name }}</option>
+														<option value="{{ $city->id }}">{{ $city->name }}</option>
 													@endforeach
 												</select>
 											</div>
@@ -82,7 +82,7 @@
 										<div class="form-group">
 											<select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
 												@foreach($cities as $city)
-													<option value="{{ $city->id }}">{{ $city->city_name }}</option>
+													<option value="{{ $city->id }}">{{ $city->name }}</option>
 												@endforeach
 											</select>
 										</div>

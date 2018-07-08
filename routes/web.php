@@ -54,6 +54,22 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
 
         Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
+
+        Route::prefix('receiving_sheet_history')->name('receiving_sheet_history.')->group(function () {
+            Route::get('list', 'Shippers\ShipperReceivingSheetHistoryController@list')->name('list');
+            Route::post('booked_shipments', 'Shippers\ShipperReceivingSheetHistoryController@booked_shipments')->name('booked_shipments');
+            Route::post('received_shipments', 'Shippers\ShipperReceivingSheetHistoryController@received_shipments')->name('received_shipments');
+            Route::post('short_received_shipments', 'Shippers\ShipperReceivingSheetHistoryController@short_received_shipments')->name('short_received_shipments');
+            Route::put('void', 'Shippers\ShipperReceivingSheetHistoryController@void')->name('void');
+            Route::post('create', 'Shippers\ShipperReceivingSheetHistoryController@create')->name('create');
+        });
+
+        Route::resource('receiving_sheet_history', 'Shippers\ShipperReceivingSheetHistoryController');
+    });
+
+    Route::prefix('tracking')->name('tracking.')->group(function () {
+        Route::get('', 'Shippers\ShipperTrackingController@index')->name('index');
+        Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
     });
 
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
@@ -100,8 +116,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         //Route
         Route::prefix('route')->name('route.')->group(function () {
-        Route::get('','Admins\AdminDashboardController@routeView')->name('index');
+        Route::get('/','Admins\AdminDashboardController@routeView')->name('index');
         Route::get('ajax', 'Admins\AdminDashboardController@routeListAjax')->name('ajax');
+        Route::get('/add', 'Admins\AdminDashboardController@addRouteView')->name('add');
+        Route::post('/add', 'Admins\AdminDashboardController@addRouteDetails')->name('add');
+        Route::get('{id}/edit', 'Admins\AdminDashboardController@editRouteView')->name('edit');
+        Route::put('{id}/edit', 'Admins\AdminDashboardController@editRouteDetails')->name('edit');
+        Route::put('/status', 'Admins\AdminDashboardController@routeStatus')->name('status');
+        });
+        Route::prefix('rider')->name('rider.')->group(function (){
+            Route::get('','Admins\AdminDashboardController@riderView')->name('index');
+            Route::get('ajax', 'Admins\AdminDashboardController@riderListAjax')->name('ajax');
+            Route::get('/add', 'Admins\AdminDashboardController@addRiderView')->name('add');
+            Route::get('categoryAjax', 'Admins\AdminDashboardController@categoryListAjax')->name('category.ajax');
+            Route::post('/add', 'Admins\AdminDashboardController@addRiderDetails')->name('add');
+            Route::get('{id}/edit', 'Admins\AdminDashboardController@editRiderView')->name('edit');
+            Route::put('{id}/edit', 'Admins\AdminDashboardController@editRiderDetails')->name('edit');
+            Route::put('/status', 'Admins\AdminDashboardController@riderStatus')->name('status');
         });
     });
 	Route::prefix('pickups')->name('pickups.')->group(function () {
@@ -121,6 +152,155 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('generate_pickup_note', 'Admins\AdminPickupsController@assigned_generate_pickup_note')->name('generate_pickup_note');
             Route::post('print', 'Admins\AdminPickupsController@assigned_print')->name('print');
         });
+
+        Route::prefix('receive')->name('receive.')->group(function () {
+            Route::get('', 'Admins\AdminPickupsController@receive_index')->name('index');
+            Route::get('list', 'Admins\AdminPickupsController@receive_list')->name('list');
+            Route::post('pickup_note', 'Admins\AdminPickupsController@receive_pickup_note')->name('pickup_note');
+            Route::post('shipment_details', 'Admins\AdminPickupsController@receive_shipment_details')->name('shipment_details');
+
+            Route::prefix('arrival_of_shipments')->name('arrival_of_shipments.')->group(function () {
+                Route::get('', 'Admins\AdminPickupsController@receive_arrival_of_shipments_index')->name('index');
+                Route::post('', 'Admins\AdminPickupsController@receive_arrival_of_shipments_store')->name('store');
+            });
+
+            Route::prefix('summary')->name('summary.')->group(function () {
+                Route::get('', 'Admins\AdminPickupsController@receive_summary_index')->name('index');
+                Route::get('list', 'Admins\AdminPickupsController@receive_summary_list')->name('list');
+
+                Route::prefix('request')->name('request.')->group(function () {
+                    Route::post('short_received', 'Admins\AdminPickupsController@receive_summary_request_short_received')->name('short_received');
+                    Route::put('done', 'Admins\AdminPickupsController@receive_summary_request_done')->name('done');
+                    Route::put('not_done', 'Admins\AdminPickupsController@receive_summary_request_not_done')->name('not_done');
+                });
+            });
+        });
+    });
+    Route::prefix('delivery')->name('delivery.')->group(function(){
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('','Admins\DeliveryController@pending_delivery_index')->name('index');
+            Route::get('list','Admins\DeliveryController@pending_list')->name('list');
+        });
+        Route::prefix('note')->name('note.')->group(function () {
+            Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
+            Route::get('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
+            Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
+
+        });
+        Route::prefix('receive')->name('receive.')->group(function (){
+            Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
+            Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
+            Route::get('tracking/search','Admins\DeliveryController@receive_delivery_search')->name('tracking.search');
+            Route::get('{id}/update','Admins\DeliveryController@receive_delivery_update')->name('update');
+            Route::get('{id}/update/list','Admins\DeliveryController@receive_delivery_notes_list')->name('update.list');
+            Route::get('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
+            Route::post('print','Admins\DeliveryController@received_print')->name('print');
+            Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
+            Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
+            Route::post('dn/verify','Admins\DeliveryController@receive_delivery_note_verify')->name('dn.verify');
+
+            Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
+            Route::post('reason','Admins\DeliveryController@receive_delivery_reason')->name('reason');
+            Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
+            Route::post('shipmentstatuscheck','Admins\DeliveryController@receive_delivery_status_check')->name('shipmentstatuscheck');
+            Route::post('replacements','Admins\DeliveryController@receive_delivery_get_replacements')->name('replacements');
+            Route::put('replacements.submit','Admins\DeliveryController@receive_delivery_replacements_submit')->name('replacements.submit');
+            Route::post('trybuys','Admins\DeliveryController@receive_delivery_get_trybuys')->name('trybuys');
+            Route::put('trybuys.submit','Admins\DeliveryController@receive_delivery_trybuys_submit')->name('trybuys.submit');
+            Route::get('{id}/status/verify','Admins\DeliveryController@receive_delivery_note_verify_view')->name('status.verify');
+            Route::get('{id}/verify/status/list','Admins\DeliveryController@receive_delivery_verify_status_list')->name('verify.status.list');
+            Route::put('verify/status/submit','Admins\DeliveryController@receive_delivery_verify_status_submit')->name('verify.status.submit');
+            Route::post('dncc/print','Admins\DeliveryController@dncc_print')->name('dncc.print');
+
+        });
+        Route::prefix('completed')->name('completed.')->group(function(){
+            Route::get('','Admins\DeliveryController@completed_deliveries_index')->name('index');
+            Route::get('list','Admins\DeliveryController@completed_receive_deliveries_list')->name('list');
+            Route::post('deposit/dncc','Admins\DeliveryController@completed_deliveries_selected_dncc')->name('deposit.dncc');
+            Route::get('sdn/create','Admins\DeliveryController@create_sdn_view')->name('sdn.create');
+            Route::post('sdn/create','Admins\DeliveryController@create_sdn_submit')->name('sdn.create.submit');
+            Route::get('dncc/list','Admins\DeliveryController@get_sdn_list')->name('dncc.list');
+        });
+        Route::prefix('sdn')->name('sdn.')->group(function (){
+           Route::get('','Admins\DeliveryController@sdn_view')->name('index');
+           Route::get('list','Admins\DeliveryController@sdn_list')->name('list');
+           Route::get('{id}/details','Admins\DeliveryController@sdn_details')->name('details');
+           Route::get('{id}/ajax','Admins\DeliveryController@sdn_details_ajax')->name('ajax');
+           Route::post('slip','Admins\DeliveryController@sdn_deposit_slip')->name('slip');
+           Route::post('print','Admins\DeliveryController@sdn_deposit_slip_print')->name('print');
+
+        });
+    });
+    Route::prefix('return')->name('return.')->group(function (){
+        Route::get('','Admins\ReturnController@return_view')->name('index');
+        Route::get('list','Admins\ReturnController@return_marked_list')->name('list');
+        Route::post('marked/status','Admins\ReturnController@return_marked_status')->name('marked.status');
+        Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
+        Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
+        Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
+        Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
+        Route::prefix('create')->name('create.')->group(function(){
+            Route::get('','Admins\ReturnController@return_create_index')->name('index');
+            Route::get('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
+            Route::post('note/submit','Admins\ReturnController@return_create_note')->name('note.submit');
+        });
+        Route::prefix('receive')->name('receive.')->group(function (){
+            Route::get('','Admins\ReturnController@return_receive_deliveries_view')->name('index');
+            Route::get('list','Admins\ReturnController@return_receive_deliveries_list')->name('list');
+            Route::get('{id}/update','Admins\ReturnController@return_receive_update')->name('update');
+            Route::get('{id}/update/list','Admins\ReturnController@return_receive_update_list')->name('update.list');
+            Route::get('update/remove','Admins\ReturnController@return_receive_update_remove')->name('update.remove');
+            Route::get('{id}/status','Admins\ReturnController@return_receive_status')->name('status');
+            Route::post('status/submit','Admins\ReturnController@receive_return_status_submit')->name('status.submit');
+            Route::post('status/delivered','Admins\ReturnController@return_status_delivered')->name('status.delivered');
+            Route::get('status/list','Admins\ReturnController@return_receive_status_list')->name('status.list');
+            Route::post('reason','Admins\ReturnController@receive_return_reason')->name('reason');
+            Route::post('rn.print','Admins\ReturnController@rrd_print')->name('rn.print');
+
+        });
+    });
+    Route::prefix('cargo')->name('cargo.')->group(function () {
+        Route::prefix('pending')->name('pending.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@pending_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@pending_list')->name('list');
+        });
+
+        Route::prefix('create')->name('create.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@create_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminCargoController@create_shipment_details')->name('shipment_details');
+            Route::post('consignment_details', 'Admins\AdminCargoController@create_consignment_details')->name('consignment_details');
+            Route::post('', 'Admins\AdminCargoController@create_store')->name('store');
+        });
+
+        Route::prefix('in_transit')->name('in_transit.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@in_transit_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@in_transit_list')->name('list');
+            Route::post('print', 'Admins\AdminCargoController@in_transit_print')->name('print');
+            Route::post('junctions', 'Admins\AdminCargoController@in_transit_junctions')->name('junctions');
+            Route::post('details', 'Admins\AdminCargoController@in_transit_details')->name('details');
+            Route::post('receive_at_link', 'Admins\AdminCargoController@in_transit_receive_at_link')->name('receive_at_link');
+            Route::post('forwarding_details', 'Admins\AdminCargoController@in_transit_forwarding_details')->name('forwarding_details');
+            Route::post('update', 'Admins\AdminCargoController@in_transit_update')->name('update');
+            Route::post('receive', 'Admins\AdminCargoController@in_transit_receive')->name('receive');
+        });
+
+        Route::prefix('receive')->name('receive.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@receive_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminCargoController@receive_shipment_details')->name('shipment_details');
+            Route::post('short_received', 'Admins\AdminCargoController@receive_short_received')->name('short_received');
+            Route::post('', 'Admins\AdminCargoController@receive_store')->name('store');
+        });
+    });
+    Route::prefix('dispute')->name('dispute.')->group(function (){
+       Route::get('','Admins\DisputeController@dispute_index')->name('index');
+       Route::get('list','Admins\DisputeController@dispute_list')->name('list');
+       Route::post('create','Admins\DisputeController@dispute_create')->name('create');
+
+    });
+
+    Route::prefix('tracking')->name('tracking.')->group(function () {
+        Route::get('', 'Admins\AdminTrackingController@index')->name('index');
+        Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
     });
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
@@ -133,4 +313,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
     Route::post('password/reset','Auth\AdminResetPasswordController@reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
+
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::prefix('pickup')->name('pickup.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@pickup_index')->name('index');
+            Route::post('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+            Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+        });
+    });
 });

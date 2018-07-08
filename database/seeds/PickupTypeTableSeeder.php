@@ -11,6 +11,7 @@ class PickupTypeTableSeeder extends Seeder
      */
     public function run()
     {
+        DB::table('pickup_types')->truncate();
         DB::table('pickup_types')->insert(array(
             array('pickup'=>'Single Address'),
             array('pickup'=>'Multiple Addresses'),
