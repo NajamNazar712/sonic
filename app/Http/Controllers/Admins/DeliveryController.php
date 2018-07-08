@@ -1340,16 +1340,27 @@ class DeliveryController extends Controller
                 return $dropdown;
             })
             ->editColumn('status', function ($sdn) {
-                return ($sdn->status == 1)? 'Deposited': 'Created';
+                if ($sdn->status == 0) {
+                    return 'Created';
+                }
+                else if ($sdn->status == 1) {
+                    return 'Deposited';
+                }
+                else {
+                    return 'Reconciled';
+                }
             })
             ->filterColumn('status', function($query, $keyword) {
                 $keyword = strtolower($keyword);
 
-                if (strpos('deposited', $keyword) !== FALSE) {
+                if (strpos('created', $keyword) !== FALSE) {
+                    $query->where('station_deposit_notes.status', '=', 0);
+                }
+                else if (strpos('deposited', $keyword) !== FALSE) {
                     $query->where('station_deposit_notes.status', '=', 1);
                 }
-                else if (strpos('created', $keyword) !== FALSE) {
-                    $query->where('station_deposit_notes.status', '=', 0);
+                else if (strpos('reconciled', $keyword) !== FALSE) {
+                    $query->where('station_deposit_notes.status', '=', 2);
                 }
                 else {
                     $query->whereRaw('false');
