@@ -794,9 +794,11 @@ class AdminCargoController extends Controller
         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
 
         if ($cargo_consignment_shipment->exists()) {
-          $cargo_consignment_shipment = $cargo_consignment_shipment->first();
+          $cargo_consignment_shipment = $cargo_consignment_shipment->where('cargo_consignment_id', $request->cargo_consignment_id);
 
-          if ($cargo_consignment_shipment->cargo_consignment_id == $request->cargo_consignment_id) {
+          if ($cargo_consignment_shipment->exists()) {
+            $cargo_consignment_shipment = $cargo_consignment_shipment->first();
+
             $details = array();
 
             $details['id'] = $shipment->id;
@@ -931,7 +933,7 @@ class AdminCargoController extends Controller
 
         $shipment->save();
 
-        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Destination Centre!', NULL, Auth::id());
+        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Origin Centre!', NULL, Auth::id());
       }
 
       return redirect()->route('admin.cargo.in_transit.index')->with('success', 'Cargo No# ' . $cargo_consignment_id . ' has been Received');

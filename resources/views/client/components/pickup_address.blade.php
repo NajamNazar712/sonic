@@ -61,7 +61,7 @@
                             <select name="temp_shipping_city" class="select2 form-control required" style="width: 100%">
                                 <option value="" selected>Select Shipper City</option>
                                 @foreach($cities as $city)
-                                    <option value="{{$city->city_code}}">{{$city->city_name}}</option>
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
                                 @endforeach
                             </select>
                         </div>

@@ -82,14 +82,16 @@ class AdminTrackingController extends Controller
                         else if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
                             $cargo_consignment = CargoConsignment::find($journey->reference_1_id);
 
-                            $journey_details['status'] .= ' | ' . $cargo_consignment->builty_number;
+                            if ($cargo_consignment->builty_number && !empty($cargo_consignment->builty_number)) {
+                                $journey_details['status'] .= ' | ' . $cargo_consignment->builty_number;
+                            }
                         }
 
     					$journey_details['status'] .= ')';
     				}
 
     				$journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
-    				$journey_details['remarks'] = $journey->remarks;
+    				$journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
     				$journey_details['user'] = ($journey->admin_id) ? $journey->admin->name : $journey->user->name;
 
     				$details['tracking_history'][] = $journey_details;

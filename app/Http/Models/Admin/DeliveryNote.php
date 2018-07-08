@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class DeliveryNote extends Model
 {
     protected $fillable=[
-        'delivery_note_id','hub_id','rider_id','route_id','shipments_count','admin_id','total_cod_amount'
+        'delivery_note_id','hub_id','rider_id','route_id','shipments_count','admin_id','updated_by','total_cod_amount','received_total_amount','expense','net_amount','remarks','status','dncc_status'
     ];
 
     public function rider(){

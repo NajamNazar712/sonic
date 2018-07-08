@@ -20,7 +20,7 @@ class ShipmentsJourney extends Model
     }
 
     public function shipment_status_reason() {
-    	return $this->belongsTo('App\Http\Models\ShipmentStatusReason');
+    	return $this->belongsTo('App\Http\Models\ShipmentStatusReason', 'status_reason_id', 'id');
     }
 
     public function admin() {

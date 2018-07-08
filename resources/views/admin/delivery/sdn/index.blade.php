@@ -61,7 +61,7 @@
                             @csrf
                             <input type="hidden" name="sdn_id" id="sdn_id"/>
                     <fieldset class="form-group">
-                        <input type="file" class="form-control-file" id="deposit_slip" name="deposit_slip" accept="image/x-png,image/jpeg">
+                        <input type="file" class="form-control-file" id="deposit_slip" name="deposit_slip" accept="image/*" data-rule-required="true" data-msg-required="File is required" data-rule-extension="image/jpeg|image/jpg|image/png" data-msg-extension="Only file with extension jpeg or png allowed" data-rule-accept="application/image" data-msg-accept="Only Image file allowed">
                     </fieldset>
 
                     <hr>
@@ -136,7 +136,7 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/dropzone.min.js')}}" type="text/javascript"></script>
 {{--    <script src="{{asset('app-assets/js/scripts/extensions/dropzone.js')}}" type="text/javascript"></script>--}}
@@ -230,6 +230,7 @@
                         data: new FormData($(this)[0])
                     }).done(function (data) {
                         if(data.status == 1){
+
                             table.ajax.reload();
                             $('#deposit_slip').val('');
                             $('#uploadDepositSlip').modal('hide');
@@ -238,7 +239,7 @@
                         }else{
                             $('#deposit_slip').val('');
                             $('#uploadDepositSlip').modal('hide');
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.error(data.error.deposit_slip[0], 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                         }
                     });

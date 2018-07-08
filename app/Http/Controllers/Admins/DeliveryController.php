@@ -867,9 +867,9 @@ class DeliveryController extends Controller
     $note_id = $request->note_id;
     $dn = DeliveryNote::where('id',$note_id);
         if($dn->exists()){
-            $shipmentStatus =  DeliveryNoteShipment::where(['delivery_note_id'=>$note_id,'status'=>0])->get();
-            if($shipmentStatus->isEmpty()){
-                $result = DeliveryNote::where('id',$note_id)->update(['status'=>1]);
+            $shipmentStatus =  DeliveryNoteShipment::where(['delivery_note_id'=>$note_id,'status'=>0]);
+            if($shipmentStatus->exists()){
+                $result = DeliveryNote::where('id',$note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
                 if($result){
                     return ['status'=>0,'success'=>'Delivery note verified!'];
                 }else{
@@ -1190,7 +1190,8 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
-            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
+            ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
             ->where('delivery_notes.status',1)
             ->where('delivery_notes.dncc_status',0);
         return Datatables::of($deliveries)
@@ -1217,6 +1218,9 @@ class DeliveryController extends Controller
             })
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+            })
+            ->editColumn('updated_at', function ($rider) {
+                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y H:i:s A') : '';
             })
             ->make(true);
 
@@ -1394,11 +1398,19 @@ class DeliveryController extends Controller
             ->make(true);
     }
     public function sdn_deposit_slip(Request $request){
-        $validate = Validator::make($request->all(), [
-            'deposit_slip' => 'required | mimes:jpeg,jpg,png | max:2000',
-        ]);
+//        return $request;
+        $messages = [
+            'deposit_slip.required' => 'No Image file selected!.',
+            'deposit_slip.mimes' => 'Image file not supported!.',
+            'deposit_slip.size' => 'Image file size exceded!.',
+            ];
+        $validation = [
+            'deposit_slip' => 'required | mimes:jpeg,png,jpg | max:2048',
+        ];
+        $validate = Validator::make($request->all(),$validation,$messages);
+
         if ($validate->fails()) {
-            return response()->json(['status' => 0, 'error' => 'Image not selected | Image file not supported | Image size exceeds 2Mb!']);
+            return response()->json(['status' => 0, 'error' => $validate->errors()]);
         }
         if($request->has('deposit_slip')){
         $image = $request->file('deposit_slip');
