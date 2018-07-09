@@ -313,6 +313,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
     });
 
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::prefix('outstanding_sdn')->name('outstanding_sdn.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@outstanding_sdn_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@outstanding_sdn_list')->name('list');
+            Route::get('delivery_notes_list', 'Admins\AdminFinanceController@outstanding_sdn_delivery_notes_list')->name('delivery_notes_list');
+            Route::post('reconcile_delivery_notes', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes')->name('reconcile_delivery_notes');
+            Route::get('export_to_excel', 'Admins\AdminFinanceController@outstanding_sdn_export_to_excel')->name('export_to_excel');
+        });
+
+        Route::prefix('outstanding_shipments')->name('outstanding_shipments.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@outstanding_shipments_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@outstanding_shipments_list')->name('list');
+            Route::put('resolved', 'Admins\AdminFinanceController@outstanding_shipments_resolved')->name('resolved');
+            Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
+        });
+    });
+
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');
