@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\City;
 use App\Http\Models\BookingType;
@@ -295,7 +296,15 @@ class AdminFinanceController extends Controller
 
             $delivery_note_shipment->save();
 
-            return ['status' => 0, 'success' => 'Shipment has been marked Resolved'];
+            $shipment = Shipment::find($request->id);
+
+            $shipment->shipper_status_id = 42;
+
+            $shipment->save();
+
+            ShipmentsJourneyController::add($request->id, 42, NULL, NULL, NULL, NULL, Auth::id());
+
+            return ['status' => 0, 'success' => 'Shipment has been marked to be Adjusted in Payment'];
         }
         else {
             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
