@@ -129,10 +129,8 @@ class AdminFinanceController extends Controller
             $delivery_note->save();
 
             foreach (DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->get() as $delivery_note_shipment) {
-                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
-
-                if (in_array($shipment->shipper_status_id, [14, 16, 30, 31, 36, 37, 38, 39, 40, 41])) {
-                    $delivery_note_shipment->status = 6;
+                if (in_array($delivery_note_shipment->status, [4, 5, 6])) {
+                    $delivery_note_shipment->status = 7;
 
                     $delivery_note_shipment->save();
                 }
@@ -212,7 +210,7 @@ class AdminFinanceController extends Controller
         ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
         ->join('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
         ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at')
-        ->where('delivery_note_shipments.status', '=', 6);
+        ->where('delivery_note_shipments.status', '=', 7);
 
         $datatables = Datatables::of($shipments)
         ->editColumn('status_updated_at', function($shipment) {
@@ -275,7 +273,7 @@ class AdminFinanceController extends Controller
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
 
-            $delivery_note_shipment->status = 7;
+            $delivery_note_shipment->status = 8;
 
             $delivery_note_shipment->save();
 
@@ -292,7 +290,7 @@ class AdminFinanceController extends Controller
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
 
-            $delivery_note_shipment->status = 8;
+            $delivery_note_shipment->status = 9;
 
             $delivery_note_shipment->save();
 
