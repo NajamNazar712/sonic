@@ -22,7 +22,7 @@ class CreatePickupsTable extends Migration
             $table->tinyInteger('pending_bookings')->nullable();
             $table->decimal('total_estimated_weight', 16, 2);
             $table->boolean('pickup_type');
-            $table->timestamp('pickup_date');
+            $table->timestamp('pickup_date')->nullable();
             $table->integer('rider_id')->nullable();
             $table->timestamp('assigned_date')->nullable();
             $table->integer('status_id');
