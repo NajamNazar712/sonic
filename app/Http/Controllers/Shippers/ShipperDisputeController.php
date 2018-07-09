@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\City;
 use App\Http\Models\Dispute;
+use App\Http\Models\DisputeComment;
 use App\Http\Models\DisputeShipment;
 use App\Http\Models\DisputeType;
 use App\Http\Models\Shipment;
@@ -42,20 +43,12 @@ class ShipperDisputeController extends Controller
             ->editColumn('no_of_shipments',function($dispute){
                 return "<a class='font-weight-bold shipment_count' href='#'>{$dispute->no_of_shipments}</a>";
             })
-//            ->editColumn('launched_by',function($dispute){
-//                if($dispute->rbstatus == 0){
-//                    return $dispute->admin;
-//                }
-//                else if($dispute->rbstatus == 1){
-//                    return $dispute->shipper;
-//                }
-//            })
             ->addColumn("action", function ($dispute) {
                 return " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                            <a href='#' class='dropdown-item view-comments'><i class='ft-plus-circle primary'></i> In Progress</a>                                   
+                                            <a href='#' class='dropdown-item view-comments'><i class='ft-plus-circle primary'></i> View Comments</a>                                   
                                             </div></span>";
             })
 
@@ -102,6 +95,16 @@ class ShipperDisputeController extends Controller
             return response()->json(['status'=>1,'shipments'=>$trackings]);
         }else{
             return response()->json(['status'=>0,'error'=>"No shipments exist!"]);
+        }
+    }
+    public function get_comments(Request $request){
+        $comments = DisputeComment::where('dispute_id',$request->id);
+        if($comments->exists()){
+            $comments = $comments->get();
+            $returnHTML = view('client.dispute.comments')->with(['comments'=>$comments])->render();
+            return response()->json(['status'=>1,'view'=>$returnHTML]);
+        }else{
+            return response()->json(['status'=>0,'error'=>"No dispute exist!"]);
         }
     }
 }

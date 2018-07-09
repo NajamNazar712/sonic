@@ -1,5 +1,4 @@
-
-@extends('admin.layout.master')
+@extends('client.layout.master')
 
 @section('content')
     <h1 class="mb-1">
@@ -107,59 +106,30 @@
     </div>
 
     {{--shipments modal--}}
-    <!--Dispute Update Modal -->
-    <div class="modal fade text-left" id="DisputeUpdateModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DisputeUpdateModal"
+    {{--resolve modal--}}
+    <div class="modal fade text-left" id="CommentsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CommentsModal"
          aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Update Dispute</h4>
+                    <h4 class="modal-title white">Dispute Comments</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body text-center update_dispute_body">
+                <div class="modal-body text-center comments-body">
 
                 </div>
             </div>
         </div>
     </div>
-    <!--Dispute Update Modal -->
-    {{--resolve modal--}}
-    <div class="modal fade text-left" id="ResolveModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ResolveModal"
-         aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Resolve Dispute</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                    <h2>Are You Sure?</h2>
-                </div>
-                <input type="hidden" id="disputeId">
-                <div class="row justify-content-center no-gutters">
-                    <div class="col">
-                        <button type="button" class="btn btn-outline-danger block padding-right-0 dispute-resolve">Yes</button>
-                    </div>
-                    <div class="col">
-                        <button type="button" class="btn btn-outline-primary block padding-left-0" data-dismiss="modal">No</button>
-                    </div>
-                </div>
-
-
-
-            </div>
-        </div>
-    </div>
-
     {{--resolve modal--}}
 
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
@@ -250,6 +220,9 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
@@ -424,7 +397,27 @@
                     })
                 }
             });
+            $('body').on('click','.view-comments',function () {
+                var dispute_id = parseInt($(this).parents('tr').attr('id'));
+                if(dispute_id != ''){
+                    $.ajax({
+                        url: '{!! route('cod.dispute.get.comments') !!}',
+                        method: 'POST',
+                        data: {
+                            'id': dispute_id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if(data.status == 1){
+                            $('#CommentsModal').modal('show');
+                            $('.modal-body.comments-body').html(data.view);
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                        }
+                    });
+                }
+            })
 
 
         });

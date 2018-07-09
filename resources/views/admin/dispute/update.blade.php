@@ -39,13 +39,13 @@
     </div>
     <hr>
 
-    <div class="comments dispute_comments_section vertical-scroll">
+    <div class="comments dispute_comments_section">
         <div class="row ">
             @foreach($comments as $comment)
             <div class="col-12">
                 <p class="comment">{{$comment->comment}}</p>
                 <hr>
-                <span class="comment-date">by <b>{{$comment->admin->name}}</b> at {{\Carbon\Carbon::parse($dispute->created_at)->format('d/m/Y H:i:s A')}}</span>
+                <span class="comment-date">by <b>{{$comment->admin->name}}</b> at {{\Carbon\Carbon::parse($comment->created_at)->format('d/m/Y H:i:s A')}}</span>
             </div>
             @endforeach
         </div>

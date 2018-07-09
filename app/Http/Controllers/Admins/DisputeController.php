@@ -80,7 +80,7 @@ class DisputeController extends Controller
     }
     static public function add_short_received_shipments($id,$count){
         $admin = Auth::id();
-        $admin_details = Admin::find($admin);
+        $admin_details = Admin::where('id',$admin)->first();
         $city_id = $admin_details->city->id;
        $dispute = Dispute::create([
             'description'=>'Shipment short received',
