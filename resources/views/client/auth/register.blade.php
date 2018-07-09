@@ -514,7 +514,7 @@
         $('#product_select').select2({
             dropdownParent:$('#registership')
         });
-        $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')})
+        $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});

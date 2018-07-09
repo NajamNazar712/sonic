@@ -318,39 +318,53 @@
             $('#create_delivery_note_form').bind('submit', function(event) {
                 event.preventDefault();
                 // riderFormValid();
-                $('button[type="submit"]').prop('disabled');
-                var errors = 0;
-                var rider = $('#rider_name').val();
-                var route = $('#route').val();
-                if(rider != ''){
+                var count = 0;
+                count = table.rows().count();
 
-                    $('#rider_error').css('display','none');
-                }else{
+                    var errors = 0;
+                    var rider = $('#rider_name').val();
+                    var route = $('#route').val();
+                    if (rider != '') {
 
-                    $('#rider_error').css('display','block');
-                }
-                if(route != ''){
+                        $('#rider_error').css('display', 'none');
+                    } else {
 
-                    $('#route_error').css('display','none');
-                }else{
+                        $('#rider_error').css('display', 'block');
+                    }
+                    if (route != '') {
 
-                    $('#route_error').css('display','block');
-                }
-                if(rider != '' && route != ''){
-                    errors = 0;
-                }else{
-                    errors = 1;
-                }
+                        $('#route_error').css('display', 'none');
+                    } else {
 
+                        $('#route_error').css('display', 'block');
+                    }
+                    if (rider != '' && route != '') {
+                        errors = 0;
+                    } else {
+                        errors = 1;
+                    }
+                    if(count > 0) {
+                        if (errors == 0) {
+                            $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                            swal({
+                                title: 'Please Wait!',
+                                text: 'Delivery Note is being created!',
+                                icon: 'info',
+                                buttons: false,
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                            $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                            $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                            $('#create_delivery_note_form input#selected_route_id').val(route);
 
-                if(errors == 0){
-                    $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                    $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                    $('#create_delivery_note_form input#selected_route_id').val(route);
+                            this.submit();
+                        }
+                    }else{
+                            var error = "Select at-least one shipment!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                    this.submit();
-
-                }
+                    }
 
 
 

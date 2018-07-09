@@ -66,7 +66,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         Route::resource('receiving_sheet_history', 'Shippers\ShipperReceivingSheetHistoryController');
     });
+    Route::prefix('dispute')->name('dispute.')->group(function (){
+       Route::get('','Shippers\ShipperDisputeController@dispute_index')->name('index');
+       Route::get('list','Shippers\ShipperDisputeController@dispute_list')->name('list');
+       Route::post('create','Shippers\ShipperDisputeController@dispute_create')->name('create');
+       Route::post('get/shipments','Shippers\ShipperDisputeController@get_shipments')->name('get.shipments');
 
+    });
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
@@ -295,6 +301,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
        Route::get('','Admins\DisputeController@dispute_index')->name('index');
        Route::get('list','Admins\DisputeController@dispute_list')->name('list');
        Route::post('create','Admins\DisputeController@dispute_create')->name('create');
+       Route::post('get/shipments','Admins\DisputeController@get_shipments')->name('get.shipments');
+       Route::post('resolve','Admins\DisputeController@resolve_dispute')->name('resolve');
+       Route::post('update','Admins\DisputeController@update_dispute_view')->name('update');
+       Route::put('update.submit','Admins\DisputeController@update_dispute')->name('update.submit');
 
     });
 

@@ -22,8 +22,6 @@
                         <th class="border-primary border-darken-1">Originated At</th>
                         <th class="border-primary border-darken-1">Dispute Type</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
-                        <th class="border-primary border-darken-1">Launched By</th>
-                        <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -46,7 +44,7 @@
                     </button>
                 </div>
                 <div class="modal-body  text-center">
-                    <form id="dispute_form" action="{{route('admin.dispute.create')}}" method="post">
+                    <form id="dispute_form" action="{{route('cod.dispute.create')}}" method="post">
                         @csrf
                         <div class="row mb-2">
                             <div class="col form-group">
@@ -60,7 +58,7 @@
                             <div class="col form-group">
                                 <select name="dispute_type_select" id="dispute_type_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                     <option></option>
-                                @foreach($dispute_types as $dispute)
+                                    @foreach($dispute_types as $dispute)
                                         <option value="{{$dispute->id}}">{{$dispute->type}}</option>
                                     @endforeach
                                 </select>
@@ -69,8 +67,6 @@
                         <div class="row mb-2 justify-content-center">
                             <div class="col-6 form-group">
                                 <input name="tracking_number" id="tracking_number" class="tracking_number" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
-                                {{--<select name="tracking_number[]" id="tracking_number" class="select2 form-control text-center numeric" multiple style="width: 100%;" data-rule-required="true" data-msg-required="This field is required">--}}
-                                {{--</select>--}}
                             </div>
                         </div>
                         <div class="row mb-2 justify-content-center">
@@ -141,17 +137,17 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                        <h2>Are You Sure?</h2>
+                    <h2>Are You Sure?</h2>
                 </div>
                 <input type="hidden" id="disputeId">
-                    <div class="row justify-content-center no-gutters">
-                        <div class="col">
-                            <button type="button" class="btn btn-outline-danger block padding-right-0 dispute-resolve">Yes</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-outline-primary block padding-left-0" data-dismiss="modal">No</button>
-                        </div>
+                <div class="row justify-content-center no-gutters">
+                    <div class="col">
+                        <button type="button" class="btn btn-outline-danger block padding-right-0 dispute-resolve">Yes</button>
                     </div>
+                    <div class="col">
+                        <button type="button" class="btn btn-outline-primary block padding-left-0" data-dismiss="modal">No</button>
+                    </div>
+                </div>
 
 
 
@@ -167,7 +163,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-{{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/ui/perfect-scrollbar.min.css')}}">--}}
+    {{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/ui/perfect-scrollbar.min.css')}}">--}}
 
 
 
@@ -265,14 +261,14 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-        $('#city_select').select2({
-            placeholder:'Select a city',
-            dropdownParent:$('#dispute_form')
-        });
-        $('#dispute_type_select').select2({
-            placeholder:'Select a Dispute type',
-            dropdownParent:$('#dispute_form')
-        });
+            $('#city_select').select2({
+                placeholder:'Select a city',
+                dropdownParent:$('#dispute_form')
+            });
+            $('#dispute_type_select').select2({
+                placeholder:'Select a Dispute type',
+                dropdownParent:$('#dispute_form')
+            });
             var select = $('#tracking_number').selectize({
                 placeholder: 'Tracking Number(s)*',
                 delimiter: ',',
@@ -302,78 +298,76 @@
                 }
             });
 
-        var table = $('#datatable').DataTable({
-            // "scrollX": true,
-            dom: '<"d-inline-block"l><"pull-right"B>tipr',
-            buttons: [{
-                text: 'Launch Dispute',
-                className: 'btn btn-primary dispute_modal',
-                enabled: true,
-                action: function (e, dt, node, config) {
+            var table = $('#datatable').DataTable({
+                // "scrollX": true,
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [{
+                    text: 'Launch Dispute',
+                    className: 'btn btn-primary dispute_modal',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
 
-                }
-            }],
-            fixedHeader: {
-                header: true,
-                headerOffset: $('.header-navbar').height()
-            },
-            lengthMenu: [[25, 50, 100], [25, 50, 100]],
-            pageLength: 25,
-            stateSave: true,
-            pagingType: 'full_numbers',
-            processing: true,
-            serverSide: true,
-            ajax: '{{ route('admin.dispute.list') }}',
-            rowId: 'dispute_id',
-            order: [[1, 'asc']],
-            columns: [
-                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'dispute_id', name: 'dispute_id', class: 'align-middle dispute_id'},
-                {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
-                {data: 'description', name: 'description', class: 'align-middle description'},
-                {data: 'originated_at', name: 'originated_at', class: 'align-middle originated_at'},
-                {data: 'dispute_type', name: 'dispute_type', class: 'align-middle dispute_type'},
-                {data: 'no_of_shipments', name: 'sm.mode', class: 'align-middle mode'},
-                {data: 'launched_by', name: 'launched_by', class: 'align-middle launched_by'},
-                {data: 'updated_by', name: 'updated_by', class: 'align-middle updated_by'},
-                {data: 'status', name: 'status', class: 'align-middle status'},
-                {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
-
-            ],
-            rowCallback: function(row, data, index) {
-                var info = table.page.info();
-                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-            },
-            initComplete: function() {
-                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                this.api().columns().every(function(column_id) {
-                    var column = this;
-                    var header = column.header();
-
-
-                    if ($(header).is('.action') || $(header).is('.serial_number')) {
-                        $(td).appendTo($(search));
                     }
-                    else {
-                        var current = $(input).appendTo($(search)).on('change', function() {
-                            column.search($(this).val(), false, false, true).draw();
-                        }).wrap(td).after(icon);
+                }],
+                fixedHeader: {
+                    header: true,
+                    headerOffset: $('.header-navbar').height()
+                },
+                lengthMenu: [[25, 50, 100], [25, 50, 100]],
+                pageLength: 25,
+                stateSave: true,
+                pagingType: 'full_numbers',
+                processing: true,
+                serverSide: true,
+                ajax: '{{ route('cod.dispute.list') }}',
+                rowId: 'dispute_id',
+                order: [[1, 'asc']],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'dispute_id', name: 'dispute_id', class: 'align-middle dispute_id'},
+                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
+                    {data: 'description', name: 'description', class: 'align-middle description'},
+                    {data: 'originated_at', name: 'originated_at', class: 'align-middle originated_at'},
+                    {data: 'dispute_type', name: 'dispute_type', class: 'align-middle dispute_type'},
+                    {data: 'no_of_shipments', name: 'sm.mode', class: 'align-middle mode'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
-                        if (column.search()) {
-                            current.val(column.search());
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+
+                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                            $(td).appendTo($(search));
                         }
-                    }
-                });
-            }
-        });
-        $('.dispute_modal').on('click',function () {
-            $('#DisputeModal').modal('show');
-        });
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                }
+            });
+            $('.dispute_modal').on('click',function () {
+                $('#DisputeModal').modal('show');
+            });
 
             $( "#dispute_form" ).validate({
                 ignore: [],
@@ -383,20 +377,20 @@
                 },
                 submitHandler: function(form) {
 
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Dispute is being created!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Dispute is being created!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
 
-                        form.submit();
+                    form.submit();
                     // console.log('here')
-                    }
+                }
 
 
             });
@@ -404,7 +398,7 @@
                 var dispute_id = parseInt($(this).parents('tr').attr('id'));
                 if(dispute_id != ''){
                     $.ajax({
-                        url: '{!! route('admin.dispute.get.shipments') !!}',
+                        url: '{!! route('cod.dispute.get.shipments') !!}',
                         method: 'POST',
                         data: {
                             'id': dispute_id,
@@ -430,59 +424,10 @@
                     })
                 }
             });
-            $('body').on('click','.resolve',function () {
-                var disputeId = parseInt($(this).parents('tr').attr('id'));
-               $('#ResolveModal').modal('show');
-               $('#disputeId').val(disputeId);
-            });
-            $('body').on('click','.dispute-resolve',function () {
-                var resolve_id = $('#disputeId').val();
-                // console.log(resolve_id);
-                if(resolve_id !== '') {
-                    $.ajax({
-                        url: '{!! route('admin.dispute.resolve') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': resolve_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        $('#ResolveModal').modal('hide');
-                        if(data.status === 1){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            table.ajax.reload();
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                        }
-                    });
-                }
-            });
-            $('body').on('click','.update',function(){
-                var disputeId = parseInt($(this).parents('tr').attr('id'));
-                // console.log(disputeId)
-                if(disputeId !== ''){
-                    $.ajax({
-                        url: '{!! route('admin.dispute.update') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': disputeId,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
 
-                        if(data.status === 1){
-                            $('.update_dispute_body').html(data.view);
-                            $('#DisputeUpdateModal').modal('show');
 
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                        }
-                    });
-                }
-            });
-    });
+        });
 
     </script>
 @endsection

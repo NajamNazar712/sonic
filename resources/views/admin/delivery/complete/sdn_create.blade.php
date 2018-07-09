@@ -334,6 +334,9 @@
             //     });
 
                 // this.submit();
+            $('body').on('change','td.remarks input',function() {
+                $(this).val($(this).val().trim());
+            });
             $( "#sdn_form" ).validate({
                 errorClass:"danger",
                 errorPlacement: function(error, element) {
@@ -344,7 +347,7 @@
 
                         swal({
                             title: 'Please Wait!',
-                            text: 'Your rates are being added!',
+                            text: 'Station deposit note is being created!',
                             icon: 'info',
                             buttons: false,
                             closeOnClickOutside: false,
