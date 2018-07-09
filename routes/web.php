@@ -71,6 +71,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
        Route::get('list','Shippers\ShipperDisputeController@dispute_list')->name('list');
        Route::post('create','Shippers\ShipperDisputeController@dispute_create')->name('create');
        Route::post('get/shipments','Shippers\ShipperDisputeController@get_shipments')->name('get.shipments');
+       Route::post('get/comments','Shippers\ShipperDisputeController@get_comments')->name('get.comments');
 
     });
     Route::prefix('tracking')->name('tracking.')->group(function () {
