@@ -1056,7 +1056,7 @@ class DeliveryController extends Controller
             $delivery_note = DeliveryNote::where('id',$request->id);
             if($delivery_note->exists()) {
                 $total_shipments = 0;
-                $total_cod_amount = 0;
+                $total_dncc_amount = 0;
                 $dncc_status = array(14,16,30,36,37);
                 $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$request->id)->select('shipment_id')->get();
                 $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereIn('shipper_status_id',$dncc_status)->get();
@@ -1094,7 +1094,7 @@ class DeliveryController extends Controller
                             
                           </tr>
             ';
-                    $total_cod_amount +=$shipment->received_amount;
+                    $total_dncc_amount +=$shipment->received_amount;
                     $shipment_details .= $shipment_details_row_start;
                 }
                 $shipment_details .= '
@@ -1150,7 +1150,7 @@ class DeliveryController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>DNCC Amount</strong></td>
-                            <td>Rs ' . number_format($total_cod_amount) . '</td>
+                            <td>Rs ' . number_format($total_dncc_amount) . '</td>
                           </tr>
                         </tbody>
                       </table>
@@ -1278,26 +1278,30 @@ class DeliveryController extends Controller
     public function create_sdn_submit(Request $request){
         if($request->sdn_hub_id){
                 $dncc_ids = explode(',',$request->sdn_dncc_ids);
-//                return $request;
-               $sdn_id = StationDepositNote::create([
-                    'hub_id'=>$request->sdn_hub_id,
-                    'dncc_count'=>$request->sdn_count,
-                    'sdn_delivered_shipments'=>$request->sdn_delivered_shipments,
-                    'sdn_amount'=>$request->total_dncc_amount,
-                    'sdn_expense'=>$request->total_expenses,
-                    'sdn_net_amount'=>$request->total_amount,
-                    'deposited_by'=>Auth::id(),
-                    'banks_list_id'=>$request->bank_select
-                ]);
-               foreach ($dncc_ids as $dncc){
-                   DeliveryNoteStationDepositNote::create([
-                       'station_deposit_note_id'=>$sdn_id->id,
-                       'delivery_note_id'=>$dncc
-                   ]);
-                   DeliveryNote::where('id',$dncc)->update(['expense'=>$request->expense[$dncc],'net_amount'=>$request->net_amount[$dncc],'remarks'=>$request->remarks[$dncc],'dncc_status'=>1]);
-               }
+                $check_status = DeliveryNote::whereIn('id',$dncc_ids)->where('dncc_status',1)->exists();
+                if(!$check_status) {
+                    $sdn_id = StationDepositNote::create([
+                        'hub_id' => $request->sdn_hub_id,
+                        'dncc_count' => $request->sdn_count,
+                        'sdn_delivered_shipments' => $request->sdn_delivered_shipments,
+                        'sdn_amount' => $request->total_dncc_amount,
+                        'sdn_expense' => $request->total_expenses,
+                        'sdn_net_amount' => $request->total_amount,
+                        'deposited_by' => Auth::id(),
+                        'banks_list_id' => $request->bank_select
+                    ]);
+                    foreach ($dncc_ids as $dncc) {
+                        DeliveryNoteStationDepositNote::create([
+                            'station_deposit_note_id' => $sdn_id->id,
+                            'delivery_note_id' => $dncc
+                        ]);
+                        DeliveryNote::where('id', $dncc)->update(['expense' => $request->expense[$dncc], 'net_amount' => $request->net_amount[$dncc], 'remarks' => $request->remarks[$dncc], 'dncc_status' => 1]);
+                    }
 
-               return redirect(route('admin.delivery.sdn.index'));
+                    return redirect(route('admin.delivery.sdn.index'));
+                }else{
+                    return redirect(route('admin.delivery.sdn.index'))->with('error','SDN already created!');
+                }
             }
     }
     public function sdn_view(Request $request){

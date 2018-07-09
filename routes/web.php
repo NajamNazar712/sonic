@@ -66,7 +66,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         Route::resource('receiving_sheet_history', 'Shippers\ShipperReceivingSheetHistoryController');
     });
+    Route::prefix('dispute')->name('dispute.')->group(function (){
+       Route::get('','Shippers\ShipperDisputeController@dispute_index')->name('index');
+       Route::get('list','Shippers\ShipperDisputeController@dispute_list')->name('list');
+       Route::post('create','Shippers\ShipperDisputeController@dispute_create')->name('create');
+       Route::post('get/shipments','Shippers\ShipperDisputeController@get_shipments')->name('get.shipments');
 
+    });
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');

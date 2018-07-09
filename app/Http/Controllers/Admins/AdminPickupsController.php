@@ -1024,7 +1024,7 @@ class AdminPickupsController extends Controller
                       $shipment = $receiving_sheet_shipment->shipment;
 
                       if ($shipment->shipper_status_id == 1 && $pickup_request->pickup_address_id == $shipment->pickup_address_id) {
-                          $short_shipments[] = $shipment->tracking_number;
+                          $short_shipments[] = $shipment->id;
                       }
                   }
               }

@@ -22,9 +22,8 @@
     </div>
     <div class="row mb-2 justify-content-center">
         <div class="col-6 form-group">
-            {{--<input name="tracking_number" id="tracking_number" class="select2 form-control" style="width: 100%;">--}}
-            <select name="update_tracking_number[]" id="update_tracking_number" class="select2 form-control text-center numeric" multiple style="width: 100%;">
-            </select>
+            <input name="update_tracking_number" id="update_tracking_number" class="tracking_numbers" data-tags-input-name="tracking_number">
+
         </div>
     </div>
     <div class="row mb-2 justify-content-center">
@@ -70,21 +69,49 @@
 
 <script type="text/javascript">
     $(document).ready(function () {
+        var select = $('#update_tracking_number').selectize({
+            placeholder: 'Tracking Number(s)*',
+            delimiter: ',',
+            createOnBlur: true,
+            persist: false,
+            plugins: ['remove_button'],
+            onDropdownOpen: function(dropdown) {
+                dropdown.remove();
+            },
+            onType: function(str) {
+                var regex = /^[0-9,]+$/;
+
+                if (!regex.test(str)) {
+                    select[0].selectize.setTextboxValue('');
+                }
+            },
+            create: function(input) {
+                if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                    return {
+                        value: input,
+                        text: input
+                    }
+                }
+                else {
+                    return false;
+                }
+            }
+        });
         //$('.dispute_comments_section').scrollable();
 
-        $('#update_tracking_number').select2({
-            placeholder:'Enter Tracking Number',
-            dropdownParent:$('#update_dispute_form'),
-            tags: true,
-            tokenSeparators: ['/',',',';'," "]
-        }).inputmask({
-            'alias': 'integer',
-            'allowMinus': false,
-            'allowPlus': false,
-            'rightAlign': false,
-            'min': 12,
-            'max': 12
-        });
+        // $('#update_tracking_number').select2({
+        //     placeholder:'Enter Tracking Number',
+        //     dropdownParent:$('#update_dispute_form'),
+        //     tags: true,
+        //     tokenSeparators: ['/',',',';'," "]
+        // }).inputmask({
+        //     'alias': 'integer',
+        //     'allowMinus': false,
+        //     'allowPlus': false,
+        //     'rightAlign': false,
+        //     'min': 12,
+        //     'max': 12
+        // });
         $('#update_city_select').select2({
             placeholder:'Select a city',
             dropdownParent:$('#update_dispute_form')
@@ -94,6 +121,7 @@
             dropdownParent:$('#update_dispute_form')
         });
         $( "#update_dispute_form" ).validate({
+            //ignore: [],
             errorClass:"danger",
             errorPlacement: function(error, element) {
                 error.addClass('w-100').appendTo(element.parent('.form-group'));
