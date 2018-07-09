@@ -365,14 +365,14 @@
 				if (index === -1) {
 					selected_rows.push(id);
 
-					var total_dncc_amount = ((total_dncc_amount_selector.val() != '') ? parseInt(total_dncc_amount_selector.val()) : 0) + parseInt(parent.children('td.dncc_amount').html());
-					var total_expense = ((total_expense_selector.val() != '') ? parseInt(total_expense_selector.val()) : 0) + parseInt(parent.children('td.expense').html());
+					var total_dncc_amount = ((total_dncc_amount_selector.val() != '') ? parseInt(total_dncc_amount_selector.val()) : 0) + ((parent.children('td.dncc_amount').html() != '') ? parseInt(parent.children('td.dncc_amount').html()) : 0);
+					var total_expense = ((total_expense_selector.val() != '') ? parseInt(total_expense_selector.val()) : 0) + ((parent.children('td.expense').html() != '') ? parseInt(parent.children('td.expense').html()) : 0);
 				}
 				else {
 					selected_rows.splice(index, 1);
 
-					var total_dncc_amount = ((total_dncc_amount_selector.val() != '') ? parseInt(total_dncc_amount_selector.val()) : 0) - parseInt(parent.children('td.dncc_amount').html());
-					var total_expense = ((total_expense_selector.val() != '') ? parseInt(total_expense_selector.val()) : 0) - parseInt(parent.children('td.expense').html());
+					var total_dncc_amount = ((total_dncc_amount_selector.val() != '') ? parseInt(total_dncc_amount_selector.val()) : 0) - ((parent.children('td.dncc_amount').html() != '') ? parseInt(parent.children('td.dncc_amount').html()) : 0);
+					var total_expense = ((total_expense_selector.val() != '') ? parseInt(total_expense_selector.val()) : 0) - ((parent.children('td.expense').html() != '') ? parseInt(parent.children('td.expense').html()) : 0);
 				}
 
 				var total_net_amount = total_dncc_amount - total_expense;
