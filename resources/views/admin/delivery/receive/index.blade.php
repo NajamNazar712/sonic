@@ -296,26 +296,7 @@
                     {{--scan.val('');--}}
                 {{--}--}}
             {{--});--}}
-            $('body').on('click','.verifyDeliveryNote',function () {
-                var note_id = parseInt($(this).parents('tr').attr('id'));
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.dn.verify') !!}',
-                    method: 'POST',
-                    data: {
-                        'note_id': note_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                        if(data.status == 0){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            table.ajax.reload();
-                        }else{
-                            // console.log(data.delivery_note_id);
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-                });
 
-            });
 
         });
     </script>
