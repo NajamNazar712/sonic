@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\City;
 use App\Http\Models\Dispute;
 use App\Http\Models\DisputeComment;
 use App\Http\Models\DisputeShipment;
 use App\Http\Models\DisputeType;
+use App\Http\Models\PaymentMode;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 
@@ -105,6 +110,140 @@ class ShipperDisputeController extends Controller
             return response()->json(['status'=>1,'view'=>$returnHTML]);
         }else{
             return response()->json(['status'=>0,'error'=>"No dispute exist!"]);
+        }
+    }
+
+    //Rebook Starts
+    public function rebook_index(Request $request){
+        return view('client.dispute.rebook.index');
+    }
+    public function rebook_list(Request $request){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->join('shipment_items as si','si.shipment_id','=','shipments.id')
+            ->join('products','products.id','=','si.product_type_id')
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name as consignee','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','products.product_name','shipments.created_at as created_at'])
+            ->where('shipments.shipper_status_id',11)
+            ->where('shipments.user_id',Auth::id());
+        return Datatables::of($shipments)
+            ->editColumn('created_at', function ($shipments) {
+                return $shipments->created_at ? with(new Carbon($shipments->created_at))->format('d/m/Y H:i:s A') : '';
+            })
+            ->addColumn("action", function ($result) {
+                return " <span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                                            <div class='dropdown-menu open-left arrow'>
+                                              <a href='#' class='dropdown-item details'><i class='ft-plus-circle primary'></i> View Details</a>                                         
+                                              <a href='#' class='dropdown-item rebook'><i class='ft-plus-circle primary'></i> Re-book</a>                                         
+                                            </div></span>";
+            })
+            ->make(true);
+    }
+    public function get_shipment_info(Request $request){
+        $shipment_id = $request->shipment_id;
+        if($shipment_id != ''){
+            $shipment = Shipment::where('id',$shipment_id);
+            if($shipment->exists()){
+                $data = array();
+                $shipment = $shipment->first();
+                $cities = City::where('status',1)->select('id','name')->get();
+                $payment_mode = PaymentMode::all();
+                $data['tracking_number'] = $shipment->tracking_number;
+                $data['consignee_city_id'] = $shipment->consignee_city->id;
+//                $data['consignee_city_name'] = $shipment->consignee_city->name;
+                $data['consignee_name'] = $shipment->consignee_name;
+                $data['consignee_address'] = $shipment->consignee_address;
+                $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
+                $data['consignee_phone2'] = $shipment->consignee_phone_number_2;
+                $data['consignee_email'] = $shipment->consignee_email;
+                $data['amount'] = $shipment->amount;
+                $data['payment_mode'] = $shipment->payment_mode->id;
+
+                return response()->json(['status'=>1,'data'=>$data,'cities'=>$cities,'payment'=>$payment_mode]);
+
+            }else{
+                return response()->json(['status'=>0,'error'=>'Shipment not found']);
+            }
+
+        }
+    }
+
+    //Re-Book a shipment
+    private function book($service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {
+        $shipment = new Shipment();
+
+        $shipment->user_id = Auth::id();
+        $shipment->booking_type_id = $service_type_id;
+        $shipment->pickup_address_id = $pickup_address_id;
+        $shipment->information_display = $information_display;
+
+        $shipment->consignee_city_id = $consignee_city_id;
+        $shipment->consignee_name = $consignee_name;
+        $shipment->consignee_address = $consignee_address;
+        $shipment->consignee_phone_number_1 = $consignee_phone_number_1;
+        $shipment->consignee_phone_number_2 = $consignee_phone_number_2;
+        $shipment->consignee_email = $consignee_email_address;
+
+        $shipment->order_id = $order_id;
+        $shipment->package_type = $package_type;
+        $shipment->pickup_date = $pickup_date;
+        $shipment->special_instructions = $special_instructions;
+
+
+        $shipment->estimated_weight = $estimated_weight;
+        $shipment->shipping_mode_id = $shipping_mode_id;
+        $shipment->same_day_timing_id = $same_day_timing_id;
+
+        $shipment->amount = $amount;
+        $shipment->payment_mode_id = $payment_mode_id;
+        $shipment->shipper_status_id = $shipper_status_id;
+        $shipment->consignee_status_id = $consignee_status_id;
+
+        $shipment->save();
+        return $shipment;
+    }
+    //rebook shipment
+    public function rebook_shipment_update(Request $request){
+        $shipment_id = $request->shipment_id;
+        $newAddress = "Trax Office";
+        if($shipment_id != ''){
+            $shipment = Shipment::where('id',$shipment_id);
+            if($shipment->exists()){
+                $shipment = $shipment->first();
+
+                if(($request->consignee_city_id != $shipment->consignee_city_id) && $shipment->shipper_status_id == 11){
+                    $shipment->shipper_status_id = 19;
+                    $shipment->consignee_status_id = 19;
+                    $shipment->save();
+
+                    $pickup_address = UserShippingInfo::create(['user_id'=>Auth::id(),'pickup_address'=>$newAddress,'poc'=>$shipment->pickup_address->poc,'phone'=>$shipment->pickup_address->phone,'email'=>$shipment->pickup_address->email,'city_id'=>$shipment->consignee_city_id,'rebook_status'=>1]);
+
+                  $newShipment =  $this->book($shipment->booking_type_id,$pickup_address->id,1,$request->consignee_city_id,$request->consignee,$request->address,$request->phone1,$request->phone2,$request->email,$shipment->order_id,$shipment->package_type,$shipment->pickup_date,$shipment->special_instructions,$shipment->estimated_weight,$request->mode,$shipment->same_day_timing_id,$request->amount,$shipment->payment_mode_id,2,2);
+
+                 $newTracking = ShipperShipmentBookController::generate_tracking_number($newShipment->id,$shipment->consignee_city_id,$newShipment->consignee_city_id);
+                    ShipmentsJourneyController::add($shipment->id, 19, 19, NULL, 'Shipment # '.$shipment->tracking_number.' has been Re-Booked as new Shipment # '.$newTracking, Auth::id(), NULL);
+
+
+                        foreach ($shipment->items as $item) {
+                            ShipperShipmentBookController::add_item($newShipment->id, $item->product_type_id, $item->description, $item->quantity, $item->price, $item->insurance, $item->type);
+                        }
+
+                    ShipmentsJourneyController::add($newShipment->id, 1, 1, NULL, 'Shipment has been Re-Booked against Tracking # '.$shipment->tracking_number, Auth::id(), NULL);
+                    ShipmentsJourneyController::add($newShipment->id, 2, 2, NULL, 'Shipment has been Re-Booked and arrived at origin center', Auth::id(), NULL);
+                    return response()->json(['status'=>1,'success'=>'Shipment has been rebooked successfully']);
+
+                }else{
+                    return response()->json(['status'=>0,'error'=>'Please select new city!']);
+                }
+            }else{
+                return response()->json(['status'=>0,'error'=>'Shipment doesn\'t exist!']);
+
+            }
         }
     }
 }
