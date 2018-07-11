@@ -319,6 +319,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@outstanding_sdn_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@outstanding_sdn_list')->name('list');
             Route::get('delivery_notes_list', 'Admins\AdminFinanceController@outstanding_sdn_delivery_notes_list')->name('delivery_notes_list');
+            Route::put('delivery_note_expense_edit', 'Admins\AdminFinanceController@outstanding_sdn_delivery_note_expense_edit')->name('delivery_note_expense_edit');
             Route::post('reconcile_delivery_notes', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes')->name('reconcile_delivery_notes');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@outstanding_sdn_export_to_excel')->name('export_to_excel');
         });
