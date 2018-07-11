@@ -89,11 +89,31 @@ class AdminFinanceController extends Controller
         ->addColumn('route', function ($delivery_note) {
             return $delivery_note->route_code . ' (' . $delivery_note->route_start . ' to ' . $delivery_note->route_end . ')';
         })
+        ->addColumn('action', function($station_deposit_note) {
+            return '<div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item edit_expense"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit Expense</div></button>
+                  </div>
+                </div>
+            ';
+        })
         ->filterColumn('route', function($query, $keyword) {
             $query->where('ro.code', 'like', '%' . $keyword . '%')->orWhere('ro.start', 'like', '%' . $keyword . '%')->orWhere('ro.end', 'like', '%' . $keyword . '%');
         });
 
         return $datatables->make(true);
+    }
+
+    public function outstanding_sdn_delivery_note_expense_edit(Request $request) {
+        $delivery_note = DeliveryNote::find($request->id);
+
+        $delivery_note->expense = $request->expense;
+        $delivery_note->net_amount = $delivery_note->received_cod_amount - $request->expense;
+
+        $delivery_note->save();
+
+        return ['status' => 0, 'success' => 'Delivery Note Expense has been updated'];
     }
 
     public function outstanding_sdn_reconcile_delivery_notes(Request $request) {
@@ -227,8 +247,8 @@ class AdminFinanceController extends Controller
             return '<div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                   <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Resolve</div></button>
-                    <button type="button" class="dropdown-item adjust_in_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Adjust in Payment</div></button>
+                    <button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>
+                    <button type="button" class="dropdown-item adjust_in_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Adjust in Payment</div></button>
                   </div>
                 </div>
             ';

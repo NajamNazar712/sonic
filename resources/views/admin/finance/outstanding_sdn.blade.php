@@ -63,6 +63,7 @@
 														<th class="border-primary border-darken-1">Updated at</th>
 														<th class="border-primary border-darken-1">DNCC Amount</th>
 														<th class="border-primary border-darken-1">Expense</th>
+														<th class="border-primary border-darken-1"></th>
 													</tr>
 												</thead>
 											</table>
@@ -94,6 +95,33 @@
 									</div>
 								</div>
 							</div>
+
+							<div class="modal fade" id="edit_expense" role="dialog" aria-labelledby="edit_expense_title" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<div class="modal-content">
+										<form class="form-horizontal" novalidate="novalidate">
+											<input type="hidden" name="id" class="id">
+
+											<div class="modal-header">
+												<h4 class="modal-title" id="edit_expense_title">Edit Expense of DNCC #<span></span></h4>
+
+												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+													<span aria-hidden="true">×</span>
+												</button>
+											</div>
+											<div class="modal-body">
+												<div class="form-group m-0">
+													<input type="text" name="expense" class="form-control expense" placeholder="Expense">
+												</div>
+											</div>
+											<div class="modal-footer">
+												<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+												<button type="submit" class="btn btn-primary ml-auto">Edit</button>
+											</div>
+										</form>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -103,6 +131,8 @@
 @endsection
 
 @section('css')
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
 	<style>
 		.modal .modal-dialog.modal-lg.modal-full-length {
 			max-width: 95%;
@@ -157,6 +187,10 @@
 @endsection
 
 @section('js')
+	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
 	<script>
 		$(document).ready(function() {
 			function print(id) {
@@ -286,14 +320,15 @@
 					{data:'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data:'updated_at', name: 'dn.updated_at', class: 'align-middle updated_at'},
 					{data:'dncc_amount', name: 'dn.received_cod_amount', class: 'align-middle dncc_amount'},
-					{data:'expense', name: 'dn.expense', class: 'align-middle expense'}
+					{data:'expense', name: 'dn.expense', class: 'align-middle expense'},
+					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
 					$('td:eq(1)', row).html(index + 1);
 
-					if ($.inArray(data.id, selected_rows) !== -1) {
-						reconcile_delivery_notes_table.row(row).select();
-					}
+					// if ($.inArray(data.id, selected_rows) !== -1) {
+					// 	reconcile_delivery_notes_table.row(row).select();
+					// }
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -306,7 +341,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else {
@@ -343,6 +378,8 @@
 					selected_rows = [];
 
 					reconcile_delivery_notes_table.clear().draw();
+
+					$('#reconcile_delivery_notes #reconcile_delivery_notes_title span').html(id);
 
 					$('#reconcile_delivery_notes').modal('show');
 				}
@@ -393,6 +430,69 @@
 				}
 
 				$('#reconcile_delivery_notes #reconcile_delivery_notes_form .delivery_note_ids').val(selected_rows);
+			});
+
+			$('#edit_expense form input.expense').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			});
+
+			$('#edit_expense form').validate({
+				errorClass: 'danger',
+				successClass: 'success',
+				errorPlacement: function(error, element) {
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
+				},
+				submitHandler: function(form) {
+					var id = $(form).find('input.id').val();
+					var expense = $(form).find('input.expense').val();
+
+					$.ajax({
+						url: '{!! route('admin.finance.outstanding_sdn.delivery_note_expense_edit') !!}',
+						method: 'PUT',
+						data: {
+							'id': id,
+							'expense': expense,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
+					.done(function(data) {
+						if (data.status == 0) {
+							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+						else {
+							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+
+						$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_dncc_amount').val('');
+						$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_expense').val('');
+						$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_net_amount').val('');
+
+						$('#reconcile_delivery_notes #reconcile_delivery_notes_form button.reconcile').prop('disabled', true);
+
+						selected_rows = [];
+
+						reconcile_delivery_notes_table.clear().draw();
+
+						$('#edit_expense').modal('hide');
+					});
+
+					return false;
+				}
+			});
+
+			$('#reconcile_delivery_notes #reconcile_delivery_notes_datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit_expense', function() {
+				var parent = $(this).parents('tr');
+				var id = parseInt(parent.attr('id'));
+				var value = parent.children('td.expense').html();
+
+				$('#edit_expense form #edit_expense_title span').html(id);
+
+				$('#edit_expense form input.id').val(id);
+				$('#edit_expense form input.expense').val(value);
+
+				$('#edit_expense').modal('show');
 			});
 		});
 	</script>

@@ -27,7 +27,7 @@
 								</div>
 
 								<div class="form-group ml-1">
-									<select name="service" class="select2" id="service" data-rule-required="true" data-msg-required="Service is required">
+									<select name="service" class="select2" id="service">
 										<option value="0">All</option>
 
 										@foreach($booking_types as $booking_type)
@@ -43,7 +43,7 @@
 										</span>
 									</div>
 
-									<input type="text" name="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_from" placeholder="Delivery Date (From)*" data-rule-required="true" data-msg-required="Delivery Date (From) is required">
+									<input type="text" name="delivery_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_from" placeholder="Delivery Date (From)">
 								</div>
 
 								<div class="form-group input-group ml-1">
@@ -53,7 +53,7 @@
 										</span>
 									</div>
 
-									<input type="text" name="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_to" placeholder="Delivery Date (To)*" data-rule-required="true" data-msg-required="Delivery Date (To) is required">
+									<input type="text" name="delivery_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="delivery_date_to" placeholder="Delivery Date (To)">
 								</div>
 
 								<div class="form-group ml-1">
@@ -165,9 +165,7 @@
 
 			$('#search_form #service').prepend('<option value="" selected="selected"></option>').select2({
 				width: '150px',
-				placeholder: 'Service*'
-			}).bind('change', function() {
-				$(this).valid();
+				placeholder: 'Service'
 			});
 
 			$('#search_form #delivery_date_from').pickadate({
@@ -179,8 +177,6 @@
 				hiddenSuffix: '_formatted',
 				onSet: function(context) {
 					if (context.select) {
-						$('#search_form #delivery_date_from').valid();
-
 						$('#search_form #delivery_date_to').pickadate('picker').set('min', $('#search_form #delivery_date_from').pickadate('picker').get('select'));
 					}
 				}
@@ -195,8 +191,6 @@
 				hiddenSuffix: '_formatted',
 				onSet: function(context) {
 					if (context.select) {
-						$('#search_form #delivery_date_to').valid();
-
 						$('#search_form #delivery_date_from').pickadate('picker').set('max', $('#search_form #delivery_date_to').pickadate('picker').get('select'));
 					}
 				}
