@@ -60,29 +60,51 @@ class ShipperDisputeController extends Controller
             ->make(true);
     }
     public function dispute_create(Request $request){
+//        return $request;
         $tracking_numbers = explode(',',$request->tracking_number);
         if(!empty($request->tracking_number)) {
             $count = 0;
-            $dispute = Dispute::create([
-                'description'=>$request->description,
-                'raised_by'=>Auth::id(),
-                'raised_by_status'=>1,
-                'city_id'=>$request->city_select,
-                'dispute_type_id'=>$request->dispute_type_select
-            ]);
+            $dispute_id = '';
+            $dispute_created = 0;
+            $tracking_number = array();
             foreach ($tracking_numbers as $tracking) {
-                $shipment = Shipment::where('tracking_number',$tracking)->where('user_id',Auth::id());
+                $shipment = Shipment::where('tracking_number',$tracking);
                 if($shipment->exists()){
                     $shipment = $shipment->first();
-                    DisputeShipment::create([
-                        'dispute_id'=>$dispute->id,
-                        'shipment_id'=>$shipment->id
-                    ]);
-                    $count++;
+                    if (Auth::id() == $shipment->user_id){
+                    if($dispute_created == 0){
+                        $dispute = Dispute::create([
+                            'description'=>$request->description,
+                            'raised_by'=>Auth::id(),
+                            'raised_by_status'=>1,
+                            'city_id'=>$request->city_select,
+                            'dispute_type_id'=>$request->dispute_type_select
+                        ]);
+                        $dispute_id = $dispute->id;
+                        $dispute_created = 1;
+                        $tracking_number['success'] = 'Dispute successfully created!';
+                    }
+
+                        DisputeShipment::create([
+                            'dispute_id'=>$dispute->id,
+                            'shipment_id'=>$shipment->id
+                        ]);
+                        $count++;
+                    }else{
+                        $tracking_number['disallowed'][] = $tracking;
+                    }
+
+                }else{
+                    $tracking_number['invalid'][] = $tracking;
                 }
             }
-            Dispute::where('id',$dispute->id)->update(['shipments_count'=>$count]);
-            return redirect()->back()->with('success','Shipment successfully created!');
+            if($dispute_id != ''){
+
+                Dispute::where('id',$dispute_id)->update(['shipments_count'=>$count]);
+            }
+            return response()->json($tracking_number);
+//            return $tracking_number;
+//            return redirect()->back()->with(['success'=>'Dispute successfully created!','error'=>$tracking_number]);
         }else{
             return redirect()->back()->with('error','No shipments selected!');
 
@@ -138,7 +160,7 @@ class ShipperDisputeController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item details'><i class='ft-plus-circle primary'></i> View Details</a>                                         
+                                              <a href='#' class='dropdown-item details print_airway'><i class='ft-plus-circle primary'></i> View Details</a>                                         
                                               <a href='#' class='dropdown-item rebook'><i class='ft-plus-circle primary'></i> Re-book</a>                                         
                                             </div></span>";
             })
