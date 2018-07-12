@@ -34,82 +34,6 @@
         </div>
     </div>
 
-
-    <!--Dispute Modal -->
-    {{--<div class="modal fade text-left" id="DisputeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DisputeModal"--}}
-         {{--aria-hidden="true">--}}
-        {{--<div class="modal-dialog modal-lg" role="document">--}}
-            {{--<div class="modal-content">--}}
-                {{--<div class="modal-header bg-primary white">--}}
-                    {{--<h4 class="modal-title white">Launch Dispute</h4>--}}
-                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-                        {{--<span aria-hidden="true">&times;</span>--}}
-                    {{--</button>--}}
-                {{--</div>--}}
-                {{--<div class="modal-body  text-center">--}}
-                    {{--<form id="dispute_form" action="{{route('cod.dispute.create')}}" method="post">--}}
-                        {{--@csrf--}}
-                        {{--<div class="row mb-2">--}}
-                            {{--<div class="col form-group">--}}
-                                {{--<select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">--}}
-                                    {{--<option></option>--}}
-                                    {{--@foreach($cities as $city)--}}
-                                        {{--<option value="{{$city->id}}">{{$city->name}}</option>--}}
-                                    {{--@endforeach--}}
-                                {{--</select>--}}
-                            {{--</div>--}}
-                            {{--<div class="col form-group">--}}
-                                {{--<select name="dispute_type_select" id="dispute_type_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">--}}
-                                    {{--<option></option>--}}
-                                    {{--@foreach($dispute_types as $dispute)--}}
-                                        {{--<option value="{{$dispute->id}}">{{$dispute->type}}</option>--}}
-                                    {{--@endforeach--}}
-                                {{--</select>--}}
-                            {{--</div>--}}
-                        {{--</div>--}}
-                        {{--<div class="row mb-2 justify-content-center">--}}
-                            {{--<div class="col-6 form-group">--}}
-                                {{--<input name="tracking_number" id="tracking_number" class="tracking_number" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">--}}
-                            {{--</div>--}}
-                        {{--</div>--}}
-                        {{--<div class="row mb-2 justify-content-center">--}}
-                            {{--<div class="col-6 form-group">--}}
-                                {{--<textarea name="description" id="description" class="form-control" cols="30" rows="3" placeholder="Enter Description" data-rule-required="true" data-msg-required="This field is required"></textarea>--}}
-                            {{--</div>--}}
-                        {{--</div>--}}
-                        {{--<div class="row justify-content-center">--}}
-                            {{--<div class="col-3">--}}
-                                {{--<button id="DisputeCreate" type="submit" class="btn btn-primary btn-block">Launch Dispute</button>--}}
-                            {{--</div>--}}
-                        {{--</div>--}}
-                    {{--</form>--}}
-                {{--</div>--}}
-            {{--</div>--}}
-        {{--</div>--}}
-    {{--</div>--}}
-    <!--Dispute Modal -->
-    {{--shipments modal--}}
-    {{--<div class="modal fade text-left" id="ShipmentsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ShipmentsModal"--}}
-         {{--aria-hidden="true">--}}
-        {{--<div class="modal-dialog modal-sm" role="document">--}}
-            {{--<div class="modal-content">--}}
-                {{--<div class="modal-header bg-primary white">--}}
-                    {{--<h4 class="modal-title white">Dispute Shipments List</h4>--}}
-                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-                        {{--<span aria-hidden="true">&times;</span>--}}
-                    {{--</button>--}}
-                {{--</div>--}}
-                {{--<div class="modal-body text-center dispute_shipments">--}}
-
-                {{--</div>--}}
-                {{--<div class="modal-footer justify-content-center">--}}
-                    {{--<button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>--}}
-                {{--</div>--}}
-            {{--</div>--}}
-        {{--</div>--}}
-    {{--</div>--}}
-
-    {{--shipments modal--}}
     {{--Rebook modal--}}
     <div class="modal fade text-left" id="RebookModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RebookModal"
          aria-hidden="true">
@@ -293,34 +217,6 @@
         $(document).ready(function () {
 
 
-            // var select = $('#tracking_number').selectize({
-            //     placeholder: 'Tracking Number(s)*',
-            //     delimiter: ',',
-            //     createOnBlur: true,
-            //     persist: false,
-            //     plugins: ['remove_button'],
-            //     onDropdownOpen: function (dropdown) {
-            //         dropdown.remove();
-            //     },
-            //     onType: function (str) {
-            //         var regex = /^[0-9,]+$/;
-            //
-            //         if (!regex.test(str)) {
-            //             select[0].selectize.setTextboxValue('');
-            //         }
-            //     },
-            //     create: function (input) {
-            //         if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
-            //             return {
-            //                 value: input,
-            //                 text: input
-            //             }
-            //         }
-            //         else {
-            //             return false;
-            //         }
-            //     }
-            // });
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 // "scrollX": true,
@@ -331,21 +227,11 @@
                     enabled: false,
                     action: function (e, dt, node, config) {
                             if(selected_rows !== ''){
-                                // console.log(selected_rows)
 
-                                // var count = selected_rows.length;
-                                // console.log(selected_rows)
-                                // for(var i=0;i<count;i++){
-                                    // console.log(selected_rows.length)
                                     if(selected_rows.length !== 0){
-                                       // $('#RebookModal').modal('show');
-                                        // get_shipment_info(selected_rows[0]);
-                                        // selected_rows.splice($.inArray(77, selected_rows), 1);
-                                        // console.log(selected_rows)
-                                        open_rebook_modal_first_time();
+                                        open_rebook_modal();
                                     }
 
-                                // }
                             }
                     }
                 }],
@@ -459,6 +345,9 @@
             });
 
             $("#phone1, #phone2").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+            $('body').on('change','#RebookModal input,#RebookModal textarea',function() {
+                $(this).val($(this).val().trim());
+            });
             $('body').on('change','#updateRebook input,#updateRebook textarea',function() {
                 $(this).val($(this).val().trim());
             });
@@ -622,12 +511,7 @@
                $('#payment_mode').empty().trigger('change');
             });
 
-            function open_rebook_modal_first_time() {
-                if(selected_rows.length !== 0){
-                        $('#RebookModal').modal('show');
-                        get_shipment_info(selected_rows[0]);
-                }
-            }
+
             function open_rebook_modal() {
                 if(selected_rows.length !== 0){
                     // setTimeout(function () {

@@ -338,6 +338,9 @@
                     });
                 }
             });
+            $('body').on('change','#DisputeModal input,#DisputeModal textarea',function() {
+                $(this).val($(this).val().trim());
+            });
             $('.dispute_modal').on('click',function () {
                 $('#DisputeModal').modal('show');
             });

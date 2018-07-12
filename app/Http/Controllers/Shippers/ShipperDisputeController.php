@@ -71,7 +71,7 @@ class ShipperDisputeController extends Controller
                 'dispute_type_id'=>$request->dispute_type_select
             ]);
             foreach ($tracking_numbers as $tracking) {
-                $shipment = Shipment::where('tracking_number',$tracking);
+                $shipment = Shipment::where('tracking_number',$tracking)->where('user_id',Auth::id());
                 if($shipment->exists()){
                     $shipment = $shipment->first();
                     DisputeShipment::create([
