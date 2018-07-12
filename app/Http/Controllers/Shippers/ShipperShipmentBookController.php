@@ -90,7 +90,7 @@ class ShipperShipmentBookController extends Controller
       return $shipment_id;
     }
 
-    private function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
+    public static function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
       $shipment = Shipment::find($shipment_id);
 
       $tracking_number = $pickup_city_id . $consignee_city_id . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
@@ -102,7 +102,7 @@ class ShipperShipmentBookController extends Controller
       return $tracking_number;
     }
 
-    private function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
+    public static function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
       $shipment_item = new ShipmentItem();
 
       $shipment_item->shipment_id = $shipment_id;

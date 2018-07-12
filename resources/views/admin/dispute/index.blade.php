@@ -227,6 +227,8 @@
         }
         p.comment{
             text-align: left;
+            -ms-word-wrap: break-word;
+            word-wrap: break-word;
         }
         .description-div p.border{
             padding:10px;
@@ -249,6 +251,13 @@
 
         .selectize-control .selectize-input .item {
             word-break: break-all;
+        }
+        .comment-row{
+            padding: 10px;
+            border: 1px #cccccc;
+            border-radius:4px;
+            background: #666ee80d;
+            margin-bottom: 5px;
         }
     </style>
 @endsection
@@ -374,7 +383,9 @@
         $('.dispute_modal').on('click',function () {
             $('#DisputeModal').modal('show');
         });
-
+        $('body').on('change','#update_dispute_form input',function() {
+            $(this).val($(this).val().trim());
+        });
             $( "#dispute_form" ).validate({
                 ignore: [],
                 errorClass:"danger",

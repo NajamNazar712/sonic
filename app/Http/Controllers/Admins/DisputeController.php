@@ -48,7 +48,7 @@ class DisputeController extends Controller
         return Datatables::of($dispute)
 
             ->editColumn('created_at', function ($dispute) {
-                return $dispute->created_at ? with(new Carbon($dispute->created_at))->format('d/m/Y H:i:s A') : '';
+                return $dispute->created_at ? with(new Carbon($dispute->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->editColumn('status',function($dispute){
                 return $dispute->status == 0? 'Dispute Launched': ($dispute->status == 1? 'Dispute Updated' : ($dispute->status == 2? 'Dispute Resolved':''));
@@ -122,7 +122,7 @@ class DisputeController extends Controller
                 }
             }
             Dispute::where('id',$dispute->id)->update(['shipments_count'=>$count]);
-            return redirect()->back()->with('success','Shipment successfully created!');
+            return redirect()->back()->with('success','Dispute successfully created!');
         }else{
             return redirect()->back()->with('error','No shipments selected!');
 
@@ -146,6 +146,12 @@ class DisputeController extends Controller
         $dispute = Dispute::where('id',$request->id);
         if($dispute->exists()){
             $dispute->update(['status'=>2,'updated_by'=>Auth::id()]);
+            $admin = Auth::id();
+            DisputeComment::create([
+               'dispute_id'=>$request->id,
+               'comment'=>'Dispute resolved by '.$admin,
+                'admin_id'=>$admin
+            ]);
             return response()->json(['status'=>1,'success'=>"Dispute resolved successfully!"]);
         }else{
             return response()->json(['status'=>0,'error'=>"Dispute not found!"]);
@@ -193,11 +199,15 @@ class DisputeController extends Controller
                         $shipment = Shipment::where('tracking_number',$tracking);
                         if($shipment->exists()){
                             $shipment = $shipment->first();
-                            DisputeShipment::create([
-                                'dispute_id'=>$dispute_details->id,
-                                'shipment_id'=>$shipment->id
-                            ]);
-                            $shipment_count++;
+                            $dispute_shipment = DisputeShipment::where(['dispute_id'=>$request->dispute_id,'shipment_id'=>$shipment->id])->exists();
+                            if(!$dispute_shipment){
+                                DisputeShipment::create([
+                                    'dispute_id'=>$dispute_details->id,
+                                    'shipment_id'=>$shipment->id
+                                ]);
+                                $shipment_count++;
+                            }
+
                         }
                     }
 
@@ -221,27 +231,5 @@ class DisputeController extends Controller
         }
 
     }
-    //for dispute start
-//          $receiving_sheets = ReceivingSheet::where('user_id', $pickup_request->shipper_id)->where('status', 1);
-//
-//          $short_shipments = array();
-//
-//          if ($receiving_sheets->exists()) {
-//              $receiving_sheets = $receiving_sheets->get();
-//
-//              foreach ($receiving_sheets as $receiving_sheet) {
-//                  foreach ($receiving_sheet->receiving_sheet_shipments as $receiving_sheet_shipment) {
-//                      $shipment = $receiving_sheet_shipment->shipment;
-//
-//                      if ($shipment->shipper_status_id == 1 && $pickup_request->pickup_address_id == $shipment->pickup_address_id) {
-//                          $short_shipments[] = $shipment->tracking_number;
-//                      }
-//                  }
-//              }
-//              $count = count($short_shipments);
-//              foreach ($short_shipments as $short_shipment) {
-//                  DisputeController::add_short_received_shipments($short_shipment, $count);
-//              }
-//          }
-    //dispute end
+
 }

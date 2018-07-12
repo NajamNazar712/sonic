@@ -43,8 +43,8 @@
                     </button>
                 </div>
                 <div class="modal-body  text-center">
-                    <form id="dispute_form" action="{{route('cod.dispute.create')}}" method="post">
-                        @csrf
+                    <form id="dispute_form" action="" method="post">
+
                         <div class="row mb-2">
                             <div class="col form-group">
                                 <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
@@ -279,7 +279,7 @@
                     className: 'btn btn-primary dispute_modal',
                     enabled: true,
                     action: function (e, dt, node, config) {
-
+                        $('#DisputeModal').modal('show');
                     }
                 }],
                 fixedHeader: {
@@ -338,10 +338,18 @@
                     });
                 }
             });
-            $('.dispute_modal').on('click',function () {
-                $('#DisputeModal').modal('show');
+            $('body').on('change','#DisputeModal input,#DisputeModal textarea',function() {
+                $(this).val($(this).val().trim());
             });
 
+            $('#dispute_form').on('submit',function (e) {
+                e.preventDefault();
+            });
+            $('#DisputeModal').on('hidden.bs.modal',function (e) {
+                $('#dispute_form')[0].reset();
+                $('#city_select').val('').trigger('change');
+                $('#dispute_type_select').val('').trigger('change');
+            });
             $( "#dispute_form" ).validate({
                 ignore: [],
                 errorClass:"danger",
@@ -352,16 +360,40 @@
 
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                    swal({
-                        title: 'Please Wait!',
-                        text: 'Dispute is being created!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
+                    var city_select = $('#city_select').val();
+                    var dispute_type_select = $('#dispute_type_select').val();
+                    var tracking_number = $('#tracking_number').val();
+                    var description = $('#description').val();
+                    $.ajax({
+                        url: '{!! route('cod.dispute.create') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'city_select': city_select,
+                            'dispute_type_select':dispute_type_select,
+                            'tracking_number':tracking_number,
+                            'description':description
+                        }
+                    }).done(function (data) {
+                        $('#DisputeModal').modal('hide');
 
-                    form.submit();
+                        if (data.invalid !== undefined) {
+                            var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
+
+                            toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+
+                        if (data.disallowed !== undefined) {
+                            var message = 'Following Tracking Number(s) doesn\'t belong to you: ' + data.disallowed.join(', ');
+
+                            toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                        if(data.success != undefined){
+                            table.ajax.reload();
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }
+                    })
                     // console.log('here')
                 }
 
@@ -417,7 +449,7 @@
                         }
                     });
                 }
-            })
+            });
 
 
         });

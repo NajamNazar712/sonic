@@ -41,18 +41,22 @@
 
     <div class="comments dispute_comments_section">
         <div class="row ">
+            <div class="col-12 ">
             @foreach($comments as $comment)
-            <div class="col-12">
-                <p class="comment">{{$comment->comment}}</p>
-                <hr>
-                <span class="comment-date">by <b>{{$comment->admin->name}}</b> at {{\Carbon\Carbon::parse($comment->created_at)->format('d/m/Y H:i:s A')}}</span>
-            </div>
+
+                <div class="comment-row border">
+                    <p class="comment">{{ucfirst($comment->comment)}}</p>
+
+                    <span class="">by <b>{{ucfirst($comment->admin->name)}}</b> at {{\Carbon\Carbon::parse($comment->created_at)->format('d/m/Y h:i:s A')}}</span>
+                </div>
+
             @endforeach
+            </div>
         </div>
     </div>
     <div class="comment-post">
         <div class="form-group">
-            <input type="text" class="form-control block" placeholder="Write a comment" name="dispute_comment" data-rule-required="true" data-msg-required="This field is required">
+            <input type="text" class="form-control block" id="commentbox" placeholder="Write a comment" name="dispute_comment" data-rule-required="true" data-msg-required="This field is required">
         </div>
 
     </div>
@@ -95,6 +99,17 @@
                 else {
                     return false;
                 }
+            }
+        });
+        var max_char = 250;
+        $('#commentbox').keypress(function (e) {
+           // var comment = $(this).val();
+           // console.log(comment)
+            if ($(this).val().length == max_char) {
+                e.preventDefault();
+            } else if ($(this).val().length > max_char) {
+                // Maximum exceeded
+                this.value = this.value.substring(0, max_char);
             }
         });
         //$('.dispute_comments_section').scrollable();
