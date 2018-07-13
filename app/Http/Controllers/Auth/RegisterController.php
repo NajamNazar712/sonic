@@ -133,6 +133,7 @@ class RegisterController extends Controller
             'ntn_no' => $data['ntn_no'],
             'url' => $data['url'],
             'city_code'=>$data['shipper_city'],
+            'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
         $shipper->products()->attach($data['product_type']);
