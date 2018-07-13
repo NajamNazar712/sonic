@@ -253,7 +253,7 @@
                                 //     console.log('yogi')
                                 // }
                             });
-                            select[0].selectize.setTextboxValue("12212112121211");
+                            select[0].selectize.setTextboxValue(data.tracking);
                             // var control = select[0].selectize;
                             // $('#universal_tracking_number').on('load', function() {
                             //     control.setTextboxValue(data.tracking,true);
