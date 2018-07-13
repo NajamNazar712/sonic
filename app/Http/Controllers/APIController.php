@@ -48,45 +48,9 @@ class APIController extends Controller
       'items.*.item_description' => 'Item Description',
       'items.*.item_quantity' => 'Item Quantity',
       'items.*.item_insurance' => 'Item Insurance',
-      'items.*.item_price' => 'Item Price'
-    ];
+      'items.*.item_price' => 'Item Price',
 
-    private $rules = [
-      'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
-      'pickup_address_id' => ['required', 'integer', 'digits_between:1,10'],
-      'information_display' => ['required', 'boolean'],
-      'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
-      'consignee_name' => ['required', 'between:1,255'],
-      'consignee_address' => ['required', 'between:1,255'],
-      'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}/'],
-      'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{4}-[0-9]{7}/'],
-      'consignee_email_address' => ['nullable', 'filled', 'email'],
-      'order_id' => ['nullable', 'filled'],
-      'package_type' => ['required_if:service_type_id,3', 'boolean'],
-      'pickup_date' => ['required', 'date', 'after:yesterday'],
-      'special_instructions' => ['nullable', 'filled'],
-      'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
-      'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
-      'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-      'amount' => ['required', 'integer', 'digits_between:1,20', 'between:1,1000000'],
-      'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:payment_modes,id'],
-
-      'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-      'item_description' => ['nullable'],
-      'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
-      'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
-      'item_price' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
-
-      'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-      'replacement_item_description' => ['nullable'],
-      'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
-
-      'items' => ['required_if:service_type_id,3', 'array'],
-      'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-      'items.*.item_description' => ['nullable'],
-      'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,1000'],
-      'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
-      'items.*.item_price' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000'],
+      'tracking_number' => 'Tracking Number'
     ];
 
     private $messages = [
@@ -109,16 +73,49 @@ class APIController extends Controller
     public function shipment_book(Request $request) {
       $user_id = $request->user_id;
 
-      $additional_rules = [
-        'pickup_address_id' => Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
+      $rules = [
+        'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
+        'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
-        }),
-        'order_id' => Rule::unique('shipments')->where(function($query) use($user_id) {
+        })],
+        'information_display' => ['required', 'boolean'],
+        'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+        'consignee_name' => ['required', 'between:1,255'],
+        'consignee_address' => ['required', 'between:1,255'],
+        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}/'],
+        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{4}-[0-9]{7}/'],
+        'consignee_email_address' => ['nullable', 'filled', 'email'],
+        'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
-        }),
+        })],
+        'package_type' => ['required_if:service_type_id,3', 'boolean'],
+        'pickup_date' => ['required', 'date', 'after:yesterday'],
+        'special_instructions' => ['nullable', 'filled'],
+        'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
+        'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
+        'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
+        'amount' => ['required', 'integer', 'digits_between:1,20', 'between:1,1000000'],
+        'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:payment_modes,id'],
+
+        'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
+        'item_description' => ['nullable'],
+        'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+        'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
+        'item_price' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
+
+        'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
+        'replacement_item_description' => ['nullable'],
+        'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+
+        'items' => ['required_if:service_type_id,3', 'array'],
+        'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
+        'items.*.item_description' => ['nullable'],
+        'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,1000'],
+        'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
+        'items.*.item_price' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
       ];
 
-      $validate = Validator::make($request->all(), array_merge($this->rules, $additional_rules), $this->messages);
+      $validate = Validator::make($request->all(), $rules, $this->messages);
 
       $validate->setAttributeNames($this->names);
 
@@ -291,6 +288,24 @@ class APIController extends Controller
         }
 
         return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
+      }
+    }
+
+    public function shipment_status(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'tracking_number' => ['required', 'integer', 'digits_between:12,20', 'exists:booking_types,id'],
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
       }
     }
 }
