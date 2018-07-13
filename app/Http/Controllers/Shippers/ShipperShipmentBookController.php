@@ -34,10 +34,10 @@ class ShipperShipmentBookController extends Controller
       session(['service_type_name' => $service_type->booking_type]);
     }
 
-    private function add_pickup_address($address, $person_of_contact, $phone_number, $email_address, $city_id) {
+    static public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id) {
       $user_shipping_info = new UserShippingInfo();
 
-      $user_shipping_info->user_id = Auth::id();
+      $user_shipping_info->user_id = $user_id;
       $user_shipping_info->pickup_address = $address;
       $user_shipping_info->poc = $person_of_contact;
       $user_shipping_info->phone = $phone_number;
@@ -49,10 +49,10 @@ class ShipperShipmentBookController extends Controller
       return $user_shipping_info->id;
     }
 
-    private function book($service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id) {
       $shipment = new Shipment();
 
-      $shipment->user_id = Auth::id();
+      $shipment->user_id = $user_id;
       $shipment->booking_type_id = $service_type_id;
       $shipment->pickup_address_id = $pickup_address_id;
       $shipment->information_display = $information_display;
@@ -83,14 +83,14 @@ class ShipperShipmentBookController extends Controller
 
       $shipment_id = $shipment->id;
 
-      AdminPickupsController::generate($shipment_id);
+      AdminPickupsController::generate($user_id, $shipment_id);
 
-      ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Booked!', Auth::id(), NULL);
+      ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Booked!', $user_id, NULL);
 
       return $shipment_id;
     }
 
-    public static function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
+    static public function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
       $shipment = Shipment::find($shipment_id);
 
       $tracking_number = $pickup_city_id . $consignee_city_id . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
@@ -102,7 +102,7 @@ class ShipperShipmentBookController extends Controller
       return $tracking_number;
     }
 
-    public static function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
+    static public function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
       $shipment_item = new ShipmentItem();
 
       $shipment_item->shipment_id = $shipment_id;
@@ -141,6 +141,8 @@ class ShipperShipmentBookController extends Controller
       }
 
       if ($valid) {
+        $user_id = Auth::id();
+
         $service_type_id = $request->input('selected_service_type');
 
         $this->set_service_type($service_type_id);
@@ -148,7 +150,7 @@ class ShipperShipmentBookController extends Controller
         if ($request->input('pickup_address') == 0) {
           $pickup_city_id = $request->input('new_pickup_city');
 
-          $pickup_address_id = $this->add_pickup_address($request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
+          $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
         }
         else {
           $pickup_address_id = $request->input('pickup_address');
@@ -220,7 +222,7 @@ class ShipperShipmentBookController extends Controller
         $amount = str_replace(',', '', $request->input('amount'));
         $payment_mode_id = $request->input('payment_mode');
 
-        $shipment_id = $this->book($service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id);
+        $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id);
 
         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
