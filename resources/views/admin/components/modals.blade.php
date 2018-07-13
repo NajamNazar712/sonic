@@ -280,3 +280,50 @@
     </div>
 </div>
 <!--Confirm Modal City-->
+<!--Dispute Modal -->
+<div class="modal fade text-left" id="UniversalDisputeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UniversalDisputeModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white">Launch Dispute</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body  text-center">
+                <form id="universal_dispute_form" action="" method="post">
+                    <input type="hidden" id="universal_dispute_id" name="universal_dispute_id">
+                    <div class="row mb-2">
+                        <div class="col form-group">
+                            <select name="universal_city_select" id="universal_city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
+                                <option></option>
+                            </select>
+                        </div>
+                        <div class="col form-group">
+                            <select name="universal_dispute_type_select" id="universal_dispute_type_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
+                                <option></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-6 form-group">
+                            <input name="universal_tracking_number" id="universal_tracking_number" class="tracking_number" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
+                    </div>
+                    <div class="row mb-2 justify-content-center">
+                        <div class="col-6 form-group">
+                            <textarea name="universal_description" id="universal_description" class="form-control" cols="30" rows="3" placeholder="Enter Description" data-rule-required="true" data-msg-required="This field is required"></textarea>
+                        </div>
+                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-3">
+                            <button id="UniversalDisputeCreate" type="submit" class="btn btn-primary btn-block">Launch Dispute</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!--Dispute Modal -->

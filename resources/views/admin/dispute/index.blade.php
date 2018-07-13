@@ -46,8 +46,8 @@
                     </button>
                 </div>
                 <div class="modal-body  text-center">
-                    <form id="dispute_form" action="{{route('admin.dispute.create')}}" method="post">
-                        @csrf
+                    <form id="dispute_form" action="" method="post">
+
                         <div class="row mb-2">
                             <div class="col form-group">
                                 <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
@@ -259,6 +259,9 @@
             background: #666ee80d;
             margin-bottom: 5px;
         }
+        td.align-middle.description {
+            word-break: break-word;
+        }
     </style>
 @endsection
 
@@ -319,7 +322,7 @@
                 className: 'btn btn-primary dispute_modal',
                 enabled: true,
                 action: function (e, dt, node, config) {
-
+                    $('#DisputeModal').modal('show');
                 }
             }],
             fixedHeader: {
@@ -380,119 +383,167 @@
                 });
             }
         });
-        $('.dispute_modal').on('click',function () {
-            $('#DisputeModal').modal('show');
+        // $('.dispute_modal').on('click',function () {
+        //
+        // });
+
+        var max_char = 250;
+        $('#description').keypress(function (e) {
+            // var comment = $(this).val();
+            // console.log(comment)
+            if ($(this).val().length == max_char) {
+                e.preventDefault();
+            } else if ($(this).val().length > max_char) {
+                // Maximum exceeded
+                this.value = this.value.substring(0, max_char);
+            }
         });
         $('body').on('change','#update_dispute_form input',function() {
             $(this).val($(this).val().trim());
         });
-            $( "#dispute_form" ).validate({
-                ignore: [],
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function(form) {
+        $('body').on('change','#dispute_form textarea',function() {
+            $(this).val($(this).val().trim());
+        });
+        $('#DisputeModal').on('hidden.bs.modal',function (e) {
+            $('#dispute_form')[0].reset();
+            $('#DisputeCreate').removeAttr('disabled');
+            select[0].selectize.clear();
+            $('#city_select').val('').trigger('change');
+            $('#dispute_type_select').val('').trigger('change');
+        });
+        $('#DisputeUpdateModal').on('hidden.bs.modal',function (e) {
+            table.ajax.reload();
+        });
+        $('#dispute_form').on('submit',function (e) {
+            e.preventDefault();
+        });
+        $( "#dispute_form" ).validate({
+            ignore: [],
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parents('.form-group'));
+            },
+            submitHandler: function(form) {
 
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Dispute is being created!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
+                var city_select = $('#city_select').val();
+                var dispute_type_select = $('#dispute_type_select').val();
+                var tracking_number = $('#tracking_number').val();
+                var description = $('#description').val();
+                $.ajax({
+                    url: '{!! route('admin.dispute.create') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'city_select': city_select,
+                        'dispute_type_select':dispute_type_select,
+                        'tracking_number':tracking_number,
+                        'description':description
+                    }
+                }).done(function(data){
+                    $('#DisputeModal').modal('hide');
+                    if (data.invalid !== undefined) {
 
-                        form.submit();
-                    // console.log('here')
+                        var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
+
+                        toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
 
+                    if(data.success != undefined){
+                        table.ajax.reload();
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-            });
-            $('body').on('click','.shipment_count',function () {
-                var dispute_id = parseInt($(this).parents('tr').attr('id'));
-                if(dispute_id != ''){
-                    $.ajax({
-                        url: '{!! route('admin.dispute.get.shipments') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': dispute_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        if(data.status == 1){
-                            // console.log(data.shipments);
-                            var shipment = '';
-                            var i = 1;
-                            $.each(data.shipments,function (key,value) {
-                                shipment += "<span class='mb-1 block'><b>"+i+':'+"</b>&emsp;<u>"+value.tracking_number+"</u></span>";
-                                i++;
-                            });
-                            $('#ShipmentsModal').modal('show');
+                    }
+                });
 
-                            $('.modal-body.dispute_shipments').html(shipment);
-                            // var shipment = "<p></p>";
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                        }
-                    })
                 }
-            });
-            $('body').on('click','.resolve',function () {
-                var disputeId = parseInt($(this).parents('tr').attr('id'));
-               $('#ResolveModal').modal('show');
-               $('#disputeId').val(disputeId);
-            });
-            $('body').on('click','.dispute-resolve',function () {
-                var resolve_id = $('#disputeId').val();
-                // console.log(resolve_id);
-                if(resolve_id !== '') {
-                    $.ajax({
-                        url: '{!! route('admin.dispute.resolve') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': resolve_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
-                        $('#ResolveModal').modal('hide');
-                        if(data.status === 1){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            table.ajax.reload();
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                        }
-                    });
-                }
-            });
-            $('body').on('click','.update',function(){
-                var disputeId = parseInt($(this).parents('tr').attr('id'));
-                // console.log(disputeId)
-                if(disputeId !== ''){
-                    $.ajax({
-                        url: '{!! route('admin.dispute.update') !!}',
-                        method: 'POST',
-                        data: {
-                            'id': disputeId,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    }).done(function (data) {
 
-                        if(data.status === 1){
-                            $('.update_dispute_body').html(data.view);
-                            $('#DisputeUpdateModal').modal('show');
+        });
+        $('body').on('click','.shipment_count',function () {
+            var dispute_id = parseInt($(this).parents('tr').attr('id'));
+            if(dispute_id != ''){
+                $.ajax({
+                    url: '{!! route('admin.dispute.get.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': dispute_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        // console.log(data.shipments);
+                        var shipment = '';
+                        var i = 1;
+                        $.each(data.shipments,function (key,value) {
+                            shipment += "<span class='mb-1 block'><b>"+i+':'+"</b>&emsp;<u>"+value.tracking_number+"</u></span>";
+                            i++;
+                        });
+                        $('#ShipmentsModal').modal('show');
 
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        $('.modal-body.dispute_shipments').html(shipment);
+                        // var shipment = "<p></p>";
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                        }
-                    });
-                }
-            });
+                    }
+                })
+            }
+        });
+        $('body').on('click','.resolve',function () {
+            var disputeId = parseInt($(this).parents('tr').attr('id'));
+           $('#ResolveModal').modal('show');
+           $('#disputeId').val(disputeId);
+        });
+        $('body').on('click','.dispute-resolve',function () {
+            var resolve_id = $('#disputeId').val();
+            // console.log(resolve_id);
+            if(resolve_id !== '') {
+                $.ajax({
+                    url: '{!! route('admin.dispute.resolve') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': resolve_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    $('#ResolveModal').modal('hide');
+                    if(data.status === 1){
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        table.ajax.reload();
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                    }
+                });
+            }
+        });
+        $('body').on('click','.update',function(){
+            var disputeId = parseInt($(this).parents('tr').attr('id'));
+            // console.log(disputeId)
+            if(disputeId !== ''){
+                $.ajax({
+                    url: '{!! route('admin.dispute.update') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': disputeId,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+
+                    if(data.status === 1){
+                        $('.update_dispute_body').html(data.view);
+                        $('#DisputeUpdateModal').modal('show');
+
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                    }
+                });
+            }
+        });
+
     });
 
     </script>

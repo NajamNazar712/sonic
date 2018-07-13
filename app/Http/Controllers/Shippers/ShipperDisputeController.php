@@ -127,11 +127,11 @@ class ShipperDisputeController extends Controller
     public function get_comments(Request $request){
         $comments = DisputeComment::where('dispute_id',$request->id);
         if($comments->exists()){
-            $comments = $comments->get();
+            $comments = $comments->order_by('created_at desc')->get();
             $returnHTML = view('client.dispute.comments')->with(['comments'=>$comments])->render();
             return response()->json(['status'=>1,'view'=>$returnHTML]);
         }else{
-            return response()->json(['status'=>0,'error'=>"No dispute exist!"]);
+            return response()->json(['status'=>0,'error'=>"No comments!"]);
         }
     }
 

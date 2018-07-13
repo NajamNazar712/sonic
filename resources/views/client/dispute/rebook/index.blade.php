@@ -67,7 +67,7 @@
                                 <input type="text" id="consignee" name="consignee" class="form-control" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="This field is required">
                             </div>
                             <div class="form-group">
-                                <textarea name="address" id="address" cols="49" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="This field is required"></textarea>
+                                <textarea name="address" class="form-control" id="address" cols="49" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="This field is required"></textarea>
                             </div>
                             <div class="form-group">
                                 <input type="text" class="form-control" id="phone1" name="phone1" data-rule-required="true" data-msg-required="This field is required" placeholder="phone 1*">
