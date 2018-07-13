@@ -31,7 +31,7 @@ class AdminPickupsController extends Controller
       $this->middleware('auth:admin');
     }
 
-    static public function generate($shipment_id) {
+    static public function generate($user_id, $shipment_id) {
       $shipment = Shipment::find($shipment_id);
 
       $pickup_request = PickupRequest::whereDate('pickup_date', $shipment->pickup_date)->where('pickup_address_id', $shipment->pickup_address_id)->where('status', 0);
@@ -58,7 +58,7 @@ class AdminPickupsController extends Controller
       else {
         $pickup_request = new PickupRequest();
 
-        $pickup_request->shipper_id = Auth::id();
+        $pickup_request->shipper_id = $user_id;
         $pickup_request->pickup_address_id = $shipment->pickup_address_id;
         $pickup_request->bookings = 1;
         $pickup_request->total_estimated_weight = $shipment->estimated_weight;

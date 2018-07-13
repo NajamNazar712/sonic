@@ -13,6 +13,6 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
+Route::middleware('APIToken')->name('api.')->group(function () {
+		Route::post('shipment/book', 'APIController@shipment_book')->name('shipment.book');
 });
