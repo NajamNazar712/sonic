@@ -82,23 +82,26 @@ class DisputeController extends Controller
 
             ->make(true);
     }
-    static public function add_short_received_shipments($id,$count){
+    static public function add_short_received_shipments($receiving,$shipments){
         $admin = Auth::id();
         $admin_details = Admin::where('id',$admin)->first();
         $city_id = $admin_details->city->id;
+        $count = count($shipments);
        $dispute = Dispute::create([
             'description'=>'Shipment short received',
             'raised_by'=>$admin,
             'raised_by_status'=>0,
             'city_id'=>$city_id,
-            'dispute_type_id'=>1,
+            'dispute_type_id'=>2,
             'shipments_count'=>$count
         ]);
        if($dispute){
-           DisputeShipment::create([
-               'dispute_id'=>$dispute->id,
-               'shipment_id'=>$id
-           ]);
+           foreach ($shipments as $shipment){
+               DisputeShipment::create([
+                   'dispute_id'=>$dispute->id,
+                   'shipment_id'=>$shipment
+               ]);
+           }
        }
 
     }
@@ -311,6 +314,43 @@ class DisputeController extends Controller
         }else{
             return redirect()->back()->with('error','No shipments selected!');
 
+        }
+    }
+    public static function add_junction_dispute($cargo_id,$junction_id){
+            $junction = City::find($junction_id);
+            $description = "This Cargo # $cargo_id is not updated at $junction->name";
+            $admin = Auth::id();
+            $admin_details = Admin::where('id',$admin)->first();
+            $city_id = $admin_details->city->id;
+            Dispute::create([
+                'description'=>$description,
+                'raised_by'=>$admin,
+                'raised_by_status'=>0,
+                'city_id'=>$city_id,
+                'dispute_type_id'=>10,
+                'shipments_count'=>0
+            ]);
+    }
+    public static function add_cargo_short_received($cargo_id,$shipments){
+        $description = "Short received shipments dispute for Cargo # $cargo_id";
+        $admin = Auth::id();
+        $admin_details = Admin::where('id',$admin)->first();
+        $city_id = $admin_details->city->id;
+        $dispute = Dispute::create([
+            'description'=>$description,
+            'raised_by'=>$admin,
+            'raised_by_status'=>0,
+            'city_id'=>$city_id,
+            'dispute_type_id'=>10,
+            'shipments_count'=>0
+        ]);
+        if($dispute){
+            foreach ($shipments as $shipment){
+                DisputeShipment::create([
+                    'dispute_id'=>$dispute->id,
+                    'shipment_id'=>$shipment->shipment_id
+                ]);
+            }
         }
     }
 }

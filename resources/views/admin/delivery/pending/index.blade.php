@@ -248,15 +248,14 @@
                                     else {
                                         return false;
                                     }
-                                },
-                                // onLoad: function (data) {
-                                //     console.log('yogi')
-                                // }
+                                }
                             });
-                            select[0].selectize.setTextboxValue(data.tracking);
-                            // var control = select[0].selectize;
+                            // var track = {
+                            //     text: data.tracking, value: 1
+                            // }
+                            // select[0].selectize.addItem(track.text,true);
                             // $('#universal_tracking_number').on('load', function() {
-                            //     control.setTextboxValue(data.tracking,true);
+                                select[0].selectize.setTextboxValue(data.tracking);
                             //     console.log('yogi')
                             // });
 
