@@ -40,6 +40,6 @@ class Admin extends Authenticatable
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
     public function city(){
-        return $this->belongsTo('App\Http\Models\City');
+        return $this->belongsTo('App\Http\Models\City','city_id','id');
     }
 }

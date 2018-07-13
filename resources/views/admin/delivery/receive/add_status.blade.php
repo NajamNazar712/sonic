@@ -51,8 +51,6 @@
     </div>
 
 
-    </div>
-
     <!--Replacement Modal -->
     <div class="modal fade text-left" id="ReplacementModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ReplacementModal"
          aria-hidden="true">
