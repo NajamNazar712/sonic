@@ -310,7 +310,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
        Route::post('get/shipments','Admins\DisputeController@get_shipments')->name('get.shipments');
        Route::post('resolve','Admins\DisputeController@resolve_dispute')->name('resolve');
        Route::post('update','Admins\DisputeController@update_dispute_view')->name('update');
-       Route::put('update.submit','Admins\DisputeController@update_dispute')->name('update.submit');
+       Route::put('update/submit','Admins\DisputeController@update_dispute')->name('update.submit');
+       Route::post('data','Admins\DisputeController@get_data')->name('data');
+       Route::post('create/universal','Admins\DisputeController@dispute_create_universal')->name('create.universal');
 
     });
 

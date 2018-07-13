@@ -216,6 +216,9 @@
         .selectize-control .selectize-input .item {
             word-break: break-all;
         }
+        td.align-middle.description {
+            word-break: break-word;
+        }
     </style>
 @endsection
 
@@ -338,6 +341,17 @@
                     });
                 }
             });
+            var max_char = 250;
+            $('#description').keypress(function (e) {
+                // var comment = $(this).val();
+                // console.log(comment)
+                if ($(this).val().length == max_char) {
+                    e.preventDefault();
+                } else if ($(this).val().length > max_char) {
+                    // Maximum exceeded
+                    this.value = this.value.substring(0, max_char);
+                }
+            });
             $('body').on('change','#DisputeModal input,#DisputeModal textarea',function() {
                 $(this).val($(this).val().trim());
             });
@@ -347,6 +361,8 @@
             });
             $('#DisputeModal').on('hidden.bs.modal',function (e) {
                 $('#dispute_form')[0].reset();
+                $('#DisputeCreate').removeAttr('disabled');
+                select[0].selectize.clear();
                 $('#city_select').val('').trigger('change');
                 $('#dispute_type_select').val('').trigger('change');
             });
@@ -393,7 +409,7 @@
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                         }
-                    })
+                    });
                     // console.log('here')
                 }
 
