@@ -88,7 +88,7 @@ class DeliveryController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id=''><i class='ft-plus-circle primary'></i> Dispute</a>                                         
+                                              <a href='#' class='dropdown-item dispute_modal'><i class='ft-plus-circle primary'></i> Dispute</a>                                         
                                             </div></span>";
             })
             ->make(true);
@@ -100,8 +100,9 @@ class DeliveryController extends Controller
     }
 
     public function get_shipment_details(Request $request){
+        $pending_status = array(2, 4, 6, 7, 8, 9, 13, 15);
         if($request->tracking != ''){
-            $shipment = Shipment::where('tracking_number', $request->tracking)->where('shipper_status_id','!=',5);
+            $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$pending_status);
             $remarks = '';$status = '';
             if($shipment->exists()){
                 $shipment = $shipment->first();
@@ -151,7 +152,7 @@ class DeliveryController extends Controller
                     return response()->json(['status'=>0,'shId'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'destination'=>$destination,'hub'=>$hub,'consignee_name'=>$shipment->consignee_name,'phone'=>$shipment->consignee_phone_number_1,'address'=>$shipment->consignee_address,'amount'=>$shipment->amount,'service_type'=>$service,'status'=>$status,'remarks'=>$remarks]);
                 }
             }else{
-                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present | This shipment\'s delivery note is already been created.'];
+                return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
             }
 
 
