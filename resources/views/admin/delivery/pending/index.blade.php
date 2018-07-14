@@ -222,6 +222,7 @@
                                 placeholder:'Select a Dispute type',
                                 dropdownParent:$('#universal_dispute_form')
                             });
+                            $('#universal_tracking_number').val(data.tracking);
                             select = $('#universal_tracking_number').selectize({
                                 placeholder: 'Tracking Number(s)*',
                                 delimiter: ',',
@@ -250,22 +251,7 @@
                                     }
                                 }
                             });
-                            // var track = {
-                            //     text: data.tracking, value: 1
-                            // }
-                            // select[0].selectize.addItem(track.text,true);
-                            // $('#universal_tracking_number').on('load', function() {
-                                select[0].selectize.setTextboxValue(data.tracking);
-                            //     console.log('yogi')
-                            // });
 
-
-                            // select[0].selectize.setValue(data.tracking,true);
-
-                            // select[0].selectize.setTextboxValue(data.tracking,true);
-                            // select.on('load', function () {
-                            //    console.log('here')
-                            // });
                         }
                     });
                 }

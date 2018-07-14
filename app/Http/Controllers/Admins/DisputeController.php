@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 use App\Http\Models\Dispute;
 use App\Http\Models\DisputeComment;
@@ -264,12 +266,33 @@ class DisputeController extends Controller
 
     }
     public function get_data(Request $request){
-        $shipment_id = $request->shipment_id;
-        $tracking = Shipment::where('id',$shipment_id)->select('tracking_number')->first();
-        $disputes = array(3,4,5,8,9);
-        $cities = City::where('status',1)->select('id','name')->get();
-        $dispute_types = DisputeType::whereIn('id',$disputes)->get();
-        return response()->json(['success'=>1,'cities'=>$cities,'dispute_types'=>$dispute_types,'tracking'=>$tracking->tracking_number]);
+
+        if($request->has('intransit')){
+            $disputes = array(3,7,9,10);
+            $cities = City::where('status',1)->select('id','name')->get();
+            $dispute_types = DisputeType::whereIn('id',$disputes)->get();
+            $cargo = CargoConsignment::find($request->cargo_id);
+            $cargo_shipments = $cargo->cargo_consignment_shipments;
+            $cargo_shipment_ids = array();
+            $tracking = array();
+            foreach ($cargo_shipments as $cargo_shipment) {
+                $cargo_shipment_ids[] = $cargo_shipment->shipment_id;
+            }
+            $trackings = Shipment::whereIn('id',$cargo_shipment_ids)->select('tracking_number')->get();
+            foreach ($trackings as $number){
+                $tracking[]  =$number->tracking_number;
+            }
+
+            return response()->json(['success'=>1,'cities'=>$cities,'dispute_types'=>$dispute_types,'cargo_shipments'=>$tracking]);
+        }else{
+            $shipment_id = $request->shipment_id;
+            $tracking = Shipment::where('id',$shipment_id)->select('tracking_number')->first();
+            $disputes = array(3,4,5,8,9);
+            $cities = City::where('status',1)->select('id','name')->get();
+            $dispute_types = DisputeType::whereIn('id',$disputes)->get();
+            return response()->json(['success'=>1,'cities'=>$cities,'dispute_types'=>$dispute_types,'tracking'=>$tracking->tracking_number]);
+        }
+
     }
     public function dispute_create_universal(Request $request){
         $tracking_numbers = explode(',',$request->tracking_number);
@@ -284,8 +307,14 @@ class DisputeController extends Controller
                     $shipment = $shipment->first();
 
                     if($dispute_created == 0){
+//                        if($request->has('intransit')){
+//                            $description = "Cargo # $request->cargo_id dispute";
+//                        }else{
+//                            $description = $request->description;
+//                        }
+                        $description = $request->description;
                         $dispute = Dispute::create([
-                            'description'=>$request->description,
+                            'description'=>$description,
                             'raised_by'=>Auth::id(),
                             'raised_by_status'=>0,
                             'city_id'=>$request->city_select,
@@ -349,6 +378,30 @@ class DisputeController extends Controller
                 DisputeShipment::create([
                     'dispute_id'=>$dispute->id,
                     'shipment_id'=>$shipment->shipment_id
+                ]);
+            }
+        }
+    }
+    public static function add_delivery_wrong_status_dispute($delivery_note,$shipments){
+//        return $shipments;
+        $admin = Auth::id();
+        $admin_details = Admin::where('id',$admin)->first();
+        $city_id = $admin_details->city->id;
+        $description = "Delivery Note # $delivery_note Dispute for different status";
+        $count = count($shipments);
+        $dispute = Dispute::create([
+            'description'=>$description,
+            'raised_by'=>$admin,
+            'raised_by_status'=>0,
+            'city_id'=>$city_id,
+            'dispute_type_id'=>8,
+            'shipments_count'=>$count
+        ]);
+        if($dispute){
+            foreach ($shipments as $shipment){
+                DisputeShipment::create([
+                    'dispute_id'=>$dispute->id,
+                    'shipment_id'=>$shipment
                 ]);
             }
         }
