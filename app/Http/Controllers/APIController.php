@@ -11,6 +11,7 @@ use Illuminate\Validation\Rule;
 
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
+use App\Http\Models\City;
 
 use Carbon\Carbon;
 
@@ -418,6 +419,36 @@ class APIController extends Controller
         }
 
         return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
+      }
+    }
+
+    public function cities(Request $request) {
+      $user_id = $request->user_id;
+
+      $cities = City::all();
+
+      if (count($cities)) {
+        $details = array();
+
+        foreach ($cities as $city) {
+          $detail = array();
+
+          $detail['id'] = $city->id;
+          $detail['name'] = $city->name;
+          $detail['pickup'] = ($city->pickup) ? TRUE : FALSE;
+          $detail['delivery'] = array();
+
+          foreach ($city->deliveries as $delivery) {
+            $detail['delivery'][$delivery->booking_type->booking_type][] = $delivery->shipping_mode->mode;
+          }
+
+          $details[] = $detail;
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
+      }
+      else {
+        return response()->json(['status' => 1, 'message' => ' No City Present']);
       }
     }
 }
