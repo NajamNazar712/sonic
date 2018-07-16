@@ -341,6 +341,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('','Admins\SamedayController@sameday_index')->name('index');
     });
 
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('', 'Admins\AdminNotificationsController@index')->name('index');
+    });
+
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');
