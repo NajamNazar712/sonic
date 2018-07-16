@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Dispute;
+use App\Http\Models\DisputeShipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -1022,15 +1025,16 @@ class AdminPickupsController extends Controller
               foreach ($receiving_sheets as $receiving_sheet) {
                   foreach ($receiving_sheet->receiving_sheet_shipments as $receiving_sheet_shipment) {
                       $shipment = $receiving_sheet_shipment->shipment;
-
                       if ($shipment->shipper_status_id == 1 && $pickup_request->pickup_address_id == $shipment->pickup_address_id) {
-                          $short_shipments[] = $shipment->id;
+
+                          $short_shipments[str_pad($receiving_sheet->id, 12, '0', STR_PAD_LEFT)][] = $shipment->id;
                       }
                   }
               }
-              $count = count($short_shipments);
-              foreach ($short_shipments as $short_shipment) {
-                  DisputeController::add_short_received_shipments($short_shipment, $count);
+
+              foreach ($short_shipments as $receiving_sheet_id => $short_shipment_ids) {
+                  DisputeController::add_short_received_shipments($receiving_sheet_id, $short_shipment_ids);
+
               }
           }
           //dispute end

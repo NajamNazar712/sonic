@@ -180,9 +180,9 @@
         });
         $("#editCity").on("show.bs.modal", function(e) {
             var $invoker = $(e.relatedTarget);
-
             var action = $invoker.attr('rel');
             var id = $(e.relatedTarget).data('target-id');
+            console.log(id)
 
             if(action == 'editcity'){
                 $.get( "/admin/management/city/"+id+"/edit/form", function( data ) {

@@ -77,7 +77,7 @@
                     <li><a class="menu-item" href="{{ route('admin.finance.outstanding_shipments.index') }}">Outstanding Shipments</a></li>
                 </ul>
             </li>
-
+            <li class=" nav-item"><a href="{{route('admin.sameday.index')}}"><i class="la la-home"></i><span class="menu-title">Same-day Delivery</span></a></li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a></li>
 
             <li class=" nav-item"><a href="{{ route('admin.tracking.index') }}"><i class="la la-home"></i><span class="menu-title">Tracking</span></a></li>

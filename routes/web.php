@@ -209,8 +209,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
             Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
-//            Route::post('dn/verify','Admins\DeliveryController@receive_delivery_note_verify')->name('dn.verify');
-
             Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
             Route::post('reason','Admins\DeliveryController@receive_delivery_reason')->name('reason');
             Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
@@ -337,6 +335,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('resolved', 'Admins\AdminFinanceController@outstanding_shipments_resolved')->name('resolved');
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
         });
+    });
+
+    Route::prefix('sameday')->name('sameday.')->group(function (){
+        Route::get('','Admins\SamedayController@sameday_index')->name('index');
     });
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
