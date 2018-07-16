@@ -13,6 +13,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
 use App\Http\Models\City;
+use App\Http\Models\CityDelivery;
 
 use Carbon\Carbon;
 
@@ -143,7 +144,7 @@ class APIController extends Controller
         $city = City::find($request->input('city_id'));
 
         if (!$city->pickup) {
-          return response()->json(['status' => 1, 'message' => 'Pickup are not allowed for given City']);
+          return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $request->input('city_id')]);
         }
 
         $person_of_contact = $request->input('person_of_contact');
@@ -224,10 +225,18 @@ class APIController extends Controller
       else {
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
+        if (!$user_shipping_info->city->pickup) {
+          return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
+        }
+
         $pickup_city_id = $user_shipping_info->city_id;
 
         if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
           return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
+        }
+
+        if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
+          return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
         }
 
         $service_type_id = $request->input('service_type_id');
