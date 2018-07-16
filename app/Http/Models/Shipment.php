@@ -41,4 +41,12 @@ class Shipment extends Model
 	public function shipment_journey(){
 	    return $this->hasMany('App\Http\Models\ShipmentsJourney');
     }
+
+    public function status_shipper() {
+    	return $this->belongsTo('App\Http\Models\ShipmentStatus', 'shipper_status_id', 'id');
+    }
+
+    public function status_consignee() {
+    	return $this->belongsTo('App\Http\Models\ShipmentStatus', 'consignee_status_id', 'id');
+    }
 }

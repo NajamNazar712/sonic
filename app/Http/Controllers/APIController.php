@@ -10,6 +10,9 @@ use Validator;
 use Illuminate\Validation\Rule;
 
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipment;
+
+use Carbon\Carbon;
 
 class APIController extends Controller
 {
@@ -50,7 +53,8 @@ class APIController extends Controller
       'items.*.item_insurance' => 'Item Insurance',
       'items.*.item_price' => 'Item Price',
 
-      'tracking_number' => 'Tracking Number'
+      'tracking_number' => 'Tracking Number',
+      'type' => 'Type'
     ];
 
     private $messages = [
@@ -295,7 +299,10 @@ class APIController extends Controller
       $user_id = $request->user_id;
 
       $rules = [
-        'tracking_number' => ['required', 'integer', 'digits_between:12,20', 'exists:booking_types,id'],
+        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })],
+        'type' => ['required', 'boolean']
       ];
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -306,6 +313,111 @@ class APIController extends Controller
         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
       }
       else {
+        $tracking_number = $request->tracking_number;
+        $type = $request->type;
+
+        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+        if ($type == 0) {
+          $current_status = $shipment->status_shipper->name;
+        }
+        else {
+          $current_status = $shipment->status_consignee->name;
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status]);
+      }
+    }
+
+    public function shipment_track(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })],
+        'type' => ['required', 'boolean']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $tracking_number = $request->tracking_number;
+        $type = $request->type;
+
+        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+        $details = array();
+
+        $details['tracking_number'] = $tracking_number;
+
+        $shipper = $shipment->user;
+
+        $details['shipper']['name'] = $shipper->name;
+
+        if ($type == 0) {
+          $details['shipper']['account_number'] = $shipper->id;
+          $details['shipper']['phone_number_1'] = $shipper->phone;
+          $details['shipper']['phone_number_2'] = $shipper->phone2;
+          $details['shipper']['address'] = $shipper->address;
+        }
+
+        $details['shipper']['origin'] = $shipper->city->name;
+
+        $details['consignee']['name'] = $shipment->consignee_name;
+        $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+        $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+        $details['consignee']['destination'] = $shipment->consignee_city->name;
+        $details['consignee']['address'] = $shipment->consignee_address;
+
+        foreach ($shipment->items as $item) {
+          $item_details = array();
+
+          $item_details['product_type'] = $item->product->product_name;
+          $item_details['description'] = $item->description;
+          $item_details['quantity'] = $item->quantity;
+
+          $details['order_information']['items'][] = $item_details;
+        }
+
+        if ($type == 0) {
+          $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+          $details['order_information']['instructions'] = $shipment->special_instructions;
+        }
+
+        if ($type == 0) {
+          foreach ($shipment->shipment_journey as $journey) {
+            $journey_details = array();
+
+            $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+            $journey_details['status'] = $journey->shipment_status_shipper->name;
+
+            $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+            $details['tracking_history'][] = $journey_details;
+          }
+        }
+        else {
+          foreach ($shipment->shipment_journey as $journey) {
+            if ($journey->consignee_status_id != NULL) {
+              $journey_details = array();
+
+              $journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y h:i A');
+              $journey_details['status'] = $journey->shipment_status_consignee->name;
+
+              $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+
+              $details['tracking_history'][] = $journey_details;
+            }
+          }
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
       }
     }
 }
