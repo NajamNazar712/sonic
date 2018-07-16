@@ -306,7 +306,7 @@
                             </select>
                         </div>
                     </div>
-                    <div class="row mb-2 justify-content-center">
+                    <div class="row mb-2 justify-content-center" id="universal_tracking_div">
                         <div class="col-6 form-group">
                             <input name="universal_tracking_number" id="universal_tracking_number" class="tracking_number" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                         </div>

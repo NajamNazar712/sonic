@@ -93,7 +93,7 @@
                         </div>
                         <div class="col justify-content-center">
                             <div class="form-group text-center">
-                                    <button id="rebookSubmit" type="submit" class="btn btn-primary btn-lg">Update</button>
+                                    <button id="rebookSubmit" type="submit" class="btn btn-primary">Update</button>
 
                             </div>
                         </div>
@@ -509,6 +509,7 @@
             $('#RebookModal').on('hidden.bs.modal',function () {
                $('#consignee_city').empty().trigger('change');
                $('#payment_mode').empty().trigger('change');
+               table.ajax.reload();
             });
 
 
