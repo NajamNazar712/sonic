@@ -9,6 +9,7 @@ use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use Validator;
 use Illuminate\Validation\Rule;
 
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
 use App\Http\Models\City;
@@ -75,6 +76,91 @@ class APIController extends Controller
       'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.'
     ];
 
+    public function pickup_addresses(Request $request) {
+      $user_id = $request->user_id;
+
+      $pickup_addresses = User::find($user_id)->shipping;
+
+      if (count($pickup_addresses)) {
+        $details = array();
+
+        foreach ($pickup_addresses as $pickup_address) {
+          if ($pickup_address->rebook_status == 0) {
+            $detail = array();
+
+            $detail['id'] = $pickup_address->id;
+            $detail['person_of_contact'] = $pickup_address->poc;
+            $detail['phone_number'] = $pickup_address->phone;
+            $detail['email_address'] = $pickup_address->email;
+            $detail['address'] = $pickup_address->pickup_address;
+            $detail['city'] = array();
+
+            $city = $pickup_address->city;
+
+            $detail['city']['id'] = $city->id;
+            $detail['city']['name'] = $city->name;
+
+            $details[] = $detail;
+          }
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Pickup Addresses', 'pickup_addresses' => $details]);
+      }
+      else {
+        return response()->json(['status' => 1, 'message' => ' No Pickup Address']);
+      }
+    }
+
+    public function pickup_address_add(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'person_of_contact' => ['required', 'between:1,190'],
+        'phone_number' => ['required', 'regex:/[0-9]{4}-[0-9]{7}$/'],
+        'email_address' => ['required', 'email'],
+        'address' => ['required', 'between:1,190'],
+        'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $a = 'Temp';
+
+        $city = City::find($request->input('city_id'));
+
+        if (!$city->pickup) {
+          return response()->json(['status' => 1, 'message' => 'Pickup are not allowed for given City']);
+        }
+
+        $person_of_contact = $request->input('person_of_contact');
+        $phone_number = $request->input('phone_number');
+        $email_address = $request->input('email_address');
+        $address = $request->input('address');
+        $city_id = $request->input('city_id');
+
+        $pickup_address = new UserShippingInfo();
+
+        $pickup_address->user_id = $user_id;
+        $pickup_address->poc = $person_of_contact;
+        $pickup_address->phone = $phone_number;
+        $pickup_address->email = $email_address;
+        $pickup_address->pickup_address = $address;
+        $pickup_address->city_id = $city_id;
+
+        $pickup_address->save();
+
+        $id = $pickup_address->id;
+
+        return response()->json(['status' => 0, 'message' => 'Pickup Address has been added', 'id' => $id]);
+      }
+    }
+
     public function shipment_book(Request $request) {
       $user_id = $request->user_id;
 
@@ -87,8 +173,8 @@ class APIController extends Controller
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
         'consignee_name' => ['required', 'between:1,255'],
         'consignee_address' => ['required', 'between:1,255'],
-        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}/'],
-        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{4}-[0-9]{7}/'],
+        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}$/'],
+        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{4}-[0-9]{7}$/'],
         'consignee_email_address' => ['nullable', 'filled', 'email'],
         'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
