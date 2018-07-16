@@ -88,7 +88,7 @@ class DeliveryController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id=''><i class='ft-plus-circle primary'></i> Dispute</a>                                         
+                                              <a href='#' class='dropdown-item dispute_modal'><i class='ft-plus-circle primary'></i> Dispute</a>                                         
                                             </div></span>";
             })
             ->make(true);
@@ -100,8 +100,9 @@ class DeliveryController extends Controller
     }
 
     public function get_shipment_details(Request $request){
+        $pending_status = array(2, 4, 6, 7, 8, 9, 13, 15);
         if($request->tracking != ''){
-            $shipment = Shipment::where('tracking_number', $request->tracking)->where('shipper_status_id','!=',5);
+            $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$pending_status);
             $remarks = '';$status = '';
             if($shipment->exists()){
                 $shipment = $shipment->first();
@@ -151,7 +152,7 @@ class DeliveryController extends Controller
                     return response()->json(['status'=>0,'shId'=>$shipment->id,'tracking_number'=>$shipment->tracking_number,'destination'=>$destination,'hub'=>$hub,'consignee_name'=>$shipment->consignee_name,'phone'=>$shipment->consignee_phone_number_1,'address'=>$shipment->consignee_address,'amount'=>$shipment->amount,'service_type'=>$service,'status'=>$status,'remarks'=>$remarks]);
                 }
             }else{
-                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present | This shipment\'s delivery note is already been created.'];
+                return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
             }
 
 
@@ -517,11 +518,11 @@ class DeliveryController extends Controller
                 foreach ($statuses as $status){
                     $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
                 }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status"><option></option>'.$drops.'</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" ><option></option>'.$drops.'</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" placeholder="Select a Reason"><option></option></select>';
+                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" ><option></option></select>';
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {
@@ -550,11 +551,12 @@ class DeliveryController extends Controller
 
     }
     public function receive_delivery_status_submit(Request $request){
-
+//            return $request;
         $shipments = explode(',',$request->shipment_ids);
         $delivery_note_id = $request->delivery_note_id;
         if($delivery_note_id != ''){
             foreach ($shipments as $shipment){
+                $statusId = "reason_drop.$shipment";
                    $shipment_status = Shipment::where('id',$shipment)->first();
                     if($request->status_drop[$shipment] != null){
                     if($request->status_drop[$shipment] == 7 || $request->status_drop[$shipment] == 18){
@@ -563,7 +565,7 @@ class DeliveryController extends Controller
                                 'shipment_id'=>$shipment,
                                 'shipper_status_id'=>$request->status_drop[$shipment],
                                 'consignee_status_id'=>null,
-                                'status_reason_id'=>$request->reason_drop[$shipment],
+                                'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
                                 'remarks'=>$request->remarks[$shipment],
                                 'admin_id'=>Auth::id()
                             ]);
@@ -579,7 +581,7 @@ class DeliveryController extends Controller
                                 'shipment_id'=>$shipment,
                                 'shipper_status_id'=>30,
                                 'consignee_status_id'=>30,
-                                'status_reason_id'=>$request->reason_drop[$shipment],
+                                'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
                                 'remarks'=>$request->remarks[$shipment],
                                 'admin_id'=>Auth::id()
                             ]);
@@ -593,7 +595,7 @@ class DeliveryController extends Controller
                                     'shipment_id'=>$shipment,
                                     'shipper_status_id'=>36,
                                     'consignee_status_id'=>36,
-                                    'status_reason_id'=>$request->reason_drop[$shipment],
+                                    'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
                                     'remarks'=>$request->remarks[$shipment],
                                     'admin_id'=>Auth::id()
                                 ]);
@@ -606,7 +608,7 @@ class DeliveryController extends Controller
                                     'shipment_id'=>$shipment,
                                     'shipper_status_id'=>36,
                                     'consignee_status_id'=>36,
-                                    'status_reason_id'=>$request->reason_drop[$shipment],
+                                    'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
                                     'remarks'=>$request->remarks[$shipment],
                                     'admin_id'=>Auth::id()
                                 ]);
@@ -620,7 +622,7 @@ class DeliveryController extends Controller
                                 'shipment_id'=>$shipment,
                                 'shipper_status_id'=>$request->status_drop[$shipment],
                                 'consignee_status_id'=>$request->status_drop[$shipment],
-                                'status_reason_id'=>($request->has('reason_drop'.$shipment)? $request->reason_drop[$shipment]:''),
+                                'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
                                 'remarks'=>$request->remarks[$shipment],
                                 'admin_id'=>Auth::id()
                             ]);
@@ -635,7 +637,7 @@ class DeliveryController extends Controller
                                 'shipment_id' => $shipment,
                                 'shipper_status_id' => $request->status_drop[$shipment],
                                 'consignee_status_id' => $request->status_drop[$shipment],
-                                'status_reason_id' => $request->reason_drop[$shipment],
+                                'status_reason_id' => ($request->has($statusId)? $request->reason_drop[$shipment]:null),
                                 'remarks' => $request->remarks[$shipment],
                                 'admin_id' => Auth::id()
                             ]);
@@ -903,19 +905,22 @@ class DeliveryController extends Controller
 
             $shipments = explode(',',$request->shipment_ids);
             $delivery_note_id = $request->delivery_note_id;
+            $shipment_count = 0;
+            $dispute_shipments = array();
             if($delivery_note_id != ''){
                 foreach ($shipments as $shipment){
 
                     if($request->status_drop[$shipment] != null) {
+                        $reasonId = "reason_drop.$shipment";
                         $shipper_status_id = Shipment::where('id', $shipment)->select('shipper_status_id')->first();
-                        if($shipper_status_id != $request->status_drop[$shipment]){
+                        if($shipper_status_id->shipper_status_id != $request->status_drop[$shipment]){
                             if ($request->status_drop[$shipment] == 7 || $request->status_drop[$shipment] == 18) {
 
                                 ShipmentsJourney::create([
                                     'shipment_id' => $shipment,
                                     'shipper_status_id' => $request->status_drop[$shipment],
                                     'consignee_status_id' => null,
-                                    'status_reason_id' => $request->reason_drop[$shipment],
+                                    'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
                                     'remarks' => $request->remarks[$shipment],
                                     'admin_id' => Auth::id()
                                 ]);
@@ -928,7 +933,7 @@ class DeliveryController extends Controller
                                         'shipment_id' => $shipment,
                                         'shipper_status_id' => 30,
                                         'consignee_status_id' => 30,
-                                        'status_reason_id' => $request->reason_drop[$shipment],
+                                        'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
                                         'remarks' => $request->remarks[$shipment],
                                         'admin_id' => Auth::id()
                                     ]);
@@ -940,7 +945,7 @@ class DeliveryController extends Controller
                                             'shipment_id' => $shipment,
                                             'shipper_status_id' => 36,
                                             'consignee_status_id' => 36,
-                                            'status_reason_id' => $request->reason_drop[$shipment],
+                                            'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
                                             'remarks' => $request->remarks[$shipment],
                                             'admin_id' => Auth::id()
                                         ]);
@@ -951,7 +956,7 @@ class DeliveryController extends Controller
                                             'shipment_id' => $shipment,
                                             'shipper_status_id' => 36,
                                             'consignee_status_id' => 36,
-                                            'status_reason_id' => $request->reason_drop[$shipment],
+                                            'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
                                             'remarks' => $request->remarks[$shipment],
                                             'admin_id' => Auth::id()
                                         ]);
@@ -963,7 +968,7 @@ class DeliveryController extends Controller
                                         'shipment_id' => $shipment,
                                         'shipper_status_id' => $request->status_drop[$shipment],
                                         'consignee_status_id' => $request->status_drop[$shipment],
-                                        'status_reason_id' => $request->reason_drop[$shipment],
+                                        'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
                                         'remarks' => $request->remarks[$shipment],
                                         'admin_id' => Auth::id()
                                     ]);
@@ -977,17 +982,20 @@ class DeliveryController extends Controller
                                     'shipment_id' => $shipment,
                                     'shipper_status_id' => $request->status_drop[$shipment],
                                     'consignee_status_id' => $request->status_drop[$shipment],
-                                    'status_reason_id' => $request->reason_drop[$shipment],
+                                    'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
                                     'remarks' => $request->remarks[$shipment],
                                     'admin_id' => Auth::id()
                                 ]);
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             }
-
+                            $dispute_shipments[] = $shipment;
                         }
                     }//main if condition
 
+                }
+                if(!empty($dispute_shipments)){
+                    DisputeController::add_delivery_wrong_status_dispute($delivery_note_id,$dispute_shipments);
                 }
                 $dncc_status = array(14,16,30,36,37);
                 $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$delivery_note_id)->select('shipment_id')->get();
