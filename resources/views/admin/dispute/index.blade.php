@@ -46,8 +46,8 @@
                     </button>
                 </div>
                 <div class="modal-body  text-center">
-                    <form id="dispute_form" action="{{route('admin.dispute.create')}}" method="post">
-                        @csrf
+                    <form id="dispute_form" action="" method="post">
+
                         <div class="row mb-2">
                             <div class="col form-group">
                                 <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
@@ -68,9 +68,9 @@
                         </div>
                         <div class="row mb-2 justify-content-center">
                             <div class="col-6 form-group">
-                                {{--<input name="tracking_number" id="tracking_number" class="select2 form-control" style="width: 100%;">--}}
-                                <select name="tracking_number[]" id="tracking_number" class="select2 form-control text-center numeric" multiple style="width: 100%;" data-rule-required="true" data-msg-required="This field is required">
-                                </select>
+                                <input name="tracking_number" id="tracking_number" class="tracking_number" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                                {{--<select name="tracking_number[]" id="tracking_number" class="select2 form-control text-center numeric" multiple style="width: 100%;" data-rule-required="true" data-msg-required="This field is required">--}}
+                                {{--</select>--}}
                             </div>
                         </div>
                         <div class="row mb-2 justify-content-center">
@@ -89,12 +89,85 @@
         </div>
     </div>
     <!--Dispute Modal -->
+    {{--shipments modal--}}
+    <div class="modal fade text-left" id="ShipmentsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ShipmentsModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Dispute Shipments List</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center dispute_shipments">
+
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-outline-primary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{--shipments modal--}}
+    <!--Dispute Update Modal -->
+    <div class="modal fade text-left" id="DisputeUpdateModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DisputeUpdateModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Update Dispute</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center update_dispute_body">
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Dispute Update Modal -->
+    {{--resolve modal--}}
+    <div class="modal fade text-left" id="ResolveModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ResolveModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Resolve Dispute</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                        <h2>Are You Sure?</h2>
+                </div>
+                <input type="hidden" id="disputeId">
+                    <div class="row justify-content-center no-gutters">
+                        <div class="col">
+                            <button type="button" class="btn btn-outline-danger block padding-right-0 dispute-resolve">Yes</button>
+                        </div>
+                        <div class="col">
+                            <button type="button" class="btn btn-outline-primary block padding-left-0" data-dismiss="modal">No</button>
+                        </div>
+                    </div>
+
+
+
+            </div>
+        </div>
+    </div>
+
+    {{--resolve modal--}}
 
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+{{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/ui/perfect-scrollbar.min.css')}}">--}}
 
 
 
@@ -144,14 +217,63 @@
             width: auto !important;
             text-align: left;
         }
+        .dispute_comments_section{
+            max-height: 200px;
+            overflow-y:scroll;
+            overflow-x:hidden;
+            /*overflow:hidden;*/
+            /*position: absolute;*/
+            padding: 10px;
+        }
+        p.comment{
+            text-align: left;
+            -ms-word-wrap: break-word;
+            word-wrap: break-word;
+        }
+        .description-div p.border{
+            padding:10px;
+        }
+        .comment-post{
+            padding-top: 10px;
+        }
+        .comment-date{
+            float:right;
+            font-size: 13px;
+            border-bottom: 1px solid #606060;
+        }
+        .selectize-control {
+            width: 100%;
+        }
+
+        .selectize-control .selectize-input {
+            vertical-align: middle;
+        }
+
+        .selectize-control .selectize-input .item {
+            word-break: break-all;
+        }
+        .comment-row{
+            padding: 10px;
+            border: 1px #cccccc;
+            border-radius:4px;
+            background: #666ee80d;
+            margin-bottom: 5px;
+        }
+        td.align-middle.description {
+            word-break: break-word;
+        }
     </style>
 @endsection
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    {{--<script src="{{asset('app-assets/vendors/js/ui/perfect-scrollbar.jquery.min.js')}}" type="text/javascript"></script>--}}
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -163,19 +285,33 @@
             placeholder:'Select a Dispute type',
             dropdownParent:$('#dispute_form')
         });
-        $('#tracking_number').select2({
-            placeholder:'Enter Tracking Number',
-            dropdownParent:$('#dispute_form'),
-            tags: true,
-            tokenSeparators: ['/',',',';'," "]
-        });
-            $('.numeric').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'rightAlign': false,
-                'min': 0,
-                'max': 1000000
+            var select = $('#tracking_number').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
+
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
             });
 
         var table = $('#datatable').DataTable({
@@ -186,7 +322,7 @@
                 className: 'btn btn-primary dispute_modal',
                 enabled: true,
                 action: function (e, dt, node, config) {
-
+                    $('#DisputeModal').modal('show');
                 }
             }],
             fixedHeader: {
@@ -247,34 +383,167 @@
                 });
             }
         });
-        $('.dispute_modal').on('click',function () {
-            $('#DisputeModal').modal('show');
+        // $('.dispute_modal').on('click',function () {
+        //
+        // });
+
+        var max_char = 250;
+        $('#description').keypress(function (e) {
+            // var comment = $(this).val();
+            // console.log(comment)
+            if ($(this).val().length == max_char) {
+                e.preventDefault();
+            } else if ($(this).val().length > max_char) {
+                // Maximum exceeded
+                this.value = this.value.substring(0, max_char);
+            }
         });
+        $('body').on('change','#update_dispute_form input',function() {
+            $(this).val($(this).val().trim());
+        });
+        $('body').on('change','#dispute_form textarea',function() {
+            $(this).val($(this).val().trim());
+        });
+        $('#DisputeModal').on('hidden.bs.modal',function (e) {
+            $('#dispute_form')[0].reset();
+            $('#DisputeCreate').removeAttr('disabled');
+            select[0].selectize.clear();
+            $('#city_select').val('').trigger('change');
+            $('#dispute_type_select').val('').trigger('change');
+        });
+        $('#DisputeUpdateModal').on('hidden.bs.modal',function (e) {
+            table.ajax.reload();
+        });
+        $('#dispute_form').on('submit',function (e) {
+            e.preventDefault();
+        });
+        $( "#dispute_form" ).validate({
+            ignore: [],
+            errorClass:"danger",
+            errorPlacement: function(error, element) {
+                error.addClass('w-100').appendTo(element.parents('.form-group'));
+            },
+            submitHandler: function(form) {
 
-            $( "#dispute_form" ).validate({
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parent('.form-group'));
-                },
-                submitHandler: function(form) {
+                $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                var city_select = $('#city_select').val();
+                var dispute_type_select = $('#dispute_type_select').val();
+                var tracking_number = $('#tracking_number').val();
+                var description = $('#description').val();
+                $.ajax({
+                    url: '{!! route('admin.dispute.create') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'city_select': city_select,
+                        'dispute_type_select':dispute_type_select,
+                        'tracking_number':tracking_number,
+                        'description':description
+                    }
+                }).done(function(data){
+                    $('#DisputeModal').modal('hide');
+                    if (data.invalid !== undefined) {
 
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Dispute is being created!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
+                        var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
 
-                        form.submit();
-                    // console.log('here')
+                        toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
 
+                    if(data.success != undefined){
+                        table.ajax.reload();
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-            });
+                    }
+                });
+
+                }
+
+
+        });
+        $('body').on('click','.shipment_count',function () {
+            var dispute_id = parseInt($(this).parents('tr').attr('id'));
+            if(dispute_id != ''){
+                $.ajax({
+                    url: '{!! route('admin.dispute.get.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': dispute_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        // console.log(data.shipments);
+                        var shipment = '';
+                        var i = 1;
+                        $.each(data.shipments,function (key,value) {
+                            shipment += "<span class='mb-1 block'><b>"+i+':'+"</b>&emsp;<u>"+value.tracking_number+"</u></span>";
+                            i++;
+                        });
+                        $('#ShipmentsModal').modal('show');
+
+                        $('.modal-body.dispute_shipments').html(shipment);
+                        // var shipment = "<p></p>";
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                    }
+                })
+            }
+        });
+        $('body').on('click','.resolve',function () {
+            var disputeId = parseInt($(this).parents('tr').attr('id'));
+           $('#ResolveModal').modal('show');
+           $('#disputeId').val(disputeId);
+        });
+        $('body').on('click','.dispute-resolve',function () {
+            var resolve_id = $('#disputeId').val();
+            // console.log(resolve_id);
+            if(resolve_id !== '') {
+                $.ajax({
+                    url: '{!! route('admin.dispute.resolve') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': resolve_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    $('#ResolveModal').modal('hide');
+                    if(data.status === 1){
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        table.ajax.reload();
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                    }
+                });
+            }
+        });
+        $('body').on('click','.update',function(){
+            var disputeId = parseInt($(this).parents('tr').attr('id'));
+            // console.log(disputeId)
+            if(disputeId !== ''){
+                $.ajax({
+                    url: '{!! route('admin.dispute.update') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': disputeId,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+
+                    if(data.status === 1){
+                        $('.update_dispute_body').html(data.view);
+                        $('#DisputeUpdateModal').modal('show');
+
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                    }
+                });
+            }
+        });
+
     });
 
     </script>

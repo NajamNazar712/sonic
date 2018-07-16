@@ -66,7 +66,19 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         Route::resource('receiving_sheet_history', 'Shippers\ShipperReceivingSheetHistoryController');
     });
-
+    Route::prefix('dispute')->name('dispute.')->group(function (){
+       Route::get('','Shippers\ShipperDisputeController@dispute_index')->name('index');
+       Route::get('list','Shippers\ShipperDisputeController@dispute_list')->name('list');
+       Route::post('create','Shippers\ShipperDisputeController@dispute_create')->name('create');
+       Route::post('get/shipments','Shippers\ShipperDisputeController@get_shipments')->name('get.shipments');
+       Route::post('get/comments','Shippers\ShipperDisputeController@get_comments')->name('get.comments');
+        Route::prefix('rebook')->name('rebook.')->group(function (){
+            Route::get('','Shippers\ShipperDisputeController@rebook_index')->name('index');
+            Route::get('list','Shippers\ShipperDisputeController@rebook_list')->name('list');
+            Route::post('shipment/info','Shippers\ShipperDisputeController@get_shipment_info')->name('shipment.info');
+            Route::post('shipment/update','Shippers\ShipperDisputeController@rebook_shipment_update')->name('shipment.update');
+        });
+    });
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
@@ -77,7 +89,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
 });
-
+//Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
@@ -197,8 +209,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
             Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
-            Route::post('dn/verify','Admins\DeliveryController@receive_delivery_note_verify')->name('dn.verify');
-
             Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
             Route::post('reason','Admins\DeliveryController@receive_delivery_reason')->name('reason');
             Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
@@ -295,12 +305,40 @@ Route::prefix('admin')->name('admin.')->group(function () {
        Route::get('','Admins\DisputeController@dispute_index')->name('index');
        Route::get('list','Admins\DisputeController@dispute_list')->name('list');
        Route::post('create','Admins\DisputeController@dispute_create')->name('create');
+       Route::post('get/shipments','Admins\DisputeController@get_shipments')->name('get.shipments');
+       Route::post('resolve','Admins\DisputeController@resolve_dispute')->name('resolve');
+       Route::post('update','Admins\DisputeController@update_dispute_view')->name('update');
+       Route::put('update/submit','Admins\DisputeController@update_dispute')->name('update.submit');
+       Route::post('data','Admins\DisputeController@get_data')->name('data');
+       Route::post('create/universal','Admins\DisputeController@dispute_create_universal')->name('create.universal');
 
     });
 
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@index')->name('index');
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
+    });
+
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::prefix('outstanding_sdn')->name('outstanding_sdn.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@outstanding_sdn_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@outstanding_sdn_list')->name('list');
+            Route::get('delivery_notes_list', 'Admins\AdminFinanceController@outstanding_sdn_delivery_notes_list')->name('delivery_notes_list');
+            Route::put('delivery_note_expense_edit', 'Admins\AdminFinanceController@outstanding_sdn_delivery_note_expense_edit')->name('delivery_note_expense_edit');
+            Route::post('reconcile_delivery_notes', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes')->name('reconcile_delivery_notes');
+            Route::get('export_to_excel', 'Admins\AdminFinanceController@outstanding_sdn_export_to_excel')->name('export_to_excel');
+        });
+
+        Route::prefix('outstanding_shipments')->name('outstanding_shipments.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@outstanding_shipments_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@outstanding_shipments_list')->name('list');
+            Route::put('resolved', 'Admins\AdminFinanceController@outstanding_shipments_resolved')->name('resolved');
+            Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
+        });
+    });
+
+    Route::prefix('sameday')->name('sameday.')->group(function (){
+        Route::get('','Admins\SamedayController@sameday_index')->name('index');
     });
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');

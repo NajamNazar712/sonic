@@ -60,6 +60,7 @@ class ShipmentStatusTableSeeder extends Seeder
 			array('id' => 44, 'code' => 'R-RE', 'name' => 'Return - Rider Exchange', 'description' => 'Return shipment not pertain\'s to assigned rider\'s route'),
 			array('id' => 45, 'code' => 'RP-RE', 'name' => 'Replacement - Rider Exchange', 'description' => 'Replacement shipment not pertain\'s to assigned rider\'s route'),
 			array('id' => 46, 'code' => 'TB-RE', 'name' => 'Try & Buy - Rider Exchange', 'description' => 'Try & Buy shipment not pertain\'s to assigned rider\'s route'),
+			array('id' => 47, 'code' => 'P-REC', 'name' => 'Payment - Rectified', 'description' => 'Shipment amount is wrongly paid and the difference is adjusted in next payment'),
         ));
     }
 }

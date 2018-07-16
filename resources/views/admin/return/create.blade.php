@@ -310,6 +310,7 @@
 
             $('#create_return_note_form').bind('submit', function(event) {
                 event.preventDefault();
+                var count = table.rows().count();
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
@@ -333,25 +334,29 @@
                     errors = 1;
                 }
 
+                if(count > 0) {
+                    if (errors == 0) {
+                        $('#create_return_note_form button[type="submit"]').attr('disabled', 'disabled');
+                        swal({
+                            title: 'Please Wait!',
+                            text: 'Return Shipments are being submited!',
+                            icon: 'info',
+                            buttons: false,
+                            closeOnClickOutside: false,
+                            closeOnEsc: false
+                        });
+                        $('#create_return_note_form input#shipment_ids').val(shipment_ids);
+                        $('#create_return_note_form input#selected_rider_id').val(rider);
+                        $('#create_return_note_form input#selected_route_id').val(route);
 
-                if(errors == 0){
-                    $('#create_return_note_form button[type="submit"]').attr('disabled','disabled');
-                     swal({
-                        title: 'Please Wait!',
-                        text: 'Return Shipments are being submited!',
-                        icon: 'info',
-                        buttons: false,
-                        closeOnClickOutside: false,
-                        closeOnEsc: false
-                    });
-                    $('#create_return_note_form input#shipment_ids').val(shipment_ids);
-                    $('#create_return_note_form input#selected_rider_id').val(rider);
-                    $('#create_return_note_form input#selected_route_id').val(route);
+                        this.submit();
 
-                    this.submit();
+                    }
+                }else{
+                    var error = "Select at-least one shipment!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                 }
-
 
 
             });

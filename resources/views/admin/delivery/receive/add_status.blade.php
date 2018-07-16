@@ -51,8 +51,6 @@
     </div>
 
 
-    </div>
-
     <!--Replacement Modal -->
     <div class="modal fade text-left" id="ReplacementModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ReplacementModal"
          aria-hidden="true">
@@ -395,10 +393,12 @@
                     }
                 }).done(function (data) {
                     if(data.status == 0){
+                        reason.empty().trigger('change');
                         $.each(data.reasons,function (key,value) {
                             var newOption = new Option(value.name, value.id, false, false);
                             reason.append(newOption).trigger('change');
                         });
+                        reason.val('').trigger('change');
                     }else{
                         $('.reasonDrop').empty();
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});

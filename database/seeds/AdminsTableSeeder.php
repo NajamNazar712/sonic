@@ -19,7 +19,7 @@ class AdminsTableSeeder extends Seeder
             'email' => 'admin@email.com',
             'username' => 'admin',
             'department' => 'Admin Department',
-            'city_id'=>17,
+            'city_id'=>202,
             'password' => bcrypt('password')
         ]);
 

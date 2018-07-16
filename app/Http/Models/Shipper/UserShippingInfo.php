@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class UserShippingInfo extends Model
 {
     protected $fillable = [
-        'user_id', 'pickup_address','poc','phone','email','city_code',
+        'user_id', 'pickup_address','poc','phone','email','city_id','rebook_status'
     ];
 
     public function user(){

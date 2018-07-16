@@ -300,6 +300,8 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+
 
 	<style>
 		table.dataTable {
@@ -347,6 +349,17 @@
 			width: auto !important;
 			text-align: left;
 		}
+		.selectize-control {
+			width: 100%;
+		}
+
+		.selectize-control .selectize-input {
+			vertical-align: middle;
+		}
+
+		.selectize-control .selectize-input .item {
+			word-break: break-all;
+		}
 	</style>
 @endsection
 
@@ -357,6 +370,8 @@
 	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
@@ -640,7 +655,134 @@
 					return false;
 				}
 			});
+			// launch dispute
+            $('body').on('click','.launch_dispute',function(){
+                var cargo_id = parseInt($(this).parents('tr').attr('id'));
 
+                $('#UniversalDisputeModal').modal('show');
+                $('#universal_dispute_id').val(cargo_id);
+            });
+            var select;
+            $('#UniversalDisputeModal').on('shown.bs.modal',function () {
+                var id = $('#universal_dispute_id').val();
+
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.dispute.data') !!}',
+                        method: 'POST',
+                        data:{
+                            '_token': '{{ csrf_token() }}',
+							'intransit':'intransit',
+                            'cargo_id':id
+                        }
+                    }).done(function (data) {
+                        if(data.success == 1){
+                            $('#universal_city_select').select2({
+                                placeholder:'Select a city',
+                                dropdownParent:$('#universal_dispute_form')
+                            });
+                            $.each(data.cities,function(key,value){
+                                var newOption = new Option(value.name, value.id, false, false);
+                                $('#universal_city_select').append(newOption).trigger('select');
+                            });
+                            $('#universal_dispute_type_select').select2({
+                                placeholder:'Select a Dispute type',
+                                dropdownParent:$('#universal_dispute_form')
+                            });
+                            $.each(data.dispute_types,function(key,value) {
+                                var dispute = new Option(value.type, value.id, false, false);
+                                $('#universal_dispute_type_select').append(dispute).trigger('select');
+                            });
+
+							$('#universal_tracking_number').val(data.cargo_shipments);
+                            select = $('#universal_tracking_number').selectize({
+                                placeholder: 'Tracking Number(s)*',
+                                delimiter: ',',
+                                createOnBlur: true,
+                                persist: false,
+                                plugins: ['remove_button'],
+                                onDropdownOpen: function(dropdown) {
+                                    dropdown.remove();
+                                },
+                                onType: function(str) {
+                                    var regex = /^[0-9,]+$/;
+
+                                    if (!regex.test(str)) {
+                                        select[0].selectize.setTextboxValue('');
+                                    }
+                                },
+                                create: function(input) {
+                                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                                        return {
+                                            value: input,
+                                            text: input
+                                        }
+                                    }
+                                    else {
+                                        return false;
+                                    }
+                                }
+                            });
+
+                        }
+                    });
+                }
+            });
+            $('#universal_dispute_form').validate({
+                ignore: [],
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    var city_select = $('#universal_city_select').val();
+                    var dispute_type_select = $('#universal_dispute_type_select').val();
+                    var tracking_number = $('#universal_tracking_number').val();
+                    var description = $('#universal_description').val();
+                    var cargo_id = $('#universal_dispute_id').val();
+                    $.ajax({
+                        url: '{!! route('admin.dispute.create.universal') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'city_select': city_select,
+							'cargo_id': cargo_id,
+                            'dispute_type_select':dispute_type_select,
+                            'tracking_number':tracking_number,
+                            'description':description
+                        }
+                    }).done(function(data){
+                        $('#UniversalDisputeModal').modal('hide');
+                        if (data.invalid !== undefined) {
+
+                            var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
+
+                            toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+
+                        if(data.success != undefined){
+                            // table.ajax.reload();
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            var redirect = '{!! route('admin.dispute.index') !!}';
+						window.location = redirect;
+                        }
+                    });
+
+                }
+
+
+            });
+            $('#UniversalDisputeModal').on('hidden.bs.modal',function () {
+                $('#universal_dispute_form')[0].reset();
+                $('#UniversalDisputeCreate').removeAttr('disabled');
+                select[0].selectize.clear();
+                $('#universal_city_select').val('').trigger('change');
+                $('#universal_dispute_type_select').val('').trigger('change');
+            });
+            //dispute end
 			$('#receive_at_link #receive_at_link_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
