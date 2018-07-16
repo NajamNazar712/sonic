@@ -935,8 +935,35 @@ class AdminCargoController extends Controller
 
         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Origin Centre!', NULL, Auth::id());
       }
+      //dispute for short received
+        if($cargo_consignment->status_id == 4){
+            $cargo_short_received_shipments = CargoConsignmentShipment::where(['cargo_consignment_id'=>$cargo_consignment_id,'status'=>0])->select('shipment_id')->get();
+            if(!empty($cargo_short_received_shipments)){
+                DisputeController::add_cargo_short_received($cargo_consignment_id,$cargo_short_received_shipments);
+            }
+        }
 
-      return redirect()->route('admin.cargo.in_transit.index')->with('success', 'Cargo No# ' . $cargo_consignment_id . ' has been Received');
+//        end dispute short received
+//        dispute start for junction
+        $junction_city_1_id = $cargo_consignment->junction_city_1_id;
+        $junction_city_2_id = $cargo_consignment->junction_city_2_id;
+        $cargo_hub = $cargo_consignment->hub_id;
+        if($cargo_hub != $junction_city_1_id){
+            $junction1 = CargoConsignmentJunctionReceival::where(['cargo_consignment_id'=>$cargo_consignment_id,'junction_id'=>$junction_city_1_id])->exists();
+            if(!$junction1){
+                DisputeController::add_junction_dispute($cargo_consignment_id,$junction_city_1_id);
+            }
+        }
+        if($cargo_hub != $junction_city_2_id){
+            $junction2 = CargoConsignmentJunctionReceival::where(['cargo_consignment_id'=>$cargo_consignment_id,'junction_id'=>$junction_city_2_id])->exists();
+            if(!$junction2){
+                DisputeController::add_junction_dispute($cargo_consignment_id,$junction_city_2_id);
+            }
+        }
+
+
+        //dispute end for junction
+        return redirect()->route('admin.cargo.in_transit.index')->with('success', 'Cargo No# ' . $cargo_consignment_id . ' has been Received');
     }
 
 }

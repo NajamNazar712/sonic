@@ -72,7 +72,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
        Route::post('create','Shippers\ShipperDisputeController@dispute_create')->name('create');
        Route::post('get/shipments','Shippers\ShipperDisputeController@get_shipments')->name('get.shipments');
        Route::post('get/comments','Shippers\ShipperDisputeController@get_comments')->name('get.comments');
-
+        Route::prefix('rebook')->name('rebook.')->group(function (){
+            Route::get('','Shippers\ShipperDisputeController@rebook_index')->name('index');
+            Route::get('list','Shippers\ShipperDisputeController@rebook_list')->name('list');
+            Route::post('shipment/info','Shippers\ShipperDisputeController@get_shipment_info')->name('shipment.info');
+            Route::post('shipment/update','Shippers\ShipperDisputeController@rebook_shipment_update')->name('shipment.update');
+        });
     });
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('', 'Shippers\ShipperTrackingController@index')->name('index');
@@ -84,7 +89,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
 });
-
+//Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
@@ -204,8 +209,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
             Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
-//            Route::post('dn/verify','Admins\DeliveryController@receive_delivery_note_verify')->name('dn.verify');
-
             Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
             Route::post('reason','Admins\DeliveryController@receive_delivery_reason')->name('reason');
             Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
@@ -305,7 +308,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
        Route::post('get/shipments','Admins\DisputeController@get_shipments')->name('get.shipments');
        Route::post('resolve','Admins\DisputeController@resolve_dispute')->name('resolve');
        Route::post('update','Admins\DisputeController@update_dispute_view')->name('update');
-       Route::put('update.submit','Admins\DisputeController@update_dispute')->name('update.submit');
+       Route::put('update/submit','Admins\DisputeController@update_dispute')->name('update.submit');
+       Route::post('data','Admins\DisputeController@get_data')->name('data');
+       Route::post('create/universal','Admins\DisputeController@dispute_create_universal')->name('create.universal');
 
     });
 
@@ -330,6 +335,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('resolved', 'Admins\AdminFinanceController@outstanding_shipments_resolved')->name('resolved');
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
         });
+    });
+
+    Route::prefix('sameday')->name('sameday.')->group(function (){
+        Route::get('','Admins\SamedayController@sameday_index')->name('index');
     });
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
