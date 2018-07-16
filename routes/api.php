@@ -14,5 +14,7 @@ use Illuminate\Http\Request;
 */
 
 Route::middleware('APIToken')->name('api.')->group(function () {
-		Route::post('shipment/book', 'APIController@shipment_book')->name('shipment.book');
+	Route::post('shipment/book', 'APIController@shipment_book')->name('shipment.book');
+	Route::get('shipment/status', 'APIController@shipment_status')->name('shipment.status');
+	Route::get('shipment/track', 'APIController@shipment_track')->name('shipment.track');
 });
