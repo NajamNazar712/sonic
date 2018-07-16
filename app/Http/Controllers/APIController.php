@@ -19,6 +19,12 @@ use Carbon\Carbon;
 class APIController extends Controller
 {
     private $names = [
+      'person_of_contact' => 'Person of Contact',
+      'phone_number' => 'Phone Number',
+      'email_address' => 'Email Address',
+      'address' => 'Address',
+      'city_id' => 'City ID',
+
       'service_type_id' => 'Service Type ID',
       'pickup_address_id' => 'Pickup Address ID',
       'information_display' => 'Information Display',
@@ -71,6 +77,8 @@ class APIController extends Controller
       'exists' => 'Given :attribute is of Invalid ID.',
       'unique' => ':attribute is already Present.',
       'date' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+
+      'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
 
       'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
       'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.'
