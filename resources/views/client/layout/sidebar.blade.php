@@ -20,7 +20,12 @@
             <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">Receiving Sheet History</a></li>
           </ul>
         </li>
-
+          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
+              <ul class="menu-content">
+                  <li><a class="menu-item" href="{{ route('cod.dispute.index') }}">Log</a></li>
+                  <li><a class="menu-item" href="{{ route('cod.dispute.rebook.index') }}">Rebook</a></li>
+              </ul>
+          </li>
          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Profile Update</span></a></li>
          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Excel Upload</span></a></li>
          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Finance</span></a></li>

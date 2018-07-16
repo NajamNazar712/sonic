@@ -231,6 +231,7 @@
                     }
                     else {
                         table.button(0).disable();
+                        hub_ids.splice(index, 1);
                     }
                 }else{
                     if(hub_ids[0] == hub_id){
@@ -247,6 +248,7 @@
                             table.button(0).enable();
                         }
                         else {
+                            hub_ids.splice(index, 1);
                             table.button(0).disable();
                         }
                     }else{

@@ -37,7 +37,8 @@ $factory->define(App\Http\Models\Shipper\User::class,function(Faker $faker){
                 'ntn_no' => '1234567',
                 'url' => $faker->url(),
                 'city_id' => '202',
-                'status' => '0'
+                'status' => '0',
+                'api_token' => uniqid(base64_encode(str_random(60)))
 
         ];
 });
