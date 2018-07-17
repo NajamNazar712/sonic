@@ -339,6 +339,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     Route::prefix('sameday')->name('sameday.')->group(function (){
         Route::get('','Admins\SamedayController@sameday_index')->name('index');
+        Route::get('list','Admins\SamedayController@sameday_list')->name('list');
     });
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');

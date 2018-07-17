@@ -30,6 +30,9 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Dispatched Time</th>
                         <th class="border-primary border-darken-1">Delivered Time</th>
+                        <th class="border-primary border-darken-1">Updated By</th>
+                        <th class="border-primary border-darken-1">TAT</th>
+                        <th class="border-primary border-darken-1">Time Remining</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -108,7 +111,7 @@
 
 
     <script type="text/javascript">
-        {{--$(document).ready(function () {--}}
+        $(document).ready(function () {
             {{--$('#city_select').select2({--}}
                 {{--placeholder:'Select a city',--}}
                 {{--dropdownParent:$('#dispute_form')--}}
@@ -146,75 +149,75 @@
                 {{--}--}}
             {{--});--}}
 
-            {{--var table = $('#datatable').DataTable({--}}
-                {{--// "scrollX": true,--}}
-                {{--dom: '<"d-inline-block"l><"pull-right"B>tipr',--}}
-                {{--buttons: [{--}}
-                    {{--text: 'Launch Dispute',--}}
-                    {{--className: 'btn btn-primary dispute_modal',--}}
-                    {{--enabled: true,--}}
-                    {{--action: function (e, dt, node, config) {--}}
-                        {{--$('#DisputeModal').modal('show');--}}
-                    {{--}--}}
-                {{--}],--}}
-                {{--fixedHeader: {--}}
-                    {{--header: true,--}}
-                    {{--headerOffset: $('.header-navbar').height()--}}
-                {{--},--}}
-                {{--lengthMenu: [[25, 50, 100], [25, 50, 100]],--}}
-                {{--pageLength: 25,--}}
-                {{--stateSave: true,--}}
-                {{--pagingType: 'full_numbers',--}}
-                {{--processing: true,--}}
-                {{--serverSide: true,--}}
-                {{--ajax: '{{ route('admin.dispute.list') }}',--}}
-                {{--rowId: 'dispute_id',--}}
-                {{--order: [[1, 'asc']],--}}
-                {{--columns: [--}}
-                    {{--{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},--}}
-                    {{--{data: 'dispute_id', name: 'dispute_id', class: 'align-middle dispute_id'},--}}
-                    {{--{data: 'created_at', name: 'created_at', class: 'align-middle created_at'},--}}
-                    {{--{data: 'description', name: 'description', class: 'align-middle description'},--}}
-                    {{--{data: 'originated_at', name: 'originated_at', class: 'align-middle originated_at'},--}}
-                    {{--{data: 'dispute_type', name: 'dispute_type', class: 'align-middle dispute_type'},--}}
-                    {{--{data: 'no_of_shipments', name: 'sm.mode', class: 'align-middle mode'},--}}
-                    {{--{data: 'launched_by', name: 'launched_by', class: 'align-middle launched_by'},--}}
-                    {{--{data: 'updated_by', name: 'updated_by', class: 'align-middle updated_by'},--}}
-                    {{--{data: 'status', name: 'status', class: 'align-middle status'},--}}
-                    {{--{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}--}}
+            var table = $('#datatable').DataTable({
+                "scrollX": true,
+                dom: 'ltipr',
+                fixedHeader: {
+                    header: true,
+                    headerOffset: $('.header-navbar').height()
+                },
+                lengthMenu: [[25, 50, 100], [25, 50, 100]],
+                pageLength: 25,
+                stateSave: true,
+                pagingType: 'full_numbers',
+                processing: true,
+                serverSide: true,
+                ajax: '{{ route('admin.sameday.list') }}',
+                rowId: 'shId',
+                order: [[1, 'asc']],
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'consignee_phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone'},
+                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
+                    {data: 'product_name', name: 'p.product_name', class: 'align-middle product_name'},
+                    {data: 'timing', name: 'sms.timing', class: 'align-middle timing'},
+                    {data: 'current_status', name: 'sst.name', class: 'align-middle current_status'},
+                    {data: 'booked_date', name: 'shipments.created_at', class: 'align-middle booked_date'},
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
+                    {data: 'dispatched_time', name: 'dispatched.created_at', class: 'align-middle dispatched_time'},
+                    {data: 'delivered_status', name: 'delivered_status', class: 'align-middle delivered_status'},
+                    {data: 'updated_by', name: 'updater.name', class: 'align-middle updated_by'},
+                    {data: 'tat', name: 'tat', class: 'align-middle tat'},
+                    {data: 'remaining_time', name: 'remaining_time', class: 'align-middle remaining_time'},
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
-                {{--],--}}
-                {{--rowCallback: function(row, data, index) {--}}
-                    {{--var info = table.page.info();--}}
-                    {{--$('td:eq(0)', row).html(index + 1 + info.page * info.length);--}}
-                {{--},--}}
-                {{--initComplete: function() {--}}
-                    {{--var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());--}}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                    {{--var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';--}}
-                    {{--var input = '<input type="text" class="form-control form-control-sm input-sm primary">';--}}
-                    {{--var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';--}}
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
 
-                    {{--this.api().columns().every(function(column_id) {--}}
-                        {{--var column = this;--}}
-                        {{--var header = column.header();--}}
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
 
 
-                        {{--if ($(header).is('.action') || $(header).is('.serial_number')) {--}}
-                            {{--$(td).appendTo($(search));--}}
-                        {{--}--}}
-                        {{--else {--}}
-                            {{--var current = $(input).appendTo($(search)).on('change', function() {--}}
-                                {{--column.search($(this).val(), false, false, true).draw();--}}
-                            {{--}).wrap(td).after(icon);--}}
+                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                            $(td).appendTo($(search));
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
 
-                            {{--if (column.search()) {--}}
-                                {{--current.val(column.search());--}}
-                            {{--}--}}
-                        {{--}--}}
-                    {{--});--}}
-                {{--}--}}
-            {{--});--}}
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                }
+            });
             {{--// $('.dispute_modal').on('click',function () {--}}
             {{--//--}}
             {{--// });--}}
@@ -323,34 +326,8 @@
                     {{--})--}}
                 {{--}--}}
             {{--});--}}
-            {{--$('body').on('click','.resolve',function () {--}}
-                {{--var disputeId = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--$('#ResolveModal').modal('show');--}}
-                {{--$('#disputeId').val(disputeId);--}}
-            {{--});--}}
-            {{--$('body').on('click','.dispute-resolve',function () {--}}
-                {{--var resolve_id = $('#disputeId').val();--}}
-                {{--// console.log(resolve_id);--}}
-                {{--if(resolve_id !== '') {--}}
-                    {{--$.ajax({--}}
-                        {{--url: '{!! route('admin.dispute.resolve') !!}',--}}
-                        {{--method: 'POST',--}}
-                        {{--data: {--}}
-                            {{--'id': resolve_id,--}}
-                            {{--'_token': '{{ csrf_token() }}'--}}
-                        {{--}--}}
-                    {{--}).done(function (data) {--}}
-                        {{--$('#ResolveModal').modal('hide');--}}
-                        {{--if(data.status === 1){--}}
-                            {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                            {{--table.ajax.reload();--}}
-                        {{--}else{--}}
-                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
 
-                        {{--}--}}
-                    {{--});--}}
-                {{--}--}}
-            {{--});--}}
+
             {{--$('body').on('click','.update',function(){--}}
                 {{--var disputeId = parseInt($(this).parents('tr').attr('id'));--}}
                 {{--// console.log(disputeId)--}}
@@ -376,7 +353,7 @@
                 {{--}--}}
             {{--});--}}
 
-        {{--});--}}
+        });
 
     </script>
 @endsection
