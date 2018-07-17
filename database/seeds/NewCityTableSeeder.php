@@ -30,5 +30,30 @@ class NewCityTableSeeder extends Seeder
             array('id'=>251,'name'=>'Multan','hub'=>1,'hub_id'=>251,'pickup'=>1,'status'=>1),
 
         ));
+
+        DB::table('city_deliveries')->truncate();
+        DB::table('city_deliveries')->insert(array(
+            array('city_id'=>1,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>1,'booking_type_id'=>1,'shipping_mode_id'=>2),
+            array('city_id'=>1,'booking_type_id'=>1,'shipping_mode_id'=>3),
+            array('city_id'=>1,'booking_type_id'=>1,'shipping_mode_id'=>4),
+            array('city_id'=>101,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>101,'booking_type_id'=>2,'shipping_mode_id'=>2),
+            array('city_id'=>101,'booking_type_id'=>3,'shipping_mode_id'=>1),
+            array('city_id'=>102,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>102,'booking_type_id'=>2,'shipping_mode_id'=>2),
+            array('city_id'=>103,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>104,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>105,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>106,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>107,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>108,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>109,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>110,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>202,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>174,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>223,'booking_type_id'=>1,'shipping_mode_id'=>1),
+            array('city_id'=>251,'booking_type_id'=>1,'shipping_mode_id'=>1),
+        ));
     }
 }

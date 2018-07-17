@@ -2820,11 +2820,11 @@ class AdminDashboardController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update City Status</a>";
+                                              <a href='#' class='dropdown-item' data-target-id='{$result->city_id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update City Status</a>";
                                               if($result->status == 1) {
-                                                  $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='cityInactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Deactivate City</a>";
+                                                  $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityInactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Deactivate City</a>";
                                               }else {
-                                                  $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='cityactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Activate City</a>";
+                                                  $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Activate City</a>";
                                               }
                                             $dropdown .="</div></span>";
                                               return $dropdown;
