@@ -9,14 +9,23 @@ use App\Http\Controllers\Shippers\ShipperShipmentBookController;
 use Validator;
 use Illuminate\Validation\Rule;
 
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipment;
+use App\Http\Models\City;
+use App\Http\Models\CityDelivery;
 
 use Carbon\Carbon;
 
 class APIController extends Controller
 {
     private $names = [
+      'person_of_contact' => 'Person of Contact',
+      'phone_number' => 'Phone Number',
+      'email_address' => 'Email Address',
+      'address' => 'Address',
+      'city_id' => 'City ID',
+
       'service_type_id' => 'Service Type ID',
       'pickup_address_id' => 'Pickup Address ID',
       'information_display' => 'Information Display',
@@ -70,9 +79,96 @@ class APIController extends Controller
       'unique' => ':attribute is already Present.',
       'date' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
 
+      'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
+
       'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
       'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.'
     ];
+
+    public function pickup_addresses(Request $request) {
+      $user_id = $request->user_id;
+
+      $pickup_addresses = User::find($user_id)->shipping;
+
+      if (count($pickup_addresses)) {
+        $details = array();
+
+        foreach ($pickup_addresses as $pickup_address) {
+          if ($pickup_address->rebook_status == 0) {
+            $detail = array();
+
+            $detail['id'] = $pickup_address->id;
+            $detail['person_of_contact'] = $pickup_address->poc;
+            $detail['phone_number'] = $pickup_address->phone;
+            $detail['email_address'] = $pickup_address->email;
+            $detail['address'] = $pickup_address->pickup_address;
+            $detail['city'] = array();
+
+            $city = $pickup_address->city;
+
+            $detail['city']['id'] = $city->id;
+            $detail['city']['name'] = $city->name;
+
+            $details[] = $detail;
+          }
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Pickup Addresses', 'pickup_addresses' => $details]);
+      }
+      else {
+        return response()->json(['status' => 1, 'message' => ' No Pickup Address']);
+      }
+    }
+
+    public function pickup_address_add(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'person_of_contact' => ['required', 'between:1,190'],
+        'phone_number' => ['required', 'regex:/[0-9]{4}-[0-9]{7}$/'],
+        'email_address' => ['required', 'email'],
+        'address' => ['required', 'between:1,190'],
+        'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id']
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $a = 'Temp';
+
+        $city = City::find($request->input('city_id'));
+
+        if (!$city->pickup) {
+          return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $request->input('city_id')]);
+        }
+
+        $person_of_contact = $request->input('person_of_contact');
+        $phone_number = $request->input('phone_number');
+        $email_address = $request->input('email_address');
+        $address = $request->input('address');
+        $city_id = $request->input('city_id');
+
+        $pickup_address = new UserShippingInfo();
+
+        $pickup_address->user_id = $user_id;
+        $pickup_address->poc = $person_of_contact;
+        $pickup_address->phone = $phone_number;
+        $pickup_address->email = $email_address;
+        $pickup_address->pickup_address = $address;
+        $pickup_address->city_id = $city_id;
+
+        $pickup_address->save();
+
+        $id = $pickup_address->id;
+
+        return response()->json(['status' => 0, 'message' => 'Pickup Address has been added', 'id' => $id]);
+      }
+    }
 
     public function shipment_book(Request $request) {
       $user_id = $request->user_id;
@@ -86,8 +182,8 @@ class APIController extends Controller
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
         'consignee_name' => ['required', 'between:1,255'],
         'consignee_address' => ['required', 'between:1,255'],
-        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}/'],
-        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{4}-[0-9]{7}/'],
+        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}$/'],
+        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{4}-[0-9]{7}$/'],
         'consignee_email_address' => ['nullable', 'filled', 'email'],
         'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
@@ -129,10 +225,18 @@ class APIController extends Controller
       else {
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
+        if (!$user_shipping_info->city->pickup) {
+          return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
+        }
+
         $pickup_city_id = $user_shipping_info->city_id;
 
         if ($request->input('consignee_city_id') != $pickup_city_id && $request->input('shipping_mode_id') == 4) {
           return response()->json(['status' => 1, 'message' => 'Same Day Delivery is not available for Different City Shipment']);
+        }
+
+        if (!CityDelivery::where('city_id', $request->input('consignee_city_id'))->where('booking_type_id', $request->input('service_type_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->exists()) {
+          return response()->json(['status' => 1, 'message' => 'Delivery is not allowed for City ID #' . $request->input('consignee_city_id') . ' with Service Type ID #' . $request->input('service_type_id') . ' and Shipping Mode ID #' . $request->input('shipping_mode_id')]);
         }
 
         $service_type_id = $request->input('service_type_id');
@@ -418,6 +522,36 @@ class APIController extends Controller
         }
 
         return response()->json(['status' => 0, 'message' => 'Tracking of Shipment #' . $tracking_number, 'details' => $details]);
+      }
+    }
+
+    public function cities(Request $request) {
+      $user_id = $request->user_id;
+
+      $cities = City::all();
+
+      if (count($cities)) {
+        $details = array();
+
+        foreach ($cities as $city) {
+          $detail = array();
+
+          $detail['id'] = $city->id;
+          $detail['name'] = $city->name;
+          $detail['pickup'] = ($city->pickup) ? TRUE : FALSE;
+          $detail['delivery'] = array();
+
+          foreach ($city->deliveries as $delivery) {
+            $detail['delivery'][$delivery->booking_type->booking_type][] = $delivery->shipping_mode->mode;
+          }
+
+          $details[] = $detail;
+        }
+
+        return response()->json(['status' => 0, 'message' => 'Pickup and Delivery Information of Cities', 'cities' => $details]);
+      }
+      else {
+        return response()->json(['status' => 1, 'message' => ' No City Present']);
       }
     }
 }

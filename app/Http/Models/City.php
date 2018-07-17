@@ -24,4 +24,8 @@ class City extends Model
     public function disputes(){
         return $this->hasMany('App\Http\Models\Dispute');
     }
+
+    public function deliveries() {
+        return $this->hasMany('App\Http\Models\CityDelivery');
+    }
 }

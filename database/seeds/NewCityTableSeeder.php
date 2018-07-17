@@ -40,7 +40,6 @@ class NewCityTableSeeder extends Seeder
             array('city_id'=>101,'booking_type_id'=>1,'shipping_mode_id'=>1),
             array('city_id'=>101,'booking_type_id'=>2,'shipping_mode_id'=>2),
             array('city_id'=>101,'booking_type_id'=>3,'shipping_mode_id'=>1),
-            array('city_id'=>101,'booking_type_id'=>4,'shipping_mode_id'=>1),
             array('city_id'=>102,'booking_type_id'=>1,'shipping_mode_id'=>1),
             array('city_id'=>102,'booking_type_id'=>2,'shipping_mode_id'=>2),
             array('city_id'=>103,'booking_type_id'=>1,'shipping_mode_id'=>1),
