@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\Admin\DeliveryNoteShipment;
+
 use App\Http\Models\Shipment;
 use Carbon\Carbon;
 use Illuminate\Http\Request;

@@ -341,6 +341,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('','Admins\SamedayController@sameday_index')->name('index');
         Route::get('list','Admins\SamedayController@sameday_list')->name('list');
     });
+    Route::prefix('packaging')->name('packaging.')->group(function (){
+        Route::get('','Admins\AdminPackagingMaterialController@packaging_index')->name('index');
+        Route::get('list','Admins\AdminPackagingMaterialController@packaging_list')->name('list');
+        Route::post('add/submit','Admins\AdminPackagingMaterialController@add_stock')->name('add.submit');
+        Route::get('fetch/cities','Admins\AdminPackagingMaterialController@fetch_cities')->name('fetch.cities');
+        Route::post('send/submit','Admins\AdminPackagingMaterialController@send_stock')->name('send.submit');
+    });
+
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
