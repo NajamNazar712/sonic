@@ -83,7 +83,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
     });
-
+    Route::prefix('packaging')->name('packaging.')->group(function (){
+        Route::prefix('requests')->name('requests.')->group(function (){
+            Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request')->name('index');
+            Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
+        });
+    });
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
@@ -347,6 +352,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('add/submit','Admins\AdminPackagingMaterialController@add_stock')->name('add.submit');
         Route::get('fetch/cities','Admins\AdminPackagingMaterialController@fetch_cities')->name('fetch.cities');
         Route::post('send/submit','Admins\AdminPackagingMaterialController@send_stock')->name('send.submit');
+        Route::prefix('requests')->name('requests.')->group(function (){
+           Route::get('','Admins\AdminPackagingMaterialController@request_index')->name('index');
+           Route::get('list','Admins\AdminPackagingMaterialController@request_list')->name('list');
+           Route::post('dispatch','Admins\AdminPackagingMaterialController@request_dispatch_submit')->name('dispatch');
+        });
     });
 
 

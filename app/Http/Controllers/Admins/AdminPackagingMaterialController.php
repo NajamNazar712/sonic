@@ -2,10 +2,16 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\PackagingMaterialStockHead;
 use App\Http\Models\Admin\PackagingMaterialStockHub;
 use App\Http\Models\Admin\PackagingStockHistory;
 use App\Http\Models\City;
+use App\Http\Models\PackagingCharge;
+use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\Shipment;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -193,5 +199,133 @@ class AdminPackagingMaterialController extends Controller
         }else{
             return false;
         }
+    }
+    public function request_index(Request $request){
+        $packaging = PackagingMaterialStockHead::latest()->first();
+        return view('admin.materials.requests.index')->with('packaging',$packaging);
+    }
+    public function request_list(Request $request){
+        $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
+            ->join('users as u','u.id','=','packaging_material_requests.user_id')
+            ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.small_flyers','packaging_material_requests.medium_flyers','packaging_material_requests.large_flyers','packaging_material_requests.boxes','packaging_material_requests.address','ppm.mode','packaging_material_requests.status']);
+        return Datatables::of($requests)
+
+            ->editColumn('created_at', function ($packaging) {
+                return $packaging->created_at ? with(new Carbon($packaging->created_at))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('status',function($packaging){
+                if($packaging->status == 0){
+                    return "Booked";
+                }
+                else if($packaging->status == 1){
+                    return "Dispatched";
+                }
+            })
+            ->addColumn('action',function ($packaging){
+                $drop = " <span class='dropdown'>
+                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>";
+                                        if($packaging->status == 0){
+                                            $drop .=  "<div class='dropdown-menu open-left arrow'><a class='dropdown-item dispatch'><i class='ft-fast-forward primary'> Dispatch</a>";
+                                        }
+
+                                           $drop .= "</div></span>";
+                                          return $drop;
+            })
+            ->make(true);
+    }
+    public function request_dispatch_submit(Request $request){
+        $request_id = $request->id;
+        $head_stocks = PackagingMaterialStockHead::latest()->first();
+        $request_details = PackagingMaterialRequest::where('id',$request_id)->with('city')->first();
+//        return $request_details->city->hub_id;
+        if($request_details->small_flyers > $head_stocks->small_flyers || $request_details->medium_flyers > $head_stocks->medium_flyers || $request_details->large_flyers > $head_stocks->large_flyers || $request_details->boxes > $head_stocks->boxes){
+            return response()->json(['status'=>0,'error'=>"Insufficient quantity!"]);
+        }else{
+
+            $balance = 4000;
+            $total_charges = 0;
+            $charges = PackagingCharge::where('user_id',$request_details->user_id)->latest()->first();
+            $total_charges += $request_details->small_flyers * $charges->sm_flyer;
+            $total_charges += $request_details->medium_flyers * $charges->md_flyer;
+            $total_charges += $request_details->large_flyers * $charges->lg_flyer;
+            $total_charges += $request_details->boxes * $charges->box_flyer;
+            if($total_charges <= $balance){
+               $hub_id = $request_details->city->hub_id;
+               $pickup_address = UserShippingInfo::where(['user_id'=>$request_details->user_id,'city_id'=>$hub_id,'hidden'=>1]);
+               if(!$pickup_address->exists()){
+                   $email = User::where('id',$request_details->user_id)->select('email')->first();
+                   $pickup_address = UserShippingInfo::create(['user_id'=>$request_details->user_id,'pickup_address'=>"Trax Office",'poc'=>$request_details->poc,'phone'=>$request_details->phone,'email'=>$email->email,'city_id'=>$hub_id,'hidden'=>1]);
+               }else{
+                $pickup_address = $pickup_address->first();
+               }
+               $now = Carbon::now()->format('yyyy-mm-dd 00:00:00');
+               if($request_details->packaging_payment_mode_id == 1){
+                  $shipment = $this->book(1,$pickup_address->id,1,$request_details->city_id,$request_details->poc,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,$total_charges,1,2,2);
+               }else{
+                 $shipment = $this->book(1,$pickup_address->id,1,$request_details->city_id,$request_details->poc,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
+               }
+               $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
+                ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, 'Shipment arrived at origin!', $request_details->user_id, NULL);
+                $this->sub_head_stock($request_details->small_flyers,$request_details->medium_flyers,$request_details->large_flyers,$request_details->boxes);
+                $request_details->status = 1;
+                $request_details->save();
+                return response()->json(['status'=>1,'success'=>"Packaging Material has been dispatched successfully!"]);
+
+            }else{
+                return response()->json(['status'=>0,'error'=>"Insufficient Balance!"]);
+
+            }
+        }
+//        if($request_details->medium_flyers > $head_stocks->medium_flyers){
+//            return response()->json(['status'=>0,'error'=>"Insufficient quantity!"]);
+//        }
+//        return $head_stocks;
+
+    }
+    private function book($service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {
+        $shipment = new Shipment();
+
+        $shipment->user_id = Auth::id();
+        $shipment->booking_type_id = $service_type_id;
+        $shipment->pickup_address_id = $pickup_address_id;
+        $shipment->information_display = $information_display;
+
+        $shipment->consignee_city_id = $consignee_city_id;
+        $shipment->consignee_name = $consignee_name;
+        $shipment->consignee_address = $consignee_address;
+        $shipment->consignee_phone_number_1 = $consignee_phone_number_1;
+        $shipment->consignee_phone_number_2 = $consignee_phone_number_2;
+        $shipment->consignee_email = $consignee_email_address;
+
+        $shipment->order_id = $order_id;
+        $shipment->package_type = $package_type;
+        $shipment->pickup_date = $pickup_date;
+        $shipment->special_instructions = $special_instructions;
+
+
+        $shipment->estimated_weight = $estimated_weight;
+        $shipment->shipping_mode_id = $shipping_mode_id;
+        $shipment->same_day_timing_id = $same_day_timing_id;
+
+        $shipment->amount = $amount;
+        $shipment->payment_mode_id = $payment_mode_id;
+        $shipment->shipper_status_id = $shipper_status_id;
+        $shipment->consignee_status_id = $consignee_status_id;
+
+        $shipment->save();
+        return $shipment;
+    }
+    private function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
+        $shipment = Shipment::find($shipment_id);
+
+        $tracking_number = $pickup_city_id . $consignee_city_id . str_pad($shipment_id, 6, '0', STR_PAD_LEFT);
+
+        $shipment->tracking_number = $tracking_number;
+
+        $shipment->save();
+
+        return $tracking_number;
     }
 }

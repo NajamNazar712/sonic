@@ -12,10 +12,10 @@
                 @include('admin.inc.messages')
                 <div class="container justify-content-center pb-2 text-center">
                     <div class="row">
-                        <div class="col-3"><h4>Small Flyers: <u>{{$packaging->small_flyers}}</u></h4></div>
-                        <div class="col-3"><h4>Medium Flyers: <u>{{$packaging->medium_flyers}}</u></h4></div>
-                        <div class="col-3"><h4>Large Flyers: <u>{{$packaging->large_flyers}}</u></h4></div>
-                        <div class="col-3"><h4>Boxes: <u>{{$packaging->boxes}}</u></h4></div>
+                        <div class="col-3"><h4>Small Flyers: <u id="sm_flyers_title">{{$packaging->small_flyers}}</u></h4></div>
+                        <div class="col-3"><h4>Medium Flyers: <u id="md_flyers_title">{{$packaging->medium_flyers}}</u></h4></div>
+                        <div class="col-3"><h4>Large Flyers: <u id="lg_flyers_title">{{$packaging->large_flyers}}</u></h4></div>
+                        <div class="col-3"><h4>Boxes: <u id="box_title">{{$packaging->boxes}}</u></h4></div>
                     </div>
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -106,8 +106,6 @@
                             <div class="row justify-content-center">
                                 <div class="col-4 form-group">
                                     <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                        <option></option>
-
                                     </select>
                                 </div>
                             </div>
@@ -118,16 +116,16 @@
                             </div>
                             <div class="row">
                                 <div class="col-6 form-group">
-                                    <input type="text" name="send_stock_smflyer" id="send_stock_smflyer" class="form-control numeric flyer" placeholder="Small Flyers">
+                                    <input type="text" name="send_stock_smflyer" id="send_stock_smflyer" class="form-control small_flyer flyer" placeholder="Small Flyers">
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="send_stock_mdflyer" id="send_stock_mdflyer" class="form-control numeric flyer" placeholder="Medium Flyers">
+                                    <input type="text" name="send_stock_mdflyer" id="send_stock_mdflyer" class="form-control medium_flyer flyer" placeholder="Medium Flyers">
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="send_stock_lgflyer" id="send_stock_lgflyer" class="form-control numeric flyer" placeholder="Large Flyers">
+                                    <input type="text" name="send_stock_lgflyer" id="send_stock_lgflyer" class="form-control large_flyer flyer" placeholder="Large Flyers">
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="send_stock_boxes" id="send_stock_boxes" class="form-control numeric flyer" placeholder="Boxes">
+                                    <input type="text" name="send_stock_boxes" id="send_stock_boxes" class="form-control box_flyer flyer" placeholder="Boxes">
                                 </div>
 
                             </div>
@@ -216,10 +214,42 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            {{--$('#city_select').select2({--}}
-                {{--placeholder:'Select a city',--}}
-                {{--dropdownParent:$('#dispute_form')--}}
-            {{--});--}}
+            var small_flyer = parseInt($('#sm_flyers_title').text());
+            var medium_flyer = parseInt($('#md_flyers_title').text());
+            var large_flyer = parseInt($('#lg_flyers_title').text());
+            var box_flyer = parseInt($('#box_title').text());
+            $('.small_flyer').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 1,
+                'max': small_flyer
+            });
+            $('.medium_flyer').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 1,
+                'max': medium_flyer
+            });
+            $('.large_flyer').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 1,
+                'max': large_flyer
+            });
+            $('.box_flyer').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 1,
+                'max': box_flyer
+            });
             $('.numeric').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -310,40 +340,15 @@
                 }
             });
 
-            {{--// $('.dispute_modal').on('click',function () {--}}
-            {{--//--}}
-            {{--// });--}}
-
-            {{--var max_char = 250;--}}
-            {{--$('#description').keypress(function (e) {--}}
-                {{--// var comment = $(this).val();--}}
-                {{--// console.log(comment)--}}
-                {{--if ($(this).val().length == max_char) {--}}
-                    {{--e.preventDefault();--}}
-                {{--} else if ($(this).val().length > max_char) {--}}
-                    {{--// Maximum exceeded--}}
-                    {{--this.value = this.value.substring(0, max_char);--}}
-                {{--}--}}
-            {{--});--}}
-            {{--$('body').on('change','#update_dispute_form input',function() {--}}
-                {{--$(this).val($(this).val().trim());--}}
-            {{--});--}}
-            {{--$('body').on('change','#dispute_form textarea',function() {--}}
-                {{--$(this).val($(this).val().trim());--}}
-            {{--});--}}
-            {{--$('#DisputeModal').on('hidden.bs.modal',function (e) {--}}
-                {{--$('#dispute_form')[0].reset();--}}
-                {{--$('#DisputeCreate').removeAttr('disabled');--}}
-                {{--select[0].selectize.clear();--}}
-                {{--$('#city_select').val('').trigger('change');--}}
-                {{--$('#dispute_type_select').val('').trigger('change');--}}
-            {{--});--}}
-            {{--$('#DisputeUpdateModal').on('hidden.bs.modal',function (e) {--}}
-                {{--table.ajax.reload();--}}
-            {{--});--}}
-            {{--$('#dispute_form').on('submit',function (e) {--}}
-                {{--e.preventDefault();--}}
-            {{--});--}}
+            $('body').on('change','#add_stock_form input',function() {
+                $(this).val($(this).val().trim());
+            });
+            $('body').on('change','#send_stock_form input',function() {
+                $(this).val($(this).val().trim());
+            });
+            $('#AddStockModal').on('hidden.bs.modal',function () {
+                $('#add_stock_form')[0].reset();
+            });
             $('#SendStockModal').on('shown.bs.modal',function () {
                 if(!$('#city_select').hasClass('select2-hidden-accessible')){
                     $('#city_select').select2({
@@ -357,6 +362,8 @@
                     method: 'GET'
                 }).done(function (data) {
                     if(data.status === 1){
+                        var newOption = new Option('', '', false, false);
+                        $('#city_select').append(newOption).trigger('select');
                         $.each(data.cities,function(key,value){
                             var newOption = new Option(value.name, value.id, false, false);
                             $('#city_select').append(newOption).trigger('select');
@@ -366,6 +373,11 @@
 
                     }
                 });
+            });
+            $('#SendStockModal').on('hidden.bs.modal',function () {
+                $('#send_stock_form')[0].reset();
+                $('#city_select').empty().trigger('change');
+                $('#city_select').val('').trigger('change');
             });
             $( "#add_stock_form" ).validate({
                 rules: {

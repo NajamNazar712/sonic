@@ -81,6 +81,7 @@
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Packaging</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.packaging.index') }}">Flyers</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.packaging.requests.index') }}">Requests</a></li>
                 </ul>
             </li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a></li>
