@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\PackagingCharge;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use Auth;
+//use Illuminate\Support\Facades\Auth;
 
 class ShipperDashboardController extends Controller
 {
@@ -14,6 +16,7 @@ class ShipperDashboardController extends Controller
     }
 
     public function index() {
+
       return view('client.dashboard');
     }
     public function ecommerce() {

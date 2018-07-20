@@ -23,7 +23,7 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Reference No.</th>
+                        <th class="border-primary border-darken-1">Invoice No./Cargo ID</th>
                         <th class="border-primary border-darken-1">Entry Type</th>
                         <th class="border-primary border-darken-1">Entered Date/Time</th>
                         <th class="border-primary border-darken-1">Entered By</th>
@@ -218,6 +218,22 @@
             var medium_flyer = parseInt($('#md_flyers_title').text());
             var large_flyer = parseInt($('#lg_flyers_title').text());
             var box_flyer = parseInt($('#box_title').text());
+            if(small_flyer == 0 && medium_flyer == 0 && large_flyer == 0 && box_flyer == 0){
+                $('#SendNewStock').prop("disabled",true);
+            }
+            if(small_flyer == 0){
+
+                $('#send_stock_smflyer').attr('disabled','disabled');
+            }
+            if(medium_flyer == 0){
+                $('#send_stock_mdflyer').attr('disabled','disabled');
+            }
+            if(large_flyer == 0){
+                $('#send_stock_lgflyer').attr('disabled','disabled');
+            }
+            if(box_flyer == 0){
+                $('#send_stock_boxes').attr('disabled','disabled');
+            }
             $('.small_flyer').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,

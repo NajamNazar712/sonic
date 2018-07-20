@@ -6,6 +6,7 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\PackagingMaterialStockHead;
 use App\Http\Models\Admin\PackagingMaterialStockHub;
 use App\Http\Models\Admin\PackagingStockHistory;
+use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
@@ -103,19 +104,25 @@ class AdminPackagingMaterialController extends Controller
         $md_quantity = ($request->send_stock_mdflyer != null)? $request->send_stock_mdflyer:0;
         $lg_quantity = ($request->send_stock_lgflyer != null)? $request->send_stock_lgflyer:0;
         $box_quantity = ($request->send_stock_boxes != null)? $request->send_stock_boxes:0;
+
         $hub_id = $request->city_select;
         $reference_number = $request->invoice_number;
-        if($reference_number != null){
+        $cargo_id = CargoConsignment::where('id',$reference_number)->where('status_id','!=',3);
+        if($cargo_id->exists()){
             $packaging = PackagingMaterialStockHub::where('hub_id',$hub_id);
             if($packaging->exists()){
                 $packaging = $packaging->first();
+                if($sm_quantity != 0  || $md_quantity != 0 || $lg_quantity != 0 || $box_quantity != 0){
+                    $result = $this->sub_head_stock($sm_quantity,$md_quantity,$lg_quantity,$box_quantity);
+                }else{
+                    return redirect()->back()->with('error','Canot send 0 Stock!');
+                }
                 $small = $packaging->small_flyers;
                 $medium = $packaging->medium_flyers;
                 $large = $packaging->large_flyers;
                 $box = $packaging->boxes;
-                $result = $this->sub_head_stock($sm_quantity,$md_quantity,$lg_quantity,$box_quantity);
 
-                if($result) {
+                if($result == true) {
                     $small += $sm_quantity;
                     $medium += $md_quantity;
                     $large += $lg_quantity;
@@ -144,10 +151,12 @@ class AdminPackagingMaterialController extends Controller
 
                 }
             }else{
-                $result = $this->sub_head_stock($sm_quantity,$md_quantity,$lg_quantity,$box_quantity);
-                if($result) {
-
-
+                if($sm_quantity != 0  || $md_quantity != 0 || $lg_quantity != 0 || $box_quantity != 0){
+                    $result = $this->sub_head_stock($sm_quantity,$md_quantity,$lg_quantity,$box_quantity);
+                }else{
+                    return redirect()->back()->with('error','Canot send 0 Stock!');
+                }
+                if($result == true) {
                     $packaging_hub = PackagingMaterialStockHub::create([
                         'hub_id' => $hub_id,
                         'small_flyers' => $sm_quantity,
@@ -173,16 +182,18 @@ class AdminPackagingMaterialController extends Controller
                 }
             }
         }else{
-            return redirect()->back()->with('error','No invoice number entered!');
+            return redirect()->back()->with('error','Cargo ID wrong or already received!');
         }
     }
     protected function sub_head_stock($small,$medium,$large,$box){
         $head_stocks = PackagingMaterialStockHead::latest()->first();
+        $small_flyers = 0; $medium_flyers = 0; $medium_flyers = 0; $large_flyers = 0;
         $small_flyers = $head_stocks->small_flyers;
         $medium_flyers = $head_stocks->medium_flyers;
         $large_flyers = $head_stocks->large_flyers;
         $boxes = $head_stocks->boxes;
         if($small <= $small_flyers && $medium <= $medium_flyers && $large <= $large_flyers && $box <= $boxes){
+
             $small_flyers -= $small;
             $medium_flyers -= $medium;
             $large_flyers -= $large;
@@ -194,10 +205,10 @@ class AdminPackagingMaterialController extends Controller
                 'boxes'=>$boxes
             ]);
             if($packaging_head){
-                return true;
+                return 1;
             }
         }else{
-            return false;
+            return 0;
         }
     }
     public function request_index(Request $request){
@@ -223,14 +234,18 @@ class AdminPackagingMaterialController extends Controller
                 }
             })
             ->addColumn('action',function ($packaging){
-                $drop = " <span class='dropdown'>
+                if($packaging->status == 0) {
+                    $drop = " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>";
-                                        if($packaging->status == 0){
-                                            $drop .=  "<div class='dropdown-menu open-left arrow'><a class='dropdown-item dispatch'><i class='ft-fast-forward primary'> Dispatch</a>";
-                                        }
 
-                                           $drop .= "</div></span>";
+                    $drop .= "<div class='dropdown-menu open-left arrow'><a class='dropdown-item dispatch'><i class='ft-fast-forward primary'> Dispatch</a>";
+
+
+                    $drop .= "</div></span>";
+                }else{
+                    $drop = "<span class='dropdown'></span>";
+                }
                                           return $drop;
             })
             ->make(true);
@@ -255,8 +270,8 @@ class AdminPackagingMaterialController extends Controller
                $hub_id = $request_details->city->hub_id;
                $pickup_address = UserShippingInfo::where(['user_id'=>$request_details->user_id,'city_id'=>$hub_id,'hidden'=>1]);
                if(!$pickup_address->exists()){
-                   $email = User::where('id',$request_details->user_id)->select('email')->first();
-                   $pickup_address = UserShippingInfo::create(['user_id'=>$request_details->user_id,'pickup_address'=>"Trax Office",'poc'=>$request_details->poc,'phone'=>$request_details->phone,'email'=>$email->email,'city_id'=>$hub_id,'hidden'=>1]);
+                   $shipper_details = User::where('id',$request_details->user_id)->select('poc','phone','email')->first();
+                   $pickup_address = UserShippingInfo::create(['user_id'=>$request_details->user_id,'pickup_address'=>"Trax Office",'poc'=>$shipper_details->poc,'phone'=>$shipper_details->phone,'email'=>$shipper_details->email,'city_id'=>$hub_id,'hidden'=>1]);
                }else{
                 $pickup_address = $pickup_address->first();
                }

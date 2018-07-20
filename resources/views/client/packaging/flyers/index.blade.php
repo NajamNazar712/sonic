@@ -8,7 +8,7 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
-                @include('admin.inc.messages')
+                @include('client.inc.messages')
             <div class="container">
                 <form action="{{route('cod.packaging.requests.submit')}}" id="material_request_form" method="post">
                     @csrf

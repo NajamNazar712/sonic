@@ -245,7 +245,8 @@ class ShipperDisputeController extends Controller
                     $consigneeCity =City::where('id',$shipment->consignee_city_id)->first();
                     $traxOffice = UserShippingInfo::where(['user_id'=>Auth::id(),'city_id'=>$consigneeCity->hub_id,'hidden'=>1]);
                     if(!$traxOffice->exists()){
-                        $pickup_address = UserShippingInfo::create(['user_id'=>Auth::id(),'pickup_address'=>$newAddress,'poc'=>$shipment->pickup_address->poc,'phone'=>$shipment->pickup_address->phone,'email'=>$shipment->pickup_address->email,'city_id'=>$shipment->consignee_city_id,'hidden'=>1]);
+                        $shipper_details = User::where('id',Auth::id())->select('poc','phone','email')->first();
+                        $pickup_address = UserShippingInfo::create(['user_id'=>Auth::id(),'pickup_address'=>$newAddress,'poc'=>$shipper_details->poc,'phone'=>$shipper_details->phone,'email'=>$shipper_details->email,'city_id'=>$shipment->consignee_city_id,'hidden'=>1]);
                     }else{
                         $pickup_address = $traxOffice->first();
                     }
