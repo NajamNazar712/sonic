@@ -294,7 +294,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.list') }}',
                 rowId: 'psh_id',
-                order: [[1, 'asc']],
+                order: [[3, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'reference_number', name: 'packaging_stock_histories.reference_number', class: 'align-middle reference_number'},

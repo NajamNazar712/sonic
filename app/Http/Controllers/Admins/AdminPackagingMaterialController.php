@@ -182,7 +182,7 @@ class AdminPackagingMaterialController extends Controller
         $medium_flyers = $head_stocks->medium_flyers;
         $large_flyers = $head_stocks->large_flyers;
         $boxes = $head_stocks->boxes;
-        if($small < $small_flyers && $medium < $medium_flyers && $large < $large_flyers && $box < $boxes){
+        if($small <= $small_flyers && $medium <= $medium_flyers && $large <= $large_flyers && $box <= $boxes){
             $small_flyers -= $small;
             $medium_flyers -= $medium;
             $large_flyers -= $large;
@@ -260,11 +260,11 @@ class AdminPackagingMaterialController extends Controller
                }else{
                 $pickup_address = $pickup_address->first();
                }
-               $now = Carbon::now()->format('yyyy-mm-dd 00:00:00');
+               $now = Carbon::today();
                if($request_details->packaging_payment_mode_id == 1){
-                  $shipment = $this->book(1,$pickup_address->id,1,$request_details->city_id,$request_details->poc,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,$total_charges,1,2,2);
+                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$request_details->poc,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,$total_charges,1,2,2);
                }else{
-                 $shipment = $this->book(1,$pickup_address->id,1,$request_details->city_id,$request_details->poc,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
+                 $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$request_details->poc,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
                }
                $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
                 ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, 'Shipment arrived at origin!', $request_details->user_id, NULL);
@@ -284,10 +284,10 @@ class AdminPackagingMaterialController extends Controller
 //        return $head_stocks;
 
     }
-    private function book($service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {
+    private function book($user_id,$service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {
         $shipment = new Shipment();
 
-        $shipment->user_id = Auth::id();
+        $shipment->user_id = $user_id;
         $shipment->booking_type_id = $service_type_id;
         $shipment->pickup_address_id = $pickup_address_id;
         $shipment->information_display = $information_display;
