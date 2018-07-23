@@ -1,9 +1,11 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
+use App\Http\Models\PackagingCharge;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
+use Illuminate\Support\Facades\Auth;
 
 class LoginController extends Controller
 {
@@ -50,6 +52,17 @@ class LoginController extends Controller
             auth()->logout();
             return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
         }
+        $packaging_charges_check = false;
+        if(PackagingCharge::where(['user_id'=>Auth::id(),'shipping_mode_id'=>1])->exists()){
+            $packaging_charges_check = true;
+        }else if(PackagingCharge::where(['user_id'=>Auth::id(),'shipping_mode_id'=>2])->exists()){
+            $packaging_charges_check = true;
+        }else if(PackagingCharge::where(['user_id'=>Auth::id(),'shipping_mode_id'=>3])->exists()){
+            $packaging_charges_check = true;
+        }else if(PackagingCharge::where(['user_id'=>Auth::id(),'shipping_mode_id'=>4])->exists()){
+            $packaging_charges_check = true;
+        }
+        session(['packaging_charges_check' => $packaging_charges_check]);
         return redirect()->intended($this->redirectPath());
 
     }

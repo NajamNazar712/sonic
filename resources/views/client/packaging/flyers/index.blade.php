@@ -13,63 +13,92 @@
                 <form action="{{route('cod.packaging.requests.submit')}}" id="material_request_form" method="post">
                     @csrf
                     <div class="row justify-content-md-center">
-                        <div class="col-md-6">
+                        <div class="col-12">
                             <div class="form-body">
-                                <div class="form-group">
-                                    <select name="address_select" id="address_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                        <option value="0">New</option>
-                                        @foreach($address as $pickup)
-                                            <option value="{{$pickup->id}}">{{$pickup->pickup_address}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div id="new_pickup_address" class="d-none">
-                                    <div class="form-group">
-                                        <textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>
+                                <div class="row justify-content-center">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <select name="address_select" id="address_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
+                                                <option value="0">New</option>
+                                                @foreach($address as $pickup)
+                                                    <option value="{{$pickup->id}}">{{$pickup->pickup_address}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
                                     </div>
+                                </div>
+                                <div class="row justify-content-center">
+                                    <div class="col-6">
+                                        <div id="new_pickup_address" class="d-none">
+                                            <div class="form-group">
+                                                <textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>
+                                            </div>
 
-                                    <div class="form-group">
-                                        <input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required">
-                                    </div>
+                                            <div class="form-group">
+                                                <input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required">
+                                            </div>
 
-                                    <div class="form-group">
-                                        <input type="text" name="new_pickup_phone_number" id="new_pickup_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                                            <div class="form-group">
+                                                <input type="text" name="new_pickup_phone_number" id="new_pickup_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                                            </div>
+                                            <div class="form-group">
+                                                <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
+                                                    @foreach($cities as $city)
+                                                        <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="form-group">
-                                        <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
-                                            @foreach($cities as $city)
-                                                <option value="{{ $city->id }}">{{ $city->name }}</option>
-                                            @endforeach
-                                        </select>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="sm_flyer">Small Flyers</label>
+                                            <input type="text" id="sm_flyer" class="form-control numeric flyer" placeholder="Small Flyers Quantity" name="sm_flyer">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="md_flyer">Medium Flyers</label>
+                                            <input type="text" id="md_flyer" class="form-control numeric flyer" placeholder="Medium Flyers Quantity" name="md_flyer">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="lg_flyer">Large Flyers</label>
+                                            <input type="text" id="lg_flyer" class="form-control numeric flyer" placeholder="Large Flyers Quantity" name="lg_flyer">
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="form-group">
+                                            <label for="boxes">Boxes</label>
+                                            <input type="text" id="boxes" class="form-control numeric flyer" placeholder="Boxes Quantity" name="boxes">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="sm_flyer">Small Flyers</label>
-                                    <input type="text" id="sm_flyer" class="form-control numeric flyer" placeholder="Small Flyers Quantity" name="sm_flyer">
+                                <div class="row justify-content-center">
+                                    <div class="col-6">
+                                        <div class="form-group">
+                                            <label for="boxes">Flyer Mode of Paymengt</label>
+                                            <select name="mode_of_payment" class="select2" id="mode_of_payment" data-rule-required="true" data-msg-required="Payment mode is required">
+                                                <option></option>
+                                                @foreach($payment_mode as $mode)
+                                                    <option value="{{$mode->id}}">{{$mode->mode}}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="md_flyer">Medium Flyers</label>
-                                    <input type="text" id="md_flyer" class="form-control numeric flyer" placeholder="Medium Flyers Quantity" name="md_flyer">
-                                </div>
-                                <div class="form-group">
-                                    <label for="lg_flyer">Large Flyers</label>
-                                    <input type="text" id="lg_flyer" class="form-control numeric flyer" placeholder="Large Flyers Quantity" name="lg_flyer">
-                                </div>
-                                <div class="form-group">
-                                    <label for="boxes">Boxes</label>
-                                    <input type="text" id="boxes" class="form-control numeric flyer" placeholder="Boxes Quantity" name="boxes">
-                                </div>
-                                <div class="form-group">
-                                    <label for="boxes">Flyer Mode of Paymengt</label>
-                                    <select name="mode_of_payment" class="select2" id="mode_of_payment" data-rule-required="true" data-msg-required="Payment mode is required">
-                                        <option></option>
-                                        @foreach($payment_mode as $mode)
-                                            <option value="{{$mode->id}}">{{$mode->mode}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
+
                                 <hr>
-                                <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block">Request Material</button>
+                                <div class="row justify-content-center">
+                                    <div class="col-6">
+                                    <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block">Request Material</button>
+
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

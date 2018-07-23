@@ -182,7 +182,40 @@
                     });
                 }
             });
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids[]': id,
+                        'admin': '{!! Auth::id() !!}',
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
 
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+                }
+            $('body').on('click','.airwaybill',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                // console.log(id);
+                print(id);
+            });
         });
 
     </script>
