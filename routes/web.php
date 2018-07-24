@@ -367,6 +367,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('', 'Admins\AdminNotificationsController@index')->name('index');
+        Route::get('list', 'Admins\AdminNotificationsController@list')->name('list');
+        Route::post('send_custom_email', 'Admins\AdminNotificationsController@send_custom_email')->name('send_custom_email');
+        Route::post('details', 'Admins\AdminNotificationsController@details')->name('details');
+        Route::post('status', 'Admins\AdminNotificationsController@status')->name('status');
+        Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
+    });
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');

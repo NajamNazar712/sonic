@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReturnNote;
@@ -103,6 +104,9 @@ class ReturnController extends Controller
                     'remarks'=>$shipment_history->remarks,
                     'admin_id'=>$admin
                 ]);
+
+                NotificationsController::send(15, 0, $shipment);
+                NotificationsController::send(16, 0, $shipment);
             }
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
         }elseif($request->action == 'reattempt'){
@@ -114,6 +118,9 @@ class ReturnController extends Controller
                     'consignee_status_id'=>13,
                     'admin_id'=>$admin
                 ]);
+
+                NotificationsController::send(15, 0, $shipment);
+                NotificationsController::send(16, 0, $shipment);
             }
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];
 
@@ -132,6 +139,10 @@ class ReturnController extends Controller
                 'remarks'=>$shipment_history->remarks,
                 'admin_id'=>$admin
             ]);
+
+            NotificationsController::send(15, 0, $request->shipment_id);
+            NotificationsController::send(16, 0, $request->shipment_id);
+
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
         }elseif($request->action == 'reattempt'){
             Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
@@ -141,6 +152,10 @@ class ReturnController extends Controller
                 'consignee_status_id'=>20,
                 'admin_id'=>$admin
             ]);
+
+            NotificationsController::send(15, 0, $request->shipment_id);
+            NotificationsController::send(16, 0, $request->shipment_id);
+
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];
         }
         return ['status'=>0,'error'=>"Something went wrong, try again later!"];
@@ -760,6 +775,10 @@ class ReturnController extends Controller
             if($shipment_status == 0){
                 ReturnNote::where('id',$return_note_id)->update(['status'=>1]);
             }
+
+            NotificationsController::send(15, $return_note_id);
+            NotificationsController::send(16, $return_note_id);
+
             return redirect()->back()->with(['success'=>'Return note statuses updates']);
         }
     }
@@ -804,6 +823,10 @@ class ReturnController extends Controller
             if($shipment_status == 0){
                 ReturnNote::where('id',$request->return_note_id)->update(['status'=>1]);
             }
+
+            NotificationsController::send(15, $request->return_note_id);
+            NotificationsController::send(16, $request->return_note_id);
+
             return ['status'=>0,'success'=>'Return note shipments status are updated to : Delivered to Shipper'];
         }else{
             return ['status'=>1,'error'=>'No shipments selected'];

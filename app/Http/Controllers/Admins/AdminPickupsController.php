@@ -8,6 +8,7 @@ use App\Http\Models\DisputeShipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\NotificationsController;
 
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
@@ -809,6 +810,8 @@ class AdminPickupsController extends Controller
         }
 
         ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, 'Shipment has Arrived!', NULL, Auth::id(), $reference_1_id, $reference_2_id);
+
+        NotificationsController::send(3, $shipment_id);
       }
 
       $pickup_requests_receiving_sheets = array();
@@ -883,6 +886,8 @@ class AdminPickupsController extends Controller
       $pickup_note->save();
 
       PickupNotesJourneyController::add($pickup_note->id, $pickup_note->status_id, 'Pickup Note has been Received!', Auth::id());
+
+      NotificationsController::send(4, $request->pickup_receive_pickup_note_id, explode(',', $request->shipment_ids));
 
       return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->pickup_receive_pickup_note_id);
     }

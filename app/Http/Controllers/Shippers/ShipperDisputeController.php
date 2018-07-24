@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\City;
 use App\Http\Models\Dispute;
@@ -101,6 +102,8 @@ class ShipperDisputeController extends Controller
             if($dispute_id != ''){
 
                 Dispute::where('id',$dispute_id)->update(['shipments_count'=>$count]);
+
+                NotificationsController::send(19, $dispute_id);
             }
             return response()->json($tracking_number);
 //            return $tracking_number;
@@ -256,6 +259,8 @@ class ShipperDisputeController extends Controller
                  $newTracking = ShipperShipmentBookController::generate_tracking_number($newShipment->id,$shipment->consignee_city_id,$newShipment->consignee_city_id);
                     ShipmentsJourneyController::add($shipment->id, 19, 19, NULL, 'Shipment # '.$shipment->tracking_number.' has been Re-Booked as new Shipment # '.$newTracking, Auth::id(), NULL);
 
+                    NotificationsController::send(17, $shipment->id, $newShipment->id);
+                    NotificationsController::send(18, $shipment->id, $newShipment->id);
 
                         foreach ($shipment->items as $item) {
                             ShipperShipmentBookController::add_item($newShipment->id, $item->product_type_id, $item->description, $item->quantity, $item->price, $item->insurance, $item->type);
