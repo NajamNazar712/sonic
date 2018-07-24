@@ -11,6 +11,7 @@ use App\Http\Models\City;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Carbon\Carbon;
@@ -266,7 +267,13 @@ class AdminPackagingMaterialController extends Controller
             $total_charges += $request_details->medium_flyers * $charges->md_flyer;
             $total_charges += $request_details->large_flyers * $charges->lg_flyer;
             $total_charges += $request_details->boxes * $charges->box_flyer;
-            if($total_charges <= $balance){
+            if($request_details->packaging_payment_mode_id == 2){
+                if($total_charges > $balance){
+                    return response()->json(['status'=>0,'error'=>"Insufficient Balance!"]);
+
+                }
+            }
+
                $hub_id = $request_details->city->hub_id;
                $pickup_address = UserShippingInfo::where(['user_id'=>$request_details->user_id,'city_id'=>$hub_id,'hidden'=>1]);
                if(!$pickup_address->exists()){
@@ -282,16 +289,14 @@ class AdminPackagingMaterialController extends Controller
                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$request_details->poc,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
                }
                $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
-                ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, 'Shipment arrived at origin!', $request_details->user_id, NULL);
+                $this->add_item($shipment->id,24,null,1,null,0,0);
+               ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, 'Shipment arrived at origin!', $request_details->user_id, NULL);
                 $this->sub_head_stock($request_details->small_flyers,$request_details->medium_flyers,$request_details->large_flyers,$request_details->boxes);
                 $request_details->status = 1;
                 $request_details->save();
                 return response()->json(['status'=>1,'success'=>"Packaging Material has been dispatched successfully!"]);
 
-            }else{
-                return response()->json(['status'=>0,'error'=>"Insufficient Balance!"]);
 
-            }
         }
 //        if($request_details->medium_flyers > $head_stocks->medium_flyers){
 //            return response()->json(['status'=>0,'error'=>"Insufficient quantity!"]);
@@ -342,5 +347,18 @@ class AdminPackagingMaterialController extends Controller
         $shipment->save();
 
         return $tracking_number;
+    }
+    private function add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type) {
+        $shipment_item = new ShipmentItem();
+
+        $shipment_item->shipment_id = $shipment_id;
+        $shipment_item->product_type_id = $product_type_id;
+        $shipment_item->description = $item_description;
+        $shipment_item->quantity = $item_quantity;
+        $shipment_item->price = $price;
+        $shipment_item->insurance = $insurance;
+        $shipment_item->type = $type;
+
+        $shipment_item->save();
     }
 }

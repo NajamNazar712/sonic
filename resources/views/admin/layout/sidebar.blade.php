@@ -5,10 +5,10 @@
 
 
             <!-- official -->
-            <li class=" nav-item"><a href="/admin/dashboard"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a></li>
+            <li class=" nav-item"><a href="{{route('admin.dashboard')}}"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a></li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Order Management</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="/admin/order/management" data-i18n="nav.dash.ecommerce">Order Management</a>
+                    <li><a class="menu-item" href="{{route('admin.orders.index')}}" data-i18n="nav.dash.ecommerce">Order Management</a>
                     </li>
                     <li><a class="menu-item" href="/admin/sheet/receiving" data-i18n="nav.dash.sales">Booked Receiving Sheets</a>
                     </li>

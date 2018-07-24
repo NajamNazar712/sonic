@@ -28,10 +28,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('register');
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
-    Route::get('/dashboard', 'Shippers\ShipperDashboardController@index')->name('dashboard');
-    Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
+    Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
+//    Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
 
+    Route::prefix('orders')->name('orders.')->group(function(){
+       Route::get('','Shippers\ShipperDashboardController@orders_index')->name('index');
+       Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
+    });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
             Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
@@ -98,8 +102,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
-    Route::get('/dashboard', 'Admins\AdminDashboardController@index')->name('dashboard');
-    Route::get('/order/management', 'Admins\AdminDashboardController@orderList');
+    Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('dashboard');
+    Route::prefix('orders')->name('orders.')->group(function () {
+        Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('index');
+        Route::get('list', 'Admins\AdminDashboardController@orders_list')->name('list');
+
+    });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::get('/accounts/pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('accounts.pending');
    

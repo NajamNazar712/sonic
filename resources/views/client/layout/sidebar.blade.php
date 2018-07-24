@@ -5,10 +5,10 @@
         
       
         <!-- official -->
-        <li class=" nav-item"><a href="/shipper/dashboard"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a></li>
+        <li class=" nav-item"><a href="{{route('cod.dashboard')}}"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a></li>
         <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Order Management</span></a>
           <ul class="menu-content">
-            <li><a class="menu-item" href="/shipper/order/management" data-i18n="nav.dash.ecommerce">Order Management</a></li>
+            <li><a class="menu-item" href="{{route('cod.orders.index')}}" data-i18n="nav.dash.ecommerce">Order Management</a></li>
           </ul>
         </li>
 
