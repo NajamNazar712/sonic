@@ -86,7 +86,7 @@ class AdminNotificationsController extends Controller
             $emails = Admin::all()->pluck('email')->toArray();
         }
         else {
-            $emails = User::where('status', '=', 3)->get()->pluck('email')->toArray();
+            $emails = User::where('status', '=', 3)->where('blacklist', '=', 0)->get()->pluck('email')->toArray();
         }
 
         if (!empty($emails)) {
