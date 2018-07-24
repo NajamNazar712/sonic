@@ -700,7 +700,7 @@ class NotificationsController extends Controller
 
               $to = $shipment->user->email;
 
-              foreach ($remove_fields => $field) {
+              foreach ($remove_fields as $field) {
                 if (strpos($subject, '[' . $field . ']') !== FALSE) {
                   $subject = str_replace('[' . $field . ']', '-', $subject);
                 }
@@ -786,7 +786,7 @@ class NotificationsController extends Controller
 
               $to = $shipment->user->phone;
 
-              foreach ($remove_fields => $field) {
+              foreach ($remove_fields as $field) {
                 if (strpos($body, '[' . $field . ']') !== FALSE) {
                   $body = str_replace('[' . $field . ']', '-', $body);
                 }
