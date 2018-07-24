@@ -107,9 +107,14 @@ class AdminPackagingMaterialController extends Controller
         $box_quantity = ($request->send_stock_boxes != null)? $request->send_stock_boxes:0;
 
         $hub_id = $request->city_select;
+        $reference_number = false;
         $reference_number = $request->invoice_number;
-        $cargo_id = CargoConsignment::where('id',$reference_number)->where('status_id','!=',3);
-        if($cargo_id->exists()){
+        if($reference_number != 0){
+            $cargo_id = CargoConsignment::where('id',$reference_number)->where('status_id','!=',3)->exists();
+        }else if($reference_number == 0){
+            $cargo_id = true;
+        }
+        if($cargo_id){
             $packaging = PackagingMaterialStockHub::where('hub_id',$hub_id);
             if($packaging->exists()){
                 $packaging = $packaging->first();

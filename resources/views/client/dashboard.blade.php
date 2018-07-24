@@ -10,7 +10,7 @@
         
        
         <!-- Active Orders -->
-       <h1>Welcome To Trax Logistics,
+       <h1 class="pb-2">Welcome To Trax Logistics,
        <span class="user-name text-bold-700 ">{{Auth::user()->name}}</span>
      </h1>
         <!-- Active Orders -->
@@ -103,7 +103,7 @@
               <div class="card">
                   <div class="card-content collapse show">
                       <div class="card-body">
-                          {{--<div id="shipment_statistics_chart" class="height-400 echart-container"></div>--}}
+                          <div id="shipment_statistics_chart" class="height-400 echart-container"></div>
                       </div>
                   </div>
               </div>
@@ -204,10 +204,10 @@
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
-    {{--<script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.js')}}" type="text/javascript"></script>--}}
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts-en.min.js" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.js')}}" type="text/javascript"></script>
+    {{--<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/4.1.0/echarts-en.min.js" type="text/javascript"></script>--}}
 
-{{--    <script src="{{asset('app-assets/js/scripts/charts/echarts/line-area/stacked-line.js')}}" type="text/javascript"></script>--}}
+{{--    <script src="{{asset('app-assets/vendors/js/charts/echarts/chart/line.js')}}" type="text/javascript"></script>--}}
     <script type="text/javascript">
         $(document).ready(function () {
             var selected_rows = [];
@@ -316,19 +316,12 @@
             {{--// Configuration--}}
             {{--// --------------------------------}}
 
-            {{--require(--}}
-                {{--[--}}
-                    {{--'echarts',--}}
-                    {{--'echarts/chart/bar',--}}
-                    {{--'echarts/chart/line'--}}
-                {{--],--}}
-
 
                 {{--// Charts setup--}}
-                {{--function (ec) {--}}
+
                     {{--// Initialize chart--}}
                     {{--// --------------------------------}}
-                    {{--var myChart = ec.init(document.getElementById('shipment_statistics_chart'));--}}
+                    {{--var myChart = echarts.init(document.getElementById('shipment_statistics_chart'));--}}
 
                     {{--// Chart Options--}}
                     {{--// --------------------------------}}
@@ -418,23 +411,23 @@
                     {{--// Resize chart--}}
                     {{--// --------------------------------}}
 
-                    {{--$(function () {--}}
+                    {{--// $(function () {--}}
+                    {{--//--}}
+                    {{--//     // Resize chart on menu width change and window resize--}}
+                    {{--//     $(window).on('resize', resize);--}}
+                    {{--//     $(".menu-toggle").on('click', resize);--}}
+                    {{--//--}}
+                    {{--//     // Resize function--}}
+                    {{--//     function resize() {--}}
+                    {{--//         setTimeout(function() {--}}
+                    {{--//--}}
+                    {{--//             // Resize chart--}}
+                    {{--//             myChart.resize();--}}
+                    {{--//         }, 200);--}}
+                    {{--//     }--}}
+                    {{--// });--}}
 
-                        {{--// Resize chart on menu width change and window resize--}}
-                        {{--$(window).on('resize', resize);--}}
-                        {{--$(".menu-toggle").on('click', resize);--}}
 
-                        {{--// Resize function--}}
-                        {{--function resize() {--}}
-                            {{--setTimeout(function() {--}}
-
-                                {{--// Resize chart--}}
-                                {{--myChart.resize();--}}
-                            {{--}, 200);--}}
-                        {{--}--}}
-                    {{--});--}}
-                {{--}--}}
-            {{--);--}}
         {{--});--}}
     </script>
 
