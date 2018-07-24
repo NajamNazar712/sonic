@@ -365,13 +365,14 @@ class DisputeController extends Controller
         $admin = Auth::id();
         $admin_details = Admin::where('id',$admin)->first();
         $city_id = $admin_details->city->id;
+        $count = count($shipments);
         $dispute = Dispute::create([
             'description'=>$description,
             'raised_by'=>$admin,
             'raised_by_status'=>0,
             'city_id'=>$city_id,
-            'dispute_type_id'=>10,
-            'shipments_count'=>0
+            'dispute_type_id'=>7,
+            'shipments_count'=>$count
         ]);
         if($dispute){
             foreach ($shipments as $shipment){

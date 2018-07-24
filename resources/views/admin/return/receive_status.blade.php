@@ -132,7 +132,7 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
-                    text: 'Delivered',
+                    text: 'Returned',
                     className: 'btn btn-primary delivered',
                     enabled: false,
                     action: function (e, dt, node, config) {

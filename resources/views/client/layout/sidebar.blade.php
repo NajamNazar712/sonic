@@ -5,10 +5,10 @@
         
       
         <!-- official -->
-        <li class=" nav-item"><a href="/shipper/dashboard"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a></li>
+        <li class=" nav-item"><a href="{{route('cod.dashboard')}}"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dashboard</span></a></li>
         <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Order Management</span></a>
           <ul class="menu-content">
-            <li><a class="menu-item" href="/shipper/order/management" data-i18n="nav.dash.ecommerce">Order Management</a></li>
+            <li><a class="menu-item" href="{{route('cod.orders.index')}}" data-i18n="nav.dash.ecommerce">Order Management</a></li>
           </ul>
         </li>
 
@@ -26,6 +26,15 @@
                   <li><a class="menu-item" href="{{ route('cod.dispute.rebook.index') }}">Rebook</a></li>
               </ul>
           </li>
+
+          @if(session('packaging_charges_check'))
+              <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Packaging</span></a>
+                  <ul class="menu-content">
+                      <li><a class="menu-item" href="{{ route('cod.packaging.requests.index') }}">Request</a></li>
+                  </ul>
+              </li>
+
+          @endif
          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Profile Update</span></a></li>
          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Excel Upload</span></a></li>
          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Finance</span></a></li>

@@ -161,7 +161,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         Buzz\LaravelGoogleCaptcha\CaptchaServiceProvider::class,
         Yajra\Datatables\DatatablesServiceProvider::class,
-
+        //custom view composer
+//        App\Providers\CODViewComposerServiceProvider::class,
     ],
 
     /*
