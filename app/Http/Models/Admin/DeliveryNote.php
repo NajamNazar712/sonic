@@ -19,4 +19,8 @@ class DeliveryNote extends Model
     public function hub(){
         return $this->belongsTo('App\Http\Models\City','hub_id');
     }
+
+    public function delivery_note_shipments() {
+        return $this->hasMany('App\Http\Models\Admin\DeliveryNoteShipment');
+    }
 }

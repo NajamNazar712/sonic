@@ -166,6 +166,7 @@ class SamedayController extends Controller
                 }else{
                     $drop .= "<a href='#' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Not Set</a>";
                 }
+                $drop .= "<a href='#' class='dropdown-item airwaybill'><i class='ft-printer primary'></i> Print Invoice</a>";
                 $drop.= "</div></span>";
                 return $drop;
             })

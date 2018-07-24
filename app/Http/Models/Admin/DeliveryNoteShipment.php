@@ -39,4 +39,8 @@ class DeliveryNoteShipment extends Model
 
 		return $this->getAttribute($keyName);
 	}
+
+	public function shipment() {
+		return $this->belongsTo('App\Http\Models\Shipment');
+	}
 }
