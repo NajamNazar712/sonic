@@ -21,4 +21,11 @@ class Dispute extends Model
     public function dispute_types(){
         return $this->belongsTo('App\Http\Models\DisputeType','dispute_type_id','id');
     }
+    public function shipper(){
+        return $this->belongsTo('App\Http\Models\Shipper\User','raised_by','id');
+    }
+
+    public function dispute_shipments() {
+        return $this->hasMany('App\Http\Models\DisputeShipment');
+    }
 }

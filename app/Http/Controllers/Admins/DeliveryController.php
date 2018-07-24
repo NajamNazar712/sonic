@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
+
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
@@ -189,6 +191,10 @@ class DeliveryController extends Controller
                     'reference_1_id'=>$note->id,
                     'reference_2_id'=>$note->rider_id
                 ]);
+
+                NotificationsController::send(10, $note->id, $shipment);
+                NotificationsController::send(11, $note->id, $shipment);
+                NotificationsController::send(12, $note->id, $shipment);
             }
         }
         return redirect()->back()->with(['success'=>'Delivery note created successfully','print'=>$note->id]);
@@ -1003,6 +1009,9 @@ class DeliveryController extends Controller
                 $dncc_amount = $filtered_shipments->sum('received_amount');
                 $delivered_shipments = $filtered_shipments->count();
                 DeliveryNote::where('id',$delivery_note_id)->update(['delivered_shipments'=>$delivered_shipments,'updated_by'=>Auth::id(),'received_cod_amount'=>$dncc_amount,'status'=>1]);
+
+                NotificationsController::send(13, $delivery_note_id);
+                NotificationsController::send(14, $delivery_note_id);
                 return redirect()->back()->with('success','Delivery Note verified and updated successfully!');
             }else{
                 return redirect()->back()->with('error','Delivery note not found!');

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
@@ -104,6 +105,8 @@ class DisputeController extends Controller
                    'shipment_id'=>$shipment
                ]);
            }
+
+           NotificationsController::send(19, $dispute->id);
        }
 
     }
@@ -146,6 +149,8 @@ class DisputeController extends Controller
             if($dispute_id != ''){
 
                 Dispute::where('id',$dispute_id)->update(['shipments_count'=>$count]);
+
+                NotificationsController::send(19, $dispute_id);
             }
             return response()->json($tracking_number);
         }else{
@@ -338,6 +343,8 @@ class DisputeController extends Controller
             if($dispute_id != ''){
 
                 Dispute::where('id',$dispute_id)->update(['shipments_count'=>$count]);
+
+                NotificationsController::send(19, $dispute_id);
             }
             return response()->json($tracking_number);
         }else{
@@ -351,7 +358,7 @@ class DisputeController extends Controller
             $admin = Auth::id();
             $admin_details = Admin::where('id',$admin)->first();
             $city_id = $admin_details->city->id;
-            Dispute::create([
+            $dispute = Dispute::create([
                 'description'=>$description,
                 'raised_by'=>$admin,
                 'raised_by_status'=>0,
@@ -359,6 +366,8 @@ class DisputeController extends Controller
                 'dispute_type_id'=>10,
                 'shipments_count'=>0
             ]);
+
+            NotificationsController::send(19, $dispute->id);
     }
     public static function add_cargo_short_received($cargo_id,$shipments){
         $description = "Short received shipments dispute for Cargo # $cargo_id";
@@ -380,6 +389,8 @@ class DisputeController extends Controller
                     'shipment_id'=>$shipment->shipment_id
                 ]);
             }
+
+            NotificationsController::send(19, $dispute->id);
         }
     }
     public static function add_delivery_wrong_status_dispute($delivery_note,$shipments){
@@ -404,6 +415,8 @@ class DisputeController extends Controller
                     'shipment_id'=>$shipment
                 ]);
             }
+
+            NotificationsController::send(19, $dispute->id);
         }
     }
 }

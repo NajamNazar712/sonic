@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\NotificationsController;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\City;
@@ -313,7 +314,13 @@ class AdminCargoController extends Controller
         $shipment->save();
 
         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment is in Transit!', NULL, Auth::id(), $cargo_consignment->id, $cargo_consignment->builty_number);
+
+        NotificationsController::send(5, $id, $shipment_id);
+
+        NotificationsController::send(6, $id, $shipment_id);
       }
+
+      NotificationsController::send(9, $id);
 
       if ($request->filled('submit_and_print')) {
         $print = $id;
@@ -933,7 +940,11 @@ class AdminCargoController extends Controller
 
         $shipment->save();
 
-        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Origin Centre!', NULL, Auth::id());
+        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Destination Centre!', NULL, Auth::id());
+
+        NotificationsController::send(7, $cargo_consignment_id, $shipment_id);
+
+        NotificationsController::send(8, $cargo_consignment_id, $shipment_id);
       }
       //dispute for short received
         if($cargo_consignment->status_id == 4){

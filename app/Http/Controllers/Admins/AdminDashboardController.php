@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
 
 use App\Http\Models\CityDelivery;
 use App\Http\Models\CityHub;
@@ -77,6 +78,8 @@ class AdminDashboardController extends Controller
             if($user->status == 2){
                $action = User::where('id',$id)->update(['status'=>3]);
                if($action == 1){
+                    NotificationsController::send(1, $id);
+
                    return redirect()->route('admin.accounts.active')->with('success', 'User is activated.');
                }else{
                    return back()->with('danger', 'There is some problem please try again.');
