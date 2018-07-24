@@ -132,7 +132,7 @@ class RegisterController extends Controller
             'cnic' => $data['cnic'],
             'ntn_no' => $data['ntn_no'],
             'url' => $data['url'],
-            'city_code'=>$data['shipper_city'],
+            'city_id'=>$data['shipper_city'],
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
@@ -145,7 +145,7 @@ class RegisterController extends Controller
                 'poc' => $data['shipping_poc'][$index],
                 'phone' => $data['shipping_phone'][$index],
                 'email' => $data['shipping_email'][$index],
-                'city_code' => $data['shipping_city'][$index],
+                'city_id' => $data['shipping_city'][$index],
             ]);
         }
         UserBankInfo::create([
@@ -157,7 +157,7 @@ class RegisterController extends Controller
                 'iban'=>$data['iban_no'],
                 'payment_mode'=>$data['mode_of_payment'],
                 'payment_cycle'=>$data['cycle_of_payment'],
-                'city_code'=>$data['bank_city'],
+                'city_id'=>$data['bank_city'],
         ]);
 
         return $newUser;

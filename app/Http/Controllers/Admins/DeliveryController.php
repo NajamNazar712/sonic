@@ -186,7 +186,7 @@ class DeliveryController extends Controller
                 ShipmentsJourney::create([
                     'shipment_id'=>$shipment,
                     'shipper_status_id'=>5,
-                    'consignee_status_id'=>6,
+                    'consignee_status_id'=>5,
                     'admin_id'=>$admin,
                     'reference_1_id'=>$note->id,
                     'reference_2_id'=>$note->rider_id

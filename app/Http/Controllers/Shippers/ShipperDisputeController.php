@@ -130,7 +130,7 @@ class ShipperDisputeController extends Controller
     public function get_comments(Request $request){
         $comments = DisputeComment::where('dispute_id',$request->id);
         if($comments->exists()){
-            $comments = $comments->order_by('created_at desc')->get();
+            $comments = $comments->orderBy('created_at', 'desc')->get();
             $returnHTML = view('client.dispute.comments')->with(['comments'=>$comments])->render();
             return response()->json(['status'=>1,'view'=>$returnHTML]);
         }else{
@@ -245,8 +245,14 @@ class ShipperDisputeController extends Controller
                     $shipment->shipper_status_id = 19;
                     $shipment->consignee_status_id = 19;
                     $shipment->save();
-
-                    $pickup_address = UserShippingInfo::create(['user_id'=>Auth::id(),'pickup_address'=>$newAddress,'poc'=>$shipment->pickup_address->poc,'phone'=>$shipment->pickup_address->phone,'email'=>$shipment->pickup_address->email,'city_id'=>$shipment->consignee_city_id,'rebook_status'=>1]);
+                    $consigneeCity =City::where('id',$shipment->consignee_city_id)->first();
+                    $traxOffice = UserShippingInfo::where(['user_id'=>Auth::id(),'city_id'=>$consigneeCity->hub_id,'hidden'=>1]);
+                    if(!$traxOffice->exists()){
+                        $shipper_details = User::where('id',Auth::id())->select('poc','phone','email')->first();
+                        $pickup_address = UserShippingInfo::create(['user_id'=>Auth::id(),'pickup_address'=>$newAddress,'poc'=>$shipper_details->poc,'phone'=>$shipper_details->phone,'email'=>$shipper_details->email,'city_id'=>$shipment->consignee_city_id,'hidden'=>1]);
+                    }else{
+                        $pickup_address = $traxOffice->first();
+                    }
 
                   $newShipment =  $this->book($shipment->booking_type_id,$pickup_address->id,1,$request->consignee_city_id,$request->consignee,$request->address,$request->phone1,$request->phone2,$request->email,$shipment->order_id,$shipment->package_type,$shipment->pickup_date,$shipment->special_instructions,$shipment->estimated_weight,$request->mode,$shipment->same_day_timing_id,$request->amount,$shipment->payment_mode_id,2,2);
 

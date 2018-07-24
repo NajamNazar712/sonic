@@ -3,36 +3,36 @@
 
 @section('content')
     <h1 class="mb-1">
-        Same-Day Deliveries
+        Packaging Material Requests
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
+                <div class="container justify-content-center pb-2 text-center">
+                    <div class="row">
+                        <div class="col-3"><h4>Small Flyers: <u id="sm_flyers_title">{{$packaging->small_flyers}}</u></h4></div>
+                        <div class="col-3"><h4>Medium Flyers: <u id="md_flyers_title">{{$packaging->medium_flyers}}</u></h4></div>
+                        <div class="col-3"><h4>Large Flyers: <u id="lg_flyers_title">{{$packaging->large_flyers}}</u></h4></div>
+                        <div class="col-3"><h4>Boxes: <u id="box_title">{{$packaging->boxes}}</u></h4></div>
+                    </div>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Origin</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Consignee Name</th>
-                        <th class="border-primary border-darken-1">Consignee Phone</th>
-                        <th class="border-primary border-darken-1">Consignee Address</th>
-                        <th class="border-primary border-darken-1">Product Type</th>
-                        <th class="border-primary border-darken-1">Same-day Type</th>
+                        <th class="border-primary border-darken-1">Requested Date/Time</th>
+                        <th class="border-primary border-darken-1">City</th>
+                        <th class="border-primary border-darken-1">Small Flyers</th>
+                        <th class="border-primary border-darken-1">Medium Flyers</th>
+                        <th class="border-primary border-darken-1">Large Flyers</th>
+                        <th class="border-primary border-darken-1">Boxes</th>
+                        <th class="border-primary border-darken-1">Address</th>
+                        <th class="border-primary border-darken-1">Payment Mode</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Booked Date</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
-                        <th class="border-primary border-darken-1">Dispatched Time</th>
-                        <th class="border-primary border-darken-1">Delivered Time</th>
-                        <th class="border-primary border-darken-1">Updated By</th>
-                        <th class="border-primary border-darken-1">TAT</th>
-                        <th class="border-primary border-darken-1">Time Remining</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -41,13 +41,14 @@
         </div>
     </div>
 
+
+
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-{{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">--}}
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    {{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/ui/perfect-scrollbar.min.css')}}">--}}
+
 
 
 
@@ -102,19 +103,22 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-{{--    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>--}}
-{{--    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>--}}
+    {{--<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>--}}
+    {{--<script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>--}}
 {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+{{--    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 {{--    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>--}}
     {{--<script src="{{asset('app-assets/vendors/js/ui/perfect-scrollbar.jquery.min.js')}}" type="text/javascript"></script>--}}
 
 
+
     <script type="text/javascript">
         $(document).ready(function () {
 
+
             var table = $('#datatable').DataTable({
-                "scrollX": true,
+                // "scrollX": true,
                 dom: 'ltipr',
                 fixedHeader: {
                     header: true,
@@ -126,29 +130,22 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.sameday.list') }}',
-                rowId: 'shId',
-                order: [[1, 'asc']],
+                ajax: '{{ route('admin.packaging.requests.list') }}',
+                rowId: 'request_id',
+                order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'consignee_phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone'},
-                    {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'product_name', name: 'p.product_name', class: 'align-middle product_name'},
-                    {data: 'timing', name: 'sms.timing', class: 'align-middle timing'},
-                    {data: 'current_status', name: 'sst.name', class: 'align-middle current_status'},
-                    {data: 'booked_date', name: 'shipments.created_at', class: 'align-middle booked_date'},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
-                    {data: 'dispatched_time', name: 'dispatched.created_at', class: 'align-middle dispatched_time'},
-                    {data: 'delivered_status', name: 'delivered_status', class: 'align-middle delivered_status'},
-                    {data: 'updated_by', name: 'updater.name', class: 'align-middle updated_by'},
-                    {data: 'tat', name: 'tat', class: 'align-middle tat'},
-                    {data: 'remaining_time', name: 'remaining_time', class: 'align-middle remaining_time'},
-                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+                    {data: 'created_at', name: 'packaging_material_requests.created_at', class: 'align-middle created_at'},
+                    {data: 'city', name: 'ct.name', class: 'align-middle city'},
+                    {data: 'small_flyers', name: 'packaging_material_requests.small_flyers', class: 'align-middle small_flyers'},
+                    {data: 'medium_flyers', name: 'packaging_material_requests.medium_flyers', class: 'align-middle medium_flyers'},
+                    {data: 'large_flyers', name: 'packaging_material_requests.large_flyers', class: 'align-middle large_flyers'},
+                    {data: 'boxes', name: 'packaging_material_requests.boxes', class: 'align-middle boxes'},
+                    {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
+                    {data: 'mode', name: 'ppm.mode', class: 'align-middle mode'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle action'}
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -167,7 +164,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -182,40 +179,30 @@
                     });
                 }
             });
-            function print(id) {
+            //dispatch
+            $('body').on('click','.dispatch',function(){
+                var request_id = parseInt($(this).parents('tr').attr('id'));
                 $.ajax({
-                    url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                    url: '{!! route('admin.packaging.requests.dispatch') !!}',
                     method: 'POST',
                     data: {
-                        'ids[]': id,
-                        'admin': '{!! Auth::id() !!}',
+                        'id': request_id,
                         '_token': '{{ csrf_token() }}'
                     }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
+                }).done(function (data) {
 
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-                }
-            $('body').on('click','.airwaybill',function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                // console.log(id);
-                print(id);
+                    if(data.status === 1){
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        setTimeout(function(){
+                            window.location.reload();
+                        },2000);
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                    }
+                });
             });
+
         });
 
     </script>

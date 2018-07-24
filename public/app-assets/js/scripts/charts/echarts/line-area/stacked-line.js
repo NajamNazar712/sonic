@@ -15,10 +15,10 @@ $(window).on("load", function(){
 
     // Set paths
     // ------------------------------
-
+    var route = "{{asset('app-assets/vendors/js/charts/echarts')}}";
     require.config({
         paths: {
-            echarts: '../../../app-assets/vendors/js/charts/echarts'
+            echarts: route
         }
     });
 
@@ -27,11 +27,11 @@ $(window).on("load", function(){
     // ------------------------------
 
     require(
-        [
-            'echarts',
-            'echarts/chart/bar',
-            'echarts/chart/line'
-        ],
+        // [
+        //     'echarts',
+        //     route+'/echarts/chart/bar',
+        //     route+'/echarts/chart/line'
+        // ],
 
 
         // Charts setup
