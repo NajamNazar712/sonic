@@ -534,6 +534,8 @@ class NotificationsController extends Controller
 
             $shipment = Shipment::find($reference_2_id);
 
+            $shipper = $shipment->user;
+
             $to = $shipper->phone;
 
             foreach ($delivery_note_fields as $key => $field) {
@@ -1056,11 +1058,11 @@ class NotificationsController extends Controller
             }
 
             if (strpos($subject, '[city]') !== FALSE) {
-              $subject = str_replace('[city]', $dispute->city->type, $subject);
+              $subject = str_replace('[city]', $dispute->city->name, $subject);
             }
 
             if (strpos($body, '[city]') !== FALSE) {
-              $body = str_replace('[city]', $dispute->city->type, $body);
+              $body = str_replace('[city]', $dispute->city->name, $body);
             }
 
             if (strpos($subject, '[tracking_number]') !== FALSE) {
