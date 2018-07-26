@@ -79,16 +79,26 @@ class NotificationsController extends Controller
             self::email($subject, $body, $to);
           }
           else if ($id == 2) {
-            $fields = ['account_id' => 'id', 'company_name' => 'name', 'order_id' => 'order_id', 'pickup_date' => 'pickup_date', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
+            $fields = ['order_id' => 'order_id', 'pickup_date' => 'pickup_date', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
 
             $shipment = Shipment::find($reference_1_id);
 
-            $to = $shipment->user->phone;
+            $shipper = $shipment->user;
+
+            $to = $shipper->phone;
 
             foreach ($fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
                 $body = str_replace('[' . $key . ']', $shipment[$field], $body);
               }
+            }
+
+            if (strpos($body, '[account_id]') !== FALSE) {
+              $body = str_replace('[account_id]', $shipper->id, $body);
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
             }
 
             if (strpos($body, '[service_type]') !== FALSE) {
@@ -114,16 +124,26 @@ class NotificationsController extends Controller
             self::sms($body, $to);
           }
           else if ($id == 3) {
-            $fields = ['company_name' => 'name', 'consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
+            $fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
 
             $shipment = Shipment::find($reference_1_id);
 
-            $to = $shipment->user->phone;
+            $shipper = $shipment->user;
+
+            $to = $shipper->phone;
 
             foreach ($fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
                 $body = str_replace('[' . $key . ']', $shipment[$field], $body);
               }
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
+            }
+
+            if (strpos($body, '[service_type]') !== FALSE) {
+              $body = str_replace('[service_type]', $shipment->booking_type->booking_type, $body);
             }
 
             if (strpos($body, '[service_type]') !== FALSE) {
@@ -225,10 +245,12 @@ class NotificationsController extends Controller
 
               foreach ($shipments as $shipment) {
                 foreach ($present_fields as $field) {
-                  $shipment_details .= $shipment[$field] . ', ';
+                  if (!empty($shipment[$field])) {
+                    $shipment_details .= $shipment[$field] . ', ';
+                  }
                 }
 
-                $shipment_details .= substr($shipment_details, 0, -2) . PHP_EOL;
+                $shipment_details = substr($shipment_details, 0, -2) . PHP_EOL;
               }
 
               foreach ($present_fields as $field) {
@@ -245,13 +267,15 @@ class NotificationsController extends Controller
           else if ($id == 5) {
             $cargo_fields = ['cargo_number' => 'id', 'departure_at' => 'created_at'];
 
-            $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $cargo_consignment = CargoConsignment::find($reference_1_id);
 
             $shipment = Shipment::find($reference_2_id);
 
-            $to = $shipment->user->email;
+            $shipper = $shipment->user;
+
+            $to = $shipper->email;
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -271,6 +295,10 @@ class NotificationsController extends Controller
               if (strpos($body, '[' . $key . ']') !== FALSE) {
                 $body = str_replace('[' . $key . ']', $shipment[$field], $body);
               }
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
             }
 
             self::email($subject, $body, $to);
@@ -278,13 +306,15 @@ class NotificationsController extends Controller
           else if ($id == 6) {
             $cargo_fields = ['cargo_number' => 'id', 'departure_at' => 'created_at'];
 
-            $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $cargo_consignment = CargoConsignment::find($reference_1_id);
 
             $shipment = Shipment::find($reference_2_id);
 
-            $to = $shipment->user->phone;
+            $shipper = $shipment->user;
+
+            $to = $shipper->phone;
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
@@ -298,18 +328,24 @@ class NotificationsController extends Controller
               }
             }
 
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
+            }
+
             self::sms($body, $to);
           }
           else if ($id == 7) {
             $cargo_fields = ['cargo_number' => 'id', 'arrival_at' => 'updated_at'];
 
-            $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $cargo_consignment = CargoConsignment::find($reference_1_id);
 
             $shipment = Shipment::find($reference_2_id);
 
-            $to = $shipment->user->email;
+            $shipper = $shipment->user;
+
+            $to = $shipper->email;
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -331,18 +367,28 @@ class NotificationsController extends Controller
               }
             }
 
+            if (strpos($subject, '[company_name]') !== FALSE) {
+              $subject = str_replace('[company_name]', $shipper->name, $subject);
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
+            }
+
             self::email($subject, $body, $to);
           }
           else if ($id == 8) {
             $cargo_fields = ['cargo_number' => 'id', 'arrival_at' => 'updated_at'];
 
-            $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $cargo_consignment = CargoConsignment::find($reference_1_id);
 
             $shipment = Shipment::find($reference_2_id);
 
-            $to = $shipment->user->phone;
+            $shipper = $shipment->user;
+
+            $to = $shipper->phone;
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
@@ -354,6 +400,10 @@ class NotificationsController extends Controller
               if (strpos($body, '[' . $key . ']') !== FALSE) {
                 $body = str_replace('[' . $key . ']', $shipment[$field], $body);
               }
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
             }
 
             self::sms($body, $to);
@@ -427,13 +477,15 @@ class NotificationsController extends Controller
           else if ($id == 10) {
             $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
-            $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $delivery_note = DeliveryNote::find($reference_1_id);
 
             $shipment = Shipment::find($reference_2_id);
 
-            $to = $shipment->user->email;
+            $shipper = $shipment->user;
+
+            $to = $shipper->email;
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -463,18 +515,26 @@ class NotificationsController extends Controller
               $body = str_replace('[rider]', $delivery_note->rider->name, $body);
             }
 
+            if (strpos($subject, '[company_name]') !== FALSE) {
+              $subject = str_replace('[company_name]', $shipper->name, $subject);
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
+            }
+
             self::email($subject, $body, $to);
           }
           else if ($id == 11) {
             $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
-            $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $delivery_note = DeliveryNote::find($reference_1_id);
 
             $shipment = Shipment::find($reference_2_id);
 
-            $to = $shipment->user->phone;
+            $to = $shipper->phone;
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
@@ -492,16 +552,22 @@ class NotificationsController extends Controller
               $body = str_replace('[rider]', $delivery_note->rider->name, $body);
             }
 
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
+            }
+
             self::sms($body, $to);
           }
           else if ($id == 12) {
             $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
-            $shipment_fields = ['company_name' => 'name', 'consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
+            $shipment_fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
 
             $delivery_note = DeliveryNote::find($reference_1_id);
 
             $shipment = Shipment::find($reference_2_id);
+
+            $shipper = $shipment->user;
 
             $to = $shipment->consignee_phone_number_1;
 
@@ -521,6 +587,10 @@ class NotificationsController extends Controller
               $body = str_replace('[rider]', $delivery_note->rider->name, $body);
             }
 
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
+            }
+
             if (strpos($body, '[payment_mode]') !== FALSE) {
               $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
             }
@@ -530,7 +600,7 @@ class NotificationsController extends Controller
           else if ($id == 13) {
             $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
-            $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $delivery_note = DeliveryNote::find($reference_1_id);
 
@@ -558,7 +628,9 @@ class NotificationsController extends Controller
             foreach ($delivery_note->delivery_note_shipments as $delivery_note_shipment) {
               $shipment = $delivery_note_shipment->shipment;
 
-              $to = $shipment->user->email;
+              $shipper = $shipment->user;
+
+              $to = $shipper->email;
 
               foreach ($shipment_fields as $key => $field) {
                 if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -568,6 +640,14 @@ class NotificationsController extends Controller
                 if (strpos($body, '[' . $key . ']') !== FALSE) {
                   $body = str_replace('[' . $key . ']', $shipment[$field], $body);
                 }
+              }
+
+              if (strpos($subject, '[company_name]') !== FALSE) {
+                $subject = str_replace('[company_name]', $shipper->name, $subject);
+              }
+
+              if (strpos($body, '[company_name]') !== FALSE) {
+                $body = str_replace('[company_name]', $shipper->name, $body);
               }
 
               if (strpos($subject, '[status]') !== FALSE) {
@@ -591,7 +671,7 @@ class NotificationsController extends Controller
           else if ($id == 14) {
             $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
 
-            $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $delivery_note = DeliveryNote::find($reference_1_id);
 
@@ -610,12 +690,18 @@ class NotificationsController extends Controller
             foreach ($delivery_note->delivery_note_shipments as $delivery_note_shipment) {
               $shipment = $delivery_note_shipment->shipment;
 
-              $to = $shipment->user->phone;
+              $shipper = $shipment->user;
+
+              $to = $shipper->phone;
 
               foreach ($shipment_fields as $key => $field) {
                 if (strpos($body, '[' . $key . ']') !== FALSE) {
                   $body = str_replace('[' . $key . ']', $shipment[$field], $body);
                 }
+              }
+
+              if (strpos($body, '[company_name]') !== FALSE) {
+                $body = str_replace('[company_name]', $shipper->name, $body);
               }
 
               if (strpos($body, '[status]') !== FALSE) {
@@ -633,7 +719,7 @@ class NotificationsController extends Controller
             if ($reference_1_id != 0) {
               $return_note_fields = ['return_note_number' => 'id', 'departure_at' => 'created_at'];
 
-              $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+              $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
               $return_note = ReturnNote::find($reference_1_id);
 
@@ -661,7 +747,9 @@ class NotificationsController extends Controller
               foreach ($return_note->return_note_shipments as $return_note_shipment) {
                 $shipment = $return_note_shipment->shipment;
 
-                $to = $shipment->user->email;
+                $shipper = $shipment->user;
+
+                $to = $shipper->email;
 
                 foreach ($shipment_fields as $key => $field) {
                   if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -671,6 +759,14 @@ class NotificationsController extends Controller
                   if (strpos($body, '[' . $key . ']') !== FALSE) {
                     $body = str_replace('[' . $key . ']', $shipment[$field], $body);
                   }
+                }
+
+                if (strpos($subject, '[company_name]') !== FALSE) {
+                  $subject = str_replace('[company_name]', $shipper->name, $subject);
+                }
+
+                if (strpos($body, '[company_name]') !== FALSE) {
+                  $body = str_replace('[company_name]', $shipper->name, $body);
                 }
 
                 if (strpos($subject, '[status]') !== FALSE) {
@@ -694,11 +790,13 @@ class NotificationsController extends Controller
             else {
               $remove_fields = ['return_note_number', 'departure_at', 'rider'];
 
-              $fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+              $fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
               $shipment = Shipment::find($reference_2_id);
 
-              $to = $shipment->user->email;
+              $shipper = $shipment->user;
+
+              $to = $shipper->email;
 
               foreach ($remove_fields as $field) {
                 if (strpos($subject, '[' . $field . ']') !== FALSE) {
@@ -720,6 +818,14 @@ class NotificationsController extends Controller
                 }
               }
 
+              if (strpos($subject, '[company_name]') !== FALSE) {
+                $subject = str_replace('[company_name]', $shipper->name, $subject);
+              }
+
+              if (strpos($body, '[company_name]') !== FALSE) {
+                $body = str_replace('[company_name]', $shipper->name, $body);
+              }
+
               if (strpos($subject, '[status]') !== FALSE) {
                 $status_parts = explode(' - ', $shipment->status_shipper->name);
 
@@ -739,7 +845,7 @@ class NotificationsController extends Controller
             if ($reference_1_id != 0) {
               $return_note_fields = ['return_note_number' => 'id', 'departure_at' => 'created_at'];
 
-              $shipment_fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+              $shipment_fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
               $return_note = ReturnNote::find($reference_1_id);
 
@@ -758,12 +864,18 @@ class NotificationsController extends Controller
               foreach ($return_note->return_note_shipments as $return_note_shipment) {
                 $shipment = $return_note_shipment->shipment;
 
-                $to = $shipment->user->phone;
+                $shipper = $shipment->user;
+
+                $to = $shipper->phone;
 
                 foreach ($shipment_fields as $key => $field) {
                   if (strpos($body, '[' . $key . ']') !== FALSE) {
                     $body = str_replace('[' . $key . ']', $shipment[$field], $body);
                   }
+                }
+
+                if (strpos($body, '[company_name]') !== FALSE) {
+                  $body = str_replace('[company_name]', $shipper->name, $body);
                 }
 
                 if (strpos($body, '[status]') !== FALSE) {
@@ -780,11 +892,13 @@ class NotificationsController extends Controller
             else {
               $remove_fields = ['return_note_number', 'departure_at', 'rider'];
 
-              $fields = ['company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+              $fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
               $shipment = Shipment::find($reference_2_id);
 
-              $to = $shipment->user->phone;
+              $shipper = $shipment->user;
+
+              $to = $shipper->phone;
 
               foreach ($remove_fields as $field) {
                 if (strpos($body, '[' . $field . ']') !== FALSE) {
@@ -798,6 +912,10 @@ class NotificationsController extends Controller
                 }
               }
 
+              if (strpos($body, '[company_name]') !== FALSE) {
+                $body = str_replace('[company_name]', $shipper->name, $body);
+              }
+
               if (strpos($body, '[status]') !== FALSE) {
                 $status_parts = explode(' - ', $shipment->status_shipper->name);
 
@@ -808,13 +926,15 @@ class NotificationsController extends Controller
             }
           }
           else if ($id == 17) {
-            $fields = ['account_id' => 'id', 'company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $shipment = Shipment::find($reference_1_id);
 
             $new_shipment = Shipment::find($reference_2_id);
 
-            $to = $shipment->user->email;
+            $shipper = $shipment->user;
+
+            $to = $shipper->email;
 
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -824,6 +944,22 @@ class NotificationsController extends Controller
               if (strpos($body, '[' . $key . ']') !== FALSE) {
                 $body = str_replace('[' . $key . ']', $shipment[$field], $body);
               }
+            }
+
+            if (strpos($subject, '[account_id]') !== FALSE) {
+              $subject = str_replace('[account_id]', $shipper->id, $subject);
+            }
+
+            if (strpos($body, '[account_id]') !== FALSE) {
+              $body = str_replace('[account_id]', $shipper->id, $body);
+            }
+
+            if (strpos($subject, '[company_name]') !== FALSE) {
+              $subject = str_replace('[company_name]', $shipper->name, $subject);
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
             }
 
             if (strpos($subject, '[service_type]') !== FALSE) {
@@ -845,18 +981,28 @@ class NotificationsController extends Controller
             self::email($subject, $body, $to);
           }
           else if ($id == 18) {
-            $fields = ['account_id' => 'id', 'company_name' => 'name', 'order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
+            $fields = ['order_id' => 'order_id', 'tracking_number' => 'tracking_number'];
 
             $shipment = Shipment::find($reference_1_id);
 
             $new_shipment = Shipment::find($reference_2_id);
 
-            $to = $shipment->user->phone;
+            $shipper = $shipment->user;
+
+            $to = $shipper->phone;
 
             foreach ($fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
                 $body = str_replace('[' . $key . ']', $shipment[$field], $body);
               }
+            }
+
+            if (strpos($body, '[account_id]') !== FALSE) {
+              $body = str_replace('[account_id]', $shipper->id, $body);
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
             }
 
             if (strpos($body, '[service_type]') !== FALSE) {
@@ -948,11 +1094,13 @@ class NotificationsController extends Controller
             self::email($subject, $body, $to);
           }
           else if ($id == 20) {
-            $fields = ['company_name' => 'name', 'consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
+            $fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
 
             $shipment = Shipment::find($reference_1_id);
 
-            $to = $shipment->user->email;
+            $shipper = $shipment->user;
+
+            $to = $shipper->email;
 
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -962,6 +1110,14 @@ class NotificationsController extends Controller
               if (strpos($body, '[' . $key . ']') !== FALSE) {
                 $body = str_replace('[' . $key . ']', $shipment[$field], $body);
               }
+            }
+
+            if (strpos($subject, '[company_name]') !== FALSE) {
+              $subject = str_replace('[company_name]', $shipper->name, $subject);
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
             }
 
             if (strpos($subject, '[service_type]') !== FALSE) {
