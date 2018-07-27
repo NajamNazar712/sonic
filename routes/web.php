@@ -35,6 +35,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('orders')->name('orders.')->group(function(){
        Route::get('','Shippers\ShipperDashboardController@orders_index')->name('index');
        Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
+       Route::post('search','Shippers\ShipperDashboardController@statistics_search')->name('search');
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
@@ -76,6 +77,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
        Route::post('create','Shippers\ShipperDisputeController@dispute_create')->name('create');
        Route::post('get/shipments','Shippers\ShipperDisputeController@get_shipments')->name('get.shipments');
        Route::post('get/comments','Shippers\ShipperDisputeController@get_comments')->name('get.comments');
+       Route::post('data','Shippers\ShipperDisputeController@get_data')->name('data');
         Route::prefix('rebook')->name('rebook.')->group(function (){
             Route::get('','Shippers\ShipperDisputeController@rebook_index')->name('index');
             Route::get('list','Shippers\ShipperDisputeController@rebook_list')->name('list');
@@ -106,6 +108,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('index');
         Route::get('list', 'Admins\AdminDashboardController@orders_list')->name('list');
+        Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
 
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');

@@ -63,7 +63,7 @@
                     <li><a class="menu-item" href="{{ route('admin.return.receive.index') }}">Receive</a></li>
                 </ul>
             </li>
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
+            <li class=" nav-item"><a href="#"><i class="la la-exclamation-circle"></i><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Log</a></li>
                 </ul>

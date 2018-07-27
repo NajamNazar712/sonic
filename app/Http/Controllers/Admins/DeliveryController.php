@@ -88,7 +88,7 @@ class DeliveryController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item dispute_modal'><i class='ft-plus-circle primary'></i> Dispute</a>                                         
+                                              <a href='#' class='dropdown-item dispute_modal'><i class='ft-alert-circle primary'></i> Dispute</a>                                         
                                             </div></span>";
             })
             ->make(true);
