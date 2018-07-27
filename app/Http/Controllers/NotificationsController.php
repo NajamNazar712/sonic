@@ -805,8 +805,8 @@ class NotificationsController extends Controller
                   $subject = str_replace('[' . $field . ']', '-', $subject);
                 }
 
-                if (strpos($body, '[' . $key . ']') !== FALSE) {
-                  $body = str_replace('[' . $key . ']', '-', $body);
+                if (strpos($body, '[' . $field . ']') !== FALSE) {
+                  $body = str_replace('[' . $field . ']', '-', $body);
                 }
               }
 
