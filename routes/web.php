@@ -348,6 +348,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('resolved', 'Admins\AdminFinanceController@outstanding_shipments_resolved')->name('resolved');
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
         });
+
+        Route::prefix('make_payments')->name('make_payments.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@make_payments_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@make_payments_list')->name('list');
+            Route::post('delivered_shipments', 'Admins\AdminFinanceController@make_payments_delivered_shipments')->name('delivered_shipments');
+            Route::post('returned_shipments', 'Admins\AdminFinanceController@make_payments_returned_shipments')->name('returned_shipments');
+            Route::post('shipment_details', 'Admins\AdminFinanceController@make_payments_shipment_details')->name('shipment_details');
+            Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
+        });
     });
 
     Route::prefix('sameday')->name('sameday.')->group(function (){

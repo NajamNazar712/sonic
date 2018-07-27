@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReturnNote;
@@ -107,6 +108,8 @@ class ReturnController extends Controller
 
                 NotificationsController::send(15, 0, $shipment);
                 NotificationsController::send(16, 0, $shipment);
+
+                AdminFinanceController::add_payment($shipment, 1);
             }
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
         }elseif($request->action == 'reattempt'){
@@ -142,6 +145,8 @@ class ReturnController extends Controller
 
             NotificationsController::send(15, 0, $request->shipment_id);
             NotificationsController::send(16, 0, $request->shipment_id);
+
+            AdminFinanceController::add_payment($shipment, 1);
 
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
         }elseif($request->action == 'reattempt'){

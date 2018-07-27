@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Admins\AdminFinanceController;
 
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
@@ -982,6 +983,7 @@ class DeliveryController extends Controller
                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                 }
 
+                                AdminFinanceController::add_payment($shipment, 0);
                             } else {
 
                                 ShipmentsJourney::create([
@@ -996,6 +998,11 @@ class DeliveryController extends Controller
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             }
                             $dispute_shipments[] = $shipment;
+                        }
+                        else {
+                            if (in_array($shipper_status_id->shipper_status_id, [14, 16, 30, 36, 37])) {
+                                AdminFinanceController::add_payment($shipment, 0);
+                            }
                         }
                     }//main if condition
 

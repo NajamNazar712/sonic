@@ -13,6 +13,8 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Shipment;
+use App\Http\Models\PendingPayment;
+use App\Http\Models\PendingPaymentShipment;
 
 use Auth;
 use DB;
@@ -328,5 +330,231 @@ class AdminFinanceController extends Controller
             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
         }
     }
+
+    public static function add_payment($shipment_id, $type) {
+        $shipment = Shipment::find($shipment_id);
+
+        $pending_payment = PendingPayment::where('user_id', $shipment->user_id)->where('status', 0);
+
+        if ($pending_payment->exists()) {
+            $pending_payment = $pending_payment->first();
+
+            $pending_payment_shipment = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->where('shipment_id', $shipment_id);
+
+            if (!$pending_payment_shipment->exists()) {
+                $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+
+                if ($type == 0) {
+                    $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
+                }
+                else {
+                    $pending_payment->returned_shipments = $pending_payment->returned_shipments + 1;
+                }
+
+                $pending_payment->save();
+
+                $pending_payment_shipment = new PendingPaymentShipment();
+
+                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                $pending_payment_shipment->shipment_id = $shipment_id;
+                $pending_payment_shipment->type = $type;
+
+                $pending_payment_shipment->save();
+            }
+            else {
+                $pending_payment_shipment = $pending_payment_shipment->first();
+
+                if ($pending_payment_shipment->type != $type) {
+                    if ($type == 0) {
+                        $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
+                        $pending_payment->returned_shipments = $pending_payment->returned_shipments - 1;
+                    }
+                    else {
+                        $pending_payment->delivered_shipments = $pending_payment->delivered_shipments - 1;
+                        $pending_payment->returned_shipments = $pending_payment->returned_shipments + 1;
+                    }
+
+                    $pending_payment->save();
+
+                    $pending_payment_shipment->type = $type;
+
+                    $pending_payment_shipment->save();
+                }
+            }
+        }
+        else {
+            $pending_payment = new PendingPayment();
+
+            $pending_payment->user_id = $shipment->user_id;
+            $pending_payment->total_shipments = 1;
+
+            if ($type == 0) {
+                $pending_payment->delivered_shipments = 1;
+                $pending_payment->returned_shipments = 0;
+            }
+            else {
+                $pending_payment->delivered_shipments = 0;
+                $pending_payment->returned_shipments = 1;
+            }
+
+            $pending_payment->save();
+
+            $pending_payment_shipment = new PendingPaymentShipment();
+
+            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+            $pending_payment_shipment->shipment_id = $shipment_id;
+            $pending_payment_shipment->type = $type;
+
+            $pending_payment_shipment->save();
+        }
+    }
+
+    public function make_payments_index() {
+      return view('admin.finance.make_payments');
+    }
+
+    public function make_payments_list(Request $request) {
+        $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
+        ->join('cities as c', 'u.city_id', '=', 'c.id')
+        ->join('user_bank_infos as ubi', 'pending_payments.user_id', '=', 'ubi.user_id')
+        ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
+        ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
+        ->select('pending_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.returned_shipments', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ubi.bank_name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle')
+        ->where('pending_payments.status', '=', 0);
+
+        $datatables = Datatables::of($pending_payments)
+        ->editColumn('delivered_shipments', function($pending_payment) {
+            if ($pending_payment->delivered_shipments != 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->delivered_shipments . '</button>';
+            }
+            else {
+                return 0;
+            }
+        })
+        ->editColumn('returned_shipments', function($pending_payment) {
+            if ($pending_payment->returned_shipments != 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->returned_shipments . '</button>';
+            }
+            else {
+                return 0;
+            }
+        })
+        ->addColumn('phone_numbers', function($pending_payment) {
+            $phone_numbers = $pending_payment->phone;
+
+            if (!empty($pending_payment->phone2)) {
+                $phone_numbers .= ' - ' . $pending_payment->phone2;
+            }
+
+            return $phone_numbers;
+        })
+        ->removeColumn('phone')
+        ->removeColumn('phone2')
+        ->addColumn('return_shipments_average_aging', function($pending_payment) {
+            if ($pending_payment->returned_shipments != 0) {
+                $shipments = 0;
+                $days = 0;
+
+                $now = Carbon::now()->startOfDay();
+
+                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->where('type', 1)->get();
+
+                foreach ($pending_payment_shipments as $pending_payment_shipment) {
+                    $created_at = Carbon::parse($pending_payment_shipment->created_at)->startOfDay();
+
+                    $days += $created_at->diffInDays($now);
+
+                    $shipments++;
+                }
+
+                $aging = ($days / $shipments) . 'd';
+
+                return $aging;
+            }
+            else {
+                return '-';
+            }
+        })
+        ->addColumn('action', function($pending_payment) {
+            return '<div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
+                    <button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment</div></button>
+                  </div>
+                </div>
+            ';
+        })
+        ->filterColumn('phone_numbers', function($query, $keyword) {
+            $search = str_replace(' ', '', $keyword);
+
+            if ($keyword != '') {
+                $query->where('u.phone', 'like', '%'.$search.'%')->orWhere('u.phone2', 'like', '%'.$search.'%');
+            }
+
+            else {
+                $query->whereRaw('false');
+            }
+        });
+
+        return $datatables->make(true);
+    }
+
+    public function make_payments_delivered_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $request->id)->where('type', 0)->get();
+
+        foreach ($pending_payment_shipments as $pending_payment_shipment) {
+            $shipment = $pending_payment_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+    public function make_payments_returned_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $request->id)->where('type', 1)->get();
+
+        foreach ($pending_payment_shipments as $pending_payment_shipment) {
+            $shipment = $pending_payment_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+    public function make_payments_shipment_details(Request $request) {
+        $details = array();
+
+        $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $request->id)->get();
+
+        foreach ($pending_payment_shipments as $pending_payment_shipment) {
+            $shipment = $pending_payment_shipment->shipment;
+
+            $detail = array();
+
+            $detail['tracking_number'] = $shipment->tracking_number;
+            $detail['type'] = (($pending_payment_shipment->type == 0) ? 'Delivered' : 'Returned');
+            $detail['amount'] = floatval($shipment->amount);
+            $detail['charges'] = floatval($shipment->charges);
+            $detail['gst'] = floatval($shipment->gst);
+            $detail['payable'] = floatval($shipment->payable);
+
+            $details[] = $detail;
+        }
+
+        return $details;
+    }
+
+    public function make_payments_shipments_list(Request $request) {
+        // $pending_payment_shipments
+    }
+
+    public function make_payments_store(Request $request) {}
 
 }
