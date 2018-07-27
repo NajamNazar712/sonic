@@ -36,6 +36,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
        Route::get('','Shippers\ShipperDashboardController@orders_index')->name('index');
        Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
        Route::post('search','Shippers\ShipperDashboardController@statistics_search')->name('search');
+       Route::post('cancel','Shippers\ShipperDashboardController@order_cancel')->name('cancel');
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {

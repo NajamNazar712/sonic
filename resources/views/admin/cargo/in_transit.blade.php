@@ -778,9 +778,9 @@
             $('#UniversalDisputeModal').on('hidden.bs.modal',function () {
                 $('#universal_dispute_form')[0].reset();
                 $('#UniversalDisputeCreate').removeAttr('disabled');
-                select[0].selectize.clear();
-                $('#universal_city_select').val('').trigger('change');
-                $('#universal_dispute_type_select').val('').trigger('change');
+                select[0].selectize.destroy();
+                $('#universal_city_select').empty().trigger('change');
+                $('#universal_dispute_type_select').empty().trigger('change');
             });
             //dispute end
 			$('#receive_at_link #receive_at_link_form').validate({

@@ -111,15 +111,23 @@
                               <div class="col-3">
                                   <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
                               </div>
-                              <div class="col-3">
+                              <div class="col-2">
                                   <select name="graph_destination" id="graph_destination" class="select2 form-control">
-                                      <option value="">Select Destination</option>
+                                      {{--<option value="">Select Destination</option>--}}
                                       @foreach($cities as $city)
                                           <option value="{{$city->id}}">{{$city->name}}</option>
                                       @endforeach
                                   </select>
                               </div>
-                              <div class="col-3">
+                              <div class="col-2">
+                                  <select name="graph_shipper" id="graph_shipper" class="select2 form-control">
+                                      {{--<option value="">Select Shipper</option>--}}
+                                      @foreach($shippers as $shipper)
+                                          <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                      @endforeach
+                                  </select>
+                              </div>
+                              <div class="col-2">
                                   <button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
@@ -259,7 +267,7 @@
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
+                max: '{{ Carbon\Carbon::now()->subDays(29) }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -295,10 +303,13 @@
                     from_date.pickadate('picker').set({'select': currentDate.toDate()},{muted: true});
                 }
             });
-
             $('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
                 placeholder:"Select a Destination"
+            });
+            $('#graph_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select a Shipper"
             });
             function print(selected_rows) {
                 $.ajax({
@@ -335,7 +346,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Print',
-                    className: 'btn btn-primary dispute_modal',
+                    className: 'btn btn-primary',
                     enabled: false,
                     action: function (e, dt, node, config) {
                         table.button(0).disable();
@@ -529,16 +540,19 @@
                 var search_btn = $(this);
                 search_btn.prop('disabled',true);
                 var destination = $('#graph_destination').val();
+                var shipper = $('#graph_shipper').val();
                 var current_date = $('input[name="to_date_formatted"]').val();
                 var old_date = $('input[name="from_date_formatted"]').val();
                 console.log("Old Date: = "+old_date);
                 console.log("New Date: = "+current_date);
                 console.log("Destination: = "+destination);
+                console.log("Shipper: = "+shipper);
                 $.ajax({
                     url: '{!! route('admin.orders.search') !!}',
                     method: 'POST',
                     data: {
                         'destination': destination,
+                        'shipper': shipper,
                         'current_date': current_date,
                         'old_date': old_date,
                         '_token': '{{ csrf_token() }}'
@@ -561,7 +575,7 @@
                             legend: {
                                 data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
                             },
-                            color: ['#00000', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                            color: ['#CECECE', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
                             xAxis: [{
                                 type: 'category',
@@ -609,9 +623,9 @@
                             ]
                         };
                         myChart.setOption(updateChartOptions);
-                        setTimeout(function () {
+                        // setTimeout(function () {
                             search_btn.removeAttr('disabled');
-                        },3000);
+                        // },3000);
 
                     }
                 });
@@ -619,7 +633,7 @@
 
             $('body').on('click','.dispute_modal',function(){
                 var shipment_id = parseInt($(this).parents('tr').attr('id'));
-                console.log(shipment_id)
+                // console.log(shipment_id)
                 $('#UniversalDisputeModal').modal('show');
                 $('#universal_dispute_id').val(shipment_id);
             });
@@ -637,7 +651,7 @@
                         }
                     }).done(function (data) {
                         if(data.success == 1){
-                            $('#universal_city_select').select2({
+                            $('#universal_city_select').prepend('<option value="" selected="selected"></option>').select2({
                                 placeholder:'Select a city',
                                 dropdownParent:$('#universal_dispute_form')
                             });
@@ -649,7 +663,7 @@
                                 var dispute = new Option(value.type, value.id, false, false);
                                 $('#universal_dispute_type_select').append(dispute).trigger('select');
                             });
-                            $('#universal_dispute_type_select').select2({
+                            $('#universal_dispute_type_select').prepend('<option value="" selected="selected"></option>').select2({
                                 placeholder:'Select a Dispute type',
                                 dropdownParent:$('#universal_dispute_form')
                             });
@@ -691,8 +705,9 @@
                 $('#universal_dispute_form')[0].reset();
                 $('#UniversalDisputeCreate').removeAttr('disabled');
                 select[0].selectize.destroy();
-                $('#universal_city_select').val('').trigger('change');
-                $('#universal_dispute_type_select').val('').trigger('change');
+                $("#universal_dispute_form").validate().resetForm();
+                $('#universal_city_select').empty().trigger('change');
+                $('#universal_dispute_type_select').empty().trigger('change');
             });
             $('#universal_dispute_form').validate({
                 ignore: [],
