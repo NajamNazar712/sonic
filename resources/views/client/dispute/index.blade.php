@@ -363,6 +363,7 @@
                 $('#dispute_form')[0].reset();
                 $('#DisputeCreate').removeAttr('disabled');
                 select[0].selectize.clear();
+                $('#dispute_form').validate().resetForm();
                 $('#city_select').val('').trigger('change');
                 $('#dispute_type_select').val('').trigger('change');
             });

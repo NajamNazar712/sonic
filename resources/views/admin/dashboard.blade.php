@@ -16,7 +16,7 @@
         <!-- Active Orders -->
           <div class="row">
               <div class="col">
-                  <div class="card">
+                  <div class="card pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -33,7 +33,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-info">
+                  <div class="card bg-gradient-directional-info pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -49,7 +49,7 @@
                       </div>
                   </div>
               </div><div class="col">
-                  <div class="card bg-gradient-directional-success">
+                  <div class="card bg-gradient-directional-success pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -65,7 +65,7 @@
                       </div>
                   </div>
               </div><div class="col">
-                  <div class="card bg-gradient-directional-warning">
+                  <div class="card bg-gradient-directional-warning pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -82,7 +82,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-danger">
+                  <div class="card bg-gradient-directional-danger pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -136,7 +136,13 @@
                   </div>
               </div>
           </div>
+          <hr>
+
           <div class="row">
+              <div class="card">
+              <div class="card-content">
+                  <div class="card-body">
+
               <h2>Order Details</h2>
               <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                   <thead>
@@ -164,6 +170,9 @@
                   </thead>
               </table>
 
+                  </div>
+              </div>
+              </div>
           </div>
       </div>
     </div>

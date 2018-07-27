@@ -65,7 +65,7 @@ class ShipperDashboardController extends Controller
             ->groupBy('shipments.id');
         return Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
-                return "<a href='#' class='tracking'><u>$shipments->tracking_number</u></a>";
+                return "<a href='javascript:void(0);' class='tracking'><u>$shipments->tracking_number</u></a>";
             })
             ->editColumn('phone1',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
@@ -86,7 +86,10 @@ class ShipperDashboardController extends Controller
                     $drop .= "<a href='javascript:void(0);' class='dropdown-item cancel_order'><i class='ft-crosshair primary'></i> Cancel</a>";
                 }
                 $drop .= "<a href='javascript:void(0);' class='dropdown-item dispute_modal'><i class='ft-alert-circle primary'></i> Dispute</a></div></span>";
-                return $drop;
+                if($shipments->shipper_status_id != 17){
+
+                    return $drop;
+                }
             })
             ->make(true);
     }

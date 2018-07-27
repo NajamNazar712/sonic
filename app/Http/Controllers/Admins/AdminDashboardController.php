@@ -170,7 +170,10 @@ class AdminDashboardController extends Controller
                 }
                
                 $drop .= "<a href='javascript:void(0);' class='dropdown-item dispute_modal'><i class='ft-alert-circle primary'></i> Dispute</a></div></span>";
-                return $drop;
+                if($shipments->shipper_status_id != 17){
+
+                    return $drop;
+                }
             })
             ->make(true);
     }
