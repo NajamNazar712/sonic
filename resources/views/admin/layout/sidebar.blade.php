@@ -30,24 +30,24 @@
             </li>
 
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Pickups</span></a>
-              <ul class="menu-content">
-                <li><a class="menu-item" href="{{ route('admin.pickups.pending.index') }}">Pending</a></li>
-                <li><a class="menu-item" href="{{ route('admin.pickups.assigned.index') }}">Assigned</a></li>
-                <li><a class="menu-item" href="{{ route('admin.pickups.receive.index') }}">Receive</a></li>
-              </ul>
+                <ul class="menu-content">
+                    <li><a class="menu-item" href="{{ route('admin.pickups.pending.index') }}">Pending</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.pickups.assigned.index') }}">Assigned</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.pickups.receive.index') }}">Receive</a></li>
+                </ul>
             </li>
 
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Cargo</span></a>
-              <ul class="menu-content">
-                <li><a class="menu-item" href="{{ route('admin.cargo.pending.index') }}">Pending</a></li>
-                <li><a class="menu-item" href="{{ route('admin.cargo.create.index') }}">Create</a></li>
-                <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a></li>
-              </ul>
+                <ul class="menu-content">
+                    <li><a class="menu-item" href="{{ route('admin.cargo.pending.index') }}">Pending</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.cargo.create.index') }}">Create</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a></li>
+                </ul>
             </li>
 
             <li class=" nav-item"><a href="{{route('admin.sameday.index')}}"><i class="la la-home"></i><span class="menu-title">Same-day Delivery</span></a></li>
 
-			<li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
+            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.delivery.pending.index') }}">Pending</a></li>
                     <li><a class="menu-item" href="{{ route('admin.delivery.note.index') }}">Create Note</a></li>
@@ -74,7 +74,7 @@
                 </ul>
             </li>
 
-			<li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Packaging</span></a>
+            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Packaging</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.packaging.index') }}">Stock</a></li>
                     <li><a class="menu-item" href="{{ route('admin.packaging.requests.index') }}">Requests</a></li>
