@@ -30,4 +30,8 @@ class ReturnNote extends Model
         return $this->belongsTo('App\Http\Models\Shipper\User');
     }
 
+    public function return_note_shipments() {
+        return $this->hasMany('App\Http\Models\Admin\ReturnNoteShipment');
+    }
+
 }

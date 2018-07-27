@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\NotificationsController;
 
 use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
@@ -318,6 +319,8 @@ class ShipperShipmentBookController extends Controller
             $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $price, $insurance, $type);
           }
         }
+
+        NotificationsController::send(2, $shipment_id);
 
         if ($request->filled('book_and_print')) {
           $print = $shipment_id;
