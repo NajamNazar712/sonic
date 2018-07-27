@@ -264,10 +264,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::now()->subDays(29) }}',
+                max: new Date(old_date_limit),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
