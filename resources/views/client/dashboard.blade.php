@@ -113,6 +113,7 @@
                               </div>
                               <div class="col-3">
                                   <select name="graph_destination" class="select2" id="graph_destination">
+                                      {{--<option value="">All</option>--}}
                                 @foreach($cities as $city)
                                       <option value="{{$city->id}}">{{$city->name}}</option>
                                 @endforeach
@@ -356,7 +357,8 @@
 
             $('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Select a Destination"
+                placeholder:"Select a Destination",
+                allowClear:true
             });
             function print(selected_rows) {
                 $.ajax({
@@ -633,7 +635,7 @@
                             legend: {
                                 data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
                             },
-                            color: ['#00000', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                            color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
                             xAxis: [{
                                 type: 'category',

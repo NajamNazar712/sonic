@@ -113,7 +113,7 @@
                               </div>
                               <div class="col-2">
                                   <select name="graph_destination" id="graph_destination" class="select2 form-control">
-                                      {{--<option value="">Select Destination</option>--}}
+                                      {{--<option value="">All</option>--}}
                                       @foreach($cities as $city)
                                           <option value="{{$city->id}}">{{$city->name}}</option>
                                       @endforeach
@@ -121,7 +121,7 @@
                               </div>
                               <div class="col-2">
                                   <select name="graph_shipper" id="graph_shipper" class="select2 form-control">
-                                      {{--<option value="">Select Shipper</option>--}}
+                                      {{--<option value="">All</option>--}}
                                       @foreach($shippers as $shipper)
                                           <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                       @endforeach
@@ -315,11 +315,13 @@
             });
             $('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Select a Destination"
+                placeholder:"Select a Destination",
+                allowClear:true
             });
             $('#graph_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Select a Shipper"
+                placeholder:"Select a Shipper",
+                allowClear:true
             });
             function print(selected_rows) {
                 $.ajax({
@@ -487,7 +489,7 @@
                 },
 
                 // Add custom colors
-                color: ['#00000', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
                 // Hirozontal axis
                 xAxis: [{
@@ -763,6 +765,10 @@
 
 
             });
+
+            $('body').on('click','.tracking',function () {
+                
+            })
 
         });
     </script>
