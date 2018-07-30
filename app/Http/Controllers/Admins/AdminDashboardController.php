@@ -2921,11 +2921,11 @@ class AdminDashboardController extends Controller
     }
 
     public function cityView(Request $request){
-        $req = $request->route();
-        $uri_path = $req->getPath();
-        $uri_parts = explode('/', $uri_path);
-        $uri_tail = end($uri_parts);
-        return $uri_tail;
+//        $req = $request->route();
+//        $uri_path = $req->getPath();
+//        $uri_parts = explode('/', $uri_path);
+//        $uri_tail = end($uri_parts);
+//        return $uri_tail;
 //        $hubs = City::where('hub',1)->get();
 //        return $hubs[0]->id;
         return view('admin.management.city_management');
