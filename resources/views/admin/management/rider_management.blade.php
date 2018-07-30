@@ -69,7 +69,12 @@
         table.dataTable tbody tr td {
             padding-left: 0.5em;
             padding-right: 0.5em;
+
         }
+        /*table.dataTable tbody tr td.junction{*/
+            /*word-wrap: break-word;*/
+            /*background: #606060;*/
+        /*}*/
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
@@ -134,7 +139,7 @@
                     {data: 'category', name: 'rider_categories.name', class: 'category'},
                     {data: 'created_at', name: 'created_at', class: 'created_at'},
                     {data: 'status', name: 'status', class: 'status'},
-                    {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
+                    {data: 'action', name: 'action', class: 'text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

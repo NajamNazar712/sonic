@@ -8,12 +8,14 @@
                 <input type="text" class="form-control" name="cityName" value="{{$city->name}}" placeholder="Add City Name" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
         </div>
-        <div class="col">
+        <div class="col-3">
             <input type="hidden" id="city_type" name="postType" value="{{($isHub == 1)? 'hub':'city'}}">
             <fieldset class="radio-inline ml-1">
                 <input type="radio" name="city-radio" class="icheck cradio" id="city-radio" rel="city" {{($isHub == 0)? 'checked':''}}>
                 <label for="city-radio">City</label>
             </fieldset>
+        </div>
+        <div class="col-3">
             <fieldset class="radio-inline ml-1">
                 <input type="radio" name="city-radio" class="icheck cradio" id="hub-radio" rel="hub" {{($isHub == 1)? 'checked':''}}>
                 <label for="hub-radio">Hub</label>

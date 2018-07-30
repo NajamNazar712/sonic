@@ -2920,7 +2920,12 @@ class AdminDashboardController extends Controller
 
     }
 
-    public function cityView(){
+    public function cityView(Request $request){
+        $req = $request->route();
+        $uri_path = $req->getPath();
+        $uri_parts = explode('/', $uri_path);
+        $uri_tail = end($uri_parts);
+        return $uri_tail;
 //        $hubs = City::where('hub',1)->get();
 //        return $hubs[0]->id;
         return view('admin.management.city_management');
@@ -2995,17 +3000,8 @@ class AdminDashboardController extends Controller
 
     public function updateCity(Request $request,$id){
         if($request->postType == 'city'){
-            $isHub = City::where('id',$id)->where('hub',1)->exists();
-            if($isHub){
-                $hubs = City::where('hub_id',$id)->where('id','!=',$id)->count();
-//                return $hubs;
-//                if($hubs > 0){
-//                    return response()->json('status'=>1,'success'=>"")
-//                }
-            }else{
-                return "No";
-            }
-            $city = City::where('id',$id)->update([
+
+            City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
@@ -3026,7 +3022,7 @@ class AdminDashboardController extends Controller
 
             return redirect()->back()->with('success','City updated successfully');
         }elseif($request->postType == 'hub'){
-            $city = City::where('id',$id)->update([
+            City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>1,
                 'hub_id'=>$id,

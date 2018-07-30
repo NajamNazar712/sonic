@@ -57,7 +57,6 @@
         table.dataTable thead tr th {
             padding-left: 0.5em;
             white-space: normal;
-            word-wrap: break-word;
         }
 
         table.dataTable thead tr th:before,
@@ -81,7 +80,9 @@
             top: 50%;
             text-shadow: none;
         }
-
+        table.dataTable tbody tr td.junction{
+            /*word-break: break-all;*/
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -160,7 +161,7 @@
                     {data: 'junction', name: 'routes.junction', class: 'junction'},
                     {data: 'created_at', name: 'created_at', class: 'created_at'},
                     {data: 'status', name: 'status', class: 'status'},
-                    {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
+                    {data: 'action', name: 'action', class: 'action text-center', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

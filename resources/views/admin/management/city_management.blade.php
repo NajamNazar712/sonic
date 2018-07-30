@@ -135,12 +135,12 @@
                 ajax: '{{ route('admin.management.city.ajax') }}',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'name', name: 'cities.name', class: 'city'},
-                    {data: 'city_id', name: 'cities.id', class: 'city_id'},
-                    {data: 'hub', name: 'h.name', class: 'hub'},
-                    {data: 'hub_id', name: 'cities.hub_id', class: 'hub_id'},
-                    {data: 'status', name: 'status', class: 'status'},
-                    {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
+                    {data: 'name', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'city_id', name: 'cities.id', class: 'align-middle city_id'},
+                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {
                    var info = table.page.info();
