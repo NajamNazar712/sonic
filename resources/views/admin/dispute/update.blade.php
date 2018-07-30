@@ -25,18 +25,23 @@
 
         </div>
     </div>
-    <div class="row mb-2 justify-content-center">
-        <div class="col-6 form-group description-div">
-            <p class="border">{{$dispute->description}}</p>
-        </div>
-        <div class="col-6">
+    <div class="row mb-2 ">
+        <div class="col-12 mb-1">
             @foreach($shipments as $cn)
                 <span class="pb-1"><u>{{$cn->tracking_number}}</u></span>&emsp;
             @endforeach
         </div>
-    </div>
-    <hr>
+        <div class="col-12 form-group description-div ">
+            <div class="p-1 border">
+                <h4><u>Description :</u></h4>
+                <p class="">{{$dispute->description}}</p>
 
+            </div>
+        </div>
+
+    </div>
+    {{--<hr>--}}
+    <h2 class="text-left"><u>Comments</u></h2>
     <div class="comments dispute_comments_section">
         <div class="row ">
             <div class="col-12 ">

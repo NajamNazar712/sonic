@@ -2995,6 +2995,16 @@ class AdminDashboardController extends Controller
 
     public function updateCity(Request $request,$id){
         if($request->postType == 'city'){
+            $isHub = City::where('id',$id)->where('hub',1)->exists();
+            if($isHub){
+                $hubs = City::where('hub_id',$id)->where('id','!=',$id)->count();
+//                return $hubs;
+//                if($hubs > 0){
+//                    return response()->json('status'=>1,'success'=>"")
+//                }
+            }else{
+                return "No";
+            }
             $city = City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>0,
@@ -3128,9 +3138,7 @@ class AdminDashboardController extends Controller
 
     public function CityStatusCheck($id){
         $hubs = City::select('name')->where('hub_id',$id)->where('id','!=',$id)->get();
-//        $cities_name = $hubs;
 
-//        return $hubs;
         return response()->json($hubs);
     }
     //route management

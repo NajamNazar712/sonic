@@ -1,9 +1,3 @@
-{{--/**--}}
- {{--* Created by PhpStorm.--}}
- {{--* User: WaqasTrax--}}
- {{--* Date: 5/31/2018--}}
- {{--* Time: 10:21 AM--}}
- {{--*/--}}
 @extends('admin.layout.master')
 
 @section('content')
@@ -16,7 +10,7 @@
 
                     <div class="card-header">
                         <span class="font-large-1 card-title">Riders List</span>
-                        <button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRider" data-toggle="modal">Add Rider</button>
+                        {{--<button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRider" data-toggle="modal">Add Rider</button>--}}
 
                         <div class="mt-1">
                             @include('admin.inc.messages')
@@ -106,7 +100,17 @@
     <script type="text/javascript">
         $(document).ready(function() {
             var table =  $('.datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [{
+                    text: 'Add Rider',
+                    className: 'btn btn-primary',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
+                        $('#addRider').modal('show');
+
+                    }
+
+                }],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()

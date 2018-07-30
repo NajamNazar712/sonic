@@ -209,45 +209,7 @@
             }).bind('input', function() {
                 table.draw();
             });
-            {{--$('#search_tracking').on('change',function () {--}}
-                {{--var input = $(this);--}}
-                {{--var tracking = $(this).val();--}}
-                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
 
-                {{--if(numberRegex.test(tracking)) {--}}
-                    {{--$.ajax({--}}
-                        {{--url:'{{route('admin.delivery.receive.tracking.search')}}',--}}
-                        {{--type:'GET',--}}
-                        {{--dataType:'JSON',--}}
-                        {{--data: {--}}
-                            {{--'tracking':tracking--}}
-                        {{--}--}}
-                    {{--}).done(function(data){--}}
-                        {{--if(data.status == 0){--}}
-                            {{--console.log(data);--}}
-                            {{--table--}}
-                                {{--.columns( 1 )--}}
-                                {{--.search( data.delivery_note )--}}
-                                {{--.draw();--}}
-                            {{--// input.val('');--}}
-                        {{--}else{--}}
-                            {{--table--}}
-                                {{--.columns( 1 )--}}
-                                {{--.search( 0 )--}}
-                                {{--.draw();--}}
-                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-                        {{--}--}}
-
-                    {{--});--}}
-                {{--}else{--}}
-                    {{--table--}}
-                        {{--.columns( 1 )--}}
-                        {{--.search( 0 )--}}
-                        {{--.draw();--}}
-                    {{--input.val('');--}}
-                {{--}--}}
-            {{--});--}}
 
             function print(id) {
                 $.ajax({

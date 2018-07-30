@@ -230,7 +230,15 @@
             -ms-word-wrap: break-word;
             word-wrap: break-word;
         }
-        .description-div p.border{
+        .description-div .border{
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+        }
+        .description-div{
+            text-align: left;
+        }
+        .description-div p{
             padding:10px;
             word-wrap: break-word;
         }

@@ -13,7 +13,7 @@
 
                     <div class="card-header">
                         <span class="font-large-1 card-title">Routes List</span>
-                        <button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRoute" data-toggle="modal">Add Route</button>
+                        {{--<button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRoute" data-toggle="modal">Add Route</button>--}}
 
                         <div class="mt-1">
                             @include('admin.inc.messages')
@@ -50,8 +50,6 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <style>
-        display:inline;
-        }
         table.dataTable {
             font-size: 12px;
         }
@@ -130,7 +128,17 @@
         $(document).ready(function() {
 
             var table =  $('.datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [{
+                    text: 'Add Route',
+                    className: 'btn btn-primary',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
+                        $('#addRoute').modal('show');
+
+                    }
+
+                }],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
