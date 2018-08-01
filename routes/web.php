@@ -380,6 +380,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
     });
 
+    //Reports start
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::prefix('qsr')->name('qsr.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@qsr_list')->name('list');
+        });
+    });
+
+    //Reports end
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');

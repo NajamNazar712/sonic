@@ -111,7 +111,7 @@
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-4 form-group">
-                                    <input type="text" name="invoice_number" id="send_stock_invoice" class="form-control" placeholder="Cargo Number *" data-rule-required="true" data-msg-required="This field is required">
+                                    <input type="text" name="invoice_number" id="send_stock_invoice" class="form-control numeric" placeholder="Cargo Number *" data-rule-required="true" data-msg-required="This field is required">
                                 </div>
                             </div>
                             <div class="row">
@@ -271,7 +271,7 @@
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
-                'min': 1,
+                'min': 0,
                 'max': 10000
             });
 

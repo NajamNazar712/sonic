@@ -167,9 +167,11 @@ class AdminDashboardController extends Controller
                                             <div class='dropdown-menu open-left arrow'>";
                 if($shipments->shipper_status_id > 1) {
                     $drop .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-plus-circle primary'></i> View Charges</a>";
+                }else{
+                    $drop .= "<a href='javascript:void(0);' class='dropdown-item '><i class='ft-plus-circle primary'></i> No Action</a>";
                 }
                
-                $drop .= "<a href='javascript:void(0);' class='dropdown-item dispute_modal'><i class='ft-alert-circle primary'></i> Dispute</a></div></span>";
+                $drop .= "</div></span>";
                 if($shipments->shipper_status_id != 17){
 
                     return $drop;
