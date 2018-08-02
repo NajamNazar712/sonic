@@ -77,6 +77,7 @@
                     <li><a class="menu-item" href="{{ route('admin.reports.qsr.index') }}">QSR Report</a></li>
                     <li><a class="menu-item" href="{{ route('admin.reports.return_note.index') }}">Return Notes Report</a></li>
                     <li><a class="menu-item" href="{{ route('admin.reports.pickup_note.index') }}">Pickup Notes Report</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.reports.cargo_received.index') }}">Cargo Received Report</a></li>
                 </ul>
             </li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Packaging</span></a>

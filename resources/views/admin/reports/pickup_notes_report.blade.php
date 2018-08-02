@@ -184,7 +184,7 @@
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
-                    $('#submission_date_root').css('top','40px');
+                    $('#completed_date_root').css('top','40px');
                 },
                 onSet: function(context) {
                 }
@@ -219,7 +219,6 @@
                     url: '{{ route('admin.reports.pickup_note.list') }}',
                     data: function (d) {
                         d.search_pn_no = $('#search_pn_no').val();
-                        // d.search_tracking = $('#search_tracking_no').val();
                         d.search_rider = $('#search_rider').val();
                         d.search_assigned_by = $('#search_assigned_by').val();
                         d.search_completed_by = $('#search_completed_by').val();
@@ -272,19 +271,7 @@
                     });
                 }
             });
-            // new $.fn.dataTable.Buttons( table, {
-            //     buttons: [
-            //         'copy', 'excel', 'pdf'
-            //     ]
-            // } );
-            // table.buttons().container()
-            //     .appendTo( $('.col-sm-6:eq(0)', table.table().container() ) );
-            // table.on('.serial_number', function () {
-            //     table.column(0, {search:'applied', order:'applied'}).nodes().each( function (cell, i) {
-            //         cell.innerHTML = i+1;
-            //         table.cell(cell).invalidate('dom');
-            //     });
-            // }).draw();
+
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });

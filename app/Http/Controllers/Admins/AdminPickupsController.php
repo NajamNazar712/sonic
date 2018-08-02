@@ -196,11 +196,14 @@ class AdminPickupsController extends Controller
 
         $pickup_note->assigned_by_user_id = Auth::id();
         $pickup_note->status_id = 1;
-        $pickup_note->city_id = Auth::user()->city_id;
+        $pickup_request_address = PickupRequest::find($pickup_request_ids[0]);
+
+        $pickup_note->city_id = $pickup_request_address->pickup_address->city_id;
 
         $pickup_note->save();
 
         $pickup_note_id = $pickup_note->id;
+
 
         PickupNotesJourneyController::add($pickup_note_id, 0, 'Pickup Note has been Created!', Auth::id());
       }

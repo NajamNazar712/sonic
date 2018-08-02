@@ -4,11 +4,13 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\ReturnNote;
+use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\PickupNote;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\Shipper\User;
+use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -154,5 +156,52 @@ class AdminReportsController extends Controller
                 $return->whereDate('pickup_notes.updated_at',$submission_date);
             }
         return $return->make(true);
+    }
+    public function cargo_received_index(Request $request){
+        $shippimg_modes = ShippingMode::all();
+        $cities = City::all(['id','name']);
+        return view('admin.reports.cargo_received_report')->with(['cities'=>$cities,'shippimg_modes'=>$shippimg_modes]);
+    }
+    public function cargo_received_list(Request $request){
+        $cargo_received = CargoConsignment::join('cities as oc','oc.id','=','cargo_consignments.origin_city_id')
+            ->join('cities as h','h.id','=','cargo_consignments.hub_id')
+            ->join('shipping_modes as sm','sm.id','=','cargo_consignments.shipping_mode_id')
+            ->join('admins as si','si.id','=','cargo_consignments.sender_id')
+            ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
+            ->select(['cargo_consignments.id as cargo_id','oc.name as origin','h.name as destination','cargo_consignments.shipments','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments'])
+            ->where('cargo_consignments.status_id',3);
+        $cargo = Datatables::of($cargo_received)
+            ->addColumn('short_received',function ($cargo){
+                return $cargo->shipments - $cargo->received_shipments;
+            })
+//            ->editColumn('received_shipments',function($cargo){
+//                return "<a class='received_shipments'>$cargo->received_shipments</a>";
+//            })
+            ->editColumn('transit_at', function ($cargo) {
+                return $cargo->transit_at ? with(new Carbon($cargo->transit_at))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('received_at', function ($cargo) {
+                return $cargo->received_at ? with(new Carbon($cargo->received_at))->format('d/m/Y h:i:s A') : '';
+            });
+
+            if($cargo_no = $request->get('search_cargo_no')){
+                $cargo->where('cargo_consignments.id','=',$cargo_no);
+            }
+            if($origin = $request->get('search_origin')){
+                $cargo->where('oc.id','=',$origin);
+            }
+            if($destination = $request->get('search_destination')){
+                $cargo->where('h.id','=',$destination);
+            }
+            if($mode = $request->get('search_shippimg_modes')){
+                $cargo->where('sm.id','=',$mode);
+            }
+            if($transit_date = $request->get('search_transit_date')){
+                $cargo->whereDate('cargo_consignments.created_at',$transit_date);
+            }
+            if($received_date = $request->get('search_received_date')){
+                $cargo->whereDate('cargo_consignments.updated_at',$received_date);
+            }
+            return $cargo->make(true);
     }
 }
