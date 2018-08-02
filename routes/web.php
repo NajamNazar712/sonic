@@ -358,7 +358,22 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('delivered_shipments', 'Admins\AdminFinanceController@make_payments_delivered_shipments')->name('delivered_shipments');
             Route::post('returned_shipments', 'Admins\AdminFinanceController@make_payments_returned_shipments')->name('returned_shipments');
             Route::post('shipment_details', 'Admins\AdminFinanceController@make_payments_shipment_details')->name('shipment_details');
+            Route::get('shipment_list', 'Admins\AdminFinanceController@make_payments_shipment_list')->name('shipment_list');
+            Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
+        });
+
+        Route::prefix('done_payments')->name('done_payments.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@done_payments_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
+            Route::put('paid', 'Admins\AdminFinanceController@done_payments_paid')->name('paid');
+            Route::put('reverted', 'Admins\AdminFinanceController@done_payments_reverted')->name('reverted');
+            Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
+            Route::post('returned_shipments', 'Admins\AdminFinanceController@done_payments_returned_shipments')->name('returned_shipments');
+            Route::post('details_print', 'Admins\AdminFinanceController@done_payments_details_print')->name('details_print');
+            Route::post('details', 'Admins\AdminFinanceController@done_payments_details')->name('details');
+            Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
+            Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
         });
     });
 

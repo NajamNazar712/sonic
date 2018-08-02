@@ -20,7 +20,8 @@ class CreateDonePaymentsTable extends Migration
             $table->integer('total_shipments');
             $table->integer('delivered_shipments');
             $table->integer('returned_shipments');
-            $table->integer('bank_instrument_number')->nullable()->default(NULL);
+            $table->string('reference_number')->nullable()->default(NULL);
+            $table->integer('company_bank_id')->nullable()->default(NULL);
             $table->tinyinteger('status')->default(0);
         });
     }

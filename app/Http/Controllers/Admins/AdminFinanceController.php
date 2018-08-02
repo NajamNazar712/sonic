@@ -6,15 +6,20 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 
+use App\Http\Models\BanksList;
 use App\Http\Models\City;
 use App\Http\Models\BookingType;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipment;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
+use App\Http\Models\DonePayment;
+use App\Http\Models\DonePaymentShipment;
 
 use Auth;
 use DB;
@@ -334,7 +339,7 @@ class AdminFinanceController extends Controller
     public static function add_payment($shipment_id, $type) {
         $shipment = Shipment::find($shipment_id);
 
-        $pending_payment = PendingPayment::where('user_id', $shipment->user_id)->where('status', 0);
+        $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
         if ($pending_payment->exists()) {
             $pending_payment = $pending_payment->first();
@@ -420,7 +425,7 @@ class AdminFinanceController extends Controller
         ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
         ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
         ->select('pending_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.returned_shipments', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ubi.bank_name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle')
-        ->where('pending_payments.status', '=', 0);
+        ->groupBy('pending_payments.id');
 
         $datatables = Datatables::of($pending_payments)
         ->editColumn('delivered_shipments', function($pending_payment) {
@@ -438,6 +443,18 @@ class AdminFinanceController extends Controller
             else {
                 return 0;
             }
+        })
+        ->editColumn('total_amount', function($pending_payment) {
+            return floatval($pending_payment->total_amount);
+        })
+        ->editColumn('total_charges', function($pending_payment) {
+            return floatval($pending_payment->total_charges);
+        })
+        ->editColumn('total_gst', function($pending_payment) {
+            return floatval($pending_payment->total_gst);
+        })
+        ->editColumn('total_payable', function($pending_payment) {
+            return floatval($pending_payment->total_payable);
         })
         ->addColumn('phone_numbers', function($pending_payment) {
             $phone_numbers = $pending_payment->phone;
@@ -540,10 +557,10 @@ class AdminFinanceController extends Controller
 
             $detail['tracking_number'] = $shipment->tracking_number;
             $detail['type'] = (($pending_payment_shipment->type == 0) ? 'Delivered' : 'Returned');
-            $detail['amount'] = floatval($shipment->amount);
-            $detail['charges'] = floatval($shipment->charges);
-            $detail['gst'] = floatval($shipment->gst);
-            $detail['payable'] = floatval($shipment->payable);
+            $detail['amount'] = floatval($pending_payment_shipment->amount);
+            $detail['charges'] = floatval($pending_payment_shipment->charges);
+            $detail['gst'] = floatval($pending_payment_shipment->gst);
+            $detail['payable'] = floatval($pending_payment_shipment->payable);
 
             $details[] = $detail;
         }
@@ -551,10 +568,696 @@ class AdminFinanceController extends Controller
         return $details;
     }
 
-    public function make_payments_shipments_list(Request $request) {
-        // $pending_payment_shipments
+    public function make_payments_shipment_list(Request $request) {
+        $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
+        ->join('users as u', 's.user_id', '=', 'u.id')
+        ->select('pending_payment_shipments.shipment_id as id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
+
+        if ($request->has('ids')) {
+           $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
+        }
+        else {
+            $pending_payment_shipments->whereRaw('FALSE');
+        }
+
+        $datatables = Datatables::of($pending_payment_shipments)
+        ->editColumn('amount', function($pending_payment_shipment) {
+            return floatval($pending_payment_shipment->amount);
+        })
+        ->editColumn('charges', function($pending_payment_shipment) {
+            return floatval($pending_payment_shipment->charges);
+        })
+        ->editColumn('gst', function($pending_payment_shipment) {
+            return floatval($pending_payment_shipment->gst);
+        })
+        ->editColumn('payable', function($pending_payment_shipment) {
+            return floatval($pending_payment_shipment->payable);
+        })
+        ->editColumn('type', function($pending_payment_shipment) {
+            if ($pending_payment_shipment->type == 0) {
+                return 'Delivered';
+            }
+            else {
+                return 'Returned';
+            }
+        });
+
+        return $datatables->make(true);
     }
 
-    public function make_payments_store(Request $request) {}
+    public function make_payments_export_bank_order(Request $request) {
+        $pending_payment_ids = explode(',', $request->pending_payment_ids);
+        $shipment_ids = explode(',', $request->shipment_ids);
+
+        $pending_payment_shipment_ids = array();
+
+        foreach ($shipment_ids as $shipment_id) {
+            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', [$pending_payment_ids])->first();
+
+            $pending_payment_shipment_ids[$pending_payment_shipment->pending_payment_id][] = $shipment_id;
+        }
+
+        $details = array();
+
+        $details[] = ['Client', 'Account Title', 'IBAN', 'Bank', 'Payable'];
+
+        foreach ($pending_payment_shipment_ids as $pending_payment_id => $shipment_ids) {
+            $pending_payment = PendingPayment::find($pending_payment_id);
+
+            $shipper = User::find($pending_payment->user_id);
+
+            $payable = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->whereIn('shipment_id', $shipment_ids)->sum('payable');
+
+            $row = array();
+
+            $row[] = $shipper->name;
+            $row[] = $shipper->bank->account_title;
+            $row[] = $shipper->bank->iban;
+            $row[] = $shipper->bank->bank_name;
+            $row[] = $payable;
+
+            $details[] = $row;
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getActiveSheet()->fromArray($details);
+
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="sonic_bank_order.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+    }
+
+    public function make_payments_store(Request $request) {
+        $pending_payment_ids = explode(',', $request->pending_payment_ids);
+        $shipment_ids = explode(',', $request->shipment_ids);
+
+        $pending_payment_shipment_ids = array();
+
+        foreach ($shipment_ids as $shipment_id) {
+            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', [$pending_payment_ids])->first();
+
+            $pending_payment_shipment_ids[$pending_payment_shipment->pending_payment_id][] = $shipment_id;
+        }
+
+        foreach ($pending_payment_shipment_ids as $pending_payment_id => $shipment_ids) {
+            $total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
+            $selected_shipments = count($shipment_ids);
+
+            $pending_payment = PendingPayment::find($pending_payment_id);
+
+            if ($total_shipments == $selected_shipments) {
+                $done_payment = new DonePayment();
+
+                $done_payment->user_id = $pending_payment->user_id;
+                $done_payment->total_shipments = $pending_payment->total_shipments;
+                $done_payment->delivered_shipments = $pending_payment->delivered_shipments;
+                $done_payment->returned_shipments = $pending_payment->returned_shipments;
+
+                $done_payment->save();
+
+                $pending_payment->delete();
+
+                foreach ($shipment_ids as $shipment_id) {
+                    $pending_payment_shipment = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('shipment_id', $shipment_id)->first();
+
+                    $done_payment_shipment = new DonePaymentShipment();
+
+                    $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
+                    $done_payment_shipment->done_payment_id = $done_payment->id;
+                    $done_payment_shipment->shipment_id = $shipment_id;
+                    $done_payment_shipment->type = $pending_payment_shipment->type;
+                    $done_payment_shipment->amount = $pending_payment_shipment->amount;
+                    $done_payment_shipment->charges = $pending_payment_shipment->charges;
+                    $done_payment_shipment->gst = $pending_payment_shipment->gst;
+                    $done_payment_shipment->payable = $pending_payment_shipment->payable;
+
+                    $done_payment_shipment->save();
+
+                    $pending_payment_shipment->delete();
+
+                    if ($done_payment_shipment->type == 0) {
+                        $status = 39;
+                    }
+                    else {
+                        $status = 43;
+                    }
+
+                    $shipment = Shipment::find($shipment_id);
+
+                    $shipment->shipper_status_id = $status;
+
+                    $shipment->save();
+
+                    ShipmentsJourneyController::add($shipment_id, $status, NULL, NULL, NULL, NULL, Auth::id());
+                }
+            }
+            else {
+                $done_payment = new DonePayment();
+
+                $done_payment->user_id = $pending_payment->user_id;
+                $done_payment->total_shipments = 0;
+                $done_payment->delivered_shipments = 0;
+                $done_payment->returned_shipments = 0;
+
+                $done_payment->save();
+
+                $total_shipments = 0;
+                $delivered_shipments = 0;
+                $returned_shipments = 0;
+
+                foreach ($shipment_ids as $shipment_id) {
+                    $pending_payment_shipment = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('shipment_id', $shipment_id)->first();
+
+                    $total_shipments++;
+
+                    if ($pending_payment_shipment->type == 0) {
+                        $delivered_shipments++;
+                    }
+                    else {
+                        $returned_shipments++;
+                    }
+
+                    $done_payment_shipment = new DonePaymentShipment();
+
+                    $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
+                    $done_payment_shipment->done_payment_id = $done_payment->id;
+                    $done_payment_shipment->shipment_id = $shipment_id;
+                    $done_payment_shipment->type = $pending_payment_shipment->type;
+                    $done_payment_shipment->amount = $pending_payment_shipment->amount;
+                    $done_payment_shipment->charges = $pending_payment_shipment->charges;
+                    $done_payment_shipment->gst = $pending_payment_shipment->gst;
+                    $done_payment_shipment->payable = $pending_payment_shipment->payable;
+
+                    $done_payment_shipment->save();
+
+                    $pending_payment_shipment->delete();
+
+                    if ($done_payment_shipment->type == 0) {
+                        $status = 39;
+                    }
+                    else {
+                        $status = 43;
+                    }
+
+                    $shipment = Shipment::find($shipment_id);
+
+                    $shipment->shipper_status_id = $status;
+
+                    $shipment->save();
+
+                    ShipmentsJourneyController::add($shipment_id, $status, NULL, NULL, NULL, NULL, Auth::id());
+                }
+
+                $done_payment->total_shipments = $total_shipments;
+                $done_payment->delivered_shipments = $delivered_shipments;
+                $done_payment->returned_shipments = $returned_shipments;
+
+                $done_payment->save();
+
+                $pending_payment->total_shipments = $pending_payment->total_shipments - $total_shipments;
+                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments - $delivered_shipments;
+                $pending_payment->returned_shipments = $pending_payment->returned_shipments - $returned_shipments;
+
+                $pending_payment->save();
+            }
+        }
+
+        return redirect()->back()->with('success', 'Payment(s) has been Made.');
+    }
+
+    public function done_payments_index() {
+        $banks = BanksList::where('affiliate', 1)->get();
+
+        return view('admin.finance.done_payments')->with('banks', $banks);
+    }
+
+    public function done_payments_list(Request $request) {
+        $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
+        ->join('cities as c', 'u.city_id', '=', 'c.id')
+        ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
+        ->join('done_payment_shipments as pps', 'done_payments.id', '=', 'pps.done_payment_id')
+        ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
+        ->select('done_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.returned_shipments', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ubi.bank_name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
+        ->groupBy('done_payments.id');
+
+        $datatables = Datatables::of($done_payments)
+        ->editColumn('delivered_shipments', function($done_payment) {
+            if ($done_payment->delivered_shipments != 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->delivered_shipments . '</button>';
+            }
+            else {
+                return 0;
+            }
+        })
+        ->editColumn('returned_shipments', function($done_payment) {
+            if ($done_payment->returned_shipments != 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->returned_shipments . '</button>';
+            }
+            else {
+                return 0;
+            }
+        })
+        ->editColumn('total_amount', function($done_payment) {
+            return floatval($done_payment->total_amount);
+        })
+        ->editColumn('total_charges', function($done_payment) {
+            return floatval($done_payment->total_charges);
+        })
+        ->editColumn('total_gst', function($done_payment) {
+            return floatval($done_payment->total_gst);
+        })
+        ->editColumn('total_payable', function($done_payment) {
+            return floatval($done_payment->total_payable);
+        })
+        ->addColumn('phone_numbers', function($done_payment) {
+            $phone_numbers = $done_payment->phone;
+
+            if (!empty($done_payment->phone2)) {
+                $phone_numbers .= ' - ' . $done_payment->phone2;
+            }
+
+            return $phone_numbers;
+        })
+        ->removeColumn('phone')
+        ->removeColumn('phone2')
+        ->editColumn('done_at', function($done_payment) {
+            return Carbon::parse($done_payment->done_at)->format('d/m/Y H:i A');
+        })
+        ->editColumn('status', function($done_payment) {
+            if ($done_payment->status == 0) {
+                return 'Processed';
+            }
+            else if ($done_payment->status == 1) {
+                return 'Paid';
+            }
+            else if ($done_payment->status == 2) {
+                return 'Reverted';
+            }
+            else {
+                return 'Unknown';
+            }
+        })
+        ->addColumn('return_shipments_average_aging', function($done_payment) {
+            if ($done_payment->returned_shipments != 0) {
+                $shipments = 0;
+                $days = 0;
+
+                $now = Carbon::now()->startOfDay();
+
+                $done_payment_shipments = donePaymentShipment::where('done_payment_id', $done_payment->id)->where('type', 1)->get();
+
+                foreach ($done_payment_shipments as $done_payment_shipment) {
+                    $created_at = Carbon::parse($done_payment_shipment->created_at)->startOfDay();
+
+                    $days += $created_at->diffInDays($now);
+
+                    $shipments++;
+                }
+
+                $aging = ($days / $shipments) . 'd';
+
+                return $aging;
+            }
+            else {
+                return '-';
+            }
+        })
+        ->addColumn('action', function($done_payment) {
+            return '<div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
+                    <button type="button" class="dropdown-item update_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Details</div></button>
+                    <button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>
+                  </div>
+                </div>
+            ';
+        })
+        ->filterColumn('phone_numbers', function($query, $keyword) {
+            $search = str_replace(' ', '', $keyword);
+
+            if ($keyword != '') {
+                $query->where('u.phone', 'like', '%'.$search.'%')->orWhere('u.phone2', 'like', '%'.$search.'%');
+            }
+
+            else {
+                $query->whereRaw('false');
+            }
+        })
+        ->filterColumn('status', function($query, $keyword) {
+            $keyword = strtolower($keyword);
+
+            if (strpos('processed', $keyword) !== FALSE) {
+                $query->where('done_payments.status', '=', 0);
+            }
+            else if (strpos('paid', $keyword) !== FALSE) {
+                $query->where('done_payments.status', '=', 1);
+            }
+            else if (strpos('reverted', $keyword) !== FALSE) {
+                $query->where('done_payments.status', '=', 2);
+            }
+            else {
+                $query->whereRaw('false');
+            }
+        });
+
+
+        return $datatables->make(true);
+    }
+
+    public function done_payments_paid(Request $request) {
+        foreach ($request->ids as $done_payment_id) {
+            $done_payment = DonePayment::find($done_payment_id);
+
+            $done_payment->status = 1;
+
+            $done_payment->save();
+
+            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                $shipment = $done_payment_shipment->shipment;
+
+                $shipment->shipper_status_id = 40;
+
+                $shipment->save();
+
+                ShipmentsJourneyController::add($shipment->id, 40, NULL, NULL, NULL, NULL, Auth::id());
+            }
+        }
+
+        return ['status' => 0, 'success' => 'Payment(s) marked Paid'];
+    }
+
+    public function done_payments_reverted(Request $request) {
+        foreach ($request->ids as $done_payment_id) {
+            $done_payment = DonePayment::find($done_payment_id);
+
+            $done_payment->status = 2;
+
+            $done_payment->save();
+
+            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+                $shipment = $done_payment_shipment->shipment;
+
+                $shipment->shipper_status_id = 41;
+
+                $shipment->save();
+
+                ShipmentsJourneyController::add($shipment->id, 41, NULL, NULL, NULL, NULL, Auth::id());
+            }
+        }
+
+        return ['status' => 0, 'success' => 'Payment(s) marked Reverted'];
+    }
+
+    public function done_payments_delivered_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 0)->get();
+
+        foreach ($done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+    public function done_payments_returned_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $done_payment_shipments = DonePaymentShipment::where('done_payment_id', $request->id)->where('type', 1)->get();
+
+        foreach ($done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+    public function done_payments_details_print(Request $request) {
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $done_payment = DonePayment::find($request->id);
+
+        $shipper = $done_payment->shipper;
+
+        $shipper_bank = $shipper->bank;
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Payment Details</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                        margin: 0mm;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color {
+                        color: #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+                      <div class="p-1 cargo_slip">
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle color primary"><strong>Payment Details</strong></td>
+                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Payment ID</strong></td>
+                              <td>' . $done_payment->id . '</td>
+                              <td rowspan="7" class="text-center align-middle">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($done_payment->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <span><strong>' . $done_payment->id . '</strong></span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Client</strong></td>
+                              <td>' . $shipper->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Client Bank</strong></td>
+                              <td>' . $shipper_bank->bank_name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Account Title</strong></td>
+                              <td>' . $shipper_bank->account_title . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>IBAN</strong></td>
+                              <td>' . $shipper_bank->iban . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Company Bank</strong></td>
+                              <td>' . $done_payment->company_bank->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Reference Number</strong></td>
+                              <td>' . $done_payment->reference_number . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="color primary"><strong>S. No.</strong></td>
+                              <td class="color primary"><strong>Tracking No.</strong></td>
+                              <td class="color primary"><strong>Order ID</strong></td>
+                              <td class="color primary"><strong>Consignee</strong></td>
+                              <td class="color primary"><strong>Destination</strong></td>
+                              <td class="color primary"><strong>Service Type</strong></td>
+                              <td class="color primary"><strong>Actual Weight</strong></td>
+                              <td class="color primary"><strong>Amount</strong></td>
+                              <td class="color primary"><strong>Charges</strong></td>
+                              <td class="color primary"><strong>Payable</strong></td>
+      ';
+
+      $serial_number = 1;
+
+      $total_amount = 0;
+      $total_charges = 0;
+      $total_gst = 0;
+      $total_payable = 0;
+
+      foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $html .= '
+                            <tr>
+                              <td>' . $serial_number . '</td>
+                              <td>' . $shipment->tracking_number . '</td>
+                              <td>' . $shipment->order_id . '</td>
+                              <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
+                              <td>' . $shipment->consignee_city->name . '</td>
+                              <td>' . $shipment->booking_type->booking_type . '</td>
+                              <td>' . $shipment->actual_weight . '</td>
+                              <td>' . $done_payment_shipment->amount . '</td>
+                              <td>' . $done_payment_shipment->charges . '</td>
+                              <td>' . $done_payment_shipment->payable . '</td>
+                            </tr>
+            ';
+
+            $serial_number++;
+
+            $total_amount += $done_payment_shipment->amount;
+            $total_charges += $done_payment_shipment->charges;
+            $total_gst += $done_payment_shipment->gst;
+            $total_payable += $done_payment_shipment->payable;
+      }
+
+      $html .= '
+                          </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="color primary"><strong>Total Amount</strong></td>
+                              <td class="color primary"><strong>Total Charges</strong></td>
+                              <td class="color primary"><strong>Total GST</strong></td>
+                              <td class="color primary"><strong>Total Payable</strong></td>
+                            </tr>
+                            <tr>
+                              <td>' . $total_amount . '</td>
+                              <td>' . $total_charges . '</td>
+                              <td>' . $total_gst . '</td>
+                              <td>' . $total_payable . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                      </div>
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+      return $html;
+    }
+
+    public function done_payments_details(Request $request) {
+        $done_payment = DonePayment::find($request->id);
+
+        $details = array();
+
+        $details['reference_number'] = $done_payment->reference_number;
+        $details['company_bank_id'] = $done_payment->company_bank_id;
+
+        return $details;
+    }
+
+    public function done_payments_update_details(Request $request) {
+        $done_payment = DonePayment::find($request->id);
+
+        $done_payment->reference_number = $request->reference_number;
+        $done_payment->company_bank_id = $request->company_bank_id;
+
+        $done_payment->save();
+
+        return ['status' => 0, 'success' => 'Details Updated'];
+    }
+
+    public function done_payments_export_to_excel(Request $request) {
+        $done_payment = DonePayment::find($request->id);
+
+        $details = array();
+
+        $details[] = ['S. No.', 'Tracking No.', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'Payable'];
+
+        $serial_number = 1;
+
+        foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $row = array();
+
+            $row[] = $serial_number;
+            $row[] = $shipment->tracking_number;
+            $row[] = $shipment->order_id;
+            $row[] = $shipment->consignee_name;
+            $row[] = $shipment->consignee_phone_number_1;
+            $row[] = $shipment->consignee_city->name;
+            $row[] = $shipment->booking_type->booking_type;
+            $row[] = $shipment->actual_weight;
+            $row[] = $done_payment_shipment->amount;
+            $row[] = $done_payment_shipment->charges;
+            $row[] = $done_payment_shipment->payable;
+
+            $details[] = $row;
+
+            $serial_number++;
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $spreadsheet->getActiveSheet()->fromArray($details);
+
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="sonic_payment_details.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+    }
 
 }

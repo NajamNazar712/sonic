@@ -71,6 +71,7 @@
                     <li><a class="menu-item" href="{{ route('admin.finance.outstanding_sdn.index') }}">Outstanding SDN</a></li>
                     <li><a class="menu-item" href="{{ route('admin.finance.outstanding_shipments.index') }}">Outstanding Shipments</a></li>
                     <li><a class="menu-item" href="{{ route('admin.finance.make_payments.index') }}">Make Payments</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.finance.done_payments.index') }}">Done Payments</a></li>
                 </ul>
             </li>
 

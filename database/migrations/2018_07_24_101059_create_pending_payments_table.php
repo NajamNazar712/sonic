@@ -20,7 +20,6 @@ class CreatePendingPaymentsTable extends Migration
             $table->integer('total_shipments');
             $table->integer('delivered_shipments');
             $table->integer('returned_shipments');
-            $table->tinyinteger('status')->default(0);
         });
     }
 

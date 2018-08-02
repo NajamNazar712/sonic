@@ -132,32 +132,51 @@
 											<form id="make_payments_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.make_payments.store') }}">
 												{{ csrf_field() }}
 
-												<input type="hidden" name="pending_payment_shipment_ids" class="pending_payment_shipment_ids">
+												<input type="hidden" name="pending_payment_ids" class="pending_payment_ids">
+												<input type="hidden" name="shipment_ids" class="shipment_ids">
 
-												<div class="form-group">
-													<input type="text" name="total_amount" class="form-control total_amount" placeholder="Total Amount" readonly="readonly">
+												<div class="col-2">
+													<div class="form-group">
+														<label class="mx-auto">Total Amount</label>
+														<input type="text" name="total_amount" class="form-control text-center total_amount" placeholder="Total Amount" readonly="readonly">
+													</div>
 												</div>
 
-												<div class="form-group ml-1">
-													<input type="text" name="total_charges" class="form-control total_charges" placeholder="Total Charges" readonly="readonly">
+												<div class="col-2">
+													<div class="form-group">
+														<label class="mx-auto">Total Charges</label>
+														<input type="text" name="total_charges" class="form-control text-center total_charges" placeholder="Total Charges" readonly="readonly">
+													</div>
 												</div>
 
-												<div class="form-group ml-1">
-													<input type="text" name="total_gst" class="form-control total_gst" placeholder="Total GST" readonly="readonly">
+												<div class="col-2">
+													<div class="form-group">
+														<label class="mx-auto">Total GST</label>
+														<input type="text" name="total_gst" class="form-control text-center total_gst" placeholder="Total GST" readonly="readonly">
+													</div>
 												</div>
 
-												<div class="form-group ml-1">
-													<input type="text" name="total_payable" class="form-control total_payable" placeholder="Total Payable" readonly="readonly">
+												<div class="w-100 mt-2"></div>
+
+												<div class="col-2">
+													<div class="form-group">
+														<label class="mx-auto">Total Payable</label>
+														<input type="text" name="total_payable" class="form-control text-center total_payable" placeholder="Total Payable" readonly="readonly">
+													</div>
 												</div>
 
-												<div class="form-group ml-1">
-													<input type="text" name="total_hold" class="form-control total_hold" placeholder="Total Hold" readonly="readonly">
+												<div class="col-2">
+													<div class="form-group">
+														<label class="mx-auto">Total Hold</label>
+														<input type="text" name="total_hold" class="form-control text-center total_hold" placeholder="Total Hold" readonly="readonly">
+													</div>
 												</div>
 
 												<div class="w-100"></div>
 
 												<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-												<button type="submit" name="reconcile" class="btn btn-primary make">Make</button>
+												<button type="submit" name="make" class="mr-1 btn btn-primary make">Make</button>
+												<button type="button" name="export_bank_order" class="btn btn-info export_bank_order">Export Bank Order</button>
 											</form>
 										</div>
 									</div>
@@ -173,6 +192,10 @@
 
 @section('css')
 	<style>
+		.modal .modal-dialog.modal-lg.modal-full-length {
+			max-width: 95%;
+		}
+
 		table,
 		table.dataTable {
 			font-size: 12px;
@@ -225,8 +248,6 @@
 @endsection
 
 @section('js')
-	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-
 	<script>
 		$(document).ready(function() {
 			var selected_rows = [];
@@ -234,6 +255,8 @@
 			var selected_pending_payment_ids = [];
 
 			var selected_rows_shipments = [];
+
+			var initial_total_hold = 0;
 
 			var table = $('#datatable').DataTable({
 				scrollX: true,
@@ -243,7 +266,25 @@
 					className: 'btn btn-primary make_payment',
 					enabled: false,
 					action: function (e, dt, node, config) {
-						//TO DO
+						$('#make_payments #make_payments_form .total_amount').val(0);
+						$('#make_payments #make_payments_form .total_charges').val(0);
+						$('#make_payments #make_payments_form .total_gst').val(0);
+						$('#make_payments #make_payments_form .total_payable').val(0);
+						$('#make_payments #make_payments_form .total_hold').val(0);
+
+						$('#make_payments #make_payments_form button.make').prop('disabled', true);
+						$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+
+						$('#make_payments #make_payments_form .pending_payment_ids').val('');
+						$('#make_payments #make_payments_form .shipment_ids').val('');
+
+						selected_pending_payment_ids = selected_rows;
+
+						selected_rows_shipments = [];
+
+						make_payments_table.clear().draw();
+
+						$('#make_payments').modal('show');
 					}
 				}],
 				fixedHeader: {
@@ -266,7 +307,7 @@
 				rowId: 'id',
 				order: [[2, 'asc']],
 				columns: [
-					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
@@ -294,14 +335,6 @@
 					var info = table.page.info();
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
-
-					if (!data.receiving_sheet) {
-						$('td:eq(0)', row).addClass('select-checkbox');
-
-						if ($.inArray(data.id, selected_rows) !== -1) {
-							table.row(row).select();
-						}
-					}
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -341,7 +374,7 @@
 				processing: true,
 				serverSide: true,
 				ajax: {
-					url: '{{ route('admin.finance.make_payments.shipments_list') }}',
+					url: '{{ route('admin.finance.make_payments.shipment_list') }}',
 					data: function (d) {
 						d.ids = selected_pending_payment_ids;
 					}
@@ -351,18 +384,13 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'delivery_note_number', name: 'dn.id', class: 'align-middle text-center delivery_note_number'},
-					{data:'hub', name: 'h.name', class: 'align-middle hub'},
-					{data:'rider', name: 'ri.name', class: 'align-middle rider'},
-					{data:'route', name: 'route', class: 'align-middle route'},
-					{data:'shipments', name: 'dn.shipments_count', class: 'align-middle shipments'},
-					{data:'delivered_shipments', name: 'dn.delivered_shipments', class: 'align-middle delivered_shipments'},
-					{data:'assigned_by', name: 'a.name', class: 'align-middle assigned_by'},
-					{data:'assigned_at', name: 'dn.created_at', class: 'align-middle assigned_at'},
-					{data:'updated_by', name: 'a.name', class: 'align-middle updated_by'},
-					{data:'updated_at', name: 'dn.updated_at', class: 'align-middle updated_at'},
-					{data:'dncc_amount', name: 'dn.received_cod_amount', class: 'align-middle dncc_amount'},
-					{data:'expense', name: 'dn.expense', class: 'align-middle expense'}
+					{data:'shipper', name: 'u.name', class: 'align-middle shipper'},
+					{data:'shipment', name: 's.tracking_number', class: 'align-middle shipment'},
+					{data:'type', name: 'pending_payment_shipments.type', class: 'align-middle type'},
+					{data:'amount', name: 'pending_payment_shipments.amount', class: 'align-middle amount'},
+					{data:'charges', name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
+					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
+					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'}
 				],
 				rowCallback: function(row, data, index) {
 					$('td:eq(1)', row).html(index + 1);
@@ -391,6 +419,13 @@
 							}
 						}
 					});
+				},
+				drawCallback: function() {
+					initial_total_hold = this.api().column('.payable').data().reduce(function (a, b) {
+						return parseFloat(a) + parseFloat(b);
+					}, 0);
+
+					$('#make_payments #make_payments_form .total_hold').val(initial_total_hold);
 				}
 			});
 
@@ -506,7 +541,22 @@
 					});
 				}
 				else if ($(this).hasClass('make_payment')) {
+					$('#make_payments #make_payments_form .total_amount').val(0);
+					$('#make_payments #make_payments_form .total_charges').val(0);
+					$('#make_payments #make_payments_form .total_gst').val(0);
+					$('#make_payments #make_payments_form .total_payable').val(0);
+					$('#make_payments #make_payments_form .total_hold').val(0);
+
+					$('#make_payments #make_payments_form button.make').prop('disabled', true);
+					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+
+					$('#make_payments #make_payments_form .pending_payment_ids').val('');
+					$('#make_payments #make_payments_form .shipment_ids').val('');
+
+
 					selected_pending_payment_ids = [];
+
+					selected_rows_shipments = [];
 
 					selected_pending_payment_ids.push(id);
 
@@ -517,18 +567,66 @@
 			});
 
 			$('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-				var id = parseInt($(this).parent('tr').attr('id'));
+				var parent = $(this).parent('tr');
+
+				var id = parseInt(parent.attr('id'));
 
 				var index = $.inArray(id, selected_rows_shipments);
 
+				var total_amount_selector = $('#make_payments #make_payments_form .total_amount');
+				var total_charges_selector = $('#make_payments #make_payments_form .total_charges');
+				var total_gst_selector = $('#make_payments #make_payments_form .total_gst');
+				var total_payable_selector = $('#make_payments #make_payments_form .total_payable');
+				var total_hold_selector = $('#make_payments #make_payments_form .total_hold');
+
 				if (index === -1) {
 					selected_rows_shipments.push(id);
+
+					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html()) : 0);
+					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html()) : 0);
+					var total_gst = ((total_gst_selector.val() != '') ? parseInt(total_gst_selector.val()) : 0) + ((parent.children('td.gst').html() != '') ? parseInt(parent.children('td.gst').html()) : 0);
+					var total_payable = ((total_payable_selector.val() != '') ? parseInt(total_payable_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html()) : 0);
+					var total_hold = ((total_hold_selector.val() != '') ? parseInt(total_hold_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html()) : 0);
 				}
 				else {
 					selected_rows_shipments.splice(index, 1);
+
+					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) - ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html()) : 0);
+					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) - ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html()) : 0);
+					var total_gst = ((total_gst_selector.val() != '') ? parseInt(total_gst_selector.val()) : 0) - ((parent.children('td.gst').html() != '') ? parseInt(parent.children('td.gst').html()) : 0);
+					var total_payable = ((total_payable_selector.val() != '') ? parseInt(total_payable_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html()) : 0);
+					var total_hold = ((total_hold_selector.val() != '') ? parseInt(total_hold_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html()) : 0);
 				}
 
-				//Calculation of Totals
+				if (selected_rows_shipments.length > 0) {
+					total_amount_selector.val(total_amount);
+					total_charges_selector.val(total_charges);
+					total_gst_selector.val(total_gst);
+					total_payable_selector.val(total_payable);
+					total_hold_selector.val(total_hold);
+
+					$('#make_payments #make_payments_form button.make').prop('disabled', false);
+					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
+				}
+				else {
+					total_amount_selector.val(0);
+					total_charges_selector.val(0);
+					total_gst_selector.val(0);
+					total_payable_selector.val(0);
+					total_hold_selector.val(initial_total_hold);
+
+					$('#make_payments #make_payments_form button.make').prop('disabled', true);
+					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+				}
+
+				$('#make_payments #make_payments_form .pending_payment_ids').val(selected_pending_payment_ids);
+				$('#make_payments #make_payments_form .shipment_ids').val(selected_rows_shipments);
+			});
+
+			$('#make_payments #make_payments_form .export_bank_order').bind('click', function(e) {
+				e.preventDefault();
+
+				window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?pending_payment_ids=' + selected_pending_payment_ids + '&shipment_ids=' + selected_rows_shipments, '_blank');
 			});
 		});
 	</script>
