@@ -16,7 +16,7 @@
         <!-- Active Orders -->
           <div class="row">
               <div class="col">
-                  <div class="card">
+                  <div class="card pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -33,7 +33,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-info">
+                  <div class="card bg-gradient-directional-info pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -49,7 +49,7 @@
                       </div>
                   </div>
               </div><div class="col">
-                  <div class="card bg-gradient-directional-success">
+                  <div class="card bg-gradient-directional-success pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -65,7 +65,7 @@
                       </div>
                   </div>
               </div><div class="col">
-                  <div class="card bg-gradient-directional-warning">
+                  <div class="card bg-gradient-directional-warning pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -82,7 +82,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-danger">
+                  <div class="card bg-gradient-directional-danger pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -111,15 +111,23 @@
                               <div class="col-3">
                                   <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
                               </div>
-                              <div class="col-3">
+                              <div class="col-2">
                                   <select name="graph_destination" id="graph_destination" class="select2 form-control">
-                                      <option value="">Select Destination</option>
+                                      {{--<option value="">All</option>--}}
                                       @foreach($cities as $city)
                                           <option value="{{$city->id}}">{{$city->name}}</option>
                                       @endforeach
                                   </select>
                               </div>
-                              <div class="col-3">
+                              <div class="col-2">
+                                  <select name="graph_shipper" id="graph_shipper" class="select2 form-control">
+                                      {{--<option value="">All</option>--}}
+                                      @foreach($shippers as $shipper)
+                                          <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                      @endforeach
+                                  </select>
+                              </div>
+                              <div class="col-2">
                                   <button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
@@ -128,7 +136,13 @@
                   </div>
               </div>
           </div>
+          <hr>
+
           <div class="row">
+              <div class="card">
+              <div class="card-content">
+                  <div class="card-body">
+
               <h2>Order Details</h2>
               <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                   <thead>
@@ -156,6 +170,9 @@
                   </thead>
               </table>
 
+                  </div>
+              </div>
+              </div>
           </div>
       </div>
     </div>
@@ -256,10 +273,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
+                max: new Date(old_date_limit),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -295,10 +313,15 @@
                     from_date.pickadate('picker').set({'select': currentDate.toDate()},{muted: true});
                 }
             });
-
             $('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Select a Destination"
+                placeholder:"Select a Destination",
+                allowClear:true
+            });
+            $('#graph_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select a Shipper",
+                allowClear:true
             });
             function print(selected_rows) {
                 $.ajax({
@@ -335,7 +358,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Print',
-                    className: 'btn btn-primary dispute_modal',
+                    className: 'btn btn-primary',
                     enabled: false,
                     action: function (e, dt, node, config) {
                         table.button(0).disable();
@@ -466,7 +489,7 @@
                 },
 
                 // Add custom colors
-                color: ['#00000', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
                 // Hirozontal axis
                 xAxis: [{
@@ -529,16 +552,19 @@
                 var search_btn = $(this);
                 search_btn.prop('disabled',true);
                 var destination = $('#graph_destination').val();
+                var shipper = $('#graph_shipper').val();
                 var current_date = $('input[name="to_date_formatted"]').val();
                 var old_date = $('input[name="from_date_formatted"]').val();
                 console.log("Old Date: = "+old_date);
                 console.log("New Date: = "+current_date);
                 console.log("Destination: = "+destination);
+                console.log("Shipper: = "+shipper);
                 $.ajax({
                     url: '{!! route('admin.orders.search') !!}',
                     method: 'POST',
                     data: {
                         'destination': destination,
+                        'shipper': shipper,
                         'current_date': current_date,
                         'old_date': old_date,
                         '_token': '{{ csrf_token() }}'
@@ -561,7 +587,7 @@
                             legend: {
                                 data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
                             },
-                            color: ['#00000', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                            color: ['#CECECE', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
                             xAxis: [{
                                 type: 'category',
@@ -609,135 +635,19 @@
                             ]
                         };
                         myChart.setOption(updateChartOptions);
-                        setTimeout(function () {
+                        // setTimeout(function () {
                             search_btn.removeAttr('disabled');
-                        },3000);
+                        // },3000);
 
                     }
                 });
             });
 
-            $('body').on('click','.dispute_modal',function(){
-                var shipment_id = parseInt($(this).parents('tr').attr('id'));
-                console.log(shipment_id)
-                $('#UniversalDisputeModal').modal('show');
-                $('#universal_dispute_id').val(shipment_id);
-            });
-            var select;
-            $('#UniversalDisputeModal').on('shown.bs.modal',function () {
-                var id = $('#universal_dispute_id').val();
-
-                if(id){
-                    $.ajax({
-                        url: '{!! route('admin.dispute.data') !!}',
-                        method: 'POST',
-                        data:{
-                            '_token': '{{ csrf_token() }}',
-                            'shipment_id':id
-                        }
-                    }).done(function (data) {
-                        if(data.success == 1){
-                            $('#universal_city_select').select2({
-                                placeholder:'Select a city',
-                                dropdownParent:$('#universal_dispute_form')
-                            });
-                            $.each(data.cities,function(key,value){
-                                var newOption = new Option(value.name, value.id, false, false);
-                                $('#universal_city_select').append(newOption).trigger('select');
-                            });
-                            $.each(data.dispute_types,function(key,value) {
-                                var dispute = new Option(value.type, value.id, false, false);
-                                $('#universal_dispute_type_select').append(dispute).trigger('select');
-                            });
-                            $('#universal_dispute_type_select').select2({
-                                placeholder:'Select a Dispute type',
-                                dropdownParent:$('#universal_dispute_form')
-                            });
-                            $('#universal_tracking_number').val(data.tracking);
-                            select = $('#universal_tracking_number').selectize({
-                                placeholder: 'Tracking Number(s)*',
-                                delimiter: ',',
-                                createOnBlur: true,
-                                persist: false,
-                                plugins: ['remove_button'],
-                                onDropdownOpen: function(dropdown) {
-                                    dropdown.remove();
-                                },
-                                onType: function(str) {
-                                    var regex = /^[0-9,]+$/;
-
-                                    if (!regex.test(str)) {
-                                        select[0].selectize.setTextboxValue('');
-                                    }
-                                },
-                                create: function(input) {
-                                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
-                                        return {
-                                            value: input,
-                                            text: input
-                                        }
-                                    }
-                                    else {
-                                        return false;
-                                    }
-                                }
-                            });
-
-                        }
-                    });
-                }
-            });
-            $('#UniversalDisputeModal').on('hidden.bs.modal',function () {
-                $('#universal_dispute_form')[0].reset();
-                $('#UniversalDisputeCreate').removeAttr('disabled');
-                select[0].selectize.destroy();
-                $('#universal_city_select').val('').trigger('change');
-                $('#universal_dispute_type_select').val('').trigger('change');
-            });
-            $('#universal_dispute_form').validate({
-                ignore: [],
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function(form) {
-
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    var city_select = $('#universal_city_select').val();
-                    var dispute_type_select = $('#universal_dispute_type_select').val();
-                    var tracking_number = $('#universal_tracking_number').val();
-                    var description = $('#universal_description').val();
-                    $.ajax({
-                        url: '{!! route('admin.dispute.create.universal') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'city_select': city_select,
-                            'dispute_type_select':dispute_type_select,
-                            'tracking_number':tracking_number,
-                            'description':description
-                        }
-                    }).done(function(data){
-                        $('#UniversalDisputeModal').modal('hide');
-                        if (data.invalid !== undefined) {
-
-                            var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
-
-                            toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-
-                        if(data.success != undefined){
-                            // table.ajax.reload();
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                        }
-                    });
-
-                }
 
 
-            });
+            // $('body').on('click','.tracking',function () {
+            //
+            // })
 
         });
     </script>

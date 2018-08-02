@@ -36,6 +36,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
        Route::get('','Shippers\ShipperDashboardController@orders_index')->name('index');
        Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
        Route::post('search','Shippers\ShipperDashboardController@statistics_search')->name('search');
+       Route::post('cancel','Shippers\ShipperDashboardController@order_cancel')->name('cancel');
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
@@ -403,6 +404,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
     });
 
+    //Reports start
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::prefix('qsr')->name('qsr.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@qsr_list')->name('list');
+        });
+    });
+
+    //Reports end
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');

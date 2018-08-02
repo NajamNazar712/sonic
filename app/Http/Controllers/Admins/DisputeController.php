@@ -58,7 +58,7 @@ class DisputeController extends Controller
 
             })
             ->editColumn('no_of_shipments',function($dispute){
-                return "<a class='font-weight-bold shipment_count' href='#'>{$dispute->no_of_shipments}</a>";
+                return "<a class='font-weight-bold shipment_count' href='javascript:void(0);'>{$dispute->no_of_shipments}</a>";
             })
             ->editColumn('launched_by',function($dispute){
                 if($dispute->rbstatus == 0){
@@ -74,10 +74,10 @@ class DisputeController extends Controller
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>";
                                  if($dispute->status == 0 || $dispute->status == 1) {
-                                     $drop .= "<a href='#' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>                                         
-                                              <a href='#' class='dropdown-item resolve'><i class='ft-check-circle primary'></i> Resolve</a>";
+                                     $drop .= "<a href='javascript:void(0);' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>                                         
+                                              <a href='javascript:void(0);' class='dropdown-item resolve'><i class='ft-check-circle primary'></i> Resolve</a>";
                                  }else{
-                                     $drop .= "<a href='#' class='dropdown-item'><i class='ft-crosshair primary'></i> No Actions</a>";
+                                     $drop .= "<a href='javascript:void(0);' class='dropdown-item'><i class='ft-crosshair primary'></i> No Actions</a>";
                                  }
                                  $drop .= "</div></span>";
                  return $drop;

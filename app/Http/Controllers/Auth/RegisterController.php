@@ -49,8 +49,8 @@ class RegisterController extends Controller
     public function showRegistrationForm()
     {
         $products = Product::all();
-        $city_list = City::all();
-        $pickup_city_list = City::where('pickup',1)->get();
+        $city_list = City::where('status',1)->get();
+        $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
 

@@ -79,7 +79,7 @@ class AdminPickupsController extends Controller
     }
 
     public function pending_index() {
-      $riders = Rider::all(['id', 'name']);
+      $riders = Rider::where('status',1)->select(['id', 'name'])->get();
 
       return view('admin.pickups.pending.index')->with(['riders' => $riders]);
     }

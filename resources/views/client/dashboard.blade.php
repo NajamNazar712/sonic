@@ -16,7 +16,7 @@
         <!-- Active Orders -->
           <div class="row">
               <div class="col">
-                  <div class="card">
+                  <div class="card pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -33,7 +33,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-info">
+                  <div class="card bg-gradient-directional-info pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -49,7 +49,7 @@
                       </div>
                   </div>
               </div><div class="col">
-                  <div class="card bg-gradient-directional-success">
+                  <div class="card bg-gradient-directional-success pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -65,7 +65,7 @@
                       </div>
                   </div>
               </div><div class="col">
-                  <div class="card bg-gradient-directional-warning">
+                  <div class="card bg-gradient-directional-warning pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -82,7 +82,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-danger">
+                  <div class="card bg-gradient-directional-danger pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -113,6 +113,7 @@
                               </div>
                               <div class="col-3">
                                   <select name="graph_destination" class="select2" id="graph_destination">
+                                      {{--<option value="">All</option>--}}
                                 @foreach($cities as $city)
                                       <option value="{{$city->id}}">{{$city->name}}</option>
                                 @endforeach
@@ -129,7 +130,11 @@
           </div>
           <hr>
           <div class="row">
-              <h2>Order Details</h2>
+              <div class="card">
+                  <div class="card-content">
+                      <div class="card-body">
+
+                      <h2>Order Details</h2>
               <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                   <thead>
                   <tr role="row" class="bg-primary white">
@@ -148,11 +153,14 @@
                       <th class="border-primary border-darken-1">COD Amount</th>
                       <th class="border-primary border-darken-1">Product Type</th>
                       <th class="border-primary border-darken-1">Booking Date</th>
+                      <th class="border-primary border-darken-1">Instructions</th>
                       <th class="border-primary border-darken-1">Action</th>
                   </tr>
                   </thead>
               </table>
-
+                 </div>
+              </div>
+          </div>
           </div>
 
       </div>
@@ -306,10 +314,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
            var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
+                max: new Date(old_date_limit),
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
@@ -348,7 +357,8 @@
 
             $('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({
                 width:'100%',
-                placeholder:"Select a Destination"
+                placeholder:"Select a Destination",
+                allowClear:true
             });
             function print(selected_rows) {
                 $.ajax({
@@ -430,6 +440,7 @@
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
                     {data: 'booking_date', name: 'booking_date', class: 'align-middle booking_date'},
+                    {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -472,6 +483,28 @@
                     });
                 }
             });
+
+            $('body').on('click','.cancel_order',function () {
+               var id = parseInt($(this).parents('tr').attr('id'));
+               if(id){
+                   $.ajax({
+                       url: '{!! route('cod.orders.cancel') !!}',
+                       method: 'POST',
+                       data: {
+                           'shipment_id': id,
+                           '_token': '{{ csrf_token() }}'
+                       }
+                   }).done(function (data) {
+                        if(data.status === 1){
+                            table.ajax.reload();
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                   });
+               }
+            });
             $('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
                 var id = parseInt($(this).parent('tr').attr('id'));
 
@@ -513,7 +546,7 @@
                 },
 
                 // Add custom colors
-                color: ['#00000', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
                 // Hirozontal axis
                 xAxis: [{
@@ -523,18 +556,13 @@
                         rotate: 45
                     },
                     data: @json($graph['dates'])
-                    // data: [
-                    //     11,12,13,14,15,16,17
-                    // ]
+
                 }
                 ],
-
                 // Vertical axis
                 yAxis: [{
                     type: 'value'
                 }],
-
-                // Add series
                 // Add series
                 series: [
                     {
@@ -607,7 +635,7 @@
                             legend: {
                                 data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
                             },
-                            color: ['#00000', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                            color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
                             xAxis: [{
                                 type: 'category',
@@ -655,9 +683,9 @@
                             ]
                         };
                         myChart.setOption(updateChartOptions);
-                        setTimeout(function () {
+                        // setTimeout(function () {
                             search_btn.removeAttr('disabled');
-                        },3000);
+                        // },3000);
 
                     }
                 });
@@ -785,7 +813,7 @@
 
                         }
                     });
-                    // console.log('here')
+
                 }
 
 
@@ -793,7 +821,8 @@
             $('#DisputeModal').on('hidden.bs.modal',function (e) {
                 $('#dispute_form')[0].reset();
                 $('#DisputeCreate').removeAttr('disabled');
-                select[0].selectize.clear();
+                select[0].selectize.destroy();
+                $('#dispute_form').validate().resetForm();
                 $('#city_select').val('').trigger('change');
                 $('#dispute_type_select').val('').trigger('change');
             });

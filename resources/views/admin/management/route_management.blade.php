@@ -13,7 +13,7 @@
 
                     <div class="card-header">
                         <span class="font-large-1 card-title">Routes List</span>
-                        <button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRoute" data-toggle="modal">Add Route</button>
+                        {{--<button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRoute" data-toggle="modal">Add Route</button>--}}
 
                         <div class="mt-1">
                             @include('admin.inc.messages')
@@ -50,8 +50,6 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <style>
-        display:inline;
-        }
         table.dataTable {
             font-size: 12px;
         }
@@ -59,7 +57,6 @@
         table.dataTable thead tr th {
             padding-left: 0.5em;
             white-space: normal;
-            word-wrap: break-word;
         }
 
         table.dataTable thead tr th:before,
@@ -83,7 +80,9 @@
             top: 50%;
             text-shadow: none;
         }
-
+        table.dataTable tbody tr td.junction{
+            /*word-break: break-all;*/
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -130,7 +129,17 @@
         $(document).ready(function() {
 
             var table =  $('.datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [{
+                    text: 'Add Route',
+                    className: 'btn btn-primary',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
+                        $('#addRoute').modal('show');
+
+                    }
+
+                }],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
@@ -152,7 +161,7 @@
                     {data: 'junction', name: 'routes.junction', class: 'junction'},
                     {data: 'created_at', name: 'created_at', class: 'created_at'},
                     {data: 'status', name: 'status', class: 'status'},
-                    {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
+                    {data: 'action', name: 'action', class: 'action text-center', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

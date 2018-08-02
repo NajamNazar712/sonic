@@ -1,16 +1,3 @@
-
-{{--/**--}}
- {{--* Created by PhpStorm.--}}
- {{--* User: WaqasTrax--}}
- {{--* Date: 6/1/2018--}}
- {{--* Time: 8:16 AM--}}
- {{--*/--}}
-{{--/**--}}
-{{--* Created by PhpStorm.--}}
-{{--* User: WaqasTrax--}}
-{{--* Date: 5/30/2018--}}
-{{--* Time: 12:00 PM--}}
-{{--*/--}}
 <style>
     textarea#address {
         resize: none;
@@ -24,7 +11,6 @@
         <div class="col">
             <fieldset class="form-group">
                 <select name="city_id" id="city_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    <option value="" selected>Select a City</option>
                     @foreach($cities as $city)
                         <option value="{{$city->id}}">{{$city->name}}</option>
                     @endforeach
@@ -91,17 +77,25 @@
 <script type="text/javascript">
     $(document).ready(function () {
 
-        $('.select2').select2({
-            dropdownParent: $("#addRider")
+        $('#city_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select a city',
+            dropdownParent: $("#addRiderForm")
         });
-
+        $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select a rider',
+            dropdownParent: $("#addRiderForm")
+        });
+        $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select a rider category',
+            dropdownParent: $("#addRiderForm")
+        });
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled','disabled');
 
-        $('#city_list').change(function () {
-
-        });
+        // $('#city_list').change(function () {
+        //
+        // });
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
             var id = $('#city_list').val();

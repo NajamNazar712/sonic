@@ -74,7 +74,11 @@
                     <li><a class="menu-item" href="{{ route('admin.finance.done_payments.index') }}">Done Payments</a></li>
                 </ul>
             </li>
-
+            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Reports</span></a>
+                <ul class="menu-content">
+                    <li><a class="menu-item" href="{{ route('admin.reports.qsr.index') }}">QSR Report</a></li>
+                </ul>
+            </li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Packaging</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{ route('admin.packaging.index') }}">Stock</a></li>

@@ -68,14 +68,16 @@ class AdminDashboardController extends Controller
             $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
             $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
         }
-
+        $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
         // return $cities;
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers]);
     }
     public function statistics_search(Request $request){
+//        return $request;
         $graph = array();
         $destination = $request->destination;
+        $shipper = $request->shipper;
         $current_date = $request->current_date;
         $old_date = $request->old_date;
         $date = $old_date;
@@ -85,25 +87,50 @@ class AdminDashboardController extends Controller
             $date = date('Y-m-d H:i:s', strtotime($date . ' +1 day'));
             $dates[] = $date;
         }
-        foreach ($dates as $this_date) {
-            $comparison_date = $this_date;
-            if($destination == ''){
-                $graph['dates'][] = Carbon::parse($this_date)->format('d M');
-                $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->count();
-                $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[2,3,4])->count();
-                $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
-                $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
-                $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
+
+            if(($destination != '') && ($shipper != '')){
+                foreach ($dates as $this_date) {
+                    $comparison_date = $this_date;
+                    $graph['dates'][] = Carbon::parse($this_date)->format('d M');
+                    $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->count();
+                    $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4])->count();
+                    $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->count();
+                    $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19])->count();
+                    $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46])->count();
+                }
+            }else if(($destination == '') && ($shipper != '')){
+                foreach ($dates as $this_date) {
+                    $comparison_date = $this_date;
+                    $graph['dates'][] = Carbon::parse($this_date)->format('d M');
+                    $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->count();
+                    $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [2, 3, 4])->count();
+                    $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->count();
+                    $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19])->count();
+                    $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46])->count();
+                }
+            }else if(($destination != '') && ($shipper == '')){
+                foreach ($dates as $this_date) {
+                    $comparison_date = $this_date;
+                    $graph['dates'][] = Carbon::parse($this_date)->format('d M');
+                    $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->count();
+                    $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4])->count();
+                    $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->count();
+                    $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19])->count();
+                    $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46])->count();
+                }
             }else{
-                $graph['dates'][] = Carbon::parse($this_date)->format('d M');
-                $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id'=>$destination])->count();
-                $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id'=>$destination])->whereIn('shipper_status_id',[2,3,4])->count();
-                $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id'=>$destination])->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
-                $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id'=>$destination])->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
-                $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id'=>$destination])->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
+                foreach ($dates as $this_date) {
+                    $comparison_date = $this_date;
+                    $graph['dates'][] = Carbon::parse($this_date)->format('d M');
+                    $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->count();
+                    $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [2, 3, 4])->count();
+                    $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->count();
+                    $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19])->count();
+                    $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46])->count();
+                }
             }
 
-        }
+
         return response()->json(['status'=>1,'graph'=>$graph]);
     }
     public function orders_list(Request $request){
@@ -139,13 +166,16 @@ class AdminDashboardController extends Controller
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>";
                 if($shipments->shipper_status_id > 1) {
-                    $drop .= "<a href='#' class='dropdown-item view_charges'><i class='ft-plus-circle primary'></i> View Charges</a>";
+                    $drop .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-plus-circle primary'></i> View Charges</a>";
+                }else{
+                    $drop .= "<a href='javascript:void(0);' class='dropdown-item '><i class='ft-plus-circle primary'></i> No Action</a>";
                 }
-                if($shipments->shipper_status_id == 1){
-                    $drop .= "<a href='#' class='dropdown-item cancel_order'><i class='ft-crosshair primary'></i> Cancel</a>";
+               
+                $drop .= "</div></span>";
+                if($shipments->shipper_status_id != 17){
+
+                    return $drop;
                 }
-                $drop .= "<a href='#' class='dropdown-item dispute_modal'><i class='ft-alert-circle primary'></i> Dispute</a></div></span>";
-                return $drop;
             })
             ->make(true);
     }
@@ -2892,7 +2922,12 @@ class AdminDashboardController extends Controller
 
     }
 
-    public function cityView(){
+    public function cityView(Request $request){
+//        $req = $request->route();
+//        $uri_path = $req->getPath();
+//        $uri_parts = explode('/', $uri_path);
+//        $uri_tail = end($uri_parts);
+//        return $uri_tail;
 //        $hubs = City::where('hub',1)->get();
 //        return $hubs[0]->id;
         return view('admin.management.city_management');
@@ -2967,7 +3002,8 @@ class AdminDashboardController extends Controller
 
     public function updateCity(Request $request,$id){
         if($request->postType == 'city'){
-            $city = City::where('id',$id)->update([
+
+            City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
@@ -2988,7 +3024,7 @@ class AdminDashboardController extends Controller
 
             return redirect()->back()->with('success','City updated successfully');
         }elseif($request->postType == 'hub'){
-            $city = City::where('id',$id)->update([
+            City::where('id',$id)->update([
                 'name'=>$request->cityName,
                 'hub'=>1,
                 'hub_id'=>$id,
@@ -3100,9 +3136,7 @@ class AdminDashboardController extends Controller
 
     public function CityStatusCheck($id){
         $hubs = City::select('name')->where('hub_id',$id)->where('id','!=',$id)->get();
-//        $cities_name = $hubs;
 
-//        return $hubs;
         return response()->json($hubs);
     }
     //route management

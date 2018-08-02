@@ -124,13 +124,14 @@ class ShipperShipmentBookController extends Controller
     public function index() {
       $booking_types = BookingType::all();
       $user = User::with('shipping.city')->find(Auth::id());
-      $cities = City::orderBy('name')->get();
+      $cities = City::where('status',1)->where('pickup',1)->orderBy('name')->get();
+      $consignee_cities = City::where('status',1)->orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_modes = ShippingMode::all();
       $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
       $payment_modes = PaymentMode::all();
 
-      return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes]);
+      return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities'=>$consignee_cities]);
     }
 
     public function store(Request $request) {

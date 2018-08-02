@@ -111,7 +111,7 @@
                             </div>
                             <div class="row justify-content-center">
                                 <div class="col-4 form-group">
-                                    <input type="text" name="invoice_number" id="send_stock_invoice" class="form-control" placeholder="Cargo Number *" data-rule-required="true" data-msg-required="This field is required">
+                                    <input type="text" name="invoice_number" id="send_stock_invoice" class="form-control numeric" placeholder="Cargo Number *" data-rule-required="true" data-msg-required="This field is required">
                                 </div>
                             </div>
                             <div class="row">
@@ -271,7 +271,7 @@
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false,
-                'min': 1,
+                'min': 0,
                 'max': 10000
             });
 
@@ -455,88 +455,6 @@
 
             });
 
-            {{--$('body').on('click','.shipment_count',function () {--}}
-                {{--var dispute_id = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--if(dispute_id != ''){--}}
-                    {{--$.ajax({--}}
-                        {{--url: '{!! route('admin.dispute.get.shipments') !!}',--}}
-                        {{--method: 'POST',--}}
-                        {{--data: {--}}
-                            {{--'id': dispute_id,--}}
-                            {{--'_token': '{{ csrf_token() }}'--}}
-                        {{--}--}}
-                    {{--}).done(function (data) {--}}
-                        {{--if(data.status == 1){--}}
-                            {{--// console.log(data.shipments);--}}
-                            {{--var shipment = '';--}}
-                            {{--var i = 1;--}}
-                            {{--$.each(data.shipments,function (key,value) {--}}
-                                {{--shipment += "<span class='mb-1 block'><b>"+i+':'+"</b>&emsp;<u>"+value.tracking_number+"</u></span>";--}}
-                                {{--i++;--}}
-                            {{--});--}}
-                            {{--$('#ShipmentsModal').modal('show');--}}
-
-                            {{--$('.modal-body.dispute_shipments').html(shipment);--}}
-                            {{--// var shipment = "<p></p>";--}}
-                        {{--}else{--}}
-                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-                        {{--}--}}
-                    {{--})--}}
-                {{--}--}}
-            {{--});--}}
-            {{--$('body').on('click','.resolve',function () {--}}
-                {{--var disputeId = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--$('#ResolveModal').modal('show');--}}
-                {{--$('#disputeId').val(disputeId);--}}
-            {{--});--}}
-            {{--$('body').on('click','.dispute-resolve',function () {--}}
-                {{--var resolve_id = $('#disputeId').val();--}}
-                {{--// console.log(resolve_id);--}}
-                {{--if(resolve_id !== '') {--}}
-                    {{--$.ajax({--}}
-                        {{--url: '{!! route('admin.dispute.resolve') !!}',--}}
-                        {{--method: 'POST',--}}
-                        {{--data: {--}}
-                            {{--'id': resolve_id,--}}
-                            {{--'_token': '{{ csrf_token() }}'--}}
-                        {{--}--}}
-                    {{--}).done(function (data) {--}}
-                        {{--$('#ResolveModal').modal('hide');--}}
-                        {{--if(data.status === 1){--}}
-                            {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                            {{--table.ajax.reload();--}}
-                        {{--}else{--}}
-                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-                        {{--}--}}
-                    {{--});--}}
-                {{--}--}}
-            {{--});--}}
-            {{--$('body').on('click','.update',function(){--}}
-                {{--var disputeId = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--// console.log(disputeId)--}}
-                {{--if(disputeId !== ''){--}}
-                    {{--$.ajax({--}}
-                        {{--url: '{!! route('admin.dispute.update') !!}',--}}
-                        {{--method: 'POST',--}}
-                        {{--data: {--}}
-                            {{--'id': disputeId,--}}
-                            {{--'_token': '{{ csrf_token() }}'--}}
-                        {{--}--}}
-                    {{--}).done(function (data) {--}}
-
-                        {{--if(data.status === 1){--}}
-                            {{--$('.update_dispute_body').html(data.view);--}}
-                            {{--$('#DisputeUpdateModal').modal('show');--}}
-
-                        {{--}else{--}}
-                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-                        {{--}--}}
-                    {{--});--}}
-                {{--}--}}
-            {{--});--}}
 
         });
 
