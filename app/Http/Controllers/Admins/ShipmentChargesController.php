@@ -12,6 +12,9 @@ use App\Http\Models\InsuranceCharge;
 use App\Http\Models\ReturnCharge;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\BookingTypeCharges;
+use App\Http\Models\DiscountCharge;
+
+use Carbon\Carbon;
 
 class ShipmentChargesController extends Controller
 {
@@ -23,10 +26,23 @@ class ShipmentChargesController extends Controller
         if ($rate_status->exists()) {
             $weight = $shipment->actual_weight;
 
-            $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight)->orderBy('id', 'desc');
+            $weight_charge = WeightCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->where('range_up', '<=', $weight)->where('range_down', '>=', $weight);
 
             if ($weight_charge->exists()) {
                 $weight_charge = $weight_charge->first();
+
+                $today = Carbon::today();
+
+                $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+                if ($discount_charge->exists()) {
+                    $discount_charge = $discount_charge->first();
+
+                    $discount = $discount_charge->weight;
+                }
+                else {
+                    $discount = 0;
+                }
 
                 if ($shipment->shipping_mode_id == 4) {
                     if ($shipment->same_day_timing_id == 1) {
@@ -53,7 +69,12 @@ class ShipmentChargesController extends Controller
                         $charges = $weight_charge->national_or_sameday;
                     }
 
-                    $shipment->weight_charges = $charges;
+                    if ($charges < $discount) {
+                        $shipment->weight_charges = $charges;
+                    }
+                    else {
+                        $shipment->weight_charges = $charges - $discount;
+                    }
 
                     $shipment->save();
                 }
@@ -101,7 +122,12 @@ class ShipmentChargesController extends Controller
                         }
                     }
 
-                    $shipment->weight_charges = $charges;
+                    if ($charges < $discount) {
+                        $shipment->weight_charges = $charges;
+                    }
+                    else {
+                        $shipment->weight_charges = $charges - $discount;
+                    }
 
                     $shipment->save();
                 }
@@ -123,13 +149,33 @@ class ShipmentChargesController extends Controller
                 if ($cash_handling_charge->exists()) {
                     $cash_handling_charge = $cash_handling_charge->first();
 
+                    $today = Carbon::today();
+
+                    $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+                    if ($discount_charge->exists()) {
+                        $discount_charge = $discount_charge->first();
+
+                        $discount = $discount_charge->cash;
+                    }
+                    else {
+                        $discount = 0;
+                    }
+
                     $charges = $cash_handling_charge->charges;
 
                     if (strpos($charges, '%') !== FALSE) {
-                        $shipment->cash_handling_charges = (floatval(str_replace('%', '', $charges)) / 100) * $amount;
+                        $charges = (floatval(str_replace('%', '', $charges)) / 100) * $amount;
                     }
                     else {
-                        $shipment->cash_handling_charges = floatval($charges);
+                        $charges = floatval($charges);
+                    }
+
+                    if ($charges < $discount) {
+                        $shipment->cash_handling_charges = $charges;
+                    }
+                    else {
+                        $shipment->cash_handling_charges = $charges - $discount;
                     }
 
                     $shipment->save();
@@ -156,6 +202,19 @@ class ShipmentChargesController extends Controller
                         if ($insurance_charge->exists()) {
                             $insurance_charge = $insurance_charge->first();
 
+                            $today = Carbon::today();
+
+                            $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+                            if ($discount_charge->exists()) {
+                                $discount_charge = $discount_charge->first();
+
+                                $discount = $discount_charge->insurance;
+                            }
+                            else {
+                                $discount = 0;
+                            }
+
                             $item_charges = $insurance_charge->charges;
 
                             if (strpos($item_charges, '%') !== FALSE) {
@@ -169,7 +228,12 @@ class ShipmentChargesController extends Controller
                 }
 
                 if ($charges != 0) {
-                    $shipment->insurance_charges = $charges;
+                    if ($charges < $discount) {
+                        $shipment->insurance_charges = $charges;
+                    }
+                    else {
+                        $shipment->insurance_charges = $charges - $discount;
+                    }
 
                     $shipment->save();
                 }
@@ -185,14 +249,34 @@ class ShipmentChargesController extends Controller
         if ($rate_status->exists()) {
             $return_charge = ReturnCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id);
 
+            $today = Carbon::today();
+
+            $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+            if ($discount_charge->exists()) {
+                $discount_charge = $discount_charge->first();
+
+                $discount = $discount_charge->return;
+            }
+            else {
+                $discount = 0;
+            }
+
             if ($return_charge->exists()) {
                 $return_charge = $return_charge->first();
 
                 if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
-                    $shipment->return_charges = $return_charge->local;
+                    $charges = $return_charge->local;
                 }
                 else {
-                    $shipment->return_charges = $return_charge->national;
+                    $charges = $return_charge->national;
+                }
+
+                if ($charges < $discount) {
+                    $shipment->return_charges = $charges;
+                }
+                else {
+                    $shipment->return_charges = $charges - $discount;
                 }
 
                 $shipment->save();
@@ -235,6 +319,19 @@ class ShipmentChargesController extends Controller
             if ($weight_charge->exists()) {
                 $weight_charge = $weight_charge->first();
 
+                $today = Carbon::today();
+
+                $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+                if ($discount_charge->exists()) {
+                    $discount_charge = $discount_charge->first();
+
+                    $discount = $discount_charge->weight;
+                }
+                else {
+                    $discount = 0;
+                }
+
                 if ($shipment->shipping_mode_id == 4) {
                     if ($shipment->same_day_timing_id == 1) {
                         $type_of_charges = 0;
@@ -260,7 +357,12 @@ class ShipmentChargesController extends Controller
                         $charges = $weight_charge->national_or_sameday;
                     }
 
-                    $shipment->replacement_charges = ($charges * $replacement_multiplier);
+                    if ($charges < $discount) {
+                        $shipment->replacement_charges = ($charges * $replacement_multiplier);
+                    }
+                    else {
+                        $shipment->replacement_charges = ($charges * $replacement_multiplier) - $discount;
+                    }
 
                     $shipment->save();
                 }
@@ -308,7 +410,12 @@ class ShipmentChargesController extends Controller
                         }
                     }
 
-                    $shipment->replacement_charges = ($charges * $replacement_multiplier);
+                    if ($charges < $discount) {
+                        $shipment->replacement_charges = ($charges * $replacement_multiplier);
+                    }
+                    else {
+                        $shipment->replacement_charges = ($charges * $replacement_multiplier) - $discount;
+                    }
 
                     $shipment->save();
                 }
@@ -324,9 +431,29 @@ class ShipmentChargesController extends Controller
         if ($booking_type_charge->exists()) {
             $booking_type_charge = $booking_type_charge->first();
 
+            $today = Carbon::today();
+
+            $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->where('shipping_mode_id', $shipment->shipping_mode_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+            if ($discount_charge->exists()) {
+                $discount_charge = $discount_charge->first();
+
+                $discount = $discount_charge->weight;
+            }
+            else {
+                $discount = 0;
+            }
+
             $try_and_buy_multiplier = ($booking_type_charge->try_and_buy_charges / 100);
 
-            $shipment->try_and_buy_charges = ($shipment->weight_charges * $try_and_buy_multiplier);
+            $charges = ($shipment->weight_charges * $try_and_buy_multiplier);
+
+            if ($charges < $discount) {
+                $shipment->try_and_buy_charges = $charges;
+            }
+            else {
+                $shipment->try_and_buy_charges = $charges - $discount;
+            }
 
             $shipment->save();
         }
