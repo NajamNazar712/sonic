@@ -344,7 +344,7 @@ class AdminCargoController extends Controller
       ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
       ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
       ->select('cargo_consignments.id' , 'oc.name as origin', 'dc.name as destination', 'hc.name as hub', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status')
-      ->whereIn('cargo_consignments.status_id', [1, 2]);
+      ->whereIn('cargo_consignments.status_id', [1, 2, 4]);
 
       $datatables = Datatables::of($cargo_consignments)
       ->editColumn('transit_at', function($cargo_consignment) {
@@ -668,6 +668,12 @@ class AdminCargoController extends Controller
         $cargo_consignment_junction_receival->receiver_id = Auth::id();
 
         $cargo_consignment_junction_receival->save();
+
+        $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
+
+        $cargo_consignment->status = 2;
+
+        $cargo_consignment->save();
       }
 
       return ['status' => 0, 'success' => 'Cargo(s) has been received at Junction'];
@@ -765,7 +771,7 @@ class AdminCargoController extends Controller
         $cargo_consignment = CargoConsignment::find($request->get('cargo_number'));
 
         if ($cargo_consignment) {
-          if (in_array($cargo_consignment->status_id, [1, 2])) {
+          if (in_array($cargo_consignment->status_id, [1, 2, 4])) {
             return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
           }
           else {
@@ -783,7 +789,7 @@ class AdminCargoController extends Controller
 
     public function receive_index() {
       if (session('cargo_consignment_id')) {
-        $total = CargoConsignmentShipment::where('cargo_consignment_id', session('cargo_consignment_id'))->count();
+        $total = CargoConsignmentShipment::where('cargo_consignment_id', session('cargo_consignment_id'))->where('status', 0)->count();
 
         return view('admin.cargo.receive')->with('total', $total);
       }
@@ -804,21 +810,28 @@ class AdminCargoController extends Controller
           $cargo_consignment_shipment = $cargo_consignment_shipment->where('cargo_consignment_id', $request->cargo_consignment_id);
 
           if ($cargo_consignment_shipment->exists()) {
-            $cargo_consignment_shipment = $cargo_consignment_shipment->first();
+            $cargo_consignment_shipment = $cargo_consignment_shipment->where('status', 0);
 
-            $details = array();
+            if ($cargo_consignment_shipment->exists()) {
+              $cargo_consignment_shipment = $cargo_consignment_shipment->first();
 
-            $details['id'] = $shipment->id;
-            $details['tracking_number'] = $shipment->tracking_number;
-            $details['origin'] = $shipment->pickup_address->city->name;
-            $details['destination'] = $shipment->consignee_city->name;
-            $details['hub'] = City::find($shipment->consignee_city->hub_id)->name;
-            $details['consignee'] = $shipment->consignee_name;
-            $details['amount'] = $shipment->amount;
-            $details['shipping_mode'] = $shipment->shipping_mode->mode;
-            $details['service_type'] = $shipment->booking_type->booking_type;
+              $details = array();
 
-            return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+              $details['id'] = $shipment->id;
+              $details['tracking_number'] = $shipment->tracking_number;
+              $details['origin'] = $shipment->pickup_address->city->name;
+              $details['destination'] = $shipment->consignee_city->name;
+              $details['hub'] = City::find($shipment->consignee_city->hub_id)->name;
+              $details['consignee'] = $shipment->consignee_name;
+              $details['amount'] = $shipment->amount;
+              $details['shipping_mode'] = $shipment->shipping_mode->mode;
+              $details['service_type'] = $shipment->booking_type->booking_type;
+
+              return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+            }
+            else {
+              return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been Received'];
+            }
           }
           else {
             return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to current Cargo Number'];
@@ -834,7 +847,7 @@ class AdminCargoController extends Controller
     }
 
     public function receive_short_received(Request $request) {
-      $cargo_consignment_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $request->input('cargo_consignment_id'));
+      $cargo_consignment_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $request->input('cargo_consignment_id'))->where('status', 0);
 
       if ($cargo_consignment_shipments->count() != count($request->input('shipment_ids'))) {
         $cargo_consignment_shipment_ids = $cargo_consignment_shipments->pluck('shipment_id')->toArray();
