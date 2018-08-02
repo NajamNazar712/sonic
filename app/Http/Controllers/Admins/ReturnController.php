@@ -688,13 +688,20 @@ class ReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id'])
             ->where('return_notes.id',$request->id)->where('dns.status',0);
 
         return Datatables::of($deliveries)
 
             ->addColumn('status', function ($deliveries) {
-                $where = array(24,25,29,31,35,38);
+
+                if($deliveries->booking_type_id == 1){
+                    $where = array(24,25);
+                }else if($deliveries->booking_type_id == 2){
+                    $where = array(29,31);
+                }else if($deliveries->booking_type_id == 3){
+                    $where = array(35,38);
+                }
                 $statuses = ShipmentStatus::whereIn('id',$where)->get();
                 $drops = '';
                 foreach ($statuses as $status){
@@ -738,6 +745,7 @@ class ReturnController extends Controller
         $return_note_id = $request->return_note_id;
         if($return_note_id != '') {
             foreach ($shipments as $shipment) {
+                $reasonId = "reason_drop.$shipment";
                 $parcel = Shipment::where('id',$shipment)->first();
 //                if($parcel->booking_type_id == 1){
 //
@@ -750,7 +758,7 @@ class ReturnController extends Controller
                     ShipmentsJourney::create([
                         'shipment_id'=>$shipment,
                         'shipper_status_id'=>$request->status_drop[$shipment],
-                        'status_reason_id'=>$request->reason_drop[$shipment],
+                        'status_reason_id'=>($request->has($reasonId)? $request->reason_drop[$shipment]:null),
                         'remarks'=>$request->remarks[$shipment],
                         'admin_id'=>Auth::id()
                     ]);
@@ -760,7 +768,7 @@ class ReturnController extends Controller
                         'shipment_id'=>$shipment,
                         'shipper_status_id'=>$request->status_drop[$shipment],
                         'consignee_status_id'=>$request->status_drop[$shipment],
-                        'status_reason_id'=>$request->reason_drop[$shipment],
+                        'status_reason_id'=>($request->has($reasonId)? $request->reason_drop[$shipment]:null),
                         'remarks'=>$request->remarks[$shipment],
                         'admin_id'=>Auth::id()
                     ]);
@@ -773,7 +781,7 @@ class ReturnController extends Controller
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$return_note_id,'status'=>0])->count();
             if($shipment_status == 0){
-                ReturnNote::where('id',$return_note_id)->update(['status'=>1]);
+                ReturnNote::where('id',$return_note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
             }
 
             NotificationsController::send(15, $return_note_id);
