@@ -14,6 +14,7 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Dispute;
+use App\Http\Models\DonePayment;
 
 use GuzzleHttp\Client;
 
@@ -1096,6 +1097,238 @@ class NotificationsController extends Controller
             self::email($subject, $body, $to);
           }
           else if ($id == 20) {
+            $possible_fields = ['consignee_name', 'consignee_city', 'order_id', 'estimated_weight', 'actual_weight', 'tracking_number', 'amount', 'charges', 'gst', 'payable'];
+
+            $present_fields = array();
+
+            $first_field = NULL;
+
+            $position = NULL;
+
+            foreach ($possible_fields as $field) {
+              $new_position = strpos($body, '[' . $field . ']');
+
+              if ($new_position !== FALSE) {
+                if ($position == NULL) {
+                  $present_fields[] = $field;
+
+                  $first_field = $field;
+                }
+                else if ($new_position > $position) {
+                  $present_fields[] = $field;
+                }
+                else {
+                  array_unshift($present_fields, $field);
+                }
+
+                $position = $new_position;
+              }
+            }
+
+            $done_payment = DonePayment::find($reference_1_id);
+
+            $shipper = User::find($done_payment->user_id);
+
+            if (strpos($subject, '[company_name]') !== FALSE) {
+              $subject = str_replace('[company_name]', $shipper->name, $subject);
+            }
+
+            if (strpos($body, '[company_name]') !== FALSE) {
+              $body = str_replace('[company_name]', $shipper->name, $body);
+            }
+
+            if (strpos($subject, '[city]') !== FALSE) {
+              $subject = str_replace('[city]', $shipper->city->name, $subject);
+            }
+
+            if (strpos($body, '[city]') !== FALSE) {
+              $body = str_replace('[city]', $shipper->city->name, $body);
+            }
+
+            if (strpos($subject, '[bank]') !== FALSE) {
+              $subject = str_replace('[bank]', $shipper->bank->bank_name, $subject);
+            }
+
+            if (strpos($body, '[bank]') !== FALSE) {
+              $body = str_replace('[bank]', $shipper->bank->bank_name, $body);
+            }
+
+            if (strpos($subject, '[bank_branch]') !== FALSE) {
+              $subject = str_replace('[bank_branch]', $shipper->bank->bank_branch, $subject);
+            }
+
+            if (strpos($body, '[bank_branch]') !== FALSE) {
+              $body = str_replace('[bank_branch]', $shipper->bank->bank_branch, $body);
+            }
+
+            if (strpos($subject, '[account_number]') !== FALSE) {
+              $subject = str_replace('[account_number]', $shipper->bank->account_no, $subject);
+            }
+
+            if (strpos($body, '[account_number]') !== FALSE) {
+              $body = str_replace('[account_number]', $shipper->bank->account_no, $body);
+            }
+
+            if (strpos($subject, '[account_title]') !== FALSE) {
+              $subject = str_replace('[account_title]', $shipper->bank->account_title, $subject);
+            }
+
+            if (strpos($body, '[account_title]') !== FALSE) {
+              $body = str_replace('[account_title]', $shipper->bank->account_title, $body);
+            }
+
+            if (strpos($subject, '[iban]') !== FALSE) {
+              $subject = str_replace('[iban]', $shipper->bank->iban, $subject);
+            }
+
+            if (strpos($body, '[iban]') !== FALSE) {
+              $body = str_replace('[iban]', $shipper->bank->iban, $body);
+            }
+
+            if (strpos($subject, '[account_city]') !== FALSE) {
+              $subject = str_replace('[account_city]', $shipper->bank->city->name, $subject);
+            }
+
+            if (strpos($body, '[account_city]') !== FALSE) {
+              $body = str_replace('[account_city]', $shipper->bank->city->name, $body);
+            }
+
+            if (strpos($subject, '[payment_mode]') !== FALSE) {
+              $subject = str_replace('[payment_mode]', $shipper->bank->payment_mode, $subject);
+            }
+
+            if (strpos($body, '[payment_mode]') !== FALSE) {
+              $body = str_replace('[payment_mode]', $shipper->bank->payment_mode, $body);
+            }
+
+            if (strpos($subject, '[payment_cycle]') !== FALSE) {
+              $subject = str_replace('[payment_cycle]', $shipper->bank->payment_cycle, $subject);
+            }
+
+            if (strpos($body, '[account_number]') !== FALSE) {
+              $body = str_replace('[payment_cycle]', $shipper->bank->payment_cycle, $body);
+            }
+
+            if (strpos($subject, '[payment_done_id]') !== FALSE) {
+              $subject = str_replace('[payment_done_id]', $done_payment->id, $subject);
+            }
+
+            if (strpos($body, '[payment_done_id]') !== FALSE) {
+              $body = str_replace('[payment_done_id]', $done_payment->id, $body);
+            }
+
+            if (strpos($subject, '[payment_done_at]') !== FALSE) {
+              $subject = str_replace('[payment_done_at]', $done_payment->created_at, $subject);
+            }
+
+            if (strpos($body, '[payment_done_at]') !== FALSE) {
+              $body = str_replace('[payment_done_at]', $done_payment->created_at, $body);
+            }
+
+            if (strpos($subject, '[total_shipments]') !== FALSE) {
+              $subject = str_replace('[total_shipments]', $done_payment->total_shipments, $subject);
+            }
+
+            if (strpos($body, '[total_shipments]') !== FALSE) {
+              $body = str_replace('[total_shipments]', $done_payment->total_shipments, $body);
+            }
+
+            if (strpos($subject, '[delivered_shipments]') !== FALSE) {
+              $subject = str_replace('[delivered_shipments]', $done_payment->delivered_shipments, $subject);
+            }
+
+            if (strpos($body, '[delivered_shipments]') !== FALSE) {
+              $body = str_replace('[delivered_shipments]', $done_payment->delivered_shipments, $body);
+            }
+
+            if (strpos($subject, '[returned_shipments]') !== FALSE) {
+              $subject = str_replace('[returned_shipments]', $done_payment->returned_shipments, $subject);
+            }
+
+            if (strpos($body, '[returned_shipments]') !== FALSE) {
+              $body = str_replace('[returned_shipments]', $done_payment->returned_shipments, $body);
+            }
+
+            if (strpos($subject, '[adjusted_shipments]') !== FALSE) {
+              $subject = str_replace('[adjusted_shipments]', $done_payment->adjusted_shipments, $subject);
+            }
+
+            if (strpos($body, '[adjusted_shipments]') !== FALSE) {
+              $body = str_replace('[adjusted_shipments]', $done_payment->adjusted_shipments, $body);
+            }
+
+            $to = $shipper->email;
+
+            $shipment_details = '';
+
+            $total_amount = 0;
+            $total_charges = 0;
+            $total_gst = 0;
+            $total_payable = 0;
+
+            foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+              $shipment = $done_payment_shipment;
+
+              foreach ($present_fields as $field) {
+                if (in_array($field, ['amount', 'charges', 'gst', 'payable']) {
+                  $shipment_details .= $done_payment_shipment[$field] . ', ';
+                }
+                else {
+                  $shipment_details .= $shipment[$field] . ', ';
+                }
+              }
+
+              $shipment_details = substr($shipment_details, 0, -2) . PHP_EOL;
+
+              $total_amount += $done_payment_shipment->amount;
+              $total_charges += $done_payment_shipment->charges;
+              $total_gst += $done_payment_shipment->gst;
+              $total_payable += $done_payment_shipment->payable;
+            }
+
+            foreach ($present_fields as $field) {
+              if ($field != $first_field) {
+                $body = str_replace('[' . $field . ']', '', $body);
+              }
+            }
+
+            $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
+
+            if (strpos($subject, '[total_amount]') !== FALSE) {
+              $subject = str_replace('[total_amount]', $total_amount, $subject);
+            }
+
+            if (strpos($body, '[total_amount]') !== FALSE) {
+              $body = str_replace('[total_amount]', $total_amount, $body);
+            }
+
+            if (strpos($subject, '[total_charges]') !== FALSE) {
+              $subject = str_replace('[total_charges]', $total_charges, $subject);
+            }
+
+            if (strpos($body, '[total_charges]') !== FALSE) {
+              $body = str_replace('[total_charges]', $total_charges, $body);
+            }
+
+            if (strpos($subject, '[total_gst]') !== FALSE) {
+              $subject = str_replace('[total_gst]', $total_gst, $subject);
+            }
+
+            if (strpos($body, '[total_gst]') !== FALSE) {
+              $body = str_replace('[total_gst]', $total_gst, $body);
+            }
+
+            if (strpos($subject, '[total_payable]') !== FALSE) {
+              $subject = str_replace('[total_payable]', $total_payable, $subject);
+            }
+
+            if (strpos($body, '[total_payable]') !== FALSE) {
+              $body = str_replace('[total_payable]', $total_payable, $body);
+            }
+
+            self::email($subject, $body, $to);
+          }
+          else if ($id == 21) {
             $fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
 
             $shipment = Shipment::find($reference_1_id);

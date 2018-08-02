@@ -27,6 +27,7 @@
 										<th class="border-primary border-darken-1">Total Shipments</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Returned Shipments</th>
+										<th class="border-primary border-darken-1">Adjusted Shipments</th>
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
@@ -69,6 +70,25 @@
 									<div class="modal-content">
 										<div class="modal-header">
 											<h4 class="modal-title" id="returned_shipments_title">Returned Shipment(s)</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
+
+							<div class="modal fade" id="adjusted_shipments" role="dialog" aria-labelledby="adjusted_shipments_title" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="adjusted_shipments_title">Adjusted Shipment(s)</h4>
 
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">×</span>
@@ -316,6 +336,7 @@
 					{data:'total_shipments', name: 'pending_payments.total_shipments', class: 'align-middle text-center total_shipments'},
 					{data:'delivered_shipments', name: 'pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'pending_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
+					{data:'adjusted_shipments', name: 'pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
 					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount'},
 					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
 					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
@@ -501,6 +522,34 @@
 						$('#returned_shipments .modal-body').html(tracking_numbers);
 
 						$('#returned_shipments').modal('show');
+					}
+				});
+			});
+
+			$('#datatable tbody').on('click', 'tr td.adjusted_shipments button', function() {
+				var id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#adjusted_shipments .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.finance.make_payments.adjusted_shipments') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'id': id
+					}
+				})
+				.done(function(data) {
+					if (data) {
+						var tracking_numbers = '';
+
+						$.each(data, function(index, tracking_number) {
+							tracking_numbers += tracking_number + '<br/>';
+						});
+
+						$('#adjusted_shipments .modal-body').html(tracking_numbers);
+
+						$('#adjusted_shipments').modal('show');
 					}
 				});
 			});
