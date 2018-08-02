@@ -288,7 +288,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_resolved(Request $request) {
-        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->where('status', 6);
+        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->where('status', 7);
 
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
@@ -305,7 +305,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_shipments_adjust_in_payment(Request $request) {
-        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->where('status', 6);
+        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->where('status', 7);
 
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
