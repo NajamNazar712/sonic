@@ -1270,7 +1270,7 @@ class NotificationsController extends Controller
               $shipment = $done_payment_shipment;
 
               foreach ($present_fields as $field) {
-                if (in_array($field, ['amount', 'charges', 'gst', 'payable']) {
+                if (in_array($field, ['amount', 'charges', 'gst', 'payable'])) {
                   $shipment_details .= $done_payment_shipment[$field] . ', ';
                 }
                 else {

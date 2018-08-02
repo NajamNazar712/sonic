@@ -350,6 +350,11 @@ class AdminFinanceController extends Controller
     public static function add_payment($shipment_id, $type) {
         $shipment = Shipment::find($shipment_id);
 
+        $amount = $shipment->amount;
+        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
+        $gst = $charges * 0.13; //Should be Dynamic
+        $payable = $amount - ($charges + $gst);
+
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
         if ($pending_payment->exists()) {
@@ -374,6 +379,10 @@ class AdminFinanceController extends Controller
                 $pending_payment_shipment->pending_payment_id = $pending_payment->id;
                 $pending_payment_shipment->shipment_id = $shipment_id;
                 $pending_payment_shipment->type = $type;
+                $pending_payment_shipment->amount = $amount;
+                $pending_payment_shipment->charges = $charges;
+                $pending_payment_shipment->gst = $gst;
+                $pending_payment_shipment->payable = $payable;
 
                 $pending_payment_shipment->save();
             }
@@ -422,6 +431,10 @@ class AdminFinanceController extends Controller
             $pending_payment_shipment->pending_payment_id = $pending_payment->id;
             $pending_payment_shipment->shipment_id = $shipment_id;
             $pending_payment_shipment->type = $type;
+            $pending_payment_shipment->amount = $amount;
+            $pending_payment_shipment->charges = $charges;
+            $pending_payment_shipment->gst = $gst;
+            $pending_payment_shipment->payable = $payable;
 
             $pending_payment_shipment->save();
         }

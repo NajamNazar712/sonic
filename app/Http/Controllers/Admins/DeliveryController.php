@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
@@ -1007,6 +1008,14 @@ class DeliveryController extends Controller
                         }
                         else {
                             if (in_array($shipper_status_id->shipper_status_id, [14, 16, 30, 36, 37])) {
+                                $parcel = Shipment::find($shipment);
+                                if ($parcel->booking_type_id == 2) {
+                                    ShipmentChargesController::replacement($shipment);
+                                }
+                                else if ($parcel->booking_type_id == 3) {
+                                    ShipmentChargesController::try_and_buy($shipment);
+                                }
+
                                 AdminFinanceController::add_payment($shipment, 0);
                             }
                         }
