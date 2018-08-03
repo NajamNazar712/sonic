@@ -18,14 +18,15 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3">
                                 <thead>
                                     <tr class="bg-primary white">
-                                        <th>Account ID</th>
-                                        <th>Company Name</th>
-                                        <th>City Name</th>
-                                        <th>Contact Person</th>
-                                        <th>Phone Number</th>
-                                        <th>Address</th>
-                                        <th>Email Address</th>
-                                        <th>Action</th>
+                                        <th class="border-primary border-darken-1">Account ID</th>
+                                        <th class="border-primary border-darken-1">Company Name</th>
+                                        <th class="border-primary border-darken-1">City Name</th>
+                                        <th class="border-primary border-darken-1">Contact Person</th>
+                                        <th class="border-primary border-darken-1">Phone Number</th>
+                                        <th class="border-primary border-darken-1">Address</th>
+                                        <th class="border-primary border-darken-1">Email Address</th>
+                                        <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -39,6 +40,8 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
     <style>
         table.dataTable {
             font-size: 12px;
@@ -89,9 +92,11 @@
 @endsection
 
 @section('js')
-<script type="text/javascript">
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
+    <script type="text/javascript">
     $(document).ready(function() {
-        $('#datatable').DataTable({
+       var table = $('#datatable').DataTable({
             dom: 'ltipr',
             fixedHeader: {
                 header: true,
@@ -103,6 +108,7 @@
             pagingType: 'full_numbers',
             processing: true,
             serverSide: true,
+            rowId: 'id',
             ajax: '{{ route('admin.accounts.active.ajax') }}',
             columns: [
                 {data: 'id', name: 'id', class: 'account_id'},
@@ -112,6 +118,7 @@
                 {data: 'phone', name: 'phone', class: 'phone'},
                 {data: 'address', name: 'address', class: 'address'},
                 {data: 'email', name: 'email', class: 'email'},
+                {data: 'status', name: 'status', class: 'status'},
                 {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
             ],
             initComplete: function() {
@@ -136,6 +143,75 @@
                             current.val(column.search());
                         }
                     }
+                });
+            }
+        });
+        $('body').on('click','a.blacklist',function () {
+            var id = $(this).parents('tr').attr('id');
+            var status = $(this).attr('rel');
+            if(id){
+                $.ajax({
+                    url: '{!! route('admin.accounts.status.block') !!}',
+                    method: 'POST',
+                    data: {
+                        'id':id,
+                        'status':status,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        table.ajax.reload();
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+
+                });
+            }
+        });
+        $('body').on('click','a.userenable',function () {
+            var status  = "enable";
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+                $.ajax({
+                    url: '{!! route('admin.accounts.status.change') !!}',
+                    method: 'POST',
+                    data: {
+                        'id':id,
+                        'status':status,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        table.ajax.reload();
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+
+                });
+            }
+        });
+        $('body').on('click','a.userdisable',function () {
+            var status  = "disable";
+            var id = $(this).parents('tr').attr('id');
+            if(id){
+                $.ajax({
+                    url: '{!! route('admin.accounts.status.change') !!}',
+                    method: 'POST',
+                    data: {
+                        'id':id,
+                        'status':status,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status == 1){
+                        table.ajax.reload();
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }
+
                 });
             }
         });

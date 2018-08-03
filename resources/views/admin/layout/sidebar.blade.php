@@ -5,12 +5,12 @@
 
 
             <!-- official -->
-            <li class=" nav-item"><a href="{{route('admin.dashboard')}}"><i class="la la-home"></i><span class="menu-title">Dashboard</span></a></li>
+{{--            <li class=" nav-item"><a href="{{route('admin.dashboard')}}"><i class="la la-home"></i><span class="menu-title">Dashboard</span></a></li>--}}
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Order Management</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{route('admin.orders.index')}}">Order Management</a>
                     </li>
-                    <li><a class="menu-item" href="/admin/sheet/receiving">Booked Receiving Sheets</a>
+                    {{--<li><a class="menu-item" href="/admin/sheet/receiving">Booked Receiving Sheets</a>--}}
                     </li>
 
                 </ul>

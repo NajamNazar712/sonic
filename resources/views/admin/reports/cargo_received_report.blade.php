@@ -100,8 +100,8 @@
                         <th class="border-primary border-darken-1">Transit Date</th>
                         <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1">Received Date</th>
-                        <th class="border-primary border-darken-1">Received Shipment(s)</th>
-                        <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
+                        {{--<th class="border-primary border-darken-1">Received Shipment(s)</th>--}}
+                        {{--<th class="border-primary border-darken-1">Short Received Shipment(s)</th>--}}
                     </tr>
                     </thead>
                 </table>
@@ -147,7 +147,7 @@
             top: 50%;
             text-shadow: none;
         }
-        a.btn.btn-secondary.buttons-html5 {
+        a.btn.btn-secondary {
             border-radius: 20px;
             background: #666ee8;
         }
@@ -229,7 +229,8 @@
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+                buttons: [
+                    {
                     extend: 'excelHtml5',
                     title: 'Received Cargo Report',
                     exportOptions: {
@@ -240,7 +241,20 @@
                             }
                         }
                     }
-                }],
+                    },
+                    {
+                    extend: 'pdfHtml5',
+                    title: 'Received Cargo Report',
+                    exportOptions: {
+                        columns: ':visible',
+                        format: {
+                            body: function ( data, row, column, node ) {
+                                return (column == 0)? index_column+=1:data;
+                            }
+                        }
+                    }
+                    },
+                ],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
@@ -274,9 +288,9 @@
                     {data: 'transit_by', name: 'si.name', class: 'align-middle transit_by'},
                     {data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
                     {data: 'received_by', name: 'ri.name', class: 'align-middle received_by'},
-                    {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'},
-                    {data: 'received_shipments', name: 'cargo_consignments.received_shipments', class: 'align-middle received_shipments'},
-                    {data: 'short_received', name: 'short_received', class: 'align-middle short_received'},
+                    {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'}
+                    // {data: 'received_shipments', name: 'cargo_consignments.received_shipments', class: 'align-middle received_shipments'},
+                    // {data: 'short_received', name: 'short_received', class: 'align-middle short_received'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

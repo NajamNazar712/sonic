@@ -131,6 +131,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     //ajax request
     Route::put('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('account.status');
+    Route::post('accounts/status/block','Admins\AdminDashboardController@UserStatusBlock')->name('accounts.status.block');
+    Route::post('accounts/status/change','Admins\AdminDashboardController@UserStatusChange')->name('accounts.status.change');
+
     //new address
     Route::prefix('management')->name('management.')->group(function () {
 
