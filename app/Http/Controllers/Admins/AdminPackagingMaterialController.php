@@ -282,16 +282,19 @@ class AdminPackagingMaterialController extends Controller
                $hub_id = $request_details->city->hub_id;
                $pickup_address = UserShippingInfo::where(['user_id'=>$request_details->user_id,'city_id'=>$hub_id,'hidden'=>1]);
                if(!$pickup_address->exists()){
-                   $shipper_details = User::where('id',$request_details->user_id)->select('poc','phone','email')->first();
+                   $shipper_details = User::where('id',$request_details->user_id)->select('name','poc','phone','email')->first();
+                   $shipment_consignee_name = "Packaging Material to $shipper_details->name";
                    $pickup_address = UserShippingInfo::create(['user_id'=>$request_details->user_id,'pickup_address'=>"Trax Office",'poc'=>$shipper_details->poc,'phone'=>$shipper_details->phone,'email'=>$shipper_details->email,'city_id'=>$hub_id,'hidden'=>1]);
                }else{
+                   $shipper_details = User::where('id',$request_details->user_id)->select('name','poc','phone','email')->first();
+                   $shipment_consignee_name = "Packaging Material to $shipper_details->name";
                 $pickup_address = $pickup_address->first();
                }
                $now = Carbon::today();
                if($request_details->packaging_payment_mode_id == 1){
-                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$request_details->poc,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,$total_charges,1,2,2);
+                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,$total_charges,1,2,2);
                }else{
-                 $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$request_details->poc,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
+                 $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
                }
                $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
                 $this->add_item($shipment->id,24,null,1,null,0,0);
