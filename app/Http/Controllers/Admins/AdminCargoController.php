@@ -867,36 +867,6 @@ class AdminCargoController extends Controller
       else {
         return ['status' => 0, 'success' => 'No Short Received Shipments', 'short_received' => FALSE];
       }
-
-      $cargo_consignment_id = PickupRequest::find($request->input('cargo_consignment_id'));
-
-      $receiving_sheets = ReceivingSheet::where('user_id', $pickup_request->shipper_id)->where('status', 1);
-
-      $short_shipments = array();
-
-      if ($receiving_sheets->exists()) {
-        $receiving_sheets = $receiving_sheets->get();
-
-        foreach ($receiving_sheets as $receiving_sheet) {
-          foreach ($receiving_sheet->receiving_sheet_shipments as $receiving_sheet_shipment) {
-            $shipment = $receiving_sheet_shipment->shipment;
-
-            if ($shipment->shipper_status_id == 1 && $pickup_request->pickup_address_id == $shipment->pickup_address_id) {
-              $short_shipments[str_pad($receiving_sheet->id, 12, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
-            }
-          }
-        }
-
-        if (!empty($short_shipments)) {
-          return ['status' => 0, 'success' => 'Shipments found Short Received', 'short_received' => $short_shipments];
-        }
-        else {
-          return ['status' => 0, 'success' => 'No Short Received Shipments', 'short_received' => FALSE];
-        }
-      }
-      else {
-        return ['status' => 1, 'error' => 'No Receiving Sheet exists for given Pickup Request'];
-      }
     }
 
     public function receive_store(Request $request) {
