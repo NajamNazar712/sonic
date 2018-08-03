@@ -11,7 +11,7 @@
 
                     <div class="card-header">
                         <span class="font-large-1 card-title">Cities List</span>
-                        <button type="button" rel="addcity" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addCity" data-toggle="modal">Add City</button>
+                        {{--<button type="button" rel="addcity" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addCity" data-toggle="modal">Add City</button>--}}
 
                         <div class="mt-1">
                             @include('admin.inc.messages')
@@ -30,7 +30,6 @@
                                     <th>Hub Name</th>
                                     <th>Hub Code</th>
                                     <th>Status</th>
-                                    {{--<th>Services Available</th>--}}
                                     <th>Action</th>
                                 </tr>
                                 </thead>
@@ -50,9 +49,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 
 
-    <style>
-          display:inline;
-        }
+    <style type="text/css">
         table.dataTable {
             font-size: 12px;
         }
@@ -107,7 +104,24 @@
     <script type="text/javascript">
         $(document).ready(function() {
            var table =  $('.datatable').DataTable({
-                dom: 'ltipr',
+               dom: '<"d-inline-block"l><"pull-right"B>tipr',
+               buttons: [{
+                   text: 'Add City',
+                   className: 'btn btn-primary',
+                   enabled: true,
+                   action: function (e, dt, node, config) {
+                        $('#addCity').modal('show');
+                       var $invoker = $(e.relatedTarget);
+                       var action = 'addcity';
+
+                       if(action === 'addcity'){
+                           $.get( "/admin/management/city/form", function( data ) {
+                               $("#addCityDiv").html(data);
+                           });
+                       }
+                   }
+
+               }],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
@@ -118,16 +132,15 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-
                 ajax: '{{ route('admin.management.city.ajax') }}',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data: 'name', name: 'cities.name', class: 'city'},
-                    {data: 'city_id', name: 'cities.id', class: 'city_id'},
-                    {data: 'hub', name: 'h.name', class: 'hub'},
-                    {data: 'hub_id', name: 'cities.hub_id', class: 'hub_id'},
-                    {data: 'status', name: 'status', class: 'status'},
-                    {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
+                    {data: 'name', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'city_id', name: 'cities.id', class: 'align-middle city_id'},
+                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                rowCallback: function(row, data, index) {
                    var info = table.page.info();
@@ -207,15 +220,26 @@
                     success:function (data) {
                         var name = [];
                         if(data.length > 0){
+                            var comma = '';
                             $.each(data, function (index, value) {
-                                name += value.name+' , ';
+                                if(data.length != index+1){ comma = ", ";}else{
+                                    comma = '';
+                                }
+                                name += value.name+comma;
 
                             });
                             swal({
                                 title: 'Please remove following cities from hub!',
                                 text: name,
                                 icon: 'info',
-                                buttons: false,
+                                buttons: {
+                                    cancel: {
+                                        text: 'Close',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    }
+                                },
                                 closeOnClickOutside: true,
                                 closeOnEsc: true
                             });
@@ -224,7 +248,6 @@
                             $('.modal-body #cid').val(id);
                             $('.modal-body #cstatus').val(rel);
                             $('#ConfirmModalCity').modal('show');
-                            console.log('no cities');
                         }
                         
                     }

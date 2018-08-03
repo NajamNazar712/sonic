@@ -16,7 +16,7 @@
         <!-- Active Orders -->
           <div class="row">
               <div class="col">
-                  <div class="card">
+                  <div class="card pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -24,7 +24,7 @@
                                       <i class="icon-book-open font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-right">
-                                      <h3 class="">{{$booked}}</h3>
+                                      <h3 class="">{{$stats['booked']}}</h3>
                                       <span>Booked</span>
                                   </div>
                               </div>
@@ -33,7 +33,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-info">
+                  <div class="card bg-gradient-directional-info pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -41,7 +41,7 @@
                                       <i class="icon-basket-loaded text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$received}}</h3>
+                                      <h3 class="text-white">{{$stats['received']}}</h3>
                                       <span>Received</span>
                                   </div>
                               </div>
@@ -49,7 +49,7 @@
                       </div>
                   </div>
               </div><div class="col">
-                  <div class="card bg-gradient-directional-success">
+                  <div class="card bg-gradient-directional-success pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -57,7 +57,7 @@
                                       <i class="icon-emoticon-smile text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$delivered}}</h3>
+                                      <h3 class="text-white">{{$stats['delivered']}}</h3>
                                       <span>Delivered</span>
                                   </div>
                               </div>
@@ -65,7 +65,7 @@
                       </div>
                   </div>
               </div><div class="col">
-                  <div class="card bg-gradient-directional-warning">
+                  <div class="card bg-gradient-directional-warning pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -73,7 +73,7 @@
                                       <i class="icon-refresh text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$return}}</h3>
+                                      <h3 class="text-white">{{$stats['return']}}</h3>
                                       <span>Returns</span>
                                   </div>
                               </div>
@@ -82,7 +82,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-danger">
+                  <div class="card bg-gradient-directional-danger pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -90,7 +90,7 @@
                                       <i class="icon-shield text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$pending}}</h3>
+                                      <h3 class="text-white">{{$stats['pending']}}</h3>
                                       <span>Pendings</span>
                                   </div>
                               </div>
@@ -100,6 +100,49 @@
               </div>
           </div>
           <div class="row">
+              <div class="card col-12">
+                  <div class="card-content collapse show">
+                      <div class="card-body">
+                          <div id="shipment_statistics_chart" class="height-400 echart-container"></div>
+                          <div class="row">
+                              <div class="col-3">
+                                  <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
+                              </div>
+                              <div class="col-3">
+                                  <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
+                              </div>
+                              <div class="col-2">
+                                  <select name="graph_destination" id="graph_destination" class="select2 form-control">
+                                      {{--<option value="">All</option>--}}
+                                      @foreach($cities as $city)
+                                          <option value="{{$city->id}}">{{$city->name}}</option>
+                                      @endforeach
+                                  </select>
+                              </div>
+                              <div class="col-2">
+                                  <select name="graph_shipper" id="graph_shipper" class="select2 form-control">
+                                      {{--<option value="">All</option>--}}
+                                      @foreach($shippers as $shipper)
+                                          <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                      @endforeach
+                                  </select>
+                              </div>
+                              <div class="col-2">
+                                  <button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
+                              </div>
+                          </div>
+
+                      </div>
+                  </div>
+              </div>
+          </div>
+          <hr>
+
+          <div class="row">
+              <div class="card">
+              <div class="card-content">
+                  <div class="card-body">
+
               <h2>Order Details</h2>
               <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                   <thead>
@@ -109,6 +152,8 @@
                       <th class="border-primary border-darken-1">SN No.</th>
                       <th class="border-primary border-darken-1">Tracking No.</th>
                       <th class="border-primary border-darken-1">Order ID</th>
+                      <th class="border-primary border-darken-1">Account No.</th>
+                      <th class="border-primary border-darken-1">Shipper</th>
                       <th class="border-primary border-darken-1">Service Type</th>
                       <th class="border-primary border-darken-1">Status</th>
                       <th class="border-primary border-darken-1">Origin</th>
@@ -119,11 +164,15 @@
                       <th class="border-primary border-darken-1">COD Amount</th>
                       <th class="border-primary border-darken-1">Product Type</th>
                       <th class="border-primary border-darken-1">Booking Date</th>
+                      <th class="border-primary border-darken-1">Instructions</th>
                       <th class="border-primary border-darken-1">Action</th>
                   </tr>
                   </thead>
               </table>
 
+                  </div>
+              </div>
+              </div>
           </div>
       </div>
     </div>
@@ -132,11 +181,17 @@
 
   @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/line-awesome/css/line-awesome.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/cryptocoins/cryptocoins.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
 
     <style>
         table.dataTable {
@@ -184,28 +239,134 @@
             width: auto !important;
             text-align: left;
         }
+        .selectize-control {
+            width: 100%;
+        }
+
+        .selectize-control .selectize-input {
+            vertical-align: middle;
+        }
+
+        .selectize-control .selectize-input .item {
+            word-break: break-all;
+        }
     </style>
 @endsection
 
 @section('js')
 
-    <script src="{{asset('app-assets/vendors/js/charts/jquery.sparkline.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+{{--    <script src="{{asset('app-assets/js/scripts/forms/select/form-select2.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.common.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+
+    <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
+            var from_date = $('#from_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: new Date(old_date_limit),
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#from_date_root').css('top', '-350px');
+                },
+                onSet: function(context) {
+                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    var contractMoment = moment(old_date_formatted);
+                    var current = moment(contractMoment).add(29, 'days');
+                    to_date.pickadate('picker').set({'select': current.toDate()},{muted: true});
+                }
+            });
+
+            var to_date = $('#to_date').pickadate({
+                firstDay: 1,
+                clear: '',
+                max: '{{ Carbon\Carbon::now() }}',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#to_date_root').css('top', '-350px');
+                },
+                onSet: function(context) {
+                    var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                    var currentMoment = moment(current_date_formatted);
+                    var currentDate = moment(currentMoment).subtract(29, 'days');
+                    from_date.pickadate('picker').set({'select': currentDate.toDate()},{muted: true});
+                }
+            });
+            $('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select a Destination",
+                allowClear:true
+            });
+            $('#graph_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                width:'100%',
+                placeholder:"Select a Shipper",
+                allowClear:true
+            });
+            function print(selected_rows) {
+                $.ajax({
+                    url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids[]': selected_rows,
+                        'admin': {!! Auth::id() !!},
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                // "scrollX": true,
+                "scrollX": true,
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Print',
-                    className: 'btn btn-primary dispute_modal',
-                    enabled: true,
+                    className: 'btn btn-primary',
+                    enabled: false,
                     action: function (e, dt, node, config) {
+                        table.button(0).disable();
+                        print(selected_rows);
+                        $.each(selected_rows, function(index, id) {
+                            table.row($('#datatable tbody tr#' + id)).deselect();
+                        });
+                        selected_rows = [];
 
                     }
                 }],
@@ -233,6 +394,8 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
+                    {data: 'account_no', name: 'ubi.account_no', class: 'align-middle account_no'},
+                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
@@ -243,6 +406,7 @@
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
                     {data: 'booking_date', name: 'booking_date', class: 'align-middle booking_date'},
+                    {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -285,76 +449,205 @@
                     });
                 }
             });
-            // var dom = document.getElementById("stacked-line");
-            // var myChart = echarts.init(dom);
-            // var app = {};
-            // option = null;
-            // option = {
-            //     title: {
-            //         text: '折线图堆叠'
-            //     },
-            //     tooltip: {
-            //         trigger: 'axis'
-            //     },
-            //     legend: {
-            //         data:['邮件营销','联盟广告','视频广告','直接访问','搜索引擎']
-            //     },
-            //     grid: {
-            //         left: '3%',
-            //         right: '4%',
-            //         bottom: '3%',
-            //         containLabel: true
-            //     },
-            //     toolbox: {
-            //         feature: {
-            //             saveAsImage: {}
-            //         }
-            //     },
-            //     xAxis: {
-            //         type: 'category',
-            //         boundaryGap: false,
-            //         data: ['周一','周二','周三','周四','周五','周六','周日']
-            //     },
-            //     yAxis: {
-            //         type: 'value'
-            //     },
-            //     series: [
-            //         {
-            //             name:'邮件营销',
-            //             type:'line',
-            //             stack: '总量',
-            //             data:[120, 132, 101, 134, 90, 230, 210]
-            //         },
-            //         {
-            //             name:'联盟广告',
-            //             type:'line',
-            //             stack: '总量',
-            //             data:[220, 182, 191, 234, 290, 330, 310]
-            //         },
-            //         {
-            //             name:'视频广告',
-            //             type:'line',
-            //             stack: '总量',
-            //             data:[150, 232, 201, 154, 190, 330, 410]
-            //         },
-            //         {
-            //             name:'直接访问',
-            //             type:'line',
-            //             stack: '总量',
-            //             data:[320, 332, 301, 334, 390, 330, 320]
-            //         },
-            //         {
-            //             name:'搜索引擎',
-            //             type:'line',
-            //             stack: '总量',
-            //             data:[820, 932, 901, 934, 1290, 1330, 1320]
-            //         }
-            //     ]
-            // };
-            // ;
-            // if (option && typeof option === "object") {
-            //     myChart.setOption(option, true);
-            // }
+            $('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, selected_rows);
+
+                if (index === -1) {
+                    selected_rows.push(id);
+                }
+                else {
+                    selected_rows.splice(index, 1);
+                }
+
+                if (selected_rows.length > 0) {
+                    table.button(0).enable();
+                }
+                else {
+                    table.button(0).disable();
+                }
+            });
+            var myChart = echarts.init(document.getElementById('shipment_statistics_chart'));
+
+            chartOptions = {
+
+                // Setup grid
+                grid: {
+                    x: 40,
+                    x2: 20
+                },
+
+                // Add tooltip
+                tooltip: {
+                    trigger: 'axis'
+                },
+
+                // Add legend
+                legend: {
+                    data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
+                },
+
+                // Add custom colors
+                color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+
+                // Hirozontal axis
+                xAxis: [{
+                    type: 'category',
+                    boundaryGap: false,
+                    axisLabel: {
+                        rotate: 45
+                    },
+                    data: @json($graph['dates'])
+                    // data: [
+                    //     11,12,13,14,15,16,17
+                    // ]
+                }
+                ],
+
+                // Vertical axis
+                yAxis: [{
+                    type: 'value'
+                }],
+
+                // Add series
+                // Add series
+                series: [
+                    {
+                        name: 'Booked',
+                        type: 'line',
+                        stack: 'Total',
+                        data: @json($graph['booked'])
+                    },
+                    {
+                        name: 'Received',
+                        type: 'line',
+                        stack: 'Total',
+                        data: @json($graph['received'])
+                    },
+                    {
+                        name: 'Delivered',
+                        type: 'line',
+                        stack: 'Total',
+                        data: @json($graph['delivered'])
+                    },
+                    {
+                        name: 'Return',
+                        type: 'line',
+                        stack: 'Total',
+                        data: @json($graph['return'])
+                    },
+                    {
+                        name: 'Pending',
+                        type: 'line',
+                        stack: 'Total',
+                        data: @json($graph['pending'])
+                    }
+                ]
+            };
+
+
+            myChart.setOption(chartOptions);
+            $('.statistics_search').on('click',function(){
+                var search_btn = $(this);
+                search_btn.prop('disabled',true);
+                var destination = $('#graph_destination').val();
+                var shipper = $('#graph_shipper').val();
+                var current_date = $('input[name="to_date_formatted"]').val();
+                var old_date = $('input[name="from_date_formatted"]').val();
+                console.log("Old Date: = "+old_date);
+                console.log("New Date: = "+current_date);
+                console.log("Destination: = "+destination);
+                console.log("Shipper: = "+shipper);
+                $.ajax({
+                    url: '{!! route('admin.orders.search') !!}',
+                    method: 'POST',
+                    data: {
+                        'destination': destination,
+                        'shipper': shipper,
+                        'current_date': current_date,
+                        'old_date': old_date,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function(data){
+                    if(data.status == 1){
+                        myChart.clear();
+                        updateChartOptions = {
+
+
+                            grid: {
+                                x: 40,
+                                x2: 20
+                            },
+
+
+                            tooltip: {
+                                trigger: 'axis'
+                            },
+                            legend: {
+                                data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
+                            },
+                            color: ['#CECECE', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+
+                            xAxis: [{
+                                type: 'category',
+                                boundaryGap: false,
+                                axisLabel: {
+                                    rotate: 45
+                                },
+                                data: data.graph['dates']
+
+                            }],
+                            yAxis: [{
+                                type: 'value'
+                            }],
+                            series: [
+                                {
+                                    name: 'Booked',
+                                    type: 'line',
+                                    stack: 'Total',
+                                    data: data.graph['booked']
+                                },
+                                {
+                                    name: 'Received',
+                                    type: 'line',
+                                    stack: 'Total',
+                                    data: data.graph['received']
+                                },
+                                {
+                                    name: 'Delivered',
+                                    type: 'line',
+                                    stack: 'Total',
+                                    data: data.graph['delivered']
+                                },
+                                {
+                                    name: 'Return',
+                                    type: 'line',
+                                    stack: 'Total',
+                                    data: data.graph['return']
+                                },
+                                {
+                                    name: 'Pending',
+                                    type: 'line',
+                                    stack: 'Total',
+                                    data: data.graph['pending']
+                                }
+                            ]
+                        };
+                        myChart.setOption(updateChartOptions);
+                        // setTimeout(function () {
+                            search_btn.removeAttr('disabled');
+                        // },3000);
+
+                    }
+                });
+            });
+
+
+
+            $('body').on('click','.tracking',function () {
+                    console.log('here');
+            });
 
         });
     </script>

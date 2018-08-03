@@ -34,7 +34,7 @@
     <!--Dispute Modal -->
     <div class="modal fade text-left" id="DisputeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DisputeModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Launch Dispute</h4>
@@ -46,7 +46,7 @@
                     <form id="dispute_form" action="" method="post">
 
                         <div class="row mb-2">
-                            <div class="col form-group">
+                            <div class="col-12 form-group">
                                 <select name="city_select" id="city_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                     <option></option>
                                     @foreach($cities as $city)
@@ -54,7 +54,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col form-group">
+                            <div class="col-12 form-group">
                                 <select name="dispute_type_select" id="dispute_type_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                     <option></option>
                                     @foreach($dispute_types as $dispute)
@@ -64,17 +64,17 @@
                             </div>
                         </div>
                         <div class="row mb-2 justify-content-center">
-                            <div class="col-6 form-group">
+                            <div class="col-12 form-group">
                                 <input name="tracking_number" id="tracking_number" class="tracking_number" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
                             </div>
                         </div>
                         <div class="row mb-2 justify-content-center">
-                            <div class="col-6 form-group">
+                            <div class="col-12 form-group">
                                 <textarea name="description" id="description" class="form-control" cols="30" rows="3" placeholder="Enter Description" data-rule-required="true" data-msg-required="This field is required"></textarea>
                             </div>
                         </div>
                         <div class="row justify-content-center">
-                            <div class="col-3">
+                            <div class="col-12">
                                 <button id="DisputeCreate" type="submit" class="btn btn-primary btn-block">Launch Dispute</button>
                             </div>
                         </div>
@@ -109,7 +109,7 @@
     {{--resolve modal--}}
     <div class="modal fade text-left" id="CommentsModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="CommentsModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Dispute Comments</h4>
@@ -184,25 +184,42 @@
             text-align: left;
         }
         .dispute_comments_section{
-            max-height: 200px;
+            max-height: 300px;
             overflow-y:scroll;
             overflow-x:hidden;
             /*overflow:hidden;*/
             /*position: absolute;*/
             padding: 10px;
         }
+
         p.comment{
             text-align: left;
+            -ms-word-wrap: break-word;
+            word-wrap: break-word;
         }
-        .description-div p.border{
+        .description-div .border{
+            -webkit-border-radius: 5px;
+            -moz-border-radius: 5px;
+            border-radius: 5px;
+        }
+        .description-div{
+            text-align: left;
+        }
+        .description-div p{
             padding:10px;
+            word-wrap: break-word;
         }
         .comment-post{
             padding-top: 10px;
         }
+        .comment-row{
+            border-radius: 5px;
+            background: #f3f3f3;
+            margin-bottom: 10px;
+            padding: 10px;
+        }
         .comment-date{
-            float:right;
-            font-size: 13px;
+            font-size: 11px;
             border-bottom: 1px solid #606060;
         }
         .selectize-control {
@@ -363,6 +380,7 @@
                 $('#dispute_form')[0].reset();
                 $('#DisputeCreate').removeAttr('disabled');
                 select[0].selectize.clear();
+                $('#dispute_form').validate().resetForm();
                 $('#city_select').val('').trigger('change');
                 $('#dispute_type_select').val('').trigger('change');
             });

@@ -46,7 +46,7 @@
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Update Date</th>
-                        <th class="border-primary border-darken-1">Total COD</th>
+                        <th class="border-primary border-darken-1">DNCC Amount</th>
                     </tr>
                     </thead>
                 </table>

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ReturnNote extends Model
 {
     protected $fillable = [
-        'hub_id','rider_id','route_id','shipments_count','admin_id'
+        'hub_id','rider_id','route_id','shipments_count','admin_id','updated_by'
     ];
     public function pickup_address() {
         return $this->belongsTo('App\Http\Models\Shipper\UserShippingInfo');
@@ -28,6 +28,10 @@ class ReturnNote extends Model
     }
     public function user() {
         return $this->belongsTo('App\Http\Models\Shipper\User');
+    }
+
+    public function return_note_shipments() {
+        return $this->hasMany('App\Http\Models\Admin\ReturnNoteShipment');
     }
 
 }

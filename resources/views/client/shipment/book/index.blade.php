@@ -81,7 +81,7 @@
 
 										<div class="form-group">
 											<select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
-												@foreach($cities as $city)
+												@foreach($consignee_cities as $city)
 													<option value="{{ $city->id }}">{{ $city->name }}</option>
 												@endforeach
 											</select>

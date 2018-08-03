@@ -206,7 +206,7 @@
                         }
                     }).done(function (data) {
                         if(data.success == 1){
-                            $('#universal_city_select').select2({
+                            $('#universal_city_select').prepend('<option value="" selected="selected"></option>').select2({
                                 placeholder:'Select a city',
                                 dropdownParent:$('#universal_dispute_form')
                             });
@@ -218,7 +218,7 @@
                                 var dispute = new Option(value.type, value.id, false, false);
                                 $('#universal_dispute_type_select').append(dispute).trigger('select');
                             });
-                            $('#universal_dispute_type_select').select2({
+                            $('#universal_dispute_type_select').prepend('<option value="" selected="selected"></option>').select2({
                                 placeholder:'Select a Dispute type',
                                 dropdownParent:$('#universal_dispute_form')
                             });
@@ -259,9 +259,10 @@
         $('#UniversalDisputeModal').on('hidden.bs.modal',function () {
             $('#universal_dispute_form')[0].reset();
             $('#UniversalDisputeCreate').removeAttr('disabled');
-            select[0].selectize.clear();
-            $('#universal_city_select').val('').trigger('change');
-            $('#universal_dispute_type_select').val('').trigger('change');
+            select[0].selectize.destroy();
+            $("#universal_dispute_form").validate().resetForm();
+            $('#universal_city_select').empty().trigger('change');
+            $('#universal_dispute_type_select').empty().trigger('change');
         });
         $('#universal_dispute_form').validate({
             ignore: [],

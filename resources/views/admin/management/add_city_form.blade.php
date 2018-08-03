@@ -8,12 +8,14 @@
                 <input type="text" class="form-control" name="cityName" placeholder="Add City Name" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
         </div>
-        <div class="col">
+        <div class="col-3">
             <input type="hidden" id="city_type" name="postType" value="city">
             <fieldset class="radio-inline ml-1">
                 <input type="radio" name="city-radio" class="icheck cradio" id="city-radio" rel="city" checked>
                 <label for="city-radio">City</label>
             </fieldset>
+        </div>
+        <div class="col-3">
             <fieldset class="radio-inline ml-2">
                 <input type="radio" name="city-radio" class="icheck cradio" id="hub-radio" rel="hub">
                 <label for="hub-radio">Hub</label>
@@ -55,6 +57,7 @@
         <div class="col-12">
             <h4 class="card-title font-weight-bold">Delivery</h4>
             @foreach($bookings as $booking)
+
             <div class="bs-callout-primary callout-border-left callout-square p-1">
                 <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" class="icheckbox bookingtype{{$booking->id}}" {{($booking->id == 1)? 'checked required':''}}></strong>
                 <div class="mt-1 form-group">
@@ -184,6 +187,7 @@
         });
         @endforeach
 
+
         $( "#addCityHubForm" ).validate({
 
 
@@ -193,6 +197,12 @@
                 error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
             submitHandler: function(form) {
+
+                $('input.bookingtype{{$booking->id}}').on('ifUnchecked',function () {
+                    var shippingmode = $(this).parent().parent().next().find('input.shippingmode');
+                    checkAtleastOne($(this),{{$booking->id}});
+                    $(shippingmode).iCheck('disable');
+                });
                 if(errors === 1){
                     return false;
                 }else{

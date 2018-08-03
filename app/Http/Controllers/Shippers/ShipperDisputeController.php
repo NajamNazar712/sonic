@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\City;
 use App\Http\Models\Dispute;
@@ -12,6 +13,7 @@ use App\Http\Models\PaymentMode;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\Shipper\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -101,6 +103,8 @@ class ShipperDisputeController extends Controller
             if($dispute_id != ''){
 
                 Dispute::where('id',$dispute_id)->update(['shipments_count'=>$count]);
+
+                NotificationsController::send(19, $dispute_id);
             }
             return response()->json($tracking_number);
 //            return $tracking_number;
@@ -132,6 +136,18 @@ class ShipperDisputeController extends Controller
             return response()->json(['status'=>1,'view'=>$returnHTML]);
         }else{
             return response()->json(['status'=>0,'error'=>"No comments!"]);
+        }
+    }
+    public function get_data(Request $request){
+        $shipment_id = $request->shipment_id;
+        $shipment = Shipment::where('id',$shipment_id);
+        if($shipment->exists()){
+            $shipment = $shipment->select('tracking_number')->first();
+            return response()->json(['success'=>1,'tracking'=>$shipment->tracking_number]);
+
+        }else{
+            return response()->json(['success'=>0,'error'=>"Shipment Not Found!"]);
+
         }
     }
 
@@ -248,6 +264,7 @@ class ShipperDisputeController extends Controller
                         $shipper_details = User::where('id',Auth::id())->select('poc','phone','email')->first();
                         $pickup_address = UserShippingInfo::create(['user_id'=>Auth::id(),'pickup_address'=>$newAddress,'poc'=>$shipper_details->poc,'phone'=>$shipper_details->phone,'email'=>$shipper_details->email,'city_id'=>$shipment->consignee_city_id,'hidden'=>1]);
                     }else{
+                    $traxOffice = UserShippingInfo::where(['user_id'=>Auth::id(),'city_id'=>$consigneeCity->hub_id,'hidden'=>0]);
                         $pickup_address = $traxOffice->first();
                     }
 
@@ -256,6 +273,8 @@ class ShipperDisputeController extends Controller
                  $newTracking = ShipperShipmentBookController::generate_tracking_number($newShipment->id,$shipment->consignee_city_id,$newShipment->consignee_city_id);
                     ShipmentsJourneyController::add($shipment->id, 19, 19, NULL, 'Shipment # '.$shipment->tracking_number.' has been Re-Booked as new Shipment # '.$newTracking, Auth::id(), NULL);
 
+                    NotificationsController::send(17, $shipment->id, $newShipment->id);
+                    NotificationsController::send(18, $shipment->id, $newShipment->id);
 
                         foreach ($shipment->items as $item) {
                             ShipperShipmentBookController::add_item($newShipment->id, $item->product_type_id, $item->description, $item->quantity, $item->price, $item->insurance, $item->type);

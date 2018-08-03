@@ -35,6 +35,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::prefix('orders')->name('orders.')->group(function(){
        Route::get('','Shippers\ShipperDashboardController@orders_index')->name('index');
        Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
+       Route::post('search','Shippers\ShipperDashboardController@statistics_search')->name('search');
+       Route::post('cancel','Shippers\ShipperDashboardController@order_cancel')->name('cancel');
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
@@ -76,6 +78,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
        Route::post('create','Shippers\ShipperDisputeController@dispute_create')->name('create');
        Route::post('get/shipments','Shippers\ShipperDisputeController@get_shipments')->name('get.shipments');
        Route::post('get/comments','Shippers\ShipperDisputeController@get_comments')->name('get.comments');
+       Route::post('data','Shippers\ShipperDisputeController@get_data')->name('data');
         Route::prefix('rebook')->name('rebook.')->group(function (){
             Route::get('','Shippers\ShipperDisputeController@rebook_index')->name('index');
             Route::get('list','Shippers\ShipperDisputeController@rebook_list')->name('list');
@@ -106,6 +109,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('index');
         Route::get('list', 'Admins\AdminDashboardController@orders_list')->name('list');
+        Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
 
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
@@ -348,6 +352,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('resolved', 'Admins\AdminFinanceController@outstanding_shipments_resolved')->name('resolved');
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
         });
+
+        Route::prefix('make_payments')->name('make_payments.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@make_payments_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@make_payments_list')->name('list');
+            Route::post('delivered_shipments', 'Admins\AdminFinanceController@make_payments_delivered_shipments')->name('delivered_shipments');
+            Route::post('returned_shipments', 'Admins\AdminFinanceController@make_payments_returned_shipments')->name('returned_shipments');
+            Route::post('adjusted_shipments', 'Admins\AdminFinanceController@make_payments_adjusted_shipments')->name('adjusted_shipments');
+            Route::post('shipment_details', 'Admins\AdminFinanceController@make_payments_shipment_details')->name('shipment_details');
+            Route::get('shipment_list', 'Admins\AdminFinanceController@make_payments_shipment_list')->name('shipment_list');
+            Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
+            Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
+        });
+
+        Route::prefix('done_payments')->name('done_payments.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@done_payments_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@done_payments_list')->name('list');
+            Route::put('paid', 'Admins\AdminFinanceController@done_payments_paid')->name('paid');
+            Route::put('reverted', 'Admins\AdminFinanceController@done_payments_reverted')->name('reverted');
+            Route::post('delivered_shipments', 'Admins\AdminFinanceController@done_payments_delivered_shipments')->name('delivered_shipments');
+            Route::post('returned_shipments', 'Admins\AdminFinanceController@done_payments_returned_shipments')->name('returned_shipments');
+            Route::post('adjusted_shipments', 'Admins\AdminFinanceController@done_payments_adjusted_shipments')->name('adjusted_shipments');
+            Route::post('details_print', 'Admins\AdminFinanceController@done_payments_details_print')->name('details_print');
+            Route::post('details', 'Admins\AdminFinanceController@done_payments_details')->name('details');
+            Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
+            Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
+        });
     });
 
     Route::prefix('sameday')->name('sameday.')->group(function (){
@@ -367,7 +397,36 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('', 'Admins\AdminNotificationsController@index')->name('index');
+        Route::get('list', 'Admins\AdminNotificationsController@list')->name('list');
+        Route::post('send_custom_email', 'Admins\AdminNotificationsController@send_custom_email')->name('send_custom_email');
+        Route::post('details', 'Admins\AdminNotificationsController@details')->name('details');
+        Route::post('status', 'Admins\AdminNotificationsController@status')->name('status');
+        Route::post('edit', 'Admins\AdminNotificationsController@edit')->name('edit');
+    });
 
+    //Reports start
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::prefix('qsr')->name('qsr.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@qsr_list')->name('list');
+        });
+        Route::prefix('return_note')->name('return_note.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@return_note_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@return_note_list')->name('list');
+        });
+        Route::prefix('pickup_note')->name('pickup_note.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@pickup_note_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@pickup_note_list')->name('list');
+        });
+        Route::prefix('cargo_received')->name('cargo_received.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@cargo_received_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@cargo_received_list')->name('list');
+        });
+    });
+
+    //Reports end
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');

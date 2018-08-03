@@ -7,7 +7,10 @@ use App\Http\Models\Dispute;
 use App\Http\Models\DisputeShipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
@@ -19,9 +22,7 @@ use App\Http\Models\PickupNote;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupNoteStatus;
 use App\Http\Models\PickupNotesJourney;
-
 use Auth;
-
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
@@ -78,7 +79,7 @@ class AdminPickupsController extends Controller
     }
 
     public function pending_index() {
-      $riders = Rider::all(['id', 'name']);
+      $riders = Rider::where('status',1)->select(['id', 'name'])->get();
 
       return view('admin.pickups.pending.index')->with(['riders' => $riders]);
     }
@@ -197,10 +198,14 @@ class AdminPickupsController extends Controller
 
         $pickup_note->assigned_by_user_id = Auth::id();
         $pickup_note->status_id = 1;
+        $pickup_request_address = PickupRequest::find($pickup_request_ids[0]);
+
+        $pickup_note->city_id = $pickup_request_address->pickup_address->city_id;
 
         $pickup_note->save();
 
         $pickup_note_id = $pickup_note->id;
+
 
         PickupNotesJourneyController::add($pickup_note_id, 0, 'Pickup Note has been Created!', Auth::id());
       }
@@ -809,6 +814,13 @@ class AdminPickupsController extends Controller
         }
 
         ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, 'Shipment has Arrived!', NULL, Auth::id(), $reference_1_id, $reference_2_id);
+
+        NotificationsController::send(3, $shipment_id);
+
+        ShipmentChargesController::weight($shipment_id);
+        ShipmentChargesController::cash_handling($shipment_id);
+        ShipmentChargesController::insurance($shipment_id);
+        ShipmentChargesController::fuel_surcharge($shipment_id);
       }
 
       $pickup_requests_receiving_sheets = array();
@@ -883,6 +895,8 @@ class AdminPickupsController extends Controller
       $pickup_note->save();
 
       PickupNotesJourneyController::add($pickup_note->id, $pickup_note->status_id, 'Pickup Note has been Received!', Auth::id());
+
+      NotificationsController::send(4, $request->pickup_receive_pickup_note_id, explode(',', $request->shipment_ids));
 
       return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->pickup_receive_pickup_note_id);
     }

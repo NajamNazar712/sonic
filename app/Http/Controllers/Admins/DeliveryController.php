@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Admins\AdminFinanceController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
@@ -88,7 +92,7 @@ class DeliveryController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item dispute_modal'><i class='ft-plus-circle primary'></i> Dispute</a>                                         
+                                              <a href='#' class='dropdown-item dispute_modal'><i class='ft-alert-circle primary'></i> Dispute</a>                                         
                                             </div></span>";
             })
             ->make(true);
@@ -189,6 +193,10 @@ class DeliveryController extends Controller
                     'reference_1_id'=>$note->id,
                     'reference_2_id'=>$note->rider_id
                 ]);
+
+                NotificationsController::send(10, $note->id, $shipment);
+                NotificationsController::send(11, $note->id, $shipment);
+                NotificationsController::send(12, $note->id, $shipment);
             }
         }
         return redirect()->back()->with(['success'=>'Delivery note created successfully','print'=>$note->id]);
@@ -287,7 +295,7 @@ class DeliveryController extends Controller
             ->where('delivery_notes.id',$id);
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-               return "<a href='#' class='deliverynoterow'>Remove</a>";
+               return "<a href='javascript:void(0);' class='deliverynoterow'>Remove</a>";
 
             })
             ->make(true);
@@ -573,7 +581,7 @@ class DeliveryController extends Controller
 
                         Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment]]);
                         DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
-                    }elseif($request->status_drop[$shipment] == 14){
+                    }elseif($request->status_drop[$shipment] == 14 || $request->status_drop[$shipment] == 16){
                         $parcel = Shipment::where('id',$shipment)->first();
                         if($parcel->booking_type_id == 2){
                             if($shipment_status->shipper_status_id != 30){
@@ -844,10 +852,16 @@ class DeliveryController extends Controller
                 $shipment_data = Shipment::find($deliveries->shId);
                 $status_id = $shipment_data->shipment_journey()->latest()->first();
                 $status_data = ShipmentStatus::where('id',$status_id->shipper_status_id)->select('id','name')->first();
+                $selected_status = '';
                 foreach ($statuses as $status){
-                    $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
+                    if($status->id == $status_data->id){
+                        $selected_status = 'selected';
+                    }else{
+                        $selected_status = '';
+                    }
+                    $drops .= '<option value="'.$status->id.'" '.$selected_status.'>'.$status->name.'</option>';
                 }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status"><option value="'.$status_data->id.'">'.$status_data->name.'</option>'.$drops.'</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status">'.$drops.'</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
@@ -926,7 +940,7 @@ class DeliveryController extends Controller
                                 ]);
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                            } elseif ($request->status_drop[$shipment] == 14) {
+                            } elseif ($request->status_drop[$shipment] == 14 || $request->status_drop[$shipment] == 16) {
                                 $parcel = Shipment::where('id', $shipment)->first();
                                 if ($parcel->booking_type_id == 2) {
                                     ShipmentsJourney::create([
@@ -976,6 +990,7 @@ class DeliveryController extends Controller
                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                 }
 
+                                AdminFinanceController::add_payment($shipment, 0);
                             } else {
 
                                 ShipmentsJourney::create([
@@ -991,6 +1006,19 @@ class DeliveryController extends Controller
                             }
                             $dispute_shipments[] = $shipment;
                         }
+                        else {
+                            if (in_array($shipper_status_id->shipper_status_id, [14, 16, 30, 36, 37])) {
+                                $parcel = Shipment::find($shipment);
+                                if ($parcel->booking_type_id == 2) {
+                                    ShipmentChargesController::replacement($shipment);
+                                }
+                                else if ($parcel->booking_type_id == 3) {
+                                    ShipmentChargesController::try_and_buy($shipment);
+                                }
+
+                                AdminFinanceController::add_payment($shipment, 0);
+                            }
+                        }
                     }//main if condition
 
                 }
@@ -1003,6 +1031,9 @@ class DeliveryController extends Controller
                 $dncc_amount = $filtered_shipments->sum('received_amount');
                 $delivered_shipments = $filtered_shipments->count();
                 DeliveryNote::where('id',$delivery_note_id)->update(['delivered_shipments'=>$delivered_shipments,'updated_by'=>Auth::id(),'received_cod_amount'=>$dncc_amount,'status'=>1]);
+
+                NotificationsController::send(13, $delivery_note_id);
+                NotificationsController::send(14, $delivery_note_id);
                 return redirect()->back()->with('success','Delivery Note verified and updated successfully!');
             }else{
                 return redirect()->back()->with('error','Delivery note not found!');
@@ -1248,13 +1279,20 @@ class DeliveryController extends Controller
     }
     //for ajax select dncc
     public function completed_deliveries_selected_dncc(Request $request){
-
         $note_ids = explode(',',$request->delivery_note_ids);
-        session(['dncc_ids'=> $note_ids]);
-        $delivery_note = DeliveryNote::find($note_ids[0]);
-        $hub_name = $delivery_note->hub->name;
-        $banks_list = BanksList::where(['affiliate'=>1,'status'=>1])->select('id','name')->get();
-        return view('admin.delivery.complete.sdn_create')->with(['hub_name'=>$hub_name,'banks_list'=>$banks_list,'dncc_ids'=>session('dncc_ids')]);
+//        return $note_ids;
+        $updated = DeliveryNote::where('dncc_status',1)->whereIn('id',$note_ids)->exists();
+        if(!$updated){
+//            dd($updated);
+//            return 132;
+            session(['dncc_ids'=> $note_ids]);
+            $delivery_note = DeliveryNote::find($note_ids[0]);
+            $hub_name = $delivery_note->hub->name;
+            $banks_list = BanksList::where(['affiliate'=>1,'status'=>1])->select('id','name')->get();
+            return view('admin.delivery.complete.sdn_create')->with(['hub_name'=>$hub_name,'banks_list'=>$banks_list,'dncc_ids'=>session('dncc_ids')]);
+        }else{
+            return redirect(route('admin.delivery.sdn.index'))->with('error','SDN already created!');
+        }
     }
     public function get_sdn_list(Request $request){
         $dncc_ids = session('dncc_ids');
@@ -1299,7 +1337,7 @@ class DeliveryController extends Controller
     public function create_sdn_submit(Request $request){
         if($request->sdn_hub_id){
                 $dncc_ids = explode(',',$request->sdn_dncc_ids);
-                $check_status = DeliveryNote::whereIn('id',[31,32,33])->where('dncc_status',1)->exists();
+                $check_status = DeliveryNote::whereIn('id',$dncc_ids)->where('dncc_status',1)->exists();
 
                 if(!$check_status) {
                     $sdn_id = StationDepositNote::create([

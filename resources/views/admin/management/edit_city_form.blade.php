@@ -8,13 +8,15 @@
                 <input type="text" class="form-control" name="cityName" value="{{$city->name}}" placeholder="Add City Name" required data-rule-required="true" data-msg-required="This field is required">
             </fieldset>
         </div>
-        <div class="col">
+        <div class="col-3">
             <input type="hidden" id="city_type" name="postType" value="{{($isHub == 1)? 'hub':'city'}}">
             <fieldset class="radio-inline ml-1">
                 <input type="radio" name="city-radio" class="icheck cradio" id="city-radio" rel="city" {{($isHub == 0)? 'checked':''}}>
                 <label for="city-radio">City</label>
             </fieldset>
-            <fieldset class="radio-inline ml-2">
+        </div>
+        <div class="col-3">
+            <fieldset class="radio-inline ml-1">
                 <input type="radio" name="city-radio" class="icheck cradio" id="hub-radio" rel="hub" {{($isHub == 1)? 'checked':''}}>
                 <label for="hub-radio">Hub</label>
             </fieldset>
@@ -26,7 +28,7 @@
         <div class="col-6">
             <fieldset class="form-group">
                 <select name="hubs" id="hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    <option value="{{(isset($cityhub[0])? $cityhub[0]->id:'')}}" selected>{{(isset($cityhub[0])? $cityhub[0]->name:'')}}</option>
+                    
                     @foreach($hubs as $hub)
                         <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
                     @endforeach
@@ -57,7 +59,7 @@
             @foreach($bookings as $index => $booking)
 
                 <div class="bs-callout-primary callout-border-left callout-square p-1">
-                    <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" readonly name="booking[{{$booking->id}}]" {{isset($delivery[$booking->id])? 'checked':''}} class="icheckbox bookingtype{{$booking->id}}"></strong>
+                    <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox"  name="booking[{{$booking->id}}]" {{isset($delivery[$booking->id])? 'checked':''}} class="icheckbox bookingtype{{$booking->id}}" {{($booking->id == 1)? 'disabled':''}}></strong>
                     <div class="mt-1 form-group">
 
                         @foreach($shippingMode as $sindex => $shipping)
@@ -135,17 +137,65 @@
             radioClass: 'iradio_flat-red',
             increaseArea: '20%' // optional
         });
-        $('.select2').select2({
+        $('#hub_list').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder: 'Select a Hub',
             dropdownParent: $("#editCity")
         });
-
+        var city_selected = '{!! isset($cityhub[0])? $cityhub[0]->id:''; !!}';
+                $('#hub_list').val(city_selected).trigger('change');
         $("input[type='radio'][name='city-radio']").on('ifChecked', function(event){
             var rtype = $(this).attr('rel');
+            var id = '{!! $city->id !!}';
             if(rtype == 'city'){
-                $('#city_type').val('city');
-                if($('#hub_list_div').is(':hidden')){
-                    // $('#hub_list_div').css('display','block');
-                    $('#hub_list_div').fadeIn("slow");
+                var isHub = {{ $isHub }};
+                if(isHub == 1){
+                    $.ajax({
+                        url:'/admin/management/city/'+id+'/status/ajax',
+                        type:'GET',
+                        dataType:'json',
+                    }).done(function (data) {
+                        var name = [];
+                        if(data.length > 0){
+                            $('#editCity').modal('hide');
+                            var comma = '';
+                            $.each(data, function (index, value) {
+                                if(data.length != index+1){ comma = ", ";}else{
+                                    comma = '';
+                                }
+                                name += value.name+comma;
+
+                            });
+                            swal({
+                                title: 'Please remove following cities from hub!',
+                                text: name,
+                                icon: 'info',
+                                buttons: {
+                                    cancel: {
+                                        text: 'Close',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    }
+                                },
+                                closeOnClickOutside: true,
+                                closeOnEsc: true
+                            });
+
+                        }else{
+                            $('#city_type').val('city');
+                            if($('#hub_list_div').is(':hidden')){
+                                // $('#hub_list_div').css('display','block');
+                                $('#hub_list_div').fadeIn("slow");
+                            }
+                        }
+                    });
+                }else{
+
+                    $('#city_type').val('city');
+                    if($('#hub_list_div').is(':hidden')){
+                        // $('#hub_list_div').css('display','block');
+                        $('#hub_list_div').fadeIn("slow");
+                    }
                 }
             }else if(rtype == 'hub'){
                 $('#city_type').val('hub');
@@ -211,7 +261,7 @@
                 error.addClass('w-100').appendTo(element.parents('.form-group'));
             },
             submitHandler: function(form) {
-                $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                // $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
                 if(errors === 1){
                     return false;

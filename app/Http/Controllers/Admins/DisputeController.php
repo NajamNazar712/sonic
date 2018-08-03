@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
@@ -57,7 +58,7 @@ class DisputeController extends Controller
 
             })
             ->editColumn('no_of_shipments',function($dispute){
-                return "<a class='font-weight-bold shipment_count' href='#'>{$dispute->no_of_shipments}</a>";
+                return "<a class='font-weight-bold shipment_count' href='javascript:void(0);'>{$dispute->no_of_shipments}</a>";
             })
             ->editColumn('launched_by',function($dispute){
                 if($dispute->rbstatus == 0){
@@ -73,10 +74,10 @@ class DisputeController extends Controller
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>";
                                  if($dispute->status == 0 || $dispute->status == 1) {
-                                     $drop .= "<a href='#' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>                                         
-                                              <a href='#' class='dropdown-item resolve'><i class='ft-check-circle primary'></i> Resolve</a>";
+                                     $drop .= "<a href='javascript:void(0);' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>                                         
+                                              <a href='javascript:void(0);' class='dropdown-item resolve'><i class='ft-check-circle primary'></i> Resolve</a>";
                                  }else{
-                                     $drop .= "<a href='#' class='dropdown-item'><i class='ft-crosshair primary'></i> No Actions</a>";
+                                     $drop .= "<a href='javascript:void(0);' class='dropdown-item'><i class='ft-crosshair primary'></i> No Actions</a>";
                                  }
                                  $drop .= "</div></span>";
                  return $drop;
@@ -104,6 +105,8 @@ class DisputeController extends Controller
                    'shipment_id'=>$shipment
                ]);
            }
+
+           NotificationsController::send(19, $dispute->id);
        }
 
     }
@@ -146,6 +149,8 @@ class DisputeController extends Controller
             if($dispute_id != ''){
 
                 Dispute::where('id',$dispute_id)->update(['shipments_count'=>$count]);
+
+                NotificationsController::send(19, $dispute_id);
             }
             return response()->json($tracking_number);
         }else{
@@ -338,6 +343,8 @@ class DisputeController extends Controller
             if($dispute_id != ''){
 
                 Dispute::where('id',$dispute_id)->update(['shipments_count'=>$count]);
+
+                NotificationsController::send(19, $dispute_id);
             }
             return response()->json($tracking_number);
         }else{
@@ -351,7 +358,7 @@ class DisputeController extends Controller
             $admin = Auth::id();
             $admin_details = Admin::where('id',$admin)->first();
             $city_id = $admin_details->city->id;
-            Dispute::create([
+            $dispute = Dispute::create([
                 'description'=>$description,
                 'raised_by'=>$admin,
                 'raised_by_status'=>0,
@@ -359,6 +366,8 @@ class DisputeController extends Controller
                 'dispute_type_id'=>10,
                 'shipments_count'=>0
             ]);
+
+            NotificationsController::send(19, $dispute->id);
     }
     public static function add_cargo_short_received($cargo_id,$shipments){
         $description = "Short received shipments dispute for Cargo # $cargo_id";
@@ -381,6 +390,8 @@ class DisputeController extends Controller
                     'shipment_id'=>$shipment->shipment_id
                 ]);
             }
+
+            NotificationsController::send(19, $dispute->id);
         }
     }
     public static function add_delivery_wrong_status_dispute($delivery_note,$shipments){
@@ -405,6 +416,8 @@ class DisputeController extends Controller
                     'shipment_id'=>$shipment
                 ]);
             }
+
+            NotificationsController::send(19, $dispute->id);
         }
     }
 }
