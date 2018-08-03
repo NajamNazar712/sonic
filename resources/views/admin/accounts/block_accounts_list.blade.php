@@ -8,7 +8,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-header">
-                        <h4>Blocked Accounts</h4>
+                        @include('admin.inc.messages')
                     </div>
 
                     <div class="card-content">

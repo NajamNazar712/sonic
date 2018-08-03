@@ -204,4 +204,42 @@ class AdminReportsController extends Controller
             }
             return $cargo->make(true);
     }
+    public function lead_time_index(Request $request){
+        $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
+            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            >leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)'));
+            })
+            ->select('shipments.id as Shipment_id','shipments.tracking_number','ubi.account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date')
+            ->orderBy('shipments.id','desc' )
+            ->get();
+        return $shipments;
+        return view('admin.reports.lead_time_report');
+    }
+    public function lead_time_list(Request $request){
+//        $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
+//            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+//            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+//            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+//            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+//            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+//            ->leftJoin('shipments_journey as sj', function ($join) {
+//                $join->on('sj.shipment_id', '=', 'shipments.id')
+//                    ->where('sj.created_at','=',
+//                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+//            })
+
+    }
 }
