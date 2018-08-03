@@ -54,7 +54,6 @@
 														<th class="border-primary border-darken-1">Delivery Note No.</th>
 														<th class="border-primary border-darken-1">Hub</th>
 														<th class="border-primary border-darken-1">Rider</th>
-														<th class="border-primary border-darken-1">Route</th>
 														<th class="border-primary border-darken-1">Shipments</th>
 														<th class="border-primary border-darken-1">Shipments Delivered</th>
 														<th class="border-primary border-darken-1">Assigned by</th>
@@ -312,7 +311,6 @@
 					{data:'delivery_note_number', name: 'dn.id', class: 'align-middle text-center delivery_note_number'},
 					{data:'hub', name: 'h.name', class: 'align-middle hub'},
 					{data:'rider', name: 'ri.name', class: 'align-middle rider'},
-					{data:'route', name: 'route', class: 'align-middle route'},
 					{data:'shipments', name: 'dn.shipments_count', class: 'align-middle shipments'},
 					{data:'delivered_shipments', name: 'dn.delivered_shipments', class: 'align-middle delivered_shipments'},
 					{data:'assigned_by', name: 'a.name', class: 'align-middle assigned_by'},
@@ -325,10 +323,6 @@
 				],
 				rowCallback: function(row, data, index) {
 					$('td:eq(1)', row).html(index + 1);
-
-					// if ($.inArray(data.id, selected_rows) !== -1) {
-					// 	reconcile_delivery_notes_table.row(row).select();
-					// }
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
