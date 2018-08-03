@@ -81,10 +81,9 @@ class AdminFinanceController extends Controller
         ->join('delivery_notes as dn', 'dnsdn.delivery_note_id', '=', 'dn.id')
         ->join('cities as h', 'dn.hub_id', '=', 'h.id')
         ->join('riders as ri', 'dn.rider_id', '=', 'ri.id')
-        ->join('routes as ro', 'dn.route_id', '=', 'ro.id')
         ->join('admins as a', 'dn.admin_id', '=', 'a.id')
         ->join('admins as au', 'dn.updated_by', '=', 'a.id')
-        ->select('dn.id', 'dn.id as delivery_note_number', 'h.name as hub', 'ri.name as rider', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'dn.shipments_count as shipments', 'dn.delivered_shipments', 'a.name as assigned_by', 'dn.created_at as assigned_at', 'au.name as updated_by', 'dn.updated_at', 'dn.received_cod_amount as dncc_amount', 'dn.expense');
+        ->select('dn.id', 'dn.id as delivery_note_number', 'h.name as hub', 'ri.name as rider', 'dn.shipments_count as shipments', 'dn.delivered_shipments', 'a.name as assigned_by', 'dn.created_at as assigned_at', 'au.name as updated_by', 'dn.updated_at', 'dn.received_cod_amount as dncc_amount', 'dn.expense');
 
         if ($request->has('id')) {
            $delivery_notes->where('station_deposit_notes.id', $request->id);
@@ -94,9 +93,6 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($delivery_notes)
-        ->addColumn('route', function ($delivery_note) {
-            return $delivery_note->route_code . ' (' . $delivery_note->route_start . ' to ' . $delivery_note->route_end . ')';
-        })
         ->addColumn('action', function($station_deposit_note) {
             return '<div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -105,9 +101,6 @@ class AdminFinanceController extends Controller
                   </div>
                 </div>
             ';
-        })
-        ->filterColumn('route', function($query, $keyword) {
-            $query->where('ro.code', 'like', '%' . $keyword . '%')->orWhere('ro.start', 'like', '%' . $keyword . '%')->orWhere('ro.end', 'like', '%' . $keyword . '%');
         });
 
         return $datatables->make(true);
