@@ -645,9 +645,9 @@
 
 
 
-            // $('body').on('click','.tracking',function () {
-            //
-            // })
+            $('body').on('click','.tracking',function () {
+                    console.log('here');
+            });
 
         });
     </script>

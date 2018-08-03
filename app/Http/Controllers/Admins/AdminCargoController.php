@@ -914,7 +914,7 @@ class AdminCargoController extends Controller
       else {
         $cargo_consignment->status_id = 3;
       }
-
+      $cargo_consignment->receiver_id = Auth::id();
       $cargo_consignment->save();
 
       foreach ($shipment_ids as $shipment_id) {

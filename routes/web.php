@@ -412,6 +412,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qsr_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@qsr_list')->name('list');
         });
+        Route::prefix('return_note')->name('return_note.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@return_note_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@return_note_list')->name('list');
+        });
+        Route::prefix('pickup_note')->name('pickup_note.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@pickup_note_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@pickup_note_list')->name('list');
+        });
+        Route::prefix('cargo_received')->name('cargo_received.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@cargo_received_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@cargo_received_list')->name('list');
+        });
     });
 
     //Reports end

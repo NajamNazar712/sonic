@@ -2,62 +2,86 @@
 
 @section('content')
     <h1 class="mb-1">
-        QSR Report
+        Cargo Received Report
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-
                 <div class="row mb-2 justify-content-center">
 
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <select name="search_shipper" id="search_shipper" class="form-control select2">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                            <input type="text" class="form-control" name="search_cargo_no" id="search_cargo_no" placeholder="Search Cargo Number">
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
                                 @endforeach
                             </select>
                         </fieldset>
                     </div>
                     <div class="col-3">
                         <fieldset class="form-group">
-                        <select name="search_origin" id="search_origin" class="form-control select2">
-                            @foreach($cities as $origin)
-                                <option value="{{$origin->id}}">{{$origin->name}}</option>
-                            @endforeach
-                        </select>
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-3">
                         <fieldset class="form-group">
-                        <select name="search_destination" id="search_destination" class="form-control select2">
-                            @foreach($cities as $destination)
-                                <option value="{{$destination->id}}">{{$destination->name}}</option>
-                            @endforeach
-                        </select>
+                            <select name="search_shippimg_modes" id="search_shippimg_modes" class="form-control select2">
+                                @foreach($shippimg_modes as $shippimg_mode)
+                                    <option value="{{$shippimg_mode->id}}">{{$shippimg_mode->mode}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
                     <div class="col-3">
                         <fieldset class="form-group">
-                        <select name="search_hub" id="search_hub" class="form-control select2">
-                            @foreach($hubs as $hub)
-                                <option value="{{$hub->id}}">{{$hub->name}}</option>
-                            @endforeach
-                        </select>
-                        </fieldset>
-                    </div>
-                    <div class="col-3 ml-5">
-                        <fieldset class="form-group">
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
+                            <input type="text" name="transit_date" class="form-control bg-primary border-primary white rounded-right" id="transit_date" placeholder="Transit Date" data-value="">
                         </fieldset>
                     </div>
                     <div class="col-3">
                         <fieldset class="form-group">
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
+                            <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" data-value="">
                         </fieldset>
                     </div>
+                    {{--<div class="col-3">--}}
+                        {{--<fieldset class="form-group">--}}
+                            {{--<select name="search_assigned_by" id="search_assigned_by" class="form-control select2">--}}
+                                {{--@foreach($admins as $admin)--}}
+                                    {{--<option value="{{$admin->id}}">{{$admin->name}}</option>--}}
+                                {{--@endforeach--}}
+                            {{--</select>--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
+                    {{--<div class="col-3">--}}
+                        {{--<fieldset class="form-group">--}}
+                            {{--<select name="search_rider" id="search_rider" class="form-control select2">--}}
+                                {{--@foreach($riders as $rider)--}}
+                                    {{--<option value="{{$rider->id}}">{{$rider->name}}</option>--}}
+                                {{--@endforeach--}}
+                            {{--</select>--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
+
+                    {{--<div class="col-3">--}}
+                        {{--<fieldset class="form-group">--}}
+                            {{--<select name="search_completed_by" id="search_completed_by" class="form-control select2">--}}
+                                {{--@foreach($admins as $admin)--}}
+                                    {{--<option value="{{$admin->id}}">{{$admin->name}}</option>--}}
+                                {{--@endforeach--}}
+                            {{--</select>--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
+
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -67,16 +91,17 @@
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">History Status</th>
-                        <th class="border-primary border-darken-1">Service</th>
-                        <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Cargo No.</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
-                        <th class="border-primary border-darken-1">Aging</th>
+                        <th class="border-primary border-darken-1">Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Shipping Mode</th>
+                        <th class="border-primary border-darken-1">Transitted By</th>
+                        <th class="border-primary border-darken-1">Transit Date</th>
+                        <th class="border-primary border-darken-1">Received By</th>
+                        <th class="border-primary border-darken-1">Received Date</th>
+                        <th class="border-primary border-darken-1">Received Shipment(s)</th>
+                        <th class="border-primary border-darken-1">Short Received Shipment(s)</th>
                     </tr>
                     </thead>
                 </table>
@@ -146,71 +171,67 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
+            $('#search_cargo_no').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
             });
             $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Origin City',
+                placeholder:'Search Origin',
                 width:'100%',
                 allowClear:true
             });
             $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Destination City',
+                placeholder:'Search Destination',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Hub',
+            $('#search_shippimg_modes').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipping Mode',
                 width:'100%',
                 allowClear:true
             });
-            var from_max = '{{ Carbon\Carbon::now() }}';
-            var to_max = '{{ Carbon\Carbon::now() }}';
-            var from_date = $('#from_date').pickadate({
+            var transit_date = $('#transit_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max: from_max,
+                max: '{{ Carbon\Carbon::now() }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
-                    $('#from_date_root').css('top','40px');
+                    $('#transit_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
-                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
                 }
             });
-            var to_date = $('#to_date').pickadate({
+            var received_date = $('#received_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max: to_max,
+                max: '{{ Carbon\Carbon::now() }}',
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
-                    $('#to_date_root').css('top', '40px');
+                    $('#received_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-                    var current_date_formatted = $('input[name="to_date_formatted"]').val();
-                    from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
+
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     extend: 'excelHtml5',
-                    title: 'QSR Report',
+                    title: 'Received Cargo Report',
                     exportOptions: {
                         columns: ':visible',
                         format: {
@@ -231,31 +252,31 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.reports.qsr.list') }}',
+                    url: '{{ route('admin.reports.cargo_received.list') }}',
                     data: function (d) {
-                        d.search_shipper = $('#search_shipper').val();
+                        d.search_cargo_no = $('#search_cargo_no').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
-                        d.search_hub = $('#search_hub').val();
-                        d.search_from = $('input[name="from_date_formatted"]').val();
-                        d.search_to = $('input[name="to_date_formatted"]').val();
+                        d.search_shippimg_modes = $('#search_shippimg_modes').val();
+                        d.search_transit_date = $('#transit_date').val();
+                        d.search_received_date = $('input[name="received_date_formatted"]').val();
                     }
                 },
-                rowId: 'shId',
-                order: [[4, 'desc']],
+                rowId: 'cargo_id',
+                order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
-                    {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
+                    {data: 'cargo_id', name: 'cargo_consignments.id', class: 'align-middle cargo_id'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging'}
-
+                    {data: 'destination', name: 'h.name', class: 'align-middle destination'},
+                    {data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle shipments'},
+                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},////
+                    {data: 'transit_by', name: 'si.name', class: 'align-middle transit_by'},
+                    {data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
+                    {data: 'received_by', name: 'ri.name', class: 'align-middle received_by'},
+                    {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'},
+                    {data: 'received_shipments', name: 'cargo_consignments.received_shipments', class: 'align-middle received_shipments'},
+                    {data: 'short_received', name: 'short_received', class: 'align-middle short_received'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -273,7 +294,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.aging')) {
+                        if ($(header).is('.serial_number') || $(header).is('.received_shipments') || $(header).is('.short_received')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -290,7 +311,7 @@
             });
 
             $('#search_filter_btn').on('click',function () {
-               table.draw();
+                table.draw();
             });
 
         });
