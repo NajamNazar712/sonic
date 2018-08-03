@@ -120,7 +120,7 @@
             top: 50%;
             text-shadow: none;
         }
-        a.btn.btn-secondary.buttons-html5 {
+        a.btn.btn-secondary {
             border-radius: 20px;
             background: #666ee8;
         }
@@ -193,7 +193,8 @@
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+                buttons: [
+                    {
                     extend: 'excelHtml5',
                     title: 'Completed Pickup Notes Report',
                     exportOptions: {
@@ -204,7 +205,20 @@
                             }
                         }
                     }
-                }],
+                    },
+                    {
+                        extend: 'pdfHtml5',
+                        title: 'Received Cargo Report',
+                        exportOptions: {
+                            columns: ':visible',
+                            format: {
+                                body: function ( data, row, column, node ) {
+                                    return (column == 0)? index_column+=1:data;
+                                }
+                            }
+                        }
+                    },
+                ],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()

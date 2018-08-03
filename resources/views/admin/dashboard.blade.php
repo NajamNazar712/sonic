@@ -468,6 +468,7 @@
                     table.button(0).disable();
                 }
             });
+
             var myChart = echarts.init(document.getElementById('shipment_statistics_chart'));
 
             chartOptions = {
@@ -499,48 +500,38 @@
                         rotate: 45
                     },
                     data: @json($graph['dates'])
-                    // data: [
-                    //     11,12,13,14,15,16,17
-                    // ]
                 }
                 ],
-
                 // Vertical axis
+
                 yAxis: [{
                     type: 'value'
                 }],
-
-                // Add series
                 // Add series
                 series: [
                     {
                         name: 'Booked',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['booked'])
                     },
                     {
                         name: 'Received',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['received'])
                     },
                     {
                         name: 'Delivered',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['delivered'])
                     },
                     {
                         name: 'Return',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['return'])
                     },
                     {
                         name: 'Pending',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['pending'])
                     }
                 ]
@@ -605,31 +596,26 @@
                                 {
                                     name: 'Booked',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['booked']
                                 },
                                 {
                                     name: 'Received',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['received']
                                 },
                                 {
                                     name: 'Delivered',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['delivered']
                                 },
                                 {
                                     name: 'Return',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['return']
                                 },
                                 {
                                     name: 'Pending',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['pending']
                                 }
                             ]

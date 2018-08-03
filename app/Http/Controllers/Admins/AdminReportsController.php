@@ -171,9 +171,9 @@ class AdminReportsController extends Controller
             ->select(['cargo_consignments.id as cargo_id','oc.name as origin','h.name as destination','cargo_consignments.shipments','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments'])
             ->where('cargo_consignments.status_id',3);
         $cargo = Datatables::of($cargo_received)
-            ->addColumn('short_received',function ($cargo){
-                return $cargo->shipments - $cargo->received_shipments;
-            })
+//            ->addColumn('short_received',function ($cargo){
+//                return $cargo->shipments - $cargo->received_shipments;
+//            })
 //            ->editColumn('received_shipments',function($cargo){
 //                return "<a class='received_shipments'>$cargo->received_shipments</a>";
 //            })
