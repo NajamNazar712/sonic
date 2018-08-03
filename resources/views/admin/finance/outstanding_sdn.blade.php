@@ -369,8 +369,6 @@
 					$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_expense').val('');
 					$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_net_amount').val('');
 
-					$('#reconcile_delivery_notes #reconcile_delivery_notes_form button.reconcile').prop('disabled', true);
-
 					$('#reconcile_delivery_notes #reconcile_delivery_notes_form .station_deposit_note_id').val(id);
 
 					station_deposit_note_id = id;
@@ -418,15 +416,11 @@
 					total_dncc_amount_selector.val(total_dncc_amount);
 					total_expense_selector.val(total_expense);
 					total_net_amount_selector.val(total_net_amount);
-
-					$('#reconcile_delivery_notes #reconcile_delivery_notes_form button.reconcile').prop('disabled', false);
 				}
 				else {
 					total_dncc_amount_selector.val('');
 					total_expense_selector.val('');
 					total_net_amount_selector.val('');
-
-					$('#reconcile_delivery_notes #reconcile_delivery_notes_form button.reconcile').prop('disabled', true);
 				}
 
 				$('#reconcile_delivery_notes #reconcile_delivery_notes_form .delivery_note_ids').val(selected_rows);
@@ -468,8 +462,6 @@
 						$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_dncc_amount').val('');
 						$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_expense').val('');
 						$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_net_amount').val('');
-
-						$('#reconcile_delivery_notes #reconcile_delivery_notes_form button.reconcile').prop('disabled', true);
 
 						selected_rows = [];
 
