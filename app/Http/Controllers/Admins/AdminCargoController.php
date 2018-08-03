@@ -671,7 +671,7 @@ class AdminCargoController extends Controller
 
         $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
 
-        $cargo_consignment->status = 2;
+        $cargo_consignment->status_id = 2;
 
         $cargo_consignment->save();
       }
