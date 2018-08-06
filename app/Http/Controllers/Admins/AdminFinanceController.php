@@ -346,7 +346,13 @@ class AdminFinanceController extends Controller
         $amount = $shipment->amount;
         $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
         $gst = $charges * 0.13; //Should be Dynamic
-        $payable = $amount - ($charges + $gst);
+
+        if (!$shipment->return_charges) {
+            $payable = $amount - ($charges + $gst);
+        }
+        else {
+            $payable = 0 - ($charges + $gst);
+        }
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
