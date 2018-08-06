@@ -74,7 +74,7 @@
             </div>
             <div class="modal-body confirmation text-center">
                 <h3>Are you sure you want to perform this action?</h3>
-                <form action="{{route('admin.account.status')}}" method="post" class="mt-2">
+                <form action="{{route('admin.accounts.status')}}" method="post" class="mt-2">
                     {{csrf_field()}}
                     <input type="hidden" name="_method" value="PUT">
                     <input type="hidden" name="shid" id="shid">

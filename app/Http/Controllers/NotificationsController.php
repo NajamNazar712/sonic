@@ -1267,13 +1267,16 @@ class NotificationsController extends Controller
             $total_payable = 0;
 
             foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-              $shipment = $done_payment_shipment;
+              $shipment = $done_payment_shipment->shipment;
 
               foreach ($present_fields as $field) {
                 if (in_array($field, ['amount', 'charges', 'gst', 'payable'])) {
                   $shipment_details .= $done_payment_shipment[$field] . ', ';
                 }
-                else {
+                else if ($field == 'consignee_city') {
+                  $shipment_details .= $shipment->consignee_city->name . ', ';
+                }
+                else if (!empty($shipment[$field])) {
                   $shipment_details .= $shipment[$field] . ', ';
                 }
               }

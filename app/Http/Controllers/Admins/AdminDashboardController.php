@@ -199,7 +199,6 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.block_accounts_list');
     }
     public function UserStatus(Request $request){
-//        dd($request);
         $id = $request->shid; //shipper id
         $status = $request->status;
         if($status == 'active'){
@@ -229,6 +228,62 @@ class AdminDashboardController extends Controller
 //                }
 //            }
 //        }
+    }
+    public function UserStatusBlock(Request $request){
+        $user_id = $request->id;
+        $status = $request->status;
+        $user = User::where('id',$user_id);
+        if($user->exists()){
+            $user = $user->first();
+            if($status == 'block'){
+                if($user->blacklist == 0){
+                    $user->blacklist = 1;
+                    $user->save();
+                    return response()->json(['status'=>1,'success'=>"User added to the blacklist!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"User is already in blacklist!"]);
+                }
+            }else if($status == 'unblock'){
+                if($user->blacklist == 1){
+                    $user->blacklist = 0;
+                    $user->save();
+                    return response()->json(['status'=>1,'success'=>"User removed from the blacklist!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"User is not in the blacklist!"]);
+                }
+            }
+
+        }else{
+            return response()->json(['status'=>0,'error'=>"User doesn\'t exist!"]);
+        }
+    }
+    public function UserStatusChange(Request $request){
+        $user_id = $request->id;
+        $status = $request->status;
+        $user = User::where('id',$user_id);
+        if($user->exists()){
+            $user = $user->first();
+            if($status == 'enable'){
+                if($user->status == 4){
+                    $user->status = 3;
+                    $user->save();
+                    return response()->json(['status'=>1,'success'=>"User is now enabled!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"User is already enabled!"]);
+                }
+            }else if($status == 'disable'){
+                if($user->status == 3){
+                    $user->status = 4;
+                    $user->save();
+                    return response()->json(['status'=>1,'success'=>"User is now disabled!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"User is already disabled!"]);
+
+                }
+            }
+        }else{
+            return response()->json(['status'=>0,'error'=>"User doesn\'t exist!"]);
+        }
     }
     /**
      * @return \Illuminate\Http\JsonResponse
@@ -2823,30 +2878,48 @@ class AdminDashboardController extends Controller
     }
     public function activeAccountListAjax(){
        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email'])->where('users.status',3)->where('blacklist',0);
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         return Datatables::of($users)
-
+            ->editColumn('status',function ($users){
+                if($users->status == 3){
+                    return "Enable";
+                }else{
+                    return "Disable";
+                }
+            })
             ->addColumn("action", function ($result) {
-                                            return " <span class='dropdown'>
+                                            $drop = " <span class='dropdown'>
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
+                                              <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
+                                              <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a><a href='javascript:void(0);' class='dropdown-item'><i class='ft-credit-card primary'></i> View Tarrif</a>";
+                if (RateStatus::where('user_id', $result->id)->exists()) {
+                    $drop .= "<a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>";
+                }
+                if($result->blacklist == 0) {
+                    $drop .= "<a href='javascript:void(0);' class='dropdown-item blacklist' rel='block'><i class='ft-user-x primary'></i> Block</a>";
+                }
+                                            if($result->status == 3){
+                                                $drop .="<a href='javascript:void(0);' class='dropdown-item userdisable'><i class='ft-user-minus primary'></i> Disable</a>";
 
-                                            </div>
+                                            }else{
+                                                $drop .="<a href='javascript:void(0);' class='dropdown-item userenable'><i class='ft-user-plus primary'></i> Enable</a>";
+
+                                            }
+                                            $drop .="</div>
                                             </span>";
+                                            return $drop;
                                         })
                                       ->make(true);
 
     }
-    //->join('rate_statuses','users.id','=','rate_statuses.user_id')
+
 
     public function pendingAccountListAjax(){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
-         //$isRate = RateStatus::where('user_id',$users->id);
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','users.blacklist'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         return Datatables::of($users)
             ->editColumn('created_at', function ($users) {
@@ -2893,7 +2966,9 @@ class AdminDashboardController extends Controller
                                                         <a href='".route('admin.add.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Add Rates</a>
                                                 ";
                                             }
-
+                                            if($result->blacklist == 0){
+                                                $dropdown .= "<a href='javascript:void(0);' class='dropdown-item blacklist' rel='block'><i class='ft-user-x primary'></i> Block</a>";
+                                            }
                                             $dropdown .= "
                                                     </div>
                                                 </span>";
@@ -2914,7 +2989,7 @@ class AdminDashboardController extends Controller
                                             <div class='dropdown-menu open-left arrow'>
                                               <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
                                               <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
-
+<a href='javascript:void(0);' class='dropdown-item blacklist' rel='unblock'><i class='ft-user-plus primary'></i> Enable</a>
                                             </div>
                                             </span>";
                                         })

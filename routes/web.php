@@ -114,15 +114,20 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
-    Route::get('/accounts/pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('accounts.pending');
-   
-   //Datatables data using ajax calls
-    Route::get('/accounts/active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('accounts.active.ajax');
-    Route::get('/accounts/pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('accounts.pending.ajax');
-    Route::get('/accounts/block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('accounts.block.ajax');
+    Route::prefix('accounts')->name('accounts.')->group(function(){
+        Route::get('pending', 'Admins\AdminDashboardController@pendingAccountsList')->name('pending');
+        Route::get('pending/ajax', 'Admins\AdminDashboardController@pendingAccountListAjax')->name('pending.ajax');
+        Route::get('active', 'Admins\AdminDashboardController@activeAccountsList')->name('active');
+        Route::get('active/ajax', 'Admins\AdminDashboardController@activeAccountListAjax')->name('active.ajax');
+        Route::get('block', 'Admins\AdminDashboardController@blockAccountsList')->name('block');
+        Route::get('block/ajax', 'Admins\AdminDashboardController@blockAccountListAjax')->name('block.ajax');
+        Route::post('status/block','Admins\AdminDashboardController@UserStatusBlock')->name('status.block');
+        Route::post('status/change','Admins\AdminDashboardController@UserStatusChange')->name('status.change');
+        Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
+    });
 
-    Route::get('/accounts/active', 'Admins\AdminDashboardController@activeAccountsList')->name('accounts.active');
-    Route::get('/accounts/block', 'Admins\AdminDashboardController@blockAccountsList');
+   //Datatables data using ajax calls
+
     //add rates view
     Route::get('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRatesView')->name('add.rates');
     Route::post('/accounts/{id}/add/rates','Admins\AdminDashboardController@addRates')->name('add.rates.submit');
@@ -131,7 +136,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
 
     //ajax request
-    Route::put('/account/status', 'Admins\AdminDashboardController@UserStatus')->name('account.status');
+
+
     //new address
     Route::prefix('management')->name('management.')->group(function () {
 
@@ -432,6 +438,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@cargo_received_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_received_list')->name('list');
         });
+        Route::prefix('lead_time')->name('lead_time.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@lead_time_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@lead_time_list')->name('list');
+        });
+
     });
 
     //Reports end
