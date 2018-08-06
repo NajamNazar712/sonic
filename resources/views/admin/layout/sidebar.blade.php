@@ -10,8 +10,6 @@
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{route('admin.orders.index')}}">Order Management</a>
                     </li>
-                    {{--<li><a class="menu-item" href="/admin/sheet/receiving">Booked Receiving Sheets</a>--}}
-                    </li>
 
                 </ul>
             </li>
@@ -23,9 +21,9 @@
 
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Shipper Accounts</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="/admin/accounts/pending" data-i18n="nav.dash.ecommerce">Pending</a></li>
-                    <li><a class="menu-item" href="/admin/accounts/active" data-i18n="nav.dash.ecommerce">Active</a></li>
-                    <li><a class="menu-item" href="/admin/accounts/block" data-i18n="nav.dash.ecommerce">Block</a></li>
+                    <li><a class="menu-item" href="{{route('admin.accounts.pending')}}" data-i18n="nav.dash.ecommerce">Pending</a></li>
+                    <li><a class="menu-item" href="{{route('admin.accounts.active')}}" data-i18n="nav.dash.ecommerce">Active</a></li>
+                    <li><a class="menu-item" href="{{route('admin.accounts.block')}}" data-i18n="nav.dash.ecommerce">Block</a></li>
                 </ul>
             </li>
 
@@ -80,6 +78,7 @@
                     <li><a class="menu-item" href="{{ route('admin.reports.return_note.index') }}">Return Notes Report</a></li>
                     <li><a class="menu-item" href="{{ route('admin.reports.pickup_note.index') }}">Pickup Notes Report</a></li>
                     <li><a class="menu-item" href="{{ route('admin.reports.cargo_received.index') }}">Cargo Received Report</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.reports.lead_time.index') }}">Lead Time Report</a></li>
                 </ul>
             </li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Packaging</span></a>
