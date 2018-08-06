@@ -97,13 +97,6 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
     });
 
-    Route::prefix('user_management')->name('user_management.')->group(function (){
-        Route::prefix('roles')->name('roles.')->group(function (){
-            Route::get('', 'Shippers\UserManagementController@role_index')->name('index');
-            Route::get('list', 'Shippers\UserManagementController@role_list')->name('list');
-        });
-    });
-
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
@@ -342,6 +335,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('tracking')->name('tracking.')->group(function () {
         Route::get('', 'Admins\AdminTrackingController@index')->name('index');
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
+    });
+
+    Route::prefix('user_management')->name('user_management.')->group(function (){
+        Route::prefix('roles')->name('roles.')->group(function (){
+            Route::get('', 'Shippers\UserManagementController@role_index')->name('index');
+            Route::get('list', 'Shippers\UserManagementController@role_list')->name('list');
+        });
     });
 
     Route::prefix('finance')->name('finance.')->group(function () {
