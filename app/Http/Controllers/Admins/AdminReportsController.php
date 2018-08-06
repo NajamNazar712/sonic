@@ -205,6 +205,9 @@ class AdminReportsController extends Controller
             return $cargo->make(true);
     }
     public function lead_time_index(Request $request){
+        return view('admin.reports.lead_time_report');
+    }
+    public function lead_time_list(Request $request){
         $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
             ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -222,24 +225,88 @@ class AdminReportsController extends Controller
                     ->where('radd.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)'));
             })
-            ->select('shipments.id as Shipment_id','shipments.tracking_number','ubi.account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date')
+            ->leftJoin('shipments_journey as fstatus', function ($join) {
+                $join->on('fstatus.shipment_id', '=', 'shipments.id')
+                    ->where('fstatus.id','>',
+                        DB::raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)'));
+            })
+            ->leftJoin('shipments_journey as dd', function ($join) {
+                $join->on('dd.shipment_id', '=', 'shipments.id')
+                    ->where('dd.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,16,30,36) )'));
+            })
+            ->leftJoin('shipments_journey as rc', function ($join) {
+                $join->on('rc.shipment_id', '=', 'shipments.id')
+                    ->where('rc.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,42))'));
+            })
+            ->leftJoin('shipments_journey as rrad', function ($join) {
+                $join->on('rrad.shipment_id', '=', 'shipments.id')
+                    ->where('rrad.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 22)'));
+            })
+            ->leftJoin('shipments_journey as rds', function ($join) {
+                $join->on('rds.shipment_id', '=', 'shipments.id')
+                    ->where('rds.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(24,25,29,31,35,38))'));
+            })
+            ->leftJoin('shipments_journey as pd', function ($join) {
+                $join->on('pd.shipment_id', '=', 'shipments.id')
+                    ->where('pd.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(39,40,41,43))'));
+            })
+            ->leftJoin('shipment_status as fs','fs.id','=','fstatus.shipper_status_id')
+            ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
+            ->select('shipments.id as Shipment_id','shipments.tracking_number','ubi.account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date')
             ->orderBy('shipments.id','desc' )
-            ->get();
-        return $shipments;
-        return view('admin.reports.lead_time_report');
-    }
-    public function lead_time_list(Request $request){
-//        $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
-//            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-//            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-//            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-//            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
-//            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-//            ->leftJoin('shipments_journey as sj', function ($join) {
-//                $join->on('sj.shipment_id', '=', 'shipments.id')
-//                    ->where('sj.created_at','=',
-//                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
-//            })
+            ->groupBy('shipments.id');
+        $datatable = Datatables::of($shipments)
+            ->addColumn('transit_tat',function ($shipments){
+                return ($shipments->arrival_date && $shipments->reached_at_destination)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->reached_at_destination) :'-';
+            })
+            ->addColumn('attempt_tat',function ($shipments){
+                return ($shipments->arrival_date && $shipments->first_status_date)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->first_status_date) :'-';
+            })
+            ->addColumn('dispatch_tat',function ($shipments){
+                return ($shipments->reached_at_destination && $shipments->first_status_date)? with(new Carbon($shipments->reached_at_destination, 'UTC'))->diffInDays($shipments->first_status_date) :'-';
+            })
+            ->addColumn('return_transit_tat',function ($shipments){
+                return ($shipments->return_confirm && $shipments->return_reached_at_destination)? with(new Carbon($shipments->return_confirm, 'UTC'))->diffInDays($shipments->return_reached_at_destination) :'-';
+            })
+            ->addColumn('return_dispatch_tat',function ($shipments){
+                return ($shipments->return_delivered_date && $shipments->return_reached_at_destination)? with(new Carbon($shipments->return_reached_at_destination, 'UTC'))->diffInDays($shipments->return_delivered_date) :'-';
+            })
+            ->addColumn('return_tat',function ($shipments){
+                return ($shipments->return_confirm && $shipments->return_delivered_date)? with(new Carbon($shipments->return_confirm, 'UTC'))->diffInDays($shipments->return_delivered_date) :'-';
+            })
+            ->editColumn('arrival_date', function ($shipments) {
+                return $shipments->arrival_date ? with(new Carbon($shipments->arrival_date))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('reached_at_destination', function ($shipments) {
+                return $shipments->reached_at_destination ? with(new Carbon($shipments->reached_at_destination))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('first_status_date', function ($shipments) {
+                return $shipments->first_status_date ? with(new Carbon($shipments->first_status_date))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('delivered_date', function ($shipments) {
+                return $shipments->delivered_date ? with(new Carbon($shipments->delivered_date))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('delivered_date', function ($shipments) {
+                return $shipments->delivered_date ? with(new Carbon($shipments->delivered_date))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('return_confirm', function ($shipments) {
+                return $shipments->return_confirm ? with(new Carbon($shipments->return_confirm))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('return_reached_at_destination', function ($shipments) {
+                return $shipments->return_reached_at_destination ? with(new Carbon($shipments->return_reached_at_destination))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('return_delivered_date', function ($shipments) {
+                return $shipments->return_delivered_date ? with(new Carbon($shipments->return_delivered_date))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('payment_done_date', function ($shipments) {
+                return $shipments->payment_done_date ? with(new Carbon($shipments->payment_done_date))->format('d/m/Y h:i:s A') : '';
+            });
 
+            return $datatable->make(true);
     }
 }

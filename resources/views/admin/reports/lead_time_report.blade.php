@@ -107,14 +107,15 @@
                         <th class="border-primary border-darken-1">Dispatch TAT(B-C)</th>
                         <th class="border-primary border-darken-1">Delivered Date(D)</th>
                         <th class="border-primary border-darken-1">Return Confirm(E)</th>
-                        <th class="border-primary border-darken-1">Reached At Destination(F)</th>
+                        <th class="border-primary border-darken-1">Reached At Origin(F)</th>
                         <th class="border-primary border-darken-1">Return Transit TAT(E-F)</th>
-                        <th class="border-primary border-darken-1">Return Status(G)</th>
+                        <th class="border-primary border-darken-1">Return Status</th>
+                        <th class="border-primary border-darken-1">Return Status Date(G)</th>
                         <th class="border-primary border-darken-1">Return Dispatch TAT(F-G)</th>
                         <th class="border-primary border-darken-1">Return TAT(E-G)</th>
                         <th class="border-primary border-darken-1">Payment Done Date(H)</th>
-                        <th class="border-primary border-darken-1">Payment TAT(D-H,G-H)</th>
-                        <th class="border-primary border-darken-1">Total TAT</th>
+                        {{--<th class="border-primary border-darken-1">Payment TAT(D-H,G-H)</th>--}}
+                        {{--<th class="border-primary border-darken-1">Total TAT</th>--}}
                     </tr>
                     </thead>
                 </table>
@@ -241,6 +242,7 @@
 
             var index_column = 0;
             var table = $('#datatable').DataTable({
+                "scrollX": true,
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
@@ -254,19 +256,7 @@
                                 }
                             }
                         }
-                    },
-                    {
-                        extend: 'pdfHtml5',
-                        title: 'Received Cargo Report',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( data, row, column, node ) {
-                                    return (column == 0)? index_column+=1:data;
-                                }
-                            }
-                        }
-                    },
+                    }
                 ],
                 fixedHeader: {
                     header: true,
@@ -279,31 +269,46 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: '{{ route('admin.reports.cargo_received.list') }}',
+                    url: '{{ route('admin.reports.lead_time.list') }}',
                     data: function (d) {
-                        d.search_cargo_no = $('#search_cargo_no').val();
-                        d.search_origin = $('#search_origin').val();
-                        d.search_destination = $('#search_destination').val();
-                        d.search_shippimg_modes = $('#search_shippimg_modes').val();
-                        d.search_transit_date = $('#transit_date').val();
-                        d.search_received_date = $('input[name="received_date_formatted"]').val();
+                        // d.search_cargo_no = $('#search_cargo_no').val();
+                        // d.search_origin = $('#search_origin').val();
+                        // d.search_destination = $('#search_destination').val();
+                        // d.search_shippimg_modes = $('#search_shippimg_modes').val();
+                        // d.search_transit_date = $('#transit_date').val();
+                        // d.search_received_date = $('input[name="received_date_formatted"]').val();
                     }
                 },
-                rowId: 'cargo_id',
-                order: [[1, 'asc']],
+                rowId: 'ahipment_id',
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'cargo_id', name: 'cargo_consignments.id', class: 'align-middle cargo_id'},
+                    // {data: 'shipment_id', name: 'shipments.id', class: 'align-middle shipment_id'},
+                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'account_no', name: 'ubi.account_no', class: 'align-middle account_no'},
+                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-                    {data: 'destination', name: 'h.name', class: 'align-middle destination'},
-                    {data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle shipments'},
-                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},////
-                    {data: 'transit_by', name: 'si.name', class: 'align-middle transit_by'},
-                    {data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
-                    {data: 'received_by', name: 'ri.name', class: 'align-middle received_by'},
-                    {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'}
-                    // {data: 'received_shipments', name: 'cargo_consignments.received_shipments', class: 'align-middle received_shipments'},
-                    // {data: 'short_received', name: 'short_received', class: 'align-middle short_received'},
+                    {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
+                    {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'current_status', name: 'ss.name', class: 'align-middle current_status'},
+                    {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date'},
+                    {data: 'reached_at_destination', name: 'reached_at_destination', class: 'align-middle reached_at_destination'},
+                    {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat'},
+                    {data: 'first_status', name: 'fs.name', class: 'align-middle first_status'},////
+                    {data: 'first_status_date', name: 'first_status_date', class: 'align-middle first_status_date'},////
+                    {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat'},////
+                    {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat'},
+                    {data: 'delivered_date', name: 'delivered_date', class: 'align-middle delivered_date'},
+                    {data: 'return_confirm', name: 'return_confirm', class: 'align-middle return_confirm'},
+                    {data: 'return_reached_at_destination', name: 'return_reached_at_destination', class: 'align-middle return_reached_at_destination'},
+                    {data: 'return_transit_tat', name: 'return_transit_tat', class: 'align-middle return_transit_tat'},
+                    {data: 'return_delivered_status', name: 'return_delivered_status', class: 'align-middle return_delivered_status'},
+                    {data: 'return_delivered_date', name: 'return_delivered_date', class: 'align-middle return_delivered_date'},
+                    {data: 'return_dispatch_tat', name: 'return_dispatch_tat', class: 'align-middle return_dispatch_tat'},
+                    {data: 'return_tat', name: 'return_tat', class: 'align-middle return_tat'},
+                    {data: 'payment_done_date', name: 'payment_done_date', class: 'align-middle payment_done_date'},
+                    // {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat'}
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -321,7 +326,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.received_shipments') || $(header).is('.short_received')) {
+                        if ($(header).is('.serial_number') || $(header).is('.transit_tat') || $(header).is('.attempt_tat')  || $(header).is('.return_transit_tat') || $(header).is('.dispatch_tat') || $(header).is('.return_dispatch_tat') || $(header).is('.return_tat')) {
                             $(td).appendTo($(search));
                         }
                         else {
