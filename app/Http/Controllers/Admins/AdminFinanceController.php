@@ -1263,7 +1263,7 @@ class AdminFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Company Bank</strong></td>
-                              <td>' . $done_payment->company_bank->name . '</td>
+                              <td>' . ($done_payment->company_bank_id) ? $done_payment->company_bank->name : '' . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Reference Number</strong></td>
