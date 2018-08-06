@@ -344,13 +344,17 @@ class AdminFinanceController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         $amount = $shipment->amount;
-        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
-        $gst = $charges * 0.13; //Should be Dynamic
 
         if (!$shipment->return_charges) {
+            $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
+            $gst = $charges * 0.13; //Should be Dynamic
+
             $payable = $amount - ($charges + $gst);
         }
         else {
+            $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
+            $gst = $charges * 0.13; //Should be Dynamic
+
             $payable = 0 - ($charges + $gst);
         }
 
@@ -447,7 +451,7 @@ class AdminFinanceController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         $amount = 0 - $done_payment_shipment->payable;
-        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
+        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
         $gst = $charges * 0.13; //Should be Dynamic
         $payable = $amount - ($charges + $gst);
 
