@@ -1273,7 +1273,10 @@ class NotificationsController extends Controller
                 if (in_array($field, ['amount', 'charges', 'gst', 'payable'])) {
                   $shipment_details .= $done_payment_shipment[$field] . ', ';
                 }
-                else {
+                else if ($field == 'consignee_city') {
+                  $shipment_details .= $shipment->consignee_city->name . ', ';
+                }
+                else if (!empty($shipment[$field])) {
                   $shipment_details .= $shipment[$field] . ', ';
                 }
               }
