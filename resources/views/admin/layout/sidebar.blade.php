@@ -89,6 +89,12 @@
                 </ul>
             </li>
 
+            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">User Management</span></a>
+                <ul class="menu-content">
+                    <li><a class="menu-item" href="{{ route('admin.user_management.roles.index') }}">Roles</a></li>
+                </ul>
+            </li>
+
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Network Management</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{route('admin.management.city.index')}}" data-i18n="nav.dash.ecommerce">City Management</a></li>

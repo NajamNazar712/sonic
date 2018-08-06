@@ -96,6 +96,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
         });
     });
+
+    Route::prefix('user_management')->name('user_management.')->group(function (){
+        Route::prefix('roles')->name('roles.')->group(function (){
+            Route::get('', 'Shippers\UserManagementController@role_index')->name('index');
+            Route::get('list', 'Shippers\UserManagementController@role_list')->name('list');
+        });
+    });
+
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
