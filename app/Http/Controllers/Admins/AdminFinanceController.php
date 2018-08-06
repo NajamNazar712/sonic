@@ -735,7 +735,7 @@ class AdminFinanceController extends Controller
         $pending_payment_shipment_ids = array();
 
         foreach ($shipment_ids as $shipment_id) {
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', [$pending_payment_ids])->first();
+            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', $pending_payment_ids)->first();
 
             $pending_payment_shipment_ids[$pending_payment_shipment->pending_payment_id][] = $shipment_id;
         }
@@ -781,7 +781,7 @@ class AdminFinanceController extends Controller
         $pending_payment_shipment_ids = array();
 
         foreach ($shipment_ids as $shipment_id) {
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', [$pending_payment_ids])->first();
+            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', $pending_payment_ids)->first();
 
             $pending_payment_shipment_ids[$pending_payment_shipment->pending_payment_id][] = $shipment_id;
         }
