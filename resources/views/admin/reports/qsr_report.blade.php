@@ -216,30 +216,33 @@
                         columns: ':visible',
                         format: {
                             body: function ( data, row, column, node ) {
-                                return (column == 0)? index_column+=1:data;
+                                // return (column == 0)? index_column+=1:data;
+                                // var server_data = table.ajax.params();
+                                // console.log(server_data.columnsS)
+                                return (column == 0)? row+1:data;
                             }
                         }
                     }
                     },
-                    {
-                        extend: 'pdfHtml5',
-                        title: 'Received Cargo Report',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( data, row, column, node ) {
-                                    return (column == 0)? index_column+=1:data;
-                                }
-                            }
-                        }
-                    },
+                    // {
+                    //     extend: 'pdfHtml5',
+                    //     title: 'Received Cargo Report',
+                    //     exportOptions: {
+                    //         columns: ':visible',
+                    //         format: {
+                    //             body: function ( data, row, column, node ) {
+                    //                 return (column == 0)? index_column+=1:data;
+                    //             }
+                    //         }
+                    //     }
+                    // },
                 ],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
                 },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
+                lengthMenu: [[10, 50, 100], [10, 50, 100]],
+                pageLength: 10,
                 stateSave: true,
                 pagingType: 'full_numbers',
                 processing: true,
