@@ -304,7 +304,7 @@ class AdminDashboardController extends Controller
      */
     public function viewShippingInfo($id){
         $user = User::find($id);
-        $shipping = $user->shipping;
+        $shipping = $user->shipping()->where('hidden',0)->get();
         $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
         return response()->json($returnHTML);
     }
@@ -2894,7 +2894,7 @@ class AdminDashboardController extends Controller
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
                                               <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                                              <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a><a href='javascript:void(0);' class='dropdown-item'><i class='ft-credit-card primary'></i> View Tarrif</a>";
+                                              <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>";
                 if (RateStatus::where('user_id', $result->id)->exists()) {
                     $drop .= "<a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>";
                 }

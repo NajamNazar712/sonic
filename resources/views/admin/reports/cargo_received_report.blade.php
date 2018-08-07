@@ -237,23 +237,23 @@
                         columns: ':visible',
                         format: {
                             body: function ( data, row, column, node ) {
-                                return (column == 0)? index_column+=1:data;
+                                return (column == 0)? row+1:data;
                             }
                         }
                     }
                     },
-                    {
-                    extend: 'pdfHtml5',
-                    title: 'Received Cargo Report',
-                    exportOptions: {
-                        columns: ':visible',
-                        format: {
-                            body: function ( data, row, column, node ) {
-                                return (column == 0)? index_column+=1:data;
-                            }
-                        }
-                    }
-                    },
+                    // {
+                    // extend: 'pdfHtml5',
+                    // title: 'Received Cargo Report',
+                    // exportOptions: {
+                    //     columns: ':visible',
+                    //     format: {
+                    //         body: function ( data, row, column, node ) {
+                    //             return (column == 0)? index_column+=1:data;
+                    //         }
+                    //     }
+                    // }
+                    // },
                 ],
                 fixedHeader: {
                     header: true,
@@ -272,7 +272,7 @@
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_shippimg_modes = $('#search_shippimg_modes').val();
-                        d.search_transit_date = $('#transit_date').val();
+                        d.search_transit_date = $('input[name="transit_date_formatted"]').val();
                         d.search_received_date = $('input[name="received_date_formatted"]').val();
                     }
                 },
