@@ -205,33 +205,69 @@
                     from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
-            var index_column = 0;
+            var index_column = [];
+            var flag = false;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                    {{--{--}}
+                        {{--extend: 'excel',--}}
+                        {{--title: 'Test',--}}
+                        {{--text: '<i class="la la-file-excel-o"></i> Test',--}}
+                        {{--exportOptions: {--}}
+                            {{--columns: ':visible',--}}
+                            {{--format: {--}}
+                                {{--body: function ( e, dt, column, config ) {--}}
+                                    {{--var info = table.ajax.params();--}}
+                                    {{--info.length = -1;--}}
+                                    {{--// console.log(e);--}}
+                                    {{--if(flag == false){--}}
+                                        {{--$.ajax({--}}
+                                            {{--url: '{{ route('admin.reports.qsr.list') }}',--}}
+                                            {{--type:"GET",--}}
+                                            {{--data: info,--}}
+                                        {{--}).done(function (data) {--}}
+                                            {{--index_column.push(data.data);--}}
+
+                                            {{--// $.each(data.data,function (key,value) {--}}
+                                            {{--//     console.log(value)--}}
+                                            {{--// })--}}
+                                        {{--});--}}
+                                        {{--flag = true;--}}
+                                    {{--}--}}
+                                    {{--console.log(index_column);--}}
+                                    {{--// return (column == 0)? dt+1:index_column[0];--}}
+
+
+                                {{--}--}}
+                            {{--}--}}
+                        {{--}--}}
+                    {{--},--}}
                     {
-                    extend: 'excelHtml5',
+                    extend: 'excel',
                     title: 'QSR Report',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
                     exportOptions: {
                         columns: ':visible',
                         format: {
-                            body: function ( data, row, column, node ) {
-                                // return (column == 0)? index_column+=1:data;
-                                // var server_data = table.ajax.params();
-                                // console.log(server_data.columnsS)
-                                return (column == 0)? row+1:data;
+                            body: function ( e, dt, column, config ) {
+                                // var info = dt.button.exportInfo();
+                                //     console.log(info);
+                                //     return false;
+                                    return (column == 0)? dt+1:e;
+
                             }
                         }
                     }
                     },
                     // {
-                    //     extend: 'pdfHtml5',
-                    //     title: 'Received Cargo Report',
+                    //     extend: 'print',
+                    //     text: '<i class="la la-print"></i> Print',
                     //     exportOptions: {
                     //         columns: ':visible',
                     //         format: {
-                    //             body: function ( data, row, column, node ) {
-                    //                 return (column == 0)? index_column+=1:data;
+                    //             body: function ( e, dt, column, node ) {
+                    //                 return (column == 0)? dt+1:e;
                     //             }
                     //         }
                     //     }
@@ -305,6 +341,7 @@
                     });
                 }
             });
+
 
             $('#search_filter_btn').on('click',function () {
                table.draw();

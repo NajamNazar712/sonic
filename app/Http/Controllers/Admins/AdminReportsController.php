@@ -357,4 +357,5 @@ class AdminReportsController extends Controller
             }
             return $lead_time->make(true);
     }
+
 }

@@ -377,7 +377,7 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesOvernight" name="on_discount_weight_switch" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_weight_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_weight_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -392,7 +392,7 @@
                                                                 <input type="checkbox" name="on_discount_cash_switch" class="switchery discountSwitchesOvernight" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_cash_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_cash_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -407,7 +407,7 @@
                                                                 <input type="checkbox" name="on_discount_insurance_switch" class="switchery discountSwitchesOvernight" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_insurance_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_insurance_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -422,7 +422,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_return_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_return_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_return_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -438,7 +438,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOvernight" data-size="xs" name="on_discount_packaging_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_packaging_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_packaging_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -805,7 +805,7 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesOverland" name="ol_discount_weight_switch" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_weight_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_weight_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -820,7 +820,7 @@
                                                                 <input type="checkbox" name="ol_cash_weight_switch" class="switchery discountSwitchesOverland" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_cash_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_cash_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -835,7 +835,7 @@
                                                                 <input type="checkbox" name="ol_discount_insurance_switch" class="switchery discountSwitchesOverland" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_insurance_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_insurance_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -850,7 +850,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_return_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_return_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_return_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -866,7 +866,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesOverland" data-size="xs" name="ol_discount_packaging_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric ol-discount-inp" name="ol_discount_packaging_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent ol-discount-inp" name="ol_discount_packaging_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1236,7 +1236,7 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesDetain" name="detain_discount_weight_switch" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_weight_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_weight_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1251,7 +1251,7 @@
                                                                 <input type="checkbox" name="detain_cash_weight_switch" class="switchery discountSwitchesDetain" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_cash_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_cash_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1266,7 +1266,7 @@
                                                                 <input type="checkbox" name="detain_discount_insurance_switch" class="switchery discountSwitchesDetain" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_insurance_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_insurance_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1281,7 +1281,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_return_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_return_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_return_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1297,7 +1297,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesDetain" data-size="xs" name="detain_discount_packaging_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric detain-discount-inp" name="detain_discount_packaging_rate" disabled>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent detain-discount-inp" name="detain_discount_packaging_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1665,7 +1665,7 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesSameday" name="sameday_discount_weight_switch" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_weight_rate" disabled>
+                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_weight_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1680,7 +1680,7 @@
                                                                 <input type="checkbox" name="sameday_cash_weight_switch" class="switchery discountSwitchesSameday" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_cash_rate" disabled>
+                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_cash_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1695,7 +1695,7 @@
                                                                 <input type="checkbox" name="sameday_discount_insurance_switch" class="switchery discountSwitchesSameday" data-size="xs" />
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_insurance_rate" disabled>
+                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_insurance_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1710,7 +1710,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_return_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_return_rate" disabled>
+                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_return_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -1726,7 +1726,7 @@
                                                                 <input type="checkbox"  class="switchery discountSwitchesSameday" data-size="xs" name="sameday_discount_packaging_switch"/>
                                                               </span>
                                                         </div>
-                                                        <input type="text"  class="form-control numeric sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" disabled>
+                                                        <input type="text"  class="form-control dec-percent sameday-discount-inp"  data-rule-required="true" data-msg-required="This field is required" name="sameday_discount_packaging_rate" disabled>
                                                     </div>
                                                 </fieldset>
                                             </div>
@@ -2167,7 +2167,7 @@
                 '                                                </div>\n' +
                 '                                                <div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="ol_cash_charges['+ol_slab_count+']" type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required">\n' +
+                '                                                        <input name="ol_cash_charges['+ol_slab_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
                 '<div class="col">\n' +
@@ -2196,7 +2196,7 @@
                 '\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="ol_ins_charges['+ol_ins_count+']" type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required">\n' +
+                '                                                        <input name="ol_ins_charges['+ol_ins_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
                 '<div class="col">\n' +
@@ -2345,7 +2345,7 @@
                 '                                                </div>\n' +
                 '                                                <div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="detain_cash_charges['+detain_slab_count+']" type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required">\n' +
+                '                                                        <input name="detain_cash_charges['+detain_slab_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
                 '<div class="col">\n' +
@@ -2374,7 +2374,7 @@
                 '\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="detain_ins_charges['+detain_ins_count+']" type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required">\n' +
+                '                                                        <input name="detain_ins_charges['+detain_ins_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
                 '<div class="col">\n' +
@@ -2479,7 +2479,6 @@
         var sameday_count = 3;
         $('body').on('click','#sameday_weightadd',function () {
 
-            // let htmdiv1 = '<div class="row" id="ol_weight_row'+sameday_count+'"><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_up[]"></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_range_down[]"></fieldset></div><div class="col-md-2 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+sameday_count+']"/></div></div><div class="col-md-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col-md-2 text-center"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_local_charges[]"></fieldset></div><div class="col-md-2"><fieldset class="form-group"><input type="number" class="form-control" min="0" value="" name="ol_wa_national_charges[]"></fieldset></div></div>';
             let htmdiv1 = '<div class="row" id="sameday_weight_row'+sameday_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_down['+sameday_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch['+sameday_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_wa_national_charges['+sameday_count+']"></fieldset></div><div class="col">\n' +
                 '<span id="sameday_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-sameday').append(htmdiv1);
@@ -2536,7 +2535,7 @@
                 '                                                </div>\n' +
                 '                                                <div class="col-md-2">\n' +
                 '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="sameday_cash_charges['+sameday_slab_count+']" type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required">\n' +
+                '                                                        <input name="sameday_cash_charges['+sameday_slab_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
                 '<div class="col">\n' +
@@ -2565,7 +2564,7 @@
                 '\n' +
                 '                                                <div class="col-md-2 text-center">\n' +
                 '                                                    <fieldset class="form-group">\n' +
-                '                                                        <input name="sameday_ins_charges['+sameday_ins_count+']" type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required">\n' +
+                '                                                        <input name="sameday_ins_charges['+sameday_ins_count+']" type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required">\n' +
                 '                                                    </fieldset>\n' +
                 '                                                </div>\n' +
                 '<div class="col">\n' +
