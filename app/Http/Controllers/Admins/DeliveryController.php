@@ -928,6 +928,7 @@ class DeliveryController extends Controller
             $delivery_note_id = $request->delivery_note_id;
             $shipment_count = 0;
             $dispute_shipments = array();
+            $delivered_status_array = array(14,16,30,36,37);
             if($delivery_note_id != ''){
                 foreach ($shipments as $shipment){
 
@@ -947,7 +948,7 @@ class DeliveryController extends Controller
                                 ]);
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                            } elseif ($request->status_drop[$shipment] == 14 || $request->status_drop[$shipment] == 16) {
+                            } elseif (in_array($request->status_drop[$shipment],$delivered_status_array)) {
                                 $parcel = Shipment::where('id', $shipment)->first();
                                 if ($parcel->booking_type_id == 2) {
                                     ShipmentsJourney::create([
