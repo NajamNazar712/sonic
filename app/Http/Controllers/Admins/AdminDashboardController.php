@@ -401,15 +401,15 @@ class AdminDashboardController extends Controller
             'on_discount_title.required_if' => 'The overnight discount title field must be required',
             'on_daterange.required_if' => 'The overnight discount date range field must be required',
             'on_discount_weight_rate.required_if' => 'The overnight discount weight field must be required',
-            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
+//            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
             'on_discount_cash_rate.required_if' => 'The overnight discount cash field must be required',
-            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
+//            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
             'on_discount_insurance_rate.required_if' => 'The overnight discount insurance field must be required',
-            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
+//            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
             'on_discount_return_rate.required_if' => 'The overnight discount return field must be required',
-            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
+//            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
             'on_discount_packaging_rate.required_if' => 'The overnight discount packaging field must be required',
-            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
+//            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
             'on_discount_title.required_with'=>'The overnight discount title field is required',
             'on_daterange.required_with'=>'The overnight discount date field is required',
             //overland starts
@@ -457,15 +457,15 @@ class AdminDashboardController extends Controller
             'ol_discount_title.required_if' => 'The overland discount title field must be required',
             'ol_daterange.required_if' => 'The overland discount date range field must be required',
             'ol_discount_weight_rate.required_if' => 'The overland discount weight field must be required',
-            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
+//            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
             'ol_discount_cash_rate.required_if' => 'The overland discount cash field must be required',
-            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
+//            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
             'ol_discount_insurance_rate.required_if' => 'The overland discount insurance field must be required',
-            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
+//            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
             'ol_discount_return_rate.required_if' => 'The overland discount return field must be required',
-            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
+//            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
             'ol_discount_packaging_rate.required_if' => 'The overland discount packaging field must be required',
-            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
+//            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
             'ol_discount_title.required_with'=>'The overland discount title field is required',
             'ol_daterange.required_with'=>'The overland discount date field is required',
             //overland end and detain starts
@@ -513,15 +513,15 @@ class AdminDashboardController extends Controller
             'detain_discount_title.required_if' => 'The detain discount title field must be required',
             'detain_daterange.required_if' => 'The detain discount date range field must be required',
             'detain_discount_weight_rate.required_if' => 'The detain discount weight field must be required',
-            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
+//            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
             'detain_discount_cash_rate.required_if' => 'The detain discount cash field must be required',
-            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
+//            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
             'detain_discount_insurance_rate.required_if' => 'The detain discount insurance field must be required',
-            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
+//            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
             'detain_discount_return_rate.required_if' => 'The detain discount return field must be required',
-            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
+//            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
             'detain_discount_packaging_rate.required_if' => 'The detain discount packaging field must be required',
-            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
+//            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
             'detain_discount_title.required_with'=>'The detain discount title field is required',
             'detain_daterange.required_with'=>'The detain discount date field is required',
             //detain ends and sameday starts
@@ -569,15 +569,15 @@ class AdminDashboardController extends Controller
             'sameday_discount_title.required_if' => 'The sameday discount title field must be required',
             'sameday_daterange.required_if' => 'The sameday discount date range field must be required',
             'sameday_discount_weight_rate.required_if' => 'The sameday discount weight field must be required',
-            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
+//            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
             'sameday_discount_cash_rate.required_if' => 'The sameday discount cash field must be required',
-            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
+//            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
             'sameday_discount_insurance_rate.required_if' => 'The sameday discount insurance field must be required',
-            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
+//            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
             'sameday_discount_return_rate.required_if' => 'The sameday discount return field must be required',
-            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
+//            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
             'sameday_discount_packaging_rate.required_if' => 'The sameday discount packaging field must be required',
-            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
+//            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
             'sameday_discount_title.required_with'=>'The sameday discount title field is required',
             'sameday_daterange.required_with'=>'The sameday discount date field is required',
             //sameday ends
@@ -613,11 +613,11 @@ class AdminDashboardController extends Controller
                 'on_flyer_box'=>'required_if:on_packaging_switch,==,on|numeric',
                 'on_discount_title'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
                 'on_daterange'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on|numeric',
-                'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on|numeric',
-                'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on|numeric',
-                'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on|numeric',
-                'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on|numeric'
+                'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on',
+                'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on',
+                'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on',
+                'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on',
+                'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on'
             ];
         }
         //overland
@@ -645,11 +645,11 @@ class AdminDashboardController extends Controller
                 'ol_flyer_box'=>'required_if:ol_packaging_switch,==,on|numeric',
                 'ol_discount_title'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
                 'ol_daterange'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on|numeric',
-                'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on|numeric',
-                'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on|numeric',
-                'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on|numeric',
-                'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on|numeric',
+                'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on',
+                'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on',
+                'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on',
+                'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on',
+                'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on',
             ];
         }
         //overland
@@ -677,11 +677,11 @@ class AdminDashboardController extends Controller
                 'detain_flyer_box'=>'required_if:detain_packaging_switch,==,on|numeric',
                 'detain_discount_title'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
                 'detain_daterange'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on|numeric',
-                'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on|numeric',
-                'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on|numeric',
-                'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on|numeric',
-                'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on|numeric',
+                'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on',
+                'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on',
+                'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on',
+                'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on',
+                'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on',
             ];
         }
         //sameday
@@ -709,11 +709,11 @@ class AdminDashboardController extends Controller
                 'sameday_flyer_box'=>'required_if:sameday_packaging_switch,==,on|numeric',
                 'sameday_discount_title'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
                 'sameday_daterange'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on|numeric',
-                'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on|numeric',
-                'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on|numeric',
-                'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on|numeric',
-                'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on|numeric',
+                'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on',
+                'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on',
+                'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on',
+                'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on',
+                'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on',
             ];
         }
 
@@ -1039,8 +1039,8 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
 
                     if($request->on_discount_record != null){
                         DiscountCharge::where(['id'=>$request->on_discount_record])->update([
@@ -1291,8 +1291,8 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
 
                     if($request->ol_discount_record != null){
                         DiscountCharge::where(['id'=>$request->ol_discount_record])->update([
@@ -1543,8 +1543,8 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
 
                     if($request->detain_discount_record != null){
                         DiscountCharge::where(['id'=>$request->detain_discount_record])->update([
@@ -1795,8 +1795,8 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
 
                     if($request->sameday_discount_record != null){
                         DiscountCharge::where(['id'=>$request->sameday_discount_record])->update([
@@ -1892,15 +1892,15 @@ class AdminDashboardController extends Controller
             'on_discount_title.required_if' => 'The overnight discount title field must be required',
             'on_daterange.required_if' => 'The overnight discount date range field must be required',
             'on_discount_weight_rate.required_if' => 'The overnight discount weight field must be required',
-            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
+//            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
             'on_discount_cash_rate.required_if' => 'The overnight discount cash field must be required',
-            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
+//            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
             'on_discount_insurance_rate.required_if' => 'The overnight discount insurance field must be required',
-            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
+//            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
             'on_discount_return_rate.required_if' => 'The overnight discount return field must be required',
-            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
+//            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
             'on_discount_packaging_rate.required_if' => 'The overnight discount packaging field must be required',
-            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
+//            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
             'on_discount_title.required_with'=>'The overnight discount title field is required',
             'on_daterange.required_with'=>'The overnight discount date field is required',
             //overland starts
@@ -1948,15 +1948,15 @@ class AdminDashboardController extends Controller
             'ol_discount_title.required_if' => 'The overland discount title field must be required',
             'ol_daterange.required_if' => 'The overland discount date range field must be required',
             'ol_discount_weight_rate.required_if' => 'The overland discount weight field must be required',
-            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
+//            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
             'ol_discount_cash_rate.required_if' => 'The overland discount cash field must be required',
-            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
+//            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
             'ol_discount_insurance_rate.required_if' => 'The overland discount insurance field must be required',
-            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
+//            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
             'ol_discount_return_rate.required_if' => 'The overland discount return field must be required',
-            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
+//            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
             'ol_discount_packaging_rate.required_if' => 'The overland discount packaging field must be required',
-            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
+//            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
             'ol_discount_title.required_with'=>'The overland discount title field is required',
             'ol_daterange.required_with'=>'The overland discount date field is required',
             //overland end and detain starts
@@ -2004,15 +2004,15 @@ class AdminDashboardController extends Controller
             'detain_discount_title.required_if' => 'The detain discount title field must be required',
             'detain_daterange.required_if' => 'The detain discount date range field must be required',
             'detain_discount_weight_rate.required_if' => 'The detain discount weight field must be required',
-            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
+//            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
             'detain_discount_cash_rate.required_if' => 'The detain discount cash field must be required',
-            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
+//            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
             'detain_discount_insurance_rate.required_if' => 'The detain discount insurance field must be required',
-            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
+//            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
             'detain_discount_return_rate.required_if' => 'The detain discount return field must be required',
-            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
+//            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
             'detain_discount_packaging_rate.required_if' => 'The detain discount packaging field must be required',
-            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
+//            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
             'detain_discount_title.required_with'=>'The detain discount title field is required',
             'detain_daterange.required_with'=>'The detain discount date field is required',
             //detain ends and sameday starts
@@ -2060,15 +2060,15 @@ class AdminDashboardController extends Controller
             'sameday_discount_title.required_if' => 'The sameday discount title field must be required',
             'sameday_daterange.required_if' => 'The sameday discount date range field must be required',
             'sameday_discount_weight_rate.required_if' => 'The sameday discount weight field must be required',
-            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
+//            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
             'sameday_discount_cash_rate.required_if' => 'The sameday discount cash field must be required',
-            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
+//            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
             'sameday_discount_insurance_rate.required_if' => 'The sameday discount insurance field must be required',
-            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
+//            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
             'sameday_discount_return_rate.required_if' => 'The sameday discount return field must be required',
-            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
+//            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
             'sameday_discount_packaging_rate.required_if' => 'The sameday discount packaging field must be required',
-            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
+//            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
             'sameday_discount_title.required_with'=>'The sameday discount title field is required',
             'sameday_daterange.required_with'=>'The sameday discount date field is required',
             //sameday ends
@@ -2104,11 +2104,11 @@ class AdminDashboardController extends Controller
                 'on_flyer_box'=>'required_if:on_packaging_switch,==,on|numeric',
                 'on_discount_title'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
                 'on_daterange'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on|numeric',
-                'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on|numeric',
-                'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on|numeric',
-                'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on|numeric',
-                'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on|numeric'
+                'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on',
+                'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on',
+                'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on',
+                'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on',
+                'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on'
             ];
         }
         //overland
@@ -2136,11 +2136,11 @@ class AdminDashboardController extends Controller
                 'ol_flyer_box'=>'required_if:ol_packaging_switch,==,on|numeric',
                 'ol_discount_title'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
                 'ol_daterange'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on|numeric',
-                'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on|numeric',
-                'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on|numeric',
-                'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on|numeric',
-                'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on|numeric',
+                'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on',
+                'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on',
+                'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on',
+                'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on',
+                'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on',
             ];
         }
              //overland
@@ -2168,11 +2168,11 @@ class AdminDashboardController extends Controller
                 'detain_flyer_box'=>'required_if:detain_packaging_switch,==,on|numeric',
                 'detain_discount_title'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
                 'detain_daterange'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on|numeric',
-                'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on|numeric',
-                'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on|numeric',
-                'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on|numeric',
-                'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on|numeric',
+                'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on',
+                'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on',
+                'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on',
+                'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on',
+                'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on',
             ];
         }
             //sameday
@@ -2200,11 +2200,11 @@ class AdminDashboardController extends Controller
                 'sameday_flyer_box'=>'required_if:sameday_packaging_switch,==,on|numeric',
                 'sameday_discount_title'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
                 'sameday_daterange'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on|numeric',
-                'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on|numeric',
-                'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on|numeric',
-                'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on|numeric',
-                'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on|numeric',
+                'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on',
+                'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on',
+                'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on',
+                'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on',
+                'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on',
             ];
         }
 
@@ -2355,14 +2355,9 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-//                    $to = str_replace('/', '-', $date_sep[0]);
-//                    $from = str_replace('/', '-', $date_sep[1]);
-//                    $nto = date_create($to);
-//                    $to =date_format($nto,"Y-m-d H:i:s");
-//                    $nfrom = date_create($from);
-//                    $from =date_format($nfrom,"Y-m-d H:i:s");
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+
 
                     DiscountCharge::create([
                         'user_id' => $id,
@@ -2519,14 +2514,9 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-//                    $to = str_replace('/', '-', $date_sep[0]);
-//                    $from = str_replace('/', '-', $date_sep[1]);
-//                    $nto = date_create($to);
-//                    $to =date_format($nto,"Y-m-d H:i:s");
-//                    $nfrom = date_create($from);
-//                    $from =date_format($nfrom,"Y-m-d H:i:s");
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+
 
                     DiscountCharge::create([
                         'user_id' => $id,
@@ -2683,14 +2673,9 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-//                    $to = str_replace('/', '-', $date_sep[0]);
-//                    $from = str_replace('/', '-', $date_sep[1]);
-//                    $nto = date_create($to);
-//                    $to = date_format($nto, "Y-m-d H:i:s");
-//                    $nfrom = date_create($from);
-//                    $from = date_format($nfrom, "Y-m-d H:i:s");
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+
 
                     DiscountCharge::create([
                         'user_id' => $id,
@@ -2846,14 +2831,9 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-//                    $to = str_replace('/', '-', $date_sep[0]);
-//                    $from = str_replace('/', '-', $date_sep[1]);
-//                    $nto = date_create($to);
-//                    $to =date_format($nto,"Y-m-d H:i:s");
-//                    $nfrom = date_create($from);
-//                    $from =date_format($nfrom,"Y-m-d H:i:s");
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+
 
                     DiscountCharge::create([
                         'user_id' => $id,

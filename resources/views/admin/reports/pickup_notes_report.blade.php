@@ -206,6 +206,17 @@
                         }
                     }
                     },
+                    {
+                        extend: 'print',
+                        exportOptions: {
+                            columns: ':visible',
+                            format: {
+                                body: function ( e, dt, column, node ) {
+                                    return (column == 0)? dt+1:e;
+                                }
+                            }
+                        }
+                    },
                     // {
                     //     extend: 'pdfHtml5',
                     //     title: 'Received Cargo Report',
