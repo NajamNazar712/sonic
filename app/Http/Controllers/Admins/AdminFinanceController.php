@@ -344,9 +344,19 @@ class AdminFinanceController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         $amount = $shipment->amount;
-        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
-        $gst = $charges * 0.13; //Should be Dynamic
-        $payable = $amount - ($charges + $gst);
+
+        if (!$shipment->return_charges) {
+            $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
+            $gst = $charges * 0.13; //Should be Dynamic
+
+            $payable = $amount - ($charges + $gst);
+        }
+        else {
+            $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
+            $gst = $charges * 0.13; //Should be Dynamic
+
+            $payable = 0 - ($charges + $gst);
+        }
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
@@ -436,7 +446,14 @@ class AdminFinanceController extends Controller
     private function adjust_payment($done_payment_id, $shipment_id) {
         $done_payment_shipment = DonePaymentShipment::where('done_payment_id', $done_payment_id)->where('shipment_id', $shipment_id)->first();
 
+        ShipmentChargesController::return($shipment_id);
+
         $shipment = Shipment::find($shipment_id);
+
+        $amount = 0 - $done_payment_shipment->payable;
+        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
+        $gst = $charges * 0.13; //Should be Dynamic
+        $payable = $amount - ($charges + $gst);
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
@@ -453,10 +470,10 @@ class AdminFinanceController extends Controller
             $pending_payment_shipment->pending_payment_id = $pending_payment->id;
             $pending_payment_shipment->shipment_id = $shipment_id;
             $pending_payment_shipment->type = 2;
-            $pending_payment_shipment->amount = 0;
-            $pending_payment_shipment->charges = 0;
-            $pending_payment_shipment->gst = 0;
-            $pending_payment_shipment->payable = 0 - $done_payment_shipment->payable;
+            $pending_payment_shipment->amount = $amount;
+            $pending_payment_shipment->charges = $charges;
+            $pending_payment_shipment->gst = $gst;
+            $pending_payment_shipment->payable = $payable;
 
             $pending_payment_shipment->save();
         }
@@ -476,10 +493,10 @@ class AdminFinanceController extends Controller
             $pending_payment_shipment->pending_payment_id = $pending_payment->id;
             $pending_payment_shipment->shipment_id = $shipment_id;
             $pending_payment_shipment->type = 2;
-            $pending_payment_shipment->amount = 0;
-            $pending_payment_shipment->charges = 0;
-            $pending_payment_shipment->gst = 0;
-            $pending_payment_shipment->payable = 0 - $done_payment_shipment->payable;
+            $pending_payment_shipment->amount = $amount;
+            $pending_payment_shipment->charges = $charges;
+            $pending_payment_shipment->gst = $gst;
+            $pending_payment_shipment->payable = $payable;
 
             $pending_payment_shipment->save();
         }
@@ -718,7 +735,7 @@ class AdminFinanceController extends Controller
         $pending_payment_shipment_ids = array();
 
         foreach ($shipment_ids as $shipment_id) {
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', [$pending_payment_ids])->first();
+            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', $pending_payment_ids)->first();
 
             $pending_payment_shipment_ids[$pending_payment_shipment->pending_payment_id][] = $shipment_id;
         }
@@ -764,7 +781,7 @@ class AdminFinanceController extends Controller
         $pending_payment_shipment_ids = array();
 
         foreach ($shipment_ids as $shipment_id) {
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', [$pending_payment_ids])->first();
+            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', $pending_payment_ids)->first();
 
             $pending_payment_shipment_ids[$pending_payment_shipment->pending_payment_id][] = $shipment_id;
         }
@@ -1250,7 +1267,7 @@ class AdminFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Company Bank</strong></td>
-                              <td>' . $done_payment->company_bank->name . '</td>
+                              <td>' . (($done_payment->company_bank_id) ? $done_payment->company_bank->name : '') . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Reference Number</strong></td>
