@@ -338,7 +338,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('tracking')->name('tracking.')->group(function () {
-        Route::get('', 'Admins\AdminTrackingController@index')->name('index');
+        Route::get('{tracking_number?}', 'Admins\AdminTrackingController@index')->name('index');
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
     });
 

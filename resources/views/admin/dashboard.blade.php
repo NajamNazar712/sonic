@@ -631,9 +631,12 @@
 
 
 
-            $('body').on('click','.tracking',function () {
-                    console.log('here');
-            });
+            {{--$('body').on('click','.tracking',function () {--}}
+                {{--var tracking = '{!! route('admin.tracking.index') !!}';--}}
+                {{--var id = $(this).parents('tr').attr('id');--}}
+                {{----}}
+                {{--window.location = tracking+'?tracking_number='+id;--}}
+            {{--});--}}
 
         });
     </script>

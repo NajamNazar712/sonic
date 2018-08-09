@@ -55,6 +55,10 @@ class ReturnController extends Controller
             ->groupBy('shipments.id');
 
         return Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
             ->editColumn('shipper',function ($shipper){
                 return "$shipper->shipper<br/>$shipper->shipper_phone1<br/>$shipper->shipper_phone2";
             })
