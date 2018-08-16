@@ -190,9 +190,9 @@ class AdminCargoController extends Controller
       $sender = Auth::user();
 
       $details['sender']['id'] = $sender->id;
-      $details['sender']['username'] = $sender->username;
+      $details['sender']['name'] = $sender->name;
 
-      $details['receivers'] = Admin::all(['id', 'username']);
+      $details['receivers'] = Admin::all(['id', 'name']);
 
       foreach ($request->shipment_ids as $shipment_id) {
         $shipment = Shipment::find($shipment_id);
@@ -689,7 +689,7 @@ class AdminCargoController extends Controller
       $details['cargo_consignment']['weight_charges_per_kg'] = $cargo_consignment->weight_charges_per_kg;
       $details['cargo_consignment']['extra_charges'] = $cargo_consignment->extra_charges;
       $details['cargo_consignment']['total_weight_charges'] = $cargo_consignment->total_weight_charges;
-      $details['cargo_consignment']['sender_username'] = Admin::find($cargo_consignment->sender_id)->username;
+      $details['cargo_consignment']['sender_name'] = Admin::find($cargo_consignment->sender_id)->name;
 
       if ($request->add) {
         $details['cargo_consignment']['junction_city_1_id'] = $cargo_consignment->junction_city_1_id;
@@ -708,7 +708,7 @@ class AdminCargoController extends Controller
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
 
-        $details['receivers'] = Admin::all(['id', 'username']);
+        $details['receivers'] = Admin::all(['id', 'name']);
       }
       else {
         $details['cargo_consignment']['junction_city_1'] = $cargo_consignment->junction_city_1->name;
@@ -719,7 +719,7 @@ class AdminCargoController extends Controller
         $details['cargo_consignment']['transport_mode_vendor'] = $cargo_consignment->transport_mode_vendor->name;
         $details['cargo_consignment']['shipments_weight'] = $cargo_consignment->shipments_weight;
         $details['cargo_consignment']['actual_weight'] = $cargo_consignment->actual_weight;
-        $details['cargo_consignment']['receiver_username'] = ($cargo_consignment->receiver_id) ? Admin::find($cargo_consignment->receiver_id)->username : '';
+        $details['cargo_consignment']['receiver_name'] = ($cargo_consignment->receiver_id) ? Admin::find($cargo_consignment->receiver_id)->name : '';
       }
 
       return $details;
