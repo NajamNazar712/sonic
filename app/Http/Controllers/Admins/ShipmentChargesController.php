@@ -122,6 +122,13 @@ class ShipmentChargesController extends Controller
                         }
                     }
 
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
+                    }
+
                     if ($charges < $discount) {
                         $shipment->weight_charges = $charges;
                     }
@@ -169,6 +176,13 @@ class ShipmentChargesController extends Controller
                     }
                     else {
                         $charges = floatval($charges);
+                    }
+
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
                     }
 
                     if ($charges < $discount) {
@@ -228,6 +242,13 @@ class ShipmentChargesController extends Controller
                 }
 
                 if ($charges != 0) {
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
+                    }
+
                     if ($charges < $discount) {
                         $shipment->insurance_charges = $charges;
                     }
@@ -270,6 +291,13 @@ class ShipmentChargesController extends Controller
                 }
                 else {
                     $charges = $return_charge->national;
+                }
+
+                if (strpos($discount, '%') !== FALSE) {
+                    $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                }
+                else {
+                    $discount = floatval($discount);
                 }
 
                 if ($charges < $discount) {
@@ -410,6 +438,13 @@ class ShipmentChargesController extends Controller
                         }
                     }
 
+                    if (strpos($discount, '%') !== FALSE) {
+                        $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+                    }
+                    else {
+                        $discount = floatval($discount);
+                    }
+
                     if ($charges < $discount) {
                         $shipment->replacement_charges = ($charges * $replacement_multiplier);
                     }
@@ -447,6 +482,13 @@ class ShipmentChargesController extends Controller
             $try_and_buy_multiplier = ($booking_type_charge->try_and_buy_charges / 100);
 
             $charges = ($shipment->weight_charges * $try_and_buy_multiplier);
+
+            if (strpos($discount, '%') !== FALSE) {
+                $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+            }
+            else {
+                $discount = floatval($discount);
+            }
 
             if ($charges < $discount) {
                 $shipment->try_and_buy_charges = $charges;
