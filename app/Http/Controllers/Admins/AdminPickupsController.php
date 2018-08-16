@@ -30,6 +30,9 @@ class AdminPickupsController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:admin');
+
+
+      $this->middleware('Permission');
     }
 
     static public function generate($user_id, $shipment_id) {

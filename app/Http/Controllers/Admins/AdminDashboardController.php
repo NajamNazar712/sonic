@@ -45,6 +45,8 @@ class AdminDashboardController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
 
     public function index(){

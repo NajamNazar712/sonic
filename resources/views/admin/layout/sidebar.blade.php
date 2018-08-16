@@ -2,10 +2,6 @@
      data-scroll-to-active="true">
     <div class="main-menu-content">
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-
-
-            <!-- official -->
-{{--            <li class=" nav-item"><a href="{{route('admin.dashboard')}}"><i class="la la-home"></i><span class="menu-title">Dashboard</span></a></li>--}}
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Order Management</span></a>
                 <ul class="menu-content">
                     <li><a class="menu-item" href="{{route('admin.orders.index')}}">Order Management</a>
@@ -13,106 +9,264 @@
 
                 </ul>
             </li>
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Log</a></li>
-                </ul>
-            </li>
 
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Shipper Accounts</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{route('admin.accounts.pending')}}" data-i18n="nav.dash.ecommerce">Pending</a></li>
-                    <li><a class="menu-item" href="{{route('admin.accounts.active')}}" data-i18n="nav.dash.ecommerce">Active</a></li>
-                    <li><a class="menu-item" href="{{route('admin.accounts.block')}}" data-i18n="nav.dash.ecommerce">Block</a></li>
-                </ul>
-            </li>
+            @if (session('role_id') == 1 || in_array(1, session('permissions')))
+                <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
+                    <ul class="menu-content">
+                        <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Log</a></li>
+                    </ul>
+                </li>
+            @endif
 
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Pickups</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.pickups.pending.index') }}">Pending</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.pickups.assigned.index') }}">Assigned</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.pickups.receive.index') }}">Receive</a></li>
-                </ul>
-            </li>
+            @if (session('role_id') == 1 || count(array_intersect([5, 11, 15], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Shipper Accounts</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(5, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.accounts.pending')}}" data-i18n="nav.dash.ecommerce">Pending</a></li>
+                        @endif
 
+                        @if (session('role_id') == 1 || in_array(11, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.accounts.active')}}" data-i18n="nav.dash.ecommerce">Active</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(15, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.accounts.block')}}" data-i18n="nav.dash.ecommerce">Block</a></li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('role_id') == 1 || count(array_intersect([17, 20, 23], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Pickups</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(17, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.pickups.pending.index') }}">Pending</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(20, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.pickups.assigned.index') }}">Assigned</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(23, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.pickups.receive.index') }}">Receive</a></li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('role_id') == 1 || count(array_intersect([25, 26, 27], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Cargo</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.cargo.pending.index') }}">Pending</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.cargo.create.index') }}">Create</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a></li>
-                </ul>
-            </li>
+                    @if (session('role_id') == 1 || in_array(25, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.cargo.pending.index') }}">Pending</a></li>
+                    @endif
 
-            <li class=" nav-item"><a href="{{route('admin.sameday.index')}}"><i class="la la-home"></i><span class="menu-title">Same-day Delivery</span></a></li>
+                    @if (session('role_id') == 1 || in_array(26, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.cargo.create.index') }}">Create</a></li>
+                    @endif
 
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.delivery.pending.index') }}">Pending</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.delivery.note.index') }}">Create Note</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.delivery.receive.index') }}">Receive</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.delivery.completed.index') }}">Completed</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.delivery.sdn.index') }}">Station Deposit Notes</a></li>
+                    @if (session('role_id') == 1 || in_array(27, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a>
+                    @endif
+                    </li>
                 </ul>
             </li>
+            @endif
 
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Return</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.return.index') }}">Mark</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.return.confirmed') }}">Confirmed</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.return.create.index') }}">Create Note</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.return.receive.index') }}">Receive</a></li>
-                </ul>
-            </li>
+            @if (session('role_id') == 1 || in_array(32, session('permissions')))
+                <li class=" nav-item"><a href="{{route('admin.sameday.index')}}"><i class="la la-home"></i><span class="menu-title">Same-day Delivery</span></a></li>
+            @endif
 
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Finance</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.finance.outstanding_sdn.index') }}">Outstanding SDN</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.finance.outstanding_shipments.index') }}">Outstanding Shipments</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.finance.make_payments.index') }}">Make Payments</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.finance.done_payments.index') }}">Done Payments</a></li>
-                </ul>
-            </li>
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Reports</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.reports.qsr.index') }}">QSR Report</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.reports.return_note.index') }}">Return Notes Report</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.reports.pickup_note.index') }}">Pickup Notes Report</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.reports.cargo_received.index') }}">Cargo Received Report</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.reports.lead_time.index') }}">Lead Time Report</a></li>
-                </ul>
-            </li>
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Packaging</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.packaging.index') }}">Stock</a></li>
-                    <li><a class="menu-item" href="{{ route('admin.packaging.requests.index') }}">Requests</a></li>
-                </ul>
-            </li>
+            @if (session('role_id') == 1 || count(array_intersect([33, 35, 36, 40], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(33, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.delivery.pending.index') }}">Pending</a></li>
+                        @endif
 
-            <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">User Management</span></a>
-                <ul class="menu-content">
-                    <li><a class="menu-item" href="{{ route('admin.user_management.roles.index') }}">Roles</a></li>
-                </ul>
-            </li>
+                        @if (session('role_id') == 1 || in_array(35, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.delivery.note.index') }}">Create Note</a></li>
+                        @endif
 
+                        @if (session('role_id') == 1 || in_array(36, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.delivery.receive.index') }}">Receive</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(40, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.delivery.completed.index') }}">Completed</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(42, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.delivery.sdn.index') }}">Station Deposit Notes</a></li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('role_id') == 1 || count(array_intersect([44, 47, 48, 49], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Return</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(44, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.return.index') }}">Mark</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(47, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.return.confirmed') }}">Confirmed</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(48, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.return.create.index') }}">Create Note</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(49, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.return.receive.index') }}">Receive</a></li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Finance</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(52, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.outstanding_sdn.index') }}">Outstanding SDN</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(54, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.outstanding_shipments.index') }}">Outstanding Shipments</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(57, session('permissions')))
+                            <li><a class="menu-item" href="">Change Shipment Amount</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(59, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.make_payments.index') }}">Make Payments</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(61, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.done_payments.index') }}">Done Payments</a></li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Reports</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(64, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.pickup_note.index') }}">Pickup Notes Completed</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(65, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.cargo_received.index') }}">Cargo Received</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(66, session('permissions')))
+                            <li><a class="menu-item" href="">Delivery Notes Completed</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(67, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.return_note.index') }}">Return Notes Completed</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(68, session('permissions')))
+                            <li><a class="menu-item" href="">Outstanding Shipments</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(69, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.lead_time.index') }}">Lead Time</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(70, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.qsr.index') }}">Quality of Service</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(71, session('permissions')))
+                            <li><a class="menu-item" href="">Quality Assurance</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(72, session('permissions')))
+                            <li><a class="menu-item" href="">Customer Retention Rate</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(73, session('permissions')))
+                            <li><a class="menu-item" href="">Daily Pickup and Sales</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(74, session('permissions')))
+                            <li><a class="menu-item" href="">Monthwise Customer Sales</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(75, session('permissions')))
+                            <li><a class="menu-item" href="">Overall Sales</a></li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('role_id') == 1 || count(array_intersect([76, 79], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Packaging</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(76, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.packaging.index') }}">Stock</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(79, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.packaging.requests.index') }}">Requests</a></li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('role_id') == 1 || count(array_intersect([81, 85], session('permissions'))) !== 0)
+                <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">User Management</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(81, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.user_management.users.index') }}">Users</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(85, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.user_management.roles.index') }}">Roles</a></li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
+            @if (session('role_id') == 1 || count(array_intersect([89, 93, 97], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Network Management</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="{{route('admin.management.city.index')}}" data-i18n="nav.dash.ecommerce">City Management</a></li>
-                    <li><a class="menu-item" href="{{route('admin.management.route.index')}}" data-i18n="nav.dash.ecommerce">Route Management</a></li>
-                    <li><a class="menu-item" href="{{route('admin.management.rider.index')}}" data-i18n="nav.dash.ecommerce">Rider Management</a></li>
+                    @if (session('role_id') == 1 || in_array(89, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.management.city.index')}}" data-i18n="nav.dash.ecommerce">City Management</a></li>
+                    @endif
+
+                    @if (session('role_id') == 1 || in_array(93, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.management.route.index')}}" data-i18n="nav.dash.ecommerce">Route Management</a></li>
+                    @endif
+
+                    @if (session('role_id') == 1 || in_array(97, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.management.rider.index')}}" data-i18n="nav.dash.ecommerce">Rider Management</a></li>
+                    @endif
 
                 </ul>
             </li>
+            @endif
 
             <li class=" nav-item"><a href="{{ route('admin.tracking.index') }}"><i class="la la-home"></i><span class="menu-title">Tracking</span></a></li>
 
-            <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><i class="la la-home"></i><span class="menu-title">Notifications</span></a></li>
+            @if (session('role_id') == 1 || in_array(101, session('permissions')))
+                <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><i class="la la-home"></i><span class="menu-title">Notifications</span></a></li>
+            @endif
 
+            @if (session('role_id') == 1 || count(array_intersect([105], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
                 <ul class="menu-content">
-                    <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}" data-i18n="nav.dash.ecommerce">Pickup Weight Settings</a></li>
-
+                    @if (session('role_id') == 1 || in_array(105, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}" data-i18n="nav.dash.ecommerce">Pickup Weight Settings</a></li>
+                    @endif
                 </ul>
             </li>
+            @endif
         </ul>
     </div>
 </div>

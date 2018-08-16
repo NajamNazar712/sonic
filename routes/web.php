@@ -106,7 +106,11 @@ Route::prefix('cod')->name('cod.')->group(function () {
 Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
+
+    Route::get('access_denied', 'Admins\AdminController@access_denied')->name('access_denied');
+
     Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('dashboard');
+
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('index');
         Route::get('list', 'Admins\AdminDashboardController@orders_list')->name('list');
@@ -143,7 +147,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::get('/city', 'Admins\AdminDashboardController@cityView')->name('city.index');
         Route::get('/city/ajax', 'Admins\AdminDashboardController@cityListAjax')->name('city.ajax');
-        Route::get('/city/form', 'Admins\AdminDashboardController@getCityForm');
+        Route::get('/city/form', 'Admins\AdminDashboardController@getCityForm')->name('city.form');
         Route::get('/city/{id}/edit/form', 'Admins\AdminDashboardController@getEditCityForm')->name('city.edit');
         Route::put('/city/{id}/edit/form', 'Admins\AdminDashboardController@updateCity')->name('city.edit');
         Route::post('/city', 'Admins\AdminDashboardController@addCityHub')->name('city');
@@ -338,15 +342,42 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
     });
 
-    Route::prefix('tracking')->name('tracking.')->group(function () {
+    Route::prefix('tracking')->name('tracking.')->group(function() {
         Route::get('', 'Admins\AdminTrackingController@index')->name('index');
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
     });
 
-    Route::prefix('user_management')->name('user_management.')->group(function (){
-        Route::prefix('roles')->name('roles.')->group(function (){
-            Route::get('', 'Shippers\UserManagementController@role_index')->name('index');
-            Route::get('list', 'Shippers\UserManagementController@role_list')->name('list');
+    Route::prefix('user_management')->name('user_management.')->group(function() {
+        Route::prefix('users')->name('users.')->group(function() {
+            Route::get('', 'Admins\UserManagementController@user_index')->name('index');
+            Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
+            Route::get('email', 'Admins\UserManagementController@user_email')->name('email');
+            Route::post('status', 'Admins\UserManagementController@user_status')->name('status');
+
+            Route::prefix('add')->name('add.')->group(function() {
+                Route::get('', 'Admins\UserManagementController@user_add_index')->name('index');
+                Route::post('', 'Admins\UserManagementController@user_add_store')->name('store');
+            });
+
+            Route::prefix('update/{id}')->name('update.')->group(function() {
+                Route::get('', 'Admins\UserManagementController@user_update_index')->name('index');
+                Route::post('', 'Admins\UserManagementController@user_update_store')->name('store');
+            });
+        });
+
+        Route::prefix('roles')->name('roles.')->group(function() {
+            Route::get('', 'Admins\UserManagementController@role_index')->name('index');
+            Route::get('list', 'Admins\UserManagementController@role_list')->name('list');
+
+            Route::prefix('add')->name('add.')->group(function() {
+                Route::get('', 'Admins\UserManagementController@role_add_index')->name('index');
+                Route::post('', 'Admins\UserManagementController@role_add_store')->name('store');
+            });
+
+            Route::prefix('update/{id}')->name('update.')->group(function() {
+                Route::get('', 'Admins\UserManagementController@role_update_index')->name('index');
+                Route::post('', 'Admins\UserManagementController@role_update_store')->name('store');
+            });
         });
     });
 

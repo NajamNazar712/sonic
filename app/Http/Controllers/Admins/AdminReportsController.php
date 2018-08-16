@@ -21,6 +21,8 @@ class AdminReportsController extends Controller
 {
     public function __construct() {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
     public function qsr_index(Request $request){
         $shippers = User::whereIn('status',[3,4])->select('id','name')->get();

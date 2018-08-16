@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\Auth;
 //use Illuminate\Support\MessageBag;
 use Illuminate\Validation\ValidationException;
 
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\AdminRoleModulePermission;
 
 class AdminLoginController extends Controller
 {
@@ -31,6 +33,17 @@ class AdminLoginController extends Controller
         //Attempt to login
         if(Auth::guard('admin')->attempt(['email' => $request->email , 'password'=>$request->password], $request->remember)){
             //if Successfull then redirect to intended location
+
+            $admin = Auth::guard('admin');
+
+            $id = $admin->id();
+            $role_id = $admin->user()->role_id;
+
+            $hubs = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
+            $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
+
+            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions]);
+
             return redirect()->intended(route('admin.dashboard'));
         }
         $errors = [$this->username() => trans('auth.failed')];

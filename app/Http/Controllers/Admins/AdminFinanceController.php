@@ -34,6 +34,8 @@ class AdminFinanceController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:admin');
+
+      $this->middleware('Permission');
     }
 
     public function outstanding_sdn_index() {

@@ -23,6 +23,8 @@ class DisputeController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
     public function dispute_index(){
         $cities = City::where('status',1)->get();
@@ -397,8 +399,7 @@ class DisputeController extends Controller
     public static function add_delivery_wrong_status_dispute($delivery_note,$shipments){
 //        return $shipments;
         $admin = Auth::id();
-        $admin_details = Admin::where('id',$admin)->first();
-        $city_id = $admin_details->city->id;
+        $city_id = Shipment::find($shipments[0])->pickup_address->city_id;
         $description = "Delivery Note # $delivery_note Dispute for different status";
         $count = count($shipments);
         $dispute = Dispute::create([

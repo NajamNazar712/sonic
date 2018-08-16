@@ -34,6 +34,8 @@ class DeliveryController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
     public function pending_delivery_index(Request $request){
         return view('admin.delivery.pending.index');
