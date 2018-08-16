@@ -519,6 +519,7 @@
 
 			var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
 				dom: 'tr',
+				paging: false,
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{name: 'cargo_number', class: 'align-middle cargo_number'},
