@@ -672,7 +672,7 @@ class AdminFinanceController extends Controller
             if ($pending_payment_shipment->type == 0) {
                 $detail['type'] = 'Delivered';
             }
-            else if ($pending_payment_shipment->type == 0) {
+            else if ($pending_payment_shipment->type == 1) {
                 $detail['type'] = 'Returned';
             }
             else {

@@ -386,6 +386,7 @@
 
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
 				dom: 'tr',
+				paging: false,
 				select: {
 					info: false,
 					style: 'multi',
@@ -446,7 +447,7 @@
 						return parseFloat(a) + parseFloat(b);
 					}, 0);
 
-					$('#make_payments #make_payments_form .total_hold').val(initial_total_hold);
+					$('#make_payments #make_payments_form .total_hold').val(parseFloat(initial_total_hold.toFixed(2)));
 				}
 			});
 
@@ -648,11 +649,11 @@
 				}
 
 				if (selected_rows_shipments.length > 0) {
-					total_amount_selector.val(total_amount);
-					total_charges_selector.val(total_charges);
-					total_gst_selector.val(total_gst);
-					total_payable_selector.val(total_payable);
-					total_hold_selector.val(total_hold);
+					total_amount_selector.val(parseFloat(total_amount.toFixed(2)));
+					total_charges_selector.val(parseFloat(total_charges.toFixed(2)));
+					total_gst_selector.val(parseFloat(total_gst.toFixed(2)));
+					total_payable_selector.val(parseFloat(total_payable.toFixed(2)));
+					total_hold_selector.val(parseFloat(total_hold.toFixed(2)));
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', false);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
@@ -662,7 +663,7 @@
 					total_charges_selector.val(0);
 					total_gst_selector.val(0);
 					total_payable_selector.val(0);
-					total_hold_selector.val(initial_total_hold);
+					total_hold_selector.val(parseFloat(initial_total_hold.toFixed(2)));
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', true);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);

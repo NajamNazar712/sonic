@@ -31,7 +31,7 @@ class ShipperReceivingSheetHistoryController extends Controller
       ->leftjoin('receiving_sheets as rs', 'receiving_sheet_received.receiving_sheet_id', '=', 'rs.id')
       ->join('user_shipping_infos as usi', 'receiving_sheet_received.pickup_address_id', '=', 'usi.id')
       ->join('cities as c', 'usi.city_id', '=', 'c.id')
-      ->select('receiving_sheet_received.receiving_sheet_id as id', 'receiving_sheet_received.receiving_sheet_id as receiving_sheet', DB::raw('count(receiving_sheet_received.receiving_sheet_id) as booked'), DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'c.name as origin', 'rs.created_at AS booking_date', 'receiving_sheet_received.pickup_address_id')
+      ->select('receiving_sheet_received.receiving_sheet_id as id', 'receiving_sheet_received.receiving_sheet_id as receiving_sheet', DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'c.name as origin', 'rs.created_at AS booking_date', 'receiving_sheet_received.pickup_address_id')
       ->where('receiving_sheet_received.status', 0)
       ->where('receiving_sheet_received.user_id', Auth::id())
       ->groupBy('receiving_sheet_received.receiving_sheet_id')
@@ -46,14 +46,16 @@ class ShipperReceivingSheetHistoryController extends Controller
           return '';
         }
       })
-      ->editColumn('booked', function($receiving_sheet_received) {
-        if ($receiving_sheet_received->booked) {
-          return '<button class="btn btn-sm btn-outline-info align-middle">' . $receiving_sheet_received->booked . '</button>';
-        }
-        else {
-          return '';
-        }
-      })
+      ->addColumn('booked', function($receiving_sheet_received) {
+       if ($receiving_sheet_received->receiving_sheet) {
+         $booked = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
+
+         return '<button class="btn btn-sm btn-outline-info align-middle">' . $booked . '</button>';
+       }
+       else {
+         return '';
+       }
+     })
       ->editColumn('received', function($receiving_sheet_received) {
         if ($receiving_sheet_received->receiving_sheet) {
           $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', Auth::id())->where('status', 0)->count();

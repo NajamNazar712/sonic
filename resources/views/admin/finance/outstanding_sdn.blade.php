@@ -289,6 +289,7 @@
 
 			var reconcile_delivery_notes_table = $('#reconcile_delivery_notes #reconcile_delivery_notes_datatable').DataTable({
 				dom: 'tr',
+				paging: false,
 				select: {
 					info: false,
 					style: 'multi',
