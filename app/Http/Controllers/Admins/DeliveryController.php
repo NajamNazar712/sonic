@@ -112,6 +112,13 @@ class DeliveryController extends Controller
             $remarks = '';$status = '';
             if($shipment->exists()){
                 $shipment = $shipment->first();
+//                return $shipment->consignee_city_id;
+                if(($shipment->consignee_city_id != $shipment->pickup_address->city_id) && $shipment->shipper_status_id == 2){
+
+                        return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
+
+
+                }
                 if($request->has('hub_id') ){
                     $hub_id = $shipment->consignee_city->hub_id;
                     if($request->hub_id == $hub_id){
@@ -841,22 +848,22 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
+            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status','ss.id as current_status_id'])
             ->where('delivery_notes.id',$id);
 
         return Datatables::of($deliveries)
 
             ->addColumn('status', function ($deliveries) {
-                $where = array(7,8,9,10,11,12,14,15,16,18);
+                $where = array(7,8,9,10,11,12,14,15,16,18,30,35,36,37);
                 $statuses = ShipmentStatus::whereIn('id',$where)->get();
                 $drops = '';
 
-                $shipment_data = Shipment::find($deliveries->shId);
-                $status_id = $shipment_data->shipment_journey()->latest()->first();
-                $status_data = ShipmentStatus::where('id',$status_id->shipper_status_id)->select('id','name')->first();
+//                $shipment_data = Shipment::find($deliveries->shId);
+//                $status_id = $shipment_data->shipment_journey()->latest()->first();
+//                $status_data = ShipmentStatus::where('id',$status_id->shipper_status_id)->select('id','name')->first();
                 $selected_status = '';
                 foreach ($statuses as $status){
-                    if($status->id == $status_data->id){
+                    if($status->id == $deliveries->current_status_id){
                         $selected_status = 'selected';
                     }else{
                         $selected_status = '';
@@ -923,6 +930,7 @@ class DeliveryController extends Controller
             $delivery_note_id = $request->delivery_note_id;
             $shipment_count = 0;
             $dispute_shipments = array();
+            $delivered_status_array = array(14,16,30,36,37);
             if($delivery_note_id != ''){
                 foreach ($shipments as $shipment){
 
@@ -942,7 +950,7 @@ class DeliveryController extends Controller
                                 ]);
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                            } elseif ($request->status_drop[$shipment] == 14 || $request->status_drop[$shipment] == 16) {
+                            } elseif (in_array($request->status_drop[$shipment],$delivered_status_array)) {
                                 $parcel = Shipment::where('id', $shipment)->first();
                                 if ($parcel->booking_type_id == 2) {
                                     ShipmentsJourney::create([

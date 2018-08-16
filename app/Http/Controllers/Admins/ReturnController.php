@@ -389,7 +389,7 @@ class ReturnController extends Controller
                 return ['status' => 1, 'error' => 'Different hub, scan shipments of same hub!.'];
                 }
             }else{
-                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present | This shipment\'s delivery note is already been created.'];
+                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present, Check tracking'];
             }
 
 

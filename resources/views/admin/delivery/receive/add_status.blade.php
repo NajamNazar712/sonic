@@ -77,7 +77,9 @@
                         </tr>
                         </thead>
                     </table>
+
                         <input type="hidden" name="shipment_id_list" id="shipment_id_list">
+
                     <div class="row justify-content-center">
                         <div class="col-3">
                             <button id="ReplacementUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
@@ -206,7 +208,7 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    {{-- <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -519,7 +521,7 @@
                                 if(data.status == 0){
                                     var rowNo = repl.rows().count();
                                     $.each(data.data,function (key,value) {
-                                        var inp = "<input class='form-control decimal' name='weight["+value.id+"]' placeholder='Enter Weight'>";
+                                        var inp = "<div class='form-group mb-0'><input class='form-control decimal' name='weight["+value.id+"]' placeholder='Enter Weight'  data-rule-required='true' data-msg-required='Weight is required!'></div>";
                                         // console.log(value.tracking_number)
                                         repl.row.add([rowNo+1,value.tracking_number,value.booking_type_id,inp]).node().id = value.id;
                                         repl.draw(false);
@@ -678,9 +680,22 @@
             //replacement modal bind
             $('#replacement_form').bind('submit',function (e) {
                 e.preventDefault();
-                $('#shipment_id_list').val(shipment_id_list);
-                this.submit();
+
+                // this.submit();
             });
+            $( "#replacement_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $('#shipment_id_list').val(shipment_id_list);
+                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                        form.submit();
+
+                }
+            });
+            //end replacement
             $('#trybuy_form').bind('submit',function (e) {
                 e.preventDefault();
                 var total = $('#cod').text();

@@ -204,8 +204,8 @@ class AdminPickupsController extends Controller
         $pickup_request_address = PickupRequest::find($pickup_request_ids[0]);
 
         $pickup_note->city_id = $pickup_request_address->pickup_address->city_id;
-
-        $pickup_note->save();
+        $pickup_note->updated_by = Auth::id();
+          $pickup_note->save();
 
         $pickup_note_id = $pickup_note->id;
 
@@ -895,7 +895,8 @@ class AdminPickupsController extends Controller
       }
 
       $pickup_note->status_id = 4;
-      $pickup_note->save();
+      $pickup_note->updated_by = Auth::id();
+        $pickup_note->save();
 
       PickupNotesJourneyController::add($pickup_note->id, $pickup_note->status_id, 'Pickup Note has been Received!', Auth::id());
 
@@ -1057,7 +1058,8 @@ class AdminPickupsController extends Controller
           //dispute end
         if ($completed) {
           $pickup_note->status_id = 5;
-          $pickup_note->save();
+          $pickup_note->updated_by = Auth::id();
+            $pickup_note->save();
 
           PickupNotesJourneyController::add($pickup_note->id, 5, 'Pickup Note has been Completed!', Auth::id());
 
@@ -1100,6 +1102,7 @@ class AdminPickupsController extends Controller
 
         if ($completed) {
           $pickup_note->status_id = 5;
+          $pickup_note->updated_by = Auth::id();
           $pickup_note->save();
 
           PickupNotesJourneyController::add($pickup_note->id, 5, 'Pickup Note has been Completed!', Auth::id());

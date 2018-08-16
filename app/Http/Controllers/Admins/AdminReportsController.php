@@ -9,6 +9,7 @@ use App\Http\Models\City;
 use App\Http\Models\PickupNote;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
@@ -207,7 +208,11 @@ class AdminReportsController extends Controller
             return $cargo->make(true);
     }
     public function lead_time_index(Request $request){
-        return view('admin.reports.lead_time_report');
+//        $shippers = User::all(['id','name']);
+        $cities = City::all(['id','name']);
+        $hubs = City::select(['id','name'])->where('hub',1)->get();
+        $statuses = ShipmentStatus::all(['id','name']);
+        return view('admin.reports.lead_time_report')->with(['cities'=>$cities,'statuses'=>$statuses,'hubs'=>$hubs]);
     }
     public function lead_time_list(Request $request){
         $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
@@ -257,12 +262,22 @@ class AdminReportsController extends Controller
                     ->where('pd.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(39,40,41,43))'));
             })
+            ->leftJoin('shipments_journey as ret_or_del', function ($join) {
+                $join->on('ret_or_del.shipment_id', '=', 'shipments.id')
+                    ->where('ret_or_del.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37,42))'));
+            })
+            ->leftJoin('shipments_journey as lj', function ($join) {
+                $join->on('lj.shipment_id', '=', 'shipments.id')
+                    ->where('lj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id)'));
+            })
             ->leftJoin('shipment_status as fs','fs.id','=','fstatus.shipper_status_id')
             ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
-            ->select('shipments.id as Shipment_id','shipments.tracking_number','ubi.account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date')
+            ->select('shipments.id as Shipment_id','shipments.tracking_number','ubi.account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date')
             ->orderBy('shipments.id','desc' )
             ->groupBy('shipments.id');
-        $datatable = Datatables::of($shipments)
+        $lead_time = Datatables::of($shipments)
             ->addColumn('transit_tat',function ($shipments){
                 return ($shipments->arrival_date && $shipments->reached_at_destination)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->reached_at_destination) :'-';
             })
@@ -280,6 +295,19 @@ class AdminReportsController extends Controller
             })
             ->addColumn('return_tat',function ($shipments){
                 return ($shipments->return_confirm && $shipments->return_delivered_date)? with(new Carbon($shipments->return_confirm, 'UTC'))->diffInDays($shipments->return_delivered_date) :'-';
+            })
+            ->addColumn('payment_tat',function ($shipments){
+
+                $return = array(20,42);
+                if(in_array($shipments->return_check,$return)){
+                    return ($shipments->return_delivered_date && $shipments->payment_done_date)? with(new Carbon($shipments->return_delivered_date, 'UTC'))->diffInDays($shipments->payment_done_date) :'-';
+                }else{
+                    return ($shipments->delivered_date && $shipments->payment_done_date)? with(new Carbon($shipments->delivered_date, 'UTC'))->diffInDays($shipments->payment_done_date) :'-';
+                }
+            })
+            ->addColumn('total_tat',function ($shipments){
+                    return ($shipments->arrival_date && $shipments->latest_journey_date)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->latest_journey_date) :'-';
+
             })
             ->editColumn('arrival_date', function ($shipments) {
                 return $shipments->arrival_date ? with(new Carbon($shipments->arrival_date))->format('d/m/Y h:i:s A') : '';
@@ -309,6 +337,27 @@ class AdminReportsController extends Controller
                 return $shipments->payment_done_date ? with(new Carbon($shipments->payment_done_date))->format('d/m/Y h:i:s A') : '';
             });
 
-            return $datatable->make(true);
+            if($tracking = $request->get('search_tracking_no')){
+                $lead_time->where('shipments.tracking_number', '=', $tracking);
+            }
+            if($origin = $request->get('search_origin')){
+                $lead_time->where('oc.id','=',$origin);
+            }
+            if($destination = $request->get('search_destination')){
+                $lead_time->where('dc.id','=',$destination);
+            }
+            if($hub = $request->get('search_hub')){
+                $lead_time->where('h.id','=',$hub);
+            }
+            if($status = $request->get('search_status')){
+                $lead_time->where('ss.id','=',$status);
+            }
+            if ($request->get('search_from') && $request->get('search_to')) {
+                $from = $request->get('search_from');
+                $to = $request->get('search_to');
+                $lead_time->whereBetween('sj.created_at', [$from,$to]);
+            }
+            return $lead_time->make(true);
     }
+
 }

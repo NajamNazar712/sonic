@@ -191,22 +191,24 @@
                         format: {
                             body: function ( data, row, column, node ) {
                                 return (column == 0)? index_column+=1:data;
+
+
                             }
-                        }
+                        },
                     }
                     },
-                    {
-                        extend: 'pdfHtml5',
-                        title: 'Received Cargo Report',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( data, row, column, node ) {
-                                    return (column == 0)? index_column+=1:data;
-                                }
-                            }
-                        }
-                    },
+                    // {
+                    //     extend: 'pdfHtml5',
+                    //     title: 'Received Cargo Report',
+                    //     exportOptions: {
+                    //         columns: ':visible',
+                    //         format: {
+                    //             body: function ( data, row, column, node ) {
+                    //                 return (column == 0)? index_column+=1:data;
+                    //             }
+                    //         }
+                    //     }
+                    // },
                 ],
                 fixedHeader: {
                     header: true,

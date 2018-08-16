@@ -9,83 +9,74 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                {{--<div class="row mb-2 justify-content-center">--}}
+                <div class="row mb-2 justify-content-center">
 
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                        </fieldset>
+                    </div>
                     {{--<div class="col-3">--}}
                         {{--<fieldset class="form-group">--}}
-                            {{--<input type="text" class="form-control" name="search_cargo_no" id="search_cargo_no" placeholder="Search Cargo Number">--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_origin" id="search_origin" class="form-control select2">--}}
-                                {{--@foreach($cities as $city)--}}
-                                    {{--<option value="{{$city->id}}">{{$city->name}}</option>--}}
+                            {{--<select name="search_shipper" id="search_shipper" class="form-control select2">--}}
+                                {{--@foreach($shippers as $shipper)--}}
+                                    {{--<option value="{{$shipper->id}}">{{$shipper->name}}</option>--}}
                                 {{--@endforeach--}}
                             {{--</select>--}}
                         {{--</fieldset>--}}
                     {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_destination" id="search_destination" class="form-control select2">--}}
-                                {{--@foreach($cities as $city)--}}
-                                    {{--<option value="{{$city->id}}">{{$city->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_shippimg_modes" id="search_shippimg_modes" class="form-control select2">--}}
-                                {{--@foreach($shippimg_modes as $shippimg_mode)--}}
-                                    {{--<option value="{{$shippimg_mode->id}}">{{$shippimg_mode->mode}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<input type="text" name="transit_date" class="form-control bg-primary border-primary white rounded-right" id="transit_date" placeholder="Transit Date" data-value="">--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" data-value="">--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                    {{--<fieldset class="form-group">--}}
-                    {{--<select name="search_assigned_by" id="search_assigned_by" class="form-control select2">--}}
-                    {{--@foreach($admins as $admin)--}}
-                    {{--<option value="{{$admin->id}}">{{$admin->name}}</option>--}}
-                    {{--@endforeach--}}
-                    {{--</select>--}}
-                    {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                    {{--<fieldset class="form-group">--}}
-                    {{--<select name="search_rider" id="search_rider" class="form-control select2">--}}
-                    {{--@foreach($riders as $rider)--}}
-                    {{--<option value="{{$rider->id}}">{{$rider->name}}</option>--}}
-                    {{--@endforeach--}}
-                    {{--</select>--}}
-                    {{--</fieldset>--}}
-                    {{--</div>--}}
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <select name="search_status" id="search_status" class="form-control select2">
+                                @foreach($statuses as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
 
-                    {{--<div class="col-3">--}}
-                    {{--<fieldset class="form-group">--}}
-                    {{--<select name="search_completed_by" id="search_completed_by" class="form-control select2">--}}
-                    {{--@foreach($admins as $admin)--}}
-                    {{--<option value="{{$admin->id}}">{{$admin->name}}</option>--}}
-                    {{--@endforeach--}}
-                    {{--</select>--}}
-                    {{--</fieldset>--}}
-                    {{--</div>--}}
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="form-group">
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
+                        </fieldset>
+                    </div>
 
-                    {{--<div class="col-2">--}}
-                        {{--<button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>--}}
-                    {{--</div>--}}
-                {{--</div>--}}
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -114,8 +105,8 @@
                         <th class="border-primary border-darken-1">Return Dispatch TAT(F-G)</th>
                         <th class="border-primary border-darken-1">Return TAT(E-G)</th>
                         <th class="border-primary border-darken-1">Payment Done Date(H)</th>
-                        {{--<th class="border-primary border-darken-1">Payment TAT(D-H,G-H)</th>--}}
-                        {{--<th class="border-primary border-darken-1">Total TAT</th>--}}
+                        <th class="border-primary border-darken-1">Payment TAT(D-H,G-H)</th>
+                        <th class="border-primary border-darken-1">Total TAT</th>
                     </tr>
                     </thead>
                 </table>
@@ -189,7 +180,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_cargo_no').inputmask({
+            $('#search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
@@ -204,39 +195,55 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shippimg_modes').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Shipping Mode',
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Hub',
                 width:'100%',
                 allowClear:true
             });
-            var transit_date = $('#transit_date').pickadate({
+            // $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+            //     placeholder:'Search Shipper',
+            //     width:'100%',
+            //     allowClear:true
+            // });
+            $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Status',
+                width:'100%',
+                allowClear:true
+            });
+            var from_max = '{{ Carbon\Carbon::now() }}';
+            var to_max = '{{ Carbon\Carbon::now() }}';
+            var from_date = $('#from_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max: '{{ Carbon\Carbon::now() }}',
+                max: from_max,
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
-                    $('#transit_date_root').css('top','40px');
+                    $('#from_date_root').css('top','40px');
                 },
                 onSet: function(context) {
+                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
                 }
             });
-            var received_date = $('#received_date').pickadate({
+            var to_date = $('#to_date').pickadate({
                 firstDay: 1,
                 clear: 'Clear',
-                max: '{{ Carbon\Carbon::now() }}',
+                max: to_max,
                 format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
-                    $('#received_date_root').css('top','40px');
+                    $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
+                    var current_date_formatted = $('input[name="to_date_formatted"]').val();
+                    from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
 
@@ -247,16 +254,27 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Received Cargo Report',
+                        title: 'Lead Time Report',
                         exportOptions: {
                             columns: ':visible',
                             format: {
                                 body: function ( data, row, column, node ) {
-                                    return (column == 0)? index_column+=1:data;
+                                    return (column == 0)? row+1:data;
                                 }
                             }
                         }
-                    }
+                    },
+                    {
+                        extend: 'print',
+                        exportOptions: {
+                            columns: ':visible',
+                            format: {
+                                body: function ( e, dt, column, node ) {
+                                    return (column == 0)? dt+1:e;
+                                }
+                            }
+                        }
+                    },
                 ],
                 fixedHeader: {
                     header: true,
@@ -271,19 +289,19 @@
                 ajax: {
                     url: '{{ route('admin.reports.lead_time.list') }}',
                     data: function (d) {
-                        // d.search_cargo_no = $('#search_cargo_no').val();
-                        // d.search_origin = $('#search_origin').val();
-                        // d.search_destination = $('#search_destination').val();
-                        // d.search_shippimg_modes = $('#search_shippimg_modes').val();
-                        // d.search_transit_date = $('#transit_date').val();
-                        // d.search_received_date = $('input[name="received_date_formatted"]').val();
+                        d.search_tracking_no = $('#search_tracking_no').val();
+                        d.search_origin = $('#search_origin').val();
+                        d.search_destination = $('#search_destination').val();
+                        d.search_hub = $('#search_hub').val();
+                        d.search_status = $('#search_status').val();
+                        d.search_from = $('input[name="from_date_formatted"]').val();
+                        d.search_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
                 rowId: 'ahipment_id',
                 order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    // {data: 'shipment_id', name: 'shipments.id', class: 'align-middle shipment_id'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'account_no', name: 'ubi.account_no', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
@@ -307,7 +325,8 @@
                     {data: 'return_dispatch_tat', name: 'return_dispatch_tat', class: 'align-middle return_dispatch_tat'},
                     {data: 'return_tat', name: 'return_tat', class: 'align-middle return_tat'},
                     {data: 'payment_done_date', name: 'payment_done_date', class: 'align-middle payment_done_date'},
-                    // {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat'}
+                    {data: 'payment_tat', name: 'payment_tat', class: 'align-middle payment_tat'},
+                    {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat'}
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -326,7 +345,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number') || $(header).is('.transit_tat') || $(header).is('.attempt_tat')  || $(header).is('.return_transit_tat') || $(header).is('.dispatch_tat') || $(header).is('.return_dispatch_tat') || $(header).is('.return_tat')) {
+                        if ($(header).is('.serial_number') || $(header).is('.transit_tat') || $(header).is('.attempt_tat')  || $(header).is('.return_transit_tat') || $(header).is('.dispatch_tat') || $(header).is('.payment_tat') || $(header).is('.return_dispatch_tat') || $(header).is('.return_tat') || $(header).is('.total_tat')) {
                             $(td).appendTo($(search));
                         }
                         else {
