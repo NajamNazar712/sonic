@@ -3,9 +3,11 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\City;
+use App\Http\Models\DiscountCharge;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
 use App\Http\Models\PackagingPaymentMode;
+use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Http\Request;
@@ -86,14 +88,14 @@ class ShipperPackagingMaterialController extends Controller
                 }
             }
         }else{
-//            return $request;
-            $balance = 4000;
+            $balance = PendingPayment::where('user_id', Auth::id())->first()->pending_payment_shipments->sum('payable');
             $total_charges = 0;
             $smallFlyers = ($request->sm_flyer != null)? $request->sm_flyer:0;
             $mediumFlyers =($request->md_flyer != null)? $request->md_flyer:0;
             $largeFlyers =($request->lg_flyer != null)? $request->lg_flyer:0;
             $boxFlyers =($request->boxes != null)? $request->boxes:0;
             $charges = PackagingCharge::where('user_id',Auth::id())->latest()->first();
+//            DiscountCharge::
             $total_charges += $smallFlyers * $charges->sm_flyer;
             $total_charges += $mediumFlyers * $charges->md_flyer;
             $total_charges += $largeFlyers * $charges->lg_flyer;

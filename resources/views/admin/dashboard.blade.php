@@ -629,14 +629,24 @@
                 });
             });
 
+            $('body').on('click','.view_charges',function () {
+                var shipment_id = $(this).parents('tr').attr('id');
+                $('#ShipmentChargesModal').modal('show');
+                $('#shipment_charges_modal_id').val(shipment_id);
+                $.ajax({
+                    url:'{!! route("admin.orders.charges") !!}',
+                    method: 'POST',
+                    data: {
+                        'shipment_id': shipment_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    $('#shipment_charges_body').html(data);
+                    $('#shipment_charges_modal_heading span').text(shipment_id);
+                })
+            });
 
 
-            {{--$('body').on('click','.tracking',function () {--}}
-                {{--var tracking = '{!! route('admin.tracking.index') !!}';--}}
-                {{--var id = $(this).parents('tr').attr('id');--}}
-                {{----}}
-                {{--window.location = tracking+'?tracking_number='+id;--}}
-            {{--});--}}
 
         });
     </script>

@@ -50,8 +50,12 @@ class AdminCargoController extends Controller
       })
       ->select('shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at');
 
-      $datatables = Datatables::of($shipments);
+      $datatables = Datatables::of($shipments)
 
+        ->editColumn('tracking_number', function ($shipments) {
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        });
       if ($shipment_type = $request->get('shipment_type')) {
         if ($shipment_type == 0) {
           $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37]);

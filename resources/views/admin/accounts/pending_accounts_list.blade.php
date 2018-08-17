@@ -20,7 +20,7 @@
                                     <tr class="bg-primary white">
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Company</th>
-                                        <th class="border-primary border-darken-1">City</th>
+                                        <th class="border-primary border-darken-1">City Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         <th class="border-primary border-darken-1">Phone No.</th>
                                         <th class="border-primary border-darken-1">Address</th>
