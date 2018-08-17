@@ -10,6 +10,7 @@ use App\Http\Models\PackagingPaymentMode;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -42,21 +43,51 @@ class ShipperPackagingMaterialController extends Controller
         return $user_shipping_info->id;
     }
     public function packaging_request_submit(Request $request){
-//        return $request;
+        $total_charges = 0;
+        $smallFlyers = ($request->sm_flyer != null)? $request->sm_flyer:0;
+        $mediumFlyers =($request->md_flyer != null)? $request->md_flyer:0;
+        $largeFlyers =($request->lg_flyer != null)? $request->lg_flyer:0;
+        $boxFlyers =($request->boxes != null)? $request->boxes:0;
+        $charges = PackagingCharge::where('user_id',Auth::id())->latest()->first();
+        $total_charges += $smallFlyers * $charges->sm_flyer;
+        $total_charges += $mediumFlyers * $charges->md_flyer;
+        $total_charges += $largeFlyers * $charges->lg_flyer;
+        $total_charges += $boxFlyers * $charges->box_flyer;
+        $today = Carbon::today();
 
+        if($discount = DiscountCharge::where('user_id', Auth::id())->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+            $discount = $discount->first();
+        }else if($discount = DiscountCharge::where('user_id', Auth::id())->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+            $discount = $discount->first();
+        }else if($discount = DiscountCharge::where('user_id', Auth::id())->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+            $discount = $discount->first();
+        }else if($discount = DiscountCharge::where('user_id', Auth::id())->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+            $discount = $discount->first();
+        }
+        if(!empty($discount->packaging)){
+            $discount_packaging = $discount->packaging;
+            if (strpos($discount_packaging, '%') !== FALSE) {
+                $discount_packaging = (floatval(str_replace('%', '', $discount_packaging)) / 100) * $total_charges;
+            }
+            else {
+                $discount_packaging += floatval($discount_packaging);
+            }
+            $total_charges = $discount_packaging;
+        }
         if($request->mode_of_payment == 1){
             $user_id = Auth::id();
             if ($request->input('address_select') == 0) {
                 $result = PackagingMaterialRequest::create([
                     'user_id'=>$user_id,
                     'city_id'=>$request->new_pickup_city,
-                    'small_flyers'=>($request->sm_flyer != null)? $request->sm_flyer:0,
-                    'medium_flyers'=>($request->md_flyer != null)? $request->md_flyer:0,
-                    'large_flyers'=>($request->lg_flyer != null)? $request->lg_flyer:0,
-                    'boxes'=>($request->boxes != null)? $request->boxes:0,
+                    'small_flyers'=>$smallFlyers,
+                    'medium_flyers'=>$mediumFlyers,
+                    'large_flyers'=>$largeFlyers,
+                    'boxes'=>$boxFlyers,
                     'address'=>$request->new_pickup_address,
                     'poc'=>$request->new_pickup_person_of_contact,
                     'phone'=>$request->new_pickup_phone_number,
+                    'amount'=>$total_charges,
                     'packaging_payment_mode_id'=>$request->mode_of_payment
                 ]);
                 if($result){
@@ -71,13 +102,14 @@ class ShipperPackagingMaterialController extends Controller
                 $result = PackagingMaterialRequest::create([
                     'user_id'=>$user_id,
                     'city_id'=>$user_address->city_id,
-                    'small_flyers'=>($request->sm_flyer != null)? $request->sm_flyer:0,
-                    'medium_flyers'=>($request->md_flyer != null)? $request->md_flyer:0,
-                    'large_flyers'=>($request->lg_flyer != null)? $request->lg_flyer:0,
-                    'boxes'=>($request->boxes != null)? $request->boxes:0,
+                    'small_flyers'=>$smallFlyers,
+                    'medium_flyers'=>$mediumFlyers,
+                    'large_flyers'=>$largeFlyers,
+                    'boxes'=>$boxFlyers,
                     'address'=>$user_address->pickup_address,
                     'poc'=>$user_address->poc,
                     'phone'=>$user_address->phone,
+                    'amount'=>$total_charges,
                     'packaging_payment_mode_id'=>$request->mode_of_payment
 
                 ]);
@@ -88,18 +120,13 @@ class ShipperPackagingMaterialController extends Controller
                 }
             }
         }else{
-            $balance = PendingPayment::where('user_id', Auth::id())->first()->pending_payment_shipments->sum('payable');
-            $total_charges = 0;
-            $smallFlyers = ($request->sm_flyer != null)? $request->sm_flyer:0;
-            $mediumFlyers =($request->md_flyer != null)? $request->md_flyer:0;
-            $largeFlyers =($request->lg_flyer != null)? $request->lg_flyer:0;
-            $boxFlyers =($request->boxes != null)? $request->boxes:0;
-            $charges = PackagingCharge::where('user_id',Auth::id())->latest()->first();
-//            DiscountCharge::
-            $total_charges += $smallFlyers * $charges->sm_flyer;
-            $total_charges += $mediumFlyers * $charges->md_flyer;
-            $total_charges += $largeFlyers * $charges->lg_flyer;
-            $total_charges += $boxFlyers * $charges->box_flyer;
+            if(PendingPayment::where('user_id', Auth::id())->exists()){
+                $balance = PendingPayment::where('user_id', Auth::id())->first()->pending_payment_shipments->sum('payable');
+
+            }else{
+                return redirect()->back()->with('error','Can\'t  Request material!');
+            }
+
             if($total_charges <= $balance){
                 $user_id = Auth::id();
                 if ($request->input('address_select') == 0) {
@@ -113,6 +140,7 @@ class ShipperPackagingMaterialController extends Controller
                         'address'=>$request->new_pickup_address,
                         'poc'=>$request->new_pickup_person_of_contact,
                         'phone'=>$request->new_pickup_phone_number,
+                        'amount'=>$total_charges,
                         'packaging_payment_mode_id'=>$request->mode_of_payment
                     ]);
                     if($result){
@@ -134,6 +162,7 @@ class ShipperPackagingMaterialController extends Controller
                         'address'=>$user_address->pickup_address,
                         'poc'=>$user_address->poc,
                         'phone'=>$user_address->phone,
+                        'amount'=>$total_charges,
                         'packaging_payment_mode_id'=>$request->mode_of_payment
 
                     ]);
