@@ -400,12 +400,14 @@ class AdminReportsController extends Controller
             $qa_data[$hub->name]['deliveries_resolved'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereDoesntHave('shipment_journey', function($query) use ($search_date,$pending_status) {
-                    $query->whereDate('created_at', '<=', $search_date)
+                ->whereHas('shipment_journey', function($query) use ($search_date) {
+                    $query->whereDate('created_at',$search_date)
                         ->where('shipper_status_id', 5);
                 })
                 ->count();
-//            $qa_data[$hub->name]['receive_deliveries_pending'] =
+            $qa_data[$hub->name]['receive_deliveries_pending'] = 0;
+            $qa_data[$hub->name]['receive_deliveries_resolved'] = 0;
+//            $qa_data[$hub->name]['return_marked_pending'] =
             }
 //       dd($qa_data);
        return $qa_data;
