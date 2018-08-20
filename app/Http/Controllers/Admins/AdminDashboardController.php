@@ -151,7 +151,8 @@ class AdminDashboardController extends Controller
             ->groupBy('shipments.id');
         return Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
-                return "<u><a href='javascript:void(0);' class='tracking'>$shipments->tracking_number</a></u>";
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('phone1',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
@@ -166,7 +167,7 @@ class AdminDashboardController extends Controller
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>";
                 if($shipments->shipper_status_id > 1) {
-                    $drop .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-plus-circle primary'></i> View Charges</a>";
+                    $drop .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-eye primary'></i> View Charges</a>";
                 }else{
                     $drop .= "<a href='javascript:void(0);' class='dropdown-item '><i class='ft-plus-circle primary'></i> No Action</a>";
                 }
@@ -284,6 +285,12 @@ class AdminDashboardController extends Controller
         }else{
             return response()->json(['status'=>0,'error'=>"User doesn\'t exist!"]);
         }
+    }
+    public function get_shipment_charges(Request $request){
+        $shipment_id = $request->shipment_id;
+        $shipment = Shipment::find($shipment_id);
+        $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment])->render();
+        return response()->json($returnHTML);
     }
     /**
      * @return \Illuminate\Http\JsonResponse
@@ -3465,4 +3472,5 @@ class AdminDashboardController extends Controller
         }
 
     }
+
 }

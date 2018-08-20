@@ -629,11 +629,24 @@
                 });
             });
 
-
-
-            $('body').on('click','.tracking',function () {
-                    console.log('here');
+            $('body').on('click','.view_charges',function () {
+                var shipment_id = $(this).parents('tr').attr('id');
+                $('#ShipmentChargesModal').modal('show');
+                $('#shipment_charges_modal_id').val(shipment_id);
+                $.ajax({
+                    url:'{!! route("admin.orders.charges") !!}',
+                    method: 'POST',
+                    data: {
+                        'shipment_id': shipment_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    $('#shipment_charges_body').html(data);
+                    $('#shipment_charges_modal_heading span').text(shipment_id);
+                })
             });
+
+
 
         });
     </script>

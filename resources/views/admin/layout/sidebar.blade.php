@@ -79,6 +79,8 @@
                     <li><a class="menu-item" href="{{ route('admin.reports.pickup_note.index') }}">Pickup Notes Report</a></li>
                     <li><a class="menu-item" href="{{ route('admin.reports.cargo_received.index') }}">Cargo Received Report</a></li>
                     <li><a class="menu-item" href="{{ route('admin.reports.lead_time.index') }}">Lead Time Report</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.reports.qa.index') }}">QA Report</a></li>
+                    <li><a class="menu-item" href="{{ route('admin.reports.outstanding_shipments.index') }}">Outstanding Shipments</a></li>
                 </ul>
             </li>
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title">Packaging</span></a>
