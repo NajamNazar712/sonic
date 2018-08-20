@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
@@ -467,7 +468,80 @@ class AdminReportsController extends Controller
             $qa_data[$hub->name]['return_receive_pending'] = ReturnNote::whereDate('created_at','<=',$search_date)->where('hub_id',$hub->id)->where('status',0)->count();
             $qa_data[$hub->name]['return_receive_resolved'] = ReturnNote::whereDate('updated_at',$search_date)->where('hub_id',$hub->id)->where('status',1)->count();
             }
-//       dd($qa_data);
+
        return $qa_data;
      }
+     public function outstanding_shipments_index(Request $request){
+        $hubs = City::where('hub',1)->select('id','name')->get();
+        return view('admin.reports.outstanding_shipments_report')->with('hubs',$hubs);
+     }
+     public function outstanding_shipments_list(Request $request){
+         $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
+             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
+             ->join('users as u', 's.user_id', '=', 'u.id')
+             ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+             ->leftjoin('shipments_journey as sj', function($join) {
+                 $join->on('sj.shipment_id', '=', 's.id')
+                     ->where('sj.created_at', '=', DB::raw('(SELECT MAX(created_at) FROM shipments_journey WHERE shipment_id = s.id)'));
+             })
+             ->leftjoin('shipments_journey as sjd', function($join) {
+                 $join->on('sjd.shipment_id', '=', 's.id')
+                     ->where('sjd.created_at', '=', DB::raw('(SELECT MAX(created_at) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
+             })
+             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+             ->join('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
+             ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at')
+             ->where('delivery_note_shipments.status', 7);
+         $datatables = Datatables::of($shipments)
+             ->editColumn('status_updated_at', function($shipment) {
+                 return Carbon::parse($shipment->status_updated_at)->format('d/m/Y H:i A');
+             })
+             ->addColumn('aging', function($shipment) {
+                 $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
+
+                 $now = Carbon::now()->startOfDay();
+
+                 return $updated_at->diffInDays($now) . 'd';
+             })
+             ->filterColumn('aging', function($query, $keyword) {
+                 $search = str_replace('d', '', str_replace(' ', '', $keyword));
+
+                 if (filter_var($search, FILTER_VALIDATE_INT)) {
+                     $date = Carbon::now();
+
+                     $date = $date->subDays($search);
+
+                     $query->whereDate('sj.updated_at', '>=', $date->toDateString());
+                 }
+                 else {
+                     $query->whereRaw($search);
+                 }
+             });
+
+         if ($hub = $request->get('hub')) {
+             $datatables->where('hc.id', '=', $hub);
+         }
+         if($status = $request->get('shipment_status')){
+             if($status == 1){
+                 $datatables->where('delivery_note_shipments.status',7);
+             }else if($status == 2){
+                 $datatables->where('delivery_note_shipments.status',8);
+
+             }else{
+                 $datatables->where('delivery_note_shipments.status',9);
+
+             }
+         }
+         if ($delivery_date_from = $request->get('delivery_date_from')) {
+             $datatables->where('sjd.created_at', '>=', $delivery_date_from);
+         }
+
+         if ($delivery_date_to = $request->get('delivery_date_to')) {
+             $datatables->where('sjd.created_at', '<', Carbon::parse($delivery_date_to)->addDay()->toDateTimeString());
+         }
+
+         return $datatables->make(true);
+     }
+
 }

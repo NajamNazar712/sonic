@@ -438,6 +438,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@qa_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@qa_list')->name('list');
         });
+        Route::prefix('outstanding_shipments')->name('outstanding_shipments.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@outstanding_shipments_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@outstanding_shipments_list')->name('list');
+        });
 
     });
 
