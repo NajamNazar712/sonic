@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
@@ -405,9 +406,66 @@ class AdminReportsController extends Controller
                         ->where('shipper_status_id', 5);
                 })
                 ->count();
-            $qa_data[$hub->name]['receive_deliveries_pending'] = 0;
-            $qa_data[$hub->name]['receive_deliveries_resolved'] = 0;
-//            $qa_data[$hub->name]['return_marked_pending'] =
+            $qa_data[$hub->name]['receive_deliveries_pending'] = DeliveryNote::whereDate('created_at','<=',$search_date)->where('status',0)->count();
+            $qa_data[$hub->name]['receive_deliveries_resolved'] = DeliveryNote::whereDate('created_at',$search_date)->where('status',1)->count();
+            $qa_data[$hub->name]['return_marked_pending'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub->id);
+            })
+                ->whereHas('shipment_journey',function ($query) use ($search_date){
+                $query->whereDate('created_at','<=',$search_date)
+                    ->where('shipper_status_id', 12);
+            })->count();
+            $qa_data[$hub->name]['return_marked_resolved'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub->id);
+            })
+            ->whereHas('shipment_journey',function ($query) use ($search_date){
+                $query->whereDate('created_at',$search_date)
+                    ->whereIn('shipper_status_id', [13,20]);
+            })->count();
+            $qa_data[$hub->name]['return_confirmed_pending'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub->id);
+            })
+                ->whereHas('shipment_journey',function ($query) use ($search_date){
+                    $query->whereDate('created_at','<=',$search_date)
+                        ->where('shipper_status_id', 20);
+                })->count();
+            $qa_data[$hub->name]['return_confirmed_resolved'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub->id);
+            })
+                ->whereHas('shipment_journey',function ($query) use ($search_date){
+                    $query->whereDate('created_at',$search_date)
+                        ->whereIn('shipper_status_id', [21,23]);
+                })->count();
+            $qa_data[$hub->name]['return_cargo_pending'] = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub->id);
+            })
+                ->whereHas('shipment_journey',function ($query) use ($search_date){
+                    $query->whereDate('created_at','<=',$search_date)
+                        ->whereIn('shipper_status_id', [21,26,32]);
+                })->count();
+            $qa_data[$hub->name]['return_cargo_resolved'] = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub->id);
+            })
+                ->whereHas('shipment_journey',function ($query) use ($search_date){
+                    $query->whereDate('created_at',$search_date)
+                        ->whereIn('shipper_status_id', [22,27,33]);
+                })->count();
+            $qa_data[$hub->name]['return_delivery_pending'] = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub->id);
+            })
+                ->whereHas('shipment_journey',function ($query) use ($search_date){
+                    $query->whereDate('created_at','<=',$search_date)
+                        ->whereIn('shipper_status_id', [22,24,27,29,33,35]);
+                })->count();
+            $qa_data[$hub->name]['return_delivery_resolved'] = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub->id);
+            })
+                ->whereHas('shipment_journey',function ($query) use ($search_date){
+                    $query->whereDate('created_at','<=',$search_date)
+                        ->whereIn('shipper_status_id', [22,24,27,29,33,35]);
+                })->count();
+            $qa_data[$hub->name]['return_receive_pending'] = ReturnNote::whereDate('created_at','<=',$search_date)->where('hub_id',$hub->id)->where('status',0)->count();
+            $qa_data[$hub->name]['return_receive_resolved'] = ReturnNote::whereDate('updated_at',$search_date)->where('hub_id',$hub->id)->where('status',1)->count();
             }
 //       dd($qa_data);
        return $qa_data;
