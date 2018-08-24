@@ -236,7 +236,7 @@
 
 													<div class="col">
 														<div class="form-group">
-															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_username"></p>
+															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_name"></p>
 														</div>
 													</div>
 
@@ -519,6 +519,7 @@
 
 			var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
 				dom: 'tr',
+				paging: false,
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{name: 'cargo_number', class: 'align-middle cargo_number'},
@@ -971,12 +972,12 @@
 						}
 
 						$.each(data.receivers, function(index, receiver) {
-							$('#add_forwarding_details form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.username + '</option>');
+							$('#add_forwarding_details form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.name + '</option>');
 						});
 
 						$('#add_forwarding_details form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
 							width: '100%',
-							placeholder: 'Receiver Username',
+							placeholder: 'Receiver Name',
 							allowClear: true
 						}).bind('change', function() {
 							$(this).valid();
@@ -990,7 +991,7 @@
 						$('#add_forwarding_details form .transport_mode_vendor').val(data.cargo_consignment.transport_mode_vendor_id).trigger('change');
 						$('#add_forwarding_details form .seal_number').val(data.cargo_consignment.seal_number);
 						$('#add_forwarding_details form .builty_number').val(data.cargo_consignment.builty_number);
-						$('#add_forwarding_details form .sender_username').html(data.cargo_consignment.sender_username);
+						$('#add_forwarding_details form .sender_name').html(data.cargo_consignment.sender_name);
 						$('#add_forwarding_details form .receiver_id').val(data.cargo_consignment.receiver_id).trigger('change');
 						$('#add_forwarding_details form .weight_charges_per_kg').val(data.cargo_consignment.weight_charges_per_kg);
 						$('#add_forwarding_details form .extra_charges').val(data.cargo_consignment.extra_charges);
@@ -1029,8 +1030,8 @@
 						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Actual Weight</strong></td><td>' + cargo_consignment.actual_weight + '</td></tr>';
 						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Extra Charges</strong></td><td>' + cargo_consignment.extra_charges + '</td></tr>';
 						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Total Weight Charges</strong></td><td>' + cargo_consignment.total_weight_charges + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Sender Username</strong></td><td>' + cargo_consignment.sender_username + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Receiver Username</strong></td><td>' + cargo_consignment.receiver_username + '</td></tr>';
+						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Sender Name</strong></td><td>' + cargo_consignment.sender_name + '</td></tr>';
+						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Receiver Name</strong></td><td>' + cargo_consignment.receiver_name + '</td></tr>';
 
 						details += '</tbody></table>';
 
