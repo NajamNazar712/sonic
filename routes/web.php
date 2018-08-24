@@ -442,6 +442,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@outstanding_shipments_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@outstanding_shipments_list')->name('list');
         });
+        Route::prefix('daily_pickup_sales')->name('daily_pickup_sales.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@daily_pickup_sales_index')->name('index');
+            Route::post('export_to_excel', 'Admins\AdminReportsController@daily_pickup_sales_export_to_excel')->name('export_to_excel');
+        });
 
     });
 

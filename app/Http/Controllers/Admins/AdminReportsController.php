@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Yajra\Datatables\Datatables;
 
 class AdminReportsController extends Controller
@@ -544,4 +545,42 @@ class AdminReportsController extends Controller
          return $datatables->make(true);
      }
 
+     public function daily_pickup_sales_index(Request $request){
+        $cities = City::all('id','name');
+        return view('admin.reports.daily_pickup_sales_report')->with(['cities'=>$cities]);
+     }
+     public function daily_pickup_sales_export_to_excel(Request $request){
+        $date = $request->date;
+         $hubs = City::where('hub',1)->select('id','name')->get();
+         $details = array();
+
+         $details[] = ['S. No.','Origin', 'No. of Parcels Booked'];
+
+         $serial_number_hubs = 1;
+         foreach ($hubs as $hub) {
+            $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub->id);
+            })->count();
+             $row = array();
+
+             $row[] = $serial_number_hubs;
+             $row[] = $hub->name;
+             $row[] = $booked;
+
+             $details[] = $row;
+
+             $serial_number_hubs++;
+
+         }
+         $spreadsheet = new Spreadsheet();
+         $spreadsheet->getActiveSheet()->fromArray($details);
+
+         $writer = new Xlsx($spreadsheet);
+
+         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+         header('Content-Disposition: attachment;filename="sonic_payment_details.xlsx"');
+         header('Cache-Control: max-age=0');
+
+         $writer->save('php://output');
+     }
 }
