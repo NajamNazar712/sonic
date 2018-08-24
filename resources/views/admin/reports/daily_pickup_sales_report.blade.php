@@ -13,19 +13,11 @@
                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                         <div class="form-group">
                             <select name="city" class="select2" id="city">
-                                <option value="0">All</option>
+                                {{--<option value="0">All</option>--}}
 
                                 @foreach($cities as $city)
                                     <option value="{{ $city->id }}">{{ $city->name }}</option>
                                 @endforeach
-                            </select>
-                        </div>
-                        <div class="form-group ml-1">
-                            <select name="shipment_type" class="select2" id="shipment_type">
-                                <option value="0">All</option>
-                                <option value="1">Normal</option>
-                                <option value="2">Return</option>
-
                             </select>
                         </div>
                         <div class="form-group input-group ml-1">
@@ -117,12 +109,13 @@
         $(document).ready(function () {
             $('#search_form #city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
-                placeholder: 'Select City'
+                placeholder: 'Select City',
+                allowClear:true
             });
-            $('#search_form #shipment_type').prepend('<option value="" selected="selected"></option>').select2({
-                width: '200px',
-                placeholder: 'Select Shipment Type'
-            });
+            // $('#search_form #shipment_type').prepend('<option value="" selected="selected"></option>').select2({
+            //     width: '200px',
+            //     placeholder: 'Select Shipment Type'
+            // });
             var date = '{{ Carbon\Carbon::now()}}';
             $('#search_form #search_date').pickadate({
                 firstDay: 1,
@@ -142,31 +135,20 @@
             $('#search_form').on('submit',function (e) {
                 e.preventDefault();
                 var search_date = $('#search_form input[name="search_date_formatted"]').val();
+                var city = $('#city').val();
                 $.ajax({
                     url: '{!! route('admin.reports.daily_pickup_sales.export_to_excel') !!}',
                     method: 'post',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'date': search_date
+                        'date': search_date,
+                        'city': city,
                     }
                 }).done(function (data) {
-
-                    var tab = window.open('', '_blank');
-
-                    if(!tab) {
-                        swal({
-                            title: 'Popup Blocker Enabled!',
-                            text: 'Please add this site to your exception list.',
-                            icon: 'error',
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-                    }
-                    else {
-                        tab.document.write(data);
-                        tab.document.close();
-                        tab.focus();
-                    }
+                    // window.open("",'_black');
+                    if(data.success == 1){
+                            window.open("{!! route('admin.reports.daily_pickup_sales.download') !!}",'_black');
+                        }
                 });
             });
         });

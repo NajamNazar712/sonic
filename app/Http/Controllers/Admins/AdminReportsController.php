@@ -18,7 +18,9 @@ use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Response;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
@@ -556,34 +558,163 @@ class AdminReportsController extends Controller
      }
 
      public function daily_pickup_sales_index(Request $request){
-        $cities = City::all('id','name');
+        $cities = City::select('id','name')->where('pickup',1)->get();
         return view('admin.reports.daily_pickup_sales_report')->with(['cities'=>$cities]);
      }
      public function daily_pickup_sales_export_to_excel(Request $request){
-        $date = $request->date;
-         $hubs = City::where('hub',1)->select('id','name')->get();
+//        return $request;
+         $date = $request->date;
+         $search_city = $request->city;
+         $city = array();
+         $hubs = array();
+         if($search_city != null){
+             $city = City::where('id',$search_city)->select('hub_id')->first();
+             $city['id'] = $city->hub->id;
+             $city['name'] = $city->hub->name;
+             $hubs[] = $city;
+         }else{
+
+             $hubs = City::where('hub',1)->select('id','name')->get();
+         }
+//         return $hubs;
+//         $all_details = array();
          $details = array();
 
-         $details[] = ['S. No.','Origin', 'No. of Parcels Booked'];
+         $details[] = ['S. No.','Origin'.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg/Parcel Revenue','Avg. Cash Collection','% Rev. on Cash Collection'];
 
          $serial_number_hubs = 1;
+         $booked = 0; $received = 0; $revenue_wo_gst = 0; $cod_collection = 0;
          foreach ($hubs as $hub) {
-            $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
-                $query->where('hub_id', '=', $hub->id);
-            })->count();
+                $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
+                    $query->where('hub_id', '=', $hub->id);
+                })->whereDate('created_at',$date)->count();
+                $received = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
+                     $query->where('hub_id', '=', $hub->id);
+                })->whereHas('shipment_journey', function($query) use ($date) {
+                     $query->whereDate('created_at',$date)
+                         ->where('shipper_status_id', 2);
+                })->count();
+                 $cod_collection = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
+                     $query->where('hub_id', '=', $hub->id);
+                 })->whereHas('shipment_journey', function($query) use ($date) {
+                     $query->whereDate('created_at',$date)
+                         ->where('shipper_status_id', 2);
+                 })->sum('amount');
+                 $revenue_wo_gst = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
+                     $query->where('hub_id', '=', $hub->id);
+                 })->whereHas('shipment_journey', function($query) use ($date) {
+                     $query->whereDate('created_at',$date)
+                         ->where('shipper_status_id', 2);
+                 })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
              $row = array();
-
+             $avg_revenue = ($received != 0)? $revenue_wo_gst/$received:0;
+             $avg_cash_collection = ($received != 0)? $cod_collection/$received:0;
+             $rev_on_cash_collection = (($avg_cash_collection != 0)? $avg_revenue/$avg_cash_collection:0)*100;
              $row[] = $serial_number_hubs;
              $row[] = $hub->name;
              $row[] = $booked;
-
+             $row[] = $received;
+             $row[] = $revenue_wo_gst;
+             $row[] = $cod_collection;
+             $row[] = $avg_revenue;
+             $row[] = $avg_cash_collection;
+             $row[] =   $rev_on_cash_collection;
              $details[] = $row;
 
              $serial_number_hubs++;
 
          }
+
+         $details[] = ['S. No.','DSR'.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg. Cash Collection','% Rev. on Cash Collection'];
+         $serial_number_shippers = 1;
+         if($search_city != null){
+             $shippers = User::where('city_id',$search_city)->where('status',3)->get();
+
+         }else{
+
+             $shippers = User::where('status',3)->get();
+         }
+         $shipper_booked = 0;
+         $shipper_received = 0;
+         foreach ($shippers as $shipper){
+             if($search_city != null){
+                $shipper_booked = Shipment::where('user_id',$shipper->id)
+                     ->whereHas('pickup_address.city', function($query) use ($hubs) {
+                         $query->where('hub_id', '=', $hubs[0]->id);
+                     })->whereDate('created_at',$date)->count();
+                 $shipper_received = Shipment::where('user_id',$shipper->id)
+                     ->whereHas('pickup_address.city', function($query) use ($hubs) {
+                         $query->where('hub_id', '=', $hubs[0]->id);
+                     })
+                     ->whereHas('shipment_journey', function($query) use ($date) {
+                     $query->whereDate('created_at', $date)
+                         ->where('shipper_status_id', 2);
+                 })->count();
+                 $shipper_rev_wo_gst = Shipment::where('user_id',$shipper->id)
+                     ->whereHas('pickup_address.city', function($query) use ($hubs) {
+                         $query->where('hub_id', '=', $hubs[0]->id);
+                     })
+                     ->whereHas('shipment_journey', function($query) use ($date) {
+                         $query->whereDate('created_at', $date)
+                             ->where('shipper_status_id', 2);
+                     })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                 $shipper_cod = Shipment::where('user_id',$shipper->id)
+                     ->whereHas('pickup_address.city', function($query) use ($hubs) {
+                         $query->where('hub_id', '=', $hubs[0]->id);
+                     })
+                     ->whereHas('shipment_journey', function($query) use ($date) {
+                         $query->whereDate('created_at', $date)
+                             ->where('shipper_status_id', 2);
+                     })->sum('amount');
+
+             }else{
+                 $shipper_booked = Shipment::where('user_id',$shipper->id)->whereDate('created_at',$date)->count();
+                 $shipper_received = Shipment::where('user_id',$shipper->id)->whereHas('shipment_journey', function($query) use ($date) {
+                     $query->whereDate('created_at', $date)
+                         ->where('shipper_status_id', 2);
+                 })->count();
+                 $shipper_rev_wo_gst = Shipment::where('user_id',$shipper->id)->whereHas('shipment_journey', function($query) use ($date) {
+                     $query->whereDate('created_at', $date)
+                         ->where('shipper_status_id', 2);
+                 })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                 $shipper_cod = Shipment::where('user_id',$shipper->id)->whereHas('shipment_journey', function($query) use ($date) {
+                     $query->whereDate('created_at', $date)
+                         ->where('shipper_status_id', 2);
+                 })->sum('amount');
+
+             }
+             $shipper_avg_revenue = ($shipper_received != 0)? $shipper_rev_wo_gst/$shipper_received:0;
+             $shipper_avg_cash_collection = ($shipper_received != 0)? $shipper_cod/$shipper_received:0;
+             $shipper_rev_on_cash_collection = (($shipper_avg_cash_collection != 0)? $shipper_avg_revenue/$shipper_avg_cash_collection:0)*100;
+
+             $shipper_row = array();
+             $shipper_row[] = $serial_number_shippers;
+             $shipper_row[] = $shipper->name;
+             $shipper_row[] = $shipper_booked;
+             $shipper_row[] = $shipper_received;
+             $shipper_row[] = $shipper_rev_wo_gst;
+             $shipper_row[] = $shipper_cod;
+             $shipper_row[] = $shipper_avg_revenue;
+             $shipper_row[] = $shipper_avg_cash_collection;
+             $shipper_row[] = $shipper_rev_on_cash_collection;
+
+             $details[] = $shipper_row;
+             $serial_number_shippers++;
+         }
+//         $all_details = array_merge($details + $shipper_details;
          $spreadsheet = new Spreadsheet();
+         $cell_st =[
+             'font' =>['bold' => true],
+             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+             'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+         ];
          $spreadsheet->getActiveSheet()->fromArray($details);
+         $spreadsheet->getActiveSheet()->getStyle('A1:H9')->applyFromArray($cell_st);
+         $spreadsheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(30);
+         $spreadsheet->getActiveSheet()->insertNewRowBefore(9, 8);
+         $spreadsheet->getActiveSheet()->setTitle('Daily Pickup Sales Report');
+//         $spreadsheet->getActiveSheet()->setCellValue('A1','S. No.');
+//         $spreadsheet->getActiveSheet()->fromArray($shipper_details);
 
          $writer = new Xlsx($spreadsheet);
 
@@ -592,6 +723,12 @@ class AdminReportsController extends Controller
          header('Cache-Control: max-age=0');
 
 //         $writer->save('php://output');
-         $writer->save('daily_pickup_sales_report.xlsx');
+         $writer->save('reports/daily_pickup_sales_report.xlsx');
+        return response()->json(['success'=>1,'file'=>'daily_pickup_sales_report.xlsx']);
+     }
+     public function daily_pickup_sales_download(Request $request){
+         $file = public_path()."/reports/daily_pickup_sales_report.xlsx";
+         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
+         return Response::download($file, 'daily_pickup_sales_report.xlsx',$headers);
      }
 }
