@@ -526,7 +526,7 @@ class AdminReportsController extends Controller
                 }else if($shipment->recovery_status == 8){
                     return "Resolved";
                 }else if($shipment->recovery_status == 9){
-                    return "Adjust in Payment";
+                    return "Payment Adjusted";
                 }
             });
 
