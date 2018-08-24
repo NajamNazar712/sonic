@@ -67,7 +67,8 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Amount</th>
-                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Recovery Status</th>
+                        <th class="border-primary border-darken-1">Current Status</th>
                         <th class="border-primary border-darken-1">Status Updated at</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">DNCC</th>
@@ -264,7 +265,8 @@
                     {data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
                     {data:'service_type', name: 'bt.booking_type', class: 'align-middle text-center service_type'},
                     {data:'amount', name: 's.amount', class: 'align-middle text-center amount'},
-                    {data:'status', name: 'ss.name as status', class: 'align-middle text-center status'},
+                    {data:'recovery_status', name: 'ss.name as status', class: 'align-middle text-center recovery_status'},
+                    {data:'current_status', name: 'ss.name as status', class: 'align-middle text-center current_status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
                     {data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
                     {data:'dncc', name: 'delivery_note_shipments.delivery_note_id', class: 'align-middle text-center dncc'},
@@ -288,7 +290,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.recovery_status')) {
                             $(td).appendTo($(search));
                         }
                         else {

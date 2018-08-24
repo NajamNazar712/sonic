@@ -150,6 +150,7 @@
                         'date': search_date
                     }
                 }).done(function (data) {
+
                     var tab = window.open('', '_blank');
 
                     if(!tab) {

@@ -20,6 +20,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\DB;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
 
 class AdminReportsController extends Controller
@@ -492,8 +493,8 @@ class AdminReportsController extends Controller
              })
              ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
              ->join('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-             ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at')
-             ->where('delivery_note_shipments.status', 7);
+             ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status')
+             ->whereIn('delivery_note_shipments.status', [7,8,9]);
          $datatables = Datatables::of($shipments)
              ->editColumn('status_updated_at', function($shipment) {
                  return Carbon::parse($shipment->status_updated_at)->format('d/m/Y H:i A');
@@ -518,19 +519,28 @@ class AdminReportsController extends Controller
                  else {
                      $query->whereRaw($search);
                  }
-             });
+             })
+            ->editColumn('recovery_status',function ($shipment){
+                if($shipment->recovery_status == 7){
+                    return "Outstanding";
+                }else if($shipment->recovery_status == 8){
+                    return "Resolved";
+                }else if($shipment->recovery_status == 9){
+                    return "Adjust in Payment";
+                }
+            });
 
          if ($hub = $request->get('hub')) {
              $datatables->where('hc.id', '=', $hub);
          }
          if($status = $request->get('shipment_status')){
              if($status == 1){
-                 $datatables->where('delivery_note_shipments.status',7);
+                 $datatables->where('delivery_note_shipments.status','=',7);
              }else if($status == 2){
-                 $datatables->where('delivery_note_shipments.status',8);
+                 $datatables->where('delivery_note_shipments.status','=',8);
 
              }else{
-                 $datatables->where('delivery_note_shipments.status',9);
+                 $datatables->where('delivery_note_shipments.status','=',9);
 
              }
          }
@@ -578,9 +588,10 @@ class AdminReportsController extends Controller
          $writer = new Xlsx($spreadsheet);
 
          header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-         header('Content-Disposition: attachment;filename="sonic_payment_details.xlsx"');
+         header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
          header('Cache-Control: max-age=0');
 
-         $writer->save('php://output');
+//         $writer->save('php://output');
+         $writer->save('daily_pickup_sales_report.xlsx');
      }
 }
