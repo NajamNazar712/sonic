@@ -280,33 +280,37 @@
 
 			var table = $('#datatable').DataTable({
 				scrollX: true,
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					text: 'Make Payment(s)',
-					className: 'btn btn-primary make_payment',
-					enabled: false,
-					action: function (e, dt, node, config) {
-						$('#make_payments #make_payments_form .total_amount').val(0);
-						$('#make_payments #make_payments_form .total_charges').val(0);
-						$('#make_payments #make_payments_form .total_gst').val(0);
-						$('#make_payments #make_payments_form .total_payable').val(0);
-						$('#make_payments #make_payments_form .total_hold').val(0);
+				@if (session('role_id') == 1 || in_array(60, session('permissions')))
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons: [{
+						text: 'Make Payment(s)',
+						className: 'btn btn-primary make_payment',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							$('#make_payments #make_payments_form .total_amount').val(0);
+							$('#make_payments #make_payments_form .total_charges').val(0);
+							$('#make_payments #make_payments_form .total_gst').val(0);
+							$('#make_payments #make_payments_form .total_payable').val(0);
+							$('#make_payments #make_payments_form .total_hold').val(0);
 
-						$('#make_payments #make_payments_form button.make').prop('disabled', true);
-						$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+							$('#make_payments #make_payments_form button.make').prop('disabled', true);
+							$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
-						$('#make_payments #make_payments_form .pending_payment_ids').val('');
-						$('#make_payments #make_payments_form .shipment_ids').val('');
+							$('#make_payments #make_payments_form .pending_payment_ids').val('');
+							$('#make_payments #make_payments_form .shipment_ids').val('');
 
-						selected_pending_payment_ids = selected_rows;
+							selected_pending_payment_ids = selected_rows;
 
-						selected_rows_shipments = [];
+							selected_rows_shipments = [];
 
-						make_payments_table.clear().draw();
+							make_payments_table.clear().draw();
 
-						$('#make_payments').modal('show');
-					}
-				}],
+							$('#make_payments').modal('show');
+						}
+					}],
+				@else
+					dom: 'ltipr',
+				@endif
 				fixedHeader: {
 					header: true,
 					headerOffset: $('.header-navbar').height()
@@ -464,10 +468,10 @@
 				}
 
 				if (selected_rows.length > 0) {
-					table.button(0).enable();
+					table.button('.make_payment').enable();
 				}
 				else {
-					table.button(0).disable();
+					table.button('.make_payment').disable();
 				}
 			});
 

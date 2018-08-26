@@ -123,7 +123,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var selected_rows = [];
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -157,9 +156,6 @@
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
-                    }
                 },
                 initComplete: function() {
                     $(".reasonDrop").select2({
@@ -193,28 +189,6 @@
                             }
                         }
                     });
-                }
-            });
-
-            $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
-                var id = parseInt($(this).parent('tr').attr('id'));
-
-                var index = $.inArray(id, selected_rows);
-
-                if (index === -1) {
-                    selected_rows.push(id);
-                }
-                else {
-                    selected_rows.splice(index, 1);
-                }
-
-                if (selected_rows.length > 0) {
-                    table.button(0).enable();
-                    // table.button(1).enable();
-                }
-                else {
-                    table.button(0).disable();
-                    // table.button(1).disable();
                 }
             });
 

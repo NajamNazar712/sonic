@@ -89,14 +89,18 @@
 	<script>
 		$(document).ready(function() {
 			var table = $('#datatable').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					text: 'Add',
-					className: 'btn btn-primary add',
-					action: function (e, dt, node, config) {
-						window.location = '{{ route('admin.user_management.roles.add.index') }}';
-					}
-				}],
+				@if (session('role_id') == 1 || in_array(86, session('permissions')))
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons: [{
+						text: 'Add',
+						className: 'btn btn-primary add',
+						action: function (e, dt, node, config) {
+							window.location = '{{ route('admin.user_management.roles.add.index') }}';
+						}
+					}],
+				@else
+	                dom: 'ltipr',
+	            @endif
 				fixedHeader: {
 					header: true,
 					headerOffset: $('.header-navbar').height()
@@ -150,12 +154,14 @@
 				}
 			});
 
-			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
-				var id = parseInt($(this).parents('tr').attr('id'));
-				var link = '{{ route('admin.user_management.roles.update.index', ["id" => 0]) }}';
+			@if (session('role_id') == 1 || in_array(87, session('permissions')))
+				$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit', function() {
+					var id = parseInt($(this).parents('tr').attr('id'));
+					var link = '{{ route('admin.user_management.roles.update.index', ["id" => 0]) }}';
 
-				window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
-			});
+					window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
+				});
+			@endif
 		});
 	</script>
 @endsection

@@ -49,27 +49,39 @@ class UserManagementController extends Controller
         })
         ->removeColumn('department')
         ->addColumn('action', function($user) {
-            $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
-            $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-            $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+            if (session('role_id') == 1 || count(array_intersect([83, 84], session('permissions'))) !== 0) {
+                $edit_button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
-            if ($user->status) {
-                return '<div class="btn-group">
+                $dropdown = '
+                    <div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">
-                        ' . $edit_button . $disable_button . '
+                ';
+
+                if (session('role_id') == 1 || in_array(83, session('permissions'))) {
+                    $dropdown .= $edit_button;
+                }
+
+                if (session('role_id') == 1 || in_array(84, session('permissions'))) {
+                    if ($user->status) {
+                        $dropdown .= $disable_button;
+                    }
+                    else {
+                        $dropdown .= $enable_button;
+                    }
+                }
+
+                $dropdown .= '
                       </div>
                     </div>
                 ';
+
+                return $dropdown;
             }
             else {
-                return '<div class="btn-group">
-                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                      <div class="dropdown-menu dropdown-menu-sm">
-                        ' . $edit_button . $enable_button . '
-                      </div>
-                    </div>
-                ';
+                return '';
             }
         })
         ->filterColumn('status', function($query, $keyword) {
@@ -233,13 +245,18 @@ class UserManagementController extends Controller
             return Carbon::parse($role->updated_at)->format('d/m/Y H:i A');
         })
         ->addColumn('action', function($role) {
-            return '<div class="btn-group">
-                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                      <div class="dropdown-menu dropdown-menu-sm">
-                        <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
-                      </div>
-                    </div>
-            ';
+            if (session('role_id') == 1 || in_array(87, session('permissions'))) {
+                return '<div class="btn-group">
+                          <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                          <div class="dropdown-menu dropdown-menu-sm">
+                            <button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>
+                          </div>
+                        </div>
+                ';
+            }
+            else {
+                return '';
+            }
         });
 
         return $datatables->make(true);

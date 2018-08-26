@@ -2810,8 +2810,9 @@
                                 <div class="form-group">
 
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
-                                    @if($shipper->status == 1)
-                                    <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
+
+                                    @if ($shipper->status == 1 && (session('role_id') == 1 || in_array(8, session('permissions'))))
+                                        <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
                                     @endif
                                 </div>
 

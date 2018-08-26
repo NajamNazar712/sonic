@@ -130,59 +130,63 @@
             var selected_rows = [];
             var note_id = $('#return_note').val();
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
-                    text: 'Returned',
-                    className: 'btn btn-primary delivered',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        if(selected_rows != ''){
-                            $.ajax({
-                                url: '{!! route('admin.return.receive.status.delivered') !!}',
-                                method: 'POST',
-                                data: {
-                                    'shipment_ids': selected_rows,
-                                    'return_note_id': note_id,
-                                    '_token': '{{ csrf_token() }}'
-                                }
-                            }).done(function (data) {
-                                if(data.status == 0){
+                @if (session('role_id') == 1 || in_array(50, session('permissions')))
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    buttons: [{
+                        text: 'Returned',
+                        className: 'btn btn-primary returned',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+                                $.ajax({
+                                    url: '{!! route('admin.return.receive.status.delivered') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'shipment_ids': selected_rows,
+                                        'return_note_id': note_id,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                }).done(function (data) {
+                                    if(data.status == 0){
 
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                                }else{
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                                }
-                                location.reload();
-                                // $.each(selected_rows, function(index, id) {
-                                //     table.row($('#datatable tbody tr#' + id)).deselect();
-                                // });
-                                // checkShipmentStatuses();
-                                // selected_rows = [];
-                                // table.button(0).disable();
-                                // table.ajax.reload();
-                                // $('.reasonDrop','.statusDrop').select2('destroy');
-                                // setTimeout(function () {
-                                //     $(".reasonDrop").select2({
-                                //         placeholder: "Select a Reason",
-                                //         width:'100%'
-                                //     });
-                                //     $(".statusDrop").select2({
-                                //         placeholder: "Select a Status",
-                                //         width:'100%'
-                                //     });
-                                // },2000);
+                                    }
+                                    location.reload();
+                                    // $.each(selected_rows, function(index, id) {
+                                    //     table.row($('#datatable tbody tr#' + id)).deselect();
+                                    // });
+                                    // checkShipmentStatuses();
+                                    // selected_rows = [];
+                                    // table.button('.returned').disable();
+                                    // table.ajax.reload();
+                                    // $('.reasonDrop','.statusDrop').select2('destroy');
+                                    // setTimeout(function () {
+                                    //     $(".reasonDrop").select2({
+                                    //         placeholder: "Select a Reason",
+                                    //         width:'100%'
+                                    //     });
+                                    //     $(".statusDrop").select2({
+                                    //         placeholder: "Select a Status",
+                                    //         width:'100%'
+                                    //     });
+                                    // },2000);
 
-                            });
-                        }else{
-                            var error = "Something went wrong please refresh page and try again!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                });
+                            }else{
+                                var error = "Something went wrong please refresh page and try again!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                            }
                         }
-                    }
 
-                }],
+                    }],
+                @else
+                    dom: 'ltipr',
+                @endif
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
@@ -271,11 +275,11 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button(0).enable();
+                    table.button('.returned').enable();
                     // table.button(1).enable();
                 }
                 else {
-                    table.button(0).disable();
+                    table.button('.returned').disable();
                     // table.button(1).disable();
                 }
             });

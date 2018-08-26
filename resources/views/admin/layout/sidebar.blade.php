@@ -233,18 +233,18 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([89, 93, 97], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([88, 92, 96], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Network Management</span></a>
                 <ul class="menu-content">
-                    @if (session('role_id') == 1 || in_array(89, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(88, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.management.city.index')}}" data-i18n="nav.dash.ecommerce">City Management</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(93, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(92, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.management.route.index')}}" data-i18n="nav.dash.ecommerce">Route Management</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(97, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(96, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.management.rider.index')}}" data-i18n="nav.dash.ecommerce">Rider Management</a></li>
                     @endif
 
@@ -254,14 +254,14 @@
 
             <li class=" nav-item"><a href="{{ route('admin.tracking.index') }}"><i class="la la-home"></i><span class="menu-title">Tracking</span></a></li>
 
-            @if (session('role_id') == 1 || in_array(101, session('permissions')))
+            @if (session('role_id') == 1 || in_array(100, session('permissions')))
                 <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><i class="la la-home"></i><span class="menu-title">Notifications</span></a></li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([105], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([104], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
                 <ul class="menu-content">
-                    @if (session('role_id') == 1 || in_array(105, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(104, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}" data-i18n="nav.dash.ecommerce">Pickup Weight Settings</a></li>
                     @endif
                 </ul>

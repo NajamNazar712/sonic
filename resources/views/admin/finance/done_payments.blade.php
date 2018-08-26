@@ -222,74 +222,86 @@
 
 			var table = $('#datatable').DataTable({
 				scrollX: true,
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					text: 'Paid',
-					className: 'mr-1 btn btn-primary paid',
-					enabled: false,
-					action: function (e, dt, node, config) {
-						$.ajax({
-							url: '{!! route('admin.finance.done_payments.paid') !!}',
-							method: 'PUT',
-							data: {
-								'_token': '{{ csrf_token() }}',
-								'ids': selected_rows
+				@if (session('role_id') == 1 || count(array_intersect([62, 63], session('permissions'))) !== 0)
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons: [
+						@if (session('role_id') == 1 || in_array(62, session('permissions')))
+							{
+							text: 'Paid',
+							className: 'mr-1 btn btn-primary paid',
+							enabled: false,
+							action: function (e, dt, node, config) {
+								$.ajax({
+									url: '{!! route('admin.finance.done_payments.paid') !!}',
+									method: 'PUT',
+									data: {
+										'_token': '{{ csrf_token() }}',
+										'ids': selected_rows
+									}
+								})
+								.done(function(data) {
+									if (data.status == 0) {
+										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									}
+									else {
+										toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									}
+
+									$.each(selected_rows, function(index, id) {
+										table.row($('#datatable tbody tr#' + id)).deselect();
+									});
+
+									selected_rows = [];
+
+									table.button('.paid').disable();
+									table.button('.reverted').disable();
+
+									table.ajax.reload();
+								});
 							}
-						})
-						.done(function(data) {
-							if (data.status == 0) {
-								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						},
+					@endif
+
+					@if (session('role_id') == 1 || in_array(63, session('permissions')))
+						{
+							text: 'Reverted',
+							className: 'btn btn-primary reverted',
+							enabled: false,
+							action: function (e, dt, node, config) {
+								$.ajax({
+									url: '{!! route('admin.finance.done_payments.reverted') !!}',
+									method: 'PUT',
+									data: {
+										'_token': '{{ csrf_token() }}',
+										'ids': selected_rows
+									}
+								})
+								.done(function(data) {
+									if (data.status == 0) {
+										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									}
+									else {
+										toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									}
+
+									$.each(selected_rows, function(index, id) {
+										table.row($('#datatable tbody tr#' + id)).deselect();
+									});
+
+									selected_rows = [];
+
+									table.button('.paid').disable();
+									table.button('.reverted').disable();
+
+									table.ajax.reload();
+								});
 							}
-							else {
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-							}
-
-							$.each(selected_rows, function(index, id) {
-								table.row($('#datatable tbody tr#' + id)).deselect();
-							});
-
-							selected_rows = [];
-
-							table.button(0).disable();
-							table.button(1).disable();
-
-							table.ajax.reload();
-						});
-					}
-				}, {
-					text: 'Reverted',
-					className: 'btn btn-primary reverted',
-					enabled: false,
-					action: function (e, dt, node, config) {
-						$.ajax({
-							url: '{!! route('admin.finance.done_payments.reverted') !!}',
-							method: 'PUT',
-							data: {
-								'_token': '{{ csrf_token() }}',
-								'ids': selected_rows
-							}
-						})
-						.done(function(data) {
-							if (data.status == 0) {
-								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-							}
-							else {
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-							}
-
-							$.each(selected_rows, function(index, id) {
-								table.row($('#datatable tbody tr#' + id)).deselect();
-							});
-
-							selected_rows = [];
-
-							table.button(0).disable();
-							table.button(1).disable();
-
-							table.ajax.reload();
-						});
-					}
-				}],
+						}
+					@endif
+					],
+				@else
+					dom: 'ltipr',
+				@endif
 				fixedHeader: {
 					header: true,
 					headerOffset: $('.header-navbar').height()
@@ -382,12 +394,12 @@
 				}
 
 				if (selected_rows.length > 0) {
-					table.button(0).enable();
-					table.button(1).enable();
+					table.button('.paid').enable();
+					table.button('.reverted').enable();
 				}
 				else {
-					table.button(0).disable();
-					table.button(1).disable();
+					table.button('.paid').disable();
+					table.button('.reverted').disable();
 				}
 			});
 

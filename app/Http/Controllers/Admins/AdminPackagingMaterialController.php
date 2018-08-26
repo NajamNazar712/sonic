@@ -242,19 +242,22 @@ class AdminPackagingMaterialController extends Controller
                 }
             })
             ->addColumn('action',function ($packaging){
-                if($packaging->status == 0) {
-                    $drop = " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>";
 
-                    $drop .= "<div class='dropdown-menu open-left arrow'><a class='dropdown-item dispatch'><i class='ft-fast-forward primary'> Dispatch</a>";
+                if ((packaging->status == 0) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                            <div class="dropdown-menu open-left arrow"><a class="dropdown-item dispatch"><i class="ft-fast-forward primary"> Dispatch</a>
+                        </div>
+                      </div>
+                    ';
 
-
-                    $drop .= "</div></span>";
-                }else{
-                    $drop = "<span class='dropdown'></span>";
+                    return $dropdown;
                 }
-                                          return $drop;
+                else {
+                    return '';
+                }
             })
             ->make(true);
     }

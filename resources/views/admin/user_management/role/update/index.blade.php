@@ -29,7 +29,7 @@
 										<select name="department_id" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
 											@foreach($departments as $department)
 												@if ($department->id == $role->department_id)
-													<option value="{{ $department->id }}" @if ($department->id == $role->department_id) selected="selected" @endif>{{ $department->name }}</option>
+													<option value="{{ $department->id }}" selected="selected">{{ $department->name }}</option>
 												@else
 													<option value="{{ $department->id }}">{{ $department->name }}</option>
 												@endif

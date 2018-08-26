@@ -111,27 +111,26 @@ class ModulePermissionTableSeeder extends Seeder
             array('id' => 85, 'name' => 'Roles - View', 'module_id' => 11),
             array('id' => 86, 'name' => 'Roles - Add', 'module_id' => 11),
             array('id' => 87, 'name' => 'Roles - Update', 'module_id' => 11),
-            array('id' => 88, 'name' => 'Roles - Enable/Disable', 'module_id' => 11),
 
-            array('id' => 89, 'name' => 'City Management - View', 'module_id' => 12),
-            array('id' => 90, 'name' => 'City Management - Add', 'module_id' => 12),
-            array('id' => 91, 'name' => 'City Management - Update', 'module_id' => 12),
-            array('id' => 92, 'name' => 'City Management - Enable/Disable', 'module_id' => 12),
-            array('id' => 93, 'name' => 'Route Management - View', 'module_id' => 12),
-            array('id' => 94, 'name' => 'Route Management - Add', 'module_id' => 12),
-            array('id' => 95, 'name' => 'Route Management - Update', 'module_id' => 12),
-            array('id' => 96, 'name' => 'Route Management - Enable/Disable', 'module_id' => 12),
-            array('id' => 97, 'name' => 'Rider Management - View', 'module_id' => 12),
-            array('id' => 98, 'name' => 'Rider Management - Add', 'module_id' => 12),
-            array('id' => 99, 'name' => 'Rider Management - Update', 'module_id' => 12),
-            array('id' => 100, 'name' => 'Rider Management - Enable/Disable', 'module_id' => 12),
+            array('id' => 88, 'name' => 'City Management - View', 'module_id' => 12),
+            array('id' => 89, 'name' => 'City Management - Add', 'module_id' => 12),
+            array('id' => 90, 'name' => 'City Management - Update', 'module_id' => 12),
+            array('id' => 91, 'name' => 'City Management - Enable/Disable', 'module_id' => 12),
+            array('id' => 92, 'name' => 'Route Management - View', 'module_id' => 12),
+            array('id' => 93, 'name' => 'Route Management - Add', 'module_id' => 12),
+            array('id' => 94, 'name' => 'Route Management - Update', 'module_id' => 12),
+            array('id' => 95, 'name' => 'Route Management - Enable/Disable', 'module_id' => 12),
+            array('id' => 96, 'name' => 'Rider Management - View', 'module_id' => 12),
+            array('id' => 97, 'name' => 'Rider Management - Add', 'module_id' => 12),
+            array('id' => 98, 'name' => 'Rider Management - Update', 'module_id' => 12),
+            array('id' => 99, 'name' => 'Rider Management - Enable/Disable', 'module_id' => 12),
 
-            array('id' => 101, 'name' => 'View', 'module_id' => 13),
-            array('id' => 102, 'name' => 'Update', 'module_id' => 13),
-            array('id' => 103, 'name' => 'Enable/Disable', 'module_id' => 13),
-            array('id' => 104, 'name' => 'Send Custom Email', 'module_id' => 13),
+            array('id' => 100, 'name' => 'View', 'module_id' => 13),
+            array('id' => 101, 'name' => 'Update', 'module_id' => 13),
+            array('id' => 102, 'name' => 'Enable/Disable', 'module_id' => 13),
+            array('id' => 103, 'name' => 'Send Custom Email', 'module_id' => 13),
 
-            array('id' => 105, 'name' => 'Pickup Weight', 'module_id' => 14)
+            array('id' => 104, 'name' => 'Pickup Weight', 'module_id' => 14)
         ));
     }
 }
