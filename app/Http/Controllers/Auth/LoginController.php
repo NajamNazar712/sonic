@@ -1,11 +1,14 @@
 <?php
 
 namespace App\Http\Controllers\Auth;
-use App\Http\Models\PackagingCharge;
+
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
+
+use App\Http\Models\PackagingCharge;
+use App\Http\Models\Shipper\SubstituteUserPermission;
 
 class LoginController extends Controller
 {
@@ -43,27 +46,99 @@ class LoginController extends Controller
     {
         return view('client.auth.login');
     }
+
+    protected function attemptLogin(Request $request)
+    {
+        $attempt = Auth::guard('web')->attempt($this->credentials($request), $request->filled('remember'));
+
+        if ($attempt) {
+            session(['user_type' => 1]);
+        }
+        else {
+            $attempt = Auth::guard('substitute_users')->attempt($this->credentials($request), $request->filled('remember'));
+
+            if ($attempt) {
+                session(['user_type' => 2]);
+            }
+        }
+
+        return $attempt;
+    }
+
+    protected function sendLoginResponse(Request $request)
+    {
+        $request->session()->regenerate();
+
+        $this->clearLoginAttempts($request);
+
+        if (session('user_type') == 1) {
+            $guard = Auth::guard('web');
+        }
+        else {
+            $guard = Auth::guard('substitute_users');
+        }
+
+        $this->authenticated($request, $guard->user());
+
+        return $this->authenticated($request, $guard->user()) ?: redirect()->intended($this->redirectPath());
+    }
+
     protected function authenticated(Request $request, $user)
     {
-        if ($user->blacklist) {
-            auth()->logout();
-            return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
-        }elseif ($user->status != 3) {
-            auth()->logout();
-            return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
-        }
-        $packaging_charges_check = false;
-        if(PackagingCharge::where(['user_id'=>Auth::id(),'shipping_mode_id'=>1])->exists()){
-            $packaging_charges_check = true;
-        }else if(PackagingCharge::where(['user_id'=>Auth::id(),'shipping_mode_id'=>2])->exists()){
-            $packaging_charges_check = true;
-        }else if(PackagingCharge::where(['user_id'=>Auth::id(),'shipping_mode_id'=>3])->exists()){
-            $packaging_charges_check = true;
-        }else if(PackagingCharge::where(['user_id'=>Auth::id(),'shipping_mode_id'=>4])->exists()){
-            $packaging_charges_check = true;
-        }
-        session(['packaging_charges_check' => $packaging_charges_check]);
-        return redirect()->intended($this->redirectPath());
+        $packaging_charges_check = FALSE;
 
+        if (session('user_type') == 1) {
+            if ($user->blacklist) {
+                auth('web')->logout();
+                return back()->with('info', 'Your Account is Blacklisted, Contact Admin');
+            }
+            else if ($user->status != 3) {
+                auth('web')->logout();
+                return back()->with('info', 'Your Account is Not Activated Yet, Contact Admin');
+            }
+            else {
+                session(['user_id' => $user->id]);
+
+                if (PackagingCharge::where('user_id', $user->id)->exists()) {
+                    $packaging_charges_check = TRUE;
+                }
+            }
+        }
+        else {
+            if (!$user->status) {
+                auth('substitute_users')->logout();
+                return back()->with('info', 'Your Account is Disabled');
+            }
+            else {
+                $permissions = SubstituteUserPermission::where('substitute_user_id', $user->id)->pluck('permission_id')->toArray();
+
+                session(['permissions' => $permissions]);
+                session(['user_id' => $user->user_id]);
+
+                if (PackagingCharge::where('user_id', $user->user_id)->exists()) {
+                    $packaging_charges_check = TRUE;
+                }
+            }
+        }
+
+        session(['packaging_charges_check' => $packaging_charges_check]);
+
+        return redirect()->intended($this->redirectPath());
+    }
+
+    public function logout(Request $request)
+    {
+        if (session('user_type') == 1) {
+            $guard = Auth::guard('web');
+        }
+        else {
+            $guard = Auth::guard('substitute_users');
+        }
+
+        $guard->logout();
+
+        $request->session()->invalidate();
+
+        return $this->loggedOut($request) ?: redirect('/');
     }
 }

@@ -25,7 +25,9 @@ use Yajra\Datatables\Datatables;
 class ShipperDisputeController extends Controller
 {
     public function __construct() {
-        $this->middleware('auth');
+        $this->middleware('auth:web,substitute_users');
+
+        $this->middleware('Permission');
     }
     public function dispute_index(){
         $cities = City::all();
@@ -36,7 +38,7 @@ class ShipperDisputeController extends Controller
         $dispute = Dispute::join('cities','cities.id','=','disputes.city_id')
             ->join('dispute_types as dt','dt.id','=','disputes.dispute_type_id')
             ->select(['disputes.id as dispute_id','disputes.created_at as created_at','disputes.description','cities.name as originated_at','dt.type as dispute_type','disputes.shipments_count as no_of_shipments','disputes.status as status'])
-            ->where('disputes.raised_by',Auth::id())
+            ->where('disputes.raised_by',session('user_id'))
             ->where('disputes.raised_by_status',1);
         return Datatables::of($dispute)
 
@@ -73,11 +75,11 @@ class ShipperDisputeController extends Controller
                 $shipment = Shipment::where('tracking_number',$tracking);
                 if($shipment->exists()){
                     $shipment = $shipment->first();
-                    if (Auth::id() == $shipment->user_id){
+                    if (session('user_id') == $shipment->user_id){
                     if($dispute_created == 0){
                         $dispute = Dispute::create([
                             'description'=>$request->description,
-                            'raised_by'=>Auth::id(),
+                            'raised_by'=>session('user_id'),
                             'raised_by_status'=>1,
                             'city_id'=>$request->city_select,
                             'dispute_type_id'=>$request->dispute_type_select
@@ -166,7 +168,7 @@ class ShipperDisputeController extends Controller
             ->join('products','products.id','=','si.product_type_id')
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name as consignee','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','products.product_name','shipments.created_at as created_at'])
             ->where('shipments.shipper_status_id',11)
-            ->where('shipments.user_id',Auth::id());
+            ->where('shipments.user_id',session('user_id'));
         return Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
@@ -219,7 +221,7 @@ class ShipperDisputeController extends Controller
     private function book($service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $estimated_weight, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id,$shipper_status_id,$consignee_status_id) {
         $shipment = new Shipment();
 
-        $shipment->user_id = Auth::id();
+        $shipment->user_id = session('user_id');
         $shipment->booking_type_id = $service_type_id;
         $shipment->pickup_address_id = $pickup_address_id;
         $shipment->information_display = $information_display;
@@ -263,19 +265,19 @@ class ShipperDisputeController extends Controller
                     $shipment->consignee_status_id = 19;
                     $shipment->save();
                     $consigneeCity =City::where('id',$shipment->consignee_city_id)->first();
-                    $traxOffice = UserShippingInfo::where(['user_id'=>Auth::id(),'city_id'=>$consigneeCity->hub_id,'hidden'=>1]);
+                    $traxOffice = UserShippingInfo::where(['user_id'=>session('user_id'),'city_id'=>$consigneeCity->hub_id,'hidden'=>1]);
                     if(!$traxOffice->exists()){
-                        $shipper_details = User::where('id',Auth::id())->select('poc','phone','email')->first();
-                        $pickup_address = UserShippingInfo::create(['user_id'=>Auth::id(),'pickup_address'=>$newAddress,'poc'=>$shipper_details->poc,'phone'=>$shipper_details->phone,'email'=>$shipper_details->email,'city_id'=>$shipment->consignee_city_id,'hidden'=>1]);
+                        $shipper_details = User::where('id',session('user_id'))->select('poc','phone','email')->first();
+                        $pickup_address = UserShippingInfo::create(['user_id'=>session('user_id'),'pickup_address'=>$newAddress,'poc'=>$shipper_details->poc,'phone'=>$shipper_details->phone,'email'=>$shipper_details->email,'city_id'=>$shipment->consignee_city_id,'hidden'=>1]);
                     }else{
-                    $traxOffice = UserShippingInfo::where(['user_id'=>Auth::id(),'city_id'=>$consigneeCity->hub_id,'hidden'=>0]);
+                    $traxOffice = UserShippingInfo::where(['user_id'=>session('user_id'),'city_id'=>$consigneeCity->hub_id,'hidden'=>0]);
                         $pickup_address = $traxOffice->first();
                     }
 
                   $newShipment =  $this->book($shipment->booking_type_id,$pickup_address->id,1,$request->consignee_city_id,$request->consignee,$request->address,$request->phone1,$request->phone2,$request->email,$shipment->order_id,$shipment->package_type,$shipment->pickup_date,$shipment->special_instructions,$shipment->estimated_weight,$request->mode,$shipment->same_day_timing_id,$request->amount,$shipment->payment_mode_id,2,2);
 
                  $newTracking = ShipperShipmentBookController::generate_tracking_number($newShipment->id,$shipment->consignee_city_id,$newShipment->consignee_city_id);
-                    ShipmentsJourneyController::add($shipment->id, 19, 19, NULL, 'Shipment # '.$shipment->tracking_number.' has been Re-Booked as new Shipment # '.$newTracking, Auth::id(), NULL);
+                    ShipmentsJourneyController::add($shipment->id, 19, 19, NULL, 'Shipment # '.$shipment->tracking_number.' has been Re-Booked as new Shipment # '.$newTracking, session('user_id'), NULL);
 
                     NotificationsController::send(17, $shipment->id, $newShipment->id);
                     NotificationsController::send(18, $shipment->id, $newShipment->id);
@@ -284,8 +286,8 @@ class ShipperDisputeController extends Controller
                             ShipperShipmentBookController::add_item($newShipment->id, $item->product_type_id, $item->description, $item->quantity, $item->price, $item->insurance, $item->type);
                         }
 
-                    ShipmentsJourneyController::add($newShipment->id, 1, 1, NULL, 'Shipment has been Re-Booked against Tracking # '.$shipment->tracking_number, Auth::id(), NULL);
-                    ShipmentsJourneyController::add($newShipment->id, 2, 2, NULL, 'Shipment has been Re-Booked and arrived at origin center', Auth::id(), NULL);
+                    ShipmentsJourneyController::add($newShipment->id, 1, 1, NULL, 'Shipment has been Re-Booked against Tracking # '.$shipment->tracking_number, session('user_id'), NULL);
+                    ShipmentsJourneyController::add($newShipment->id, 2, 2, NULL, 'Shipment has been Re-Booked and arrived at origin center', session('user_id'), NULL);
                     return response()->json(['status'=>1,'success'=>'Shipment has been rebooked successfully']);
 
                 }else{

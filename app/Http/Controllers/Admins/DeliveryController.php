@@ -294,7 +294,7 @@ class DeliveryController extends Controller
                 $shift_shipment_button = '<a href="{$route}" class="dropdown-item deliverynoteupdate" data-target-id="{$result->delivery_note}"><i class="ft-plus-circle primary"></i> Shift Shipment</a>';
                 $verify_statuses_button = '<a href="{$verifyStatus}" class="dropdown-item" data-target-id="{$result->id}"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
 
-                if ((session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>

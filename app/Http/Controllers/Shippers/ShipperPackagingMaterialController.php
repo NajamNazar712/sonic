@@ -18,11 +18,13 @@ use Illuminate\Support\Facades\Auth;
 class ShipperPackagingMaterialController extends Controller
 {
     public function __construct() {
-        $this->middleware('auth');
+        $this->middleware('auth:web,substitute_users');
+
+        $this->middleware('Permission');
     }
     public function packaging_request(){
         $cities = City::where('status',1)->orderBy('name')->get();
-        $address = UserShippingInfo::where(['user_id'=>Auth::id(),'hidden'=>0])->with('city')->get();
+        $address = UserShippingInfo::where(['user_id'=>session('user_id'),'hidden'=>0])->with('city')->get();
         $payment_mode = PackagingPaymentMode::all();
 //        return $address;
         return view('client.packaging.flyers.index')->with(['address'=>$address,'cities'=>$cities,'payment_mode'=>$payment_mode]);
@@ -48,20 +50,20 @@ class ShipperPackagingMaterialController extends Controller
         $mediumFlyers =($request->md_flyer != null)? $request->md_flyer:0;
         $largeFlyers =($request->lg_flyer != null)? $request->lg_flyer:0;
         $boxFlyers =($request->boxes != null)? $request->boxes:0;
-        $charges = PackagingCharge::where('user_id',Auth::id())->latest()->first();
+        $charges = PackagingCharge::where('user_id',session('user_id'))->latest()->first();
         $total_charges += $smallFlyers * $charges->sm_flyer;
         $total_charges += $mediumFlyers * $charges->md_flyer;
         $total_charges += $largeFlyers * $charges->lg_flyer;
         $total_charges += $boxFlyers * $charges->box_flyer;
         $today = Carbon::today();
 
-        if($discount = DiscountCharge::where('user_id', Auth::id())->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+        if($discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',1)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
             $discount = $discount->first();
-        }else if($discount = DiscountCharge::where('user_id', Auth::id())->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+        }else if($discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',2)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
             $discount = $discount->first();
-        }else if($discount = DiscountCharge::where('user_id', Auth::id())->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+        }else if($discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',3)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
             $discount = $discount->first();
-        }else if($discount = DiscountCharge::where('user_id', Auth::id())->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
+        }else if($discount = DiscountCharge::where('user_id', session('user_id'))->where('shipping_mode_id',4)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today)->exists()){
             $discount = $discount->first();
         }
         if(!empty($discount->packaging)){
@@ -75,7 +77,7 @@ class ShipperPackagingMaterialController extends Controller
             $total_charges = $discount_packaging;
         }
         if($request->mode_of_payment == 1){
-            $user_id = Auth::id();
+            $user_id = session('user_id');
             if ($request->input('address_select') == 0) {
                 $result = PackagingMaterialRequest::create([
                     'user_id'=>$user_id,
@@ -120,15 +122,15 @@ class ShipperPackagingMaterialController extends Controller
                 }
             }
         }else{
-            if(PendingPayment::where('user_id', Auth::id())->exists()){
-                $balance = PendingPayment::where('user_id', Auth::id())->first()->pending_payment_shipments->sum('payable');
+            if(PendingPayment::where('user_id', session('user_id'))->exists()){
+                $balance = PendingPayment::where('user_id', session('user_id'))->first()->pending_payment_shipments->sum('payable');
 
             }else{
                 return redirect()->back()->with('error','Can\'t  Request material!');
             }
 
             if($total_charges <= $balance){
-                $user_id = Auth::id();
+                $user_id = session('user_id');
                 if ($request->input('address_select') == 0) {
                     $result = PackagingMaterialRequest::create([
                         'user_id'=>$user_id,
