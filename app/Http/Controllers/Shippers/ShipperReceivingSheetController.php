@@ -17,7 +17,9 @@ use Carbon\Carbon;
 class ShipperReceivingSheetController extends Controller
 {
     public function __construct() {
-      $this->middleware('auth');
+      $this->middleware('auth:web,substitute_users');
+
+      $this->middleware('Permission');
     }
 
     public function index() {
@@ -32,7 +34,7 @@ class ShipperReceivingSheetController extends Controller
       foreach ($shipment_ids as $shipment_id) {
         $shipment = Shipment::find($shipment_id);
 
-        if ($shipment->user_id != Auth::id()) {
+        if ($shipment->user_id != session('user_id')) {
           return ['status' => 1, 'error' => 'One of the Shipment(s) doesn\'t belong to you'];
         }
 
@@ -48,7 +50,7 @@ class ShipperReceivingSheetController extends Controller
 
       $receiving_sheet = new ReceivingSheet();
 
-      $receiving_sheet->user_id = Auth::id();
+      $receiving_sheet->user_id = session('user_id');
       $receiving_sheet->status = 0;
 
       $receiving_sheet->save();
@@ -75,7 +77,7 @@ class ShipperReceivingSheetController extends Controller
       ->leftjoin('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
       ->leftjoin('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
       ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet')
-      ->where('shipments.user_id', Auth::id())
+      ->where('shipments.user_id', session('user_id'))
       ->where('shipments.shipper_status_id', 1)
       ->where(function ($query) {
         $query->whereNull('rs.status')->orWhere('rs.status', 0);
@@ -115,16 +117,16 @@ class ShipperReceivingSheetController extends Controller
     }
 
     public function all() {
-      return ReceivingSheet::where('user_id', Auth::id())->where('status', 0)->select('id')->get();
+      return ReceivingSheet::where('user_id', session('user_id'))->where('status', 0)->select('id')->get();
     }
 
     public function add(Request $request) {
       $shipment = Shipment::find($request->input('shipment_id'));
 
-      if ($shipment->user_id == Auth::id()) {
+      if ($shipment->user_id == session('user_id')) {
         $receiving_sheet = ReceivingSheet::find($request->input('receiving_sheet_id'));
 
-        if ($receiving_sheet->user_id == Auth::id()) {
+        if ($receiving_sheet->user_id == session('user_id')) {
           if ($receiving_sheet->status == 0) {
             $first_receiving_sheet_shipment = ReceivingSheetShipment::where('receiving_sheet_id', $request->input('receiving_sheet_id'))->first();
 
@@ -172,7 +174,7 @@ class ShipperReceivingSheetController extends Controller
     public function void(Request $request) {
       $shipment = Shipment::find($request->input('shipment_id'));
 
-      if ($shipment->user_id == Auth::id()) {
+      if ($shipment->user_id == session('user_id')) {
         $receiving_sheet_shipment = ReceivingSheetShipment::find($request->input('shipment_id'));
 
         if ($receiving_sheet_shipment->receiving_sheet_id == $request->input('receiving_sheet_id')) {

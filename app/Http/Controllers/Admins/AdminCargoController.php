@@ -384,7 +384,7 @@ class AdminCargoController extends Controller
 
         $dropdown .= $print_button;
 
-        if (session('role_id') == 1 || (in_array(28, session('permissions') && in_array($cargo_consignment->origin_id, session('hubs'))))) {
+        if (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($cargo_consignment->origin_id, session('hubs')))) {
           $dropdown .= $add_forwarding_details_button;
         }
 
@@ -394,7 +394,7 @@ class AdminCargoController extends Controller
           $dropdown .= $launch_dispute_button;
         }
 
-        if (session('role_id') == 1 || (in_array(31, session('permissions') && in_array($cargo_consignment->destination_id, session('hubs'))))) {
+        if (session('role_id') == 1 || (in_array(31, session('permissions')) && in_array($cargo_consignment->destination_id, session('hubs')))) {
           $dropdown .= $receive_button;
         }
 

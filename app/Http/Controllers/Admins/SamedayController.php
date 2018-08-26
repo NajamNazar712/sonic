@@ -157,7 +157,7 @@ class SamedayController extends Controller
                 }
             })
             ->addColumn("action", function ($shipments) {
-                if ((session('role_id') == 1 || count(array_intersect([3, 4], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([3, 4], session('permissions'))) !== 0) {
                     $delivery_statuses = array(2, 4, 6, 7, 8, 9, 13, 15);
 
                     $dropdown = "

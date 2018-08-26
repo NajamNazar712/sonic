@@ -94,7 +94,7 @@ class ReturnController extends Controller
                 $confirm_button = '<a href="#" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
                 $re_attempt_button = '<a href="#" class="dropdown-item returnMarkStatus" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';
 
-                if ((session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0) {
                     $dropdown = "
                         <span class='dropdown'>
                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
@@ -565,10 +565,10 @@ class ReturnController extends Controller
             $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
             $route = route('admin.return.receive.update',['id'=>$result->return_note]);
 
-            $receive_button = '<a href='{$statusUpdate}' class='dropdown-item' class=''><i class='ft-plus-circle primary'></i> Receive</a>';
-            $shift_shipment_button = '<a href='{$route}' class='dropdown-item returnnoteupdate'><i class='ft-plus-circle primary'></i> Shift Shipment</a>';
+            $receive_button = '<a href="{$statusUpdate}" class="dropdown-item" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
+            $shift_shipment_button = '<a href="{$route}" class="dropdown-item returnnoteupdate"><i class="ft-plus-circle primary"></i> Shift Shipment</a>';
 
-            if ((session('role_id') == 1 || count(array_intersect([50, 51], session('permissions'))) !== 0) {
+            if (session('role_id') == 1 || count(array_intersect([50, 51], session('permissions'))) !== 0) {
                 $dropdown = "
                     <span class='dropdown'>
                         <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'

@@ -28,6 +28,9 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('register');
     Route::post('/register','Auth\RegisterController@register')->name('register.submit');
     Route::get('/new/address','Auth\RegisterController@addressView')->name('new.address');
+
+    Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
+
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
 //    Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
@@ -72,6 +75,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         Route::resource('receiving_sheet_history', 'Shippers\ShipperReceivingSheetHistoryController');
     });
+
     Route::prefix('dispute')->name('dispute.')->group(function (){
        Route::get('','Shippers\ShipperDisputeController@dispute_index')->name('index');
        Route::get('list','Shippers\ShipperDisputeController@dispute_list')->name('list');
@@ -94,6 +98,23 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('requests')->name('requests.')->group(function (){
             Route::get('','Shippers\ShipperPackagingMaterialController@packaging_request')->name('index');
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
+        });
+    });
+
+    Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function() {
+        Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@index')->name('index');
+        Route::get('list', 'Shippers\ShipperSubstituteAccountManagementController@list')->name('list');
+        Route::get('email', 'Shippers\ShipperSubstituteAccountManagementController@email')->name('email');
+        Route::post('status', 'Shippers\ShipperSubstituteAccountManagementController@status')->name('status');
+
+        Route::prefix('add')->name('add.')->group(function() {
+            Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@add_index')->name('index');
+            Route::post('', 'Shippers\ShipperSubstituteAccountManagementController@add_store')->name('store');
+        });
+
+        Route::prefix('update/{id}')->name('update.')->group(function() {
+            Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@update_index')->name('index');
+            Route::post('', 'Shippers\ShipperSubstituteAccountManagementController@update_store')->name('store');
         });
     });
 
