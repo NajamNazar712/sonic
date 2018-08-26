@@ -101,13 +101,13 @@ class ShipperDashboardController extends Controller
                         $options = TRUE;
                     }
 
-                    if ($shipments->shipper_status_id == 1 && in_array(2, session('permissions'))) {
+                    if ($shipments->shipper_status_id == 1 && (session('user_type') == 1 || in_array(2, session('permissions')))) {
                         $dropdown .= "<a href='javascript:void(0);' class='dropdown-item cancel_order'><i class='ft-crosshair primary'></i> Cancel</a>";
 
                         $options = TRUE;
                     }
 
-                    if (in_array(6, session('permissions'))) {
+                    if (session('user_type') == 1 || in_array(6, session('permissions'))) {
                         $dropdown .= "<a href='javascript:void(0);' class='dropdown-item dispute_modal'><i class='ft-alert-circle primary'></i> Dispute</a>";
 
                         $options = TRUE;

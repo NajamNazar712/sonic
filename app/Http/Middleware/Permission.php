@@ -289,12 +289,15 @@ class Permission
         else if (Auth::guard('substitute_users')->check()) {
             $action = str_replace('cod.', '', $request->route()->getName());
 
-            if (!isset($this->actions['shipper'][$action]) || in_array($this->actions['shipper'][$action], session('permissions'))) {
+            if (session('user_type') == 1 || !isset($this->actions['shipper'][$action]) || in_array($this->actions['shipper'][$action], session('permissions'))) {
                 return $next($request);
             }
             else {
                 return redirect()->route('cod.access_denied');
             }
+        }
+        else {
+            return $next($request);
         }
     }
 }
