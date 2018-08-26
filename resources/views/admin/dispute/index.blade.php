@@ -400,7 +400,7 @@
         // });
 
         var max_char = 250;
-        $('#description').keypress(function (e) {
+        $('#description').on('keypress copy paste',function (e) {
             // var comment = $(this).val();
             // console.log(comment)
             if ($(this).val().length == max_char) {

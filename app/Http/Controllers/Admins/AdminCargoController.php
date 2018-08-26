@@ -56,7 +56,11 @@ class AdminCargoController extends Controller
         $shipments = $shipments->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
       }
 
-      $datatables = Datatables::of($shipments);
+      $datatables = Datatables::of($shipments)
+      ->editColumn('tracking_number', function ($shipments) {
+          $route = route('admin.tracking.index');
+          return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+      });
 
       if ($shipment_type = $request->get('shipment_type')) {
         if ($shipment_type == 0) {

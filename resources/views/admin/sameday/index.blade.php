@@ -33,6 +33,7 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">TAT</th>
                         <th class="border-primary border-darken-1">Time Remining</th>
+                        <th class="border-primary border-darken-1">Instructions</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -148,6 +149,7 @@
                     {data: 'updated_by', name: 'updater.name', class: 'align-middle updated_by'},
                     {data: 'tat', name: 'tat', class: 'align-middle tat'},
                     {data: 'remaining_time', name: 'remaining_time', class: 'align-middle remaining_time'},
+                    {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -216,6 +218,23 @@
                 // console.log(id);
                 print(id);
             });
+            $('body').on('click','.view_charges',function () {
+                var shipment_id = $(this).parents('tr').attr('id');
+                $('#ShipmentChargesModal').modal('show');
+                $('#shipment_charges_modal_id').val(shipment_id);
+                $.ajax({
+                    url:'{!! route("admin.orders.charges") !!}',
+                    method: 'POST',
+                    data: {
+                        'shipment_id': shipment_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    $('#shipment_charges_body').html(data);
+                    $('#shipment_charges_modal_heading span').text(shipment_id);
+                })
+            });
+
         });
 
     </script>

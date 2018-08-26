@@ -74,6 +74,10 @@ class DeliveryController extends Controller
         }
 
         return Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {

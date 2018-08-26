@@ -20,7 +20,8 @@ class AdminTrackingController extends Controller
       $this->middleware('auth:admin');
     }
 
-    public function index() {
+    public function index(Request $request) {
+
       return view('admin.tracking');
     }
 

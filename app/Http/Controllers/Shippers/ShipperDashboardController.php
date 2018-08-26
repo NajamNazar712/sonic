@@ -65,7 +65,8 @@ class ShipperDashboardController extends Controller
             ->groupBy('shipments.id');
         return Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
-                return "<a href='javascript:void(0);' class='tracking'><u>$shipments->tracking_number</u></a>";
+                $route = route('cod.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('phone1',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;

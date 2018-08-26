@@ -61,6 +61,10 @@ class ReturnController extends Controller
         }
 
         return Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
             ->editColumn('shipper',function ($shipper){
                 return "$shipper->shipper<br/>$shipper->shipper_phone1<br/>$shipper->shipper_phone2";
             })
@@ -230,8 +234,9 @@ class ReturnController extends Controller
         }
 
         $datatables = Datatables::of($shipments)
-            ->editColumn('tracking_number',function ($shipment){
-                    return "<a href='#'>{$shipment->tracking_number}</a>";
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {

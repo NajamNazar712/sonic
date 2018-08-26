@@ -589,7 +589,7 @@
                                                                 <input type="checkbox" id="" class="switchery discountSwitchesOvernight" name="on_discount_weight_switch" data-size="xs" {{$on_discount_weight_switch}}/>
                                                               </span>
                                                         </div>
-                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control numeric on-discount-inp" name="on_discount_weight_rate" value="{{$on_discount_weight_sw}}" {{$on_discount_weight_disable}}>
+                                                        <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control dec-percent on-discount-inp" name="on_discount_weight_rate" value="{{$on_discount_weight_sw}}" {{$on_discount_weight_disable}}>
                                                     </div>
                                                 </fieldset>
                                             </div>

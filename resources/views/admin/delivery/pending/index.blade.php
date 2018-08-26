@@ -256,6 +256,17 @@
                     });
                 }
         });
+        var max_char = 250;
+        $('#universal_description').on('keypress copy paste',function (e) {
+            // var comment = $(this).val();
+            // console.log(comment)
+            if ($(this).val().length == max_char) {
+                e.preventDefault();
+            } else if ($(this).val().length > max_char) {
+                // Maximum exceeded
+                this.value = this.value.substring(0, max_char);
+            }
+        });
         $('#UniversalDisputeModal').on('hidden.bs.modal',function () {
             $('#universal_dispute_form')[0].reset();
             $('#UniversalDisputeCreate').removeAttr('disabled');

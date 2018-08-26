@@ -171,7 +171,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(68, session('permissions')))
-                            <li><a class="menu-item" href="">Outstanding Shipments</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.outstanding_shipments.index') }}">Outstanding Shipments</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(69, session('permissions')))
@@ -183,7 +183,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(71, session('permissions')))
-                            <li><a class="menu-item" href="">Quality Assurance</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.qa.index') }}">Quality Assurance</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(72, session('permissions')))
@@ -191,7 +191,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(73, session('permissions')))
-                            <li><a class="menu-item" href="">Daily Pickup and Sales</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.reports.daily_pickup_sales.index') }}">Daily Pickup and Sales</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(74, session('permissions')))

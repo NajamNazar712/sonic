@@ -66,7 +66,7 @@ class SamedayController extends Controller
             })
             ->leftjoin('shipment_status as sst','sst.id','=','last_update.shipper_status_id')
             ->leftjoin('admins as updater','updater.id','=','last_update.admin_id')
-            ->select('shipments.id as shId','shipments.booking_type_id','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address','p.product_name','sms.id as timing_id','sms.timing','sj.created_at as arrival','shipments.created_at as booked_date','shipments.pickup_date','dispatched.created_at as dispatched_time','regular_delivery.created_at as delivered_time','trybuy_delivery.created_at as trybuy_delivered','replacement_delivery.created_at as replacement_delivered','updater.name as updated_by','sst.name as current_status','shipments.shipper_status_id')
+            ->select('shipments.id as shId','shipments.booking_type_id','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address','p.product_name','sms.id as timing_id','sms.timing','sj.created_at as arrival','shipments.created_at as booked_date','shipments.pickup_date','dispatched.created_at as dispatched_time','regular_delivery.created_at as delivered_time','trybuy_delivery.created_at as trybuy_delivered','replacement_delivery.created_at as replacement_delivered','updater.name as updated_by','sst.name as current_status','shipments.shipper_status_id', 'shipments.special_instructions as instructions')
 
             ->where('shipments.shipping_mode_id',4)
             ->whereNotIn('shipments.shipper_status_id',[39,40,41,42,43,47])
@@ -77,6 +77,10 @@ class SamedayController extends Controller
         }
 
         return Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
             ->editColumn('dispatched_time',function ($shipments){
                 if($shipments->dispatched_time) {
 
@@ -177,10 +181,13 @@ class SamedayController extends Controller
                         $dropdown .= "<a href='{$route}' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>";
                     }
 
-                    $dropdown .= "<a href='#' class='dropdown-item airwaybill'><i class='ft-printer primary'></i> Print Invoice</a>";
+                    $dropdown .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-eye primary'></i> View Charges</a>";
+
+                    $dropdown .= "<a href='javascript:void(0);' class='dropdown-item airwaybill'><i class='ft-printer primary'></i> Print Invoice</a>";
 
                     $dropdown .= "
-                            </div></span>
+                            </div>
+                        </span>
                     ";
 
                     return $dropdown;

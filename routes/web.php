@@ -87,7 +87,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
     });
     Route::prefix('tracking')->name('tracking.')->group(function () {
-        Route::get('', 'Shippers\ShipperTrackingController@index')->name('index');
+        Route::get('{tracking_number?}', 'Shippers\ShipperTrackingController@index')->name('index');
         Route::post('track', 'Shippers\ShipperTrackingController@track')->name('track');
     });
     Route::prefix('packaging')->name('packaging.')->group(function (){
@@ -115,7 +115,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('dashboard', 'Admins\AdminDashboardController@index')->name('index');
         Route::get('list', 'Admins\AdminDashboardController@orders_list')->name('list');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
-
+        Route::post('shipment_charges','Admins\AdminDashboardController@get_shipment_charges')->name('charges');
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
@@ -343,7 +343,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     Route::prefix('tracking')->name('tracking.')->group(function() {
-        Route::get('', 'Admins\AdminTrackingController@index')->name('index');
+        Route::get('{tracking_number?}', 'Admins\AdminTrackingController@index')->name('index');
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
     });
 
@@ -472,6 +472,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('lead_time')->name('lead_time.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@lead_time_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@lead_time_list')->name('list');
+        });
+        Route::prefix('qa')->name('qa.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@qa_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@qa_list')->name('list');
+        });
+        Route::prefix('outstanding_shipments')->name('outstanding_shipments.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@outstanding_shipments_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@outstanding_shipments_list')->name('list');
+        });
+        Route::prefix('daily_pickup_sales')->name('daily_pickup_sales.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@daily_pickup_sales_index')->name('index');
+            Route::post('export_to_excel', 'Admins\AdminReportsController@daily_pickup_sales_export_to_excel')->name('export_to_excel');
+            Route::get('download', 'Admins\AdminReportsController@daily_pickup_sales_download')->name('download');
         });
 
     });
