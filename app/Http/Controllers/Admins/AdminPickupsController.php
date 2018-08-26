@@ -21,7 +21,7 @@ use App\Http\Models\PickupRequest;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupNoteStatus;
-use App\Http\Models\PickupNotesJourney;
+
 use Auth;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
@@ -198,8 +198,6 @@ class AdminPickupsController extends Controller
         $pickup_note->save();
 
         $pickup_note_id = $pickup_note->id;
-
-        PickupNotesJourneyController::add($pickup_note_id, $pickup_note->status_id, 'Pickup Request(s) has been added into the Pickup Note!', Auth::id());
       }
       else {
         $pickup_note = new PickupNote();
@@ -225,9 +223,6 @@ class AdminPickupsController extends Controller
           $pickup_note->save();
 
         $pickup_note_id = $pickup_note->id;
-
-
-        PickupNotesJourneyController::add($pickup_note_id, 0, 'Pickup Note has been Created!', Auth::id());
       }
 
       foreach ($pickup_request_ids as $pickup_request_id) {
@@ -397,8 +392,6 @@ class AdminPickupsController extends Controller
           $pickup_request->save();
         }
 
-        PickupNotesJourneyController::add($pickup_note_id, 6, 'Pickup Note has been Cancelled!', Auth::id());
-
         return ['status' => 0, 'success' => 'Pickup has been Cancelled'];
       }
       else {
@@ -446,8 +439,6 @@ class AdminPickupsController extends Controller
         $pickup_note->status_id = 2;
 
         $pickup_note->save();
-
-        PickupNotesJourneyController::add($pickup_note_id, 2, 'Pickup Note has been Generated!', Auth::id());
 
         return ['status' => 0, 'success' => 'Pickup Note has been Generated'];
       }
@@ -854,7 +845,7 @@ class AdminPickupsController extends Controller
           $reference_2_id = NULL;
         }
 
-        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, 'Shipment has Arrived!', NULL, Auth::id(), $reference_1_id, $reference_2_id);
+        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
         NotificationsController::send(3, $shipment_id);
 
@@ -934,9 +925,7 @@ class AdminPickupsController extends Controller
 
       $pickup_note->status_id = 4;
       $pickup_note->updated_by = Auth::id();
-        $pickup_note->save();
-
-      PickupNotesJourneyController::add($pickup_note->id, $pickup_note->status_id, 'Pickup Note has been Received!', Auth::id());
+      $pickup_note->save();
 
       NotificationsController::send(4, $request->pickup_receive_pickup_note_id, explode(',', $request->shipment_ids));
 
@@ -1097,9 +1086,7 @@ class AdminPickupsController extends Controller
         if ($completed) {
           $pickup_note->status_id = 5;
           $pickup_note->updated_by = Auth::id();
-            $pickup_note->save();
-
-          PickupNotesJourneyController::add($pickup_note->id, 5, 'Pickup Note has been Completed!', Auth::id());
+          $pickup_note->save();
 
           return ['status' => 0, 'success' => 'Pickup has been marked Done & Pickup Note has been Completed', 'complete' => TRUE];
         }
@@ -1142,8 +1129,6 @@ class AdminPickupsController extends Controller
           $pickup_note->status_id = 5;
           $pickup_note->updated_by = Auth::id();
           $pickup_note->save();
-
-          PickupNotesJourneyController::add($pickup_note->id, 5, 'Pickup Note has been Completed!', Auth::id());
 
           return ['status' => 0, 'success' => 'Pickup has been marked Not Done and is moved to Pending & Pickup Note has been Completed', 'complete' => TRUE];
         }

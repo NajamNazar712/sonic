@@ -304,7 +304,7 @@ class AdminPackagingMaterialController extends Controller
                }
                $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
                 $this->add_item($shipment->id,24,null,1,null,0,0);
-               ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, 'Shipment arrived at origin!', $request_details->user_id, NULL);
+               ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, $request_details->user_id, NULL);
                 $this->sub_head_stock($request_details->small_flyers,$request_details->medium_flyers,$request_details->large_flyers,$request_details->boxes);
                 $request_details->status = 1;
                 $request_details->save();
