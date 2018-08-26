@@ -288,7 +288,7 @@ class AdminPickupsController extends Controller
       ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
       ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
-      ->where('pickup_notes.status_id', '<', 3);
+      ->where('pickup_notes.status_id', '=', 1);
 
       if (session('role_id') != 1) {
         $pickup_notes = $pickup_notes->whereIn('c.hub_id', session('hubs'));
@@ -308,13 +308,9 @@ class AdminPickupsController extends Controller
       ->editColumn('pickup_type', function($pickup_note) {
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
       })
-      ->editColumn('pickup_note_no', function($pickup_note) {
-        return ($pickup_note->status_id == 2) ? $pickup_note->id : '';
-      })
       ->addColumn('action', function($pickup_note) {
         $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
         $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
-        $generate_pickup_note_button = '<button type="button" class="dropdown-item generate_pickup_note"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-target"></i></div><div class="col-9 offset-1">Generate Pickup Note</div></div></button>';
         $print_pickup_note_button = '<button type="button" class="dropdown-item print_pickup_note"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print Pickup Note</div></button>';
         $sms_rider_button = '<button type="button" class="dropdown-item sms_rider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-message-circle"></i></div><div class="col-9 offset-1">SMS Rider</div></button>';
 
@@ -330,13 +326,8 @@ class AdminPickupsController extends Controller
 
         $dropdown .= $view_details_button;
 
-        if ($pickup_note->status_id == 1) {
-          $dropdown .= $generate_pickup_note_button;
-        }
-        else {
-          if (session('role_id') == 1 || in_array(22, session('permissions'))) {
-            $dropdown .= $print_pickup_note_button . $sms_rider_button;
-          }
+        if (session('role_id') == 1 || in_array(22, session('permissions'))) {
+          $dropdown .= $print_pickup_note_button . $sms_rider_button;
         }
 
         $dropdown .= '
@@ -366,7 +357,7 @@ class AdminPickupsController extends Controller
         }
       })
       ->filterColumn('pickup_note_no', function($query, $keyword) {
-        $query->where('pickup_notes.status_id', '=', 2)->where('pickup_notes.id', '=', $keyword);
+        $query->where('pickup_notes.id', '=', $keyword);
       });
 
       return $datatables->make(true);
@@ -377,8 +368,8 @@ class AdminPickupsController extends Controller
 
       $pickup_note = PickupNote::find($pickup_note_id);
 
-      if ($pickup_note->status_id < 3) {
-        $pickup_note->status_id = 6;
+      if ($pickup_note->status_id == 1) {
+        $pickup_note->status_id = 5;
 
         $pickup_note->save();
 
@@ -428,23 +419,6 @@ class AdminPickupsController extends Controller
       }
 
       return $details;
-    }
-
-    public function assigned_generate_pickup_note(Request $request) {
-      $pickup_note_id = $request->input('pickup_note_id');
-
-      $pickup_note = PickupNote::find($pickup_note_id);
-
-      if ($pickup_note->status_id == 1) {
-        $pickup_note->status_id = 2;
-
-        $pickup_note->save();
-
-        return ['status' => 0, 'success' => 'Pickup Note has been Generated'];
-      }
-      else {
-        return ['status' => 1, 'error' => 'Selected Pickup has already been modified'];
-      }
     }
 
     public function assigned_print(Request $request) {
@@ -594,9 +568,11 @@ class AdminPickupsController extends Controller
                       <hr>
         ';
 
-        $pickup_note->status_id = 3;
+        if ($request->dispatch) {
+          $pickup_note->status_id = 2;
 
-        $pickup_note->save();
+          $pickup_note->save();
+        }
       }
 
       $html .= '
@@ -626,7 +602,7 @@ class AdminPickupsController extends Controller
       ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
       ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
-      ->whereIn('pickup_notes.status_id', [3, 4]);
+      ->whereIn('pickup_notes.status_id', [2, 3]);
 
       if (session('role_id') != 1) {
         $pickup_notes = $pickup_notes->whereIn('c.hub_id', session('hubs'));
@@ -645,13 +621,15 @@ class AdminPickupsController extends Controller
       ->editColumn('assigned_date', function($pickup_note) {
         return Carbon::parse($pickup_note->assigned_date)->format('d/m/Y H:i A');
       })
+      ->editColumn('pickup_note_no', function($pickup_note) {
+        return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $pickup_note->pickup_note_no . '</span></button>';
+      })
       ->addColumn('action', function($pickup_note) {
         $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
-        // $view_button = '<button type="button" class="dropdown-item summary"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-target"></i></div><div class="col-9 offset-1">Summary</div></button>';
-        $view_button = '';
+        $view_button = '<button type="button" class="dropdown-item summary"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-target"></i></div><div class="col-9 offset-1">Summary</div></button>';
 
         if (session('role_id') == 1 || in_array(24, session('permissions'))) {
-          if ($pickup_note->status_id == 3) {
+          if ($pickup_note->status_id == 2) {
             return '<div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">
@@ -664,7 +642,7 @@ class AdminPickupsController extends Controller
             return '<div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">
-                        ' . $receive_button . $view_button . '
+                        ' . $view_button . '
                       </div>
                     </div>
             ';
@@ -692,6 +670,9 @@ class AdminPickupsController extends Controller
         else {
           $query->whereRaw('false');
         }
+      })
+      ->filterColumn('pickup_note_no', function($query, $keyword) {
+        $query->where('pickup_notes.id', '=', $keyword);
       });
 
       return $datatables->make(true);
@@ -702,8 +683,11 @@ class AdminPickupsController extends Controller
         $pickup_note = PickupNote::find($request->get('pickup_note_no'));
 
         if ($pickup_note) {
-          if ($pickup_note->status_id == 3 || $pickup_note->status_id == 4) {
+          if ($pickup_note->status_id == 2) {
             return redirect()->route('admin.pickups.receive.arrival_of_shipments.index')->with('pickup_receive_pickup_note_id', $request->get('pickup_note_no'));
+          }
+          else if ($pickup_note->status_id == 3) {
+            return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->get('pickup_note_no'));
           }
           else {
             return back()->withErrors('Given Pickup Note has already been modified!');
@@ -923,7 +907,7 @@ class AdminPickupsController extends Controller
         }
       }
 
-      $pickup_note->status_id = 4;
+      $pickup_note->status_id = 3;
       $pickup_note->updated_by = Auth::id();
       $pickup_note->save();
 
@@ -1084,7 +1068,7 @@ class AdminPickupsController extends Controller
           }
           //dispute end
         if ($completed) {
-          $pickup_note->status_id = 5;
+          $pickup_note->status_id = 4;
           $pickup_note->updated_by = Auth::id();
           $pickup_note->save();
 
@@ -1126,7 +1110,7 @@ class AdminPickupsController extends Controller
         }
 
         if ($completed) {
-          $pickup_note->status_id = 5;
+          $pickup_note->status_id = 4;
           $pickup_note->updated_by = Auth::id();
           $pickup_note->save();
 
