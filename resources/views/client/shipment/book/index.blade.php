@@ -294,10 +294,6 @@
 												@endforeach
 											</select>
 										</div>
-
-										<div class="form-group">
-											<p class="border-bottom border-light text-center font-medium-1 text-bold-600">Estimated Charges</p>
-										</div>
 									</div>
 								</div>
 

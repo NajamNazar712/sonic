@@ -126,6 +126,7 @@
 					method: 'POST',
 					data: {
 						'ids': ids,
+						'dispatch': 1,
 						'_token': '{{ csrf_token() }}'
 					}
 				})
@@ -361,50 +362,6 @@
 							$('#view_details .modal-body').html(pickup_requests);
 
 							$('#view_details').modal('show');
-						}
-					});
-				}
-				else if ($(this).hasClass('generate_pickup_note')) {
-					swal({
-						text: 'Are you sure, you want to Generate Pickup Note?',
-						icon: 'warning',
-						buttons: {
-							cancel: {
-								text: 'Close',
-								value: null,
-								visible: true,
-								closeModal: true,
-							},
-							confirm: {
-								text: 'Generate',
-								value: true,
-								visible: true,
-								closeModal: true
-							}
-						},
-						closeOnClickOutside: false,
-						closeOnEsc: false,
-						dangerMode: true
-					}).then(function(confirm) {
-						if (confirm) {
-							$.ajax({
-								url: '{!! route('admin.pickups.assigned.generate_pickup_note') !!}',
-								method: 'PUT',
-								data: {
-									'pickup_note_id': pickup_note_id,
-									'_token': '{{ csrf_token() }}'
-								}
-							})
-							.done(function(data) {
-								if (data.status == 0) {
-									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-								}
-								else {
-									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-								}
-
-								table.ajax.reload();
-							});
 						}
 					});
 				}

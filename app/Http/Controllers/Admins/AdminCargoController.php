@@ -328,7 +328,7 @@ class AdminCargoController extends Controller
 
         $shipment->save();
 
-        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment is in Transit!', NULL, Auth::id(), $cargo_consignment->id, $cargo_consignment->builty_number);
+        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $cargo_consignment->id, $cargo_consignment->builty_number);
 
         NotificationsController::send(5, $id, $shipment_id);
 
@@ -970,7 +970,7 @@ class AdminCargoController extends Controller
 
         $shipment->save();
 
-        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, 'Shipment has Arrived at Destination Centre!', NULL, Auth::id());
+        ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id());
 
         NotificationsController::send(7, $cargo_consignment_id, $shipment_id);
 
