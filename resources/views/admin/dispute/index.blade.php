@@ -324,16 +324,19 @@
             });
 
         var table = $('#datatable').DataTable({
-            // "scrollX": true,
-            dom: '<"d-inline-block"l><"pull-right"B>tipr',
-            buttons: [{
-                text: 'Launch Dispute',
-                className: 'btn btn-primary dispute_modal',
-                enabled: true,
-                action: function (e, dt, node, config) {
-                    $('#DisputeModal').modal('show');
-                }
-            }],
+            @if (session('role_id') == 1 || in_array(2, session('permissions')))
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [{
+                    text: 'Launch Dispute',
+                    className: 'btn btn-primary dispute_modal',
+                    enabled: true,
+                    action: function (e, dt, node, config) {
+                        $('#DisputeModal').modal('show');
+                    }
+                }],
+            @else
+                dom: 'ltipr',
+            @endif
             fixedHeader: {
                 header: true,
                 headerOffset: $('.header-navbar').height()
@@ -397,7 +400,7 @@
         // });
 
         var max_char = 250;
-        $('#description').keypress(function (e) {
+        $('#description').on('keypress copy paste',function (e) {
             // var comment = $(this).val();
             // console.log(comment)
             if ($(this).val().length == max_char) {

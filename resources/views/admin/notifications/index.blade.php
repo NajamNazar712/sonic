@@ -29,85 +29,89 @@
 								</thead>
 							</table>
 
-							<div class="modal fade" id="send_custom_email" role="dialog" aria-labelledby="send_custom_email_title" aria-hidden="true">
-								<div class="modal-dialog modal-lg" role="document">
-									<div class="modal-content">
-										<form class="form-horizontal" method="POST" action="{{ route('admin.notifications.send_custom_email') }}" novalidate="novalidate">
-											{{ csrf_field() }}
+							@if (session('role_id') == 1 || in_array(104, session('permissions')))
+								<div class="modal fade" id="send_custom_email" role="dialog" aria-labelledby="send_custom_email_title" aria-hidden="true">
+									<div class="modal-dialog modal-lg" role="document">
+										<div class="modal-content">
+											<form class="form-horizontal" method="POST" action="{{ route('admin.notifications.send_custom_email') }}" novalidate="novalidate">
+												{{ csrf_field() }}
 
-											<div class="modal-header">
-												<h4 class="modal-title" id="send_custom_email_title">Send Custom Email</h4>
+												<div class="modal-header">
+													<h4 class="modal-title" id="send_custom_email_title">Send Custom Email</h4>
 
-												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-													<span aria-hidden="true">×</span>
-												</button>
-											</div>
-											<div class="modal-body">
-												<div class="form-group">
-													<select name="receiver" class="select2 receiver" data-rule-required="true" data-msg-required="Receiver is required">
-														<option value="" selected="selected"></option>
-														<option value="1">Employees</option>
-														<option value="2">Shippers</option>
-													</select>
+													<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+														<span aria-hidden="true">×</span>
+													</button>
 												</div>
+												<div class="modal-body">
+													<div class="form-group">
+														<select name="receiver" class="select2 receiver" data-rule-required="true" data-msg-required="Receiver is required">
+															<option value="" selected="selected"></option>
+															<option value="1">Employees</option>
+															<option value="2">Shippers</option>
+														</select>
+													</div>
 
-												<div class="form-group">
-													<label>Subject</label>
-													<input type="text" name="subject" class="form-control subject" placeholder="Subject*" data-rule-required="true" data-msg-required="Subject is required">
-												</div>
+													<div class="form-group">
+														<label>Subject</label>
+														<input type="text" name="subject" class="form-control subject" placeholder="Subject*" data-rule-required="true" data-msg-required="Subject is required">
+													</div>
 
-												<div class="form-group">
-													<label>Body</label>
-													<textarea type="text" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required"></textarea>
-												</div>
-											</div>
-											<div class="modal-footer">
-												<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-												<button type="submit" name="send" class="btn btn-primary">Send</button>
-											</div>
-										</form>
-									</div>
-								</div>
-							</div>
-
-							<div class="modal fade" id="edit" role="dialog" aria-labelledby="edit_title" aria-hidden="true">
-								<div class="modal-dialog modal-lg" role="document">
-									<div class="modal-content">
-										<form class="form-horizontal" novalidate="novalidate">
-											<input type="hidden" name="id" class="id">
-
-											<div class="modal-header">
-												<h4 class="modal-title" id="edit_title">Edit</h4>
-
-												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-													<span aria-hidden="true">×</span>
-												</button>
-											</div>
-											<div class="modal-body">
-												<div class="form-group email">
-													<label>Subject</label>
-													<input type="text" name="subject" class="form-control subject" placeholder="Subject*" data-rule-required="true" data-msg-required="Subject is required" data-rule-field="true">
-												</div>
-
-												<div class="form-group">
-													<label>Body</label>
-													<textarea type="text" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required" data-rule-field="true"></textarea>
-												</div>
-
-												<div class="form-group">
-													<label>Fields</label>
-													<div class="fields">
+													<div class="form-group">
+														<label>Body</label>
+														<textarea type="text" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required"></textarea>
 													</div>
 												</div>
-											</div>
-											<div class="modal-footer">
-												<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-												<button type="submit" name="edit" class="btn btn-primary">Edit</button>
-											</div>
-										</form>
+												<div class="modal-footer">
+													<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+													<button type="submit" name="send" class="btn btn-primary">Send</button>
+												</div>
+											</form>
+										</div>
 									</div>
 								</div>
-							</div>
+							@endif
+
+							@if (session('role_id') == 1 || in_array(102, session('permissions')))
+								<div class="modal fade" id="edit" role="dialog" aria-labelledby="edit_title" aria-hidden="true">
+									<div class="modal-dialog modal-lg" role="document">
+										<div class="modal-content">
+											<form class="form-horizontal" novalidate="novalidate">
+												<input type="hidden" name="id" class="id">
+
+												<div class="modal-header">
+													<h4 class="modal-title" id="edit_title">Edit</h4>
+
+													<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+														<span aria-hidden="true">×</span>
+													</button>
+												</div>
+												<div class="modal-body">
+													<div class="form-group email">
+														<label>Subject</label>
+														<input type="text" name="subject" class="form-control subject" placeholder="Subject*" data-rule-required="true" data-msg-required="Subject is required" data-rule-field="true">
+													</div>
+
+													<div class="form-group">
+														<label>Body</label>
+														<textarea type="text" name="body" class="form-control body" placeholder="Body*" data-rule-required="true" data-msg-required="Body is required" data-rule-field="true"></textarea>
+													</div>
+
+													<div class="form-group">
+														<label>Fields</label>
+														<div class="fields">
+														</div>
+													</div>
+												</div>
+												<div class="modal-footer">
+													<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+													<button type="submit" name="edit" class="btn btn-primary">Edit</button>
+												</div>
+											</form>
+										</div>
+									</div>
+								</div>
+							@endif
 						</div>
 					</div>
 				</div>
@@ -177,30 +181,38 @@
 
 	<script>
 		$(document).ready(function() {
-			$('#send_custom_email .receiver').select2({
-				width: '100%',
-				placeholder: 'Receiver'
-			}).bind('change', function() {
-				if ($(this).hasClass('danger')) {
-					$(this).valid();
-				}
-			});
+			@if (session('role_id') == 1 || in_array(104, session('permissions')))
+				$('#send_custom_email .receiver').select2({
+					width: '100%',
+					placeholder: 'Receiver'
+				}).bind('change', function() {
+					if ($(this).hasClass('danger')) {
+						$(this).valid();
+					}
+				});
 
-			autosize($('#send_custom_email .body')[0]);
+				autosize($('#send_custom_email .body')[0]);
+			@endif
 
-			autosize($('#edit .body')[0]);
+			@if (session('role_id') == 1 || in_array(102, session('permissions')))
+				autosize($('#edit .body')[0]);
+			@endif
 
 			var valid_fields = [];
 
 			var table = $('#datatable').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					text: 'Send Custom Email',
-					className: 'btn btn-primary send_custom_email',
-					action: function (e, dt, node, config) {
-						$('#send_custom_email').modal('show');
-					}
-				}],
+				@if (session('role_id') == 1 || in_array(104, session('permissions')))
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons: [{
+						text: 'Send Custom Email',
+						className: 'btn btn-primary send_custom_email',
+						action: function (e, dt, node, config) {
+							$('#send_custom_email').modal('show');
+						}
+					}],
+				@else
+                	dom: 'ltipr',
+				@endif
 				fixedHeader: {
 					header: true,
 					headerOffset: $('.header-navbar').height()
@@ -255,159 +267,168 @@
 				}
 			});
 
-			$('#send_custom_email form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				normalizer: function(value) {
-					return $.trim(value);
-				},
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
-				}
-			});
+			@if (session('role_id') == 1 || in_array(104, session('permissions')))
+				$('#send_custom_email form').validate({
+					errorClass: 'danger',
+					successClass: 'success',
+					normalizer: function(value) {
+						return $.trim(value);
+					},
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
+					}
+				});
+			@endif
 
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var notification_id = parseInt($(this).parents('tr').attr('id'));
 				var notification_type = parseInt($(this).parents('tr').attr('data-type'));
 
-				if ($(this).hasClass('edit')) {
-					$.ajax({
-						url: '{!! route('admin.notifications.details') !!}',
-						method: 'POST',
-						data: {
-							'_token': '{{ csrf_token() }}',
-							'id': notification_id
-						}
-					})
-					.done(function(data) {
-						$('#edit .id').val(notification_id);
+				@if (session('role_id') == 1 || in_array(102, session('permissions')))
+					if ($(this).hasClass('edit')) {
+						$.ajax({
+							url: '{!! route('admin.notifications.details') !!}',
+							method: 'POST',
+							data: {
+								'_token': '{{ csrf_token() }}',
+								'id': notification_id
+							}
+						})
+						.done(function(data) {
+							$('#edit .id').val(notification_id);
 
-						if (notification_type == 1) {
-							$('#edit .email').removeClass('d-none');
+							if (notification_type == 1) {
+								$('#edit .email').removeClass('d-none');
 
-							$('#edit .subject').val(data.subject);
-						}
-						else {
-							$('#edit .email').addClass('d-none');
+								$('#edit .subject').val(data.subject);
+							}
+							else {
+								$('#edit .email').addClass('d-none');
 
-							$('#edit .subject').val('');
-						}
+								$('#edit .subject').val('');
+							}
 
-						$('#edit .body').val(data.body);
+							$('#edit .body').val(data.body);
 
-						$('#edit .fields').html('');
+							$('#edit .fields').html('');
 
-						valid_fields = [];
+							valid_fields = [];
 
-						$.each(data.fields, function(index, field) {
-							$('#edit .fields').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + field + ']</span>');
+							$.each(data.fields, function(index, field) {
+								$('#edit .fields').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + field + ']</span>');
 
-							valid_fields.push(field);
+								valid_fields.push(field);
+							});
+
+							$('#edit').modal('show');
 						});
+					}
+				@endif
 
-						$('#edit').modal('show');
-					});
-				}
-				else if ($(this).hasClass('enable')) {
-					$.ajax({
-						url: '{!! route('admin.notifications.status') !!}',
-						method: 'POST',
-						data: {
-							'id': notification_id,
-							'status': 1,
-							'_token': '{{ csrf_token() }}'
-						}
-					})
-					.done(function(data) {
-						if (data.status == 0) {
-							table.draw(false);
+				@if (session('role_id') == 1 || in_array(103, session('permissions')))
+					if ($(this).hasClass('enable')) {
+						$.ajax({
+							url: '{!! route('admin.notifications.status') !!}',
+							method: 'POST',
+							data: {
+								'id': notification_id,
+								'status': 1,
+								'_token': '{{ csrf_token() }}'
+							}
+						})
+						.done(function(data) {
+							if (data.status == 0) {
+								table.draw(false);
 
-							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-						else {
-							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-					});
-				}
-				else if ($(this).hasClass('disable')) {
-					$.ajax({
-						url: '{!! route('admin.notifications.status') !!}',
-						method: 'POST',
-						data: {
-							'id': notification_id,
-							'status': 0,
-							'_token': '{{ csrf_token() }}'
-						}
-					})
-					.done(function(data) {
-						if (data.status == 0) {
-							table.draw(false);
+								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
+							else {
+								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
+						});
+					}
+					else if ($(this).hasClass('disable')) {
+						$.ajax({
+							url: '{!! route('admin.notifications.status') !!}',
+							method: 'POST',
+							data: {
+								'id': notification_id,
+								'status': 0,
+								'_token': '{{ csrf_token() }}'
+							}
+						})
+						.done(function(data) {
+							if (data.status == 0) {
+								table.draw(false);
 
-							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-						else {
-							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-					});
-				}
+								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
+							else {
+								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
+						});
+					}
+				@endif
 			});
 
-			$('#edit').on('shown.bs.modal', function (e) {
-				autosize.update($('#edit .body')[0]);
-			})
+			@if (session('role_id') == 1 || in_array(102, session('permissions')))
+				$('#edit').on('shown.bs.modal', function (e) {
+					autosize.update($('#edit .body')[0]);
+				})
 
-			$.validator.addMethod('field', function(value, element) {
-				var valid = true;
+				$.validator.addMethod('field', function(value, element) {
+					var valid = true;
 
-				var entered_fields = value.match(/[^[\]]+(?=])/g);
+					var entered_fields = value.match(/[^[\]]+(?=])/g);
 
-				$.each(entered_fields, function(index, field) {
-					if ($.inArray(field, valid_fields) === -1) {
-						valid = false;
+					$.each(entered_fields, function(index, field) {
+						if ($.inArray(field, valid_fields) === -1) {
+							valid = false;
 
-						return valid;
+							return valid;
+						}
+					});
+
+					return valid;
+				}, 'One or more invalid Field(s) entered');
+
+				$('#edit form').validate({
+					errorClass: 'danger',
+					successClass: 'success',
+					normalizer: function(value) {
+						return $.trim(value);
+					},
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
+					},
+					submitHandler: function(form) {
+						var id = $(form).find('.id').val();
+						var subject = $(form).find('.subject').val();
+						var body = $(form).find('.body').val();
+
+						$.ajax({
+							url: '{!! route('admin.notifications.edit') !!}',
+							method: 'POST',
+							data: {
+								'_token': '{{ csrf_token() }}',
+								'id': id,
+								'subject': subject,
+								'body': body
+							}
+						})
+						.done(function(data) {
+							if (data.status == 0) {
+								$('#edit').modal('hide');
+
+								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
+							else {
+								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							}
+						});
 					}
 				});
-
-				return valid;
-			}, 'One or more invalid Field(s) entered');
-
-			$('#edit form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				normalizer: function(value) {
-					return $.trim(value);
-				},
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
-				},
-				submitHandler: function(form) {
-					var id = $(form).find('.id').val();
-					var subject = $(form).find('.subject').val();
-					var body = $(form).find('.body').val();
-
-					$.ajax({
-						url: '{!! route('admin.notifications.edit') !!}',
-						method: 'POST',
-						data: {
-							'_token': '{{ csrf_token() }}',
-							'id': id,
-							'subject': subject,
-							'body': body
-						}
-					})
-					.done(function(data) {
-						if (data.status == 0) {
-							$('#edit').modal('hide');
-
-							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-						else {
-							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-					});
-				}
-			});
+			@endif
 		});
 	</script>
 @endsection

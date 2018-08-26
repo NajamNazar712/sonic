@@ -30,6 +30,9 @@ class AdminPickupsController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:admin');
+
+
+      $this->middleware('Permission');
     }
 
     static public function generate($user_id, $shipment_id) {
@@ -79,7 +82,15 @@ class AdminPickupsController extends Controller
     }
 
     public function pending_index() {
-      $riders = Rider::where('status',1)->select(['id', 'name'])->get();
+      $riders = Rider::where('status',1)->select(['id', 'name']);
+
+      if (session('role_id') != 1) {
+        $riders = $riders->whereHas('city', function ($query) {
+          $query->whereIn('hub_id', session('hubs'));
+        });
+      }
+
+      $riders = $riders->get();
 
       return view('admin.pickups.pending.index')->with(['riders' => $riders]);
     }
@@ -90,6 +101,10 @@ class AdminPickupsController extends Controller
       ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
       ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.pending_bookings', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
       ->where('pickup_requests.status', 0);
+
+      if (session('role_id') != 1) {
+        $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
+      }
 
       $datatables = Datatables::of($pickup_requests)
       ->editColumn('requested_at', function($pickup_request) {
@@ -103,13 +118,18 @@ class AdminPickupsController extends Controller
         return Carbon::parse($pickup_request->pickup_date)->format('d/m/Y');
       })
       ->addColumn('action', function($receiving_sheet) {
-        return '<div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                  <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>
+        if (session('role_id') == 1 || in_array(18, session('permissions'))) {
+          return '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                      <button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>
+                    </div>
                   </div>
-                </div>
-        ';
+          ';
+        }
+        else {
+          return '';
+        }
       })
       ->filterColumn('pickup_type', function($query, $keyword) {
         $keyword = strtolower($keyword);
@@ -201,8 +221,8 @@ class AdminPickupsController extends Controller
         $pickup_request_address = PickupRequest::find($pickup_request_ids[0]);
 
         $pickup_note->city_id = $pickup_request_address->pickup_address->city_id;
-
-        $pickup_note->save();
+        $pickup_note->updated_by = Auth::id();
+          $pickup_note->save();
 
         $pickup_note_id = $pickup_note->id;
 
@@ -275,6 +295,10 @@ class AdminPickupsController extends Controller
       ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
       ->where('pickup_notes.status_id', '<', 3);
 
+      if (session('role_id') != 1) {
+        $pickup_notes = $pickup_notes->whereIn('c.hub_id', session('hubs'));
+      }
+
       $datatables = Datatables::of($pickup_notes)
       ->addColumn('rider', function($pickup_note) {
         return $pickup_note->rider_name . '<br/>' . $pickup_note->rider_phone;
@@ -299,25 +323,33 @@ class AdminPickupsController extends Controller
         $print_pickup_note_button = '<button type="button" class="dropdown-item print_pickup_note"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print Pickup Note</div></button>';
         $sms_rider_button = '<button type="button" class="dropdown-item sms_rider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-message-circle"></i></div><div class="col-9 offset-1">SMS Rider</div></button>';
 
+        $dropdown = '
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+            <div class="dropdown-menu dropdown-menu-sm">
+        ';
+
+        if (session('role_id') == 1 || in_array(21, session('permissions'))) {
+          $dropdown .= $cancel_button;
+        }
+
+        $dropdown .= $view_details_button;
+
         if ($pickup_note->status_id == 1) {
-          return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      ' . $cancel_button . $view_details_button . $generate_pickup_note_button . '
-                    </div>
-                  </div>
-          ';
+          $dropdown .= $generate_pickup_note_button;
         }
         else {
-          return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      ' . $cancel_button . $view_details_button . $print_pickup_note_button . $sms_rider_button . '
-                    </div>
-                  </div>
-
-          ';
+          if (session('role_id') == 1 || in_array(22, session('permissions'))) {
+            $dropdown .= $print_pickup_note_button . $sms_rider_button;
+          }
         }
+
+        $dropdown .= '
+            </div>
+          </div>
+        ';
+
+        return $dropdown;
       })
       ->filterColumn('rider', function($query, $keyword) {
         $query->where('r.name', 'like', '%' . $keyword . '%')->orWhere('r.phone', 'like', '%' . $keyword . '%');
@@ -605,6 +637,10 @@ class AdminPickupsController extends Controller
       ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no', 'pickup_notes.status_id', 'pns.name as status')
       ->whereIn('pickup_notes.status_id', [3, 4]);
 
+      if (session('role_id') != 1) {
+        $pickup_notes = $pickup_notes->whereIn('c.hub_id', session('hubs'));
+      }
+
       $datatables = Datatables::of($pickup_notes)
       ->addColumn('rider', function($pickup_note) {
         return $pickup_note->rider_name . '<br/>' . $pickup_note->rider_phone;
@@ -623,23 +659,28 @@ class AdminPickupsController extends Controller
         // $view_button = '<button type="button" class="dropdown-item summary"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-target"></i></div><div class="col-9 offset-1">Summary</div></button>';
         $view_button = '';
 
-        if ($pickup_note->status_id == 3) {
-          return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      ' . $receive_button . '
+        if (session('role_id') == 1 || in_array(24, session('permissions'))) {
+          if ($pickup_note->status_id == 3) {
+            return '<div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                        ' . $receive_button . '
+                      </div>
                     </div>
-                  </div>
-          ';
+            ';
+          }
+          else {
+            return '<div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                        ' . $receive_button . $view_button . '
+                      </div>
+                    </div>
+            ';
+          }
         }
         else {
-          return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      ' . $receive_button . $view_button . '
-                    </div>
-                  </div>
-          ';
+          return '';
         }
       })
       ->filterColumn('rider', function($query, $keyword) {
@@ -892,7 +933,8 @@ class AdminPickupsController extends Controller
       }
 
       $pickup_note->status_id = 4;
-      $pickup_note->save();
+      $pickup_note->updated_by = Auth::id();
+        $pickup_note->save();
 
       PickupNotesJourneyController::add($pickup_note->id, $pickup_note->status_id, 'Pickup Note has been Received!', Auth::id());
 
@@ -1054,7 +1096,8 @@ class AdminPickupsController extends Controller
           //dispute end
         if ($completed) {
           $pickup_note->status_id = 5;
-          $pickup_note->save();
+          $pickup_note->updated_by = Auth::id();
+            $pickup_note->save();
 
           PickupNotesJourneyController::add($pickup_note->id, 5, 'Pickup Note has been Completed!', Auth::id());
 
@@ -1097,6 +1140,7 @@ class AdminPickupsController extends Controller
 
         if ($completed) {
           $pickup_note->status_id = 5;
+          $pickup_note->updated_by = Auth::id();
           $pickup_note->save();
 
           PickupNotesJourneyController::add($pickup_note->id, 5, 'Pickup Note has been Completed!', Auth::id());

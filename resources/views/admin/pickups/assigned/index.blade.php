@@ -152,25 +152,29 @@
 			var selected_rows = [];
 
 			var table = $('#datatable').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					text: 'Print',
-					className: 'btn btn-primary print',
-					enabled: false,
-					action: function (e, dt, node, config) {
-						print(selected_rows);
+				@if (session('role_id') == 1 || in_array(22, session('permissions')))
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons: [{
+						text: 'Print',
+						className: 'btn btn-primary print',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							print(selected_rows);
 
-						$.each(selected_rows, function(index, id) {
-							table.row($('#datatable tbody tr#' + id)).deselect();
-						});
+							$.each(selected_rows, function(index, id) {
+								table.row($('#datatable tbody tr#' + id)).deselect();
+							});
 
-						selected_rows = [];
+							selected_rows = [];
 
-						table.button(0).disable();
+							table.button('.print').disable();
 
-						table.ajax.reload();
-					}
-				}],
+							table.ajax.reload();
+						}
+					}],
+				@else
+	                dom: 'ltipr',
+	            @endif
 				fixedHeader: {
 					header: true,
 					headerOffset: $('.header-navbar').height()
@@ -260,10 +264,10 @@
 				}
 
 				if (selected_rows.length > 0) {
-					table.button(0).enable();
+					table.button('.print').enable();
 				}
 				else {
-					table.button(0).disable();
+					table.button('.print').disable();
 				}
 			});
 
@@ -316,10 +320,10 @@
 								}
 
 								if (selected_rows.length > 0) {
-									table.button(0).enable();
+									table.button('.print').enable();
 								}
 								else {
-									table.button(0).disable();
+									table.button('.print').disable();
 								}
 
 								table.ajax.reload();
@@ -414,10 +418,10 @@
 					}
 
 					if (selected_rows.length > 0) {
-						table.button(0).enable();
+						table.button('.print').enable();
 					}
 					else {
-						table.button(0).disable();
+						table.button('.print').disable();
 					}
 
 					table.ajax.reload();

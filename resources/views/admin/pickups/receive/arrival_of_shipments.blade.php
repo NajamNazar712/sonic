@@ -44,7 +44,7 @@
 								</div>
 
 								<div class="form-group ml-1">
-									<button type="submit" name="add" class="btn btn-primary" value="Add">Add</button>
+									<button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
 								</div>
 							</form>
 
@@ -258,6 +258,8 @@
 					error.addClass('w-100').appendTo(element.parents('form'));
 				},
 				submitHandler: function(form) {
+					$('#add_shipment_form button.add').prop('disabled', true);
+
 					var pickup_receive_pickup_note_id = $(form).find('input.pickup_receive_pickup_note_id').val();
 					var tracking_number = $(form).find('input.tracking_number').val();
 					var weight = $(form).find('input.weight').val();
@@ -283,6 +285,8 @@
 							form.reset();
 
 							$('#add_shipment_form input.tracking_number').val('').focus();
+
+							$('#add_shipment_form button.add').prop('disabled', false);
 
 							if (data.status == 0) {
 								table.row.add([0, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight]).node().id = data.details.id;

@@ -27,6 +27,8 @@ class AdminCargoController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:admin');
+
+      $this->middleware('Permission');
     }
 
     public function pending_index() {
@@ -50,7 +52,15 @@ class AdminCargoController extends Controller
       })
       ->select('shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at');
 
-      $datatables = Datatables::of($shipments);
+      if (session('role_id') != 1) {
+        $shipments = $shipments->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+      }
+
+      $datatables = Datatables::of($shipments)
+      ->editColumn('tracking_number', function ($shipments) {
+          $route = route('admin.tracking.index');
+          return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+      });
 
       if ($shipment_type = $request->get('shipment_type')) {
         if ($shipment_type == 0) {
@@ -80,75 +90,80 @@ class AdminCargoController extends Controller
       if ($shipment->exists()) {
         $shipment = $shipment->first();
 
-        if ($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) {
-          $hub = City::find($shipment->consignee_city->hub_id);
+        if (session('role_id') == 1 || (in_array($shipment->pickup_address->city->hub_id, session('hubs')) || in_array($shipment->destination_city->hub_id, session('hubs')))) {
+          if ($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) {
+            $hub = City::find($shipment->consignee_city->hub_id);
 
-          if ($request->hub_id == 0 || $request->hub_id == $shipment->consignee_city->hub_id) {
-            if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37])) {
-              $details = array();
+            if ($request->hub_id == 0 || $request->hub_id == $shipment->consignee_city->hub_id) {
+              if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37])) {
+                $details = array();
 
-              if ($request->cargo_type != 0) {
-                if ($request->cargo_type == 1) {
-                  if ($shipment->shipper_status_id != 2) {
-                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
+                if ($request->cargo_type != 0) {
+                  if ($request->cargo_type == 1) {
+                    if ($shipment->shipper_status_id != 2) {
+                      return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
+                    }
+                  }
+                  else {
+                    if (!in_array($shipment->shipper_status_id, [20, 30, 36, 37])) {
+                      return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
+                    }
                   }
                 }
                 else {
-                  if (!in_array($shipment->shipper_status_id, [20, 30, 36, 37])) {
-                    return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
+                  if ($shipment->shipper_status_id == 2) {
+                    $details['cargo_type'] = 1;
+                  }
+                  else {
+                    $details['cargo_type'] = 2;
                   }
                 }
+
+                $details['id'] = $shipment->id;
+                $details['tracking_number'] = $shipment->tracking_number;
+                $details['order_id'] = $shipment->order_id;
+                $details['service_type'] = $shipment->booking_type->booking_type;
+                $details['destination'] = $shipment->consignee_city->name;
+                $details['amount'] = $shipment->amount;
+                $details['shipping_mode'] = $shipment->shipping_mode->mode;
+
+                $hub = City::find($shipment->consignee_city->hub_id);
+
+                $details['hub']['id'] = $hub->id;
+                $details['hub']['name'] = $hub->name;
+
+                if ($request->hub_id == 0) {
+                  $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                  ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+                  ->join('cities as dc', function($join) {
+                    $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                    ->on('oc.hub_id', '!=', 'dc.hub_id');
+                  })
+                  ->select(DB::raw('count(shipments.id) as count'))
+                  ->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37])
+                  ->where('dc.hub_id', $hub->id)
+                  ->first();
+
+                  $details['total'] = $shipments->count;
+                }
+
+                return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
               }
               else {
-                if ($shipment->shipper_status_id == 2) {
-                  $details['cargo_type'] = 1;
-                }
-                else {
-                  $details['cargo_type'] = 2;
-                }
+                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
               }
-
-              $details['id'] = $shipment->id;
-              $details['tracking_number'] = $shipment->tracking_number;
-              $details['order_id'] = $shipment->order_id;
-              $details['service_type'] = $shipment->booking_type->booking_type;
-              $details['destination'] = $shipment->consignee_city->name;
-              $details['amount'] = $shipment->amount;
-              $details['shipping_mode'] = $shipment->shipping_mode->mode;
-
-              $hub = City::find($shipment->consignee_city->hub_id);
-
-              $details['hub']['id'] = $hub->id;
-              $details['hub']['name'] = $hub->name;
-
-              if ($request->hub_id == 0) {
-                $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
-                ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-                ->join('cities as dc', function($join) {
-                  $join->on('shipments.consignee_city_id', '=', 'dc.id')
-                  ->on('oc.hub_id', '!=', 'dc.hub_id');
-                })
-                ->select(DB::raw('count(shipments.id) as count'))
-                ->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37])
-                ->where('dc.hub_id', $hub->id)
-                ->first();
-
-                $details['total'] = $shipments->count;
-              }
-
-              return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
             }
             else {
-              return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+              return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
             }
           }
           else {
-            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
           }
         }
         else {
-            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
-          }
+          return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to any of your assigned Hub\'s Cities'];
+        }
       }
       else {
         return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present'];
@@ -190,9 +205,9 @@ class AdminCargoController extends Controller
       $sender = Auth::user();
 
       $details['sender']['id'] = $sender->id;
-      $details['sender']['username'] = $sender->username;
+      $details['sender']['name'] = $sender->name;
 
-      $details['receivers'] = Admin::all(['id', 'username']);
+      $details['receivers'] = Admin::all(['id', 'name']);
 
       foreach ($request->shipment_ids as $shipment_id) {
         $shipment = Shipment::find($shipment_id);
@@ -343,25 +358,52 @@ class AdminCargoController extends Controller
       ->join('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
       ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
       ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
-      ->select('cargo_consignments.id' , 'oc.name as origin', 'dc.name as destination', 'hc.name as hub', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status')
+      ->select('cargo_consignments.id' , 'oc.id as origin_id', 'oc.name as origin', 'dc.id as destination_id', 'dc.name as destination', 'hc.name as hub', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status')
       ->whereIn('cargo_consignments.status_id', [1, 2, 4]);
+
+      if (session('role_id') != 1) {
+        $cargo_consignments = $cargo_consignments->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+      }
 
       $datatables = Datatables::of($cargo_consignments)
       ->editColumn('transit_at', function($cargo_consignment) {
         return Carbon::parse($cargo_consignment->transit_at)->format('d/m/Y H:i A');
       })
       ->addColumn('action', function($cargo_consignment) {
-        return '<div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                  <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>
-                    <button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Forwarding Details</div></button>
-                    <button type="button" class="dropdown-item view_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Forwarding Details</div></button>
-                    <button type="button" class="dropdown-item launch_dispute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Launch Dispute</div></button>
-                    <button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>
-                  </div>
-                </div>
+        $print_button = '<button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>';
+        $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Forwarding Details</div></button>';
+        $view_forwarding_details_button = '<button type="button" class="dropdown-item view_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Forwarding Details</div></button>';
+        $launch_dispute_button = '<button type="button" class="dropdown-item launch_dispute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Launch Dispute</div></button>';
+        $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
+
+        $dropdown = '
+          <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+            <div class="dropdown-menu dropdown-menu-sm">
         ';
+
+        $dropdown .= $print_button;
+
+        if (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($cargo_consignment->origin_id, session('hubs')))) {
+          $dropdown .= $add_forwarding_details_button;
+        }
+
+        $dropdown .= $view_forwarding_details_button;
+
+        if (session('role_id') == 1 || in_array(29, session('permissions'))) {
+          $dropdown .= $launch_dispute_button;
+        }
+
+        if (session('role_id') == 1 || (in_array(31, session('permissions')) && in_array($cargo_consignment->destination_id, session('hubs')))) {
+          $dropdown .= $receive_button;
+        }
+
+        $dropdown .= '
+            </div>
+          </div>
+        ';
+
+        return $dropdown;
       });
 
       if ($cargo_type = $request->get('cargo_type')) {
@@ -639,19 +681,24 @@ class AdminCargoController extends Controller
       if ($cargo_consignment->exists()) {
         $cargo_consignment = $cargo_consignment->first();
 
-        if (in_array($cargo_consignment->status_id, [1, 2])) {
-          $details = array();
+        if (session('role_id') == 1 || (in_array($cargo_consignment->junction_city_1_id, session('hubs')) || $cargo_consignment->junction_city_2_id, session('hubs')))) {
+          if (in_array($cargo_consignment->status_id, [1, 2])) {
+            $details = array();
 
-          $details['cargo_number'] = $cargo_consignment->id;
-          $details['origin'] = $cargo_consignment->origin_city->name;
-          $details['destination'] = $cargo_consignment->destination_city->name;
-          $details['hub'] = $cargo_consignment->hub->name;
-          $details['seal_number'] = $cargo_consignment->seal_number;
+            $details['cargo_number'] = $cargo_consignment->id;
+            $details['origin'] = $cargo_consignment->origin_city->name;
+            $details['destination'] = $cargo_consignment->destination_city->name;
+            $details['hub'] = $cargo_consignment->hub->name;
+            $details['seal_number'] = $cargo_consignment->seal_number;
 
-          return ['status' => 0, 'success' => 'Cargo has been scanned', 'details' => $details];
+            return ['status' => 0, 'success' => 'Cargo has been scanned', 'details' => $details];
+          }
+          else {
+            return ['status' => 1, 'error' => 'Given Seal Number\'s Cargo has already been modified'];
+          }
         }
         else {
-          return ['status' => 1, 'error' => 'Given Seal Number\'s Cargo has already been modified'];
+          return ['status' => 1, 'error' => 'Given Seal Number\'s Cargo does not have any of your assigned Hub\'s Cities as it\'s Junctions'];
         }
       }
       else {
@@ -689,7 +736,7 @@ class AdminCargoController extends Controller
       $details['cargo_consignment']['weight_charges_per_kg'] = $cargo_consignment->weight_charges_per_kg;
       $details['cargo_consignment']['extra_charges'] = $cargo_consignment->extra_charges;
       $details['cargo_consignment']['total_weight_charges'] = $cargo_consignment->total_weight_charges;
-      $details['cargo_consignment']['sender_username'] = Admin::find($cargo_consignment->sender_id)->username;
+      $details['cargo_consignment']['sender_name'] = Admin::find($cargo_consignment->sender_id)->name;
 
       if ($request->add) {
         $details['cargo_consignment']['junction_city_1_id'] = $cargo_consignment->junction_city_1_id;
@@ -708,7 +755,7 @@ class AdminCargoController extends Controller
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
 
-        $details['receivers'] = Admin::all(['id', 'username']);
+        $details['receivers'] = Admin::all(['id', 'name']);
       }
       else {
         $details['cargo_consignment']['junction_city_1'] = $cargo_consignment->junction_city_1->name;
@@ -719,7 +766,7 @@ class AdminCargoController extends Controller
         $details['cargo_consignment']['transport_mode_vendor'] = $cargo_consignment->transport_mode_vendor->name;
         $details['cargo_consignment']['shipments_weight'] = $cargo_consignment->shipments_weight;
         $details['cargo_consignment']['actual_weight'] = $cargo_consignment->actual_weight;
-        $details['cargo_consignment']['receiver_username'] = ($cargo_consignment->receiver_id) ? Admin::find($cargo_consignment->receiver_id)->username : '';
+        $details['cargo_consignment']['receiver_name'] = ($cargo_consignment->receiver_id) ? Admin::find($cargo_consignment->receiver_id)->name : '';
       }
 
       return $details;

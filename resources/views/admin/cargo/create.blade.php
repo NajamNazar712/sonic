@@ -21,7 +21,7 @@
 								</div>
 
 								<div class="form-group ml-1">
-									<button type="submit" name="add" class="btn btn-primary" value="Add">Add</button>
+									<button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
 								</div>
 							</form>
 
@@ -153,7 +153,7 @@
 														<div class="form-group">
 															<input type="hidden" name="sender_id" class="sender_id">
 
-															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_username"></p>
+															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_name"></p>
 														</div>
 													</div>
 
@@ -297,6 +297,8 @@
 					error.addClass('w-100').appendTo(element.parents('form'));
 				},
 				submitHandler: function(form) {
+					$('#add_shipment_form button.add').prop('disabled', true);
+
 					var tracking_number = $(form).find('input.tracking_number').val();
 
 					form.reset();
@@ -313,6 +315,8 @@
 							}
 						})
 						.done(function(data) {
+							$('#add_shipment_form button.add').prop('disabled', false);
+
 							if (data.status == 0) {
 								table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount, data.details.shipping_mode]);
 								table.draw(false);
@@ -351,6 +355,30 @@
 			});
 
 			$('#cargo_consignment_confirm').bind('click', function() {
+				if ($('#cargo_consignment form .junction_1').hasClass('select2-hidden-accessible')) {
+					$('#cargo_consignment form .junction_1').html('').select2('destroy');
+				}
+
+				if ($('#cargo_consignment form .junction_2').hasClass('select2-hidden-accessible')) {
+					$('#cargo_consignment form .junction_2').html('').select2('destroy');
+				}
+
+				if ($('#cargo_consignment form .shipping_mode').hasClass('select2-hidden-accessible')) {
+					$('#cargo_consignment form .shipping_mode').html('').select2('destroy');
+				}
+
+				if ($('#cargo_consignment form .transport_mode').hasClass('select2-hidden-accessible')) {
+					$('#cargo_consignment form .transport_mode').html('').select2('destroy');
+				}
+
+				if ($('#cargo_consignment form .transport_mode_vendor').hasClass('select2-hidden-accessible')) {
+					$('#cargo_consignment form .transport_mode_vendor').html('').select2('destroy');
+				}
+
+				if ($('#cargo_consignment form .receiver_id').hasClass('select2-hidden-accessible')) {
+					$('#cargo_consignment form .receiver_id').html('').select2('destroy');
+				}
+
 				$.ajax({
 					url: '{!! route('admin.cargo.create.consignment_details') !!}',
 					method: 'POST',
@@ -463,15 +491,15 @@
 					});
 
 					$('#cargo_consignment form .sender_id').val(data.sender.id);
-					$('#cargo_consignment form .sender_username').html(data.sender.username);
+					$('#cargo_consignment form .sender_name').html(data.sender.name);
 
 					$.each(data.receivers, function(index, receiver) {
-						$('#cargo_consignment form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.username + '</option>');
+						$('#cargo_consignment form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.name + '</option>');
 					});
 
 					$('#cargo_consignment form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
 						width: '100%',
-						placeholder: 'Receiver Username',
+						placeholder: 'Receiver Name',
 						allowClear: true
 					}).bind('change', function() {
 						$(this).valid();

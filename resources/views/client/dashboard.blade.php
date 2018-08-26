@@ -568,31 +568,26 @@
                     {
                         name: 'Booked',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['booked'])
                     },
                     {
                         name: 'Received',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['received'])
                     },
                     {
                         name: 'Delivered',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['delivered'])
                     },
                     {
                         name: 'Return',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['return'])
                     },
                     {
                         name: 'Pending',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['pending'])
                     }
                 ]
@@ -653,31 +648,26 @@
                                 {
                                     name: 'Booked',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['booked']
                                 },
                                 {
                                     name: 'Received',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['received']
                                 },
                                 {
                                     name: 'Delivered',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['delivered']
                                 },
                                 {
                                     name: 'Return',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['return']
                                 },
                                 {
                                     name: 'Pending',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['pending']
                                 }
                             ]
@@ -756,7 +746,7 @@
             });
 
             var max_char = 250;
-            $('#description').keypress(function (e) {
+            $('#description').on('keypress copy paste',function (e) {
                 // var comment = $(this).val();
                 // console.log(comment)
                 if ($(this).val().length == max_char) {

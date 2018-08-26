@@ -34,6 +34,8 @@ class DeliveryController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
     public function pending_delivery_index(Request $request){
         return view('admin.delivery.pending.index');
@@ -67,7 +69,15 @@ class DeliveryController extends Controller
             ->whereIn('shipments.shipper_status_id',$status)
             ->groupBy('shipments.id');
 
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
         return Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
@@ -88,18 +98,46 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                return " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item dispute_modal'><i class='ft-alert-circle primary'></i> Dispute</a>                                         
-                                            </div></span>";
+                if (session('role_id') == 1 || in_array(34, session('permissions'))) {
+                     $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                            <a href="#" class="dropdown-item dispute_modal"><i class="ft-alert-circle primary"></i> Dispute</a>
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+
+                }
+                else {
+                    return '';
+                }
             })
             ->make(true);
     }
     public function delivery_note_index(){
-        $riders = Rider::all()->where('status',1);
-        $routes = Route::all()->where('status',1);
+        $riders = Rider::where('status', 1);
+
+        if (session('role_id') != 1) {
+            $riders = $riders->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $riders = $riders->get();
+
+        $routes = Route::where('status', 1);
+
+        if (session('role_id') != 1) {
+            $routes = $routes->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $routes = $routes->get();
+
         return view('admin.delivery.note.index')->with(['riders'=>$riders,'routes'=>$routes]);
     }
 
@@ -110,6 +148,13 @@ class DeliveryController extends Controller
             $remarks = '';$status = '';
             if($shipment->exists()){
                 $shipment = $shipment->first();
+//                return $shipment->consignee_city_id;
+                if(($shipment->consignee_city_id != $shipment->pickup_address->city_id) && $shipment->shipper_status_id == 2){
+
+                        return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
+
+
+                }
                 if($request->has('hub_id') ){
                     $hub_id = $shipment->consignee_city->hub_id;
                     if($request->hub_id == $hub_id){
@@ -213,6 +258,11 @@ class DeliveryController extends Controller
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
             ->where('delivery_notes.status',0);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+
         $datatables = Datatables::of($deliveries)
 
 
@@ -236,23 +286,45 @@ class DeliveryController extends Controller
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
             })
             ->addColumn("action", function ($result) {
+                $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
                 $route = route('admin.delivery.receive.update',['note'=>$result->delivery_note]);
                 $verifyStatus = route('admin.delivery.receive.status.verify',['note'=>$result->delivery_note]);
-                $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
-                $dropdown = "<span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='{$statusUpdate}' class='dropdown-item' data-target-id='{$result->delivery_note}' class=''><i class='ft-plus-circle primary'></i> Receive</a>
-                                              <a href='{$route}' class='dropdown-item deliverynoteupdate' data-target-id='{$result->delivery_note}'><i class='ft-plus-circle primary'></i> Shift Shipment</a>";
-                $statusCheck = DeliveryNoteShipment::where(['delivery_note_id'=>$result->delivery_note,'status'=>0])->get();
-                if($statusCheck->isEmpty()){
 
-                    $dropdown .= "<a href='{$verifyStatus}' class='dropdown-item' data-target-id='{$result->id}'><i class='ft-plus-circle primary'></i> Verify Statuses</a>";
+                $receive_button = '<a href="{$statusUpdate}" class="dropdown-item" data-target-id="{$result->delivery_note}" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
+                $shift_shipment_button = '<a href="{$route}" class="dropdown-item deliverynoteupdate" data-target-id="{$result->delivery_note}"><i class="ft-plus-circle primary"></i> Shift Shipment</a>';
+                $verify_statuses_button = '<a href="{$verifyStatus}" class="dropdown-item" data-target-id="{$result->id}"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
+
+                if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    if (session('role_id') == 1 || in_array(37, session('permissions'))) {
+                      $dropdown .= $receive_button;
+                    }
+
+                    if (session('role_id') == 1 || in_array(38, session('permissions'))) {
+                      $dropdown .= $shift_shipment_button;
+                    }
+
+                    $statusCheck = DeliveryNoteShipment::where(['delivery_note_id'=>$result->delivery_note,'status'=>0])->get();
+
+                    if (($statusCheck->isEmpty()) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
+                      $dropdown .= $verify_statuses_button;
+                    }
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
                 }
-
-                $dropdown .="</div></span>";
-                return $dropdown;
+                else {
+                    return '';
+                }
             });
 
             if ($tracking_number = $request->get('search_tracking')) {
@@ -293,6 +365,11 @@ class DeliveryController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address as address','delivery_notes.total_cod_amount as amount','bt.booking_type as service_type'])
             ->where('delivery_notes.id',$id);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
                return "<a href='javascript:void(0);' class='deliverynoterow'>Remove</a>";
@@ -516,6 +593,10 @@ class DeliveryController extends Controller
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
             ->where('delivery_notes.id',$id);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
 
         return Datatables::of($deliveries)
 
@@ -839,22 +920,22 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status'])
+            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status','ss.id as current_status_id'])
             ->where('delivery_notes.id',$id);
 
         return Datatables::of($deliveries)
 
             ->addColumn('status', function ($deliveries) {
-                $where = array(7,8,9,10,11,12,14,15,16,18);
+                $where = array(7,8,9,10,11,12,14,15,16,18,30,35,36,37);
                 $statuses = ShipmentStatus::whereIn('id',$where)->get();
                 $drops = '';
 
-                $shipment_data = Shipment::find($deliveries->shId);
-                $status_id = $shipment_data->shipment_journey()->latest()->first();
-                $status_data = ShipmentStatus::where('id',$status_id->shipper_status_id)->select('id','name')->first();
+//                $shipment_data = Shipment::find($deliveries->shId);
+//                $status_id = $shipment_data->shipment_journey()->latest()->first();
+//                $status_data = ShipmentStatus::where('id',$status_id->shipper_status_id)->select('id','name')->first();
                 $selected_status = '';
                 foreach ($statuses as $status){
-                    if($status->id == $status_data->id){
+                    if($status->id == $deliveries->current_status_id){
                         $selected_status = 'selected';
                     }else{
                         $selected_status = '';
@@ -921,6 +1002,7 @@ class DeliveryController extends Controller
             $delivery_note_id = $request->delivery_note_id;
             $shipment_count = 0;
             $dispute_shipments = array();
+            $delivered_status_array = array(14,16,30,36,37);
             if($delivery_note_id != ''){
                 foreach ($shipments as $shipment){
 
@@ -940,7 +1022,7 @@ class DeliveryController extends Controller
                                 ]);
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
-                            } elseif ($request->status_drop[$shipment] == 14 || $request->status_drop[$shipment] == 16) {
+                            } elseif (in_array($request->status_drop[$shipment],$delivered_status_array)) {
                                 $parcel = Shipment::where('id', $shipment)->first();
                                 if ($parcel->booking_type_id == 2) {
                                     ShipmentsJourney::create([
@@ -1246,6 +1328,11 @@ class DeliveryController extends Controller
             ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
             ->where('delivery_notes.status',1)
             ->where('delivery_notes.dncc_status',0);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+
         return Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='#' class='printDNCC'><u>DNCC</u></a>";
@@ -1303,6 +1390,11 @@ class DeliveryController extends Controller
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->select(['delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','delivery_notes.received_cod_amount','delivery_notes.shipments_count','delivery_notes.delivered_shipments'])
             ->whereIn('delivery_notes.id',$dncc_ids);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+
         return Datatables::of($deliveries)
             ->setRowAttr([
                 'data-hub' => function($deliveries) {
@@ -1373,6 +1465,11 @@ class DeliveryController extends Controller
             ->join('admins','admins.id','=','station_deposit_notes.deposited_by')
             ->join('banks_lists','banks_lists.id','=','station_deposit_notes.banks_list_id')
             ->select(['station_deposit_notes.id as sdn','station_deposit_notes.id as sdn_id','oc.name as hub','station_deposit_notes.dncc_count','station_deposit_notes.sdn_delivered_shipments','station_deposit_notes.sdn_amount','station_deposit_notes.sdn_expense','station_deposit_notes.sdn_net_amount','admins.name as deposited_by','station_deposit_notes.created_at','station_deposit_notes.deposit_slip','station_deposit_notes.status','banks_lists.name as bank']);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('station_deposit_notes.hub_id', session('hubs'));
+        }
+
         return Datatables::of($sdn)
             ->editColumn('sdn', function ($sdn) {
                 return "<a href='#' class='printSDN'><u>{$sdn->sdn_id}</u></a>";
@@ -1391,15 +1488,26 @@ class DeliveryController extends Controller
             })
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.sdn.details',['id'=>$result->sdn_id]);
-                $dropdown = "<span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='{$route}' class='dropdown-item' data-target-id='{$result->sdn_id}' class=''><i class='ft-plus-circle primary'></i> Details</a>";
-                if($result->status == 0){
 
-                    $dropdown .=  "<a href='#' class='dropdown-item' data-target-id='{$result->sdn_id}' class='' data-target='#uploadDepositSlip' data-toggle='modal'><i class='ft-plus-circle primary'></i> Upload Deposit Slip</a></div></span>";
+                $details_button = '<a href="{$route}" class="dropdown-item" data-target-id="{$result->sdn_id}" class=""><i class="ft-plus-circle primary"></i> Details</a>';
+                $upload_deposit_slip_button = '<a href="#" class="dropdown-item" data-target-id="{$result->sdn_id}" class="" data-target="#uploadDepositSlip" data-toggle="modal"><i class="ft-plus-circle primary"></i> Upload Deposit Slip</a>';
+
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                $dropdown .= $details_button;
+
+                if (($result->status == 0) && (session('role_id') == 1 || in_array(43, session('permissions')))) {
+                  $dropdown .= $upload_deposit_slip_button;
                 }
+
+                $dropdown .= '
+                    </div>
+                  </div>
+                ';
 
                 return $dropdown;
             })
@@ -1433,6 +1541,11 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->select(['delivery_notes.id as dncc','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','delivery_notes.received_cod_amount','delivery_notes.shipments_count','delivery_notes.delivered_shipments','delivery_notes.expense','delivery_notes.net_amount','delivery_notes.remarks'])
             ->where('station_deposit_notes.id',$id);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('station_deposit_notes.hub_id', session('hubs'));
+        }
+
         return Datatables::of($deliveries)
 
             ->editColumn('route', function ($rider) {

@@ -15,6 +15,8 @@ class SamedayController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
     public function sameday_index(){
 
@@ -64,12 +66,21 @@ class SamedayController extends Controller
             })
             ->leftjoin('shipment_status as sst','sst.id','=','last_update.shipper_status_id')
             ->leftjoin('admins as updater','updater.id','=','last_update.admin_id')
-            ->select('shipments.id as shId','shipments.booking_type_id','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address','p.product_name','sms.id as timing_id','sms.timing','sj.created_at as arrival','shipments.created_at as booked_date','shipments.pickup_date','dispatched.created_at as dispatched_time','regular_delivery.created_at as delivered_time','trybuy_delivery.created_at as trybuy_delivered','replacement_delivery.created_at as replacement_delivered','updater.name as updated_by','sst.name as current_status','shipments.shipper_status_id')
+            ->select('shipments.id as shId','shipments.booking_type_id','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address','p.product_name','sms.id as timing_id','sms.timing','sj.created_at as arrival','shipments.created_at as booked_date','shipments.pickup_date','dispatched.created_at as dispatched_time','regular_delivery.created_at as delivered_time','trybuy_delivery.created_at as trybuy_delivered','replacement_delivery.created_at as replacement_delivered','updater.name as updated_by','sst.name as current_status','shipments.shipper_status_id', 'shipments.special_instructions as instructions')
 
             ->where('shipments.shipping_mode_id',4)
             ->whereNotIn('shipments.shipper_status_id',[39,40,41,42,43,47])
             ->groupBy('shipments.id');
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
+        }
+
         return Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
             ->editColumn('dispatched_time',function ($shipments){
                 if($shipments->dispatched_time) {
 
@@ -146,29 +157,44 @@ class SamedayController extends Controller
                 }
             })
             ->addColumn("action", function ($shipments) {
-                //$shipment_verification = DeliveryNoteShipment::where(['shipment_id'=>$shipments->shId,'status'=>0])->exists();
-                $delivery_array = array(2, 4, 6, 7, 8, 9, 13, 15);
-                $drop = " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>";
-                if($shipments->shipper_status_id == 1){
-                    $route = route('admin.pickups.pending.index');
-                    $drop .= "<a href='{$route}' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>";
-                }else
-                if(in_array($shipments->shipper_status_id,$delivery_array)) {
-                    $route = route('admin.delivery.note.index');
-                    $drop .= "<a href='{$route}' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>";
+                if (session('role_id') == 1 || count(array_intersect([3, 4], session('permissions'))) !== 0) {
+                    $delivery_statuses = array(2, 4, 6, 7, 8, 9, 13, 15);
 
-                }else if($shipments->shipper_status_id == 5) {
-                    $route = route('admin.delivery.receive.index');
-                    $drop .= "<a href='{$route}' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>";
-                }else{
-                    $drop .= "<a href='#' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Not Set</a>";
+                    $dropdown = "
+                        <span class='dropdown'>
+                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                            <div class='dropdown-menu open-left arrow'>";
+
+                    if (($shipments->shipper_status_id == 1) && (session('role_id') == 1 || in_array(17, session('permissions')))) {
+                        $route = route('admin.pickups.pending.index');
+                    }
+                    else if ((in_array($shipments->shipper_status_id, $delivery_statuses)) && (session('role_id') == 1 || in_array(35, session('permissions')))) {
+                        $route = route('admin.delivery.note.index');
+
+                    }
+                    else if (($shipments->shipper_status_id == 5) && (session('role_id') == 1 || in_array(36, session('permissions')))) {
+                        $route = route('admin.delivery.receive.index');
+                    }
+
+                    if (isset($route)) {
+                        $dropdown .= "<a href='{$route}' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>";
+                    }
+
+                    $dropdown .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-eye primary'></i> View Charges</a>";
+
+                    $dropdown .= "<a href='javascript:void(0);' class='dropdown-item airwaybill'><i class='ft-printer primary'></i> Print Invoice</a>";
+
+                    $dropdown .= "
+                            </div>
+                        </span>
+                    ";
+
+                    return $dropdown;
                 }
-                $drop .= "<a href='#' class='dropdown-item airwaybill'><i class='ft-printer primary'></i> Print Invoice</a>";
-                $drop.= "</div></span>";
-                return $drop;
+                else {
+                    return '';
+                }
             })
             ->make(true);
     }

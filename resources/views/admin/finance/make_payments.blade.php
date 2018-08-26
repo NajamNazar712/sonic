@@ -280,33 +280,37 @@
 
 			var table = $('#datatable').DataTable({
 				scrollX: true,
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					text: 'Make Payment(s)',
-					className: 'btn btn-primary make_payment',
-					enabled: false,
-					action: function (e, dt, node, config) {
-						$('#make_payments #make_payments_form .total_amount').val(0);
-						$('#make_payments #make_payments_form .total_charges').val(0);
-						$('#make_payments #make_payments_form .total_gst').val(0);
-						$('#make_payments #make_payments_form .total_payable').val(0);
-						$('#make_payments #make_payments_form .total_hold').val(0);
+				@if (session('role_id') == 1 || in_array(60, session('permissions')))
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons: [{
+						text: 'Make Payment(s)',
+						className: 'btn btn-primary make_payment',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							$('#make_payments #make_payments_form .total_amount').val(0);
+							$('#make_payments #make_payments_form .total_charges').val(0);
+							$('#make_payments #make_payments_form .total_gst').val(0);
+							$('#make_payments #make_payments_form .total_payable').val(0);
+							$('#make_payments #make_payments_form .total_hold').val(0);
 
-						$('#make_payments #make_payments_form button.make').prop('disabled', true);
-						$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
+							$('#make_payments #make_payments_form button.make').prop('disabled', true);
+							$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
-						$('#make_payments #make_payments_form .pending_payment_ids').val('');
-						$('#make_payments #make_payments_form .shipment_ids').val('');
+							$('#make_payments #make_payments_form .pending_payment_ids').val('');
+							$('#make_payments #make_payments_form .shipment_ids').val('');
 
-						selected_pending_payment_ids = selected_rows;
+							selected_pending_payment_ids = selected_rows;
 
-						selected_rows_shipments = [];
+							selected_rows_shipments = [];
 
-						make_payments_table.clear().draw();
+							make_payments_table.clear().draw();
 
-						$('#make_payments').modal('show');
-					}
-				}],
+							$('#make_payments').modal('show');
+						}
+					}],
+				@else
+					dom: 'ltipr',
+				@endif
 				fixedHeader: {
 					header: true,
 					headerOffset: $('.header-navbar').height()
@@ -386,6 +390,7 @@
 
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
 				dom: 'tr',
+				paging: false,
 				select: {
 					info: false,
 					style: 'multi',
@@ -446,7 +451,7 @@
 						return parseFloat(a) + parseFloat(b);
 					}, 0);
 
-					$('#make_payments #make_payments_form .total_hold').val(initial_total_hold);
+					$('#make_payments #make_payments_form .total_hold').val(parseFloat(initial_total_hold.toFixed(2)));
 				}
 			});
 
@@ -463,10 +468,10 @@
 				}
 
 				if (selected_rows.length > 0) {
-					table.button(0).enable();
+					table.button('.make_payment').enable();
 				}
 				else {
-					table.button(0).disable();
+					table.button('.make_payment').disable();
 				}
 			});
 
@@ -569,7 +574,7 @@
 						}
 					})
 					.done(function(data) {
-						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center"Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
 
 						$.each(data, function(index, detail) {
 							details += '<tr>';
@@ -631,28 +636,28 @@
 				if (index === -1) {
 					selected_rows_shipments.push(id);
 
-					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html()) : 0);
-					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html()) : 0);
-					var total_gst = ((total_gst_selector.val() != '') ? parseInt(total_gst_selector.val()) : 0) + ((parent.children('td.gst').html() != '') ? parseInt(parent.children('td.gst').html()) : 0);
-					var total_payable = ((total_payable_selector.val() != '') ? parseInt(total_payable_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html()) : 0);
-					var total_hold = ((total_hold_selector.val() != '') ? parseInt(total_hold_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html()) : 0);
+					var total_amount = ((total_amount_selector.val() != '') ? parseFloat(total_amount_selector.val()) : 0) + ((parent.children('td.amount').html() != '') ? parseFloat(parent.children('td.amount').html()) : 0);
+					var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseFloat(parent.children('td.charges').html()) : 0);
+					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) + ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html()) : 0);
+					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html()) : 0);
+					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html()) : 0);
 				}
 				else {
 					selected_rows_shipments.splice(index, 1);
 
-					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) - ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html()) : 0);
-					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) - ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html()) : 0);
-					var total_gst = ((total_gst_selector.val() != '') ? parseInt(total_gst_selector.val()) : 0) - ((parent.children('td.gst').html() != '') ? parseInt(parent.children('td.gst').html()) : 0);
-					var total_payable = ((total_payable_selector.val() != '') ? parseInt(total_payable_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html()) : 0);
-					var total_hold = ((total_hold_selector.val() != '') ? parseInt(total_hold_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html()) : 0);
+					var total_amount = ((total_amount_selector.val() != '') ? parseFloat(total_amount_selector.val()) : 0) - ((parent.children('td.amount').html() != '') ? parseFloat(parent.children('td.amount').html()) : 0);
+					var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector.val()) : 0) - ((parent.children('td.charges').html() != '') ? parseFloat(parent.children('td.charges').html()) : 0);
+					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) - ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html()) : 0);
+					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html()) : 0);
+					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html()) : 0);
 				}
 
 				if (selected_rows_shipments.length > 0) {
-					total_amount_selector.val(total_amount);
-					total_charges_selector.val(total_charges);
-					total_gst_selector.val(total_gst);
-					total_payable_selector.val(total_payable);
-					total_hold_selector.val(total_hold);
+					total_amount_selector.val(parseFloat(total_amount.toFixed(2)));
+					total_charges_selector.val(parseFloat(total_charges.toFixed(2)));
+					total_gst_selector.val(parseFloat(total_gst.toFixed(2)));
+					total_payable_selector.val(parseFloat(total_payable.toFixed(2)));
+					total_hold_selector.val(parseFloat(total_hold.toFixed(2)));
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', false);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
@@ -662,7 +667,7 @@
 					total_charges_selector.val(0);
 					total_gst_selector.val(0);
 					total_payable_selector.val(0);
-					total_hold_selector.val(initial_total_hold);
+					total_hold_selector.val(parseFloat(initial_total_hold.toFixed(2)));
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', true);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);

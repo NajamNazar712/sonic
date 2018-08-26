@@ -120,28 +120,31 @@
         $(document).ready(function () {
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
-                    text: 'Deposit DNCC',
-                    className: 'btn btn-primary delivered',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        if(selected_rows != ''){
-                            $('#delivery_note_ids').val(selected_rows);
-                            var delivery_note_ids = $('#delivery_note_ids').val();
-                            // console.log(delivery_note_ids)
-                            if(delivery_note_ids != ''){
-                                $('#post_delivery_note_ids_form').submit();
+                @if (session('role_id') == 1 || in_array(41, session('permissions')))
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    buttons: [{
+                        text: 'Deposit DNCC',
+                        className: 'btn btn-primary delivered',
+                        enabled: false,
+                        action: function (e, dt, node, config) {
+                            if(selected_rows != ''){
+                                $('#delivery_note_ids').val(selected_rows);
+                                var delivery_note_ids = $('#delivery_note_ids').val();
+                                // console.log(delivery_note_ids)
+                                if(delivery_note_ids != ''){
+                                    $('#post_delivery_note_ids_form').submit();
+                                }
+
+                            }else{
+                                var error = "Something went wrong please refresh page and try again!";
+                                toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
                             }
-
-                        }else{
-                            var error = "Something went wrong please refresh page and try again!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
                         }
-                    }
-
-                }],
+                    }],
+                @else
+                    dom: 'ltipr',
+                @endif
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
@@ -227,10 +230,10 @@
                     }
 
                     if (selected_rows.length > 0) {
-                        table.button(0).enable();
+                        table.button('.delivered').enable();
                     }
                     else {
-                        table.button(0).disable();
+                        table.button('.delivered').disable();
                         hub_ids.splice(index, 1);
                     }
                 }else{
@@ -245,11 +248,11 @@
                         }
 
                         if (selected_rows.length > 0) {
-                            table.button(0).enable();
+                            table.button('.delivered').enable();
                         }
                         else {
                             hub_ids.splice(index, 1);
-                            table.button(0).disable();
+                            table.button('.delivered').disable();
                         }
                     }else{
                         var error = "Selected hubs should be the same!";

@@ -45,28 +45,129 @@ class AdminDashboardController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
 
     public function index(){
         $stats = array();
         $graph = array();
         $graph_dates = array();
-        $stats['booked'] = Shipment::all()->count();
-        $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4])->count();
-        $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
-        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
-        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
+
+        $stats['booked'] = Shipment::all();
+        $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4]);
+        $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
+        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46]);
+        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19]);
+
+        if (session('role_id') != 1) {
+            $stats['booked'] = Shipment::where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+
+            $stats['received'] = $stats['received']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+
+            $stats['delivered'] = $stats['delivered']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+
+            $stats['return'] = $stats['return']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+
+            $stats['pending'] = $stats['pending']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+        }
+
+        $stats['booked'] = $stats['booked']->count();
+        $stats['received'] = $stats['received']->count();
+        $stats['delivered'] = $stats['delivered']->count();
+        $stats['return'] = $stats['return']->count();
+        $stats['pending'] = $stats['pending']->count();
+
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
         for ($counter = 29; $counter >= 0; $counter--) {
             $date = Carbon::now()->subDays($counter);
             $comparison_date = $date->toDateString();
             $graph['dates'][] = $date->format('d M');
-            $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->count();
-            $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[2,3,4])->count();
-            $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
-            $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
-            $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
+
+            $booked = Shipment::whereDate('created_at', $comparison_date);
+            $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[2,3,4]);
+            $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
+            $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19]);
+            $return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46]);
+
+            if (session('role_id') != 1) {
+                $booked = $booked->where(function($query) {
+                    $query->whereHas('pickup_address.city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    })->orWhereHas('consignee_city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    });
+                });
+
+                $received = $received->where(function($query) {
+                    $query->whereHas('pickup_address.city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    })->orWhereHas('consignee_city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    });
+                });
+
+                $delivered = $delivered->where(function($query) {
+                    $query->whereHas('pickup_address.city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    })->orWhereHas('consignee_city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    });
+                });
+
+                $return = $return->where(function($query) {
+                    $query->whereHas('pickup_address.city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    })->orWhereHas('consignee_city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    });
+                });
+
+                $pending = $pending->where(function($query) {
+                    $query->whereHas('pickup_address.city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    })->orWhereHas('consignee_city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    });
+                });
+            }
+
+            $graph['booked'][] = $booked->count();
+            $graph['received'][] = $received->count();
+            $graph['delivered'][] = $delivered->count();
+            $graph['pending'][] = $pending->count();
+            $graph['return'][] = $return->count();
         }
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
@@ -92,41 +193,237 @@ class AdminDashboardController extends Controller
                 foreach ($dates as $this_date) {
                     $comparison_date = $this_date;
                     $graph['dates'][] = Carbon::parse($this_date)->format('d M');
-                    $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->count();
-                    $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4])->count();
-                    $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->count();
-                    $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19])->count();
-                    $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46])->count();
+
+                    $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination]);
+                    $received = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
+                    $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                    $pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                    $return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
+
+                    if (session('role_id') != 1) {
+                        $booked = $booked->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $received = $received->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $delivered = $delivered->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $return = $return->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $pending = $pending->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+                    }
+
+                    $graph['booked'][] = $booked->count();
+                    $graph['received'][] = $received->count();
+                    $graph['delivered'][] = $delivered->count();
+                    $graph['pending'][] = $pending->count();
+                    $graph['return'][] = $return->count();
                 }
             }else if(($destination == '') && ($shipper != '')){
                 foreach ($dates as $this_date) {
                     $comparison_date = $this_date;
                     $graph['dates'][] = Carbon::parse($this_date)->format('d M');
-                    $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->count();
-                    $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [2, 3, 4])->count();
-                    $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->count();
-                    $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19])->count();
-                    $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46])->count();
+
+                    $booked = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper);
+                    $received = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [2, 3, 4]);
+                    $delivered = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                    $pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                    $return = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
+
+                    if (session('role_id') != 1) {
+                        $booked = $booked->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $received = $received->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $delivered = $delivered->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $return = $return->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $pending = $pending->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+                    }
+
+                    $graph['booked'][] = $booked->count();
+                    $graph['received'][] = $received->count();
+                    $graph['delivered'][] = $delivered->count();
+                    $graph['pending'][] = $pending->count();
+                    $graph['return'][] = $return->count();
                 }
             }else if(($destination != '') && ($shipper == '')){
                 foreach ($dates as $this_date) {
                     $comparison_date = $this_date;
                     $graph['dates'][] = Carbon::parse($this_date)->format('d M');
-                    $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->count();
-                    $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4])->count();
-                    $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->count();
-                    $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19])->count();
-                    $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46])->count();
+
+                    $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination]);
+                    $received = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
+                    $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                    $pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                    $return = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
+
+                    if (session('role_id') != 1) {
+                        $booked = $booked->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $received = $received->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $delivered = $delivered->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $return = $return->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $pending = $pending->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+                    }
+
+                    $graph['booked'][] = $booked->count();
+                    $graph['received'][] = $received->count();
+                    $graph['delivered'][] = $delivered->count();
+                    $graph['pending'][] = $pending->count();
+                    $graph['return'][] = $return->count();
                 }
             }else{
                 foreach ($dates as $this_date) {
                     $comparison_date = $this_date;
                     $graph['dates'][] = Carbon::parse($this_date)->format('d M');
-                    $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->count();
-                    $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [2, 3, 4])->count();
-                    $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47])->count();
-                    $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19])->count();
-                    $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46])->count();
+
+                    $booked = Shipment::whereDate('created_at', $comparison_date);
+                    $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [2, 3, 4]);
+                    $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
+                    $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
+                    $return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
+
+                    if (session('role_id') != 1) {
+                        $booked = $booked->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $received = $received->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $delivered = $delivered->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $return = $return->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+
+                        $pending = $pending->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
+                    }
+
+                    $graph['booked'][] = $booked->count();
+                    $graph['received'][] = $received->count();
+                    $graph['delivered'][] = $delivered->count();
+                    $graph['pending'][] = $pending->count();
+                    $graph['return'][] = $return->count();
                 }
             }
 
@@ -149,9 +446,15 @@ class AdminDashboardController extends Controller
             //->where('shipments.user_id',Auth::id())
             ->orderBy('shipments.id','desc')
             ->groupBy('shipments.id');
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+        }
+
         return Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
-                return "<u><a href='javascript:void(0);' class='tracking'>$shipments->tracking_number</a></u>";
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('phone1',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
@@ -166,7 +469,7 @@ class AdminDashboardController extends Controller
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>";
                 if($shipments->shipper_status_id > 1) {
-                    $drop .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-plus-circle primary'></i> View Charges</a>";
+                    $drop .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-eye primary'></i> View Charges</a>";
                 }else{
                     $drop .= "<a href='javascript:void(0);' class='dropdown-item '><i class='ft-plus-circle primary'></i> No Action</a>";
                 }
@@ -199,7 +502,6 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.block_accounts_list');
     }
     public function UserStatus(Request $request){
-//        dd($request);
         $id = $request->shid; //shipper id
         $status = $request->status;
         if($status == 'active'){
@@ -230,6 +532,68 @@ class AdminDashboardController extends Controller
 //            }
 //        }
     }
+    public function UserStatusBlock(Request $request){
+        $user_id = $request->id;
+        $status = $request->status;
+        $user = User::where('id',$user_id);
+        if($user->exists()){
+            $user = $user->first();
+            if($status == 'block'){
+                if($user->blacklist == 0){
+                    $user->blacklist = 1;
+                    $user->save();
+                    return response()->json(['status'=>1,'success'=>"User added to the blacklist!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"User is already in blacklist!"]);
+                }
+            }else if($status == 'unblock'){
+                if($user->blacklist == 1){
+                    $user->blacklist = 0;
+                    $user->save();
+                    return response()->json(['status'=>1,'success'=>"User removed from the blacklist!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"User is not in the blacklist!"]);
+                }
+            }
+
+        }else{
+            return response()->json(['status'=>0,'error'=>"User doesn\'t exist!"]);
+        }
+    }
+    public function UserStatusChange(Request $request){
+        $user_id = $request->id;
+        $status = $request->status;
+        $user = User::where('id',$user_id);
+        if($user->exists()){
+            $user = $user->first();
+            if($status == 'enable'){
+                if($user->status == 4){
+                    $user->status = 3;
+                    $user->save();
+                    return response()->json(['status'=>1,'success'=>"User is now enabled!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"User is already enabled!"]);
+                }
+            }else if($status == 'disable'){
+                if($user->status == 3){
+                    $user->status = 4;
+                    $user->save();
+                    return response()->json(['status'=>1,'success'=>"User is now disabled!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"User is already disabled!"]);
+
+                }
+            }
+        }else{
+            return response()->json(['status'=>0,'error'=>"User doesn\'t exist!"]);
+        }
+    }
+    public function get_shipment_charges(Request $request){
+        $shipment_id = $request->shipment_id;
+        $shipment = Shipment::find($shipment_id);
+        $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment])->render();
+        return response()->json($returnHTML);
+    }
     /**
      * @return \Illuminate\Http\JsonResponse
      * @throws \Throwable
@@ -249,7 +613,7 @@ class AdminDashboardController extends Controller
      */
     public function viewShippingInfo($id){
         $user = User::find($id);
-        $shipping = $user->shipping;
+        $shipping = $user->shipping()->where('hidden',0)->get();
         $returnHTML = view('admin.components.shipping')->with(['shipping'=>$shipping,'user'=>$user])->render();
         return response()->json($returnHTML);
     }
@@ -346,15 +710,15 @@ class AdminDashboardController extends Controller
             'on_discount_title.required_if' => 'The overnight discount title field must be required',
             'on_daterange.required_if' => 'The overnight discount date range field must be required',
             'on_discount_weight_rate.required_if' => 'The overnight discount weight field must be required',
-            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
+//            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
             'on_discount_cash_rate.required_if' => 'The overnight discount cash field must be required',
-            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
+//            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
             'on_discount_insurance_rate.required_if' => 'The overnight discount insurance field must be required',
-            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
+//            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
             'on_discount_return_rate.required_if' => 'The overnight discount return field must be required',
-            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
+//            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
             'on_discount_packaging_rate.required_if' => 'The overnight discount packaging field must be required',
-            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
+//            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
             'on_discount_title.required_with'=>'The overnight discount title field is required',
             'on_daterange.required_with'=>'The overnight discount date field is required',
             //overland starts
@@ -402,15 +766,15 @@ class AdminDashboardController extends Controller
             'ol_discount_title.required_if' => 'The overland discount title field must be required',
             'ol_daterange.required_if' => 'The overland discount date range field must be required',
             'ol_discount_weight_rate.required_if' => 'The overland discount weight field must be required',
-            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
+//            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
             'ol_discount_cash_rate.required_if' => 'The overland discount cash field must be required',
-            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
+//            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
             'ol_discount_insurance_rate.required_if' => 'The overland discount insurance field must be required',
-            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
+//            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
             'ol_discount_return_rate.required_if' => 'The overland discount return field must be required',
-            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
+//            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
             'ol_discount_packaging_rate.required_if' => 'The overland discount packaging field must be required',
-            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
+//            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
             'ol_discount_title.required_with'=>'The overland discount title field is required',
             'ol_daterange.required_with'=>'The overland discount date field is required',
             //overland end and detain starts
@@ -458,15 +822,15 @@ class AdminDashboardController extends Controller
             'detain_discount_title.required_if' => 'The detain discount title field must be required',
             'detain_daterange.required_if' => 'The detain discount date range field must be required',
             'detain_discount_weight_rate.required_if' => 'The detain discount weight field must be required',
-            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
+//            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
             'detain_discount_cash_rate.required_if' => 'The detain discount cash field must be required',
-            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
+//            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
             'detain_discount_insurance_rate.required_if' => 'The detain discount insurance field must be required',
-            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
+//            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
             'detain_discount_return_rate.required_if' => 'The detain discount return field must be required',
-            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
+//            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
             'detain_discount_packaging_rate.required_if' => 'The detain discount packaging field must be required',
-            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
+//            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
             'detain_discount_title.required_with'=>'The detain discount title field is required',
             'detain_daterange.required_with'=>'The detain discount date field is required',
             //detain ends and sameday starts
@@ -514,15 +878,15 @@ class AdminDashboardController extends Controller
             'sameday_discount_title.required_if' => 'The sameday discount title field must be required',
             'sameday_daterange.required_if' => 'The sameday discount date range field must be required',
             'sameday_discount_weight_rate.required_if' => 'The sameday discount weight field must be required',
-            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
+//            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
             'sameday_discount_cash_rate.required_if' => 'The sameday discount cash field must be required',
-            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
+//            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
             'sameday_discount_insurance_rate.required_if' => 'The sameday discount insurance field must be required',
-            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
+//            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
             'sameday_discount_return_rate.required_if' => 'The sameday discount return field must be required',
-            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
+//            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
             'sameday_discount_packaging_rate.required_if' => 'The sameday discount packaging field must be required',
-            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
+//            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
             'sameday_discount_title.required_with'=>'The sameday discount title field is required',
             'sameday_daterange.required_with'=>'The sameday discount date field is required',
             //sameday ends
@@ -558,11 +922,11 @@ class AdminDashboardController extends Controller
                 'on_flyer_box'=>'required_if:on_packaging_switch,==,on|numeric',
                 'on_discount_title'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
                 'on_daterange'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on|numeric',
-                'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on|numeric',
-                'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on|numeric',
-                'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on|numeric',
-                'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on|numeric'
+                'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on',
+                'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on',
+                'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on',
+                'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on',
+                'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on'
             ];
         }
         //overland
@@ -590,11 +954,11 @@ class AdminDashboardController extends Controller
                 'ol_flyer_box'=>'required_if:ol_packaging_switch,==,on|numeric',
                 'ol_discount_title'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
                 'ol_daterange'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on|numeric',
-                'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on|numeric',
-                'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on|numeric',
-                'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on|numeric',
-                'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on|numeric',
+                'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on',
+                'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on',
+                'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on',
+                'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on',
+                'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on',
             ];
         }
         //overland
@@ -622,11 +986,11 @@ class AdminDashboardController extends Controller
                 'detain_flyer_box'=>'required_if:detain_packaging_switch,==,on|numeric',
                 'detain_discount_title'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
                 'detain_daterange'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on|numeric',
-                'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on|numeric',
-                'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on|numeric',
-                'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on|numeric',
-                'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on|numeric',
+                'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on',
+                'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on',
+                'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on',
+                'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on',
+                'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on',
             ];
         }
         //sameday
@@ -654,11 +1018,11 @@ class AdminDashboardController extends Controller
                 'sameday_flyer_box'=>'required_if:sameday_packaging_switch,==,on|numeric',
                 'sameday_discount_title'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
                 'sameday_daterange'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on|numeric',
-                'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on|numeric',
-                'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on|numeric',
-                'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on|numeric',
-                'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on|numeric',
+                'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on',
+                'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on',
+                'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on',
+                'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on',
+                'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on',
             ];
         }
 
@@ -984,8 +1348,8 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
 
                     if($request->on_discount_record != null){
                         DiscountCharge::where(['id'=>$request->on_discount_record])->update([
@@ -1236,8 +1600,8 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
 
                     if($request->ol_discount_record != null){
                         DiscountCharge::where(['id'=>$request->ol_discount_record])->update([
@@ -1488,8 +1852,8 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
 
                     if($request->detain_discount_record != null){
                         DiscountCharge::where(['id'=>$request->detain_discount_record])->update([
@@ -1740,8 +2104,8 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
 
                     if($request->sameday_discount_record != null){
                         DiscountCharge::where(['id'=>$request->sameday_discount_record])->update([
@@ -1837,15 +2201,15 @@ class AdminDashboardController extends Controller
             'on_discount_title.required_if' => 'The overnight discount title field must be required',
             'on_daterange.required_if' => 'The overnight discount date range field must be required',
             'on_discount_weight_rate.required_if' => 'The overnight discount weight field must be required',
-            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
+//            'on_discount_weight_rate.numeric' => 'The overnight discount weight field must be numeric',
             'on_discount_cash_rate.required_if' => 'The overnight discount cash field must be required',
-            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
+//            'on_discount_cash_rate.numeric' => 'The overnight discount cash field must be numeric',
             'on_discount_insurance_rate.required_if' => 'The overnight discount insurance field must be required',
-            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
+//            'on_discount_insurance_rate.numeric' => 'The overnight discount insurance field must be numeric',
             'on_discount_return_rate.required_if' => 'The overnight discount return field must be required',
-            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
+//            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
             'on_discount_packaging_rate.required_if' => 'The overnight discount packaging field must be required',
-            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
+//            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
             'on_discount_title.required_with'=>'The overnight discount title field is required',
             'on_daterange.required_with'=>'The overnight discount date field is required',
             //overland starts
@@ -1893,15 +2257,15 @@ class AdminDashboardController extends Controller
             'ol_discount_title.required_if' => 'The overland discount title field must be required',
             'ol_daterange.required_if' => 'The overland discount date range field must be required',
             'ol_discount_weight_rate.required_if' => 'The overland discount weight field must be required',
-            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
+//            'ol_discount_weight_rate.numeric' => 'The overland discount weight field must be numeric',
             'ol_discount_cash_rate.required_if' => 'The overland discount cash field must be required',
-            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
+//            'ol_discount_cash_rate.numeric' => 'The overland discount cash field must be numeric',
             'ol_discount_insurance_rate.required_if' => 'The overland discount insurance field must be required',
-            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
+//            'ol_discount_insurance_rate.numeric' => 'The overland discount insurance field must be numeric',
             'ol_discount_return_rate.required_if' => 'The overland discount return field must be required',
-            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
+//            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
             'ol_discount_packaging_rate.required_if' => 'The overland discount packaging field must be required',
-            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
+//            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
             'ol_discount_title.required_with'=>'The overland discount title field is required',
             'ol_daterange.required_with'=>'The overland discount date field is required',
             //overland end and detain starts
@@ -1949,15 +2313,15 @@ class AdminDashboardController extends Controller
             'detain_discount_title.required_if' => 'The detain discount title field must be required',
             'detain_daterange.required_if' => 'The detain discount date range field must be required',
             'detain_discount_weight_rate.required_if' => 'The detain discount weight field must be required',
-            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
+//            'detain_discount_weight_rate.numeric' => 'The detain discount weight field must be numeric',
             'detain_discount_cash_rate.required_if' => 'The detain discount cash field must be required',
-            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
+//            'detain_discount_cash_rate.numeric' => 'The detain discount cash field must be numeric',
             'detain_discount_insurance_rate.required_if' => 'The detain discount insurance field must be required',
-            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
+//            'detain_discount_insurance_rate.numeric' => 'The detain discount insurance field must be numeric',
             'detain_discount_return_rate.required_if' => 'The detain discount return field must be required',
-            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
+//            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
             'detain_discount_packaging_rate.required_if' => 'The detain discount packaging field must be required',
-            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
+//            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
             'detain_discount_title.required_with'=>'The detain discount title field is required',
             'detain_daterange.required_with'=>'The detain discount date field is required',
             //detain ends and sameday starts
@@ -2005,15 +2369,15 @@ class AdminDashboardController extends Controller
             'sameday_discount_title.required_if' => 'The sameday discount title field must be required',
             'sameday_daterange.required_if' => 'The sameday discount date range field must be required',
             'sameday_discount_weight_rate.required_if' => 'The sameday discount weight field must be required',
-            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
+//            'sameday_discount_weight_rate.numeric' => 'The sameday discount weight field must be numeric',
             'sameday_discount_cash_rate.required_if' => 'The sameday discount cash field must be required',
-            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
+//            'sameday_discount_cash_rate.numeric' => 'The sameday discount cash field must be numeric',
             'sameday_discount_insurance_rate.required_if' => 'The sameday discount insurance field must be required',
-            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
+//            'sameday_discount_insurance_rate.numeric' => 'The sameday discount insurance field must be numeric',
             'sameday_discount_return_rate.required_if' => 'The sameday discount return field must be required',
-            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
+//            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
             'sameday_discount_packaging_rate.required_if' => 'The sameday discount packaging field must be required',
-            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
+//            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
             'sameday_discount_title.required_with'=>'The sameday discount title field is required',
             'sameday_daterange.required_with'=>'The sameday discount date field is required',
             //sameday ends
@@ -2049,11 +2413,11 @@ class AdminDashboardController extends Controller
                 'on_flyer_box'=>'required_if:on_packaging_switch,==,on|numeric',
                 'on_discount_title'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
                 'on_daterange'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on|numeric',
-                'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on|numeric',
-                'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on|numeric',
-                'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on|numeric',
-                'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on|numeric'
+                'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on',
+                'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on',
+                'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on',
+                'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on',
+                'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on'
             ];
         }
         //overland
@@ -2081,11 +2445,11 @@ class AdminDashboardController extends Controller
                 'ol_flyer_box'=>'required_if:ol_packaging_switch,==,on|numeric',
                 'ol_discount_title'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
                 'ol_daterange'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on|numeric',
-                'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on|numeric',
-                'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on|numeric',
-                'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on|numeric',
-                'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on|numeric',
+                'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on',
+                'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on',
+                'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on',
+                'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on',
+                'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on',
             ];
         }
              //overland
@@ -2113,11 +2477,11 @@ class AdminDashboardController extends Controller
                 'detain_flyer_box'=>'required_if:detain_packaging_switch,==,on|numeric',
                 'detain_discount_title'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
                 'detain_daterange'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on|numeric',
-                'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on|numeric',
-                'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on|numeric',
-                'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on|numeric',
-                'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on|numeric',
+                'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on',
+                'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on',
+                'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on',
+                'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on',
+                'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on',
             ];
         }
             //sameday
@@ -2145,11 +2509,11 @@ class AdminDashboardController extends Controller
                 'sameday_flyer_box'=>'required_if:sameday_packaging_switch,==,on|numeric',
                 'sameday_discount_title'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
                 'sameday_daterange'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on|numeric',
-                'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on|numeric',
-                'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on|numeric',
-                'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on|numeric',
-                'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on|numeric',
+                'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on',
+                'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on',
+                'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on',
+                'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on',
+                'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on',
             ];
         }
 
@@ -2300,14 +2664,9 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-//                    $to = str_replace('/', '-', $date_sep[0]);
-//                    $from = str_replace('/', '-', $date_sep[1]);
-//                    $nto = date_create($to);
-//                    $to =date_format($nto,"Y-m-d H:i:s");
-//                    $nfrom = date_create($from);
-//                    $from =date_format($nfrom,"Y-m-d H:i:s");
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+
 
                     DiscountCharge::create([
                         'user_id' => $id,
@@ -2464,14 +2823,9 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-//                    $to = str_replace('/', '-', $date_sep[0]);
-//                    $from = str_replace('/', '-', $date_sep[1]);
-//                    $nto = date_create($to);
-//                    $to =date_format($nto,"Y-m-d H:i:s");
-//                    $nfrom = date_create($from);
-//                    $from =date_format($nfrom,"Y-m-d H:i:s");
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+
 
                     DiscountCharge::create([
                         'user_id' => $id,
@@ -2628,14 +2982,9 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-//                    $to = str_replace('/', '-', $date_sep[0]);
-//                    $from = str_replace('/', '-', $date_sep[1]);
-//                    $nto = date_create($to);
-//                    $to = date_format($nto, "Y-m-d H:i:s");
-//                    $nfrom = date_create($from);
-//                    $from = date_format($nfrom, "Y-m-d H:i:s");
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+
 
                     DiscountCharge::create([
                         'user_id' => $id,
@@ -2791,14 +3140,9 @@ class AdminDashboardController extends Controller
                     $date_sep = explode(' - ', $date_str);
                     $date_to = explode('/', $date_sep[0]);
                     $date_from = explode('/', $date_sep[1]);
-                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'Asia/Karachi')->toDateTimeString();
-//                    $to = str_replace('/', '-', $date_sep[0]);
-//                    $from = str_replace('/', '-', $date_sep[1]);
-//                    $nto = date_create($to);
-//                    $to =date_format($nto,"Y-m-d H:i:s");
-//                    $nfrom = date_create($from);
-//                    $from =date_format($nfrom,"Y-m-d H:i:s");
+                    $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
+                    $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+
 
                     DiscountCharge::create([
                         'user_id' => $id,
@@ -2823,30 +3167,76 @@ class AdminDashboardController extends Controller
     }
     public function activeAccountListAjax(){
        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email'])->where('users.status',3)->where('blacklist',0);
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
+
+        if (session('role_id') != 1) {
+            $users = $users->whereIn('cities.hub_id', session('hubs'));
+        }
 
         return Datatables::of($users)
-
+            ->editColumn('status',function ($users){
+                if($users->status == 3){
+                    return "Enable";
+                }else{
+                    return "Disable";
+                }
+            })
             ->addColumn("action", function ($result) {
-                                            return " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
+                $dropdown = "
+                    <span class='dropdown'>
+                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                        aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
 
-                                            </div>
-                                            </span>";
-                                        })
-                                      ->make(true);
+                        <div class='dropdown-menu open-left arrow'>
+                            <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
+                            <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
+                ";
+
+                if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
+                    $dropdown .= "
+                            <a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>
+                    ";
+                }
+                if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
+                    $dropdown .= "
+                            <a href='javascript:void(0);' class='dropdown-item blacklist' rel='block'><i class='ft-user-x primary'></i> Block</a>
+                    ";
+                }
+
+                if (session('role_id') == 1 || in_array(13, session('permissions'))) {
+                    if ($result->status == 3) {
+                        $dropdown .="
+                                <a href='javascript:void(0);' class='dropdown-item userdisable'><i class='ft-user-minus primary'></i> Disable</a>
+                        ";
+
+                    }
+                    else {
+                        $dropdown .="
+                                <a href='javascript:void(0);' class='dropdown-item userenable'><i class='ft-user-plus primary'></i> Enable</a>
+                        ";
+
+                    }
+                }
+
+                $dropdown .="
+                        </div>
+                    </span>
+                ";
+
+                return $dropdown;
+            })
+            ->make(true);
 
     }
-    //->join('rate_statuses','users.id','=','rate_statuses.user_id')
+
 
     public function pendingAccountListAjax(){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
-         //$isRate = RateStatus::where('user_id',$users->id);
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','users.blacklist'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+
+        if (session('role_id') != 1) {
+            $users = $users->whereIn('cities.hub_id', session('hubs'));
+        }
 
         return Datatables::of($users)
             ->editColumn('created_at', function ($users) {
@@ -2872,53 +3262,84 @@ class AdminDashboardController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                                            $dropdown = "
-                                                <span class='dropdown'>
-                                                    <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                            aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                                    <div class='dropdown-menu open-left arrow'>
-                                                      <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                                                      <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>";
-                                                    if($result->status == 2){
-                                                        $dropdown .= "<a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='active' data-toggle='modal' data-target='#ConfirmModal'><i class='ft-plus-circle primary'></i> Activate Account</a>";
+                $dropdown = "
+                    <span class='dropdown'>
+                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                        <div class='dropdown-menu open-left arrow'>
+                          <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
+                          <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
+                ";
 
-                                                    }
-                                            if (RateStatus::where('user_id', $result->id)->exists()) {
-                                                $dropdown .= "
-                                                        <a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>
-                                                ";
-                                            }
-                                            else {
-                                                $dropdown .= "
-                                                        <a href='".route('admin.add.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Add Rates</a>
-                                                ";
-                                            }
+                if($result->status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
+                    $dropdown .= "
+                            <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='active' data-toggle='modal' data-target='#ConfirmModal'><i class='ft-plus-circle primary'></i> Activate Account</a>
+                    ";
 
-                                            $dropdown .= "
-                                                    </div>
-                                                </span>";
+                }
 
-                                            return $dropdown;
-                                        })
-                                      ->make(true);
+                if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
+                    $dropdown .= "
+                            <a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>
+                    ";
+                }
+                else {
+                    if (session('role_id') == 1 || in_array(6, session('permissions'))) {
+                        $dropdown .= "
+                            <a href='".route('admin.add.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Add Rates</a>
+                        ";
+                    }
+                }
+
+                if($result->blacklist == 0 && (session('role_id') == 1 || in_array(10, session('permissions')))) {
+                    $dropdown .= "
+                            <a href='javascript:void(0);' class='dropdown-item blacklist' rel='block'><i class='ft-user-x primary'></i> Block</a>
+                    ";
+                }
+
+                $dropdown .= "
+                        </div>
+                    </span>
+                ";
+
+                return $dropdown;
+            })
+          ->make(true);
 
     }
     public function blockAccountListAjax(){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email'])->where('blacklist',1);
 
-        return Datatables::of($users)->addColumn("action", function ($result) {
-                                            return " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
+        if (session('role_id') != 1) {
+            $users = $users->whereIn('cities.hub_id', session('hubs'));
+        }
 
-                                            </div>
-                                            </span>";
-                                        })
-                                      ->make(true);
+        return Datatables::of($users)->addColumn("action", function ($result) {
+            $dropdown = "
+                <span class='dropdown'>
+                    <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                            aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+
+                    <div class='dropdown-menu open-left arrow'>
+                      <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
+                      <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
+            ";
+
+            if (session('role_id') == 1 || in_array(16, session('permissions'))) {
+                $dropdown .= "
+                        <a href='javascript:void(0);' class='dropdown-item blacklist' rel='unblock'><i class='ft-user-plus primary'></i> Unblock</a>
+                ";
+            }
+
+            $dropdown .= "
+                    </div>
+                </span>
+            ";
+
+            return $dropdown;
+        })
+      ->make(true);
 
     }
 
@@ -2935,6 +3356,7 @@ class AdminDashboardController extends Controller
     public function cityListAjax(){
         $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
         ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','cities.hub as isHub','cities.status as status']);
+
         return Datatables::of($cities)
         ->editColumn('status', function ($cities) {
             return ($cities->status == 1)? 'Active': 'Inactive';
@@ -2953,21 +3375,47 @@ class AdminDashboardController extends Controller
             }
         })
         ->addColumn("action", function ($result) {
-            $dropdown = "<span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->city_id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update City Status</a>";
-                                              if($result->status == 1) {
-                                                  $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityInactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Deactivate City</a>";
-                                              }else {
-                                                  $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Activate City</a>";
-                                              }
-                                            $dropdown .="</div></span>";
-                                              return $dropdown;
+            if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
+                $dropdown = "
+                    <span class='dropdown'>
+                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                        <div class='dropdown-menu open-left arrow'>
+                ";
+
+                if (session('role_id') == 1 || in_array(90, session('permissions'))) {
+                    $dropdown .= "
+                            <a href='#' class='dropdown-item' data-target-id='{$result->city_id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update City Status</a>
+                    ";
+                }
+
+                if (session('role_id') == 1 || in_array(91, session('permissions'))) {
+                    if ($result->status == 1) {
+                        $dropdown .= "
+                            <a class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityInactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Deactivate City</a>
+                        ";
+                    }
+                    else {
+                        $dropdown .= "
+                            <a class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Activate City</a>
+                        ";
+                    }
+                }
+
+                $dropdown .= "
+                        </div>
+                    </span>
+                ";
+
+                return $dropdown;
+            }
+            else {
+                return '';
+            }
         })
-            ->make(true);
+        ->make(true);
     }
+
     public function getCityForm(){
         $hubs = City::where('hub',1)->where('status',1)->get();
         $shippingMode = ShippingMode::all();
@@ -3146,6 +3594,11 @@ class AdminDashboardController extends Controller
     public function routeListAjax(){
         $routes = Route::join('cities','routes.city_id','=','cities.id')
             ->select(['cities.name as city','routes.id','routes.code as code','routes.start','routes.end','routes.junction','routes.status as status','routes.created_at']);
+
+        if (session('role_id') != 1) {
+            $routes = $routes->whereIn('cities.hub_id', session('hubs'));
+        }
+
         return Datatables::of($routes)
             ->editColumn('status', function ($routes) {
                 return ($routes->status == 0)? 'Inactive': 'Active';
@@ -3167,20 +3620,45 @@ class AdminDashboardController extends Controller
                 return $routes->created_at ? with(new Carbon($routes->created_at))->format('d/m/Y H:i:s A') : '';
             })
             ->addColumn("action", function ($result) {
-                $dropdown = "<span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editroute' data-toggle='modal' data-target='#editRoute'><i class='ft-plus-circle primary'></i> Update Route</a>";
-                if($result->status == 1) {
-                    $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeInactive'  data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Deactivate Route</a>";
-                }else {
-                    $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeActive' data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Activate Route</a>";
+                if (session('role_id') == 1 || count(array_intersect([94, 95], session('permissions'))) !== 0) {
+                $dropdown = "
+                    <span class='dropdown'>
+                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                        <div class='dropdown-menu open-left arrow'>
+                ";
+
+                if (session('role_id') == 1 || in_array(94, session('permissions'))) {
+                    $dropdown .= "
+                            <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editroute' data-toggle='modal' data-target='#editRoute'><i class='ft-plus-circle primary'></i> Update Route</a>
+                    ";
                 }
-                $dropdown .="</div></span>";
+
+                if (session('role_id') == 1 || in_array(95, session('permissions'))) {
+                    if ($result->status == 1) {
+                        $dropdown .= "
+                            <a class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeInactive'  data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Deactivate Route</a>
+                        ";
+                    }
+                    else {
+                        $dropdown .= "
+                            <a class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeActive' data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Activate Route</a>
+                        ";
+                    }
+                }
+
+                $dropdown .= "
+                        </div>
+                    </span>
+                ";
+
                 return $dropdown;
-            })
-            ->make(true);
+            }
+            else {
+                return '';
+            }
+        })
+        ->make(true);
     }
     public function addRouteView(){
        $city = City::select(['id','name'])->where('status',1)->get();
@@ -3265,6 +3743,11 @@ class AdminDashboardController extends Controller
             ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
             ->select(['cities.name as city','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
+
+        if (session('role_id') != 1) {
+            $rider = $rider->whereIn('cities.hub_id', session('hubs'));
+        }
+
         return Datatables::of($rider)
             ->editColumn('status', function ($rider) {
                 return ($rider->status == 0)? 'Inactive': 'Active';
@@ -3299,20 +3782,45 @@ class AdminDashboardController extends Controller
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
             })
             ->addColumn("action", function ($rider) {
-                $dropdown = "<span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item' data-target-id='{$rider->id}' rel='editRider' data-toggle='modal' data-target='#editRider'><i class='ft-plus-circle primary'></i> Update Rider</a>";
-                if($rider->status == 1) {
-                    $dropdown .= "<a  class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderInactive'  data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Deactivate Rider</a>";
-                }else {
-                    $dropdown .= " <a  class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderActive' data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Activate Rider</a>";
+                if (session('role_id') == 1 || count(array_intersect([98, 99], session('permissions'))) !== 0) {
+                $dropdown = "
+                    <span class='dropdown'>
+                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                        <div class='dropdown-menu open-left arrow'>
+                ";
+
+                if (session('role_id') == 1 || in_array(98, session('permissions'))) {
+                    $dropdown .= "
+                            <a href='#' class='dropdown-item' data-target-id='{$rider->id}' rel='editRider' data-toggle='modal' data-target='#editRider'><i class='ft-plus-circle primary'></i> Update Rider</a>
+                    ";
                 }
-                $dropdown .="</div></span>";
+
+                if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                    if ($rider->status == 1) {
+                        $dropdown .= "
+                            <a class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderInactive'  data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Deactivate Rider</a>
+                        ";
+                    }
+                    else {
+                        $dropdown .= "
+                            <a class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderActive' data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Activate Rider</a>
+                        ";
+                    }
+                }
+
+                $dropdown .= "
+                        </div>
+                    </span>
+                ";
+
                 return $dropdown;
-            })
-            ->make(true);
+            }
+            else {
+                return '';
+            }
+        })
+        ->make(true);
     }
     public function addRiderView(){
         $city = City::select(['id','name'])->where('status',1)->get();
@@ -3321,7 +3829,15 @@ class AdminDashboardController extends Controller
     }
     public function categoryListAjax(Request $request){
         $city_id = $request->id;
-        $route = Route::select(['id','code','start','end'])->where('city_id',$city_id)->where('status',1)->get();
+        $route = Route::select(['id','code','start','end'])->where('city_id',$city_id)->where('status',1);
+
+        if (session('role_id') != 1) {
+            $route = $route->whereHas('city', function ($query) {
+                $query->whereIn('hub_id', session('hubs'));
+            });
+        }
+
+        $route = $route->get();
 
         return response()->json($route);
     }
@@ -3410,4 +3926,5 @@ class AdminDashboardController extends Controller
         }
 
     }
+
 }

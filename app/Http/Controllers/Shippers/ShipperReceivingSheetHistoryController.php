@@ -19,7 +19,9 @@ use Carbon\Carbon;
 class ShipperReceivingSheetHistoryController extends Controller
 {
     public function __construct() {
-      $this->middleware('auth');
+      $this->middleware('auth:web,substitute_users');
+
+      $this->middleware('Permission');
     }
 
     public function index() {
@@ -31,9 +33,9 @@ class ShipperReceivingSheetHistoryController extends Controller
       ->leftjoin('receiving_sheets as rs', 'receiving_sheet_received.receiving_sheet_id', '=', 'rs.id')
       ->join('user_shipping_infos as usi', 'receiving_sheet_received.pickup_address_id', '=', 'usi.id')
       ->join('cities as c', 'usi.city_id', '=', 'c.id')
-      ->select('receiving_sheet_received.receiving_sheet_id as id', 'receiving_sheet_received.receiving_sheet_id as receiving_sheet', DB::raw('count(receiving_sheet_received.receiving_sheet_id) as booked'), DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'c.name as origin', 'rs.created_at AS booking_date', 'receiving_sheet_received.pickup_address_id')
+      ->select('receiving_sheet_received.receiving_sheet_id as id', 'receiving_sheet_received.receiving_sheet_id as receiving_sheet', DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'c.name as origin', 'rs.created_at AS booking_date', 'receiving_sheet_received.pickup_address_id')
       ->where('receiving_sheet_received.status', 0)
-      ->where('receiving_sheet_received.user_id', Auth::id())
+      ->where('receiving_sheet_received.user_id', session('user_id'))
       ->groupBy('receiving_sheet_received.receiving_sheet_id')
       ->groupBy('receiving_sheet_received.pickup_address_id');
 
@@ -46,17 +48,19 @@ class ShipperReceivingSheetHistoryController extends Controller
           return '';
         }
       })
-      ->editColumn('booked', function($receiving_sheet_received) {
-        if ($receiving_sheet_received->booked) {
-          return '<button class="btn btn-sm btn-outline-info align-middle">' . $receiving_sheet_received->booked . '</button>';
-        }
-        else {
-          return '';
-        }
-      })
+      ->addColumn('booked', function($receiving_sheet_received) {
+       if ($receiving_sheet_received->receiving_sheet) {
+         $booked = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
+
+         return '<button class="btn btn-sm btn-outline-info align-middle">' . $booked . '</button>';
+       }
+       else {
+         return '';
+       }
+     })
       ->editColumn('received', function($receiving_sheet_received) {
         if ($receiving_sheet_received->receiving_sheet) {
-          $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', Auth::id())->where('status', 0)->count();
+          $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', session('user_id'))->where('status', 0)->count();
 
           return '<button class="btn btn-sm btn-outline-info align-middle" data-id="' . $receiving_sheet_received->pickup_address_id . '">' . $received . '</button>';
         }
@@ -131,10 +135,10 @@ class ShipperReceivingSheetHistoryController extends Controller
 
     public function received_shipments(Request $request) {
       if ($request->receiving_sheet_id != 'NaN') {
-        $receiving_sheet_received = ReceivingSheetReceived::where('receiving_sheet_id', $request->receiving_sheet_id)->where('user_id', Auth::id())->where('status', 0)->get();
+        $receiving_sheet_received = ReceivingSheetReceived::where('receiving_sheet_id', $request->receiving_sheet_id)->where('user_id', session('user_id'))->where('status', 0)->get();
       }
       else {
-        $receiving_sheet_received = ReceivingSheetReceived::whereNull('receiving_sheet_id')->where('user_id', Auth::id())->where('pickup_address_id', $request->pickup_address_id)->where('status', 0)->get();
+        $receiving_sheet_received = ReceivingSheetReceived::whereNull('receiving_sheet_id')->where('user_id', session('user_id'))->where('pickup_address_id', $request->pickup_address_id)->where('status', 0)->get();
       }
 
       $tracking_numbers = array();
@@ -187,7 +191,7 @@ class ShipperReceivingSheetHistoryController extends Controller
     public function create(Request $request) {
       $shipment_ids = array();
 
-      foreach (ReceivingSheetReceived::whereNull('receiving_sheet_id')->where('user_id', Auth::id())->where('pickup_address_id', $request->pickup_address_id)->where('status', 0)->get() as $receiving_sheet_received) {
+      foreach (ReceivingSheetReceived::whereNull('receiving_sheet_id')->where('user_id', session('user_id'))->where('pickup_address_id', $request->pickup_address_id)->where('status', 0)->get() as $receiving_sheet_received) {
         $shipment_ids[] = $receiving_sheet_received->shipment_id;
 
         $receiving_sheet_received->status = 1;
@@ -197,7 +201,7 @@ class ShipperReceivingSheetHistoryController extends Controller
 
       $receiving_sheet = new ReceivingSheet();
 
-      $receiving_sheet->user_id = Auth::id();
+      $receiving_sheet->user_id = session('user_id');
       $receiving_sheet->status = 1;
 
       $receiving_sheet->save();

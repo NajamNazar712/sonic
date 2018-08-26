@@ -358,10 +358,10 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Print',
-                    className: 'btn btn-primary',
+                    className: 'btn btn-primary print',
                     enabled: false,
                     action: function (e, dt, node, config) {
-                        table.button(0).disable();
+                        table.button('.print').disable();
                         print(selected_rows);
                         $.each(selected_rows, function(index, id) {
                             table.row($('#datatable tbody tr#' + id)).deselect();
@@ -462,12 +462,13 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button(0).enable();
+                    table.button('.print').enable();
                 }
                 else {
-                    table.button(0).disable();
+                    table.button('.print').disable();
                 }
             });
+
             var myChart = echarts.init(document.getElementById('shipment_statistics_chart'));
 
             chartOptions = {
@@ -499,48 +500,38 @@
                         rotate: 45
                     },
                     data: @json($graph['dates'])
-                    // data: [
-                    //     11,12,13,14,15,16,17
-                    // ]
                 }
                 ],
-
                 // Vertical axis
+
                 yAxis: [{
                     type: 'value'
                 }],
-
-                // Add series
                 // Add series
                 series: [
                     {
                         name: 'Booked',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['booked'])
                     },
                     {
                         name: 'Received',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['received'])
                     },
                     {
                         name: 'Delivered',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['delivered'])
                     },
                     {
                         name: 'Return',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['return'])
                     },
                     {
                         name: 'Pending',
                         type: 'line',
-                        stack: 'Total',
                         data: @json($graph['pending'])
                     }
                 ]
@@ -605,31 +596,26 @@
                                 {
                                     name: 'Booked',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['booked']
                                 },
                                 {
                                     name: 'Received',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['received']
                                 },
                                 {
                                     name: 'Delivered',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['delivered']
                                 },
                                 {
                                     name: 'Return',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['return']
                                 },
                                 {
                                     name: 'Pending',
                                     type: 'line',
-                                    stack: 'Total',
                                     data: data.graph['pending']
                                 }
                             ]
@@ -643,11 +629,24 @@
                 });
             });
 
-
-
-            $('body').on('click','.tracking',function () {
-                    console.log('here');
+            $('body').on('click','.view_charges',function () {
+                var shipment_id = $(this).parents('tr').attr('id');
+                $('#ShipmentChargesModal').modal('show');
+                $('#shipment_charges_modal_id').val(shipment_id);
+                $.ajax({
+                    url:'{!! route("admin.orders.charges") !!}',
+                    method: 'POST',
+                    data: {
+                        'shipment_id': shipment_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    $('#shipment_charges_body').html(data);
+                    $('#shipment_charges_modal_heading span').text(shipment_id);
+                })
             });
+
+
 
         });
     </script>
