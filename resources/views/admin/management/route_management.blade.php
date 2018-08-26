@@ -129,17 +129,21 @@
         $(document).ready(function() {
 
             var table =  $('.datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
-                    text: 'Add Route',
-                    className: 'btn btn-primary',
-                    enabled: true,
-                    action: function (e, dt, node, config) {
-                        $('#addRoute').modal('show');
+                @if (session('role_id') == 1 || in_array(93, session('permissions')))
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    buttons: [{
+                        text: 'Add Route',
+                        className: 'btn btn-primary',
+                        enabled: true,
+                        action: function (e, dt, node, config) {
+                            $('#addRoute').modal('show');
 
-                    }
+                        }
 
-                }],
+                    }],
+                @else
+                    dom: 'ltipr',
+                @endif
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()

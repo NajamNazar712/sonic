@@ -10,6 +10,7 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
 use App\Http\Models\Shipper\User;
@@ -25,6 +26,8 @@ class AdminPackagingMaterialController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
 
     public function packaging_index(){
@@ -240,19 +243,22 @@ class AdminPackagingMaterialController extends Controller
                 }
             })
             ->addColumn('action',function ($packaging){
-                if($packaging->status == 0) {
-                    $drop = " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>";
 
-                    $drop .= "<div class='dropdown-menu open-left arrow'><a class='dropdown-item dispatch'><i class='ft-fast-forward primary'> Dispatch</a>";
+                if ((packaging->status == 0) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                            <div class="dropdown-menu open-left arrow"><a class="dropdown-item dispatch"><i class="ft-fast-forward primary"> Dispatch</a>
+                        </div>
+                      </div>
+                    ';
 
-
-                    $drop .= "</div></span>";
-                }else{
-                    $drop = "<span class='dropdown'></span>";
+                    return $dropdown;
                 }
-                                          return $drop;
+                else {
+                    return '';
+                }
             })
             ->make(true);
     }
@@ -265,19 +271,19 @@ class AdminPackagingMaterialController extends Controller
             return response()->json(['status'=>0,'error'=>"Insufficient quantity!"]);
         }else{
 
-            $balance = 4000;
-            $total_charges = 0;
-            $charges = PackagingCharge::where('user_id',$request_details->user_id)->latest()->first();
-            $total_charges += $request_details->small_flyers * $charges->sm_flyer;
-            $total_charges += $request_details->medium_flyers * $charges->md_flyer;
-            $total_charges += $request_details->large_flyers * $charges->lg_flyer;
-            $total_charges += $request_details->boxes * $charges->box_flyer;
-            if($request_details->packaging_payment_mode_id == 2){
-                if($total_charges > $balance){
-                    return response()->json(['status'=>0,'error'=>"Insufficient Balance!"]);
-
-                }
-            }
+//            $balance = PendingPayment::where('user_id', $request_details->user_id)->first()->pending_payment_shipments->sum('payable');
+//            $total_charges = 0;
+//            $charges = PackagingCharge::where('user_id',$request_details->user_id)->latest()->first();
+//            $total_charges += $request_details->small_flyers * $charges->sm_flyer;
+//            $total_charges += $request_details->medium_flyers * $charges->md_flyer;
+//            $total_charges += $request_details->large_flyers * $charges->lg_flyer;
+//            $total_charges += $request_details->boxes * $charges->box_flyer;
+//            if($request_details->packaging_payment_mode_id == 2){
+//                if($total_charges > $balance){
+//                    return response()->json(['status'=>0,'error'=>"Insufficient Balance!"]);
+//
+//                }
+//            }
 
                $hub_id = $request_details->city->hub_id;
                $pickup_address = UserShippingInfo::where(['user_id'=>$request_details->user_id,'city_id'=>$hub_id,'hidden'=>1]);
@@ -292,7 +298,7 @@ class AdminPackagingMaterialController extends Controller
                }
                $now = Carbon::today();
                if($request_details->packaging_payment_mode_id == 1){
-                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,$total_charges,1,2,2);
+                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,$request_details->amount,1,2,2);
                }else{
                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
                }

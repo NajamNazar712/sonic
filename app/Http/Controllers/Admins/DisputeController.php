@@ -23,6 +23,8 @@ class DisputeController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
     public function dispute_index(){
         $cities = City::where('status',1)->get();
@@ -48,6 +50,11 @@ class DisputeController extends Controller
                 })
             ->leftJoin('admins as au', 'dc.admin_id', '=', 'au.id')
             ->select(['disputes.id as dispute_id','disputes.created_at as created_at','disputes.description','cities.name as originated_at','dt.type as dispute_type','disputes.shipments_count as no_of_shipments','ad.name as admin','us.name as shipper','disputes.raised_by_status as rbstatus','au.name as updated_by','disputes.status as status']);
+
+        if (session('role_id') != 1) {
+            $dispute = $dispute->whereIn('cities.hub_id', session('hubs'));
+        }
+
         return Datatables::of($dispute)
 
             ->editColumn('created_at', function ($dispute) {
@@ -69,26 +76,43 @@ class DisputeController extends Controller
                 }
             })
             ->addColumn("action", function ($dispute) {
-                $drop = " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>";
-                                 if($dispute->status == 0 || $dispute->status == 1) {
-                                     $drop .= "<a href='javascript:void(0);' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>                                         
-                                              <a href='javascript:void(0);' class='dropdown-item resolve'><i class='ft-check-circle primary'></i> Resolve</a>";
-                                 }else{
-                                     $drop .= "<a href='javascript:void(0);' class='dropdown-item'><i class='ft-crosshair primary'></i> No Actions</a>";
-                                 }
-                                 $drop .= "</div></span>";
-                 return $drop;
+                if (($dispute->status == 0 || $dispute->status == 1) && (session('role_id') == 1 || count(array_intersect([3, 4], session('permissions'))) !== 0)) {
+                    $dropdown = "
+                        <span class='dropdown'>
+                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
+                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                            <div class='dropdown-menu open-left arrow'>
+                    ";
+
+                    if (session('role_id') == 1 || in_array(3, session('permissions'))) {
+                        $dropdown .= "
+                                <a href='javascript:void(0);' class='dropdown-item update'><i class='ft-plus-circle primary'></i> Update</a>
+                        ";
+                    }
+
+                    if (session('role_id') == 1 || in_array(4, session('permissions'))) {
+                        $dropdown .= "
+                                <a href='javascript:void(0);' class='dropdown-item resolve'><i class='ft-check-circle primary'></i> Resolve</a>
+                        ";
+                    }
+
+                    $dropdown .= "
+                            </div>
+                        </span>
+                    ";
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
             })
 
             ->make(true);
     }
     static public function add_short_received_shipments($receiving,$shipments){
         $admin = Auth::id();
-        $admin_details = Admin::where('id',$admin)->first();
-        $city_id = $admin_details->city->id;
+        $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
         $count = count($shipments);
        $dispute = Dispute::create([
             'description'=>'Shipment short received',
@@ -356,8 +380,8 @@ class DisputeController extends Controller
             $junction = City::find($junction_id);
             $description = "This Cargo # $cargo_id is not updated at $junction->name";
             $admin = Auth::id();
-            $admin_details = Admin::where('id',$admin)->first();
-            $city_id = $admin_details->city->id;
+            $city_id = $junction_id;
+
             $dispute = Dispute::create([
                 'description'=>$description,
                 'raised_by'=>$admin,
@@ -372,8 +396,7 @@ class DisputeController extends Controller
     public static function add_cargo_short_received($cargo_id,$shipments){
         $description = "Short received shipments dispute for Cargo # $cargo_id";
         $admin = Auth::id();
-        $admin_details = Admin::where('id',$admin)->first();
-        $city_id = $admin_details->city->id;
+        $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
         $count = count($shipments);
         $dispute = Dispute::create([
             'description'=>$description,
@@ -397,8 +420,7 @@ class DisputeController extends Controller
     public static function add_delivery_wrong_status_dispute($delivery_note,$shipments){
 //        return $shipments;
         $admin = Auth::id();
-        $admin_details = Admin::where('id',$admin)->first();
-        $city_id = $admin_details->city->id;
+        $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
         $description = "Delivery Note # $delivery_note Dispute for different status";
         $count = count($shipments);
         $dispute = Dispute::create([

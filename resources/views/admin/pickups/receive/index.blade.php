@@ -15,17 +15,19 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="receive_pickup_note_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.pickups.receive.pickup_note') }}">
-								{{ csrf_field() }}
+							@if (session('role_id') == 1 || in_array(24, session('permissions')))
+								<form id="receive_pickup_note_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.pickups.receive.pickup_note') }}">
+									{{ csrf_field() }}
 
-								<div class="form-group">
-									<input type="text" name="pickup_note_no" class="form-control pickup_note_no" placeholder="Pickup Note No.*" data-rule-required="true" data-msg-required="Pickup Note No. is required">
-								</div>
+									<div class="form-group">
+										<input type="text" name="pickup_note_no" class="form-control pickup_note_no" placeholder="Pickup Note No.*" data-rule-required="true" data-msg-required="Pickup Note No. is required">
+									</div>
 
-								<div class="form-group ml-1">
-									<button type="submit" name="receive" class="btn btn-primary" value="Receive">Receive</button>
-								</div>
-							</form>
+									<div class="form-group ml-1">
+										<button type="submit" name="receive" class="btn btn-primary" value="Receive">Receive</button>
+									</div>
+								</form>
+							@endif
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
@@ -194,29 +196,31 @@
 				}
 			});
 
-			$('#receive_pickup_note_form input.pickup_note_no').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false
-			});
+			@if (session('role_id') == 1 || in_array(24, session('permissions')))
+				$('#receive_pickup_note_form input.pickup_note_no').inputmask({
+					'alias': 'integer',
+					'allowMinus': false,
+					'allowPlus': false
+				});
 
-			$('#receive_pickup_note_form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('form'));
-				}
-			});
+				$('#receive_pickup_note_form').validate({
+					errorClass: 'danger',
+					successClass: 'success',
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').appendTo(element.parents('form'));
+					}
+				});
 
-			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
-				var pickup_note_id = parseInt($(this).parents('tr').attr('id'));
+				$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+					var pickup_note_id = parseInt($(this).parents('tr').attr('id'));
 
-				if ($(this).hasClass('receive')) {
-					$('#receive_pickup_note_form input.pickup_note_no').val(pickup_note_id);
+					if ($(this).hasClass('receive')) {
+						$('#receive_pickup_note_form input.pickup_note_no').val(pickup_note_id);
 
-					$('#receive_pickup_note_form').submit();
-				}
-			});
+						$('#receive_pickup_note_form').submit();
+					}
+				});
+			@endif
 		});
 	</script>
 @endsection

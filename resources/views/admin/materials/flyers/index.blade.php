@@ -277,27 +277,36 @@
 
             var table = $('#datatable').DataTable({
                 // "scrollX": true,
+                @if (session('role_id') == 1 || count(array_intersect([77, 78], session('permissions'))) !== 0)
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
-                    {
-                        text: 'Add Stock',
-                        className: 'btn btn-primary add_stock',
-                        enabled: true,
-                        action: function (e, dt, node, config) {
-                            $('#AddStockModal').modal('show');
+                    buttons: [
+                    @if (session('role_id') == 1 || in_array(77, session('permissions')))
+                        {
+                            text: 'Add Stock',
+                            className: 'btn btn-primary add_stock',
+                            enabled: true,
+                            action: function (e, dt, node, config) {
+                                $('#AddStockModal').modal('show');
 
-                        }
-                    },
-                    {
-                        text:'Send Stock',
-                        className: 'btn btn-primary send_stock',
-                        enabled:true,
-                        action: function(e, dt, node, config){
-                            $('#SendStockModal').modal('show');
+                            }
+                        },
+                    @endif
 
+                    @if (session('role_id') == 1 || in_array(78, session('permissions')))
+                        {
+                            text:'Send Stock',
+                            className: 'btn btn-primary send_stock',
+                            enabled:true,
+                            action: function(e, dt, node, config){
+                                $('#SendStockModal').modal('show');
+
+                            }
                         }
-                    }
-                ],
+                    @endif
+                    ],
+                @else
+                    dom: 'ltipr',
+                @endif
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()

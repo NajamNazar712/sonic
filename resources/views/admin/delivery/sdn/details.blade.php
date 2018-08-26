@@ -74,7 +74,10 @@
             top: 50%;
             text-shadow: none;
         }
-
+        a.btn.btn-secondary {
+            border-radius: 20px;
+            background: #666ee8;
+        }
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
@@ -102,8 +105,19 @@
         $(document).ready(function () {
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [
-                    'csvHtml5'
+                buttons: [{
+                    extend: 'excelHtml5',
+                    title: 'Station Deposit Note',
+                    text: 'Export',
+                    exportOptions: {
+                        columns: ':visible',
+                        format: {
+                            body: function ( data, row, column, node ) {
+                                return (column == 0)? row+1:data;
+                            }
+                        }
+                    }
+                }
                 ],
                 fixedHeader: {
                     header: true,

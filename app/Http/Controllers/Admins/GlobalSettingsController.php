@@ -11,6 +11,8 @@ class GlobalSettingsController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
     public function pickup_index(){
         $settings = GlobalSettings::all();

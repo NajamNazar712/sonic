@@ -256,7 +256,7 @@
                                 // });
                                 // checkShipmentStatuses();
                                 // selected_rows = [];
-                                // table.button(0).disable();
+                                // table.button('.delivered').disable();
                                 // table.ajax.reload();
                                 // $('.reasonDrop','.statusDrop').select2('destroy');
                                 // setTimeout(function () {
@@ -370,11 +370,11 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button(0).enable();
+                    table.button('.delivered').enable();
                     // table.button(1).enable();
                 }
                 else {
-                    table.button(0).disable();
+                    table.button('.delivered').disable();
                     // table.button(1).disable();
                 }
             });

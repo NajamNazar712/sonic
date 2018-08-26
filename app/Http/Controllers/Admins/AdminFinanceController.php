@@ -34,6 +34,8 @@ class AdminFinanceController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:admin');
+
+      $this->middleware('Permission');
     }
 
     public function outstanding_sdn_index() {
@@ -46,6 +48,10 @@ class AdminFinanceController extends Controller
         ->join('banks_lists as b', 'station_deposit_notes.banks_list_id', '=', 'b.id')
         ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_expense', 'station_deposit_notes.sdn_net_amount', 'a.name as deposited_by', 'b.name as bank', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip')
         ->where('station_deposit_notes.status', 1);
+
+        if (session('role_id') != 1) {
+            $station_deposit_notes = $station_deposit_notes->whereIn('h.id', session('hubs'));
+        }
 
         $datatables = Datatables::of($station_deposit_notes)
         ->editColumn('sdn_number', function($station_deposit_note) {
@@ -63,14 +69,27 @@ class AdminFinanceController extends Controller
             }
         })
         ->addColumn('action', function($station_deposit_note) {
-            return '<div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                  <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item reconcile_delivery_notes"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Reconcile Delivery Notes</div></button>
-                    <button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>
-                  </div>
-                </div>
+            $reconcile_delivery_notes_button = '<button type="button" class="dropdown-item reconcile_delivery_notes"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Reconcile Delivery Notes</div></button>';
+            $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
+
+            $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
             ';
+
+            if (session('role_id') == 1 || in_array(53, session('permissions'))) {
+              $dropdown .= $reconcile_delivery_notes_button;
+            }
+
+            $dropdown .= $export_to_excel_button;
+
+            $dropdown .= '
+                </div>
+              </div>
+            ';
+
+            return $dropdown;
         });
 
         return $datatables->make(true);
@@ -216,6 +235,8 @@ class AdminFinanceController extends Controller
 
     public function outstanding_shipments_list(Request $request) {
         $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+        ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
+        ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
         ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
         ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
         ->join('users as u', 's.user_id', '=', 'u.id')
@@ -233,6 +254,10 @@ class AdminFinanceController extends Controller
         ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at')
         ->where('delivery_note_shipments.status', '=', 7);
 
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
+        }
+
         $datatables = Datatables::of($shipments)
         ->editColumn('status_updated_at', function($shipment) {
             return Carbon::parse($shipment->status_updated_at)->format('d/m/Y H:i A');
@@ -245,14 +270,36 @@ class AdminFinanceController extends Controller
             return $updated_at->diffInDays($now) . 'd';
         })
         ->addColumn('action', function($shipment) {
-            return '<div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                  <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>
-                    <button type="button" class="dropdown-item adjust_in_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Adjust in Payment</div></button>
+            $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
+            $adjust_in_payment_button = '<button type="button" class="dropdown-item adjust_in_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Adjust in Payment</div></button>';
+
+            if ((session('role_id') == 1 || count(array_intersect([55, 56], session('permissions'))) !== 0) {
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                $dropdown .= $print_button;
+
+                if (session('role_id') == 1 || in_array(55, session('permissions'))) {
+                  $dropdown .= $resolve_button;
+                }
+
+                if (session('role_id') == 1 || in_array(56, session('permissions'))) {
+                  $dropdown .= $adjust_in_payment_button;
+                }
+
+                $dropdown .= '
+                    </div>
                   </div>
-                </div>
-            ';
+                ';
+
+                return $dropdown;
+            }
+            else {
+                return '';
+            }
         })
         ->filterColumn('aging', function($query, $keyword) {
             $search = str_replace('d', '', str_replace(' ', '', $keyword));
@@ -515,6 +562,10 @@ class AdminFinanceController extends Controller
         ->select('pending_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.returned_shipments', 'pending_payments.adjusted_shipments', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ubi.bank_name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle')
         ->groupBy('pending_payments.id');
 
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('c.hub_id', session('hubs'));
+        }
+
         $datatables = Datatables::of($pending_payments)
         ->editColumn('delivered_shipments', function($pending_payment) {
             if ($pending_payment->delivered_shipments != 0) {
@@ -589,14 +640,27 @@ class AdminFinanceController extends Controller
             }
         })
         ->addColumn('action', function($pending_payment) {
-            return '<div class="btn-group">
-                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                  <div class="dropdown-menu dropdown-menu-sm">
-                    <button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>
-                    <button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment</div></button>
-                  </div>
-                </div>
+            $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
+            $make_payments_button = '<button type="button" class="dropdown-item make_payment"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-credit-card"></i></div><div class="col-9 offset-1">Make Payment</div></button>';
+
+            $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
             ';
+
+            $dropdown .= $view_details_button;
+
+            if (session('role_id') == 1 || in_array(60, session('permissions'))) {
+              $dropdown .= $make_payments_button;
+            }
+
+            $dropdown .= '
+                </div>
+              </div>
+            ';
+
+            return $dropdown;
         })
         ->filterColumn('phone_numbers', function($query, $keyword) {
             $search = str_replace(' ', '', $keyword);
@@ -946,6 +1010,10 @@ class AdminFinanceController extends Controller
         ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
         ->select('done_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.returned_shipments', 'done_payments.adjusted_shipments', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ubi.bank_name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
         ->groupBy('done_payments.id');
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('c.hub_id', session('hubs'));
+        }
 
         $datatables = Datatables::of($done_payments)
         ->editColumn('delivered_shipments', function($done_payment) {
