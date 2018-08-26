@@ -771,6 +771,29 @@ class AdminPickupsController extends Controller
       }
     }
 
+    public function receive_shipment_remove(Request $request) {
+      $shipment = Shipment::find($request->id);
+
+      if ($shipment) {
+        if ($shipment->shipper_status_id == 1) {
+          $shipment->actual_weight = NULL;
+          $shipment->length = NULL;
+          $shipment->breadth = NULL;
+          $shipment->height = NULL;
+
+          $shipment->save();
+
+          return ['status' => 0, 'success' => 'Shipment can be removed'];
+        }
+        else {
+          return ['status' => 1, 'error' => 'Given Shipment ID has already been modified'];
+        }
+      }
+      else {
+        return ['status' => 1, 'error' => 'No Shipment with given ID is present'];
+      }
+    }
+
     public function receive_arrival_of_shipments_store(Request $request) {
       $pickup_note = PickupNote::find($request->pickup_receive_pickup_note_id);
 

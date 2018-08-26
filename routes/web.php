@@ -210,7 +210,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminPickupsController@assigned_list')->name('list');
             Route::put('cancel', 'Admins\AdminPickupsController@assigned_cancel')->name('cancel');
             Route::post('view_details', 'Admins\AdminPickupsController@assigned_view_details')->name('view_details');
-            Route::put('generate_pickup_note', 'Admins\AdminPickupsController@assigned_generate_pickup_note')->name('generate_pickup_note');
             Route::post('print', 'Admins\AdminPickupsController@assigned_print')->name('print');
         });
 
@@ -219,6 +218,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminPickupsController@receive_list')->name('list');
             Route::post('pickup_note', 'Admins\AdminPickupsController@receive_pickup_note')->name('pickup_note');
             Route::post('shipment_details', 'Admins\AdminPickupsController@receive_shipment_details')->name('shipment_details');
+            Route::post('shipment_remove', 'Admins\AdminPickupsController@receive_shipment_remove')->name('shipment_remove');
 
             Route::prefix('arrival_of_shipments')->name('arrival_of_shipments.')->group(function () {
                 Route::get('', 'Admins\AdminPickupsController@receive_arrival_of_shipments_index')->name('index');
