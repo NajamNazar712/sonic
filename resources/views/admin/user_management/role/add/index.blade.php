@@ -26,11 +26,13 @@
 									</div>
 
 									<div class="col-6">
-										<select name="department_id" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
-											@foreach($departments as $department)
-												<option value="{{ $department->id }}">{{ $department->name }}</option>
-											@endforeach
-										</select>
+										<div class="form-group">
+											<select name="department_id" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
+												@foreach($departments as $department)
+													<option value="{{ $department->id }}">{{ $department->name }}</option>
+												@endforeach
+											</select>
+										</div>
 									</div>
 
 									<div class="col-12">
