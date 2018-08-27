@@ -29,7 +29,7 @@
 								</thead>
 							</table>
 
-							@if (session('role_id') == 1 || in_array(104, session('permissions')))
+							@if (session('role_id') == 1 || in_array(103, session('permissions')))
 								<div class="modal fade" id="send_custom_email" role="dialog" aria-labelledby="send_custom_email_title" aria-hidden="true">
 									<div class="modal-dialog modal-lg" role="document">
 										<div class="modal-content">
@@ -72,7 +72,7 @@
 								</div>
 							@endif
 
-							@if (session('role_id') == 1 || in_array(102, session('permissions')))
+							@if (session('role_id') == 1 || in_array(101, session('permissions')))
 								<div class="modal fade" id="edit" role="dialog" aria-labelledby="edit_title" aria-hidden="true">
 									<div class="modal-dialog modal-lg" role="document">
 										<div class="modal-content">
@@ -181,7 +181,7 @@
 
 	<script>
 		$(document).ready(function() {
-			@if (session('role_id') == 1 || in_array(104, session('permissions')))
+			@if (session('role_id') == 1 || in_array(103, session('permissions')))
 				$('#send_custom_email .receiver').select2({
 					width: '100%',
 					placeholder: 'Receiver'
@@ -194,14 +194,14 @@
 				autosize($('#send_custom_email .body')[0]);
 			@endif
 
-			@if (session('role_id') == 1 || in_array(102, session('permissions')))
+			@if (session('role_id') == 1 || in_array(101, session('permissions')))
 				autosize($('#edit .body')[0]);
 			@endif
 
 			var valid_fields = [];
 
 			var table = $('#datatable').DataTable({
-				@if (session('role_id') == 1 || in_array(104, session('permissions')))
+				@if (session('role_id') == 1 || in_array(103, session('permissions')))
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
 					buttons: [{
 						text: 'Send Custom Email',
@@ -267,7 +267,7 @@
 				}
 			});
 
-			@if (session('role_id') == 1 || in_array(104, session('permissions')))
+			@if (session('role_id') == 1 || in_array(103, session('permissions')))
 				$('#send_custom_email form').validate({
 					errorClass: 'danger',
 					successClass: 'success',
@@ -284,7 +284,7 @@
 				var notification_id = parseInt($(this).parents('tr').attr('id'));
 				var notification_type = parseInt($(this).parents('tr').attr('data-type'));
 
-				@if (session('role_id') == 1 || in_array(102, session('permissions')))
+				@if (session('role_id') == 1 || in_array(101, session('permissions')))
 					if ($(this).hasClass('edit')) {
 						$.ajax({
 							url: '{!! route('admin.notifications.details') !!}',
@@ -325,7 +325,7 @@
 					}
 				@endif
 
-				@if (session('role_id') == 1 || in_array(103, session('permissions')))
+				@if (session('role_id') == 1 || in_array(102, session('permissions')))
 					if ($(this).hasClass('enable')) {
 						$.ajax({
 							url: '{!! route('admin.notifications.status') !!}',
@@ -371,7 +371,7 @@
 				@endif
 			});
 
-			@if (session('role_id') == 1 || in_array(102, session('permissions')))
+			@if (session('role_id') == 1 || in_array(101, session('permissions')))
 				$('#edit').on('shown.bs.modal', function (e) {
 					autosize.update($('#edit .body')[0]);
 				})
