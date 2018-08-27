@@ -101,7 +101,7 @@ class AdminFinanceController extends Controller
         ->join('cities as h', 'dn.hub_id', '=', 'h.id')
         ->join('riders as ri', 'dn.rider_id', '=', 'ri.id')
         ->join('admins as a', 'dn.admin_id', '=', 'a.id')
-        ->join('admins as au', 'dn.updated_by', '=', 'a.id')
+        ->join('admins as au', 'dn.updated_by', '=', 'au.id')
         ->select('dn.id', 'dn.id as delivery_note_number', 'h.name as hub', 'ri.name as rider', 'dn.shipments_count as shipments', 'dn.delivered_shipments', 'a.name as assigned_by', 'dn.created_at as assigned_at', 'au.name as updated_by', 'dn.updated_at', 'dn.received_cod_amount as dncc_amount', 'dn.expense');
 
         if ($request->has('id')) {
