@@ -731,4 +731,68 @@ class AdminReportsController extends Controller
          $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
          return Response::download($file, 'daily_pickup_sales_report.xlsx',$headers);
      }
+
+     public function customer_sales_index(Request $request){
+        $shippers = User::where('status',3)->get();
+         $hubs = City::select('id','name')->where('hub',1)->get();
+        return view('admin.reports.customer_sales_report')->with(['hubs'=>$hubs,'shippers'=>$shippers]);
+     }
+     public function customer_sales_export_to_excel(Request $request){
+        $hub = $request->city;
+        $shipper = $request->shipper;
+        $from_date = $request->from_date;
+        $to_date = $request->to_date;
+         if($hub != null){
+             $city = City::where('id',$hub)->select('id','name')->get();
+         }else{
+             $city = City::all();
+         }
+
+         $details = array();
+
+         $details['header'] = ['Origin', 'Client Name' ];
+         foreach ($city as $c){
+             $hubs = array();
+             $users = array();
+             $details['hubs'][] = $c->name;
+             $shippers = User::whereHas('city', function($query) use ($c) {
+                 $query->where('hub_id', '=', $c->id);
+             })->get();
+             foreach ($shippers as $s){
+                 $details['shippers'][] = $s->name;
+
+//                 $details['parcels'][] =
+             }
+//             $details[] = $users;
+//             $details[] = $hubs;
+         }
+
+         $spreadsheet = new Spreadsheet();
+         $spreadsheet->getActiveSheet()->fromArray($details['header']);
+         $col = 4;
+         foreach ($details['hubs'] as $h) {
+
+             $spreadsheet->getActiveSheet()->setCellValue('A'.$col,$h);
+             foreach ($details['shippers'] as $client){
+                 $spreadsheet->getActiveSheet()->setCellValue('B'.$col,$client);
+                 $col++;
+             }
+         }
+//         $spreadsheet->getActiveSheet()->fromArray($details['shippers'], NULL, 'B4');
+
+         $writer = new Xlsx($spreadsheet);
+
+         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+         header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
+         header('Cache-Control: max-age=0');
+
+//         $writer->save('php://output');
+         $writer->save('reports/customer_sales_report.xlsx');
+         return response()->json(['success'=>1,'file'=>'customer_sales_report.xlsx']);
+     }
+    public function customer_sales_download(Request $request){
+        $file = public_path()."/reports/customer_sales_report.xlsx";
+        $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
+        return Response::download($file, 'customer_sales_report.xlsx',$headers);
+    }
 }

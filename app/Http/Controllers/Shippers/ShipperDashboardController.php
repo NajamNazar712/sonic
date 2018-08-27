@@ -109,6 +109,12 @@ class ShipperDashboardController extends Controller
             }
         }
     }
+    public function get_shipment_charges(Request $request){
+        $shipment_id = $request->shipment_id;
+        $shipment = Shipment::find($shipment_id);
+        $returnHTML = view('client/components/shipment_charges')->with(['shipment'=>$shipment])->render();
+        return response()->json($returnHTML);
+    }
     public function ecommerce() {
       return view('client.ecommerce');
     }
