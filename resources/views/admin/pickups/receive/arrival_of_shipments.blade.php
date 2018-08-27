@@ -44,7 +44,7 @@
 								</div>
 
 								<div class="form-group ml-1">
-									<button type="submit" name="add" class="btn btn-primary" value="Add">Add</button>
+									<button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
 								</div>
 							</form>
 
@@ -59,6 +59,7 @@
 										<th class="border-primary border-darken-1">COD Amount</th>
 										<th class="border-primary border-darken-1">Estimated Weight (kg)</th>
 										<th class="border-primary border-darken-1">Actual Weight (kg)</th>
+										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
 							</table>
@@ -160,7 +161,8 @@
 					{name: 'destination', class: 'align-middle destination'},
 					{name: 'cod_amount', class: 'align-middle cod_amount'},
 					{name: 'estimated_weight', class: 'align-middle estimated_weight'},
-					{name: 'actual_weight', class: 'align-middle actual_weight'}
+					{name: 'actual_weight', class: 'align-middle actual_weight'},
+					{name: 'remove', class: 'align-middle remove'}
 				],
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
@@ -178,7 +180,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number')) {
+						if ($(header).is('.serial_number') || $(header).is('.remove')) {
 							$(td).appendTo($(search));
 						}
 						else {
@@ -258,6 +260,8 @@
 					error.addClass('w-100').appendTo(element.parents('form'));
 				},
 				submitHandler: function(form) {
+					$('#add_shipment_form button.add').prop('disabled', true);
+
 					var pickup_receive_pickup_note_id = $(form).find('input.pickup_receive_pickup_note_id').val();
 					var tracking_number = $(form).find('input.tracking_number').val();
 					var weight = $(form).find('input.weight').val();
@@ -284,8 +288,12 @@
 
 							$('#add_shipment_form input.tracking_number').val('').focus();
 
+							$('#add_shipment_form button.add').prop('disabled', false);
+
+							remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
+
 							if (data.status == 0) {
-								table.row.add([0, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight]).node().id = data.details.id;
+								table.row.add([0, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).node().id = data.details.id;
 								table.draw(false);
 
 								shipment_ids.push(data.details.id);
@@ -313,6 +321,41 @@
 				$('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
 
 				this.submit();
+			});
+
+			$('#datatable tbody').on('click', 'tr td.remove button', function() {
+				var parent = $(this).parents('tr');
+				var id = parseInt(parent.attr('id'));
+
+				$.ajax({
+					url: '{!! route('admin.pickups.receive.shipment_remove') !!}',
+					method: 'POST',
+					data: {
+						'id': id,
+						'_token': '{{ csrf_token() }}'
+					}
+				})
+				.done(function(data) {
+					if (data.status == 0) {
+						table.row(parent).remove();
+						table.draw(false);
+
+						var index = $.inArray(id, shipment_ids);
+
+						if (index !== -1) {
+							shipment_ids.splice(index, 1);
+
+							if (shipment_ids.length == 0) {
+								$('#arrival_of_shipments_form button.confirm').prop('disabled', true);
+							}
+						}
+
+						toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+					}
+					else {
+						toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+					}
+				});
 			});
 		});
 	</script>

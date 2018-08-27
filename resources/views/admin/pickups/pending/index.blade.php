@@ -139,74 +139,86 @@
 			var selected_rows = [];
 
 			var table = $('#datatable').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					text: 'Assign',
-					className: 'btn btn-primary assign',
-					enabled: false,
-					action: function (e, dt, node, config) {
-						$('#assign_to_rider .rider').val(null).trigger('change');
+				@if (session('role_id') == 1 || count(array_intersect([18, 19], session('permissions'))) !== 0)
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons: [
+					@if (session('role_id') == 1 || in_array(19, session('permissions')))
+						{
+							text: 'Assign',
+							className: 'btn btn-primary assign',
+							enabled: false,
+							action: function (e, dt, node, config) {
+								$('#assign_to_rider .rider').val(null).trigger('change');
 
-						$('#assign_to_rider').modal('show');
-					}
-				}, {
-					text: 'Cancel',
-					className: 'btn btn-danger ml-1 cancel',
-					enabled: false,
-					action: function (e, dt, node, config) {
-						swal({
-							text: 'Are you sure, you want to Cancel these Pickup(s)?',
-							icon: 'warning',
-							buttons: {
-								cancel: {
-									text: 'Close',
-									value: null,
-									visible: true,
-									closeModal: true,
-								},
-								confirm: {
-									text: 'Cancel',
-									value: true,
-									visible: true,
-									closeModal: true
-								}
-							},
-							closeOnClickOutside: false,
-							closeOnEsc: false,
-							dangerMode: true
-						}).then(function(confirm) {
-							if (confirm) {
-								$.ajax({
-									url: '{!! route('admin.pickups.pending.multiple_cancel') !!}',
-									method: 'PUT',
-									data: {
-										'pickup_request_ids': selected_rows,
-										'_token': '{{ csrf_token() }}'
+								$('#assign_to_rider').modal('show');
+							}
+						},
+					@endif
+
+					@if (session('role_id') == 1 || in_array(18, session('permissions')))
+						{
+							text: 'Cancel',
+							className: 'btn btn-danger ml-1 cancel',
+							enabled: false,
+							action: function (e, dt, node, config) {
+								swal({
+									text: 'Are you sure, you want to Cancel these Pickup(s)?',
+									icon: 'warning',
+									buttons: {
+										cancel: {
+											text: 'Close',
+											value: null,
+											visible: true,
+											closeModal: true,
+										},
+										confirm: {
+											text: 'Cancel',
+											value: true,
+											visible: true,
+											closeModal: true
+										}
+									},
+									closeOnClickOutside: false,
+									closeOnEsc: false,
+									dangerMode: true
+								}).then(function(confirm) {
+									if (confirm) {
+										$.ajax({
+											url: '{!! route('admin.pickups.pending.multiple_cancel') !!}',
+											method: 'PUT',
+											data: {
+												'pickup_request_ids': selected_rows,
+												'_token': '{{ csrf_token() }}'
+											}
+										})
+										.done(function(data) {
+											if (data.status == 0) {
+												toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+											}
+											else {
+												toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+											}
+
+											$.each(selected_rows, function(index, id) {
+												table.row($('#datatable tbody tr#' + id)).deselect();
+											});
+
+											selected_rows = [];
+
+											table.button('.assign').disable();
+											table.button('.cancel').disable();
+
+											table.ajax.reload();
+										});
 									}
-								})
-								.done(function(data) {
-									if (data.status == 0) {
-										toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-									}
-									else {
-										toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-									}
-
-									$.each(selected_rows, function(index, id) {
-										table.row($('#datatable tbody tr#' + id)).deselect();
-									});
-
-									selected_rows = [];
-
-									table.button(0).disable();
-									table.button(1).disable();
-
-									table.ajax.reload();
 								});
 							}
-						});
-					}
-				}],
+						}
+					@endif
+					],
+				@else
+					dom: 'ltipr',
+				@endif
 				fixedHeader: {
 					header: true,
 					headerOffset: $('.header-navbar').height()
@@ -291,12 +303,12 @@
 				}
 
 				if (selected_rows.length > 0) {
-					table.button(0).enable();
-					table.button(1).enable();
+					table.button('.assign').enable();
+					table.button('.cancel').enable();
 				}
 				else {
-					table.button(0).disable();
-					table.button(1).disable();
+					table.button('.assign').disable();
+					table.button('.cancel').disable();
 				}
 			});
 
@@ -341,8 +353,8 @@
 
 						selected_rows = [];
 
-						table.button(0).disable();
-						table.button(1).disable();
+						table.button('.assign').disable();
+						table.button('.cancel').disable();
 
 						table.ajax.reload();
 
@@ -399,12 +411,12 @@
 							}
 
 							if (selected_rows.length > 0) {
-								table.button(0).enable();
-								table.button(1).enable();
+								table.button('.assign').enable();
+								table.button('.cancel').enable();
 							}
 							else {
-								table.button(0).disable();
-								table.button(1).disable();
+								table.button('.assign').disable();
+								table.button('.cancel').disable();
 							}
 
 							table.ajax.reload();

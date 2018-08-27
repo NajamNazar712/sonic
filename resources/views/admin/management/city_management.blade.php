@@ -104,24 +104,28 @@
     <script type="text/javascript">
         $(document).ready(function() {
            var table =  $('.datatable').DataTable({
-               dom: '<"d-inline-block"l><"pull-right"B>tipr',
-               buttons: [{
-                   text: 'Add City',
-                   className: 'btn btn-primary',
-                   enabled: true,
-                   action: function (e, dt, node, config) {
-                        $('#addCity').modal('show');
-                       var $invoker = $(e.relatedTarget);
-                       var action = 'addcity';
+                @if (session('role_id') == 1 || in_array(89, session('permissions')))
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    buttons: [{
+                       text: 'Add City',
+                       className: 'btn btn-primary',
+                       enabled: true,
+                       action: function (e, dt, node, config) {
+                            $('#addCity').modal('show');
+                           var $invoker = $(e.relatedTarget);
+                           var action = 'addcity';
 
-                       if(action === 'addcity'){
-                           $.get( "/admin/management/city/form", function( data ) {
-                               $("#addCityDiv").html(data);
-                           });
+                           if(action === 'addcity'){
+                               $.get( "/admin/management/city/form", function( data ) {
+                                   $("#addCityDiv").html(data);
+                               });
+                           }
                        }
-                   }
 
-               }],
+                    }],
+                @else
+                    dom: 'ltipr',
+                @endif
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()

@@ -126,6 +126,7 @@
 					method: 'POST',
 					data: {
 						'ids': ids,
+						'dispatch': 1,
 						'_token': '{{ csrf_token() }}'
 					}
 				})
@@ -152,25 +153,29 @@
 			var selected_rows = [];
 
 			var table = $('#datatable').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					text: 'Print',
-					className: 'btn btn-primary print',
-					enabled: false,
-					action: function (e, dt, node, config) {
-						print(selected_rows);
+				@if (session('role_id') == 1 || in_array(22, session('permissions')))
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons: [{
+						text: 'Print',
+						className: 'btn btn-primary print',
+						enabled: false,
+						action: function (e, dt, node, config) {
+							print(selected_rows);
 
-						$.each(selected_rows, function(index, id) {
-							table.row($('#datatable tbody tr#' + id)).deselect();
-						});
+							$.each(selected_rows, function(index, id) {
+								table.row($('#datatable tbody tr#' + id)).deselect();
+							});
 
-						selected_rows = [];
+							selected_rows = [];
 
-						table.button(0).disable();
+							table.button('.print').disable();
 
-						table.ajax.reload();
-					}
-				}],
+							table.ajax.reload();
+						}
+					}],
+				@else
+	                dom: 'ltipr',
+	            @endif
 				fixedHeader: {
 					header: true,
 					headerOffset: $('.header-navbar').height()
@@ -260,10 +265,10 @@
 				}
 
 				if (selected_rows.length > 0) {
-					table.button(0).enable();
+					table.button('.print').enable();
 				}
 				else {
-					table.button(0).disable();
+					table.button('.print').disable();
 				}
 			});
 
@@ -316,10 +321,10 @@
 								}
 
 								if (selected_rows.length > 0) {
-									table.button(0).enable();
+									table.button('.print').enable();
 								}
 								else {
-									table.button(0).disable();
+									table.button('.print').disable();
 								}
 
 								table.ajax.reload();
@@ -360,50 +365,6 @@
 						}
 					});
 				}
-				else if ($(this).hasClass('generate_pickup_note')) {
-					swal({
-						text: 'Are you sure, you want to Generate Pickup Note?',
-						icon: 'warning',
-						buttons: {
-							cancel: {
-								text: 'Close',
-								value: null,
-								visible: true,
-								closeModal: true,
-							},
-							confirm: {
-								text: 'Generate',
-								value: true,
-								visible: true,
-								closeModal: true
-							}
-						},
-						closeOnClickOutside: false,
-						closeOnEsc: false,
-						dangerMode: true
-					}).then(function(confirm) {
-						if (confirm) {
-							$.ajax({
-								url: '{!! route('admin.pickups.assigned.generate_pickup_note') !!}',
-								method: 'PUT',
-								data: {
-									'pickup_note_id': pickup_note_id,
-									'_token': '{{ csrf_token() }}'
-								}
-							})
-							.done(function(data) {
-								if (data.status == 0) {
-									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-								}
-								else {
-									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-								}
-
-								table.ajax.reload();
-							});
-						}
-					});
-				}
 				else if ($(this).hasClass('print_pickup_note')) {
 					print([pickup_note_id]);
 
@@ -414,10 +375,10 @@
 					}
 
 					if (selected_rows.length > 0) {
-						table.button(0).enable();
+						table.button('.print').enable();
 					}
 					else {
-						table.button(0).disable();
+						table.button('.print').disable();
 					}
 
 					table.ajax.reload();

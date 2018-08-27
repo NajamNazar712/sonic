@@ -16,7 +16,7 @@ class Admin extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name','username', 'email', 'password','department'
+        'name','username', 'email', 'phone_number', 'cnic', 'role_id', 'password', 'updated_by'
     ];
 
     /**
@@ -25,7 +25,7 @@ class Admin extends Authenticatable
      * @var array
      */
     protected $hidden = [
-        'password', 'remember_token',
+        'password', 'remember_token'
     ];
 
     /**
@@ -39,7 +39,12 @@ class Admin extends Authenticatable
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function city(){
-        return $this->belongsTo('App\Http\Models\City','city_id','id');
+
+    public function role() {
+        return $this->belongsTo('App\Http\Models\Admin\Role', 'role_id', 'id');
+    }
+
+    public function hubs() {
+        return $this->hasMany('App\Http\Models\Admin\AdminHub', 'admin_id', 'id');
     }
 }

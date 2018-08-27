@@ -26,6 +26,8 @@ class AdminPackagingMaterialController extends Controller
     public function __construct()
     {
         $this->middleware('auth:admin');
+
+        $this->middleware('Permission');
     }
 
     public function packaging_index(){
@@ -240,20 +242,22 @@ class AdminPackagingMaterialController extends Controller
                     return "Dispatched";
                 }
             })
-            ->addColumn('action',function ($packaging){
-                if($packaging->status == 0) {
-                    $drop = " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>";
+            ->addColumn('action',function ($packaging) {
+                if (($packaging->status == 0) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                            <div class="dropdown-menu open-left arrow"><a class="dropdown-item dispatch"><i class="ft-fast-forward primary"> Dispatch</a>
+                        </div>
+                      </div>
+                    ';
 
-                    $drop .= "<div class='dropdown-menu open-left arrow'><a class='dropdown-item dispatch'><i class='ft-fast-forward primary'> Dispatch</a>";
-
-
-                    $drop .= "</div></span>";
-                }else{
-                    $drop = "<span class='dropdown'></span>";
+                    return $dropdown;
                 }
-                                          return $drop;
+                else {
+                    return '';
+                }
             })
             ->make(true);
     }
@@ -299,7 +303,7 @@ class AdminPackagingMaterialController extends Controller
                }
                $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
                 $this->add_item($shipment->id,24,null,1,null,0,0);
-               ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, 'Shipment arrived at origin!', $request_details->user_id, NULL);
+               ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, $request_details->user_id, NULL);
                 $this->sub_head_stock($request_details->small_flyers,$request_details->medium_flyers,$request_details->large_flyers,$request_details->boxes);
                 $request_details->status = 1;
                 $request_details->save();

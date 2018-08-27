@@ -17,6 +17,8 @@ class AdminNotificationsController extends Controller
 {
     public function __construct() {
       $this->middleware('auth:admin');
+
+      $this->middleware('Permission');
     }
 
     public function index() {
@@ -45,24 +47,31 @@ class AdminNotificationsController extends Controller
             $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
             $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
-            if ($notification->status) {
-                return '<div class="btn-group">
-                          <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                          <div class="dropdown-menu dropdown-menu-sm">
-                            ' . $edit_button . $disable_button . '
-                          </div>
-                        </div>
-                ';
+            $dropdown = '
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+            if (session('role_id') == 1 || in_array(101, session('permissions'))) {
+                $dropdown .= $edit_button;
             }
-            else {
-                return '<div class="btn-group">
-                          <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                          <div class="dropdown-menu dropdown-menu-sm">
-                            ' . $edit_button . $enable_button . '
-                          </div>
-                        </div>
-                ';
+
+            if (session('role_id') == 1 || in_array(102, session('permissions'))) {
+                if ($notification->status) {
+                    $dropdown .= $disable_button;
+                }
+                else {
+                    $dropdown .= $enable_button;
+                }
             }
+
+            $dropdown .= '
+                  </div>
+                </div>
+            ';
+
+            return $dropdown;
         })
         ->filterColumn('status', function($query, $keyword) {
             $keyword = strtolower($keyword);

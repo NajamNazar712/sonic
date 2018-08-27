@@ -15,17 +15,19 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="receive_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.cargo.in_transit.receive') }}">
-								{{ csrf_field() }}
+							@if (session('role_id') == 1 || in_array(31, session('permissions')))
+								<form id="receive_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.cargo.in_transit.receive') }}">
+									{{ csrf_field() }}
 
-								<div class="form-group">
-									<input type="text" name="cargo_number" class="form-control cargo_number" placeholder="Cargo No.*" data-rule-required="true" data-msg-required="Cargo No. is required">
-								</div>
+									<div class="form-group">
+										<input type="text" name="cargo_number" class="form-control cargo_number" placeholder="Cargo No.*" data-rule-required="true" data-msg-required="Cargo No. is required">
+									</div>
 
-								<div class="form-group ml-1">
-									<button type="submit" name="receive" class="btn btn-primary" value="Receive">Receive</button>
-								</div>
-							</form>
+									<div class="form-group ml-1">
+										<button type="submit" name="receive" class="btn btn-primary" value="Receive">Receive</button>
+									</div>
+								</form>
+							@endif
 
 							<div class="text-center">
 								<form id="cargo_type_search_form" class="d-inline-block form-inline mb-1 justify-content-center text-left" novalidate="novalidate">
@@ -70,204 +72,208 @@
 								</thead>
 							</table>
 
-							<div class="modal fade" id="receive_at_link" role="dialog" aria-labelledby="receive_at_link_title" aria-hidden="true">
-								<div class="modal-dialog modal-lg" role="document">
-									<div class="modal-content">
-										<div class="modal-header">
-											<h4 class="modal-title" id="receive_at_link_title">Receive at Link</h4>
-
-											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-												<span aria-hidden="true">×</span>
-											</button>
-										</div>
-										<div class="modal-body">
-											<form id="scan_seal_number_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
-												<div class="form-group">
-													<input type="text" name="seal_number" class="form-control seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
-												</div>
-
-												<div class="form-group ml-1">
-													<button type="submit" name="add" class="btn btn-primary" value="Add">Scan</button>
-												</div>
-											</form>
-
-											<table class="table table-bordered datatable" id="receive_at_link_datatable" style="z-index: 3;">
-												<thead>
-													<tr role="row" class="bg-primary white">
-														<th class="border-primary border-darken-1">S. No.</th>
-														<th class="border-primary border-darken-1">Cargo No.</th>
-														<th class="border-primary border-darken-1">Origin</th>
-														<th class="border-primary border-darken-1">Destination</th>
-														<th class="border-primary border-darken-1">Hub</th>
-														<th class="border-primary border-darken-1">Seal No.</th>
-													</tr>
-												</thead>
-											</table>
-
-											<form id="receive_at_link_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate">
-												<div class="form-group">
-													<select name="junction" class="select2 junction" data-rule-required="true" data-msg-required="Junction is required">
-													</select>
-												</div>
-
-												<div class="w-100"></div>
-
-												<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-												<button type="submit" name="receive" class="btn btn-primary receive">Receive</button>
-											</form>
-										</div>
-									</div>
-								</div>
-							</div>
-
-							<div class="modal fade" id="add_forwarding_details" role="dialog" aria-labelledby="add_forwarding_details_title" aria-hidden="true">
-								<div class="modal-dialog modal-lg" role="document">
-									<div class="modal-content">
-										<form class="form-horizontal" method="POST" action="{{ route('admin.cargo.in_transit.update') }}" novalidate="novalidate">
-											{{ csrf_field() }}
-
-											<input type="hidden" name="cargo_consignment_id" class="cargo_consignment_id">
-
+							@if (session('role_id') == 1 || in_array(30, session('permissions')))
+								<div class="modal fade" id="receive_at_link" role="dialog" aria-labelledby="receive_at_link_title" aria-hidden="true">
+									<div class="modal-dialog modal-lg" role="document">
+										<div class="modal-content">
 											<div class="modal-header">
-												<h4 class="modal-title" id="add_forwarding_details_title">Forwarding Details</h4>
+												<h4 class="modal-title" id="receive_at_link_title">Receive at Link</h4>
 
 												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 													<span aria-hidden="true">×</span>
 												</button>
 											</div>
 											<div class="modal-body">
-												<div class="row">
-													<div class="col-12">
-														<h4 class="form-section mb-2 text-center">Shipper Information</h4>
+												<form id="scan_seal_number_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+													<div class="form-group">
+														<input type="text" name="seal_number" class="form-control seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
 													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<select name="junction_1" class="select2 junction_1" data-rule-required="true" data-msg-required="Junction 1 is required">
-															</select>
+													<div class="form-group ml-1">
+														<button type="submit" name="add" class="btn btn-primary" value="Add">Scan</button>
+													</div>
+												</form>
+
+												<table class="table table-bordered datatable" id="receive_at_link_datatable" style="z-index: 3;">
+													<thead>
+														<tr role="row" class="bg-primary white">
+															<th class="border-primary border-darken-1">S. No.</th>
+															<th class="border-primary border-darken-1">Cargo No.</th>
+															<th class="border-primary border-darken-1">Origin</th>
+															<th class="border-primary border-darken-1">Destination</th>
+															<th class="border-primary border-darken-1">Hub</th>
+															<th class="border-primary border-darken-1">Seal No.</th>
+														</tr>
+													</thead>
+												</table>
+
+												<form id="receive_at_link_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate">
+													<div class="form-group">
+														<select name="junction" class="select2 junction" data-rule-required="true" data-msg-required="Junction is required">
+														</select>
+													</div>
+
+													<div class="w-100"></div>
+
+													<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+													<button type="submit" name="receive" class="btn btn-primary receive">Receive</button>
+												</form>
+											</div>
+										</div>
+									</div>
+								</div>
+							@endif
+
+							@if (session('role_id') == 1 || in_array(28, session('permissions')))
+								<div class="modal fade" id="add_forwarding_details" role="dialog" aria-labelledby="add_forwarding_details_title" aria-hidden="true">
+									<div class="modal-dialog modal-lg" role="document">
+										<div class="modal-content">
+											<form class="form-horizontal" method="POST" action="{{ route('admin.cargo.in_transit.update') }}" novalidate="novalidate">
+												{{ csrf_field() }}
+
+												<input type="hidden" name="cargo_consignment_id" class="cargo_consignment_id">
+
+												<div class="modal-header">
+													<h4 class="modal-title" id="add_forwarding_details_title">Forwarding Details</h4>
+
+													<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+														<span aria-hidden="true">×</span>
+													</button>
+												</div>
+												<div class="modal-body">
+													<div class="row">
+														<div class="col-12">
+															<h4 class="form-section mb-2 text-center">Shipper Information</h4>
 														</div>
-													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<select name="junction_2" class="select2 junction_2" data-rule-required="true" data-msg-required="Junction 2 is required">
-															</select>
-														</div>
-													</div>
-
-													<div class="col-5">
-														<div class="form-group input-group">
-															<div class="input-group-prepend">
-																<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-																	<span class="la la-calendar-o"></span>
-																</span>
+														<div class="col">
+															<div class="form-group">
+																<select name="junction_1" class="select2 junction_1" data-rule-required="true" data-msg-required="Junction 1 is required">
+																</select>
 															</div>
-
-															<input type="text" name="expected_arrival_date" class="form-control pickadate bg-primary border-primary white rounded-right expected_arrival_date" placeholder="Expected Arrival Date*" data-rule-required="true" data-msg-required="Expected Arrival Date is required">
 														</div>
-													</div>
 
-													<div class="w-100"></div>
-
-													<div class="col">
-														<div class="form-group">
-															<select name="shipping_mode" class="select2 shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
-															</select>
+														<div class="col">
+															<div class="form-group">
+																<select name="junction_2" class="select2 junction_2" data-rule-required="true" data-msg-required="Junction 2 is required">
+																</select>
+															</div>
 														</div>
-													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<select name="transport_mode" class="select2 transport_mode" data-rule-required="true" data-msg-required="Transport Mode is required">
-															</select>
+														<div class="col-5">
+															<div class="form-group input-group">
+																<div class="input-group-prepend">
+																	<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+																		<span class="la la-calendar-o"></span>
+																	</span>
+																</div>
+
+																<input type="text" name="expected_arrival_date" class="form-control pickadate bg-primary border-primary white rounded-right expected_arrival_date" placeholder="Expected Arrival Date*" data-rule-required="true" data-msg-required="Expected Arrival Date is required">
+															</div>
 														</div>
-													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<select name="transport_mode_vendor" class="select2 transport_mode_vendor" data-rule-required="true" data-msg-required="Vendor is required">
-															</select>
+														<div class="w-100"></div>
+
+														<div class="col">
+															<div class="form-group">
+																<select name="shipping_mode" class="select2 shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
+																</select>
+															</div>
 														</div>
-													</div>
 
-													<div id="new_vendor" class="col d-none">
-														<div class="form-group">
-															<input type="text" name="vendor_name" class="form-control vendor_name" placeholder="Vendor Name*" data-rule-required="true" data-msg-required="Vendor Name is required">
+														<div class="col">
+															<div class="form-group">
+																<select name="transport_mode" class="select2 transport_mode" data-rule-required="true" data-msg-required="Transport Mode is required">
+																</select>
+															</div>
 														</div>
-													</div>
 
-													<div class="w-100"></div>
-
-													<div class="col">
-														<div class="form-group">
-															<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
+														<div class="col">
+															<div class="form-group">
+																<select name="transport_mode_vendor" class="select2 transport_mode_vendor" data-rule-required="true" data-msg-required="Vendor is required">
+																</select>
+															</div>
 														</div>
-													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<input type="text" name="builty_number" class="form-control rounded-right builty_number" placeholder="Builty Number*" data-rule-required="true" data-msg-required="Builty Number is required">
+														<div id="new_vendor" class="col d-none">
+															<div class="form-group">
+																<input type="text" name="vendor_name" class="form-control vendor_name" placeholder="Vendor Name*" data-rule-required="true" data-msg-required="Vendor Name is required">
+															</div>
 														</div>
-													</div>
 
-													<div class="w-100"></div>
+														<div class="w-100"></div>
 
-													<div class="col">
-														<div class="form-group">
-															<input type="text" name="weight_charges_per_kg" class="form-control rounded-right weight_charges_per_kg" placeholder="Weight Charges / kg*" data-rule-required="true" data-msg-required="Builty Number is required">
+														<div class="col">
+															<div class="form-group">
+																<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
+															</div>
 														</div>
-													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<input type="text" name="extra_charges" class="form-control rounded-right extra_charges" placeholder="Extra Charges*" data-rule-required="true" data-msg-required="Extra Charges is required">
+														<div class="col">
+															<div class="form-group">
+																<input type="text" name="builty_number" class="form-control rounded-right builty_number" placeholder="Builty Number*" data-rule-required="true" data-msg-required="Builty Number is required">
+															</div>
 														</div>
-													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<input type="text" name="total_weight_charges" class="form-control rounded-right total_weight_charges" placeholder="Total Weight Charges*" data-rule-required="true" data-msg-required="Total Weight Charges is required">
+														<div class="w-100"></div>
+
+														<div class="col">
+															<div class="form-group">
+																<input type="text" name="weight_charges_per_kg" class="form-control rounded-right weight_charges_per_kg" placeholder="Weight Charges / kg*" data-rule-required="true" data-msg-required="Builty Number is required">
+															</div>
 														</div>
-													</div>
 
-													<div class="col-12">
-														<h4 class="form-section mb-2 text-center">Sender Information</h4>
-													</div>
-
-													<div class="col">
-														<div class="form-group">
-															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_name"></p>
+														<div class="col">
+															<div class="form-group">
+																<input type="text" name="extra_charges" class="form-control rounded-right extra_charges" placeholder="Extra Charges*" data-rule-required="true" data-msg-required="Extra Charges is required">
+															</div>
 														</div>
-													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_hub">Hub</p>
+														<div class="col">
+															<div class="form-group">
+																<input type="text" name="total_weight_charges" class="form-control rounded-right total_weight_charges" placeholder="Total Weight Charges*" data-rule-required="true" data-msg-required="Total Weight Charges is required">
+															</div>
 														</div>
-													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<select name="receiver_id" class="select2 receiver_id">
-															</select>
+														<div class="col-12">
+															<h4 class="form-section mb-2 text-center">Sender Information</h4>
 														</div>
-													</div>
 
-													<div class="col">
-														<div class="form-group">
-															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 receiver_hub">Hub</p>
+														<div class="col">
+															<div class="form-group">
+																<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_name"></p>
+															</div>
+														</div>
+
+														<div class="col">
+															<div class="form-group">
+																<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_hub">Hub</p>
+															</div>
+														</div>
+
+														<div class="col">
+															<div class="form-group">
+																<select name="receiver_id" class="select2 receiver_id">
+																</select>
+															</div>
+														</div>
+
+														<div class="col">
+															<div class="form-group">
+																<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 receiver_hub">Hub</p>
+															</div>
 														</div>
 													</div>
 												</div>
-											</div>
-											<div class="modal-footer">
-												<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-												<button type="submit" name="update" class="btn btn-primary">Update</button>
-											</div>
-										</form>
+												<div class="modal-footer">
+													<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
+													<button type="submit" name="update" class="btn btn-primary">Update</button>
+												</div>
+											</form>
+										</div>
 									</div>
 								</div>
-							</div>
+							@endif
 
 							<div class="modal fade" id="view_forwarding_details" role="dialog" aria-labelledby="view_forwarding_details_title" aria-hidden="true">
 								<div class="modal-dialog modal-lg" role="document">
@@ -410,46 +416,50 @@
 			@endif
 
 			var table = $('#datatable').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
-				buttons: [{
-					text: 'Update at Link',
-					className: 'btn btn-primary receive_at_link',
-					action: function (e, dt, node, config) {
-						$.ajax({
-							url: '{!! route('admin.cargo.in_transit.junctions') !!}',
-							method: 'POST',
-							data: {
-								'_token': '{{ csrf_token() }}'
-							}
-						})
-						.done(function(data) {
-							$('#receive_at_link #scan_seal_number_form .seal_number').val('');
+				@if (session('role_id') == 1 || in_array(30, session('permissions')))
+					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+					buttons: [{
+						text: 'Update at Link',
+						className: 'btn btn-primary receive_at_link',
+						action: function (e, dt, node, config) {
+							$.ajax({
+								url: '{!! route('admin.cargo.in_transit.junctions') !!}',
+								method: 'POST',
+								data: {
+									'_token': '{{ csrf_token() }}'
+								}
+							})
+							.done(function(data) {
+								$('#receive_at_link #scan_seal_number_form .seal_number').val('');
 
-							receive_at_link_table.clear().draw();
+								receive_at_link_table.clear().draw();
 
-							cargo_consignment_ids = [];
+								cargo_consignment_ids = [];
 
-							$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', true);
+								$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', true);
 
-							if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
-								$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
-							}
+								if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
+									$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
+								}
 
-							$.each(data, function(index, junction) {
-								$('#receive_at_link #receive_at_link_form .junction').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+								$.each(data, function(index, junction) {
+									$('#receive_at_link #receive_at_link_form .junction').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+								});
+
+								$('#receive_at_link #receive_at_link_form .junction').prepend('<option value="" selected="selected"></option>').select2({
+									width: '150px',
+									placeholder: 'Junction*'
+								}).bind('change', function() {
+									$(this).valid();
+								});
 							});
 
-							$('#receive_at_link #receive_at_link_form .junction').prepend('<option value="" selected="selected"></option>').select2({
-								width: '150px',
-								placeholder: 'Junction*'
-							}).bind('change', function() {
-								$(this).valid();
-							});
-						});
-
-						$('#receive_at_link').modal('show');
-					}
-				}],
+							$('#receive_at_link').modal('show');
+						}
+					}],
+				@else
+                	dom: 'ltipr',
+				@endif
 				fixedHeader: {
 					header: true,
 					headerOffset: $('.header-navbar').height()
@@ -517,29 +527,41 @@
 
 			var cargo_consignment_ids = [];
 
-			var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
-				dom: 'tr',
-				paging: false,
-				columns: [
-					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{name: 'cargo_number', class: 'align-middle cargo_number'},
-					{name: 'origin', class: 'align-middle origin'},
-					{name: 'destination', class: 'align-middle destination'},
-					{name: 'hub', class: 'align-middle hub'},
-					{name: 'seal_number', class: 'align-middle seal_number'}
-				],
-				rowCallback: function(row, data, index) {
-					var info = receive_at_link_table.page.info();
+			@if (session('role_id') == 1 || in_array(30, session('permissions')))
+				var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
+					dom: 'tr',
+					paging: false,
+					columns: [
+						{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+						{name: 'cargo_number', class: 'align-middle cargo_number'},
+						{name: 'origin', class: 'align-middle origin'},
+						{name: 'destination', class: 'align-middle destination'},
+						{name: 'hub', class: 'align-middle hub'},
+						{name: 'seal_number', class: 'align-middle seal_number'}
+					],
+					rowCallback: function(row, data, index) {
+						var info = receive_at_link_table.page.info();
 
-					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
-				}
-			});
+						$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					}
+				});
+			@endif
 
-			$('#receive_form .cargo_number').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false
-			});
+			@if (session('role_id') == 1 || in_array(31, session('permissions')))
+				$('#receive_form .cargo_number').inputmask({
+					'alias': 'integer',
+					'allowMinus': false,
+					'allowPlus': false
+				});
+
+				$('#receive_form').validate({
+					errorClass: 'danger',
+					successClass: 'success',
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').appendTo(element.parents('form'));
+					}
+				});
+			@endif
 
 			$('#cargo_type_search_form #cargo_type').select2({
 				width: '125px',
@@ -566,280 +588,284 @@
 				table.draw();
 			});
 
-			$('#receive_at_link #scan_seal_number_form .seal_number').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false
-			});
+			@if (session('role_id') == 1 || in_array(30, session('permissions')))
+				$('#receive_at_link #scan_seal_number_form .seal_number').inputmask({
+					'alias': 'integer',
+					'allowMinus': false,
+					'allowPlus': false
+				});
+			@endif
 
-			$('#add_forwarding_details form .seal_number').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false
-			});
+			@if (session('role_id') == 1 || in_array(28, session('permissions')))
+				$('#add_forwarding_details form .seal_number').inputmask({
+					'alias': 'integer',
+					'allowMinus': false,
+					'allowPlus': false
+				});
 
-			$('#add_forwarding_details form .weight_charges_per_kg').inputmask({
-				'alias': 'decimal',
-				'allowMinus': false,
-				'allowPlus': false,
-				'digits': 2,
-				'min': 0.1,
-				'max': 1000
-			});
+				$('#add_forwarding_details form .weight_charges_per_kg').inputmask({
+					'alias': 'decimal',
+					'allowMinus': false,
+					'allowPlus': false,
+					'digits': 2,
+					'min': 0.1,
+					'max': 1000
+				});
 
-			$('#add_forwarding_details form .extra_charges').inputmask({
-				'alias': 'decimal',
-				'allowMinus': false,
-				'allowPlus': false,
-				'digits': 2,
-				'min': 0.1,
-				'max': 10000
-			});
+				$('#add_forwarding_details form .extra_charges').inputmask({
+					'alias': 'decimal',
+					'allowMinus': false,
+					'allowPlus': false,
+					'digits': 2,
+					'min': 0.1,
+					'max': 10000
+				});
 
-			$('#add_forwarding_details form .total_weight_charges').inputmask({
-				'alias': 'decimal',
-				'allowMinus': false,
-				'allowPlus': false,
-				'digits': 2,
-				'min': 0.1,
-				'max': 1000000
-			});
+				$('#add_forwarding_details form .total_weight_charges').inputmask({
+					'alias': 'decimal',
+					'allowMinus': false,
+					'allowPlus': false,
+					'digits': 2,
+					'min': 0.1,
+					'max': 1000000
+				});
+			@endif
 
-			$('#receive_form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('form'));
-				}
-			});
+			@if (session('role_id') == 1 || in_array(30, session('permissions')))
+				$('#receive_at_link #scan_seal_number_form').validate({
+					errorClass: 'danger',
+					successClass: 'success',
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').appendTo(element.parents('form'));
+					},
+					submitHandler: function(form) {
+						var seal_number = $(form).find('.seal_number').val();
 
-			$('#receive_at_link #scan_seal_number_form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('form'));
-				},
-				submitHandler: function(form) {
-					var seal_number = $(form).find('.seal_number').val();
+						if (receive_at_link_table.columns('.seal_number').data().eq(0).indexOf(parseInt(seal_number)) === -1) {
+							$.ajax({
+								url: '{!! route('admin.cargo.in_transit.details') !!}',
+								method: 'POST',
+								data: {
+									'seal_number': seal_number,
+									'_token': '{{ csrf_token() }}'
+								}
+							})
+							.done(function(data) {
+								$('#receive_at_link #scan_seal_number_form .seal_number').val('');
 
-					if (receive_at_link_table.columns('.seal_number').data().eq(0).indexOf(parseInt(seal_number)) === -1) {
+								if (data.status == 0) {
+									receive_at_link_table.row.add([0, data.details.cargo_number, data.details.origin, data.details.destination, data.details.hub, data.details.seal_number]).node().id = data.details.cargo_number;
+									receive_at_link_table.draw(false);
+
+									cargo_consignment_ids.push(data.details.cargo_number);
+
+									$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', false);
+
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+
+								table.draw();
+							});
+						}
+						else {
+							toastr.error('Cargo has been scanned already', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+
+						return false;
+					}
+				});
+
+				$('#receive_at_link #receive_at_link_form').validate({
+					errorClass: 'danger',
+					successClass: 'success',
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').insertAfter(element.parent('.form-group'));
+					},
+					submitHandler: function(form) {
+						var junction = $(form).find('.junction').val();
+
 						$.ajax({
-							url: '{!! route('admin.cargo.in_transit.details') !!}',
+							url: '{!! route('admin.cargo.in_transit.receive_at_link') !!}',
 							method: 'POST',
 							data: {
-								'seal_number': seal_number,
+								'cargo_consignment_ids': cargo_consignment_ids,
+								'junction': junction,
 								'_token': '{{ csrf_token() }}'
 							}
 						})
 						.done(function(data) {
-							$('#receive_at_link #scan_seal_number_form .seal_number').val('');
-
 							if (data.status == 0) {
-								receive_at_link_table.row.add([0, data.details.cargo_number, data.details.origin, data.details.destination, data.details.hub, data.details.seal_number]).node().id = data.details.cargo_number;
-								receive_at_link_table.draw(false);
-
-								cargo_consignment_ids.push(data.details.cargo_number);
-
-								$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', false);
+								$('#receive_at_link').modal('hide');
 
 								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
 							else {
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
-
-							table.draw();
 						});
+
+						return false;
 					}
-					else {
-						toastr.error('Cargo has been scanned already', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+				});
+			@endif
+
+			@if (session('role_id') == 1 || in_array(29, session('permissions')))
+	            $('body').on('click','.launch_dispute',function(){
+	                var cargo_id = parseInt($(this).parents('tr').attr('id'));
+
+	                $('#UniversalDisputeModal').modal('show');
+	                $('#universal_dispute_id').val(cargo_id);
+	            });
+	            var select;
+	            $('#UniversalDisputeModal').on('shown.bs.modal',function () {
+	                var id = $('#universal_dispute_id').val();
+
+	                if(id){
+	                    $.ajax({
+	                        url: '{!! route('admin.dispute.data') !!}',
+	                        method: 'POST',
+	                        data:{
+	                            '_token': '{{ csrf_token() }}',
+								'intransit':'intransit',
+	                            'cargo_id':id
+	                        }
+	                    }).done(function (data) {
+	                        if(data.success == 1){
+	                            $('#universal_city_select').select2({
+	                                placeholder:'Select a city',
+	                                dropdownParent:$('#universal_dispute_form')
+	                            });
+	                            $.each(data.cities,function(key,value){
+	                                var newOption = new Option(value.name, value.id, false, false);
+	                                $('#universal_city_select').append(newOption).trigger('select');
+	                            });
+	                            $('#universal_dispute_type_select').select2({
+	                                placeholder:'Select a Dispute type',
+	                                dropdownParent:$('#universal_dispute_form')
+	                            });
+	                            $.each(data.dispute_types,function(key,value) {
+	                                var dispute = new Option(value.type, value.id, false, false);
+	                                $('#universal_dispute_type_select').append(dispute).trigger('select');
+	                            });
+
+								$('#universal_tracking_number').val(data.cargo_shipments);
+	                            select = $('#universal_tracking_number').selectize({
+	                                placeholder: 'Tracking Number(s)*',
+	                                delimiter: ',',
+	                                createOnBlur: true,
+	                                persist: false,
+	                                plugins: ['remove_button'],
+	                                onDropdownOpen: function(dropdown) {
+	                                    dropdown.remove();
+	                                },
+	                                onType: function(str) {
+	                                    var regex = /^[0-9,]+$/;
+
+	                                    if (!regex.test(str)) {
+	                                        select[0].selectize.setTextboxValue('');
+	                                    }
+	                                },
+	                                create: function(input) {
+	                                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+	                                        return {
+	                                            value: input,
+	                                            text: input
+	                                        }
+	                                    }
+	                                    else {
+	                                        return false;
+	                                    }
+	                                }
+	                            });
+
+	                        }
+	                    });
+	                }
+	            });
+
+				var max_char = 250;
+				$('#universal_description').on('keypress copy paste',function (e) {
+	                // var comment = $(this).val();
+	                // console.log(comment)
+	                if ($(this).val().length == max_char) {
+	                    e.preventDefault();
+	                } else if ($(this).val().length > max_char) {
+	                    // Maximum exceeded
+	                    this.value = this.value.substring(0, max_char);
+	                }
+	            });
+
+	            $('#universal_dispute_form').validate({
+	                ignore: [],
+	                errorClass:"danger",
+	                errorPlacement: function(error, element) {
+	                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+	                },
+	                submitHandler: function(form) {
+
+	                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+	                    var city_select = $('#universal_city_select').val();
+	                    var dispute_type_select = $('#universal_dispute_type_select').val();
+	                    var tracking_number = $('#universal_tracking_number').val();
+	                    var description = $('#universal_description').val();
+	                    var cargo_id = $('#universal_dispute_id').val();
+	                    $.ajax({
+	                        url: '{!! route('admin.dispute.create.universal') !!}',
+	                        method: 'POST',
+	                        data: {
+	                            '_token': '{{ csrf_token() }}',
+	                            'city_select': city_select,
+								'cargo_id': cargo_id,
+	                            'dispute_type_select':dispute_type_select,
+	                            'tracking_number':tracking_number,
+	                            'description':description
+	                        }
+	                    }).done(function(data){
+	                        $('#UniversalDisputeModal').modal('hide');
+	                        if (data.invalid !== undefined) {
+
+	                            var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
+
+	                            toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+	                        }
+
+	                        if(data.success != undefined){
+	                            // table.ajax.reload();
+	                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+	                            var redirect = '{!! route('admin.dispute.index') !!}';
+							window.location = redirect;
+	                        }
+	                    });
+
+	                }
+
+
+	            });
+	            $('#UniversalDisputeModal').on('hidden.bs.modal',function () {
+	                $('#universal_dispute_form')[0].reset();
+	                $('#UniversalDisputeCreate').removeAttr('disabled');
+	                select[0].selectize.destroy();
+	                $('#universal_city_select').empty().trigger('change');
+	                $('#universal_dispute_type_select').empty().trigger('change');
+	            });
+            @endif
+
+			@if (session('role_id') == 1 || in_array(28, session('permissions')))
+				$('#add_forwarding_details form').validate({
+					errorClass: 'danger',
+					successClass: 'success',
+					normalizer: function(value) {
+						return $.trim(value);
+					},
+					errorPlacement: function(error, element) {
+						error.addClass('w-100').appendTo(element.parent('.form-group'));
 					}
-
-					return false;
-				}
-			});
-			// launch dispute
-            $('body').on('click','.launch_dispute',function(){
-                var cargo_id = parseInt($(this).parents('tr').attr('id'));
-
-                $('#UniversalDisputeModal').modal('show');
-                $('#universal_dispute_id').val(cargo_id);
-            });
-            var select;
-            $('#UniversalDisputeModal').on('shown.bs.modal',function () {
-                var id = $('#universal_dispute_id').val();
-
-                if(id){
-                    $.ajax({
-                        url: '{!! route('admin.dispute.data') !!}',
-                        method: 'POST',
-                        data:{
-                            '_token': '{{ csrf_token() }}',
-							'intransit':'intransit',
-                            'cargo_id':id
-                        }
-                    }).done(function (data) {
-                        if(data.success == 1){
-                            $('#universal_city_select').select2({
-                                placeholder:'Select a city',
-                                dropdownParent:$('#universal_dispute_form')
-                            });
-                            $.each(data.cities,function(key,value){
-                                var newOption = new Option(value.name, value.id, false, false);
-                                $('#universal_city_select').append(newOption).trigger('select');
-                            });
-                            $('#universal_dispute_type_select').select2({
-                                placeholder:'Select a Dispute type',
-                                dropdownParent:$('#universal_dispute_form')
-                            });
-                            $.each(data.dispute_types,function(key,value) {
-                                var dispute = new Option(value.type, value.id, false, false);
-                                $('#universal_dispute_type_select').append(dispute).trigger('select');
-                            });
-
-							$('#universal_tracking_number').val(data.cargo_shipments);
-                            select = $('#universal_tracking_number').selectize({
-                                placeholder: 'Tracking Number(s)*',
-                                delimiter: ',',
-                                createOnBlur: true,
-                                persist: false,
-                                plugins: ['remove_button'],
-                                onDropdownOpen: function(dropdown) {
-                                    dropdown.remove();
-                                },
-                                onType: function(str) {
-                                    var regex = /^[0-9,]+$/;
-
-                                    if (!regex.test(str)) {
-                                        select[0].selectize.setTextboxValue('');
-                                    }
-                                },
-                                create: function(input) {
-                                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
-                                        return {
-                                            value: input,
-                                            text: input
-                                        }
-                                    }
-                                    else {
-                                        return false;
-                                    }
-                                }
-                            });
-
-                        }
-                    });
-                }
-            });
-            var max_char = 250;
-            $('#universal_description').on('keypress copy paste',function (e) {
-                // var comment = $(this).val();
-                // console.log(comment)
-                if ($(this).val().length == max_char) {
-                    e.preventDefault();
-                } else if ($(this).val().length > max_char) {
-                    // Maximum exceeded
-                    this.value = this.value.substring(0, max_char);
-                }
-            });
-            $('#universal_dispute_form').validate({
-                ignore: [],
-                errorClass:"danger",
-                errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
-                },
-                submitHandler: function(form) {
-
-                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                    var city_select = $('#universal_city_select').val();
-                    var dispute_type_select = $('#universal_dispute_type_select').val();
-                    var tracking_number = $('#universal_tracking_number').val();
-                    var description = $('#universal_description').val();
-                    var cargo_id = $('#universal_dispute_id').val();
-                    $.ajax({
-                        url: '{!! route('admin.dispute.create.universal') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'city_select': city_select,
-							'cargo_id': cargo_id,
-                            'dispute_type_select':dispute_type_select,
-                            'tracking_number':tracking_number,
-                            'description':description
-                        }
-                    }).done(function(data){
-                        $('#UniversalDisputeModal').modal('hide');
-                        if (data.invalid !== undefined) {
-
-                            var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
-
-                            toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-
-                        if(data.success != undefined){
-                            // table.ajax.reload();
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            var redirect = '{!! route('admin.dispute.index') !!}';
-						window.location = redirect;
-                        }
-                    });
-
-                }
-
-
-            });
-            $('#UniversalDisputeModal').on('hidden.bs.modal',function () {
-                $('#universal_dispute_form')[0].reset();
-                $('#UniversalDisputeCreate').removeAttr('disabled');
-                select[0].selectize.destroy();
-                $('#universal_city_select').empty().trigger('change');
-                $('#universal_dispute_type_select').empty().trigger('change');
-            });
-            //dispute end
-			$('#receive_at_link #receive_at_link_form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').insertAfter(element.parent('.form-group'));
-				},
-				submitHandler: function(form) {
-					var junction = $(form).find('.junction').val();
-
-					$.ajax({
-						url: '{!! route('admin.cargo.in_transit.receive_at_link') !!}',
-						method: 'POST',
-						data: {
-							'cargo_consignment_ids': cargo_consignment_ids,
-							'junction': junction,
-							'_token': '{{ csrf_token() }}'
-						}
-					})
-					.done(function(data) {
-						if (data.status == 0) {
-							$('#receive_at_link').modal('hide');
-
-							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-						else {
-							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-					});
-
-					return false;
-				}
-			});
-
-			$('#add_forwarding_details form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				normalizer: function(value) {
-					return $.trim(value);
-				},
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
-				}
-			});
+				});
+			@endif
 
 			var picker = null;
 
@@ -849,157 +875,159 @@
 				if ($(this).hasClass('print')) {
 					print(cargo_consignment_id);
 				}
-				else if ($(this).hasClass('add_forwarding_details')) {
-					$.ajax({
-						url: '{!! route('admin.cargo.in_transit.forwarding_details') !!}',
-						method: 'POST',
-						data: {
-							'add': 1,
-							'cargo_consignment_id': cargo_consignment_id,
-							'_token': '{{ csrf_token() }}'
-						}
-					})
-					.done(function(data) {
-						$('#add_forwarding_details form .cargo_consignment_id').val(cargo_consignment_id);
+				@if (session('role_id') == 1 || in_array(28, session('permissions')))
+					else if ($(this).hasClass('add_forwarding_details')) {
+						$.ajax({
+							url: '{!! route('admin.cargo.in_transit.forwarding_details') !!}',
+							method: 'POST',
+							data: {
+								'add': 1,
+								'cargo_consignment_id': cargo_consignment_id,
+								'_token': '{{ csrf_token() }}'
+							}
+						})
+						.done(function(data) {
+							$('#add_forwarding_details form .cargo_consignment_id').val(cargo_consignment_id);
 
-						if ($('#add_forwarding_details form .junction_1').hasClass('select2-hidden-accessible') || $('#add_forwarding_details form .junction_2').hasClass('select2-hidden-accessible')) {
-							$('#add_forwarding_details form .junction_1').html('').select2('destroy');
-							$('#add_forwarding_details form .junction_2').html('').select2('destroy');
-						}
-
-						$.each(data.junctions, function(index, junction) {
-							$('#add_forwarding_details form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-							$('#add_forwarding_details form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-						});
-
-						$('#add_forwarding_details form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
-							width: '100%',
-							placeholder: 'Junction 1*'
-						}).bind('change', function() {
-							$(this).valid();
-						});
-
-						$('#add_forwarding_details form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
-							width: '100%',
-							placeholder: 'Junction 2*'
-						}).bind('change', function() {
-							$(this).valid();
-						});
-
-						if (picker) {
-							picker.pickadate('picker').clear();
-						}
-						else {
-							picker = $('#add_forwarding_details form .expected_arrival_date').pickadate({
-								firstDay: 1,
-								clear: '',
-								min: '{{ Carbon\Carbon::now() }}',
-								selectYears: true,
-								selectMonths: true,
-								formatSubmit: 'yyyy-mm-dd 00:00:00',
-								hiddenSuffix: '_formatted',
-								onSet: function(context) {
-									$('#add_forwarding_details form .expected_arrival_date').valid();
-								}
-							});
-						}
-
-						if ($('#add_forwarding_details form .shipping_mode').hasClass('select2-hidden-accessible')) {
-							$('#add_forwarding_details form .shipping_mode').html('').select2('destroy');
-						}
-
-						$.each(data.shipping_modes, function(index, shipping_mode) {
-							$('#add_forwarding_details form .shipping_mode').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
-						});
-
-						$('#add_forwarding_details form .shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-							width: '100%',
-							placeholder: 'Shipment Mode*'
-						}).bind('change', function() {
-							$(this).valid();
-						});
-
-						if ($('#add_forwarding_details form .transport_mode').hasClass('select2-hidden-accessible')) {
-							$('#add_forwarding_details form .transport_mode').html('').select2('destroy');
-							$('#add_forwarding_details form .transport_mode_vendor').html('').select2('destroy');
-						}
-
-						$.each(data.transport_modes, function(index, transport_mode) {
-							$('#add_forwarding_details form .transport_mode').append('<option value="' + transport_mode.id + '">' + transport_mode.name + '</option>');
-						});
-
-						$('#add_forwarding_details form .transport_mode').prepend('<option value="" selected="selected"></option>').select2({
-							width: '100%',
-							placeholder: 'Transport Mode*'
-						}).bind('change', function() {
-							$(this).valid();
-
-							$('#add_forwarding_details form .transport_mode_vendor').html('');
-
-							$.each(transport_mode_vendors[this.value], function(index, vendor) {
-								var option = new Option(vendor.name, vendor.id, false, false);
-								$('#add_forwarding_details form .transport_mode_vendor').append(option);
-							});
-
-							var option = new Option('Others', 0, false, false);
-							$('#add_forwarding_details form .transport_mode_vendor').append(option);
-
-							$('#add_forwarding_details form .transport_mode_vendor').val(null).trigger('change');
-						});
-
-						transport_mode_vendors = data.transport_mode_vendors;
-
-						$('#add_forwarding_details form .transport_mode_vendor').prepend('<option value="" selected="selected"></option>').select2({
-							width: '100%',
-							placeholder: 'Vendor*'
-						}).bind('change', function() {
-							if (this.value) {
-								$(this).valid();
+							if ($('#add_forwarding_details form .junction_1').hasClass('select2-hidden-accessible') || $('#add_forwarding_details form .junction_2').hasClass('select2-hidden-accessible')) {
+								$('#add_forwarding_details form .junction_1').html('').select2('destroy');
+								$('#add_forwarding_details form .junction_2').html('').select2('destroy');
 							}
 
-							if (this.value && this.value == 0) {
-								$('#add_forwarding_details #new_vendor').removeClass('d-none');
+							$.each(data.junctions, function(index, junction) {
+								$('#add_forwarding_details form .junction_1').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+								$('#add_forwarding_details form .junction_2').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+							});
+
+							$('#add_forwarding_details form .junction_1').prepend('<option value="" selected="selected"></option>').select2({
+								width: '100%',
+								placeholder: 'Junction 1*'
+							}).bind('change', function() {
+								$(this).valid();
+							});
+
+							$('#add_forwarding_details form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
+								width: '100%',
+								placeholder: 'Junction 2*'
+							}).bind('change', function() {
+								$(this).valid();
+							});
+
+							if (picker) {
+								picker.pickadate('picker').clear();
 							}
 							else {
-								$('#add_forwarding_details #new_vendor').addClass('d-none');
-
-								$('#add_forwarding_details #vendor_name-error').remove();
+								picker = $('#add_forwarding_details form .expected_arrival_date').pickadate({
+									firstDay: 1,
+									clear: '',
+									min: '{{ Carbon\Carbon::now() }}',
+									selectYears: true,
+									selectMonths: true,
+									formatSubmit: 'yyyy-mm-dd 00:00:00',
+									hiddenSuffix: '_formatted',
+									onSet: function(context) {
+										$('#add_forwarding_details form .expected_arrival_date').valid();
+									}
+								});
 							}
+
+							if ($('#add_forwarding_details form .shipping_mode').hasClass('select2-hidden-accessible')) {
+								$('#add_forwarding_details form .shipping_mode').html('').select2('destroy');
+							}
+
+							$.each(data.shipping_modes, function(index, shipping_mode) {
+								$('#add_forwarding_details form .shipping_mode').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
+							});
+
+							$('#add_forwarding_details form .shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+								width: '100%',
+								placeholder: 'Shipment Mode*'
+							}).bind('change', function() {
+								$(this).valid();
+							});
+
+							if ($('#add_forwarding_details form .transport_mode').hasClass('select2-hidden-accessible')) {
+								$('#add_forwarding_details form .transport_mode').html('').select2('destroy');
+								$('#add_forwarding_details form .transport_mode_vendor').html('').select2('destroy');
+							}
+
+							$.each(data.transport_modes, function(index, transport_mode) {
+								$('#add_forwarding_details form .transport_mode').append('<option value="' + transport_mode.id + '">' + transport_mode.name + '</option>');
+							});
+
+							$('#add_forwarding_details form .transport_mode').prepend('<option value="" selected="selected"></option>').select2({
+								width: '100%',
+								placeholder: 'Transport Mode*'
+							}).bind('change', function() {
+								$(this).valid();
+
+								$('#add_forwarding_details form .transport_mode_vendor').html('');
+
+								$.each(transport_mode_vendors[this.value], function(index, vendor) {
+									var option = new Option(vendor.name, vendor.id, false, false);
+									$('#add_forwarding_details form .transport_mode_vendor').append(option);
+								});
+
+								var option = new Option('Others', 0, false, false);
+								$('#add_forwarding_details form .transport_mode_vendor').append(option);
+
+								$('#add_forwarding_details form .transport_mode_vendor').val(null).trigger('change');
+							});
+
+							transport_mode_vendors = data.transport_mode_vendors;
+
+							$('#add_forwarding_details form .transport_mode_vendor').prepend('<option value="" selected="selected"></option>').select2({
+								width: '100%',
+								placeholder: 'Vendor*'
+							}).bind('change', function() {
+								if (this.value) {
+									$(this).valid();
+								}
+
+								if (this.value && this.value == 0) {
+									$('#add_forwarding_details #new_vendor').removeClass('d-none');
+								}
+								else {
+									$('#add_forwarding_details #new_vendor').addClass('d-none');
+
+									$('#add_forwarding_details #vendor_name-error').remove();
+								}
+							});
+
+							if ($('#add_forwarding_details form .receiver_id').hasClass('select2-hidden-accessible')) {
+								$('#add_forwarding_details form .receiver_id').html('').select2('destroy');
+							}
+
+							$.each(data.receivers, function(index, receiver) {
+								$('#add_forwarding_details form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.name + '</option>');
+							});
+
+							$('#add_forwarding_details form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
+								width: '100%',
+								placeholder: 'Receiver Name',
+								allowClear: true
+							}).bind('change', function() {
+								$(this).valid();
+							});
+
+							$('#add_forwarding_details form .junction_1').val(data.cargo_consignment.junction_city_1_id).trigger('change');
+							$('#add_forwarding_details form .junction_2').val(data.cargo_consignment.junction_city_2_id).trigger('change');
+							picker.pickadate('picker').set('select', data.cargo_consignment.expected_arrival_date);
+							$('#add_forwarding_details form .shipping_mode').val(data.cargo_consignment.shipping_mode_id).trigger('change');
+							$('#add_forwarding_details form .transport_mode').val(data.cargo_consignment.transport_mode_id).trigger('change');
+							$('#add_forwarding_details form .transport_mode_vendor').val(data.cargo_consignment.transport_mode_vendor_id).trigger('change');
+							$('#add_forwarding_details form .seal_number').val(data.cargo_consignment.seal_number);
+							$('#add_forwarding_details form .builty_number').val(data.cargo_consignment.builty_number);
+							$('#add_forwarding_details form .sender_name').html(data.cargo_consignment.sender_name);
+							$('#add_forwarding_details form .receiver_id').val(data.cargo_consignment.receiver_id).trigger('change');
+							$('#add_forwarding_details form .weight_charges_per_kg').val(data.cargo_consignment.weight_charges_per_kg);
+							$('#add_forwarding_details form .extra_charges').val(data.cargo_consignment.extra_charges);
+							$('#add_forwarding_details form .total_weight_charges').val(data.cargo_consignment.total_weight_charges);
+
+							$('#add_forwarding_details').modal('show');
 						});
-
-						if ($('#add_forwarding_details form .receiver_id').hasClass('select2-hidden-accessible')) {
-							$('#add_forwarding_details form .receiver_id').html('').select2('destroy');
-						}
-
-						$.each(data.receivers, function(index, receiver) {
-							$('#add_forwarding_details form .receiver_id').append('<option value="' + receiver.id + '">' + receiver.name + '</option>');
-						});
-
-						$('#add_forwarding_details form .receiver_id').prepend('<option value="" selected="selected"></option>').select2({
-							width: '100%',
-							placeholder: 'Receiver Name',
-							allowClear: true
-						}).bind('change', function() {
-							$(this).valid();
-						});
-
-						$('#add_forwarding_details form .junction_1').val(data.cargo_consignment.junction_city_1_id).trigger('change');
-						$('#add_forwarding_details form .junction_2').val(data.cargo_consignment.junction_city_2_id).trigger('change');
-						picker.pickadate('picker').set('select', data.cargo_consignment.expected_arrival_date);
-						$('#add_forwarding_details form .shipping_mode').val(data.cargo_consignment.shipping_mode_id).trigger('change');
-						$('#add_forwarding_details form .transport_mode').val(data.cargo_consignment.transport_mode_id).trigger('change');
-						$('#add_forwarding_details form .transport_mode_vendor').val(data.cargo_consignment.transport_mode_vendor_id).trigger('change');
-						$('#add_forwarding_details form .seal_number').val(data.cargo_consignment.seal_number);
-						$('#add_forwarding_details form .builty_number').val(data.cargo_consignment.builty_number);
-						$('#add_forwarding_details form .sender_name').html(data.cargo_consignment.sender_name);
-						$('#add_forwarding_details form .receiver_id').val(data.cargo_consignment.receiver_id).trigger('change');
-						$('#add_forwarding_details form .weight_charges_per_kg').val(data.cargo_consignment.weight_charges_per_kg);
-						$('#add_forwarding_details form .extra_charges').val(data.cargo_consignment.extra_charges);
-						$('#add_forwarding_details form .total_weight_charges').val(data.cargo_consignment.total_weight_charges);
-
-						$('#add_forwarding_details').modal('show');
-					});
-				}
+					}
+				@endif
 				else if ($(this).hasClass('view_forwarding_details')) {
 					$('#view_forwarding_details .modal-body').html('');
 
@@ -1040,11 +1068,13 @@
 						$('#view_forwarding_details').modal('show');
 					});
 				}
-				else if ($(this).hasClass('receive')) {
-					$('#receive_form .cargo_number').val(cargo_consignment_id);
+				@if (session('role_id') == 1 || in_array(31, session('permissions')))
+					else if ($(this).hasClass('receive')) {
+						$('#receive_form .cargo_number').val(cargo_consignment_id);
 
-					$('#receive_form').submit();
-				}
+						$('#receive_form').submit();
+					}
+				@endif
 			});
 		});
 	</script>

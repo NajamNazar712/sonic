@@ -25,7 +25,7 @@ use Auth;
 class ShipperShipmentBookController extends Controller
 {
     private function unique_order_id($order_id) {
-      return !(Shipment::where('user_id', Auth::id())->where('order_id', $order_id)->exists());
+      return !(Shipment::where('user_id', session('user_id'))->where('order_id', $order_id)->exists());
     }
 
     private function set_service_type($service_type_id) {
@@ -86,7 +86,7 @@ class ShipperShipmentBookController extends Controller
 
       AdminPickupsController::generate($user_id, $shipment_id);
 
-      ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Booked!', $user_id, NULL);
+      ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
 
       return $shipment_id;
     }
@@ -118,12 +118,14 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function __construct() {
-      $this->middleware('auth')->except('print_air_waybill');
+      $this->middleware('auth:web,substitute_users')->except('print_air_waybill');
+
+      $this->middleware('Permission');
     }
 
     public function index() {
       $booking_types = BookingType::all();
-      $user = User::with('shipping.city')->find(Auth::id());
+      $user = User::with('shipping.city')->find(session('user_id'));
       $cities = City::where('status',1)->where('pickup',1)->orderBy('name')->get();
       $consignee_cities = City::where('status',1)->orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
@@ -143,7 +145,7 @@ class ShipperShipmentBookController extends Controller
       }
 
       if ($valid) {
-        $user_id = Auth::id();
+        $user_id = session('user_id');
 
         $service_type_id = $request->input('selected_service_type');
 
@@ -435,7 +437,7 @@ class ShipperShipmentBookController extends Controller
       foreach($request->ids as $id) {
         $shipment = Shipment::find($id);
 
-        if ($request->has('admin') || Auth::id() == $shipment->user_id) {
+        if ($request->has('admin') || session('user_id') == $shipment->user_id) {
           $table_start = '
                       <table class="table table-sm table-bordered border twice">
                         <tbody>
@@ -623,8 +625,8 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_index() {
-      $booking_types = BookingType::all();
-      $pickup_addresses = UserShippingInfo::with('city')->where('user_id', Auth::id())->get();
+      $booking_types = BookingType::where('id', '!=', 3)->get();
+      $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->get();
       $cities = City::orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_modes = ShippingMode::all();

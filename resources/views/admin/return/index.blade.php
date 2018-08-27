@@ -106,67 +106,79 @@
         $(document).ready(function () {
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX:true,
-                buttons: [{
-                    text: 'Confirm',
-                    className: 'btn btn-primary confirm',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        if(selected_rows != ''){
-                            $.ajax({
-                                url:"{{route('admin.return.marked.status')}}",
-                                method:'POST',
-                                data:{
-                                    'shipment_ids':selected_rows,
-                                    '_token':'{{ csrf_token() }}',
-                                    'action': 'confirm'
-                                }
-                            }).done(function (data) {
-                                $.each(selected_rows, function(index, id) {
-                                    table.row($('#datatable tbody tr#' + id)).deselect();
-                                });
-                                selected_rows = [];
-                                table.button(0).disable();
-                                table.button(1).disable();
-                                table.ajax.reload();
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                @if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0)
+                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                    buttons: [
+                    @if (session('role_id') == 1 || in_array(45, session('permissions')))
+                        {
+                            text: 'Confirm',
+                            className: 'btn btn-primary confirm',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                if(selected_rows != ''){
+                                    $.ajax({
+                                        url:"{{route('admin.return.marked.status')}}",
+                                        method:'POST',
+                                        data:{
+                                            'shipment_ids':selected_rows,
+                                            '_token':'{{ csrf_token() }}',
+                                            'action': 'confirm'
+                                        }
+                                    }).done(function (data) {
+                                        $.each(selected_rows, function(index, id) {
+                                            table.row($('#datatable tbody tr#' + id)).deselect();
+                                        });
+                                        selected_rows = [];
+                                        table.button('.confirm').disable();
+                                        table.button('.re-attempt').disable();
+                                        table.ajax.reload();
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                            });
-
-                        }else{
-                            var error = "Not selected any shipments!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }
-                    }
-                    }, {
-                        text: 'Re-Attempt',
-                        className: 'btn btn-primary re-attempt',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-                                $.ajax({
-                                    url:"{{route('admin.return.marked.status')}}",
-                                    method:'POST',
-                                    data:{
-                                        'shipment_ids':selected_rows,
-                                        '_token':'{{ csrf_token() }}',
-                                        'action': 'reattempt'
-                                    }
-                                }).done(function (data) {
-                                    selected_rows = [];
-                                    table.button(0).disable();
-                                    table.button(1).disable();
-                                    table.ajax.reload();
-                                    $.each(selected_rows, function(index, id) {
-                                        table.row($('#datatable tbody tr#' + id)).deselect();
                                     });
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                                });
+                                }else{
+                                    var error = "Not selected any shipments!";
+                                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }
                             }
+                        },
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(46, session('permissions')))
+                        {
+                            text: 'Re-Attempt',
+                            className: 'btn btn-primary re-attempt',
+                            enabled: false,
+                            action: function (e, dt, node, config) {
+                                if(selected_rows != ''){
+                                    $.ajax({
+                                        url:"{{route('admin.return.marked.status')}}",
+                                        method:'POST',
+                                        data:{
+                                            'shipment_ids':selected_rows,
+                                            '_token':'{{ csrf_token() }}',
+                                            'action': 'reattempt'
+                                        }
+                                    }).done(function (data) {
+                                        selected_rows = [];
+                                        table.button('.confirm').disable();
+                                        table.button('.re-attempt').disable();
+                                        table.ajax.reload();
+                                        $.each(selected_rows, function(index, id) {
+                                            table.row($('#datatable tbody tr#' + id)).deselect();
+                                        });
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                    });
+                                }
+                            }
+                            @endif
                         }
-                }],
+                    ],
+                @else
+                    dom: 'ltipr',
+                @endif
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
@@ -259,12 +271,12 @@
                     }
 
                     if (selected_rows.length > 0) {
-                        table.button(0).enable();
-                        table.button(1).enable();
+                        table.button('.confirm').enable();
+                        table.button('.re-attempt').enable();
                     }
                     else {
-                        table.button(0).disable();
-                        table.button(1).disable();
+                        table.button('.confirm').disable();
+                        table.button('.re-attempt').disable();
                     }
                 }else{
                     if(hub_ids[0] == hub_id){
@@ -278,12 +290,12 @@
                         }
 
                         if (selected_rows.length > 0) {
-                            table.button(0).enable();
-                            table.button(1).enable();
+                            table.button('.confirm').enable();
+                            table.button('.re-attempt').enable();
                         }
                         else {
-                            table.button(0).disable();
-                            table.button(1).disable();
+                            table.button('.confirm').disable();
+                            table.button('.re-attempt').disable();
                         }
                     }else{
                         var error = "Selected hubs should be the same!";

@@ -358,10 +358,10 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Print',
-                    className: 'btn btn-primary',
+                    className: 'btn btn-primary print',
                     enabled: false,
                     action: function (e, dt, node, config) {
-                        table.button(0).disable();
+                        table.button('.print').disable();
                         print(selected_rows);
                         $.each(selected_rows, function(index, id) {
                             table.row($('#datatable tbody tr#' + id)).deselect();
@@ -462,10 +462,10 @@
                 }
 
                 if (selected_rows.length > 0) {
-                    table.button(0).enable();
+                    table.button('.print').enable();
                 }
                 else {
-                    table.button(0).disable();
+                    table.button('.print').disable();
                 }
             });
 

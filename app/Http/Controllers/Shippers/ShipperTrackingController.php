@@ -17,7 +17,9 @@ use Carbon\Carbon;
 class ShipperTrackingController extends Controller
 {
     public function __construct() {
-      $this->middleware('auth');
+      $this->middleware('auth:web,substitute_users');
+
+      $this->middleware('Permission');
     }
 
     public function index() {
@@ -35,7 +37,7 @@ class ShipperTrackingController extends Controller
     		if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
-                if (Auth::id() == $shipment->user_id) {
+                if (session('user_id') == $shipment->user_id) {
         			$details = array();
 
                     $details['tracking_number'] = $tracking_number;
