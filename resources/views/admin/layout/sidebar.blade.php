@@ -137,7 +137,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(57, session('permissions')))
-                            <li><a class="menu-item" href="">Change Shipment Amount</a></li>
+                            <li><a class="menu-item" href="#">Change Shipment Amount</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(59, session('permissions')))
@@ -163,7 +163,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(66, session('permissions')))
-                            <li><a class="menu-item" href="">Delivery Notes Completed</a></li>
+                            <li><a class="menu-item" href="#">Delivery Notes Completed</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(67, session('permissions')))
@@ -187,7 +187,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(72, session('permissions')))
-                            <li><a class="menu-item" href="">Customer Retention Rate</a></li>
+                            <li><a class="menu-item" href="#">Customer Retention Rate</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(73, session('permissions')))
@@ -195,11 +195,11 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(74, session('permissions')))
-                            <li><a class="menu-item" href="">Monthwise Customer Sales</a></li>
+                            <li><a class="menu-item" href="#">Monthwise Customer Sales</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(75, session('permissions')))
-                            <li><a class="menu-item" href="">Overall Sales</a></li>
+                            <li><a class="menu-item" href="#">Overall Sales</a></li>
                         @endif
                     </ul>
                 </li>
