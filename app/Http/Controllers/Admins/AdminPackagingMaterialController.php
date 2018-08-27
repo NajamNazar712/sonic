@@ -248,7 +248,9 @@ class AdminPackagingMaterialController extends Controller
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                         <div class="dropdown-menu dropdown-menu-sm">
-                            <div class="dropdown-menu open-left arrow"><a class="dropdown-item dispatch"><i class="ft-fast-forward primary"> Dispatch</a>
+                            <div class="dropdown-menu open-left arrow">
+                                <a class="dropdown-item dispatch"><i class="ft-fast-forward primary"> Dispatch</a>
+                            </div>
                         </div>
                       </div>
                     ';
