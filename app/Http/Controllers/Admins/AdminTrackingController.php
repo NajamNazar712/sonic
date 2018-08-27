@@ -79,7 +79,7 @@ class AdminTrackingController extends Controller
     					$journey_details['status'] .= ' (' . $journey->reference_1_id;
 
     					if ($journey->reference_2_id) {
-                            if (in_array($journey->shipper_status_id, [2, 5, 23])) {
+                            if (in_array($journey->shipper_status_id, [5, 23])) {
                                 $rider = Rider::find($journey->reference_2_id);
 
                                 $journey_details['status'] .= ' | ' . $rider->name;
