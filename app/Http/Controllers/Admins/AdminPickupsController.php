@@ -783,7 +783,7 @@ class AdminPickupsController extends Controller
 
           $shipment->save();
 
-          return ['status' => 0, 'success' => 'Shipment can be removed'];
+          return ['status' => 0, 'success' => 'Shipment has been removed'];
         }
         else {
           return ['status' => 1, 'error' => 'Given Shipment ID has already been modified'];
