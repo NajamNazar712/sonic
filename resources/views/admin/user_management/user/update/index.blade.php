@@ -53,7 +53,7 @@
 										<select name="role_id" class="select2" id="role" data-rule-required="true" data-msg-required="Role is required">
 											@foreach($roles as $role)
 												@if ($role->id == $user->role_id)
-													<option value="{{ $role->id }}" selected="selected">{{ $role->name }}</option>
+													<option value="{{ $role->id }}" selected="selected">{{ $role->name }} - {{ $role->department->name }}</option>
 												@else
 													<option value="{{ $role->id }}">{{ $role->name }} - {{ $role->department->name }}</option>
 												@endif
