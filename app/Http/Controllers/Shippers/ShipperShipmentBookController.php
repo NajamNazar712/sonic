@@ -625,7 +625,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function excel_index() {
-      $booking_types = BookingType::all();
+      $booking_types = BookingType::where('id', '!=', 3)->get();
       $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->get();
       $cities = City::orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();

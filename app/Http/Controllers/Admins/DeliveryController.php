@@ -1467,7 +1467,7 @@ class DeliveryController extends Controller
             ->select(['station_deposit_notes.id as sdn','station_deposit_notes.id as sdn_id','oc.name as hub','station_deposit_notes.dncc_count','station_deposit_notes.sdn_delivered_shipments','station_deposit_notes.sdn_amount','station_deposit_notes.sdn_expense','station_deposit_notes.sdn_net_amount','admins.name as deposited_by','station_deposit_notes.created_at','station_deposit_notes.deposit_slip','station_deposit_notes.status','banks_lists.name as bank']);
 
         if (session('role_id') != 1) {
-            $deliveries = $deliveries->whereIn('station_deposit_notes.hub_id', session('hubs'));
+            $sdn = $sdn->whereIn('station_deposit_notes.hub_id', session('hubs'));
         }
 
         return Datatables::of($sdn)
