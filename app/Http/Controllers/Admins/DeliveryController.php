@@ -290,9 +290,9 @@ class DeliveryController extends Controller
                 $route = route('admin.delivery.receive.update',['note'=>$result->delivery_note]);
                 $verifyStatus = route('admin.delivery.receive.status.verify',['note'=>$result->delivery_note]);
 
-                $receive_button = '<a href="{$statusUpdate}" class="dropdown-item" data-target-id="{$result->delivery_note}" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
-                $shift_shipment_button = '<a href="{$route}" class="dropdown-item deliverynoteupdate" data-target-id="{$result->delivery_note}"><i class="ft-plus-circle primary"></i> Shift Shipment</a>';
-                $verify_statuses_button = '<a href="{$verifyStatus}" class="dropdown-item" data-target-id="{$result->id}"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
+                $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item" data-target-id="' . $result->delivery_note . '" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
+                $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-plus-circle primary"></i> Shift Shipment</a>';
+                $verify_statuses_button = '<a href="' . $verifyStatus . '" class="dropdown-item" data-target-id="' . $result->id . '"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
 
                 if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -1489,8 +1489,8 @@ class DeliveryController extends Controller
             ->addColumn("action", function ($result) {
                 $route = route('admin.delivery.sdn.details',['id'=>$result->sdn_id]);
 
-                $details_button = '<a href="{$route}" class="dropdown-item" data-target-id="{$result->sdn_id}" class=""><i class="ft-plus-circle primary"></i> Details</a>';
-                $upload_deposit_slip_button = '<a href="#" class="dropdown-item" data-target-id="{$result->sdn_id}" class="" data-target="#uploadDepositSlip" data-toggle="modal"><i class="ft-plus-circle primary"></i> Upload Deposit Slip</a>';
+                $details_button = '<a href="' . $route . '" class="dropdown-item" data-target-id="' . $result->sdn_id . '" class=""><i class="ft-plus-circle primary"></i> Details</a>';
+                $upload_deposit_slip_button = '<a href="#" class="dropdown-item" data-target-id="' . $result->sdn_id . '" class="" data-target="#uploadDepositSlip" data-toggle="modal"><i class="ft-plus-circle primary"></i> Upload Deposit Slip</a>';
 
                 $dropdown = '
                   <div class="btn-group">
