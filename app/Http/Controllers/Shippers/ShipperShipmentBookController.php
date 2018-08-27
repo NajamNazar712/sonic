@@ -22,6 +22,9 @@ use App\Http\Models\ShipmentsJourney;
 
 use Auth;
 
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+
 class ShipperShipmentBookController extends Controller
 {
     private function unique_order_id($order_id) {
@@ -636,5 +639,16 @@ class ShipperShipmentBookController extends Controller
       return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes]);
     }
 
-    public function excel_store(Request $request) {}
+    public function excel_store(Request $request) {
+      $file = $request->file('shipments');
+
+      $spreadsheet = IOFactory::createReaderForFile($file);
+      $spreadsheet->setReadDataOnly(true);
+      $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+
+      $header = ['Service Type ID', 'Pickup Address ID', 'Show Informaiton on Air Waybill', 'Consignee City ID', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1', 'Consignee Phone Number 2', 'Consignee Email Address', 'Order ID', 'Product Type ID', 'Item Description', 'Item Quantity', 'Price', 'Insurance', 'Replacement Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Amount', 'Mode of Payment ID'];
+
+      var_dump($spreadsheet);
+      exit;
+    }
 }
