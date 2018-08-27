@@ -683,7 +683,7 @@ class AdminPickupsController extends Controller
         $pickup_note = PickupNote::find($request->get('pickup_note_no'));
 
         if ($pickup_note) {
-          if ($pickup_note->status_id == 2) {
+          if ($pickup_note->status_id == 2 || $request->has('summary')) {
             return redirect()->route('admin.pickups.receive.arrival_of_shipments.index')->with('pickup_receive_pickup_note_id', $request->get('pickup_note_no'));
           }
           else if ($pickup_note->status_id == 3) {
