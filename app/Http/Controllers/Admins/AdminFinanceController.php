@@ -280,8 +280,6 @@ class AdminFinanceController extends Controller
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
 
-                $dropdown .= $print_button;
-
                 if (session('role_id') == 1 || in_array(55, session('permissions'))) {
                   $dropdown .= $resolve_button;
                 }
