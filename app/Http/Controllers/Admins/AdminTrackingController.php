@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentJourney;
+use App\Http\Models\Rider;
 use App\Http\Models\CargoConsignment;
 
 use Auth;
@@ -78,7 +79,14 @@ class AdminTrackingController extends Controller
     					$journey_details['status'] .= ' (' . $journey->reference_1_id;
 
     					if ($journey->reference_2_id) {
-    						$journey_details['status'] .= ' | ' . $journey->reference_2_id;
+                            if (in_array($journey->shipper_status_id, [5, 23])) {
+                                $rider = Rider::find($journey->reference_2_id);
+
+                                $journey_details['status'] .= ' | ' . $rider->name;
+                            }
+                            else {
+                                $journey_details['status'] .= ' | ' . $journey->reference_2_id;
+                            }
     					}
                         else if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
                             $cargo_consignment = CargoConsignment::find($journey->reference_1_id);

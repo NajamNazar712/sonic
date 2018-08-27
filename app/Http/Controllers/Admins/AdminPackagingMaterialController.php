@@ -242,9 +242,8 @@ class AdminPackagingMaterialController extends Controller
                     return "Dispatched";
                 }
             })
-            ->addColumn('action',function ($packaging){
-
-                if ((packaging->status == 0) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
+            ->addColumn('action',function ($packaging) {
+                if (($packaging->status == 0) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>

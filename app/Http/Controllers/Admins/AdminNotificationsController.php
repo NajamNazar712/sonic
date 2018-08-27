@@ -53,11 +53,11 @@ class AdminNotificationsController extends Controller
                   <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            if (session('role_id') == 1 || in_array(102, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(101, session('permissions'))) {
                 $dropdown .= $edit_button;
             }
 
-            if (session('role_id') == 1 || in_array(103, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(102, session('permissions'))) {
                 if ($notification->status) {
                     $dropdown .= $disable_button;
                 }

@@ -50,11 +50,13 @@
 									</div>
 
 									<div class="col-4">
-										<select name="role_id" class="select2" id="role" data-rule-required="true" data-msg-required="Role is required">
-											@foreach($roles as $role)
-												<option value="{{ $role->id }}">{{ $role->name }} - {{ $role->department->name }}</option>
-											@endforeach
-										</select>
+										<div class="form-group">
+											<select name="role_id" class="select2" id="role" data-rule-required="true" data-msg-required="Role is required">
+												@foreach($roles as $role)
+													<option value="{{ $role->id }}">{{ $role->name }} - {{ $role->department->name }}</option>
+												@endforeach
+											</select>
+										</div>
 									</div>
 
 									<div class="col-12">

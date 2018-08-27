@@ -681,7 +681,7 @@ class AdminCargoController extends Controller
       if ($cargo_consignment->exists()) {
         $cargo_consignment = $cargo_consignment->first();
 
-        if (session('role_id') == 1 || (in_array($cargo_consignment->junction_city_1_id, session('hubs')) || $cargo_consignment->junction_city_2_id, session('hubs')))) {
+        if (session('role_id') == 1 || (in_array($cargo_consignment->junction_city_1_id, session('hubs')) || in_array($cargo_consignment->junction_city_2_id, session('hubs')))) {
           if (in_array($cargo_consignment->status_id, [1, 2])) {
             $details = array();
 
