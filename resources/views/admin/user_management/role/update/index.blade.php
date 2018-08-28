@@ -21,7 +21,7 @@
 								<div class="row">
 									<div class="col-6">
 										<div class="form-group">
-											<input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" value="{{ $role->name }}">
+											<input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Designation is required" value="{{ $role->name }}">
 										</div>
 									</div>
 

@@ -79,8 +79,6 @@ class LoginController extends Controller
         }
 
         $this->authenticated($request, $guard->user());
-
-        return $this->authenticated($request, $guard->user()) ?: redirect()->intended($this->redirectPath());
     }
 
     protected function authenticated(Request $request, $user)
@@ -123,7 +121,7 @@ class LoginController extends Controller
 
         session(['packaging_charges_check' => $packaging_charges_check]);
 
-        return redirect()->intended($this->redirectPath());
+        return redirect()->route('cod.dashboard');
     }
 
     public function logout(Request $request)
