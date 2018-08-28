@@ -134,8 +134,8 @@ class AdminReportsController extends Controller
     }
     public function pickup_note_list(Request $request){
         $pickup_note = PickupNote::join('cities','cities.id','=','pickup_notes.city_id')
-            ->join('riders','riders.id','=','pickup_notes.rider_id')
-            ->join('admins as ab','ab.id','=','pickup_notes.assigned_by_user_id')
+            ->leftjoin('riders','riders.id','=','pickup_notes.rider_id')
+            ->leftjoin('admins as ab','ab.id','=','pickup_notes.assigned_by_user_id')
             ->leftjoin('admins as up','up.id','=','pickup_notes.updated_by')
             ->select(['pickup_notes.id as pn_id','cities.name as city','pickup_notes.pickups','pickup_notes.bookings as count','riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
             ->where('pickup_notes.status_id',5);
@@ -744,6 +744,7 @@ class AdminReportsController extends Controller
         $shipper = $request->shipper;
         $from_date = $request->from_date;
         $to_date = $request->to_date;
+        return $request;
          if($hub != null){
              $city = City::where('id',$hub)->select('id','name')->get();
          }else{
@@ -762,6 +763,9 @@ class AdminReportsController extends Controller
              })->with('city')->get();
              foreach ($shippers as $s){
                  $details['shipper'][$c->id][] = $s->name;
+//                 foreach ($s as $parcel){
+//
+//                 }
              }
 //                 $details['parcels'][] =
 //             $details[] = $users;
@@ -772,21 +776,22 @@ class AdminReportsController extends Controller
          $spreadsheet = new Spreadsheet();
          $spreadsheet->getActiveSheet()->fromArray($details['header']);
          $col = 4;
-         $hubid = '';
+
          foreach ($details['hubs'] as $key => $h) {
 
-                 foreach ($details['shipper'] as $hkey => $client){
+             $spreadsheet->getActiveSheet()->setCellValue('A'.$col,$h);
+             foreach ($details['shipper'] as $hkey => $client){
                      foreach ($client as $cli){
                          if($hkey == $key){
-                             $spreadsheet->getActiveSheet()->setCellValue('A'.$col,$h);
                              $spreadsheet->getActiveSheet()->setCellValue('B'.$col,$cli);
 
+                             $col++;
                          }
-                         $col++;
                      }
 
 
                 }
+             $col++;
          }
 //         $spreadsheet->getActiveSheet()->fromArray($details['shippers'], NULL, 'B4');
 
