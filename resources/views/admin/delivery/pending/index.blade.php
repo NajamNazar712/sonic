@@ -139,7 +139,7 @@
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                {data: 'origin', name: 'on.name', class: 'align-middle origin'},
+                {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                 {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                 {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},

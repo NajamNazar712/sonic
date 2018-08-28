@@ -82,7 +82,7 @@
             dropdownParent: $("#addRiderForm")
         });
         $('#route_list').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select a rider',
+            placeholder:'Select a route',
             dropdownParent: $("#addRiderForm")
         });
         $('#category_list').prepend('<option value="" selected="selected"></option>').select2({
