@@ -27,7 +27,7 @@
           </li>
         @endif
 
-        @if(session('user_type') == 1 || session('packaging_charges_check') && in_array(4, session('permissions')))
+        @if(session('packaging_charges_check') && (session('user_type') == 1 || in_array(4, session('permissions'))))
           <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Packaging</span></a>
               <ul class="menu-content">
                   <li><a class="menu-item" href="{{ route('cod.packaging.requests.index') }}">Request</a></li>
@@ -58,7 +58,11 @@
         @endif
 
         @if (session('user_type') == 1 || in_array(8, session('permissions')))
-          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a></li>
+          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a>
+              <ul class="menu-content">
+                  <li><a class="menu-item" href="{{ route('cod.reports.qsr.index') }}">QSR</a></li>
+              </ul>
+          </li>
         @endif
 
         <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><i class="la la-home"></i><span class="menu-title">Tracking</span></a></li>

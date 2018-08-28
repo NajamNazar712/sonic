@@ -174,7 +174,12 @@ class Permission
             'reports.qa.index' => 71,
             'reports.qa.list' => 71,
             'reports.daily_pickup_sales.index' => 73,
-            'reports.daily_pickup_sales.list' => 73,
+            'reports.daily_pickup_sales.export_to_excel' => 73,
+            'reports.daily_pickup_sales.download' => 73,
+            'reports.customer_sales.index' => 74,
+            'reports.customer_sales.export_to_excel' => 74,
+            'reports.customer_sales.download' => 74,
+
 
             'packaging.index' => 76,
             'packaging.list' => 76,

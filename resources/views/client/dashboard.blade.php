@@ -166,6 +166,25 @@
       </div>
     </div>
   </div>
+<!--Shipment Charges Modal -->
+<div class="modal fade text-left" id="ShipmentChargesModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ShipmentChargesModal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-primary white">
+                <h4 class="modal-title white" id="shipment_charges_modal_heading">Shipment Charges of # <span></span></h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <input type="hidden" id="shipment_charges_modal_id">
+            <div class="modal-body shipment_charges_body text-center" id="shipment_charges_body">
+
+            </div>
+        </div>
+    </div>
+</div>
+<!--Shipment Charges Modal -->
 <!--Dispute Modal -->
 <div class="modal fade text-left" id="DisputeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="DisputeModal"
      aria-hidden="true">
@@ -817,13 +836,24 @@
                 $('#dispute_type_select').val('').trigger('change');
             });
 
-
+            $('body').on('click','.view_charges',function () {
+                var shipment_id = $(this).parents('tr').attr('id');
+                $('#ShipmentChargesModal').modal('show');
+                $('#shipment_charges_modal_id').val(shipment_id);
+                $.ajax({
+                    url:'{!! route("cod.orders.charges") !!}',
+                    method: 'POST',
+                    data: {
+                        'shipment_id': shipment_id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    $('#shipment_charges_body').html(data);
+                    $('#shipment_charges_modal_heading span').text(shipment_id);
+                })
+            });
 
         });
-
-      
-
-
 
     </script>
 

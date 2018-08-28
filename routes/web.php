@@ -40,6 +40,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
        Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
        Route::post('search','Shippers\ShipperDashboardController@statistics_search')->name('search');
        Route::post('cancel','Shippers\ShipperDashboardController@order_cancel')->name('cancel');
+       Route::post('shipment_charges','Shippers\ShipperDashboardController@get_shipment_charges')->name('charges');
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
@@ -115,6 +116,13 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::prefix('update/{id}')->name('update.')->group(function() {
             Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@update_index')->name('index');
             Route::post('', 'Shippers\ShipperSubstituteAccountManagementController@update_store')->name('store');
+        });
+    });
+
+    Route::prefix('reports')->name('reports.')->group(function (){
+        Route::prefix('qsr')->name('qsr.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@qsr_index')->name('index');
+            Route::get('list','Shippers\ShipperReportsController@qsr_list')->name('list');
         });
     });
 
@@ -506,6 +514,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@daily_pickup_sales_index')->name('index');
             Route::post('export_to_excel', 'Admins\AdminReportsController@daily_pickup_sales_export_to_excel')->name('export_to_excel');
             Route::get('download', 'Admins\AdminReportsController@daily_pickup_sales_download')->name('download');
+        });
+        Route::prefix('customer_sales')->name('customer_sales.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@customer_sales_index')->name('index');
+            Route::post('export_to_excel', 'Admins\AdminReportsController@customer_sales_export_to_excel')->name('export_to_excel');
+            Route::get('download', 'Admins\AdminReportsController@customer_sales_download')->name('download');
         });
 
     });

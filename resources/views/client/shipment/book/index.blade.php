@@ -46,11 +46,11 @@
 
 										<div id="new_pickup_address" class="d-none">
 											<div class="form-group">
-												<textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>
+												<textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
 											</div>
 
 											<div class="form-group">
-												<input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required">
+												<input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters">
 											</div>
 
 											<div class="form-group">
@@ -88,11 +88,11 @@
 										</div>
 
 										<div class="form-group">
-											<input type="text" name="consignee_name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required">
+											<input type="text" name="consignee_name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-maxlength="100" data-msg-maxlength="Name can be maximum 100 characters">
 										</div>
 
 										<div class="form-group">
-											<textarea name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="250" data-msg-maxlength="Address can not be maximum 250 characters"></textarea>
+											<textarea name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
 										</div>
 
 										<div class="form-group">
@@ -112,7 +112,7 @@
 										<h4 class="form-section mb-2 text-center">Order Information</h4>
 
 										<div class="form-group">
-											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
+											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique" data-rule-maxlength="190" data-msg-maxlength="Order ID can be maximum 190 characters">
 										</div>
 
 										<div id="regular">
@@ -125,7 +125,7 @@
 											</div>
 
 											<div class="form-group">
-												<textarea name="item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="250" data-msg-maxlength="Item Description can not be maximum 250 characters"></textarea>
+												<textarea name="item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
 											</div>
 
 											<div class="form-group input-group">
@@ -159,7 +159,7 @@
 												</div>
 
 												<div class="form-group">
-													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="250" data-msg-maxlength="Item Description can not be maximum 250 characters"></textarea>
+													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
 												</div>
 
 												<div class="form-group input-group">
@@ -187,7 +187,7 @@
 															</div>
 
 															<div class="form-group">
-																<textarea name="item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="250" data-msg-maxlength="Item Description can not be maximum 250 characters"></textarea>
+																<textarea name="item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
 															</div>
 
 															<div class="form-group input-group">
@@ -242,7 +242,7 @@
 										</div>
 
 										<div class="form-group">
-											<textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="250" data-msg-maxlength="Special Instructions can not be maximum 250 characters"></textarea>
+											<textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters"></textarea>
 										</div>
 									</div>
 
