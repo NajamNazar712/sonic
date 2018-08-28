@@ -756,29 +756,37 @@ class AdminReportsController extends Controller
          foreach ($city as $c){
              $hubs = array();
              $users = array();
-             $details['hubs'][] = $c->name;
+             $details['hubs'][$c->id] = $c->name;
              $shippers = User::whereHas('city', function($query) use ($c) {
                  $query->where('hub_id', '=', $c->id);
-             })->get();
+             })->with('city')->get();
              foreach ($shippers as $s){
-                 $details['shippers'][] = $s->name;
-
-//                 $details['parcels'][] =
+                 $details['shipper'][$c->id][] = $s->name;
              }
+//                 $details['parcels'][] =
 //             $details[] = $users;
 //             $details[] = $hubs;
          }
+         //echo "<pre>";print_r($details); echo "</pre>";die();
 
          $spreadsheet = new Spreadsheet();
          $spreadsheet->getActiveSheet()->fromArray($details['header']);
          $col = 4;
-         foreach ($details['hubs'] as $h) {
+         $hubid = '';
+         foreach ($details['hubs'] as $key => $h) {
 
-             $spreadsheet->getActiveSheet()->setCellValue('A'.$col,$h);
-             foreach ($details['shippers'] as $client){
-                 $spreadsheet->getActiveSheet()->setCellValue('B'.$col,$client);
-                 $col++;
-             }
+                 foreach ($details['shipper'] as $hkey => $client){
+                     foreach ($client as $cli){
+                         if($hkey == $key){
+                             $spreadsheet->getActiveSheet()->setCellValue('A'.$col,$h);
+                             $spreadsheet->getActiveSheet()->setCellValue('B'.$col,$cli);
+
+                         }
+                         $col++;
+                     }
+
+
+                }
          }
 //         $spreadsheet->getActiveSheet()->fromArray($details['shippers'], NULL, 'B4');
 
@@ -796,5 +804,49 @@ class AdminReportsController extends Controller
         $file = public_path()."/reports/customer_sales_report.xlsx";
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
         return Response::download($file, 'customer_sales_report.xlsx',$headers);
+    }
+    public function completed_delivery_notes_index(){
+        return view('admin.reports.completed_delivery_notes_report');
+    }
+    public function completed_delivery_notes_list(Request $request){
+        $deliveries = DeliveryNote::
+        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->join('admins','admins.id','=','delivery_notes.admin_id')
+            ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
+            ->where('delivery_notes.status',1);
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($deliveries)
+            ->setRowAttr([
+                'data-hub' => function($deliveries) {
+                    return $deliveries->hub_id;
+                },
+            ])
+            ->editColumn('route', function ($rider) {
+                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->editColumn('created_at', function ($rider) {
+                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+            })
+            ->editColumn('updated_at', function ($rider) {
+                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y H:i:s A') : '';
+            })
+            ->make(true);
+
     }
 }
