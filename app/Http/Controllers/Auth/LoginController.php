@@ -139,6 +139,6 @@ class LoginController extends Controller
 
         $request->session()->invalidate();
 
-        return $this->loggedOut($request) ?: redirect('/');
+        return redirect()->route('cod.login');
     }
 }

@@ -255,7 +255,7 @@
 											if (data.complete) {
 												setTimeout(function() {
 													window.location.href = '{{ route('admin.pickups.receive.index') }}';
-												}, 5000);
+												}, 2500);
 											}
 										}
 										else {

@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers\Admins;
 
-use App\Http\Models\Admin\Admin;
-use App\Http\Models\Dispute;
-use App\Http\Models\DisputeShipment;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -12,6 +9,10 @@ use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 
+use App\Http\Models\Admin\Admin;
+use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Dispute;
+use App\Http\Models\DisputeShipment;
 use App\Http\Models\Rider;
 use App\Http\Models\Shipment;
 use App\Http\Models\ReceivingSheet;
@@ -36,6 +37,15 @@ class AdminPickupsController extends Controller
     }
 
     static public function generate($user_id, $shipment_id) {
+      if ($defined_pickup_weight->exists()) {
+        $defined_pickup_weight = $defined_pickup_weight->first();
+
+        $defined_pickup_weight = $defined_pickup_weight->setting_value;
+      }
+      else {
+        $defined_pickup_weight = 10;
+      }
+
       $shipment = Shipment::find($shipment_id);
 
       $pickup_request = PickupRequest::whereDate('pickup_date', $shipment->pickup_date)->where('pickup_address_id', $shipment->pickup_address_id)->where('status', 0);
@@ -46,7 +56,7 @@ class AdminPickupsController extends Controller
         $bookings = $pickup_request->bookings + 1;
         $total_estimated_weight = $pickup_request->total_estimated_weight + $shipment->estimated_weight;
 
-        if ($total_estimated_weight < 10) {
+        if ($total_estimated_weight < $defined_pickup_weight) {
           $pickup_type = 0;
         }
         else {
@@ -67,7 +77,7 @@ class AdminPickupsController extends Controller
         $pickup_request->bookings = 1;
         $pickup_request->total_estimated_weight = $shipment->estimated_weight;
 
-        if ($shipment->estimated_weight < 10) {
+        if ($shipment->estimated_weight < $defined_pickup_weight) {
           $pickup_request->pickup_type = 0;
         }
         else {
@@ -176,6 +186,17 @@ class AdminPickupsController extends Controller
         $total_estimated_weight += $pickup_request->total_estimated_weight;
       }
 
+       $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
+
+      if ($defined_pickup_weight->exists()) {
+        $defined_pickup_weight = $defined_pickup_weight->first();
+
+        $defined_pickup_weight = $defined_pickup_weight->setting_value;
+      }
+      else {
+        $defined_pickup_weight = 10;
+      }
+
       $existing_pickup_note = FALSE;
 
       $pickup_note = PickupNote::where('rider_id', $rider_id)->where('status_id', '=', 1);
@@ -188,7 +209,7 @@ class AdminPickupsController extends Controller
 
         $pickup_note->total_estimated_weight += $total_estimated_weight;
 
-        if ($total_estimated_weight < 10) {
+        if ($total_estimated_weight < $defined_pickup_weight) {
           $pickup_note->pickup_type = 0;
         }
         else {
@@ -207,7 +228,7 @@ class AdminPickupsController extends Controller
         $pickup_note->bookings = $bookings;
         $pickup_note->total_estimated_weight = $total_estimated_weight;
 
-        if ($total_estimated_weight < 10) {
+        if ($total_estimated_weight < $defined_pickup_weight) {
           $pickup_note->pickup_type = 0;
         }
         else {
