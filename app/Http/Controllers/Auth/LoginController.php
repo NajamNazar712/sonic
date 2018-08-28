@@ -7,8 +7,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Support\Facades\Auth;
 
-use App\Http\Models\PackagingCharge;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\SubstituteUserPermission;
+use App\Http\Models\PackagingCharge;
 
 class LoginController extends Controller
 {
@@ -78,7 +79,7 @@ class LoginController extends Controller
             $guard = Auth::guard('substitute_users');
         }
 
-        $this->authenticated($request, $guard->user());
+        return $this->authenticated($request, $guard->user());
     }
 
     protected function authenticated(Request $request, $user)
@@ -103,7 +104,17 @@ class LoginController extends Controller
             }
         }
         else {
-            if (!$user->status) {
+            $shipper = User::find($user->user_id);
+
+            if ($shipper->blacklist) {
+                auth('substitute_users')->logout();
+                return back()->with('info', 'Your Shipper\'s Account is Blacklisted, Contact Admin');
+            }
+            else if ($shipper->status != 3) {
+                auth('substitute_users')->logout();
+                return back()->with('info', 'Your Shipper\'s Account is Not Activated Yet, Contact Admin');
+            }
+            else if (!$user->status) {
                 auth('substitute_users')->logout();
                 return back()->with('info', 'Your Account is Disabled');
             }
