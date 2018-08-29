@@ -11,6 +11,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\BookingType;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\RateStatus;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\Product;
@@ -780,7 +781,11 @@ class ShipperShipmentBookController extends Controller
               $errors['Row #' . $row_id] = $validate->errors()->all();
             }
 
-            if (empty($errors)) {
+            if (empty($errors['Row #' . $row_id])) {
+              if (!RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $row['shipping_mode_id'])->where('status', 1)->exists()) {
+                $errors['Row #' . $row_id][] = 'Booking is not enabled for Shipping Mode ID #' . $row['shipping_mode_id'] . ' on your Account';
+              }
+
               $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
               if (!$user_shipping_info->city->status) {
