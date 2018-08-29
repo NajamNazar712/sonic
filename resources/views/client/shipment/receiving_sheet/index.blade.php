@@ -198,7 +198,7 @@
 
 							table.button(0).disable();
 
-							table.ajax.reload();
+							table.draw('false');
 						});
 					}
 				}],
@@ -335,7 +335,7 @@
 
 						table.row($('.datatable tbody tr#' + shipment_id)).deselect();
 
-						table.ajax.reload();
+						table.draw('false');
 
 						$('#add_in_receiving_sheet').modal('hide');
 					});
@@ -435,7 +435,7 @@
 									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 
-								table.ajax.reload();
+								table.draw('false');
 							});
 						}
 					});

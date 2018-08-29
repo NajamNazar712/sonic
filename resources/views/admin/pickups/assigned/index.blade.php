@@ -170,7 +170,7 @@
 
 							table.button('.print').disable();
 
-							table.ajax.reload();
+							table.draw('false');
 						}
 					}],
 				@else
@@ -327,7 +327,7 @@
 									table.button('.print').disable();
 								}
 
-								table.ajax.reload();
+								table.draw('false');
 							});
 						}
 					});
@@ -381,7 +381,7 @@
 						table.button('.print').disable();
 					}
 
-					table.ajax.reload();
+					table.draw('false');
 				}
 			});
 		});

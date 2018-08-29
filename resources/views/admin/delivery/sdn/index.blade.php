@@ -231,7 +231,7 @@
                     }).done(function (data) {
                         if(data.status == 1){
 
-                            table.ajax.reload();
+                            table.draw('false');
                             $('#deposit_slip').val('');
                             $('#uploadDepositSlip').modal('hide');
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
