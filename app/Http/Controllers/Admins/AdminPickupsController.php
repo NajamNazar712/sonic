@@ -37,6 +37,8 @@ class AdminPickupsController extends Controller
     }
 
     static public function generate($user_id, $shipment_id) {
+      $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
+
       if ($defined_pickup_weight->exists()) {
         $defined_pickup_weight = $defined_pickup_weight->first();
 
@@ -186,7 +188,7 @@ class AdminPickupsController extends Controller
         $total_estimated_weight += $pickup_request->total_estimated_weight;
       }
 
-       $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
+      $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
 
       if ($defined_pickup_weight->exists()) {
         $defined_pickup_weight = $defined_pickup_weight->first();

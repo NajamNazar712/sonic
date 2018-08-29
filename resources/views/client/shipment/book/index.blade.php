@@ -666,6 +666,8 @@
 						}
 					});
 
+					$('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
+
 					$(this).find('.price').inputmask({
 						'alias': 'integer',
 						'allowMinus': false,
@@ -798,6 +800,8 @@
 					try_and_buy_total_quantity();
 				}
 			});
+
+			$('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
 
 			$('.price').inputmask({
 				'alias': 'integer',
