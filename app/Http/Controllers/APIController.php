@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Shippers\ShipperShipmentBookController;
+use App\Http\Controllers\NotificationsController;
 
 use Validator;
 use Illuminate\Validation\Rule;
@@ -106,17 +107,19 @@ class APIController extends Controller
 
             $city = $pickup_address->city;
 
-            $detail['city']['id'] = $city->id;
-            $detail['city']['name'] = $city->name;
+            if (!$city->status) {
+              $detail['city']['id'] = $city->id;
+              $detail['city']['name'] = $city->name;
 
-            $details[] = $detail;
+              $details[] = $detail;
+            }
           }
         }
 
         return response()->json(['status' => 0, 'message' => 'Pickup Addresses', 'pickup_addresses' => $details]);
       }
       else {
-        return response()->json(['status' => 1, 'message' => ' No Pickup Address']);
+        return response()->json(['status' => 1, 'message' => 'No Pickup Address']);
       }
     }
 
@@ -139,9 +142,11 @@ class APIController extends Controller
         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
       }
       else {
-        $a = 'Temp';
-
         $city = City::find($request->input('city_id'));
+
+        if (!$city->status) {
+          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('city_id')]) . ' is deactivated';
+        }
 
         if (!$city->pickup) {
           return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $request->input('city_id')]);
@@ -180,8 +185,8 @@ class APIController extends Controller
         })],
         'information_display' => ['required', 'boolean'],
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
-        'consignee_name' => ['required', 'between:1,255'],
-        'consignee_address' => ['required', 'between:1,255'],
+        'consignee_name' => ['required', 'between:1,100'],
+        'consignee_address' => ['required', 'between:1,190'],
         'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}$/'],
         'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{4}-[0-9]{7}$/'],
         'consignee_email_address' => ['nullable', 'filled', 'email'],
@@ -190,7 +195,7 @@ class APIController extends Controller
         })],
         'package_type' => ['required_if:service_type_id,3', 'boolean'],
         'pickup_date' => ['required', 'date', 'after:yesterday'],
-        'special_instructions' => ['nullable', 'filled'],
+        'special_instructions' => ['nullable', 'filled', 'between:0,190'],
         'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
         'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
         'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
@@ -198,18 +203,18 @@ class APIController extends Controller
         'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:payment_modes,id'],
 
         'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-        'item_description' => ['nullable'],
+        'item_description' => ['nullable', 'between:0,190'],
         'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
         'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
         'item_price' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
         'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
-        'replacement_item_description' => ['nullable'],
+        'replacement_item_description' => ['nullable', 'between:0,190'],
         'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
         'items' => ['required_if:service_type_id,3', 'array'],
         'items.*.item_product_type_id' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'exists:products,id'],
-        'items.*.item_description' => ['nullable'],
+        'items.*.item_description' => ['nullable', 'between:0,190'],
         'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,1000'],
         'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
         'items.*.item_price' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
@@ -225,8 +230,18 @@ class APIController extends Controller
       else {
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
+        if (!$user_shipping_info->city->status) {
+          return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
+        }
+
         if (!$user_shipping_info->city->pickup) {
           return response()->json(['status' => 1, 'message' => 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id]);
+        }
+
+        $consignee_city = City::find($request->input('consignee_city_id'));
+
+        if (!$consignee_city->status) {
+          return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
         }
 
         $pickup_city_id = $user_shipping_info->city_id;
@@ -395,6 +410,8 @@ class APIController extends Controller
           }
         }
 
+        NotificationsController::send(2, $shipment_id);
+
         return response()->json(['status' => 0, 'message' => 'Shipment has been Booked!', 'tracking_number' => $tracking_number]);
       }
     }
@@ -528,9 +545,11 @@ class APIController extends Controller
     public function cities(Request $request) {
       $user_id = $request->user_id;
 
-      $cities = City::all();
+      $cities = City::where('status', 1);
 
-      if (count($cities)) {
+      if ($cities->exists()) {
+        $cities = $cities->get();
+
         $details = array();
 
         foreach ($cities as $city) {

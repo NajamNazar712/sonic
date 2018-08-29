@@ -64,13 +64,13 @@
 									<table class="table table-bordered">
 										<thead>
 											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Show Informaiton on Air Waybill</th>
+												<th colspan="2" class="border-primary border-darken-1">Show Information on Air Waybill</th>
 											</tr>
 										</thead>
 										<tbody>
 											<tr role="row">
-												<td class="text-center">Hide</td>
-												<td class="text-center">Show</td>
+												<td class="text-center">No</td>
+												<td class="text-center">Yes</td>
 											</tr>
 										</tbody>
 									</table>
