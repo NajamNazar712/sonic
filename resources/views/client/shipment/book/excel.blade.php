@@ -78,7 +78,7 @@
 									<table class="table table-bordered">
 										<thead>
 											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Insurance</th>
+												<th colspan="2" class="border-primary border-darken-1">Item Insurance</th>
 											</tr>
 										</thead>
 										<tbody>
