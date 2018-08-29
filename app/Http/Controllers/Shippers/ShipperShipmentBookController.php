@@ -727,9 +727,9 @@ class ShipperShipmentBookController extends Controller
         'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:No,Yes'],
         'item_price' => ['required_if:item_insurance,Yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
-        'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
+        'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
         'replacement_item_description' => ['nullable', 'between:0,190'],
-        'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+        'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
         'pickup_date' => ['required', 'date', 'after:yesterday'],
         'special_instructions' => ['nullable', 'between:0,190'],
