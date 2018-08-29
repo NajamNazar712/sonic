@@ -163,7 +163,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(66, session('permissions')))
-                            <li><a class="menu-item" href="#">Delivery Notes Completed</a></li>
+                            <li><a class="menu-item" href="{{route('admin.reports.completed_delivery_notes.index')}}">Delivery Notes Completed</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(67, session('permissions')))
