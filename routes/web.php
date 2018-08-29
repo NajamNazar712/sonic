@@ -520,6 +520,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('export_to_excel', 'Admins\AdminReportsController@customer_sales_export_to_excel')->name('export_to_excel');
             Route::get('download', 'Admins\AdminReportsController@customer_sales_download')->name('download');
         });
+        Route::prefix('completed_delivery_notes')->name('completed_delivery_notes.')->group(function(){
+            Route::get('','Admins\AdminReportsController@completed_delivery_notes_index')->name('index');
+            Route::get('list','Admins\AdminReportsController@completed_delivery_notes_list')->name('list');
+        });
 
     });
 

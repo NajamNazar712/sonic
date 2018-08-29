@@ -657,6 +657,15 @@ class ReturnController extends Controller
                 $count = $count-1;
                 ReturnNote::where('id',$return_note)->update(['shipments_count'=>$count]);
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>$shipper_status]);
+
+                ShipmentsJourney::create([
+                    'shipment_id'=>$parcel->id,
+                    'shipper_status_id'=>$shipper_status,
+                    'consignee_status_id'=>$shipper_status,
+                    'status_reason_id'=>null,
+                    'remarks'=>null,
+                    'admin_id'=>Auth::id()
+                ]);
                 return ['status' => 0, 'success' => 'Return Shipment is successfully removed'];
             }else{
                 return ['status' => 1, 'error' => 'Something went wrong'];
