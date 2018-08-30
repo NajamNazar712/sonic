@@ -108,7 +108,7 @@ class APIController extends Controller
 
             $city = $pickup_address->city;
 
-            if (!$city->status) {
+            if ($city->status) {
               $detail['city']['id'] = $city->id;
               $detail['city']['name'] = $city->name;
 
@@ -117,7 +117,12 @@ class APIController extends Controller
           }
         }
 
-        return response()->json(['status' => 0, 'message' => 'Pickup Addresses', 'pickup_addresses' => $details]);
+        if (!empty($details)) {
+          return response()->json(['status' => 0, 'message' => 'Pickup Addresses', 'pickup_addresses' => $details]);
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'No Pickup Address']);
+        }
       }
       else {
         return response()->json(['status' => 1, 'message' => 'No Pickup Address']);
