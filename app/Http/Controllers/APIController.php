@@ -230,7 +230,7 @@ class APIController extends Controller
       }
       else {
         if (!RateStatus::where('user_id', session('user_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('status', 1)->exists()) {
-          return response()->json(['status' => 1, 'message' => 'Booking is not enabled for Shipping Mode ID #' . $request->input('shipping_mode_id') . ' on your Account';
+          return response()->json(['status' => 1, 'message' => 'Booking is not enabled for Shipping Mode ID #' . $request->input('shipping_mode_id') . ' on your Account']);
         }
 
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
