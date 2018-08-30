@@ -393,44 +393,24 @@ class DeliveryController extends Controller
                 $cod = $delivery->total_cod_amount;
                 $count = $count-1;
                 $cod = $cod - $parcel->amount;
-                DeliveryNote::where('id',$delivery_note)->update(['shipments_count'=>$count,'total_cod_amount'=>$cod]);
-                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>4]);
-                if($shipment->booking_type_id == 1){
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment->id,
-                        'shipper_status_id'=>7,
-                        'consignee_status_id'=>7,
-                        'status_reason_id'=>null,
-                        'remarks'=>null,
-                        'admin_id'=>Auth::id()
-                    ]);
-                }else if($shipment->booking_type_id == 2){
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment->id,
-                        'shipper_status_id'=>45,
-                        'consignee_status_id'=>45,
-                        'status_reason_id'=>null,
-                        'remarks'=>null,
-                        'admin_id'=>Auth::id()
-                    ]);
-                }else if($shipment->booking_type_id == 3){
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment->id,
-                        'shipper_status_id'=>46,
-                        'consignee_status_id'=>46,
-                        'status_reason_id'=>null,
-                        'remarks'=>null,
-                        'admin_id'=>Auth::id()
-                    ]);
+                if($count == 0){
+                    DeliveryNote::where('id',$delivery_note)->update(['shipments_count'=>$count,'total_cod_amount'=>$cod,'status'=>4]);
+                }else{
+
+                    DeliveryNote::where('id',$delivery_note)->update(['shipments_count'=>$count,'total_cod_amount'=>$cod]);
                 }
-                ShipmentsJourney::create([
-                    'shipment_id'=>$request->shipment_id,
-                    'shipper_status_id'=>4,
-                    'consignee_status_id'=>4,
-                    'status_reason_id'=>null,
-                    'remarks'=>null,
-                    'admin_id'=>Auth::id()
-                ]);
+                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>6]);
+
+                    ShipmentsJourney::create([
+                        'shipment_id' => $shipment->id,
+                        'shipper_status_id' => 6,
+                        'consignee_status_id' => null,
+                        'status_reason_id' => null,
+                        'remarks' => null,
+                        'admin_id' => Auth::id()
+                    ]);
+
+
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
             }else{
                 return ['status' => 1, 'error' => 'Something went wrong'];

@@ -15,15 +15,11 @@ class GlobalSettingsController extends Controller
         $this->middleware('Permission');
     }
     public function pickup_index(){
-        $settings = GlobalSettings::all();
+        $settings = GlobalSettings::where('type','=','pickup_weight')->first();
         return view('admin.settings.pickup')->with('settings',$settings);
     }
     public function add_pickup_weight(Request $request){
 
-//        $result = GlobalSettings::updateOrCreate(['setting_value'=>$request->pickup_weight,'type'=>'pickup_weight']);
-//        if($result){
-//            return redirect()->back()->with('success','Pickup request weight added/updated');
-//        }
         if($request->isMethod('post')){
             $result = GlobalSettings::create([
                 'setting_value'=>$request->pickup_weight,
