@@ -696,6 +696,7 @@ class ShipperShipmentBookController extends Controller
         'exists' => 'Given :attribute is of Invalid ID.',
         'unique' => ':attribute is already Present.',
         'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+        'in' => ':attribute must be No or Yes.',
 
         'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
 
@@ -740,7 +741,7 @@ class ShipperShipmentBookController extends Controller
         'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:payment_modes,id']
       ];
 
-      $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_id', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_price', 14 => 'item_insurance', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'pickup_date', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id'];
+      $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_id', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'pickup_date', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id'];
 
       $file = $request->file('shipments');
 
