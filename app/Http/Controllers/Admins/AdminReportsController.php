@@ -777,7 +777,7 @@ class AdminReportsController extends Controller
          }
 
          $details = array();
-         $shippers_ = array();
+         $shippers = array();
          unset($months_array[0]);
 
          $details['header'] = ['Origin', 'Client Name' ];
@@ -791,39 +791,55 @@ class AdminReportsController extends Controller
              $users = array();
              $details['hubs'][$c->id] = $c->name;
              if ($shipper_filter != null) {
-                 $shippers = User::where('id', $shipper_filter)->whereHas('city', function ($query) use ($c) {
-                     $query->where('hub_id', '=', $c->id);
-                 })->get();
+                    $shippers = User::where('id', $shipper_filter)->whereHas('city', function ($query) use ($c) {
+                        $query->where('hub_id', '=', $c->id);
+                    });
+                 if($shippers->exists()){
+                     $shippers = $shippers->get();
+                 }
              } else {
                  $shippers = User::whereHas('city', function ($query) use ($c) {
                      $query->where('hub_id', '=', $c->id);
-                 })->get();
+                 });
+                 if($shippers->exists()){
+                     $shippers = $shippers->get();
+                 }
              }
 
-
-//             if (!$shippers->isEmpty()) {
+             if (!empty($shippers)) {
              foreach ($shippers as $key => $s) {
                  $details['shipper'][$c->id][$s->id] = $s->name;
                  foreach ($months_array as $month) {
                      $thisMonth = Carbon::parse($month)->month;
                      $thisYear = Carbon::parse($month)->year;
-                     $details['parcels'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereMonth('created_at', $thisMonth)->whereYear('created_at', $thisYear)->count();
-                     $details['weight'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereMonth('created_at', $thisMonth)->whereYear('created_at', $thisYear)->sum('actual_weight');
-                     $details['amount'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereMonth('created_at', $thisMonth)->whereYear('created_at', $thisYear)->sum('amount');
-                     $details['revenue'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereMonth('created_at', $thisMonth)->whereYear('created_at', $thisYear)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                     $details['parcels'][$s->id][$month] = Shipment::where('user_id', $s->id)
+                         ->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                             $query->whereMonth('created_at', $thisMonth)
+                                 ->whereYear('created_at', $thisYear)
+                                 ->where('shipper_status_id', 2);
+                         })->count();
+                     $details['weight'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                         $query->whereMonth('created_at', $thisMonth)
+                             ->whereYear('created_at', $thisYear)
+                             ->where('shipper_status_id', 2);
+                     })->sum('actual_weight');
+                     $details['amount'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                         $query->whereMonth('created_at', $thisMonth)
+                             ->whereYear('created_at', $thisYear)
+                             ->where('shipper_status_id', 2);
+                     })->sum('amount');
+                     $details['revenue'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                         $query->whereMonth('created_at', $thisMonth)
+                             ->whereYear('created_at', $thisYear)
+                             ->where('shipper_status_id', 2);
+                     })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                  }
              }
-//         }else{
-//                 return response()->json(['failure'=>0,'error'=>'No data found! first']);
-//             }
+             }
          }
-//         if($shippers->isEmpty()){
-//             return $shippers->count();
-//         }else{
-//             return "Emptyy";
-//         }
-//         echo "<pre>";print_r($details);echo "</pre>";die();
+
+         //echo "<pre>";print_r($details);echo "</pre>";die();
          $spreadsheet = new Spreadsheet();
          $sheet = $spreadsheet->getActiveSheet();
          $cell_st =[
@@ -869,8 +885,8 @@ class AdminReportsController extends Controller
              $sheet->setCellValue('A'.$col,$h);
              $sheet->getStyle('A'.$col)->applyFromArray($cell_st);
 
-             if(!$shippers->isEmpty()){
-                 return 123;
+             if(!empty($shippers)){
+
              foreach ($details['shipper'] as $hkey => $client){
                      foreach ($client as $ship_key => $cli){
                          if($hkey == $key){
