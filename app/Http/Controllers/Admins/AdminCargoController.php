@@ -127,7 +127,7 @@ class AdminCargoController extends Controller
                 $details['amount'] = $shipment->amount;
                 $details['shipping_mode'] = $shipment->shipping_mode->mode;
 
-                $hub = City::find($shipment->consignee_city->hub_id);
+                $hub = $shipment->consignee_city->hub_city;
 
                 $details['hub']['id'] = $hub->id;
                 $details['hub']['name'] = $hub->name;
@@ -180,14 +180,14 @@ class AdminCargoController extends Controller
     public function create_consignment_details(Request $request) {
       $shipment = Shipment::find(current($request->shipment_ids));
 
-      $origin = $shipment->pickup_address->city->hub;
+      $origin = $shipment->pickup_address->city->hub_city;
 
       $origin_details = array();
 
       $origin_details['id'] = $origin->id;
       $origin_details['name'] = $origin->name;
 
-      $destination = $shipment->consignee_city->hub;
+      $destination = $shipment->consignee_city->hub_city;
 
       $destination_details = array();
 
@@ -210,7 +210,7 @@ class AdminCargoController extends Controller
       $details['sender']['name'] = $sender->name;
 
       $details['receivers'] = Admin::where('status', 1)->whereHas('hubs', function ($query) use($destination_details) {
-        $query->whereIn('hub_id', $destination_details['id']);
+        $query->where('hub_id',  $destination_details['id']);
       })->select(['id', 'name']);
 
       if ($request->cargo_type == 1) {
@@ -543,10 +543,10 @@ class AdminCargoController extends Controller
                               <td>' . (($receiver) ? $receiver['name'] : '') . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Department</strong></td>
-                              <td>' . $sender['department'] . '</td>
-                              <td class="color secondary"><strong>Department</strong></td>
-                              <td>' . (($receiver) ? $receiver['department'] : '') . '</td>
+                              <td class="color secondary"><strong>Role</strong></td>
+                              <td>' . $sender->role->name  . ' - ' . $sender->role->department->name . '</td>
+                              <td class="color secondary"><strong>Role</strong></td>
+                              <td>' . (($receiver) ? $receiver->role->department->name : '') . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Phone No.</strong></td>
@@ -654,7 +654,13 @@ class AdminCargoController extends Controller
     }
 
     public function in_transit_junctions(Request $request) {
-      return City::select(['id', 'name'])->where('hub', 1)->where('status', 1)->get();
+      $cities = City::select(['id', 'name'])->where('hub', 1)->where('status', 1);
+
+      if (session('role_id') != 1) {
+        $cities = $cities->whereIn('id', session('hubs'));
+      }
+
+      return $cities->get();
     }
 
     public function in_transit_details(Request $request) {
@@ -736,7 +742,9 @@ class AdminCargoController extends Controller
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
 
-        $details['receivers'] = Admin::all(['id', 'name']);
+        $details['receivers'] = Admin::where('status', 1)->whereHas('hubs', function ($query) use($destination_details) {
+          $query->where('hub_id',  $destination_details['id']);
+        })->select(['id', 'name']);
       }
       else {
         $details['cargo_consignment']['junction_hub_1'] = $cargo_consignment->junction_hub_1->name;
@@ -851,7 +859,7 @@ class AdminCargoController extends Controller
               $details['tracking_number'] = $shipment->tracking_number;
               $details['origin'] = $shipment->pickup_address->city->name;
               $details['destination'] = $consignee_city->name;
-              $details['hub'] = $consignee_city->hub->name;
+              $details['hub'] = $consignee_city->hub_city->name;
               $details['consignee'] = $shipment->consignee_name;
               $details['amount'] = $shipment->amount;
               $details['shipping_mode'] = $shipment->shipping_mode->mode;
