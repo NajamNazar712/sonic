@@ -327,6 +327,8 @@
 						});
 					}
 					else {
+						$('#add_shipment_form button.add').prop('disabled', false);
+
 						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 					}
 
