@@ -41,7 +41,7 @@ class Admin extends Authenticatable
      */
 
     public function role() {
-        return $this->belongsTo('App\Http\Models\Admin\Role', 'role_id', 'id');
+        return $this->belongsTo('App\Http\Models\Admin\AdminRole', 'role_id', 'id');
     }
 
     public function hubs() {

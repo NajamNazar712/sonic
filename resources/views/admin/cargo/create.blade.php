@@ -66,7 +66,7 @@
 
 													<div class="col">
 														<div class="form-group">
-															<input type="hidden" name="origin_city_id" class="origin_city_id">
+															<input type="hidden" name="origin_hub_id" class="origin_hub_id">
 
 															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 origin"></p>
 														</div>
@@ -74,7 +74,7 @@
 
 													<div class="col">
 														<div class="form-group">
-															<input type="hidden" name="destination_city_id" class="destination_city_id">
+															<input type="hidden" name="destination_hub_id" class="destination_hub_id">
 
 															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 destination"></p>
 														</div>
@@ -91,14 +91,6 @@
 														<div class="form-group">
 															<select name="junction_2" class="select2 junction_2" data-rule-required="true" data-msg-required="Junction 2 is required">
 															</select>
-														</div>
-													</div>
-
-													<div class="col">
-														<div class="form-group">
-															<input type="hidden" name="hub_id" class="hub_id">
-
-															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 hub"></p>
 														</div>
 													</div>
 
@@ -159,20 +151,8 @@
 
 													<div class="col">
 														<div class="form-group">
-															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_hub">Hub</p>
-														</div>
-													</div>
-
-													<div class="col">
-														<div class="form-group">
 															<select name="receiver_id" class="select2 receiver_id">
 															</select>
-														</div>
-													</div>
-
-													<div class="col">
-														<div class="form-group">
-															<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 receiver_hub">Hub</p>
 														</div>
 													</div>
 												</div>
@@ -392,10 +372,10 @@
 					$('#cargo_consignment form .cargo_type').val(cargo_type);
 					$('#cargo_consignment form .shipment_ids').val(shipment_ids);
 
-					$('#cargo_consignment form .origin_city_id').val(data.origin.id);
+					$('#cargo_consignment form .origin_hub_id').val(data.origin.id);
 					$('#cargo_consignment form .origin').html(data.origin.name);
 
-					$('#cargo_consignment form .destination_city_id').val(data.destination.id);
+					$('#cargo_consignment form .destination_hub_id').val(data.destination.id);
 					$('#cargo_consignment form .destination').html(data.destination.name);
 
 					$.each(data.junctions, function(index, junction) {
@@ -417,9 +397,6 @@
 					}).bind('change', function() {
 						$(this).valid();
 					});
-
-					$('#cargo_consignment form .hub_id').val(data.hub.id);
-					$('#cargo_consignment form .hub').html(data.hub.name);
 
 					$('#cargo_consignment form input.seal_number').inputmask({
 						'alias': 'integer',

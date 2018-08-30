@@ -61,7 +61,6 @@
 										<th class="border-primary border-darken-1">Cargo No.</th>
 										<th class="border-primary border-darken-1">Origin</th>
 										<th class="border-primary border-darken-1">Destination</th>
-										<th class="border-primary border-darken-1">Hub</th>
 										<th class="border-primary border-darken-1">Shipment(s)</th>
 										<th class="border-primary border-darken-1">Shipping Mode</th>
 										<th class="border-primary border-darken-1">Transit At</th>
@@ -101,7 +100,6 @@
 															<th class="border-primary border-darken-1">Cargo No.</th>
 															<th class="border-primary border-darken-1">Origin</th>
 															<th class="border-primary border-darken-1">Destination</th>
-															<th class="border-primary border-darken-1">Hub</th>
 															<th class="border-primary border-darken-1">Seal No.</th>
 														</tr>
 													</thead>
@@ -247,20 +245,8 @@
 
 														<div class="col">
 															<div class="form-group">
-																<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_hub">Hub</p>
-															</div>
-														</div>
-
-														<div class="col">
-															<div class="form-group">
 																<select name="receiver_id" class="select2 receiver_id">
 																</select>
-															</div>
-														</div>
-
-														<div class="col">
-															<div class="form-group">
-																<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 receiver_hub">Hub</p>
 															</div>
 														</div>
 													</div>
@@ -483,9 +469,8 @@
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'id', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
-					{data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-					{data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-					{data: 'hub', name: 'hc.name', class: 'align-middle hub'},
+					{data: 'origin', name: 'oh.name', class: 'align-middle origin'},
+					{data: 'destination', name: 'dh.name', class: 'align-middle destination'},
 					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle shipments'},
 					{data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
 					{data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
@@ -536,7 +521,6 @@
 						{name: 'cargo_number', class: 'align-middle cargo_number'},
 						{name: 'origin', class: 'align-middle origin'},
 						{name: 'destination', class: 'align-middle destination'},
-						{name: 'hub', class: 'align-middle hub'},
 						{name: 'seal_number', class: 'align-middle seal_number'}
 					],
 					rowCallback: function(row, data, index) {
@@ -654,7 +638,7 @@
 								$('#receive_at_link #scan_seal_number_form .seal_number').val('');
 
 								if (data.status == 0) {
-									receive_at_link_table.row.add([0, data.details.cargo_number, data.details.origin, data.details.destination, data.details.hub, data.details.seal_number]).node().id = data.details.cargo_number;
+									receive_at_link_table.row.add([0, data.details.cargo_number, data.details.origin, data.details.destination, data.details.seal_number]).node().id = data.details.cargo_number;
 									receive_at_link_table.draw(false);
 
 									cargo_consignment_ids.push(data.details.cargo_number);
@@ -1010,8 +994,8 @@
 								$(this).valid();
 							});
 
-							$('#add_forwarding_details form .junction_1').val(data.cargo_consignment.junction_city_1_id).trigger('change');
-							$('#add_forwarding_details form .junction_2').val(data.cargo_consignment.junction_city_2_id).trigger('change');
+							$('#add_forwarding_details form .junction_1').val(data.cargo_consignment.junction_hub_1_id).trigger('change');
+							$('#add_forwarding_details form .junction_2').val(data.cargo_consignment.junction_hub_2_id).trigger('change');
 							picker.pickadate('picker').set('select', data.cargo_consignment.expected_arrival_date);
 							$('#add_forwarding_details form .shipping_mode').val(data.cargo_consignment.shipping_mode_id).trigger('change');
 							$('#add_forwarding_details form .transport_mode').val(data.cargo_consignment.transport_mode_id).trigger('change');
@@ -1045,8 +1029,8 @@
 
 						var details = '<table class="table table-sm table-bordered"><tbody>';
 
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Junction 1</strong></td><td>' + cargo_consignment.junction_city_1 + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Junction 2</strong></td><td>' + cargo_consignment.junction_city_2 + '</td></tr>';
+						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Junction 1</strong></td><td>' + cargo_consignment.junction_hub_1 + '</td></tr>';
+						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Junction 2</strong></td><td>' + cargo_consignment.junction_hub_2 + '</td></tr>';
 						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Expected Arrival Date</strong></td><td>' + cargo_consignment.expected_arrival_date + '</td></tr>';
 						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Shipping Mode</strong></td><td>' + cargo_consignment.shipping_mode + '</td></tr>';
 						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Transport Mode</strong></td><td>' + cargo_consignment.transport_mode + '</td></tr>';
