@@ -79,7 +79,7 @@ class APIController extends Controller
       'email' => ':attribute must be a Valid Email Address.',
       'exists' => 'Given :attribute is of Invalid ID.',
       'unique' => ':attribute is already Present.',
-      'date' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+      'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
 
       'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
 
@@ -200,7 +200,7 @@ class APIController extends Controller
           $query->where('user_id', $user_id);
         })],
         'package_type' => ['required_if:service_type_id,3', 'boolean'],
-        'pickup_date' => ['required', 'date_format:d-m-Y', 'after:yesterday'],
+        'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
         'special_instructions' => ['nullable', 'filled', 'between:0,190'],
         'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
         'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
