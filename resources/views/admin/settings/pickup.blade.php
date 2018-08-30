@@ -41,13 +41,12 @@
                                         </div>
                                         @php
                                         $pickup_weight = '';
-                                        if($settings->isEmpty() == false){
-                                            if(isset($settings[0]->setting_value)){
-                                                $pickup_weight = $settings[0]->setting_value;
+                                        if(!empty($settings)){
+                                                $pickup_weight = $settings->setting_value;
                                             }else{
                                                 $pickup_weight = '';
                                             }
-                                        }
+
 
                                         @endphp
                                         <div class="col-md-4">
