@@ -79,7 +79,7 @@ class APIController extends Controller
       'email' => ':attribute must be a Valid Email Address.',
       'exists' => 'Given :attribute is of Invalid ID.',
       'unique' => ':attribute is already Present.',
-      'date' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+      'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
 
       'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
 
@@ -96,7 +96,7 @@ class APIController extends Controller
         $details = array();
 
         foreach ($pickup_addresses as $pickup_address) {
-          if ($pickup_address->rebook_status == 0) {
+          if ($pickup_address->hidden == 0) {
             $detail = array();
 
             $detail['id'] = $pickup_address->id;
@@ -108,7 +108,7 @@ class APIController extends Controller
 
             $city = $pickup_address->city;
 
-            if (!$city->status) {
+            if ($city->status) {
               $detail['city']['id'] = $city->id;
               $detail['city']['name'] = $city->name;
 
@@ -117,7 +117,12 @@ class APIController extends Controller
           }
         }
 
-        return response()->json(['status' => 0, 'message' => 'Pickup Addresses', 'pickup_addresses' => $details]);
+        if (!empty($details)) {
+          return response()->json(['status' => 0, 'message' => 'Pickup Addresses', 'pickup_addresses' => $details]);
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'No Pickup Address']);
+        }
       }
       else {
         return response()->json(['status' => 1, 'message' => 'No Pickup Address']);
@@ -195,7 +200,7 @@ class APIController extends Controller
           $query->where('user_id', $user_id);
         })],
         'package_type' => ['required_if:service_type_id,3', 'boolean'],
-        'pickup_date' => ['required', 'date', 'after:yesterday'],
+        'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
         'special_instructions' => ['nullable', 'filled', 'between:0,190'],
         'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
         'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
@@ -229,8 +234,8 @@ class APIController extends Controller
         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
       }
       else {
-        if (!RateStatus::where('user_id', session('user_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('status', 1)->exists()) {
-          return response()->json(['status' => 1, 'message' => 'Booking is not enabled for Shipping Mode ID #' . $request->input('shipping_mode_id') . ' on your Account';
+        if (!RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('status', 1)->exists()) {
+          return response()->json(['status' => 1, 'message' => 'Booking is not enabled for Shipping Mode ID #' . $request->input('shipping_mode_id') . ' on your Account']);
         }
 
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));

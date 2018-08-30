@@ -424,7 +424,7 @@
             $('#dispute_type_select').val('').trigger('change');
         });
         $('#DisputeUpdateModal').on('hidden.bs.modal',function (e) {
-            table.ajax.reload();
+            table.draw('false');
         });
         $('#dispute_form').on('submit',function (e) {
             e.preventDefault();
@@ -463,7 +463,7 @@
                     }
 
                     if(data.success != undefined){
-                        table.ajax.reload();
+                        table.draw('false');
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                     }
@@ -523,7 +523,7 @@
                     $('#ResolveModal').modal('hide');
                     if(data.status === 1){
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        table.ajax.reload();
+                        table.draw('false');
                     }else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 

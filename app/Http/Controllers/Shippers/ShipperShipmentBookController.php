@@ -634,7 +634,7 @@ class ShipperShipmentBookController extends Controller
 
     public function excel_index() {
       $booking_types = BookingType::where('id', '!=', 3)->get();
-      $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->get();
+      $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->where('hidden', 0)->get();
       $cities = City::orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_modes = ShippingMode::all();
@@ -695,7 +695,8 @@ class ShipperShipmentBookController extends Controller
         'email' => ':attribute must be a Valid Email Address.',
         'exists' => 'Given :attribute is of Invalid ID.',
         'unique' => ':attribute is already Present.',
-        'date' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+        'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
+        'in' => ':attribute must be No or Yes.',
 
         'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
 
@@ -710,7 +711,7 @@ class ShipperShipmentBookController extends Controller
         'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })],
-        'information_display' => ['required', 'string', 'in:No,Yes'],
+        'information_display' => ['required', 'string', 'in:No,Yes,no,yes'],
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
         'consignee_name' => ['required', 'between:1,100'],
         'consignee_address' => ['required', 'between:1,190'],
@@ -724,14 +725,14 @@ class ShipperShipmentBookController extends Controller
         'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
         'item_description' => ['nullable', 'between:0,190'],
         'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
-        'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:No,Yes'],
-        'item_price' => ['required_if:item_insurance,Yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+        'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:No,Yes,no,yes'],
+        'item_price' => ['required_if:item_insurance,Yes,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
-        'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
+        'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
         'replacement_item_description' => ['nullable', 'between:0,190'],
-        'replacement_item_quantity' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
+        'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
-        'pickup_date' => ['required', 'date', 'after:yesterday'],
+        'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
         'special_instructions' => ['nullable', 'between:0,190'],
         'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
         'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
@@ -740,7 +741,7 @@ class ShipperShipmentBookController extends Controller
         'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:payment_modes,id']
       ];
 
-      $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_id', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_price', 14 => 'item_insurance', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'pickup_date', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id'];
+      $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_id', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'pickup_date', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id'];
 
       $file = $request->file('shipments');
 
@@ -748,7 +749,7 @@ class ShipperShipmentBookController extends Controller
       $spreadsheet->setReadDataOnly(true);
       $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-      $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City ID', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1', 'Consignee Phone Number 2', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Price', 'Item Insurance', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Amount', 'Mode of Payment ID'];
+      $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City ID', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (0300-0000000)', 'Consignee Phone Number 2 (0300-0000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Item Price', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Amount', 'Mode of Payment ID'];
 
       if ($spreadsheet[0] == $header) {
         unset($spreadsheet[0]);
@@ -823,7 +824,7 @@ class ShipperShipmentBookController extends Controller
               $service_type_id = $row['service_type_id'];
               $pickup_address_id = $row['pickup_address_id'];
 
-              if ($row['information_display'] == 'Yes') {
+              if ($row['information_display'] == 'Yes' || $row['information_display'] == 'yes') {
                 $information_display = TRUE;
               }
               else {
@@ -896,7 +897,7 @@ class ShipperShipmentBookController extends Controller
 
                 $item_quantity = $row['item_quantity'];
 
-                if ($row['item_insurance'] == 'Yes') {
+                if ($row['item_insurance'] == 'Yes' || $row['item_insurance'] == 'yes') {
                   $item_price = str_replace(',', '', $row['item_price']);
                   $item_insurance = TRUE;
                 }
@@ -921,7 +922,7 @@ class ShipperShipmentBookController extends Controller
 
                 $item_quantity = $row['item_quantity'];
 
-                if ($row['item_insurance'] == 'Yes') {
+                if ($row['item_insurance'] == 'Yes' || $row['item_insurance'] == 'yes') {
                   $item_price = str_replace(',', '', $row['item_price']);
                   $item_insurance = TRUE;
                 }

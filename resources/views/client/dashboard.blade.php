@@ -515,7 +515,7 @@
                        }
                    }).done(function (data) {
                         if(data.status === 1){
-                            table.ajax.reload();
+                            table.draw('false');
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                         }else{
@@ -817,7 +817,7 @@
                             toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                         }
                         if(data.success != undefined){
-                            table.ajax.reload();
+                            table.draw('false');
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                         }

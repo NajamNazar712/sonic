@@ -410,7 +410,7 @@
                                         get_shipment_info(selected_rows[0]);
                                     }else{
                                         $('#RebookModal').modal('hide');
-                                        table.ajax.reload();
+                                        table.draw('false');
                                     }
 
                                 } else {
@@ -509,7 +509,7 @@
             $('#RebookModal').on('hidden.bs.modal',function () {
                $('#consignee_city').empty().trigger('change');
                $('#payment_mode').empty().trigger('change');
-               table.ajax.reload();
+               table.draw('false');
             });
 
 

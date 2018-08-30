@@ -250,7 +250,7 @@
 										if (data.status == 0) {
 											toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-											table.ajax.reload();
+											table.draw('false');
 
 											if (data.complete) {
 												setTimeout(function() {
@@ -261,7 +261,7 @@
 										else {
 											toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-											table.ajax.reload();
+											table.draw('false');
 										}
 									});
 								}
@@ -317,7 +317,7 @@
 									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 
-								table.ajax.reload();
+								table.draw('false');
 							});
 						}
 					});

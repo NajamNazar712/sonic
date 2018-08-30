@@ -208,7 +208,7 @@
 											table.button('.assign').disable();
 											table.button('.cancel').disable();
 
-											table.ajax.reload();
+											table.draw('false');
 										});
 									}
 								});
@@ -356,7 +356,7 @@
 						table.button('.assign').disable();
 						table.button('.cancel').disable();
 
-						table.ajax.reload();
+						table.draw('false');
 
 						$('#assign_to_rider').modal('hide');
 					});
@@ -419,7 +419,7 @@
 								table.button('.cancel').disable();
 							}
 
-							table.ajax.reload();
+							table.draw('false');
 						});
 					}
 				});

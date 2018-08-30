@@ -294,11 +294,11 @@ class ShipperReceivingSheetController extends Controller
                             <td class="color primary"><strong>Order ID</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Item Type</strong></td>
-                            <td class="color primary"><strong>Item Description</strong></td>
-                            <td class="color primary"><strong>Item Quantity</strong></td>
-                            <td class="color primary"><strong>Destination City</strong></td>
-                            <td class="color primary"><strong>COD Amount</strong></td>
+                            <td class="color primary"><strong>Product Type</strong></td>
+                            <td class="color primary"><strong>Description</strong></td>
+                            <td class="color primary"><strong>Quantity</strong></td>
+                            <td class="color primary"><strong>Destination</strong></td>
+                            <td class="color primary"><strong>Amount</strong></td>
                           </tr>
         ';
 
@@ -421,7 +421,7 @@ class ShipperReceivingSheetController extends Controller
                             <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>Client Name</strong></td>
+                            <td class="color secondary"><strong>Shipper</strong></td>
                             <td>' . Auth::user()->name . '</td>
                             <td rowspan="7" class="text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
@@ -441,7 +441,7 @@ class ShipperReceivingSheetController extends Controller
                             <td>' . $shipment->pickup_address->phone . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>Client City</strong></td>
+                            <td class="color secondary"><strong>Origin</strong></td>
                             <td>' . $shipment->pickup_address->city->name  . '</td>
                           </tr>
                           <tr>
@@ -449,7 +449,7 @@ class ShipperReceivingSheetController extends Controller
                             <td>' . $total_shipments . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>Total COD Amount</strong></td>
+                            <td class="color secondary"><strong>Total Amount</strong></td>
                             <td>Rs ' . number_format($total_cod) . '</td>
                           </tr>
                         </tbody>
@@ -464,19 +464,12 @@ class ShipperReceivingSheetController extends Controller
                       <div class="mt-2 manual_form">
                         <div class="row justify-content-between align-items-end">
                           <div class="col">
-                            <div>
-                              <strong class="d-inline-block w-200">Total No. of Shipments:</strong>
-                              <span class="d-inline-block w-200 line"></span>
-                            </div>
-
-                            <div class="mt-2">
-                              <strong class="d-inline-block w-200">No. of Shipments Received:</strong>
-                              <span class="d-inline-block w-200 line"></span>
-                            </div>
+                            <strong class="d-inline-block w-200">No. of Shipments Received:</strong>
+                            <span class="d-inline-block w-200 line"></span>
                           </div>
 
                           <div class="col text-right">
-                            <div class="d-inline-block text-center">
+                            <div class="d-inline-block text-center mt-2">
                               <span class="d-block w-200 mx-auto line"></span>
                               <strong class="d-inline-block w-200">Client Signature</strong>
                             </div>
@@ -509,7 +502,7 @@ class ShipperReceivingSheetController extends Controller
                             </div>
                           </div>
 
-                          <div class="col text-right">
+                          <div class="col text-right mt-4">
                             <div class="d-inline-block text-center">
                               <span class="d-block w-200 mx-auto line"></span>
                               <strong class="d-inline-block w-200">Office Signature</strong>
