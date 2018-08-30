@@ -634,7 +634,7 @@ class ShipperShipmentBookController extends Controller
 
     public function excel_index() {
       $booking_types = BookingType::where('id', '!=', 3)->get();
-      $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->get();
+      $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->where('hidden', 0)->get();
       $cities = City::orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_modes = ShippingMode::all();
@@ -731,7 +731,7 @@ class ShipperShipmentBookController extends Controller
         'replacement_item_description' => ['nullable', 'between:0,190'],
         'replacement_item_quantity' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'between:1,1000'],
 
-        'pickup_date' => ['required', 'date', 'after:yesterday'],
+        'pickup_date' => ['required', 'date_format:d-m-Y', 'after:yesterday'],
         'special_instructions' => ['nullable', 'between:0,190'],
         'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
         'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],

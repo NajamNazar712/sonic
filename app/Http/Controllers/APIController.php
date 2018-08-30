@@ -96,7 +96,7 @@ class APIController extends Controller
         $details = array();
 
         foreach ($pickup_addresses as $pickup_address) {
-          if ($pickup_address->rebook_status == 0) {
+          if ($pickup_address->hidden == 0) {
             $detail = array();
 
             $detail['id'] = $pickup_address->id;
@@ -195,7 +195,7 @@ class APIController extends Controller
           $query->where('user_id', $user_id);
         })],
         'package_type' => ['required_if:service_type_id,3', 'boolean'],
-        'pickup_date' => ['required', 'date', 'after:yesterday'],
+        'pickup_date' => ['required', 'date_format:d-m-Y', 'after:yesterday'],
         'special_instructions' => ['nullable', 'filled', 'between:0,190'],
         'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
         'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
