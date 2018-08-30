@@ -234,7 +234,7 @@ class APIController extends Controller
         return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
       }
       else {
-        if (!RateStatus::where('user_id', session('user_id'))->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('status', 1)->exists()) {
+        if (!RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $request->input('shipping_mode_id'))->where('status', 1)->exists()) {
           return response()->json(['status' => 1, 'message' => 'Booking is not enabled for Shipping Mode ID #' . $request->input('shipping_mode_id') . ' on your Account']);
         }
 
