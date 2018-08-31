@@ -175,8 +175,8 @@ class AdminReportsController extends Controller
         return view('admin.reports.cargo_received_report')->with(['cities'=>$cities,'shippimg_modes'=>$shippimg_modes]);
     }
     public function cargo_received_list(Request $request){
-        $cargo_received = CargoConsignment::join('cities as oc','oc.id','=','cargo_consignments.origin_city_id')
-            ->join('cities as h','h.id','=','cargo_consignments.hub_id')
+        $cargo_received = CargoConsignment::join('cities as oc','oc.id','=','cargo_consignments.origin_hub_id')
+            ->join('cities as h','h.id','=','cargo_consignments.destination_hub_id')
             ->join('shipping_modes as sm','sm.id','=','cargo_consignments.shipping_mode_id')
             ->join('admins as si','si.id','=','cargo_consignments.sender_id')
             ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
@@ -394,8 +394,8 @@ class AdminReportsController extends Controller
                     $query->where('shipper_status_id', '=', 3)
                         ->whereDate('created_at','=', $search_date);
                 })->count();
-            $qa_data[$hub->name]['cargo_transit_pending'] = CargoConsignment::whereDate('created_at','<=',$search_date)->where('status_id','!=',3)->where('origin_city_id',$hub->id)->count();
-            $qa_data[$hub->name]['cargo_transit_resolved'] = CargoConsignment::whereDate('updated_at','=',$search_date)->where('status_id','=',3)->where('origin_city_id',$hub->id)->count();
+            $qa_data[$hub->name]['cargo_transit_pending'] = CargoConsignment::whereDate('created_at','<=',$search_date)->where('status_id','!=',3)->where('origin_hub_id',$hub->id)->count();
+            $qa_data[$hub->name]['cargo_transit_resolved'] = CargoConsignment::whereDate('updated_at','=',$search_date)->where('status_id','=',3)->where('origin_hub_id',$hub->id)->count();
             $pending_status = array(2, 4, 6, 7, 8, 9, 13, 15); //for pending deliveries
             $not_pending_status = array(1, 3, 5, 10, 11,12,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47); //for pending deliveries
             $qa_data[$hub->name]['deliveries_pending'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
@@ -978,6 +978,20 @@ class AdminReportsController extends Controller
         return view('admin.reports.customer_retention_report')->with(['hubs'=>$hubs,'shippers'=>$shippers]);
     }
     public function customer_retention_export_to_excel(Request $request){
-        return $request;
+        $hub = $request->city;
+        $shipper_filter = $request->shipper;
+        $from_date = $request->from_date;
+        $to_date = $request->to_date;
+        $months_array = array();
+        $months_array = $this->get_months($from_date,$to_date);
+
+        if($hub != null){
+            $city = City::where('id',$hub)->select('id','name')->get();
+        }else{
+            $city = City::all();
+        }
+
+        $details = array();
+        $shippers = array();
     }
 }

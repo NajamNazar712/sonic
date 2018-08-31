@@ -235,7 +235,7 @@
                     var city = $('#city').val();
                     var shipper = $('#shipper').val();
                     $.ajax({
-                        url: '{!! route('admin.reports.customer_sales.export_to_excel') !!}',
+                        url: '{!! route('admin.reports.customer_retention.export_to_excel') !!}',
                         method: 'post',
                         data: {
                             '_token': '{{ csrf_token() }}',
@@ -246,12 +246,12 @@
                         }
                     }).done(function (data) {
                         // window.open("",'_black');
-                        if(data.success == 1){
-                            window.open("{!! route('admin.reports.customer_sales.download') !!}",'_black');
-                        }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        {{--if(data.success == 1){--}}
+                            {{--window.open("{!! route('admin.reports.customer_sales.download') !!}",'_black');--}}
+                        {{--}else{--}}
+                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
 
-                        }
+                        {{--}--}}
                     });
                     return false;
                 }

@@ -507,7 +507,8 @@ class AdminDashboardController extends Controller
         if($status == 'active'){
             $user = User::find($id);
             if($user->status == 2){
-               $action = User::where('id',$id)->update(['status'=>3]);
+                $now = Carbon::now();
+               $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now]);
                if($action == 1){
                     NotificationsController::send(1, $id);
 
@@ -2143,7 +2144,7 @@ class AdminDashboardController extends Controller
             //dd($weightAlready);
         }
         if($request->authorize == 1){
-            User::where('id',$id)->update(['status'=>2]);
+            User::where('id',$id)->update(['status'=>2,'rates_authorized_by'=>Auth::id()]);
             return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
         }
 
@@ -3161,7 +3162,7 @@ class AdminDashboardController extends Controller
 
             }
             }
-            User::where('id',$id)->update(['status'=>1]);
+            User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
 
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
