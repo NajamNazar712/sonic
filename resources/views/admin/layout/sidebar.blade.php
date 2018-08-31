@@ -187,7 +187,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(72, session('permissions')))
-                            <li><a class="menu-item" href="#">Customer Retention Rate</a></li>
+                            <li><a class="menu-item" href="{{route('admin.reports.customer_retention.index')}}">Customer Retention Rate</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(73, session('permissions')))

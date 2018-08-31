@@ -524,6 +524,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('','Admins\AdminReportsController@completed_delivery_notes_index')->name('index');
             Route::get('list','Admins\AdminReportsController@completed_delivery_notes_list')->name('list');
         });
+        Route::prefix('customer_retention')->name('customer_retention.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@customer_retention_index')->name('index');
+            Route::post('export_to_excel', 'Admins\AdminReportsController@customer_retention_export_to_excel')->name('export_to_excel');
+            Route::get('download', 'Admins\AdminReportsController@customer_retention_download')->name('download');
+        });
 
     });
 

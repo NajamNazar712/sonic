@@ -978,4 +978,12 @@ class AdminReportsController extends Controller
             ->make(true);
 
     }
+    public function customer_retention_index(){
+        $shippers = User::where('status',3)->get();
+        $hubs = City::select('id','name')->where('hub',1)->get();
+        return view('admin.reports.customer_retention_report')->with(['hubs'=>$hubs,'shippers'=>$shippers]);
+    }
+    public function customer_retention_export_to_excel(Request $request){
+        return $request;
+    }
 }
