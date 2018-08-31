@@ -19,6 +19,7 @@ use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\PickupRequest;
+use App\Http\Models\PickupRequestAssignedShipment;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupNoteStatus;
@@ -91,6 +92,14 @@ class AdminPickupsController extends Controller
 
         $pickup_request->save();
       }
+
+      $pickup_request_assigned_shipment = new PickupRequestAssignedShipment();
+
+      $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
+      $pickup_request_assigned_shipment->shipment_id = $shipment_id;
+      $pickup_request_assigned_shipment->status = 0;
+
+      $pickup_request_assigned_shipment->save();
     }
 
     public function pending_index() {
@@ -819,6 +828,25 @@ class AdminPickupsController extends Controller
 
     public function receive_arrival_of_shipments_store(Request $request) {
       $pickup_note = PickupNote::find($request->pickup_receive_pickup_note_id);
+
+      foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
+        $pickup_request = $pickup_note_request->pickup_request;
+
+        foreach ($pickup_request->pickup_request_assigned_shipments as $pickup_request_assigned_shipment) {
+          $pickup_request_assigned_shipment->status = 1;
+
+          $pickup_request_assigned_shipment->save();
+
+          $pickup_request_received_shipment = new PickupRequestReceivedShipment();
+
+          $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
+          $pickup_request_received_shipment->shipment_id = $shipment_id;
+
+          $pickup_request_received_shipment->save();
+        }
+      }
+
+      //OLD
 
       $pickup_request_ids = array();
 
