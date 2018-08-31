@@ -473,7 +473,7 @@ class ReturnController extends Controller
                         $origin = $shipment->consignee_city->hub_id;
                         if ($origin != $destination->hub_id) {
 //                            return 123;
-                            if ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35) {
+                            if ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46) {
                             if ($shipment->booking_type_id == 1) { //attempt failed and arrived at origin center
 
                                 ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
@@ -506,7 +506,7 @@ class ReturnController extends Controller
 
                         } else if ($origin == $destination->hub_id) {
                             //if status == 20
-                            if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27|| $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 42 ) {
+                            if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27|| $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46) {
                                 if ($shipment->booking_type_id == 1) {
                                     ReturnNoteShipment::create(['return_note_id'=>$note->id,'shipment_id'=>$tracking]);
                                     $shipment->shipper_status_id = 23;
@@ -655,13 +655,18 @@ class ReturnController extends Controller
                 $return = $return->first();
                 $count = $return->shipments_count;
                 $count = $count-1;
-                ReturnNote::where('id',$return_note)->update(['shipments_count'=>$count]);
+                if($count == 0){
+                    ReturnNote::where('id',$return_note)->update(['shipments_count'=>$count,'status'=>2]);
+                }else{
+
+                    ReturnNote::where('id',$return_note)->update(['shipments_count'=>$count]);
+                }
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>$shipper_status]);
 
                 ShipmentsJourney::create([
                     'shipment_id'=>$parcel->id,
                     'shipper_status_id'=>$shipper_status,
-                    'consignee_status_id'=>$shipper_status,
+                    'consignee_status_id'=>null,
                     'status_reason_id'=>null,
                     'remarks'=>null,
                     'admin_id'=>Auth::id()

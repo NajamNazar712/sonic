@@ -748,7 +748,7 @@ class AdminPickupsController extends Controller
           foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
             $pickup_request = $pickup_note_request->pickup_request;
 
-            if ($pickup_request->seller_id == $shipment->seller_id) {
+            if ($pickup_request->shipper_id == $shipment->user_id) {
               $exists = TRUE;
 
               break;

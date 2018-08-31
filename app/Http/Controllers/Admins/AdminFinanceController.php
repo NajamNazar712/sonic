@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
@@ -385,6 +386,96 @@ class AdminFinanceController extends Controller
         }
     }
 
+    public function change_shipment_amount_index() {
+        return view('admin.finance.change_shipment_amount');
+    }
+
+    public function change_shipment_amount_shipment_details(Request $request) {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            if (!in_array($shipment->shipper_status_id, [39, 40, 41, 42])) {
+                $details = array();
+
+                $shipper = $shipment->user;
+
+                $details['id'] = $shipment->id;
+
+                $details['tracking_number'] = $shipment->tracking_number;
+                $details['status'] = $shipment->status_shipper->name;
+
+                $details['service_type'] = $shipment->booking_type->booking_type;
+                $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+
+                $details['payment_mode'] = $shipment->payment_mode->mode;
+                $details['amount'] = $shipment->amount;
+
+                $details['shipper']['name'] = $shipper->name;
+                $details['shipper']['account_number'] = $shipper->id;
+                $details['shipper']['phone_number_1'] = $shipper->phone;
+                $details['shipper']['phone_number_2'] = $shipper->phone2;
+                $details['shipper']['origin'] = $shipper->city->name;
+                $details['shipper']['address'] = $shipper->address;
+
+                $details['consignee']['name'] = $shipment->consignee_name;
+                $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                $details['consignee']['destination'] = $shipment->consignee_city->name;
+                $details['consignee']['address'] = $shipment->consignee_address;
+
+                return ['status' => 0, 'success' => 'Shipment\'s amount can be changed', 'details' => $details];
+            }
+            else {
+                return ['status' => 1, 'error' => 'Shipment\'s Payment has already been Processed'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment exists with given Tracking Number'];
+        }
+    }
+
+    public function change_shipment_amount_store(Request $request) {
+        $shipment_id = $request->input('shipment_id');
+        $amount = str_replace(',', '', $request->input('amount'));
+
+        $shipment = Shipment::find($shipment_id);
+
+        $shipment->amount = $amount;
+
+        $shipment->save();
+
+        ShipmentChargesController::cash_handling($shipment_id);
+
+        $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment_id);
+
+        if ($pending_payment_shipments->exists()) {
+            foreach ($pending_payment_shipments->get() as $pending_payment_shipment) {
+                if ($pending_payment_shipment->type == 0) {
+                    $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
+                    $gst = $charges * 0.13; //Should be Dynamic
+                    $payable = $amount - ($charges + $gst);
+
+                    $pending_payment_shipment->amount = $amount;
+                    $pending_payment_shipment->charges = $charges;
+                    $pending_payment_shipment->gst = $gst;
+                    $pending_payment_shipment->payable = $payable;
+
+                    $pending_payment_shipment->save();
+                }
+                else if ($pending_payment_shipment->type == 1) {
+                    $pending_payment_shipment->amount = $amount;
+
+                    $pending_payment_shipment->save();
+                }
+            }
+        }
+
+        return redirect()->route('admin.finance.change_shipment_amount.index')->with('success', 'Shipment\'s amount has been changed');
+    }
+
     public static function add_payment($shipment_id, $type) {
         $shipment = Shipment::find($shipment_id);
 
@@ -397,7 +488,7 @@ class AdminFinanceController extends Controller
             $payable = $amount - ($charges + $gst);
         }
         else {
-            $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
+            $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
             $gst = $charges * 0.13; //Should be Dynamic
 
             $payable = 0 - ($charges + $gst);
@@ -496,7 +587,7 @@ class AdminFinanceController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         $amount = 0 - $done_payment_shipment->payable;
-        $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
+        $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
         $gst = $charges * 0.13; //Should be Dynamic
         $payable = $amount - ($charges + $gst);
 

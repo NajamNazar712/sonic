@@ -21,8 +21,10 @@ use App\Http\Controllers\Controller;
 
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
+use PHPExcel_Cell;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Yajra\Datatables\Datatables;
 
 class AdminReportsController extends Controller
@@ -55,7 +57,7 @@ class AdminReportsController extends Controller
         ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47]);
         $datatable = Datatables::of($shipments)
             ->addColumn('aging',function ($shipments){
-                $now = Carbon::now();
+
                 $days = Carbon::now()->diffInDays($shipments->arrival);
                 if($days == 0){
                     return "-";
@@ -739,12 +741,35 @@ class AdminReportsController extends Controller
          $hubs = City::select('id','name')->where('hub',1)->get();
         return view('admin.reports.customer_sales_report')->with(['hubs'=>$hubs,'shippers'=>$shippers]);
      }
+        private function get_months($date1, $date2) {
+            $time1  = strtotime($date1);
+            $time2  = strtotime($date2);
+            $my     = date('mY', $time2);
+
+            $months = array(date('F', $time1));
+            $f      = '';
+
+            while($time1 < $time2) {
+                $time1 = strtotime((date('Y-m-d', $time1).' +15days'));
+                if(date('F', $time1) != $f) {
+                    $f = date('F', $time1);
+                    if(date('mY', $time1) != $my && ($time1 < $time2))
+                        $months[] = date('F Y', $time1);
+                }
+            }
+
+            $months[] = date('F Y', $time2);
+            return $months;
+        }
+
      public function customer_sales_export_to_excel(Request $request){
-        $hub = $request->city;
-        $shipper = $request->shipper;
-        $from_date = $request->from_date;
-        $to_date = $request->to_date;
-        return $request;
+         $hub = $request->city;
+         $shipper_filter = $request->shipper;
+         $from_date = $request->from_date;
+         $to_date = $request->to_date;
+         $months_array = array();
+         $months_array = $this->get_months($from_date,$to_date);
+
          if($hub != null){
              $city = City::where('id',$hub)->select('id','name')->get();
          }else{
@@ -752,56 +777,155 @@ class AdminReportsController extends Controller
          }
 
          $details = array();
+         $shippers = array();
+         unset($months_array[0]);
 
          $details['header'] = ['Origin', 'Client Name' ];
-         foreach ($city as $c){
+         $details['subheader'] = ['Parcels', 'Weight','COD Amount','Revenue' ];
+
+         foreach ($months_array as $month){
+             $details['months'][] = $month;
+         }
+         foreach ($city as $c) {
              $hubs = array();
              $users = array();
              $details['hubs'][$c->id] = $c->name;
-             $shippers = User::whereHas('city', function($query) use ($c) {
-                 $query->where('hub_id', '=', $c->id);
-             })->with('city')->get();
-             foreach ($shippers as $s){
-                 $details['shipper'][$c->id][] = $s->name;
-//                 foreach ($s as $parcel){
-//
-//                 }
+             if ($shipper_filter != null) {
+                    $shippers = User::where('id', $shipper_filter)->whereHas('city', function ($query) use ($c) {
+                        $query->where('hub_id', '=', $c->id);
+                    });
+                 if($shippers->exists()){
+                     $shippers = $shippers->get();
+                 }
+             } else {
+                 $shippers = User::whereHas('city', function ($query) use ($c) {
+                     $query->where('hub_id', '=', $c->id);
+                 });
+                 if($shippers->exists()){
+                     $shippers = $shippers->get();
+                 }
              }
-//                 $details['parcels'][] =
-//             $details[] = $users;
-//             $details[] = $hubs;
+
+             if (!empty($shippers)) {
+             foreach ($shippers as $key => $s) {
+                 $details['shipper'][$c->id][$s->id] = $s->name;
+                 foreach ($months_array as $month) {
+                     $thisMonth = Carbon::parse($month)->month;
+                     $thisYear = Carbon::parse($month)->year;
+                     $details['parcels'][$s->id][$month] = Shipment::where('user_id', $s->id)
+                         ->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                             $query->whereMonth('created_at', $thisMonth)
+                                 ->whereYear('created_at', $thisYear)
+                                 ->where('shipper_status_id', 2);
+                         })->count();
+                     $details['weight'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                         $query->whereMonth('created_at', $thisMonth)
+                             ->whereYear('created_at', $thisYear)
+                             ->where('shipper_status_id', 2);
+                     })->sum('actual_weight');
+                     $details['amount'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                         $query->whereMonth('created_at', $thisMonth)
+                             ->whereYear('created_at', $thisYear)
+                             ->where('shipper_status_id', 2);
+                     })->sum('amount');
+                     $details['revenue'][$s->id][$month] = Shipment::where('user_id', $s->id)->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                         $query->whereMonth('created_at', $thisMonth)
+                             ->whereYear('created_at', $thisYear)
+                             ->where('shipper_status_id', 2);
+                     })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+
+                 }
+             }
+             }
          }
-         //echo "<pre>";print_r($details); echo "</pre>";die();
 
+         //echo "<pre>";print_r($details);echo "</pre>";die();
          $spreadsheet = new Spreadsheet();
-         $spreadsheet->getActiveSheet()->fromArray($details['header']);
-         $col = 4;
+         $sheet = $spreadsheet->getActiveSheet();
+         $cell_st =[
+             'font' =>['bold' => true],
+             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+             'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+         ];
+         $sheet->getStyle('A1:B1')->applyFromArray($cell_st);
 
+         $cellIndexcol1 = 3;
+         $weight_index = 4;
+         $cod_index = 5;
+         $cellIndexcol2 = 6;
+
+             foreach ($details['months'] as $key => $name) {
+                 $cellIndex1 = Coordinate::stringFromColumnIndex($cellIndexcol1);
+//                 $cellIndexw = Coordinate::stringFromColumnIndex($weight_index);
+//                 $cellIndexc = Coordinate::stringFromColumnIndex($cod_index);
+                 $cellIndex2 = Coordinate::stringFromColumnIndex($cellIndexcol2);
+                 $cellIndex11 = $cellIndex1 . '1';
+                 $cellIndex12 = $cellIndex2 . '1';
+                 $sheet->mergeCells("$cellIndex11:$cellIndex12");
+                 $sheet->getStyle("$cellIndex11:$cellIndex12")->applyFromArray($cell_st);
+                 $sheet->setCellValue($cellIndex11, $name);
+                 $sheet->fromArray($details['subheader'], NULL, $cellIndex1 . '2');
+
+
+
+                 $cellIndexcol1 += 4;
+//                 $weight_index += 4;
+//                 $cod_index += 4;
+                 $cellIndexcol2 += 4;
+
+         }
+         $sheet->fromArray($details['header'],NULL,'A1');
+         $col = 4;
+         $parcelIndex = 3;
+         $weightIndex = 4;
+         $codIndex = 5;
+         $revenueIndex = 6;
          foreach ($details['hubs'] as $key => $h) {
 
-             $spreadsheet->getActiveSheet()->setCellValue('A'.$col,$h);
-             foreach ($details['shipper'] as $hkey => $client){
-                     foreach ($client as $cli){
-                         if($hkey == $key){
-                             $spreadsheet->getActiveSheet()->setCellValue('B'.$col,$cli);
+             $sheet->setCellValue('A'.$col,$h);
+             $sheet->getStyle('A'.$col)->applyFromArray($cell_st);
 
+             if(!empty($shippers)){
+
+             foreach ($details['shipper'] as $hkey => $client){
+                     foreach ($client as $ship_key => $cli){
+                         if($hkey == $key){
+                             $sheet->setCellValue('B'.$col,$cli);
+                             $parcelIndex = 3;
+                             $weightIndex = 4;
+                             $codIndex = 5;
+                             $revenueIndex = 6;
+                             foreach ($details['months'] as $m){
+                                 $parcelIndexl = Coordinate::stringFromColumnIndex($parcelIndex);
+                                 $weightIndexl = Coordinate::stringFromColumnIndex($weightIndex);
+                                 $codIndexl = Coordinate::stringFromColumnIndex($codIndex);
+                                 $revenueIndexl = Coordinate::stringFromColumnIndex($revenueIndex);
+                                     $sheet->setCellValue($parcelIndexl.$col,$details['parcels'][$ship_key][$m]);
+                                     $sheet->setCellValue($weightIndexl.$col,$details['weight'][$ship_key][$m]);
+                                     $sheet->setCellValue($codIndexl.$col,$details['amount'][$ship_key][$m]);
+                                     $sheet->setCellValue($revenueIndexl.$col,$details['revenue'][$ship_key][$m]);
+                                 $parcelIndex += 4;
+                                 $weightIndex += 4;
+                                 $codIndex += 4;
+                                 $revenueIndex += 4;
+                             }
                              $col++;
                          }
                      }
 
 
                 }
+             }else{
+                 return response()->json(['failure'=>0,'error'=>'No data found!']);
+             }
              $col++;
          }
-//         $spreadsheet->getActiveSheet()->fromArray($details['shippers'], NULL, 'B4');
-
          $writer = new Xlsx($spreadsheet);
 
          header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
          header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
          header('Cache-Control: max-age=0');
 
-//         $writer->save('php://output');
          $writer->save('reports/customer_sales_report.xlsx');
          return response()->json(['success'=>1,'file'=>'customer_sales_report.xlsx']);
      }

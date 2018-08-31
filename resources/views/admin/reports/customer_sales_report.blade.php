@@ -77,6 +77,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
     <style>
         table.dataTable {
             font-size: 12px;
@@ -140,7 +142,9 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -251,30 +255,15 @@
                         // window.open("",'_black');
                         if(data.success == 1){
                             window.open("{!! route('admin.reports.customer_sales.download') !!}",'_black');
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
                         }
                     });
                     return false;
                 }
             });
-            {{--$('#search_form').on('submit',function (e) {--}}
-                {{--e.preventDefault();--}}
-                {{--var search_date = $('#search_form input[name="search_date_formatted"]').val();--}}
-                {{--var city = $('#city').val();--}}
-                {{--$.ajax({--}}
-                    {{--url: '{!! route('admin.reports.daily_pickup_sales.export_to_excel') !!}',--}}
-                    {{--method: 'post',--}}
-                    {{--data: {--}}
-                        {{--'_token': '{{ csrf_token() }}',--}}
-                        {{--'date': search_date,--}}
-                        {{--'city': city,--}}
-                    {{--}--}}
-                {{--}).done(function (data) {--}}
-                    {{--// window.open("",'_black');--}}
-                    {{--if(data.success == 1){--}}
-                        {{--window.open("{!! route('admin.reports.daily_pickup_sales.download') !!}",'_black');--}}
-                    {{--}--}}
-                {{--});--}}
-            {{--});--}}
+
         });
 
     </script>
