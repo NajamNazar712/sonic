@@ -140,7 +140,7 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as ab','ab.id','=','pickup_notes.assigned_by_user_id')
             ->leftjoin('admins as up','up.id','=','pickup_notes.updated_by')
             ->select(['pickup_notes.id as pn_id','cities.name as city','pickup_notes.pickups','pickup_notes.bookings as count','riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
-            ->where('pickup_notes.status_id',5);
+            ->where('pickup_notes.status_id',4);
         $return = Datatables::of($pickup_note)
             ->editColumn('assigned_date', function ($pickup_note) {
                 return $pickup_note->assigned_date ? with(new Carbon($pickup_note->assigned_date))->format('d/m/Y h:i:s A') : '';
@@ -568,6 +568,7 @@ class AdminReportsController extends Controller
      public function daily_pickup_sales_export_to_excel(Request $request){
 //        return $request;
          $date = $request->date;
+         $date = Carbon::parse($date)->toDateString();
          $search_city = $request->city;
          $city = array();
          $hubs = array();
@@ -583,8 +584,9 @@ class AdminReportsController extends Controller
 //         return $hubs;
 //         $all_details = array();
          $details = array();
+         $details_shipper = array();
 
-         $details[] = ['S. No.','Origin'.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg/Parcel Revenue','Avg. Cash Collection','% Rev. on Cash Collection'];
+         $details[] = ['S. No.','Origin '.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg/Parcel Revenue','Avg. Cash Collection','% Rev. on Cash Collection'];
 
          $serial_number_hubs = 1;
          $booked = 0; $received = 0; $revenue_wo_gst = 0; $cod_collection = 0;
@@ -629,7 +631,7 @@ class AdminReportsController extends Controller
 
          }
 
-         $details[] = ['S. No.','DSR'.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg. Cash Collection','% Rev. on Cash Collection'];
+         $details_shipper[] = ['S. No.','DSR '.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg/Parcel Revenue','Avg. Cash Collection','% Rev. on Cash Collection'];
          $serial_number_shippers = 1;
          if($search_city != null){
              $shippers = User::where('city_id',$search_city)->where('status',3)->get();
@@ -702,7 +704,7 @@ class AdminReportsController extends Controller
              $shipper_row[] = $shipper_avg_cash_collection;
              $shipper_row[] = $shipper_rev_on_cash_collection;
 
-             $details[] = $shipper_row;
+             $details_shipper[] = $shipper_row;
              $serial_number_shippers++;
          }
 //         $all_details = array_merge($details + $shipper_details;
@@ -712,13 +714,16 @@ class AdminReportsController extends Controller
              'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
              'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
          ];
-         $spreadsheet->getActiveSheet()->fromArray($details);
-         $spreadsheet->getActiveSheet()->getStyle('A1:H9')->applyFromArray($cell_st);
-         $spreadsheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(30);
-         $spreadsheet->getActiveSheet()->insertNewRowBefore(9, 8);
-         $spreadsheet->getActiveSheet()->setTitle('Daily Pickup Sales Report');
-//         $spreadsheet->getActiveSheet()->setCellValue('A1','S. No.');
-//         $spreadsheet->getActiveSheet()->fromArray($shipper_details);
+         $sheet = $spreadsheet->getActiveSheet();
+         $sheet->getStyle('A1:I1')->applyFromArray($cell_st);
+         $sheet->getDefaultColumnDimension()->setWidth(20);
+         $sheet->fromArray($details,NULL,'A1');
+         $sheet->getStyle('A21:I21')->applyFromArray($cell_st);
+         $sheet->fromArray($details_shipper,NULL,'A21');
+//         $sheet->insertNewRowBefore(9, 8);
+         $sheet->setTitle('Daily Pickup Sales Report');
+//         $sheet->setCellValue('A1','S. No.');
+//         $sheet->fromArray($shipper_details);
 
          $writer = new Xlsx($spreadsheet);
 
@@ -773,7 +778,7 @@ class AdminReportsController extends Controller
          if($hub != null){
              $city = City::where('id',$hub)->select('id','name')->get();
          }else{
-             $city = City::all();
+             $city = City::where('hub',1)->get();
          }
 
          $details = array();
@@ -850,8 +855,6 @@ class AdminReportsController extends Controller
          $sheet->getStyle('A1:B1')->applyFromArray($cell_st);
 
          $cellIndexcol1 = 3;
-         $weight_index = 4;
-         $cod_index = 5;
          $cellIndexcol2 = 6;
 
              foreach ($details['months'] as $key => $name) {
@@ -867,7 +870,7 @@ class AdminReportsController extends Controller
                  $cellIndexcol1 += 4;
                  $cellIndexcol2 += 4;
 
-         }
+            }
          $sheet->fromArray($details['header'],NULL,'A1');
          $col = 4;
          $parcelIndex = 3;
@@ -917,7 +920,7 @@ class AdminReportsController extends Controller
          $writer = new Xlsx($spreadsheet);
 
          header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-         header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
+         header('Content-Disposition: attachment;filename="customer_sales_report.xlsx"');
          header('Cache-Control: max-age=0');
 
          $writer->save('reports/customer_sales_report.xlsx');
@@ -984,14 +987,152 @@ class AdminReportsController extends Controller
         $to_date = $request->to_date;
         $months_array = array();
         $months_array = $this->get_months($from_date,$to_date);
+        unset($months_array[0]);
 
-        if($hub != null){
-            $city = City::where('id',$hub)->select('id','name')->get();
-        }else{
-            $city = City::all();
-        }
+//        if($hub != null){
+//            $city = City::where('id',$hub)->select('id','name')->get();
+//        }else{
+//            $city = City::where('hub',1)->get();
+//        }
 
         $details = array();
         $shippers = array();
+        $shippers['header'] = ['S.No','Client Name'];
+
+
+
+         foreach($months_array as $month){
+
+            $first_date  = Carbon::parse($month)->firstOfMonth();
+            $last_date  = Carbon::parse($month)->lastOfMonth()->endOfDay();
+            if($hub != null){
+                $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->where('city_id',$hub)->count();
+                $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->where('city_id',$hub)->count();
+                $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->where('city_id',$hub)->count();
+            }else{
+                $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->count();
+                $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->count();
+                $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->count();
+            }
+
+            $n = ($details['s'][$month] != 0)? $details['s'][$month]:0;
+            $details['crr'][$month] = ($n != 0)? (($details['e'][$month]-$details['n'][$month])/$n)*100:'-';
+
+            $shippers['header'][] = $month;
+
+         }
+        $shippers['header'][] = 'Grand Total';
+        if($hub != null){
+            $shippers['shipper'][] = User::where('city_id',$hub)->where('status','>=',3)->get();
+             if($shipper_filter != null){
+                 $client_exist =User::where('id',$shipper_filter)->where('city_id',$hub);
+                 if(!$client_exist->exists()){
+                     $shippers['shipper'][] = $client_exist->get();
+                 }
+
+             }
+         }else{
+             if($shipper_filter != null){
+                 $client_exist =User::where('id',$shipper_filter);
+                 if(!$client_exist->exists()){
+                     $shippers['shipper'][] = $client_exist->get();
+                 }
+
+             }else{
+
+                 $shippers['shipper'] = User::where('status','>=',3)->get();
+             }
+
+         }
+        if(!empty($shippers['shipper'])){
+            foreach ($shippers['shipper'] as $client){
+                $shippers['name'][$client->id] = $client->name;
+                foreach($months_array as $month) {
+                    $thisMonth = Carbon::parse($month)->month;
+                    $thisYear = Carbon::parse($month)->year;
+                    $shippers['parcels'][$client->id][$month] = Shipment::where('user_id', $client->id)
+                        ->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                            $query->whereMonth('created_at', $thisMonth)
+                                ->whereYear('created_at', $thisYear)
+                                ->where('shipper_status_id', 2);
+                        })->count();
+
+                }
+            }
+        }
+
+
+
+//        return $shippers;
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $style =[
+            'font' =>['bold' => true],
+            'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => array(
+                'outline' => array(
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
+                    'color' => array('argb' => '000000'),
+                ),
+            ),
+        ];
+        $sheet->getDefaultColumnDimension()->setWidth(20);
+        $sheet->getStyle('A2:Z2')->applyFromArray($style);
+        $sheet->getStyle('A4')->applyFromArray($style);
+        $sheet->getStyle('A5:D5')->applyFromArray($style);
+        $sheet->getStyle('A6:D9')->applyFromArray($style);
+        $sheet->mergeCells('A2:Z2');
+        $sheet->getStyle('A10:D10')->applyFromArray($style);
+        $sheet->getStyle('A12:A12')->applyFromArray($style);
+        $sheet->setCellValue('A2', 'Business Retention Report');
+        $sheet->setCellValue('A4', 'Summary');
+        $sheet->setCellValue('A5','Months');
+        $sheet->setCellValue('A7','S');
+        $sheet->setCellValue('A8','E');
+        $sheet->setCellValue('A9','N');
+        $sheet->setCellValue('A10','CRR');
+        $sheet->setCellValue('A12', 'Details');
+        $monthIndexcol1 = 2;
+        $monthRow = 5;
+        foreach ($months_array as $month) {
+                $cellIndex1 = Coordinate::stringFromColumnIndex($monthIndexcol1);
+                $sheet->setCellValue($cellIndex1.$monthRow, $month);
+                $sheet->setCellValue($cellIndex1.'7', $details['s'][$month]);
+                $sheet->setCellValue($cellIndex1.'8', $details['e'][$month]);
+                $sheet->setCellValue($cellIndex1.'9', $details['n'][$month]);
+                $sheet->setCellValue($cellIndex1.'10', $details['crr'][$month]);
+            $monthIndexcol1 += 1;
+        }
+        $sheet->fromArray($shippers['header'],NULL,'A13');
+        $col = 14;
+        $serials = 1;
+        $dateIndex = 3;
+        foreach ($shippers['name'] as $id => $shipper){
+            $sheet->setCellValue('A'.$col,$serials);
+            $sheet->setCellValue('B'.$col,$shipper);
+            foreach ($months_array as $m){
+                $cellIndexShipper = Coordinate::stringFromColumnIndex($dateIndex);
+                $sheet->setCellValue($cellIndexShipper.$col,$shippers['parcels'][$id][$m]);
+                $dateIndex++;
+            }
+//            $sheet->setCellValue($dateIndex.$col,$shippers['total'][$id]);
+            $col++;
+            $serials++;
+            $dateIndex = 3;
+        }
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="customer_retention_report.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('reports/customer_retention_report.xlsx');
+        return response()->json(['success'=>1,'file'=>'customer_retention_report.xlsx']);
+
+    }
+    public function customer_retention_download(Request $request){
+        $file = public_path()."/reports/customer_retention_report.xlsx";
+        $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
+        return Response::download($file, 'customer_retention_report.xlsx',$headers);
     }
 }
