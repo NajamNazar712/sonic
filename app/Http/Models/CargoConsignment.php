@@ -10,24 +10,20 @@ class CargoConsignment extends Model
 		return $this->hasMany('App\Http\Models\CargoConsignmentShipment');
 	}
 
-	public function origin_city() {
-		return $this->belongsTo('App\Http\Models\City', 'origin_city_id', 'id');
+	public function origin_hub() {
+		return $this->belongsTo('App\Http\Models\City', 'origin_hub_id', 'id');
 	}
 
-	public function destination_city() {
-		return $this->belongsTo('App\Http\Models\City', 'destination_city_id', 'id');
+	public function destination_hub() {
+		return $this->belongsTo('App\Http\Models\City', 'destination_hub_id', 'id');
 	}
 
-	public function junction_city_1() {
-		return $this->belongsTo('App\Http\Models\City', 'junction_city_1_id', 'id');
+	public function junction_hub_1() {
+		return $this->belongsTo('App\Http\Models\City', 'junction_hub_1_id', 'id');
 	}
 
-	public function junction_city_2() {
-		return $this->belongsTo('App\Http\Models\City', 'junction_city_2_id', 'id');
-	}
-
-	public function hub() {
-		return $this->belongsTo('App\Http\Models\City', 'hub_id', 'id');
+	public function junction_hub_2() {
+		return $this->belongsTo('App\Http\Models\City', 'junction_hub_2_id', 'id');
 	}
 
 	public function shipping_mode() {

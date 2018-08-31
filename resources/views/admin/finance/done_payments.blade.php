@@ -256,7 +256,7 @@
 									table.button('.paid').disable();
 									table.button('.reverted').disable();
 
-									table.ajax.reload();
+									table.draw('false');
 								});
 							}
 						},
@@ -293,7 +293,7 @@
 									table.button('.paid').disable();
 									table.button('.reverted').disable();
 
-									table.ajax.reload();
+									table.draw('false');
 								});
 							}
 						}
@@ -580,7 +580,7 @@
 							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 						}
 
-						table.ajax.reload();
+						table.draw('false');
 
 						$('#update_details').modal('hide');
 					});

@@ -160,7 +160,7 @@
                     }
                 }).done(function (data) {
                     if(data.status == 1){
-                        table.ajax.reload();
+                        table.draw('false');
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -183,7 +183,7 @@
                     }
                 }).done(function (data) {
                     if(data.status == 1){
-                        table.ajax.reload();
+                        table.draw('false');
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -206,7 +206,7 @@
                     }
                 }).done(function (data) {
                     if(data.status == 1){
-                        table.ajax.reload();
+                        table.draw('false');
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }else{
                         toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});

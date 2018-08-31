@@ -137,7 +137,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(57, session('permissions')))
-                            <li><a class="menu-item" href="#">Change Shipment Amount</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.finance.change_shipment_amount.index') }}">Change Shipment Amount</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(59, session('permissions')))

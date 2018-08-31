@@ -171,6 +171,8 @@
 					error.addClass('w-100').appendTo(element.parents('form'));
 				},
 				submitHandler: function(form) {
+					$('#add_shipment_form button.add').prop('disabled', true);
+
 					var tracking_number = $(form).find('input.tracking_number').val();
 
 					form.reset();
@@ -186,6 +188,8 @@
 							}
 						})
 						.done(function(data) {
+							$('#add_shipment_form button.add').prop('disabled', false);
+
 							if (data.status == 0) {
 								table.row.add([0, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]);
 								table.draw(false);
@@ -204,8 +208,12 @@
 						});
 					}
 					else {
+						$('#add_shipment_form button.add').prop('disabled', false);
+
 						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 					}
+
+					$('#add_shipment_form button.add').prop('disabled', false);
 
 					return false;
 				}

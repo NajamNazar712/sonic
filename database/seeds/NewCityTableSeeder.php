@@ -13,7 +13,6 @@ class NewCityTableSeeder extends Seeder
     {
         DB::table('cities')->truncate();
         DB::table('cities')->insert(array(
-            array('id'=>1,'name'=>'Multiple','hub'=>1,'hub_id'=>0,'pickup'=>1,'status'=>1),
             array('id'=>101,'name'=>'Abbottabad','hub'=>1,'hub_id'=>101,'pickup'=>1,'status'=>1),
             array('id'=>102,'name'=>'Abdul Hakim','hub'=>0,'hub_id'=>251,'pickup'=>1,'status'=>1),
             array('id'=>103,'name'=>'Ahmed Pur East','hub'=>0,'hub_id'=>110,'pickup'=>1,'status'=>1),
@@ -33,10 +32,6 @@ class NewCityTableSeeder extends Seeder
 
         DB::table('city_deliveries')->truncate();
         DB::table('city_deliveries')->insert(array(
-            array('city_id'=>1,'booking_type_id'=>1,'shipping_mode_id'=>1),
-            array('city_id'=>1,'booking_type_id'=>1,'shipping_mode_id'=>2),
-            array('city_id'=>1,'booking_type_id'=>1,'shipping_mode_id'=>3),
-            array('city_id'=>1,'booking_type_id'=>1,'shipping_mode_id'=>4),
             array('city_id'=>101,'booking_type_id'=>1,'shipping_mode_id'=>1),
             array('city_id'=>101,'booking_type_id'=>2,'shipping_mode_id'=>2),
             array('city_id'=>101,'booking_type_id'=>3,'shipping_mode_id'=>1),

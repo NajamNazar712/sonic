@@ -196,6 +196,11 @@ class ShipmentChargesController extends Controller
                 }
             }
         }
+        else {
+            $shipment->cash_handling_charges = 0;
+
+            $shipment->save();
+        }
     }
 
     static public function insurance($id) {

@@ -353,7 +353,7 @@
 											toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 										}
 
-										table.ajax.reload();
+										table.draw('false');
 									});
 								}
 							});
@@ -379,7 +379,7 @@
 							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 						}
 
-						table.ajax.reload();
+						table.draw('false');
 					});
 				}
 			});

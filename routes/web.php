@@ -427,6 +427,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
         });
 
+        Route::prefix('change_shipment_amount')->name('change_shipment_amount.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@change_shipment_amount_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminFinanceController@change_shipment_amount_shipment_details')->name('shipment_details');
+            Route::post('', 'Admins\AdminFinanceController@change_shipment_amount_store')->name('store');
+        });
+
         Route::prefix('make_payments')->name('make_payments.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@make_payments_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@make_payments_list')->name('list');

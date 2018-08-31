@@ -15,7 +15,7 @@
 						<div class="card-body">
 							@include('client.inc.messages')
 
-							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.excel_store') }}" novalidate="novalidate">
+							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
 
 								<div class="row align-items-center justify-content-center">
@@ -64,13 +64,13 @@
 									<table class="table table-bordered">
 										<thead>
 											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Show Informaiton on Air Waybill</th>
+												<th colspan="2" class="border-primary border-darken-1">Show Information on Air Waybill</th>
 											</tr>
 										</thead>
 										<tbody>
 											<tr role="row">
-												<td class="text-center">Hide</td>
-												<td class="text-center">Show</td>
+												<td class="text-center">No</td>
+												<td class="text-center">Yes</td>
 											</tr>
 										</tbody>
 									</table>
@@ -78,7 +78,7 @@
 									<table class="table table-bordered">
 										<thead>
 											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Insurance</th>
+												<th colspan="2" class="border-primary border-darken-1">Item Insurance</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -256,7 +256,7 @@
 						closeOnEsc: false
 					});
 
-					// form.submit();
+					form.submit();
 				}
 			});
 		});
