@@ -211,7 +211,7 @@ class AdminCargoController extends Controller
 
       $details['receivers'] = Admin::where('status', 1)->whereHas('hubs', function ($query) use($destination_details) {
         $query->where('hub_id',  $destination_details['id']);
-      })->select(['id', 'name']);
+      })->select(['id', 'name'])->get();
 
       if ($request->cargo_type == 1) {
         $details['origin'] = $origin_details;
@@ -359,7 +359,7 @@ class AdminCargoController extends Controller
       })
       ->addColumn('action', function($cargo_consignment) {
         $print_button = '<button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>';
-        $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Forwarding Details</div></button>';
+        $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Forwarding Details</div></button>';
         $view_forwarding_details_button = '<button type="button" class="dropdown-item view_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Forwarding Details</div></button>';
         $launch_dispute_button = '<button type="button" class="dropdown-item launch_dispute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Launch Dispute</div></button>';
         $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
@@ -742,9 +742,11 @@ class AdminCargoController extends Controller
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
 
-        $details['receivers'] = Admin::where('status', 1)->whereHas('hubs', function ($query) use($destination_details) {
-          $query->where('hub_id',  $destination_details['id']);
-        })->select(['id', 'name']);
+        $destination_hub_id = $cargo_consignment->destination_hub_id;
+
+        $details['receivers'] = Admin::where('status', 1)->whereHas('hubs', function ($query) use($destination_hub_id) {
+          $query->where('hub_id',  $destination_hub_id);
+        })->select(['id', 'name'])->get();
       }
       else {
         $details['cargo_consignment']['junction_hub_1'] = $cargo_consignment->junction_hub_1->name;
