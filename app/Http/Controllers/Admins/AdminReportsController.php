@@ -856,8 +856,6 @@ class AdminReportsController extends Controller
 
              foreach ($details['months'] as $key => $name) {
                  $cellIndex1 = Coordinate::stringFromColumnIndex($cellIndexcol1);
-//                 $cellIndexw = Coordinate::stringFromColumnIndex($weight_index);
-//                 $cellIndexc = Coordinate::stringFromColumnIndex($cod_index);
                  $cellIndex2 = Coordinate::stringFromColumnIndex($cellIndexcol2);
                  $cellIndex11 = $cellIndex1 . '1';
                  $cellIndex12 = $cellIndex2 . '1';
@@ -866,11 +864,7 @@ class AdminReportsController extends Controller
                  $sheet->setCellValue($cellIndex11, $name);
                  $sheet->fromArray($details['subheader'], NULL, $cellIndex1 . '2');
 
-
-
                  $cellIndexcol1 += 4;
-//                 $weight_index += 4;
-//                 $cod_index += 4;
                  $cellIndexcol2 += 4;
 
          }
