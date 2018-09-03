@@ -53,34 +53,7 @@
                             <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" data-value="">
                         </fieldset>
                     </div>
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_assigned_by" id="search_assigned_by" class="form-control select2">--}}
-                                {{--@foreach($admins as $admin)--}}
-                                    {{--<option value="{{$admin->id}}">{{$admin->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_rider" id="search_rider" class="form-control select2">--}}
-                                {{--@foreach($riders as $rider)--}}
-                                    {{--<option value="{{$rider->id}}">{{$rider->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
 
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_completed_by" id="search_completed_by" class="form-control select2">--}}
-                                {{--@foreach($admins as $admin)--}}
-                                    {{--<option value="{{$admin->id}}">{{$admin->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
 
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -100,8 +73,6 @@
                         <th class="border-primary border-darken-1">Transit Date</th>
                         <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1">Received Date</th>
-                        {{--<th class="border-primary border-darken-1">Received Shipment(s)</th>--}}
-                        {{--<th class="border-primary border-darken-1">Short Received Shipment(s)</th>--}}
                     </tr>
                     </thead>
                 </table>
@@ -225,7 +196,44 @@
                 onSet: function(context) {
                 }
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.cargo_received.list') }}',
+                        data: {
+                            'search_cargo_no': $('#search_cargo_no').val(),
+                            'search_origin': $('#search_origin').val(),
+                            'search_destination': $('#search_destination').val(),
+                            'search_shippimg_modes': $('#search_shippimg_modes').val(),
+                            'search_transit_date': $('input[name="transit_date_formatted"]').val(),
+                            'search_received_date': $('input[name="received_date_formatted"]').val()
+                        },
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.cargo_id);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.shipments);
+                                row.push(values.shipping_mode);
+                                row.push(values.transit_by);
+                                row.push(values.transit_at);
+                                row.push(values.received_by);
+                                row.push(values.received_at);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                }
+            } );
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -233,26 +241,9 @@
                     {
                     extend: 'excelHtml5',
                     title: 'Received Cargo Report',
-                    exportOptions: {
-                        columns: ':visible',
-                        format: {
-                            body: function ( data, row, column, node ) {
-                                return (column == 0)? row+1:data;
-                            }
-                        }
-                    }
+                    text:'<i class="la la-file-excel-o"></i> Excel',
                     },
-                    {
-                        extend: 'print',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( e, dt, column, node ) {
-                                    return (column == 0)? dt+1:e;
-                                }
-                            }
-                        }
-                    },
+
                 ],
                 fixedHeader: {
                     header: true,

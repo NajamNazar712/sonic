@@ -50,15 +50,7 @@
                                 <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
 
                         </div></div>
-                        {{--<div class="form-group input-group ml-1">--}}
-                            {{--<div class="input-group-prepend">--}}
-										{{--<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-											{{--<span class="la la-calendar-o"></span>--}}
-										{{--</span>--}}
-                            {{--</div>--}}
 
-                            {{--<input type="text" name="search_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date" placeholder="Search Date" data-value="{{Carbon\Carbon::now()}}">--}}
-                        {{--</div>--}}
                         <div class="col-2">
                         <div class="form-group ml-1">
                             <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
@@ -150,7 +142,7 @@
         $(document).ready(function () {
             $('#search_form #city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
-                placeholder: 'Select City',
+                placeholder: 'Select Hub',
                 allowClear:true
             });
             $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({

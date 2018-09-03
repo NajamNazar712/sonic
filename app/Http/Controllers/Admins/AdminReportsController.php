@@ -172,7 +172,7 @@ class AdminReportsController extends Controller
     }
     public function cargo_received_index(Request $request){
         $shippimg_modes = ShippingMode::all();
-        $cities = City::all(['id','name']);
+        $cities = City::select('id','name')->where('hub',1)->get();
         return view('admin.reports.cargo_received_report')->with(['cities'=>$cities,'shippimg_modes'=>$shippimg_modes]);
     }
     public function cargo_received_list(Request $request){
@@ -226,7 +226,7 @@ class AdminReportsController extends Controller
     }
     public function lead_time_list(Request $request){
         $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
-            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
+//            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -284,7 +284,7 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipment_status as fs','fs.id','=','fstatus.shipper_status_id')
             ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
-            ->select('shipments.id as Shipment_id','shipments.tracking_number','ubi.account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date')
+            ->select('shipments.id as Shipment_id','shipments.tracking_number','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date')
             ->orderBy('shipments.id','desc' )
             ->groupBy('shipments.id');
         $lead_time = Datatables::of($shipments)
@@ -933,7 +933,9 @@ class AdminReportsController extends Controller
         return Response::download($file, 'customer_sales_report.xlsx',$headers);
     }
     public function completed_delivery_notes_index(){
-        return view('admin.reports.completed_delivery_notes_report');
+        $riders = Rider::all(['id','name']);
+        $admins = Admin::all(['id','name']);
+        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins]);
     }
     public function completed_delivery_notes_list(Request $request){
         $deliveries = DeliveryNote::
@@ -948,7 +950,7 @@ class AdminReportsController extends Controller
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
-        return Datatables::of($deliveries)
+        $datatable = Datatables::of($deliveries)
             ->setRowAttr([
                 'data-hub' => function($deliveries) {
                     return $deliveries->hub_id;
@@ -972,8 +974,28 @@ class AdminReportsController extends Controller
             })
             ->editColumn('updated_at', function ($rider) {
                 return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y H:i:s A') : '';
-            })
-            ->make(true);
+            });
+            if($rn_no = $request->get('search_dn_no')){
+                $datatable->where('delivery_notes.id','=',$rn_no);
+            }
+            if($tracking = $request->get('search_tracking')){
+                $datatable->join('delivery_note_shipments as rns','rns.delivery_note_id','=','delivery_notes.id')
+                    ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking);
+            }
+            if($rider = $request->get('search_rider')){
+                $datatable->where('riders.id','=',$rider);
+            }
+            if($created_by = $request->get('search_assigned_by')){
+                $datatable->where('admins.id','=',$created_by);
+            }
+            if($submitted_by = $request->get('search_updated_by')){
+                $datatable->where('ub.id','=',$submitted_by);
+            }
+            if($submission_date = $request->get('search_submission')){
+                $datatable->whereDate('delivery_notes.updated_at',$submission_date);
+            }
+            return $datatable->make(true);
 
     }
     public function customer_retention_index(){
@@ -1017,34 +1039,27 @@ class AdminReportsController extends Controller
             }
 
             $n = ($details['s'][$month] != 0)? $details['s'][$month]:0;
-            $details['crr'][$month] = ($n != 0)? (($details['e'][$month]-$details['n'][$month])/$n)*100:'-';
+            $details['crr'][$month] = ($n != 0)? (($details['e'][$month]-$details['n'][$month])/$n)*100 :'-';
 
             $shippers['header'][] = $month;
 
          }
         $shippers['header'][] = 'Grand Total';
         if($hub != null){
-            $shippers['shipper'][] = User::where('city_id',$hub)->where('status','>=',3)->get();
-             if($shipper_filter != null){
-                 $client_exist =User::where('id',$shipper_filter)->where('city_id',$hub);
-                 if($client_exist->exists()){
-                     $shippers['shipper'][] = $client_exist->get();
-                 }
+            $shippers['shipper'] = User::whereHas('city.hub', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub);
+            })->where('status','>=',3)->get();
 
-             }
          }else{
-             if($shipper_filter != null){
-                 $client_exist =User::where('id',$shipper_filter);
-                 if($client_exist->exists()){
-                     $shippers['shipper'] = $client_exist->get();
-                 }
-
-             }else{
-
                  $shippers['shipper'] = User::where('status','>=',3)->get();
-             }
-
          }
+
+        if($shipper_filter != null){
+            $client_exist =User::where('id',$shipper_filter);
+            if($client_exist->exists()){
+                $shippers['shipper'] = $client_exist->get();
+            }
+        }
         if(!empty($shippers['shipper'])){
             foreach ($shippers['shipper'] as $client){
                 $shippers['name'][$client->id] = $client->name;
@@ -1057,14 +1072,10 @@ class AdminReportsController extends Controller
                                 ->whereYear('created_at', $thisYear)
                                 ->where('shipper_status_id', 2);
                         })->count();
-
                 }
             }
         }
 
-
-
-//        return $shippers;
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $style =[

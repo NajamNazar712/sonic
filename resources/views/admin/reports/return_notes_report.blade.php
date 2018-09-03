@@ -178,7 +178,43 @@
                 onSet: function(context) {
                 }
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.return_note.list') }}',
+                        data: {
+                            'search_rn_no': $('#search_rn_no').val(),
+                            'search_tracking': $('#search_tracking_no').val(),
+                            'search_rider': $('#search_rider').val(),
+                            'search_created_by': $('#search_created_by').val(),
+                            'search_submitted_by': $('#search_submitted_by').val(),
+                            'search_hub': $('#search_hub').val(),
+                            'search_submission': $('input[name="submission_date_formatted"]').val(),
+                        },
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.return_note_id);
+                                row.push(values.updated_by);
+                                row.push(values.count);
+                                row.push(values.submission_date);
+                                row.push(values.rider);
+                                row.push(values.created_by);
+                                row.push(values.created_at);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                }
+            } );
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -186,29 +222,8 @@
                     {
                     extend: 'excelHtml5',
                     title: 'Completed Return Notes Report',
-                    exportOptions: {
-                        columns: ':visible',
-                        format: {
-                            body: function ( data, row, column, node ) {
-                                return (column == 0)? index_column+=1:data;
-
-
-                            }
-                        },
-                    }
+                    text:'<i class="la la-file-excel-o"></i> Excel',
                     },
-                    // {
-                    //     extend: 'pdfHtml5',
-                    //     title: 'Received Cargo Report',
-                    //     exportOptions: {
-                    //         columns: ':visible',
-                    //         format: {
-                    //             body: function ( data, row, column, node ) {
-                    //                 return (column == 0)? index_column+=1:data;
-                    //             }
-                    //         }
-                    //     }
-                    // },
                 ],
                 fixedHeader: {
                     header: true,

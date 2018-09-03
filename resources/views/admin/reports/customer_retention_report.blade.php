@@ -141,15 +141,23 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_form #city').prepend('<option value="" selected="selected"></option>').select2({
+            var city_select = $('#search_form #city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
-                placeholder: 'Select City',
+                placeholder: 'Select Hub',
                 allowClear:true
+            }).bind('change', function() {
+                if(shipper_select.val() != ''){
+                    shipper_select.val(null).trigger('change');
+                }
             });
-            $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
+            var shipper_select = $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
                 placeholder: 'Select Shipper',
                 allowClear:true
+            }).bind('change', function() {
+                if(city_select.val() != ''){
+                    city_select.val(null).trigger('change');
+                }
             });
 
             var max = '{{ Carbon\Carbon::now() }}';
