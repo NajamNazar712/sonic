@@ -205,80 +205,65 @@
                     from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
+
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.qsr.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_shipper': $('#search_shipper').val(),
+                            'search_origin': $('#search_origin').val(),
+                            'search_destination': $('#search_destination').val(),
+                            'search_hub': $('#search_hub').val(),
+                            'search_from': $('input[name="from_date_formatted"]').val(),
+                            'search_to': $('input[name="to_date_formatted"]').val()
+                        },
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.shipper);
+                                row.push(values.history_status);
+                                row.push(values.service_type);
+                                row.push(values.arrival);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.amount);
+                                row.push(values.aging);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                }
+            } );
+
             var index_column = [];
             var flag = false;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
-                    {{--{--}}
-                        {{--extend: 'excel',--}}
-                        {{--title: 'Test',--}}
-                        {{--text: '<i class="la la-file-excel-o"></i> Test',--}}
-                        {{--exportOptions: {--}}
-                            {{--columns: ':visible',--}}
-                            {{--format: {--}}
-                                {{--body: function ( e, dt, column, config ) {--}}
-                                    {{--var info = table.ajax.params();--}}
-                                    {{--info.length = -1;--}}
-                                    {{--// console.log(e);--}}
-                                    {{--if(flag == false){--}}
-                                        {{--$.ajax({--}}
-                                            {{--url: '{{ route('admin.reports.qsr.list') }}',--}}
-                                            {{--type:"GET",--}}
-                                            {{--data: info,--}}
-                                        {{--}).done(function (data) {--}}
-                                            {{--index_column.push(data.data);--}}
-
-                                            {{--// $.each(data.data,function (key,value) {--}}
-                                            {{--//     console.log(value)--}}
-                                            {{--// })--}}
-                                        {{--});--}}
-                                        {{--flag = true;--}}
-                                    {{--}--}}
-                                    {{--console.log(index_column);--}}
-                                    {{--// return (column == 0)? dt+1:index_column[0];--}}
-
-
-                                {{--}--}}
-                            {{--}--}}
-                        {{--}--}}
-                    {{--},--}}
                     {
                     extend: 'excel',
                     title: 'QSR Report',
                     text: '<i class="la la-file-excel-o"></i> Excel',
-                    exportOptions: {
-                        columns: ':visible',
-                        format: {
-                            body: function ( e, dt, column, config ) {
-                                // var info = dt.button.exportInfo();
-                                //     console.log(info);
-                                //     return false;
-                                    return (column == 0)? dt+1:e;
-
-                            }
-                        }
-                    }
                     },
-                    // {
-                    //     extend: 'print',
-                    //     text: '<i class="la la-print"></i> Print',
-                    //     exportOptions: {
-                    //         columns: ':visible',
-                    //         format: {
-                    //             body: function ( e, dt, column, node ) {
-                    //                 return (column == 0)? dt+1:e;
-                    //             }
-                    //         }
-                    //     }
-                    // },
                 ],
                 fixedHeader: {
                     header: true,
                     headerOffset: $('.header-navbar').height()
                 },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
+                lengthMenu: [[10, 50, 100], [10, 50, 100]],
+                pageLength: 10,
                 stateSave: true,
                 pagingType: 'full_numbers',
                 processing: true,

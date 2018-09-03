@@ -22,49 +22,7 @@
                     </div>
                 </div>
                 <div id="qa_table"></div>
-                {{--<table class="table table-bordered datatable nodisplay" id="datatable" style="z-index: 3;">--}}
-                    {{--<thead>--}}
-                    {{--<tr role="row" class="bg-primary white">--}}
-
-                        {{--<th class="border-primary border-darken-1" >Stations</th>--}}
-                        {{--<th class="border-primary border-darken-1" colspan="2">Parcel Pending for Cargo</th>--}}
-                        {{--<th class="border-primary border-darken-1" colspan="2">Cargo In Transit</th>--}}
-                        {{--<th class="border-primary border-darken-1" colspan="2">Pending Deliveries</th>--}}
-                        {{--<th class="border-primary border-darken-1" colspan="2">Receive Deliveries</th>--}}
-                        {{--<th class="border-primary border-darken-1" colspan="2">Return Marked</th>--}}
-                        {{--<th class="border-primary border-darken-1" colspan="2">Confirmed Returns</th>--}}
-                        {{--<th class="border-primary border-darken-1" colspan="2">Return Cargo In Transit</th>--}}
-                        {{--<th class="border-primary border-darken-1" colspan="2">Return Pending for Delivery</th>--}}
-                        {{--<th class="border-primary border-darken-1" colspan="2">Return Return Note</th>--}}
-                        {{--<th class="border-primary border-darken-1" rowspan="2">Grand Total</th>--}}
-
-                    {{--</tr>--}}
-                    {{--<tr role="row" class="bg-primary white">--}}
-
-
-                        {{--<th class="border-primary border-darken-1"></th>--}}
-                        {{--<th class="border-primary border-darken-1">Pending</th>--}}
-                        {{--<th class="border-primary border-darken-1">Resolved</th>--}}
-                        {{--<th class="border-primary border-darken-1">Pending</th>--}}
-                        {{--<th class="border-primary border-darken-1">Resolved</th>--}}
-                        {{--<th class="border-primary border-darken-1">Pending</th>--}}
-                        {{--<th class="border-primary border-darken-1">Resolved</th>--}}
-                        {{--<th class="border-primary border-darken-1">Pending</th>--}}
-                        {{--<th class="border-primary border-darken-1">Resolved</th>--}}
-                        {{--<th class="border-primary border-darken-1">Pending</th>--}}
-                        {{--<th class="border-primary border-darken-1">Resolved</th>--}}
-                        {{--<th class="border-primary border-darken-1">Pending</th>--}}
-                        {{--<th class="border-primary border-darken-1">Resolved</th>--}}
-                        {{--<th class="border-primary border-darken-1">Pending</th>--}}
-                        {{--<th class="border-primary border-darken-1">Resolved</th>--}}
-                        {{--<th class="border-primary border-darken-1">Pending</th>--}}
-                        {{--<th class="border-primary border-darken-1">Resolved</th>--}}
-                        {{--<th class="border-primary border-darken-1">Pending</th>--}}
-                        {{--<th class="border-primary border-darken-1">Resolved</th>--}}
-
-                    {{--</tr>--}}
-                    {{--</thead>--}}
-                {{--</table>--}}
+               
             </div>
         </div>
     </div>

@@ -54,7 +54,8 @@ class AdminReportsController extends Controller
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount'])
-        ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47]);
+        ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47])
+            ->orderBy('shipments.id');
         $datatable = Datatables::of($shipments)
             ->addColumn('aging',function ($shipments){
 
@@ -1026,7 +1027,7 @@ class AdminReportsController extends Controller
             $shippers['shipper'][] = User::where('city_id',$hub)->where('status','>=',3)->get();
              if($shipper_filter != null){
                  $client_exist =User::where('id',$shipper_filter)->where('city_id',$hub);
-                 if(!$client_exist->exists()){
+                 if($client_exist->exists()){
                      $shippers['shipper'][] = $client_exist->get();
                  }
 
@@ -1034,8 +1035,8 @@ class AdminReportsController extends Controller
          }else{
              if($shipper_filter != null){
                  $client_exist =User::where('id',$shipper_filter);
-                 if(!$client_exist->exists()){
-                     $shippers['shipper'][] = $client_exist->get();
+                 if($client_exist->exists()){
+                     $shippers['shipper'] = $client_exist->get();
                  }
 
              }else{
