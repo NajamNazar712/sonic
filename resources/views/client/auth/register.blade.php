@@ -115,7 +115,7 @@
                                                         <label for="shipper_phone">Phone Number 1:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" placeholder="0345-9999999 / 0213-9999999" name="shipper_phone" value="{{ old('shipper_phone') }}">
+                                                        <input type="text" class="form-control required" placeholder="0345-9999999 / 0213-9999999" name="shipper_phone" value="{{ old('shipper_phone') }}">
                                                     </div>
                                                 </div>
                                             </div>
@@ -177,7 +177,7 @@
                                                             Pickup Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('pickup_address.0') }}"  name="pickup_address[]">
+                                                        <input type="text" class="form-control required" value="{{ old('pickup_address.0') }}"  name="pickup_address[]" placeholder="Pickup Address">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_poc">
@@ -241,7 +241,7 @@
                                         @if (old('pickup_address'))
                                             @php ($i = 1)
                                         @else
-                                            @php ($i = 0)
+                                            @php ($i = 1)
                                         @endif
                                         @while (old('pickup_address.'.$i) != null)
 
@@ -263,7 +263,7 @@
                                                                     Pickup Address:
                                                                     <span class="danger">*</span>
                                                                 </label>
-                                                                <input type="text" class="form-control required" value="{{ old('pickup_address.'.$i) }}" name="pickup_address[]">
+                                                                <input type="text" class="form-control required" value="{{ old('pickup_address.'.$i) }}" name="pickup_address[]" placeholder="Pickup Address">
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="shipping_poc">
@@ -299,7 +299,7 @@
                                                                 <label for="shipping_email">Email Address:
                                                                 <span class="danger">*</span>
                                                             </label>
-                                                                <input type="email" name="shipping_email[]" class="form-control required" value="{{ old('shipping_email.'.$i) }}">
+                                                                <input type="email" name="shipping_email[]" class="form-control required" value="{{ old('shipping_email.'.$i) }}" placeholder="abc@example.com">
                                                             </div>
                                                             <div class="form-group">
 
@@ -345,7 +345,15 @@
                                                             Bank Name:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('bank_name') }}"   name="bank_name">
+                                                        {{--<input type="text" class="form-control required" value="{{ old('bank_name') }}"   name="bank_name">--}}
+                                                        <div>
+                                                            <select name="bank_city" id="bank_name" class="select2 form-control required" style="width: 100%">
+                                                                <option value="" selected>Select a Bank</option>
+                                                                @foreach($banks as $bank)
+                                                                    <option value="{{$bank->id}}"  {{ old('bank_name') == $bank->id ? 'selected' : '' }} >{{$bank->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="bank_branch">
@@ -516,7 +524,7 @@
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
-        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
         $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,
@@ -526,7 +534,7 @@
         $('#shipInfo').perfectScrollbar('update');
 
 
-        var count = {{$i}};
+        var count = '{{$i}}';
         $('body').on('click','#addMoreAddress',function () {
             $.get( 'new/address', function( data ) {
                 $('#newAddress').append(data);
@@ -555,6 +563,7 @@
                 $('#shipInfo').stop().animate({
                   scrollTop: $('#shipInfo')[0].scrollHeight
                 }, 2000);
+                $("input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
 
                 $('#shipping_' + count + ' .select2').select2({
                     dropdownParent:$('#registership')

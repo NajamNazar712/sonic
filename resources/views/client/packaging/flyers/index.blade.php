@@ -81,7 +81,7 @@
                                 <div class="row justify-content-center">
                                     <div class="col-6">
                                         <div class="form-group">
-                                            <label for="boxes">Flyer Mode of Paymengt</label>
+                                            <label for="boxes">Flyer Mode of Payment</label>
                                             <select name="mode_of_payment" class="select2" id="mode_of_payment" data-rule-required="true" data-msg-required="Payment mode is required">
                                                 <option></option>
                                                 @foreach($payment_mode as $mode)

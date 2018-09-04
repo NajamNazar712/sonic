@@ -18,15 +18,19 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Company</th>
                                         <th class="border-primary border-darken-1">City Name</th>
                                         <th class="border-primary border-darken-1">Contact Person</th>
                                         <th class="border-primary border-darken-1">Phone No.</th>
-                                        <th class="border-primary border-darken-1">Address</th>
+                                        <th class="border-primary border-darken-1">Company Address</th>
                                         <th class="border-primary border-darken-1">Email Address</th>
-                                        <th class="border-primary border-darken-1">Created At</th>
+                                        <th class="border-primary border-darken-1">Product Type</th>
+                                        <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Rates Added By</th>
+                                        <th class="border-primary border-darken-1">Rates Approved By</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -111,17 +115,25 @@
             rowId: 'id',
             ajax: '{{ route('admin.accounts.pending.ajax') }}',
             columns: [
-                {data: 'id', name: 'id', class: 'account_id'},
-                {data: 'name', name: 'name', class: 'company_name'},
-                {data: 'city', name: 'cities.name', class: 'city'},
-                {data: 'poc', name: 'poc', class: 'contact_person'},
-                {data: 'phone', name: 'phone', class: 'phone'},
-                {data: 'address', name: 'address', class: 'address'},
-                {data: 'email', name: 'email', class: 'email'},
-                {data: 'created_at', name: 'created_at', class: 'created'},
-                {data: 'status', name: 'status', class: 'status'},
-                {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
+                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                {data: 'id', name: 'id', class: 'align-middle account_id'},
+                {data: 'name', name: 'name', class: 'align-middle company_name'},
+                {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
+                {data: 'phone', name: 'phone', class: 'align-middle phone'},
+                {data: 'address', name: 'address', class: 'align-middle address'},
+                {data: 'email', name: 'email', class: 'align-middle email'},
+                {data: 'product_name', name: 'products.product_name', class: 'align-middle product_name'},
+                {data: 'created_at', name: 'created_at', class: 'align-middle created'},
+                {data: 'status', name: 'status', class: 'align-middle status'},
+                {data: 'rates_added_by', name: 'rab.rates_added_by', class: 'align-middle rates_added_by'},
+                {data: 'rates_authorized_by', name: 'rabb.rates_authorized_by', class: 'align-middle rates_authorized_by'},
+                {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
+               rowCallback: function(row, data, index) {
+                   var info = table.page.info();
+                   $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+               },
             initComplete: function() {
                 var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
@@ -132,7 +144,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number')) {
                         $(td).appendTo($(search));
                     }
                     else {

@@ -304,12 +304,12 @@ class DeliveryController extends Controller
                     if (session('role_id') == 1 || in_array(37, session('permissions'))) {
                       $dropdown .= $receive_button;
                     }
+                    $statusCheck = DeliveryNoteShipment::where(['delivery_note_id'=>$result->delivery_note,'status'=>0])->get();
 
-                    if (session('role_id') == 1 || in_array(38, session('permissions'))) {
+                    if ((!$statusCheck->isEmpty()) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
                       $dropdown .= $shift_shipment_button;
                     }
 
-                    $statusCheck = DeliveryNoteShipment::where(['delivery_note_id'=>$result->delivery_note,'status'=>0])->get();
 
                     if (($statusCheck->isEmpty()) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
                       $dropdown .= $verify_statuses_button;
@@ -1341,7 +1341,7 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count'])
             ->where('delivery_notes.status',1)
             ->where('delivery_notes.dncc_status',0);
 
@@ -1351,7 +1351,7 @@ class DeliveryController extends Controller
 
         return Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='#' class='printDNCC'><u>DNCC</u></a>";
+                return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
             ->setRowAttr([
                 'data-hub' => function($deliveries) {

@@ -54,7 +54,8 @@ class AdminReportsController extends Controller
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount'])
-        ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47]);
+        ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47])
+            ->orderBy('shipments.id');
         $datatable = Datatables::of($shipments)
             ->addColumn('aging',function ($shipments){
 
@@ -140,7 +141,7 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as ab','ab.id','=','pickup_notes.assigned_by_user_id')
             ->leftjoin('admins as up','up.id','=','pickup_notes.updated_by')
             ->select(['pickup_notes.id as pn_id','cities.name as city','pickup_notes.pickups','pickup_notes.bookings as count','riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
-            ->where('pickup_notes.status_id',5);
+            ->where('pickup_notes.status_id',4);
         $return = Datatables::of($pickup_note)
             ->editColumn('assigned_date', function ($pickup_note) {
                 return $pickup_note->assigned_date ? with(new Carbon($pickup_note->assigned_date))->format('d/m/Y h:i:s A') : '';
@@ -171,12 +172,12 @@ class AdminReportsController extends Controller
     }
     public function cargo_received_index(Request $request){
         $shippimg_modes = ShippingMode::all();
-        $cities = City::all(['id','name']);
+        $cities = City::select('id','name')->where('hub',1)->get();
         return view('admin.reports.cargo_received_report')->with(['cities'=>$cities,'shippimg_modes'=>$shippimg_modes]);
     }
     public function cargo_received_list(Request $request){
-        $cargo_received = CargoConsignment::join('cities as oc','oc.id','=','cargo_consignments.origin_city_id')
-            ->join('cities as h','h.id','=','cargo_consignments.hub_id')
+        $cargo_received = CargoConsignment::join('cities as oc','oc.id','=','cargo_consignments.origin_hub_id')
+            ->join('cities as h','h.id','=','cargo_consignments.destination_hub_id')
             ->join('shipping_modes as sm','sm.id','=','cargo_consignments.shipping_mode_id')
             ->join('admins as si','si.id','=','cargo_consignments.sender_id')
             ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
@@ -225,7 +226,7 @@ class AdminReportsController extends Controller
     }
     public function lead_time_list(Request $request){
         $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
-            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
+//            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
@@ -283,7 +284,7 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipment_status as fs','fs.id','=','fstatus.shipper_status_id')
             ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
-            ->select('shipments.id as Shipment_id','shipments.tracking_number','ubi.account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date')
+            ->select('shipments.id as Shipment_id','shipments.tracking_number','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date')
             ->orderBy('shipments.id','desc' )
             ->groupBy('shipments.id');
         $lead_time = Datatables::of($shipments)
@@ -394,8 +395,8 @@ class AdminReportsController extends Controller
                     $query->where('shipper_status_id', '=', 3)
                         ->whereDate('created_at','=', $search_date);
                 })->count();
-            $qa_data[$hub->name]['cargo_transit_pending'] = CargoConsignment::whereDate('created_at','<=',$search_date)->where('status_id','!=',3)->where('origin_city_id',$hub->id)->count();
-            $qa_data[$hub->name]['cargo_transit_resolved'] = CargoConsignment::whereDate('updated_at','=',$search_date)->where('status_id','=',3)->where('origin_city_id',$hub->id)->count();
+            $qa_data[$hub->name]['cargo_transit_pending'] = CargoConsignment::whereDate('created_at','<=',$search_date)->where('status_id','!=',3)->where('origin_hub_id',$hub->id)->count();
+            $qa_data[$hub->name]['cargo_transit_resolved'] = CargoConsignment::whereDate('updated_at','=',$search_date)->where('status_id','=',3)->where('origin_hub_id',$hub->id)->count();
             $pending_status = array(2, 4, 6, 7, 8, 9, 13, 15); //for pending deliveries
             $not_pending_status = array(1, 3, 5, 10, 11,12,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47); //for pending deliveries
             $qa_data[$hub->name]['deliveries_pending'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
@@ -568,6 +569,7 @@ class AdminReportsController extends Controller
      public function daily_pickup_sales_export_to_excel(Request $request){
 //        return $request;
          $date = $request->date;
+         $date = Carbon::parse($date)->toDateString();
          $search_city = $request->city;
          $city = array();
          $hubs = array();
@@ -583,8 +585,9 @@ class AdminReportsController extends Controller
 //         return $hubs;
 //         $all_details = array();
          $details = array();
+         $details_shipper = array();
 
-         $details[] = ['S. No.','Origin'.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg/Parcel Revenue','Avg. Cash Collection','% Rev. on Cash Collection'];
+         $details[] = ['S. No.','Origin '.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg/Parcel Revenue','Avg. Cash Collection','% Rev. on Cash Collection'];
 
          $serial_number_hubs = 1;
          $booked = 0; $received = 0; $revenue_wo_gst = 0; $cod_collection = 0;
@@ -629,7 +632,7 @@ class AdminReportsController extends Controller
 
          }
 
-         $details[] = ['S. No.','DSR'.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg. Cash Collection','% Rev. on Cash Collection'];
+         $details_shipper[] = ['S. No.','DSR '.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg/Parcel Revenue','Avg. Cash Collection','% Rev. on Cash Collection'];
          $serial_number_shippers = 1;
          if($search_city != null){
              $shippers = User::where('city_id',$search_city)->where('status',3)->get();
@@ -702,7 +705,7 @@ class AdminReportsController extends Controller
              $shipper_row[] = $shipper_avg_cash_collection;
              $shipper_row[] = $shipper_rev_on_cash_collection;
 
-             $details[] = $shipper_row;
+             $details_shipper[] = $shipper_row;
              $serial_number_shippers++;
          }
 //         $all_details = array_merge($details + $shipper_details;
@@ -712,13 +715,16 @@ class AdminReportsController extends Controller
              'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
              'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
          ];
-         $spreadsheet->getActiveSheet()->fromArray($details);
-         $spreadsheet->getActiveSheet()->getStyle('A1:H9')->applyFromArray($cell_st);
-         $spreadsheet->getActiveSheet()->getDefaultColumnDimension()->setWidth(30);
-         $spreadsheet->getActiveSheet()->insertNewRowBefore(9, 8);
-         $spreadsheet->getActiveSheet()->setTitle('Daily Pickup Sales Report');
-//         $spreadsheet->getActiveSheet()->setCellValue('A1','S. No.');
-//         $spreadsheet->getActiveSheet()->fromArray($shipper_details);
+         $sheet = $spreadsheet->getActiveSheet();
+         $sheet->getStyle('A1:I1')->applyFromArray($cell_st);
+         $sheet->getDefaultColumnDimension()->setWidth(20);
+         $sheet->fromArray($details,NULL,'A1');
+         $sheet->getStyle('A21:I21')->applyFromArray($cell_st);
+         $sheet->fromArray($details_shipper,NULL,'A21');
+//         $sheet->insertNewRowBefore(9, 8);
+         $sheet->setTitle('Daily Pickup Sales Report');
+//         $sheet->setCellValue('A1','S. No.');
+//         $sheet->fromArray($shipper_details);
 
          $writer = new Xlsx($spreadsheet);
 
@@ -773,7 +779,7 @@ class AdminReportsController extends Controller
          if($hub != null){
              $city = City::where('id',$hub)->select('id','name')->get();
          }else{
-             $city = City::all();
+             $city = City::where('hub',1)->get();
          }
 
          $details = array();
@@ -850,14 +856,10 @@ class AdminReportsController extends Controller
          $sheet->getStyle('A1:B1')->applyFromArray($cell_st);
 
          $cellIndexcol1 = 3;
-         $weight_index = 4;
-         $cod_index = 5;
          $cellIndexcol2 = 6;
 
              foreach ($details['months'] as $key => $name) {
                  $cellIndex1 = Coordinate::stringFromColumnIndex($cellIndexcol1);
-//                 $cellIndexw = Coordinate::stringFromColumnIndex($weight_index);
-//                 $cellIndexc = Coordinate::stringFromColumnIndex($cod_index);
                  $cellIndex2 = Coordinate::stringFromColumnIndex($cellIndexcol2);
                  $cellIndex11 = $cellIndex1 . '1';
                  $cellIndex12 = $cellIndex2 . '1';
@@ -866,14 +868,10 @@ class AdminReportsController extends Controller
                  $sheet->setCellValue($cellIndex11, $name);
                  $sheet->fromArray($details['subheader'], NULL, $cellIndex1 . '2');
 
-
-
                  $cellIndexcol1 += 4;
-//                 $weight_index += 4;
-//                 $cod_index += 4;
                  $cellIndexcol2 += 4;
 
-         }
+            }
          $sheet->fromArray($details['header'],NULL,'A1');
          $col = 4;
          $parcelIndex = 3;
@@ -923,7 +921,7 @@ class AdminReportsController extends Controller
          $writer = new Xlsx($spreadsheet);
 
          header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-         header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
+         header('Content-Disposition: attachment;filename="customer_sales_report.xlsx"');
          header('Cache-Control: max-age=0');
 
          $writer->save('reports/customer_sales_report.xlsx');
@@ -935,7 +933,9 @@ class AdminReportsController extends Controller
         return Response::download($file, 'customer_sales_report.xlsx',$headers);
     }
     public function completed_delivery_notes_index(){
-        return view('admin.reports.completed_delivery_notes_report');
+        $riders = Rider::all(['id','name']);
+        $admins = Admin::all(['id','name']);
+        return view('admin.reports.completed_delivery_notes_report')->with(['riders'=>$riders,'admins'=>$admins]);
     }
     public function completed_delivery_notes_list(Request $request){
         $deliveries = DeliveryNote::
@@ -950,7 +950,7 @@ class AdminReportsController extends Controller
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
-        return Datatables::of($deliveries)
+        $datatable = Datatables::of($deliveries)
             ->setRowAttr([
                 'data-hub' => function($deliveries) {
                     return $deliveries->hub_id;
@@ -974,8 +974,177 @@ class AdminReportsController extends Controller
             })
             ->editColumn('updated_at', function ($rider) {
                 return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y H:i:s A') : '';
-            })
-            ->make(true);
+            });
+            if($rn_no = $request->get('search_dn_no')){
+                $datatable->where('delivery_notes.id','=',$rn_no);
+            }
+            if($tracking = $request->get('search_tracking')){
+                $datatable->join('delivery_note_shipments as rns','rns.delivery_note_id','=','delivery_notes.id')
+                    ->join('shipments as s', 'rns.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking);
+            }
+            if($rider = $request->get('search_rider')){
+                $datatable->where('riders.id','=',$rider);
+            }
+            if($created_by = $request->get('search_assigned_by')){
+                $datatable->where('admins.id','=',$created_by);
+            }
+            if($submitted_by = $request->get('search_updated_by')){
+                $datatable->where('ub.id','=',$submitted_by);
+            }
+            if($submission_date = $request->get('search_submission')){
+                $datatable->whereDate('delivery_notes.updated_at',$submission_date);
+            }
+            return $datatable->make(true);
 
+    }
+    public function customer_retention_index(){
+        $shippers = User::where('status',3)->get();
+        $hubs = City::select('id','name')->where('hub',1)->get();
+        return view('admin.reports.customer_retention_report')->with(['hubs'=>$hubs,'shippers'=>$shippers]);
+    }
+    public function customer_retention_export_to_excel(Request $request){
+        $hub = $request->city;
+        $shipper_filter = $request->shipper;
+        $from_date = $request->from_date;
+        $to_date = $request->to_date;
+        $months_array = array();
+        $months_array = $this->get_months($from_date,$to_date);
+        unset($months_array[0]);
+
+//        if($hub != null){
+//            $city = City::where('id',$hub)->select('id','name')->get();
+//        }else{
+//            $city = City::where('hub',1)->get();
+//        }
+
+        $details = array();
+        $shippers = array();
+        $shippers['header'] = ['S.No','Client Name'];
+
+
+
+         foreach($months_array as $month){
+
+            $first_date  = Carbon::parse($month)->firstOfMonth();
+            $last_date  = Carbon::parse($month)->lastOfMonth()->endOfDay();
+            if($hub != null){
+                $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->where('city_id',$hub)->count();
+                $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->where('city_id',$hub)->count();
+                $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->where('city_id',$hub)->count();
+            }else{
+                $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->count();
+                $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->count();
+                $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->count();
+            }
+
+            $n = ($details['s'][$month] != 0)? $details['s'][$month]:0;
+            $details['crr'][$month] = ($n != 0)? (($details['e'][$month]-$details['n'][$month])/$n)*100 :'-';
+
+            $shippers['header'][] = $month;
+
+         }
+        $shippers['header'][] = 'Grand Total';
+        if($hub != null){
+            $shippers['shipper'] = User::whereHas('city.hub', function($query) use ($hub) {
+                $query->where('hub_id', '=', $hub);
+            })->where('status','>=',3)->get();
+
+         }else{
+                 $shippers['shipper'] = User::where('status','>=',3)->get();
+         }
+
+        if($shipper_filter != null){
+            $client_exist =User::where('id',$shipper_filter);
+            if($client_exist->exists()){
+                $shippers['shipper'] = $client_exist->get();
+            }
+        }
+        if(!empty($shippers['shipper'])){
+            foreach ($shippers['shipper'] as $client){
+                $shippers['name'][$client->id] = $client->name;
+                foreach($months_array as $month) {
+                    $thisMonth = Carbon::parse($month)->month;
+                    $thisYear = Carbon::parse($month)->year;
+                    $shippers['parcels'][$client->id][$month] = Shipment::where('user_id', $client->id)
+                        ->whereHas('shipment_journey', function($query) use ($thisMonth,$thisYear) {
+                            $query->whereMonth('created_at', $thisMonth)
+                                ->whereYear('created_at', $thisYear)
+                                ->where('shipper_status_id', 2);
+                        })->count();
+                }
+            }
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $style =[
+            'font' =>['bold' => true],
+            'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders' => array(
+                'outline' => array(
+                    'borderStyle' => \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THICK,
+                    'color' => array('argb' => '000000'),
+                ),
+            ),
+        ];
+        $sheet->getDefaultColumnDimension()->setWidth(20);
+        $sheet->getStyle('A2:Z2')->applyFromArray($style);
+        $sheet->getStyle('A4')->applyFromArray($style);
+        $sheet->getStyle('A5:D5')->applyFromArray($style);
+        $sheet->getStyle('A6:D9')->applyFromArray($style);
+        $sheet->mergeCells('A2:Z2');
+        $sheet->getStyle('A10:D10')->applyFromArray($style);
+        $sheet->getStyle('A12:A12')->applyFromArray($style);
+        $sheet->setCellValue('A2', 'Business Retention Report');
+        $sheet->setCellValue('A4', 'Summary');
+        $sheet->setCellValue('A5','Months');
+        $sheet->setCellValue('A7','S');
+        $sheet->setCellValue('A8','E');
+        $sheet->setCellValue('A9','N');
+        $sheet->setCellValue('A10','CRR');
+        $sheet->setCellValue('A12', 'Details');
+        $monthIndexcol1 = 2;
+        $monthRow = 5;
+        foreach ($months_array as $month) {
+                $cellIndex1 = Coordinate::stringFromColumnIndex($monthIndexcol1);
+                $sheet->setCellValue($cellIndex1.$monthRow, $month);
+                $sheet->setCellValue($cellIndex1.'7', $details['s'][$month]);
+                $sheet->setCellValue($cellIndex1.'8', $details['e'][$month]);
+                $sheet->setCellValue($cellIndex1.'9', $details['n'][$month]);
+                $sheet->setCellValue($cellIndex1.'10', $details['crr'][$month]);
+            $monthIndexcol1 += 1;
+        }
+        $sheet->fromArray($shippers['header'],NULL,'A13');
+        $col = 14;
+        $serials = 1;
+        $dateIndex = 3;
+        foreach ($shippers['name'] as $id => $shipper){
+            $sheet->setCellValue('A'.$col,$serials);
+            $sheet->setCellValue('B'.$col,$shipper);
+            foreach ($months_array as $m){
+                $cellIndexShipper = Coordinate::stringFromColumnIndex($dateIndex);
+                $sheet->setCellValue($cellIndexShipper.$col,$shippers['parcels'][$id][$m]);
+                $dateIndex++;
+            }
+//            $sheet->setCellValue($dateIndex.$col,$shippers['total'][$id]);
+            $col++;
+            $serials++;
+            $dateIndex = 3;
+        }
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="customer_retention_report.xlsx"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('reports/customer_retention_report.xlsx');
+        return response()->json(['success'=>1,'file'=>'customer_retention_report.xlsx']);
+
+    }
+    public function customer_retention_download(Request $request){
+        $file = public_path()."/reports/customer_retention_report.xlsx";
+        $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
+        return Response::download($file, 'customer_retention_report.xlsx',$headers);
     }
 }

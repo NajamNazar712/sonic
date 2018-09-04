@@ -105,7 +105,7 @@
                 }
             }
         });
-        var max_char = 250;
+        var max_char = 190;
         $('#commentbox').keypress(function (e) {
             // var comment = $(this).val();
            // console.log(comment)

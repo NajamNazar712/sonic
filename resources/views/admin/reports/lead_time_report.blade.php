@@ -16,15 +16,7 @@
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_shipper" id="search_shipper" class="form-control select2">--}}
-                                {{--@foreach($shippers as $shipper)--}}
-                                    {{--<option value="{{$shipper->id}}">{{$shipper->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
+
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
@@ -246,8 +238,89 @@
                     from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.lead_time.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_tracking_no': $('#search_tracking_no').val(),
+                            'search_origin': $('#search_origin').val(),
+                            'search_destination': $('#search_destination').val(),
+                            'search_hub': $('#search_hub').val(),
+                            'search_status': $('#search_status').val(),
+                            'search_from': $('input[name="from_date_formatted"]').val(),
+                            'search_to': $('input[name="to_date_formatted"]').val()
+                        },
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+                                head = [];
 
-            var index_column = 0;
+                                head.push('S.No');
+                                head.push('Tracking .No');
+                                head.push('Account No.');
+                                head.push('Shipper');
+                                head.push('Origin');
+                                head.push('Destination');
+                                head.push('Hub');
+                                head.push('Current Status');
+                                head.push('Arrival Date(A)');
+                                head.push('Reached At Destination Date(B)');
+                                head.push('Transit TAT(A-B)');
+                                head.push('First Status');
+                                head.push('First Status Date(C)');
+                                head.push('Attempt TAT(A-C)');
+                                head.push('Dispatch TAT(B-C)');
+                                head.push('Delivered Date(D)');
+                                head.push('Return Confirm(E)');
+                                head.push('Reached At Origin(F)');
+                                head.push('Return Transit TAT(E-F)');
+                                head.push('Return Status');
+                                head.push('Return Status Date(G)');
+                                head.push('Return Dispatch TAT(F-G)');
+                                head.push('Return TAT(E-G)');
+                                head.push('Payment Done Date(H)');
+                                head.push('Payment TAT(D-H,G-H)');
+                                head.push('Total TAT');
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.account_no);
+                                row.push(values.shipper);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.current_status);
+                                row.push(values.arrival_date);
+                                row.push(values.reached_at_destination);
+                                row.push(values.transit_tat);
+                                row.push(values.first_status);
+                                row.push(values.first_status_date);
+                                row.push(values.attempt_tat);
+                                row.push(values.dispatch_tat);
+                                row.push(values.delivered_date);
+                                row.push(values.return_confirm);
+                                row.push(values.return_reached_at_destination);
+                                row.push(values.return_transit_tat);
+                                row.push(values.return_delivered_status);
+                                row.push(values.return_delivered_date);
+                                row.push(values.return_dispatch_tat);
+                                row.push(values.return_tat);
+                                row.push(values.payment_done_date);
+                                row.push(values.payment_tat);
+                                row.push(values.total_tat);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );            var index_column = 0;
             var table = $('#datatable').DataTable({
                 "scrollX": true,
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -255,25 +328,7 @@
                     {
                         extend: 'excelHtml5',
                         title: 'Lead Time Report',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( data, row, column, node ) {
-                                    return (column == 0)? row+1:data;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( e, dt, column, node ) {
-                                    return (column == 0)? dt+1:e;
-                                }
-                            }
-                        }
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
                 fixedHeader: {
