@@ -18,6 +18,7 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3">
                                 <thead>
                                     <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">City Name</th>
@@ -25,7 +26,13 @@
                                         <th class="border-primary border-darken-1">Phone Number</th>
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">Email Address</th>
+                                        <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Request Date</th>
+                                        <th class="border-primary border-darken-1">Rate Added By</th>
+                                        <th class="border-primary border-darken-1">Rate Approved By</th>
+                                        <th class="border-primary border-darken-1">Account Activated By</th>
+                                        <th class="border-primary border-darken-1">Account Activation Date</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -97,6 +104,7 @@
     <script type="text/javascript">
     $(document).ready(function() {
        var table = $('#datatable').DataTable({
+           "scrollX": true,
             dom: 'ltipr',
             fixedHeader: {
                 header: true,
@@ -111,16 +119,27 @@
             rowId: 'id',
             ajax: '{{ route('admin.accounts.active.ajax') }}',
             columns: [
-                {data: 'id', name: 'id', class: 'account_id'},
-                {data: 'name', name: 'name', class: 'company_name'},
-                {data: 'city', name: 'cities.name', class: 'city'},
-                {data: 'poc', name: 'poc', class: 'contact_person'},
-                {data: 'phone', name: 'phone', class: 'phone'},
-                {data: 'address', name: 'address', class: 'address'},
-                {data: 'email', name: 'email', class: 'email'},
-                {data: 'status', name: 'status', class: 'status'},
-                {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
+                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                {data: 'id', name: 'id', class: 'align-middle account_id'},
+                {data: 'name', name: 'name', class: 'align-middle company_name'},
+                {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                {data: 'poc', name: 'poc', class: 'align-middle contact_person'},
+                {data: 'phone', name: 'phone', class: 'align-middle phone'},
+                {data: 'address', name: 'address', class: 'align-middle address'},
+                {data: 'email', name: 'email', class: 'align-middle email'},
+                {data: 'product_name', name: 'p.product_name', class: 'align-middle product_name'},
+                {data: 'status', name: 'status', class: 'align-middle status'},
+                {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
+                {data: 'added_by', name: 'rab.added_by', class: 'align-middle added_by'},
+                {data: 'approved_by', name: 'rabb.approved_by', class: 'align-middle approved_by'},
+                {data: 'account_activated_by', name: 'rabba.account_activated_by', class: 'align-middle account_activated_by'},
+                {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
+                {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
+           rowCallback: function(row, data, index) {
+               var info = table.page.info();
+               $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+           },
             initComplete: function() {
                 var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
@@ -131,7 +150,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action')) {
+                    if ($(header).is('.action')  || $(header).is('.serial_number')) {
                         $(td).appendTo($(search));
                     }
                     else {

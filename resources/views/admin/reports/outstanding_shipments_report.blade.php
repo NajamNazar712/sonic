@@ -13,7 +13,7 @@
                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                         <div class="form-group">
                             <select name="hub" class="select2" id="hub">
-                                <option value="0">All</option>
+
 
                                 @foreach($hubs as $hub)
                                     <option value="{{ $hub->id }}">{{ $hub->name }}</option>
@@ -150,13 +150,15 @@
         $(document).ready(function () {
             $('#search_form #hub').prepend('<option value="" selected="selected"></option>').select2({
                 width: '150px',
-                placeholder: 'Select Hub'
+                placeholder: 'Select Hub',
+                allowClear:true,
             }).bind('change', function() {
                 table.draw();
             });
             $('#search_form #shipment_status').prepend('<option value="" selected="selected"></option>').select2({
                 width: '150px',
-                placeholder: 'Select Status'
+                placeholder: 'Select Status',
+                allowClear:true,
             }).bind('change', function() {
                 table.draw();
             });
@@ -174,7 +176,6 @@
                     }
                 }
             });
-
             $('#search_form #delivery_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
@@ -204,34 +205,58 @@
             //         return false;
             //     }
             // });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.outstanding_shipments.list') }}',
+                        data:{
+                            'page': 'all',
+                            'hub': $('#search_form #hub').val(),
+                            'shipment_status': $('#search_form #shipment_status').val(),
+                            'delivery_date_from': $('#search_form input[name="delivery_date_from_formatted"]').val(),
+                            'delivery_date_to': $('#search_form input[name="delivery_date_to_formatted"]').val()
+                        },
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.consignee);
+                                row.push(values.address);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.shipper);
+                                row.push(values.service_type);
+                                row.push(values.amount);
+                                row.push(values.recovery_status);
+                                row.push(values.current_status);
+                                row.push(values.status_updated_at);
+                                row.push(values.remarks);
+                                row.push(values.dncc);
+                                row.push(values.sdn);
+                                row.push(values.aging);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                }
+            } );
 
             var index_column = 0;
             var table = $('#datatable').DataTable({
-                "scrollX": true,
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Lead Time Report',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( data, row, column, node ) {
-                                    return (column == 0)? row+1:data;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( e, dt, column, node ) {
-                                    return (column == 0)? dt+1:e;
-                                }
-                            }
-                        }
+                        title: 'Outstanding Shipments Report',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
                 fixedHeader: {

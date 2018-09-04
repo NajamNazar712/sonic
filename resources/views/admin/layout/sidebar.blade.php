@@ -163,7 +163,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(66, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.reports.completed_delivery_notes.index')}}">Delivery Notes Completed</a></li>
+                            <li><a class="menu-item" href="{{route('admin.reports.completed_delivery_notes.index')}}">Completed Delivery Notes</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(67, session('permissions')))
@@ -187,7 +187,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(72, session('permissions')))
-                            <li><a class="menu-item" href="#">Customer Retention Rate</a></li>
+                            <li><a class="menu-item" href="{{route('admin.reports.customer_retention.index')}}">Customer Retention Rate</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(73, session('permissions')))
@@ -199,7 +199,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(75, session('permissions')))
-                            <li><a class="menu-item" href="#">Overall Sales</a></li>
+                            {{--<li><a class="menu-item" href="#">Overall Sales</a></li>--}}
                         @endif
                     </ul>
                 </li>

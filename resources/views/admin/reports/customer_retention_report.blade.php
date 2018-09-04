@@ -2,7 +2,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Monthwise Customer Sales Report
+        Customer Retention Report
     </h1>
 
     <div class="card">
@@ -11,53 +11,54 @@
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
                     <div class="col-12">
-                    <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="post" action="{{route('admin.reports.customer_sales.export_to_excel')}}">
-                        <div class="col-2">
-                        <div class="form-group">
-                            <select name="city" class="select2" id="city">
-                                @foreach($hubs as $city)
-                                    <option value="{{ $city->id }}">{{ $city->name }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        </div>
-                        <div class="col-2">
-                        <div class="form-group ml-1">
-                            <select name="shipper" class="select2" id="shipper">
-                                @foreach($shippers as $shipper)
-                                    <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
-                                @endforeach
-                            </select>
-                        </div></div>
-                        <div class="col-3">
-                        <div class="form-group input-group ml-1">
-
-                                <div class="input-group-prepend">
-                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-                                <span class="la la-calendar-o"></span>
-                                </span>
+                        <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="post" action="{{route('admin.reports.customer_sales.export_to_excel')}}">
+                            <div class="col-2">
+                                <div class="form-group">
+                                    <select name="city" class="select2" id="city">
+                                        @foreach($hubs as $city)
+                                            <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                        @endforeach
+                                    </select>
                                 </div>
-                                <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+                            </div>
+                            <div class="col-2">
+                                <div class="form-group ml-1">
+                                    <select name="shipper" class="select2" id="shipper">
+                                        @foreach($shippers as $shipper)
+                                            <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div></div>
+                            <div class="col-3">
+                                <div class="form-group input-group ml-1">
 
-                        </div></div>
-                        <div class="col-3">
-                        <div class="form-group input-group ml-1">
-                            <div class="input-group-prepend">
+                                    <div class="input-group-prepend">
                                 <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
                                 </span>
+                                    </div>
+                                    <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-rule-required="true" data-msg-required="Date(From) is required">
+
+                                </div></div>
+                            <div class="col-3">
+                                <div class="form-group input-group ml-1">
+                                    <div class="input-group-prepend">
+                                <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                                </span>
+                                    </div>
+                                    <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
+
+                                </div>
                             </div>
-                                <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-rule-required="true" data-msg-required="Date(To) is required">
 
-                        </div></div>
-
-                        <div class="col-2">
-                        <div class="form-group ml-1">
-                            <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
-                        </div>
-                        </div>
-                    </form>
-                </div>
+                            <div class="col-2">
+                                <div class="form-group ml-1">
+                                    <button type="submit" name="search" class="btn btn-primary" value="Search">Search</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -140,30 +141,38 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_form #city').prepend('<option value="" selected="selected"></option>').select2({
+            var city_select = $('#search_form #city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
                 placeholder: 'Select Hub',
                 allowClear:true
+            }).bind('change', function() {
+                if(shipper_select.val() != ''){
+                    shipper_select.val(null).trigger('change');
+                }
             });
-            $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
+            var shipper_select = $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
                 placeholder: 'Select Shipper',
                 allowClear:true
+            }).bind('change', function() {
+                if(city_select.val() != ''){
+                    city_select.val(null).trigger('change');
+                }
             });
 
             var max = '{{ Carbon\Carbon::now() }}';
 
             var from_date = $('#from_date').pickadate({
-                    firstDay: 1,
-                    disable:[true],
-                    clear: '',
-                    today:'Select Current Month',
-                    max: max,
-                    format:'mmmm, yyyy',
-                    selectYears: true,
-                    selectMonths: true,
-                    formatSubmit: 'yyyy-mm-dd 00:00:00',
-                    hiddenSuffix: '_formatted',
+                firstDay: 1,
+                disable:[true],
+                clear: '',
+                today:'Select Current Month',
+                max: max,
+                format:'mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#from_date_root').css('top','40px');
                 },
@@ -180,11 +189,11 @@
                     $('#from_date_root button.picker__button--today').removeAttr('disabled');
                 }
                 // onClear: function() {
-                    // from_date.pickadate('picker').set('clear');
-                    // $('input[name="from_date_formatted"]').val('');
-                    // var from_month = $('.picker__select--month').val('');
-                    // var from_year = $('.picker__select--year').val('');
-                    // from_date.pickadate('picker').clear();
+                // from_date.pickadate('picker').set('clear');
+                // $('input[name="from_date_formatted"]').val('');
+                // var from_month = $('.picker__select--month').val('');
+                // var from_year = $('.picker__select--year').val('');
+                // from_date.pickadate('picker').clear();
                 // },
 
             });
@@ -234,7 +243,7 @@
                     var city = $('#city').val();
                     var shipper = $('#shipper').val();
                     $.ajax({
-                        url: '{!! route('admin.reports.customer_sales.export_to_excel') !!}',
+                        url: '{!! route('admin.reports.customer_retention.export_to_excel') !!}',
                         method: 'post',
                         data: {
                             '_token': '{{ csrf_token() }}',
@@ -246,7 +255,7 @@
                     }).done(function (data) {
                         // window.open("",'_black');
                         if(data.success == 1){
-                            window.open("{!! route('admin.reports.customer_sales.download') !!}",'_black');
+                            window.open("{!! route('admin.reports.customer_retention.download') !!}",'_black');
                         }else{
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 

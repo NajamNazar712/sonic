@@ -16,6 +16,7 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1"></th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">City Name</th>
@@ -108,6 +109,7 @@
             rowId:'id',
             ajax: '{{ route('admin.accounts.block.ajax') }}',
             columns: [
+                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'id', name: 'id', class: 'account_id'},
                 {data: 'name', name: 'name', class: 'company_name'},
                 {data: 'city', name: 'cities.name', class: 'city'},
@@ -117,6 +119,10 @@
                 {data: 'email', name: 'email', class: 'email'},
                 {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
             ],
+            rowCallback: function(row, data, index) {
+                var info = table.page.info();
+                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+            },
             initComplete: function() {
                 var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
@@ -127,7 +133,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number')) {
                         $(td).appendTo($(search));
                     }
                     else {

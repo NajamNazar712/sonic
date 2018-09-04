@@ -190,6 +190,46 @@
                 }
             });
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.pickup_note.list') }}',
+                        data: {
+                                'page': 'all',
+                                'search_pn_no': $('#search_pn_no').val(),
+                                'search_rider': $('#search_rider').val(),
+                                'search_assigned_by': $('#search_assigned_by').val(),
+                                'search_completed_by': $('#search_completed_by').val(),
+                                'search_city': $('#search_city').val(),
+                                'search_completed_date': $('input[name="completed_date_formatted"]').val()
+                        },
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.pn_id);
+                                row.push(values.city);
+                                row.push(values.pickups);
+                                row.push(values.count);
+                                row.push(values.rider);
+                                row.push(values.assigned_date);
+                                row.push(values.assigned_by);
+                                row.push(values.completed_by);
+                                row.push(values.completed_date);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                }
+            } );
+
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -197,38 +237,8 @@
                     {
                     extend: 'excelHtml5',
                     title: 'Completed Pickup Notes Report',
-                    exportOptions: {
-                        columns: ':visible',
-                        format: {
-                            body: function ( data, row, column, node ) {
-                                return (column == 0)? row+1:data;
-                            }
-                        }
-                    }
+                    text: '<i class="la la-file-excel-o"></i> Excel'
                     },
-                    {
-                        extend: 'print',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( e, dt, column, node ) {
-                                    return (column == 0)? dt+1:e;
-                                }
-                            }
-                        }
-                    },
-                    // {
-                    //     extend: 'pdfHtml5',
-                    //     title: 'Received Cargo Report',
-                    //     exportOptions: {
-                    //         columns: ':visible',
-                    //         format: {
-                    //             body: function ( data, row, column, node ) {
-                    //                 return (column == 0)? index_column+=1:data;
-                    //             }
-                    //         }
-                    //     }
-                    // },
                 ],
                 fixedHeader: {
                     header: true,

@@ -764,7 +764,7 @@
                 }
             });
 
-            var max_char = 250;
+            var max_char = 190;
             $('#description').on('keypress copy paste',function (e) {
                 // var comment = $(this).val();
                 // console.log(comment)
