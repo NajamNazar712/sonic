@@ -197,6 +197,7 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.completed_delivery_notes.list') }}',
                         data: {
+                            'page': 'all',
                             'search_dn_no': $('#search_dn_no').val(),
                             'search_tracking': $('#search_tracking_no').val(),
                             'search_rider': $('#search_rider').val(),

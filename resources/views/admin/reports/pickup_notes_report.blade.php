@@ -197,6 +197,7 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.pickup_note.list') }}',
                         data: {
+                                'page': 'all',
                                 'search_pn_no': $('#search_pn_no').val(),
                                 'search_rider': $('#search_rider').val(),
                                 'search_assigned_by': $('#search_assigned_by').val(),
@@ -238,18 +239,6 @@
                     title: 'Completed Pickup Notes Report',
                     text: '<i class="la la-file-excel-o"></i> Excel'
                     },
-                    // {
-                    //     extend: 'print',
-                    //     exportOptions: {
-                    //         columns: ':visible',
-                    //         format: {
-                    //             body: function ( e, dt, column, node ) {
-                    //                 return (column == 0)? dt+1:e;
-                    //             }
-                    //         }
-                    //     }
-                    // },
-
                 ],
                 fixedHeader: {
                     header: true,

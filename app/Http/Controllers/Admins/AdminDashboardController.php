@@ -3168,7 +3168,11 @@ class AdminDashboardController extends Controller
     }
     public function activeAccountListAjax(){
        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->leftjoin('products as p','p.id','=','users.product_id')
+           ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
+           ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
+           ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name','rab.name as added_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -3233,7 +3237,10 @@ class AdminDashboardController extends Controller
 
     public function pendingAccountListAjax(){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','users.blacklist'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->leftjoin('products','products.id','=','users.product_id')
+            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
+            ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));

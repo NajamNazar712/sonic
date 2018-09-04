@@ -211,6 +211,7 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.outstanding_shipments.list') }}',
                         data:{
+                            'page': 'all',
                             'hub': $('#search_form #hub').val(),
                             'shipment_status': $('#search_form #shipment_status').val(),
                             'delivery_date_from': $('#search_form input[name="delivery_date_from_formatted"]').val(),
@@ -254,7 +255,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Lead Time Report',
+                        title: 'Outstanding Shipments Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],

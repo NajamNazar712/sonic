@@ -203,6 +203,7 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.cargo_received.list') }}',
                         data: {
+                            'page': 'all',
                             'search_cargo_no': $('#search_cargo_no').val(),
                             'search_origin': $('#search_origin').val(),
                             'search_destination': $('#search_destination').val(),

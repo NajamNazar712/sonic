@@ -244,6 +244,7 @@
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.lead_time.list') }}',
                         data: {
+                            'page': 'all',
                             'search_tracking_no': $('#search_tracking_no').val(),
                             'search_origin': $('#search_origin').val(),
                             'search_destination': $('#search_destination').val(),

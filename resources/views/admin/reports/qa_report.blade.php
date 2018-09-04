@@ -154,47 +154,49 @@
                         var grand_total_resolved = 0;
                         var total_unresolved = 0;
                         var grand_total_unresolved = 0;
-                        shipment += '<table class="table table-bordered datatable " id="datatable" style="z-index: 3;">\n' +
-                            '                    <thead>\n' +
-                            '                    <tr class="bg-primary white">\n' +
-                            '\n' +
-                            '                        <th class="border-primary border-darken-1" rowspan="2">Stations</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="2">Parcel Pending for Cargo</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="2">Cargo In Transit</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="2">Pending Deliveries</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="2">Receive Delivery Note</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="2">Return Marked</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="2">Confirmed Returns</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="2">Return Cargo In Transit</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="2">Return Pending for Delivery</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="2">Receive Return Note</th>\n' +
-                            '                        <th class="border-primary border-darken-1" colspan="3">Grand Total</th>\n' +
-                            '\n' +
-                            '                    </tr>\n' +
-                            '                    <tr role="row" class="bg-primary white">\n' +
+                        shipment += '<table class="table table-bordered datatable " id="datatable" style="z-index: 3;">' +
+                            '                    <thead>' +
+                            '                    <tr class="bg-primary white">' +
 
-                            '                        <th class="border-primary border-darken-1">Pending</th>\n' +
-                            '                        <th class="border-primary border-darken-1">Resolved</th>\n' +
-                            '                        <th class="border-primary border-darken-1">Pending</th>\n' +
-                            '                        <th class="border-primary border-darken-1">Resolved</th>\n' +
-                            '                        <th class="border-primary border-darken-1">Pending</th>\n' +
-                            '                        <th class="border-primary border-darken-1">Resolved</th>' +                                                    '                        <th class="border-primary border-darken-1">Pending</th>\n' +
+                            '                        <th class="border-primary border-darken-1" rowspan="2">Stations</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="2">Parcel Pending for Cargo</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="2">Cargo In Transit</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="2">Pending Deliveries</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="2">Receive Delivery Note</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="2">Return Marked</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="2">Confirmed Returns</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="2">Return Cargo In Transit</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="2">Return Pending for Delivery</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="2">Receive Return Note</th>' +
+                            '                        <th class="border-primary border-darken-1" colspan="3">Grand Total</th>' +
+                            '' +
+                            '                    </tr>' +
+                            '                    <tr role="row" class="bg-primary white">' +
+
+                            '                        <th class="border-primary border-darken-1">Pending</th>' +
                             '                        <th class="border-primary border-darken-1">Resolved</th>' +
-                            '                        <th class="border-primary border-darken-1">Pending</th>\n' +
+                            '                        <th class="border-primary border-darken-1">Pending</th>' +
                             '                        <th class="border-primary border-darken-1">Resolved</th>' +
-                            '                        <th class="border-primary border-darken-1">Pending</th>\n' +
+                            '                        <th class="border-primary border-darken-1">Pending</th>' +
                             '                        <th class="border-primary border-darken-1">Resolved</th>' +
-                            '                        <th class="border-primary border-darken-1">Pending</th>\n' +
+                            '                        <th class="border-primary border-darken-1">Pending</th>' +
                             '                        <th class="border-primary border-darken-1">Resolved</th>' +
-                            '                        <th class="border-primary border-darken-1">Pending</th>\n' +
+                            '                        <th class="border-primary border-darken-1">Pending</th>' +
                             '                        <th class="border-primary border-darken-1">Resolved</th>' +
-                            '                        <th class="border-primary border-darken-1">Pending</th>\n' +
+                            '                        <th class="border-primary border-darken-1">Pending</th>' +
+                            '                        <th class="border-primary border-darken-1">Resolved</th>' +
+                            '                        <th class="border-primary border-darken-1">Pending</th>' +
+                            '                        <th class="border-primary border-darken-1">Resolved</th>' +
+                            '                        <th class="border-primary border-darken-1">Pending</th>' +
+                            '                        <th class="border-primary border-darken-1">Resolved</th>' +
+                            '                        <th class="border-primary border-darken-1">Pending</th>' +
                             '                        <th class="border-primary border-darken-1">Resolved</th>' +
                             '                        <th class="border-primary border-darken-1">Total Pendings</th>' +
                             '                        <th class="border-primary border-darken-1">Total Resolved</th>' +
                             '                        <th class="border-primary border-darken-1">Total Unresolved</th>' +
                             '                    </tr></thead>';
 
+                            shipment += '<tbody>';
                         $.each(data,function (id,details) {
                             total_pendings = details.cargo_pending + details.cargo_transit_pending + details.deliveries_pending + details.receive_deliveries_pending + details.return_marked_pending + details.return_confirmed_pending + details.return_cargo_pending + details.return_delivery_pending + details.return_receive_pending;
                             total_resolved = details.cargo_resolved + details.cargo_transit_resolved + details.deliveries_resolved + details.receive_deliveries_resolved + details.return_marked_resolved + details.return_confirmed_resolved + details.return_cargo_resolved + details.return_delivery_resolved + details.return_receive_resolved;
@@ -202,8 +204,8 @@
                             grand_total_pendings += total_pendings;
                             grand_total_resolved += total_resolved;
                             grand_total_unresolved += total_unresolved;
-                            shipment += '<tbody><tr>';
-                            shipment += '<td class="align-middle stations">'+id+'</td>';
+
+                            shipment += '<tr><td class="align-middle stations">'+id+'</td>';
                             shipment += '<td class="align-middle cargo_pending">'+details.cargo_pending+'</td>';
                             cargo_pending += details.cargo_pending;
                             shipment += '<td class="align-middle cargo_resolved">'+details.cargo_resolved+'</td>';
@@ -245,7 +247,8 @@
                             shipment += '<td class="align-middle total_unresolved">'+total_unresolved+'</td>';
                             shipment += '</tr>';
                         });
-                        shipment += '<tr>';
+                        shipment += '</tbody>';
+                        shipment += '<tfoot><tr>';
                         shipment += '<td class="align-middle stations bg-primary white" rowspan="2">Grand Total</td>';
                         shipment += '<td class="align-middle cargo_pending bg-primary white">'+cargo_pending+'</td>';
                         shipment += '<td class="align-middle cargo_resolved bg-primary white">'+cargo_resolved+'</td>';
@@ -271,60 +274,46 @@
                         shipment += '</tr>';
                         shipment += '<tr>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((cargo_pending != 0? (cargo_resolved/cargo_pending):0) * 100).toPrecision(2)+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((cargo_pending != 0? (cargo_resolved/cargo_pending):0) * 100).toFixed(2))+'%</td>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((cargo_transit_pending !=0? (cargo_transit_resolved/cargo_transit_pending):0) * 100).toPrecision(2)+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((cargo_transit_pending !=0? (cargo_transit_resolved/cargo_transit_pending):0) * 100).toFixed(2))+'%</td>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((deliveries_pending !=0?(deliveries_resolved/deliveries_pending):0) * 100).toPrecision(2)+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((deliveries_pending !=0?(deliveries_resolved/deliveries_pending):0) * 100).toFixed(2))+'%</td>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((receive_deliveries_pending !=0?(receive_deliveries_resolved/receive_deliveries_pending):0) * 100).toPrecision(2)+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((receive_deliveries_pending !=0?(receive_deliveries_resolved/receive_deliveries_pending):0) * 100).toFixed(2))+'%</td>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((return_marked_pending !=0?(return_marked_resolved/return_marked_pending):0) * 100).toPrecision(2)+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((return_marked_pending !=0?(return_marked_resolved/return_marked_pending):0) * 100).toFixed(2))+'%</td>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((return_confirmed_pending != 0? (return_confirmed_resolved/return_confirmed_pending):0) * 100).toPrecision(2)+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((return_confirmed_pending != 0? (return_confirmed_resolved/return_confirmed_pending):0) * 100).toFixed(2))+'%</td>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((return_cargo_pending!=0? (return_cargo_resolved/return_cargo_pending):0) * 100).toPrecision(2)+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((return_cargo_pending!=0? (return_cargo_resolved/return_cargo_pending):0) * 100).toFixed(2))+'%</td>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((return_delivery_pending !=0? (return_delivery_resolved/return_delivery_pending):0) * 100).toPrecision(2)+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((return_delivery_pending !=0? (return_delivery_resolved/return_delivery_pending):0) * 100).toFixed(2))+'%</td>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((return_receive_pending !=0? (return_receive_resolved/return_receive_pending):0) * 100).toPrecision(2)+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((return_receive_pending !=0? (return_receive_resolved/return_receive_pending):0) * 100).toFixed(2))+'%</td>';
                         shipment += '<td class="align-middle stations bg-primary white">100%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+((grand_total_pendings != 0?(grand_total_resolved/grand_total_pendings):0) * 100).toPrecision(2)+'%</td>';
-                        shipment += '<td class="align-middle stations bg-primary white">'+(((grand_total_resolved+grand_total_pendings) != 0? grand_total_unresolved/(grand_total_resolved+grand_total_pendings):0) * 100).toPrecision(2)+'%</td>';
-                        shipment += '</tr>';
-                        shipment += '</tbody></table>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat(((grand_total_pendings != 0?(grand_total_resolved/grand_total_pendings):0) * 100).toFixed(2))+'%</td>';
+                        shipment += '<td class="align-middle stations bg-primary white">'+parseFloat((((grand_total_resolved+grand_total_pendings) != 0? grand_total_unresolved/(grand_total_resolved+grand_total_pendings):0) * 100).toFixed(2))+'%</td>';
+                        shipment += '</tr></tfoot>';
+                        shipment += '</table>';
                         $('#qa_table').html(shipment);
                         var table = $('#datatable').DataTable({
                             "scrollX": true,
-                            "dom":'t',
-                            // dom: '<"d-inline-block"><"pull-right"B>t',
-                            // buttons: [
-                            //     {
-                            //         extend: 'excelHtml5',
-                            //         title: 'Lead Time Report',
-                            //         exportOptions: {
-                            //             columns: ':visible',
-                            //             format: {
-                            //                 body: function ( data, row, column, node ) {
-                            //                     return (column == 0)? row+1:data;
-                            //                 }
-                            //             }
-                            //         }
-                            //     },
-                            //     {
-                            //         extend: 'print',
-                            //         exportOptions: {
-                            //             columns: ':visible',
-                            //             format: {
-                            //                 body: function ( e, dt, column, node ) {
-                            //                     return (column == 0)? dt+1:e;
-                            //                 }
-                            //             }
-                            //         }
-                            //     },
-                            // ],
-                            order: [[0, 'asc']],
-                            // "aoColumns": [{ "bSortable": false },{ "bSortable": false }],
+                            dom: '<"d-inline-block"><"pull-right"B>t',
+                            buttons: [
+                                {
+                                    extend: 'excelHtml5',
+                                    footer: true,
+                                    title: 'QA Report',
+                                    text:'<i class="la la-file-excel-o"></i> Excel',
+                                },
+                            ],
+                            fixedHeader: {
+                                header: true,
+                                headerOffset: $('.header-navbar').height()
+                            },
+                            paging:false,
+                            ordering: false,
                             columns: [
                                 {name: 'stations', class: 'align-middle stations'},
                                 {name: 'cargo_pending', class: 'align-middle cargo_pending'},
@@ -350,12 +339,6 @@
                                 {name: 'grand_total_unresolved', class: 'align-middle grand_total_unresolved'}
                             ]
                         });
-                        // if ( ! $.fn.DataTable.isDataTable( '#datatable' ) ) {
-                        //
-                        // }else{
-                        //     console.log(table)
-                        //
-                        // }
 
                     });
                 }
