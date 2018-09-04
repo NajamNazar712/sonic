@@ -92,7 +92,7 @@ class ShipperShipmentBookController extends Controller
 
       $shipment_id = $shipment->id;
 
-      AdminPickupsController::generate($user_id, $shipment_id);
+      AdminPickupsController::generate($shipment_id);
 
       ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
 

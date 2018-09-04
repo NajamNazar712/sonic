@@ -5,9 +5,9 @@ namespace App\Http\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
-class PickupNoteRequest extends Model
+class PickupRequestShortReceivedShipment extends Model
 {
-	protected $primaryKey = ['pickup_note_id', 'pickup_request_id'];
+	protected $primaryKey = ['pickup_request_id', 'shipment_id'];
 	public $incrementing = FALSE;
 	public $timestamps = FALSE;
 
@@ -37,11 +37,7 @@ class PickupNoteRequest extends Model
 		return $this->getAttribute($keyName);
 	}
 
-	public function pickup_request() {
-		return $this->belongsTo('App\Http\Models\PickupRequest');
-	}
-
-	public function pickup_note() {
-		return $this->belongsTo('App\Http\Models\PickupNote');
+	public function shipment() {
+		return $this->belongsTo('App\Http\Models\Shipment');
 	}
 }

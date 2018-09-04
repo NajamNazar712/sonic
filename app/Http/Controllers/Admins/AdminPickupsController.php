@@ -19,6 +19,9 @@ use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
 use App\Http\Models\ReceivingSheetReceived;
 use App\Http\Models\PickupRequest;
+use App\Http\Models\PickupRequestAssignedShipment;
+use App\Http\Models\PickupRequestReceivedShipment;
+use App\Http\Models\PickupRequestShortReceivedShipment;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupNoteRequest;
 use App\Http\Models\PickupNoteStatus;
@@ -36,7 +39,7 @@ class AdminPickupsController extends Controller
       $this->middleware('Permission');
     }
 
-    static public function generate($user_id, $shipment_id) {
+    static public function generate($shipment_id) {
       $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
 
       if ($defined_pickup_weight->exists()) {
@@ -74,7 +77,7 @@ class AdminPickupsController extends Controller
       else {
         $pickup_request = new PickupRequest();
 
-        $pickup_request->shipper_id = $user_id;
+        $pickup_request->shipper_id = $shipment->user_id;
         $pickup_request->pickup_address_id = $shipment->pickup_address_id;
         $pickup_request->bookings = 1;
         $pickup_request->total_estimated_weight = $shipment->estimated_weight;
@@ -91,6 +94,14 @@ class AdminPickupsController extends Controller
 
         $pickup_request->save();
       }
+
+      $pickup_request_assigned_shipment = new PickupRequestAssignedShipment();
+
+      $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
+      $pickup_request_assigned_shipment->shipment_id = $shipment_id;
+      $pickup_request_assigned_shipment->status = 0;
+
+      $pickup_request_assigned_shipment->save();
     }
 
     public function pending_index() {
@@ -404,6 +415,12 @@ class AdminPickupsController extends Controller
           $pickup_request->pending_bookings = $pickup_request->bookings;
 
           $pickup_request->save();
+
+          foreach ($pickup_request->pickup_request_assigned_shipments as $pickup_request_assigned_shipment) {
+            $pickup_request_assigned_shipment->status = 1;
+
+            $pickup_request_assigned_shipment->save();
+          }
         }
 
         return ['status' => 0, 'success' => 'Pickup has been Cancelled'];
@@ -510,6 +527,12 @@ class AdminPickupsController extends Controller
       foreach($request->ids as $id) {
         $pickup_note = PickupNote::find($id);
 
+        if ($request->dispatch) {
+          $pickup_note->status_id = 2;
+
+          $pickup_note->save();
+        }
+
         $rider = Rider::find($pickup_note->rider_id);
         $route = $rider->route;
 
@@ -590,12 +613,6 @@ class AdminPickupsController extends Controller
 
                       <hr>
         ';
-
-        if ($request->dispatch) {
-          $pickup_note->status_id = 2;
-
-          $pickup_note->save();
-        }
       }
 
       $html .= '
@@ -748,7 +765,7 @@ class AdminPickupsController extends Controller
           foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
             $pickup_request = $pickup_note_request->pickup_request;
 
-            if ($pickup_request->shipper_id == $shipment->user_id) {
+            if ($pickup_request->shipper_id == $shipment->user_id && $pickup_request->pickup_address_id == $shipment->pickup_address_id) {
               $exists = TRUE;
 
               break;
@@ -819,25 +836,46 @@ class AdminPickupsController extends Controller
 
     public function receive_arrival_of_shipments_store(Request $request) {
       $pickup_note = PickupNote::find($request->pickup_receive_pickup_note_id);
+      $shipment_ids = explode(',', $request->shipment_ids);
+
+      $reference_1_id = $pickup_note;
 
       $pickup_request_ids = array();
+      $pickup_request_shipper_wise_ids = array();
 
       foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
         $pickup_request = $pickup_note_request->pickup_request;
 
         $pickup_request_ids[] = $pickup_request->id;
+
+        $pickup_request_shipper_wise_ids[$pickup_request->shipper_id] = $pickup_request->id;
       }
 
-      $receiving_sheet_shipment_ids = array();
-      $over_received_shipment_ids = array();
+      $pickup_note->status_id = 3;
+      $pickup_note->updated_by = Auth::id();
 
-      foreach (explode(',', $request->shipment_ids) as $shipment_id) {
+      $pickup_note->save();
+
+      $receiving_sheet_ids = array();
+
+      foreach ($shipment_ids as $shipment_id) {
         $shipment = Shipment::find($shipment_id);
 
-        if ($shipment->receiving_sheet_shipment) {
-          $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+        if ($receiving_sheet_shipment = $shipment->receiving_sheet_shipment) {
+          $receiving_sheet_shipment->status = 1;
+          $receiving_sheet_shipment->save();
 
-          $receiving_sheet_shipment_ids[$receiving_sheet_id][] = $shipment_id;
+          $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
+
+          if (!in_array($receiving_sheet_id, $receiving_sheet_ids)) {
+            $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
+
+            $receiving_sheet->status = 1;
+
+            $receiving_sheet->save();
+
+            $receiving_sheet_ids[] = $receiving_sheet_id;
+          }
 
           $receiving_sheet_received = new ReceivingSheetReceived();
 
@@ -848,10 +886,10 @@ class AdminPickupsController extends Controller
           $receiving_sheet_received->status = 0;
 
           $receiving_sheet_received->save();
+
+          $reference_2_id = $receiving_sheet_id;
         }
         else {
-          $over_received_shipment_ids[] = $shipment_id;
-
           $receiving_sheet_received = new ReceivingSheetReceived();
 
           $receiving_sheet_received->user_id = $shipment->user_id;
@@ -860,20 +898,14 @@ class AdminPickupsController extends Controller
           $receiving_sheet_received->status = 0;
 
           $receiving_sheet_received->save();
+
+          $reference_2_id = NULL;
         }
 
         $shipment->shipper_status_id = 2;
         $shipment->consignee_status_id = 2;
+
         $shipment->save();
-
-        $reference_1_id = $request->pickup_receive_pickup_note_id;
-
-        if ($shipment->receiving_sheet_shipment) {
-          $reference_2_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
-        }
-        else {
-          $reference_2_id = NULL;
-        }
 
         ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, NULL, Auth::id(), $reference_1_id, $reference_2_id);
 
@@ -885,79 +917,196 @@ class AdminPickupsController extends Controller
         ShipmentChargesController::fuel_surcharge($shipment_id);
       }
 
-      $pickup_requests_receiving_sheets = array();
+      $done_receiving_sheet_ids = array();
 
-      if (!empty($receiving_sheet_shipment_ids)) {
-        foreach ($receiving_sheet_shipment_ids as $receiving_sheet_id => $receiving_sheet_shipments) {
-          $receiving_sheet = ReceivingSheet::find($receiving_sheet_id);
+      foreach ($shipment_ids as $shipment_id) {
+        $shipment = Shipment::find($shipment_id);
 
-          $receiving_sheet->status = 1;
+        $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id)->whereIn('pickup_request_id', $pickup_request_ids);
 
-          $receiving_sheet->save();
+        if ($pickup_request_assigned_shipment->exists()) {
+          $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
 
-          foreach ($receiving_sheet_shipments as $shipment_id) {
-            $shipment = Shipment::find($shipment_id);
+          $pickup_request = $pickup_request_assigned_shipment->pickup_request;
 
-            foreach ($pickup_request_ids as $pickup_request_id) {
-              $pickup_request = PickupRequest::find($pickup_request_id);
+          $pickup_request->received = $pickup_request->received + 1;
 
-              if ($shipment->user_id == $pickup_request->shipper_id && $shipment->pickup_address_id == $pickup_request->pickup_address_id) {
-                $receiving_sheet_shipments_count = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->count();
+          $short_received_shipment = PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id);
 
-                if ($pickup_request->received) {
-                  $pickup_request->received = $pickup_request->received + 1;
+          if ($short_received_shipment->exists()) {
+            $short_received_shipment->delete();
+
+            $pickup_request->short_received = $pickup_request->short_received - 1;
+
+            $pickup_request->save();
+          }
+
+          if (!empty($receiving_sheet_ids)) {
+            $receving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+
+            if (!in_array($receving_sheet_id, $done_receiving_sheet_ids)) {
+              $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->where('status', 0);
+
+              $pickup_request->short_received = $pickup_request->short_received + $short_received_shipments->count();
+
+              foreach ($short_received_shipments->get() as $short_received_shipment) {
+                if (!PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $short_received_shipment->shipment_id)->exists()) {
+                  $pickup_request_short_received_shipment = new PickupRequestShortReceivedShipment();
+
+                  $pickup_request_short_received_shipment->pickup_request_id = $pickup_request->id;
+                  $pickup_request_short_received_shipment->shipment_id = $short_received_shipment->shipment_id;
+
+                  $pickup_request_short_received_shipment->save();
                 }
-                else {
-                  $pickup_request->received = 1;
-                }
-
-                if ($pickup_request->short_received) {
-                  if (in_array($receiving_sheet_id, $pickup_requests_receiving_sheets)) {
-                    $pickup_request->short_received = $pickup_request->short_received - 1;
-                  }
-                  else {
-                    $pickup_request->short_received = $pickup_request->short_received - 1 + $receiving_sheet_shipments_count;
-                  }
-                }
-                else {
-                  $pickup_request->short_received = $receiving_sheet_shipments_count - 1;
-                }
-
-                $pickup_request->save();
-
-                $pickup_requests_receiving_sheets[] = $receiving_sheet_id;
               }
+
+              $done_receiving_sheet_ids[] = $receiving_sheet_id;
             }
+          }
+
+          $pickup_request->save();
+
+          $pickup_request_assigned_shipment->status = 2;
+
+          $pickup_request_assigned_shipment->save();
+
+          $pickup_request_received_shipment = new PickupRequestReceivedShipment();
+
+          $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
+          $pickup_request_received_shipment->shipment_id = $shipment_id;
+
+          $pickup_request_received_shipment->save();
+        }
+        else {
+          $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id)->whereIn('type', [1, 2])->first();
+
+          $pickup_request = PickupRequest::find($pickup_request_shipper_wise_ids[$pickup_request_assigned_shipment->pickup_request->shipper_id]);
+
+          $pickup_request->received = $pickup_request->received + 1;
+
+          $short_received_shipment = PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $shipment_id);
+
+          if ($short_received_shipment->exists()) {
+            $short_received_shipment->delete();
+
+            $pickup_request->short_received = $pickup_request->short_received - 1;
+
+            $pickup_request->save();
+          }
+
+          if (!empty($receiving_sheet_ids)) {
+            $receving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+
+            if (!in_array($receving_sheet_id, $done_receiving_sheet_ids)) {
+              $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->where('status', 0);
+
+              $pickup_request->short_received = $pickup_request->short_received + $short_received_shipments->count();
+
+              foreach ($short_received_shipments->get() as $short_received_shipment) {
+                if (!PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $short_received_shipment->shipment_id)->exists()) {
+                  $pickup_request_short_received_shipment = new PickupRequestShortReceivedShipment();
+
+                  $pickup_request_short_received_shipment->pickup_request_id = $pickup_request->id;
+                  $pickup_request_short_received_shipment->shipment_id = $short_received_shipment->shipment_id;
+
+                  $pickup_request_short_received_shipment->save();
+                }
+              }
+
+              $done_receiving_sheet_ids[] = $receiving_sheet_id;
+            }
+          }
+
+          $pickup_request->save();
+
+          $pickup_request_received_shipment = new PickupRequestReceivedShipment();
+
+          $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
+          $pickup_request_received_shipment->shipment_id = $shipment_id;
+
+          $pickup_request_received_shipment->save();
+
+          $pickup_request = $pickup_request_assigned_shipment->pickup_request;
+
+          $bookings = $pickup_request->bookings - 1;
+
+          $pickup_request->bookings = $bookings;
+
+          if ($pickup_request_assigned_shipment->status == 1) {
+            $pickup_request->pending_bookings = $pickup_request->pending_bookings - 1;
+          }
+
+          $pickup_request_assigned_shipment->status = 3;
+
+          $pickup_request_assigned_shipment->save();
+
+          $weight = $pickup_request->total_estimated_weight - $shipment->estimated_weight;
+
+          $pickup_request->total_estimated_weight = $weight;
+
+          $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
+
+          if ($defined_pickup_weight->exists()) {
+            $defined_pickup_weight = $defined_pickup_weight->first();
+
+            $defined_pickup_weight = $defined_pickup_weight->setting_value;
+          }
+          else {
+            $defined_pickup_weight = 10;
+          }
+
+          if ($weight < $defined_pickup_weight) {
+            $pickup_request->pickup_type = 0;
+          }
+          else {
+            $pickup_request->pickup_type = 1;
+          }
+
+          if ($bookings == 0) {
+            $pickup_request->status = 3;
+          }
+
+          $pickup_request->save();
+
+          $pickup_note = $pickup_request->pickup_note_request->pickup_note;
+
+          if ($bookings == 0) {
+            PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
+          }
+
+          $pickup_note_requests = $pickup_note->pickup_note_requests;
+
+          if ($pickup_note_requests->exists()) {
+            if ($bookings == 0) {
+              $pickup_note->pickups = $pickup_note->pickups - 1;
+            }
+
+            $pickup_note->bookings = $pickup_note->bookings - 1;
+
+            $weight = $pickup_note->weight - $weight;
+
+            $pickup_note->weight = $weight;
+
+            if ($weight < $defined_pickup_weight) {
+              $pickup_note->pickup_type = 0;
+            }
+            else {
+              $pickup_note->pickup_type = 1;
+            }
+
+            $pickup_note->save();
+          }
+          else {
+            $pickup_note->pickups = 0;
+            $pickup_note->bookings = 0;
+            $pickup_note->status_id = 5;
+
+            $pickup_note->save();
           }
         }
       }
 
-      if (!empty($over_received_shipment_ids)) {
-        foreach ($over_received_shipment_ids as $shipment_id) {
-          $shipment = Shipment::find($shipment_id);
-
-            foreach ($pickup_request_ids as $pickup_request_id) {
-              $pickup_request = PickupRequest::find($pickup_request_id);
-
-              if ($shipment->user_id == $pickup_request->shipper_id && $shipment->pickup_address_id == $pickup_request->pickup_address_id) {
-                if ($pickup_request->received) {
-                  $pickup_request->received = $pickup_request->received + 1;
-                }
-                else {
-                  $pickup_request->received = 1;
-                }
-
-                $pickup_request->save();
-              }
-            }
-        }
-      }
-
-      $pickup_note->status_id = 3;
-      $pickup_note->updated_by = Auth::id();
-      $pickup_note->save();
-
-      NotificationsController::send(4, $request->pickup_receive_pickup_note_id, explode(',', $request->shipment_ids));
+      NotificationsController::send(4, $request->pickup_receive_pickup_note_id, $shipment_ids);
 
       return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->pickup_receive_pickup_note_id);
     }
@@ -1037,32 +1186,21 @@ class AdminPickupsController extends Controller
 
       $pickup_request = PickupRequest::find($pickup_request_id);
 
-      $receiving_sheets = ReceivingSheet::where('user_id', $pickup_request->shipper_id)->where('status', 1);
+      $pickup_request_short_received_shipments = $pickup_request->pickup_request_short_received_shipments;
 
-      $short_shipments = array();
+      if ($pickup_request_short_received_shipments->count() != 0) {
+        $short_shipments = array();
 
-      if ($receiving_sheets->exists()) {
-        $receiving_sheets = $receiving_sheets->get();
+        foreach ($pickup_request_short_received_shipments as $pickup_request_short_received_shipment) {
+          $shipment = $pickup_request_short_received_shipment->shipment;
 
-        foreach ($receiving_sheets as $receiving_sheet) {
-          foreach ($receiving_sheet->receiving_sheet_shipments as $receiving_sheet_shipment) {
-            $shipment = $receiving_sheet_shipment->shipment;
-
-            if ($shipment->shipper_status_id == 1 && $pickup_request->pickup_address_id == $shipment->pickup_address_id) {
-              $short_shipments[str_pad($receiving_sheet->id, 12, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
-            }
-          }
+          $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 12, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
         }
 
-        if (!empty($short_shipments)) {
-          return ['status' => 0, 'success' => 'Shipments found Short Received', 'short_received' => $short_shipments];
-        }
-        else {
-          return ['status' => 0, 'success' => 'No Short Received Shipments', 'short_received' => FALSE];
-        }
+        return ['status' => 0, 'success' => 'Shipments found Short Received', 'short_received' => $short_shipments];
       }
       else {
-        return ['status' => 0, 'success' => 'No Receiving Sheet', 'short_received' => FALSE];
+        return ['status' => 0, 'success' => 'No Short Received Shipments', 'short_received' => FALSE];
       }
     }
 
@@ -1089,30 +1227,31 @@ class AdminPickupsController extends Controller
             break;
           }
         }
-          //for dispute start
-          $receiving_sheets = ReceivingSheet::where('user_id', $pickup_request->shipper_id)->where('status', 1);
 
+        //for dispute start
+        $pickup_request_short_received_shipments = $pickup_request->pickup_request_short_received_shipments;
+
+        if ($pickup_request_short_received_shipments->count() != 0) {
           $short_shipments = array();
 
-          if ($receiving_sheets->exists()) {
-              $receiving_sheets = $receiving_sheets->get();
+          foreach ($pickup_request->pickup_request_short_received_shipments as $pickup_request_short_received_shipment) {
+            $shipment = $pickup_request_short_received_shipment->shipment;
 
-              foreach ($receiving_sheets as $receiving_sheet) {
-                  foreach ($receiving_sheet->receiving_sheet_shipments as $receiving_sheet_shipment) {
-                      $shipment = $receiving_sheet_shipment->shipment;
-                      if ($shipment->shipper_status_id == 1 && $pickup_request->pickup_address_id == $shipment->pickup_address_id) {
-
-                          $short_shipments[str_pad($receiving_sheet->id, 12, '0', STR_PAD_LEFT)][] = $shipment->id;
-                      }
-                  }
-              }
-
-              foreach ($short_shipments as $receiving_sheet_id => $short_shipment_ids) {
-                  DisputeController::add_short_received_shipments($receiving_sheet_id, $short_shipment_ids);
-
-              }
+           $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 12, '0', STR_PAD_LEFT)][] = $shipment->id;
           }
-          //dispute end
+
+          foreach ($short_shipments as $receiving_sheet_id => $short_shipment_ids) {
+            DisputeController::add_short_received_shipments($receiving_sheet_id, $short_shipment_ids);
+          }
+        }
+        //dispute end
+
+        foreach ($pickup_request->pickup_request_assigned_shipments as $pickup_request_assigned_shipment) {
+          if ($pickup_request_assigned_shipment->status < 2) {
+            $this->generate($pickup_request_assigned_shipment->shipment_id);
+          }
+        }
+
         if ($completed) {
           $pickup_note->status_id = 4;
           $pickup_note->updated_by = Auth::id();
@@ -1170,6 +1309,4 @@ class AdminPickupsController extends Controller
         return ['status' => 1, 'error' => 'Selected Pickup has already been modified'];
       }
     }
-
-
 }

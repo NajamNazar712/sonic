@@ -34,7 +34,6 @@ class ShipperReceivingSheetHistoryController extends Controller
       ->join('user_shipping_infos as usi', 'receiving_sheet_received.pickup_address_id', '=', 'usi.id')
       ->join('cities as c', 'usi.city_id', '=', 'c.id')
       ->select('receiving_sheet_received.receiving_sheet_id as id', 'receiving_sheet_received.receiving_sheet_id as receiving_sheet', DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'c.name as origin', 'rs.created_at AS booking_date', 'receiving_sheet_received.pickup_address_id')
-      ->where('receiving_sheet_received.status', 0)
       ->where('receiving_sheet_received.user_id', session('user_id'))
       ->groupBy('receiving_sheet_received.receiving_sheet_id')
       ->groupBy('receiving_sheet_received.pickup_address_id');
@@ -48,6 +47,14 @@ class ShipperReceivingSheetHistoryController extends Controller
           return '';
         }
       })
+      ->addColumn('booked_count', function($receiving_sheet_received) {
+        if ($receiving_sheet_received->receiving_sheet) {
+          return ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
+        }
+        else {
+          return 0;
+        }
+      })
       ->addColumn('booked', function($receiving_sheet_received) {
        if ($receiving_sheet_received->receiving_sheet) {
          $booked = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
@@ -58,6 +65,14 @@ class ShipperReceivingSheetHistoryController extends Controller
          return '';
        }
      })
+      ->addColumn('received_count', function($receiving_sheet_received) {
+        if ($receiving_sheet_received->receiving_sheet) {
+          return ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', session('user_id'))->where('status', 0)->count();
+        }
+        else {
+          return $receiving_sheet_received->received;
+        }
+      })
       ->editColumn('received', function($receiving_sheet_received) {
         if ($receiving_sheet_received->receiving_sheet) {
           $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', session('user_id'))->where('status', 0)->count();
@@ -78,16 +93,24 @@ class ShipperReceivingSheetHistoryController extends Controller
       })
       ->addColumn('action', function($receiving_sheet_received) {
         if ($receiving_sheet_received->receiving_sheet) {
-          return '<div class="btn-group">
+
+          if ($receiving_sheet_received->booked_count != $receiving_sheet_received->received_count) {
+            return '
+                  <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                       <button type="button" class="dropdown-item view_short_received"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">View Short Received</div></button>
                     </div>
                   </div>
-          ';
+            ';
+          }
+          else {
+            return '';
+          }
         }
         else {
-          return '<div class="btn-group">
+          return '
+                  <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                       <button type="button" class="dropdown-item create_receiving_sheet" data-id="' . $receiving_sheet_received->pickup_address_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Create Receiving Sheet</div></button>
@@ -179,25 +202,11 @@ class ShipperReceivingSheetHistoryController extends Controller
         $receiving_sheet_shipment->delete();
       }
 
-      foreach (ReceivingSheetReceived::where('receiving_sheet_id', $request->receiving_sheet_id)->get() as $receiving_sheet_received) {
-        $receiving_sheet_received->status = 1;
-
-        $receiving_sheet_received->save();
-      }
-
       return ['status' => 0, 'success' => 'Shipment(s) has been Voided'];
     }
 
     public function create(Request $request) {
       $shipment_ids = array();
-
-      foreach (ReceivingSheetReceived::whereNull('receiving_sheet_id')->where('user_id', session('user_id'))->where('pickup_address_id', $request->pickup_address_id)->where('status', 0)->get() as $receiving_sheet_received) {
-        $shipment_ids[] = $receiving_sheet_received->shipment_id;
-
-        $receiving_sheet_received->status = 1;
-
-        $receiving_sheet_received->save();
-      }
 
       $receiving_sheet = new ReceivingSheet();
 
@@ -208,11 +217,20 @@ class ShipperReceivingSheetHistoryController extends Controller
 
       $receiving_sheet_id = $receiving_sheet->id;
 
+      foreach (ReceivingSheetReceived::whereNull('receiving_sheet_id')->where('user_id', session('user_id'))->where('pickup_address_id', $request->pickup_address_id)->where('status', 0)->get() as $receiving_sheet_received) {
+        $shipment_ids[] = $receiving_sheet_received->shipment_id;
+
+        $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+
+        $receiving_sheet_received->save();
+      }
+
       foreach ($shipment_ids as $shipment_id) {
         $receiving_sheet_shipment = new ReceivingSheetShipment();
 
         $receiving_sheet_shipment->shipment_id = $shipment_id;
         $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
+        $receiving_sheet_shipment->status = 1;
 
         $receiving_sheet_shipment->save();
       }
