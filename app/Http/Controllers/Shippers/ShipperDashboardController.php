@@ -2,15 +2,19 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Http\Controllers\Admins\AdminPickupsController;
+
 use App\Http\Models\DisputeType;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\Shipment;
 use App\Http\Models\City;
-use Carbon\Carbon;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+
 use Auth;
+
 use Yajra\Datatables\Datatables;
+use Carbon\Carbon;
 
 //use Illuminate\Support\Facades\Auth;
 
@@ -141,6 +145,9 @@ class ShipperDashboardController extends Controller
                 $shipment->shipper_status_id = 17;
                 $shipment->consignee_status_id = 17;
                 $shipment->save();
+
+                AdminPickupsController::cancel($shipment->id);
+
                 return response()->json(['status'=>1,'success'=>'Shipment has been canceled successfully']);
             }else{
                 return response()->json(['status'=>0,'error'=>'Shipment not found']);

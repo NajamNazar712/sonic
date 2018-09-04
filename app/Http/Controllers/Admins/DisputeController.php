@@ -396,7 +396,7 @@ class DisputeController extends Controller
     public static function add_cargo_short_received($cargo_id,$shipments){
         $description = "Short received shipments dispute for Cargo # $cargo_id";
         $admin = Auth::id();
-        $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
+        $city_id = Shipment::find($shipments[0]->shipment_id)->pickup_address->city->hub_id;
         $count = count($shipments);
         $dispute = Dispute::create([
             'description'=>$description,
