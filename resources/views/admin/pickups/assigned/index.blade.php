@@ -383,6 +383,39 @@
 
 					table.draw('false');
 				}
+				else if ($(this).hasClass('sms_rider')) {
+					$.ajax({
+						url: '{!! route('admin.pickups.assigned.sms') !!}',
+						method: 'POST',
+						data: {
+							'pickup_note_id': pickup_note_id,
+							'_token': '{{ csrf_token() }}'
+						}
+					})
+					.done(function(data) {
+						if (data.status == 0) {
+							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+						else {
+							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						}
+
+						var index = $.inArray(pickup_note_id, selected_rows);
+
+						if (index !== -1) {
+							selected_rows.splice(index, 1);
+						}
+
+						if (selected_rows.length > 0) {
+							table.button('.print').enable();
+						}
+						else {
+							table.button('.print').disable();
+						}
+
+						table.draw('false');
+					});
+				}
 			});
 		});
 	</script>

@@ -11,6 +11,7 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Notification;
 use App\Http\Models\Dispute;
 use App\Http\Models\DisputeShipment;
 use App\Http\Models\Rider;
@@ -416,7 +417,11 @@ class AdminPickupsController extends Controller
         $dropdown .= $view_details_button;
 
         if (session('role_id') == 1 || in_array(22, session('permissions'))) {
-          $dropdown .= $print_pickup_note_button . $sms_rider_button;
+          $dropdown .= $print_pickup_note_button;
+
+          if (Notification::find(22)->status) {
+            $dropdown .= $sms_rider_button;
+          }
         }
 
         $dropdown .= '
@@ -685,6 +690,19 @@ class AdminPickupsController extends Controller
       ';
 
       return $html;
+    }
+
+    public function assigned_sms(Request $request) {
+      $pickup_note = PickupNote::find($request->pickup_note_id);
+
+      $pickup_note->status_id = 2;
+      $pickup_note->updated_by = Auth::id();
+
+      $pickup_note->save();
+
+      NotificationsController::send(22, $pickup_note->id);
+
+      return ['status' => 0, 'success' => 'Pickup has been Dispatched'];
     }
 
     public function receive_index() {

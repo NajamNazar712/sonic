@@ -102,6 +102,7 @@ class AdminTrackingController extends Controller
     				$journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
     				$journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
     				$journey_details['user'] = ($journey->admin_id) ? $journey->admin->name : $journey->user->name;
+                    $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
 
     				$details['tracking_history'][] = $journey_details;
     			}

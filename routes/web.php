@@ -219,6 +219,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('cancel', 'Admins\AdminPickupsController@assigned_cancel')->name('cancel');
             Route::post('view_details', 'Admins\AdminPickupsController@assigned_view_details')->name('view_details');
             Route::post('print', 'Admins\AdminPickupsController@assigned_print')->name('print');
+            Route::post('sms', 'Admins\AdminPickupsController@assigned_sms')->name('sms');
         });
 
         Route::prefix('receive')->name('receive.')->group(function () {

@@ -315,6 +315,7 @@
                                 shipment += '<th><strong>Date / Time</strong></th>';
                                 shipment += '<th><strong>Status</strong></th>';
                                 shipment += '<th><strong>Reason</strong></th>';
+                                shipment += '<th><strong>City</strong></th>';
                                 shipment += '</tr>';
                                 shipment += '</thead>';
                                 shipment += '<tbody>';
@@ -324,6 +325,7 @@
                                     shipment += '<td>' + history.date_time + '</td>';
                                     shipment += '<td>' + history.status + '</td>';
                                     shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
+                                    shipment += '<td>' + history.city + '</td>';
                                     shipment += '</tr>';
                                 });
 

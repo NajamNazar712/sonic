@@ -278,6 +278,7 @@
 							shipment += '<th><strong>Reason</strong></th>';
 							shipment += '<th><strong>Remarks</strong></th>';
 							shipment += '<th><strong>User</strong></th>';
+							shipment += '<th><strong>City</strong></th>';
 							shipment += '</tr>';
 							shipment += '</thead>';
 							shipment += '<tbody>';
@@ -289,6 +290,7 @@
 								shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
 								shipment += '<td>' + history.remarks + '</td>';
 								shipment += '<td>' + history.user + '</td>';
+								shipment += '<td>' + history.city + '</td>';
 								shipment += '</tr>';
 							});
 

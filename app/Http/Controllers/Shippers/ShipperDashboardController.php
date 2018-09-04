@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Shippers;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
+use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\DisputeType;
 use App\Http\Models\PackagingCharge;
@@ -147,6 +148,8 @@ class ShipperDashboardController extends Controller
                 $shipment->save();
 
                 AdminPickupsController::cancel($shipment->id);
+
+                ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, session('user_id'), NULL);
 
                 return response()->json(['status'=>1,'success'=>'Shipment has been canceled successfully']);
             }else{
