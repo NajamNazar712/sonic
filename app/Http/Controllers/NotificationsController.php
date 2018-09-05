@@ -443,8 +443,6 @@ class NotificationsController extends Controller
           else if ($id == 9) {
             $fields = ['cargo_number' => 'id', 'departure_at' => 'created_at', 'seal_number' => 'seal_number', 'builty_number' => 'builty_number', 'expected_arrival_date', 'expected_arrival_date'];
 
-            'shipping_mode', 'transport_mode', 'vendor', 'sender', 'tracking_number'
-
             $cargo_consignment = CargoConsignment::find($reference_1_id);
 
             foreach ($fields as $key => $field) {
