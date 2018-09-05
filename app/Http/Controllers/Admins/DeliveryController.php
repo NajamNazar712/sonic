@@ -6,6 +6,7 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
@@ -230,14 +231,15 @@ class DeliveryController extends Controller
                     'shipment_id'=>$shipment
                 ]);
                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>5,'consignee_status_id'=>5]);
-                ShipmentsJourney::create([
-                    'shipment_id'=>$shipment,
-                    'shipper_status_id'=>5,
-                    'consignee_status_id'=>5,
-                    'admin_id'=>$admin,
-                    'reference_1_id'=>$note->id,
-                    'reference_2_id'=>$note->rider_id
-                ]);
+                ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(),$note->id,$note->rider_id);
+//                ShipmentsJourney::create([
+//                    'shipment_id'=>$shipment,
+//                    'shipper_status_id'=>5,
+//                    'consignee_status_id'=>5,
+//                    'admin_id'=>$admin,
+//                    'reference_1_id'=>$note->id,
+//                    'reference_2_id'=>$note->rider_id
+//                ]);
 
                 NotificationsController::send(10, $note->id, $shipment);
                 NotificationsController::send(11, $note->id, $shipment);
