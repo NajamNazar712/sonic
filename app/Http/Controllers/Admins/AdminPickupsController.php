@@ -1053,7 +1053,7 @@ class AdminPickupsController extends Controller
         else {
           $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id)->whereIn('status', [0, 1])->first();
 
-          $pickup_request = PickupRequest::find($pickup_request_shipper_wise_ids[$pickup_request_assigned_shipment->pickup_request_id]);
+          $pickup_request = PickupRequest::find($pickup_request_shipper_wise_ids[$pickup_request_assigned_shipment->pickup_request->shipper_id]);
 
           $pickup_request->received = $pickup_request->received + 1;
 
