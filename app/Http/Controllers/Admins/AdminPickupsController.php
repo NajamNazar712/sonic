@@ -1071,7 +1071,7 @@ class AdminPickupsController extends Controller
             $receving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
 
             if (!in_array($receving_sheet_id, $done_receiving_sheet_ids)) {
-              $pickup_request_short_received_shipments = PickupRequestShortReceivedShipment::where('pickup_address_id', $pickup_request->id);
+              $pickup_request_short_received_shipments = PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id);
 
               if ($pickup_request_short_received_shipments->exists()) {
                 $pickup_request_short_received_shipments = $pickup_request_short_received_shipments->pluck('shipment_id');
