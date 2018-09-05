@@ -276,7 +276,7 @@ class NotificationsController extends Controller
               $general_admins = Admin::whereIn('role_id', [4, 3, 6])->where('status', 1);
 
               if ($general_admins->exists()) {
-                $bcc = array_merge($bcc, $general_admins->pluck('email'));
+                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
               }
 
               $origin_hub_id = $pickup_note->city->hub_id;
@@ -286,7 +286,7 @@ class NotificationsController extends Controller
               });
 
               if ($related_admins->exists()) {
-                $bcc = array_merge($bcc, $related_admins->pluck('email'));
+                $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
               }
 
               if (empty($bcc)) {
@@ -504,7 +504,7 @@ class NotificationsController extends Controller
             $general_admins = Admin::whereIn('role_id', [3, 4, 6])->where('status', 1);
 
             if ($general_admins->exists()) {
-              $to = array_merge($to, $general_admins->pluck('email'));
+              $to = array_merge($to, $general_admins->pluck('email')->toArray());
             }
 
             $origin_hub_id = $cargo_consignment->origin_hub_id;
@@ -516,7 +516,7 @@ class NotificationsController extends Controller
             });
 
             if ($related_admins->exists()) {
-              $to = array_merge($to, $related_admins->pluck('email'));
+              $to = array_merge($to, $related_admins->pluck('email')->toArray());
             }
 
             if (!empty($to)) {
@@ -1145,7 +1145,7 @@ class NotificationsController extends Controller
             $general_admins = Admin::whereIn('role_id', [4, 3, 2, 5, 6])->where('status', 1);
 
             if ($general_admins->exists()) {
-              $to = array_merge($to, $general_admins->pluck('email'));
+              $to = array_merge($to, $general_admins->pluck('email')->toArray());
             }
 
             $hub_id = $dispute->city->hub_id;
@@ -1155,7 +1155,7 @@ class NotificationsController extends Controller
             });
 
             if ($related_admins->exists()) {
-              $to = array_merge($to, $related_admins->pluck('email'));
+              $to = array_merge($to, $related_admins->pluck('email')->toArray());
             }
 
             self::email($subject, $body, $to);
@@ -1398,7 +1398,7 @@ class NotificationsController extends Controller
             $general_admins = Admin::whereIn('role_id', [4, 3, 6])->where('status', 1);
 
             if ($general_admins->exists()) {
-              $bcc = array_merge($bcc, $general_admins->pluck('email'));
+              $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
             }
 
             $hub_id = $shipper->city->hub_id;
@@ -1408,7 +1408,7 @@ class NotificationsController extends Controller
             });
 
             if ($related_admins->exists()) {
-              $bcc = array_merge($bcc, $related_admins->pluck('email'));
+              $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
             }
 
             if (empty($bcc)) {
@@ -1487,7 +1487,7 @@ class NotificationsController extends Controller
             $general_admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
 
             if ($general_admins->exists()) {
-              $to = array_merge($to, $general_admins->pluck('email'));
+              $to = array_merge($to, $general_admins->pluck('email')->toArray());
             }
 
             $origin_hub_id = $pickup_note->city->hub_id;
