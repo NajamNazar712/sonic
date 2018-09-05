@@ -1400,6 +1400,76 @@ class NotificationsController extends Controller
 
             self::email($subject, $body, $to);
           }
+          else if ($id == 22) {
+            $possible_fields = ['company_name', 'person_of_contact', 'phone_number', 'address', 'city'];
+
+            $present_fields = array();
+
+            $first_field = NULL;
+
+            $position = NULL;
+
+            foreach ($possible_fields as $field) {
+              $new_position = strpos($body, '[' . $field . ']');
+
+              if ($new_position !== FALSE) {
+                if ($position == NULL) {
+                  $present_fields[] = $field;
+
+                  $first_field = $field;
+                }
+                else if ($new_position > $position) {
+                  $present_fields[] = $field;
+                }
+                else {
+                  array_unshift($present_fields, $field);
+                }
+
+                $position = $new_position;
+              }
+            }
+
+            $pickup_note = PickupNote::find($reference_1_id);
+
+            $to = $pickup_note->rider->phone;
+
+            $pickup_details = '';
+
+            foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
+              $pickup_request = $pickup_note_request->pickup_request;
+              $pickup_address = $pickup_request->pickup_address;
+
+              foreach ($present_fields as $field) {
+                if ($field == 'company_name') {
+                  $pickup_details .= $pickup_request->shipper->name . ', ';
+                }
+                else if ($field == 'person_of_contact') {
+                  $pickup_details .= $pickup_address->poc . ', ';
+                }
+                else if ($field == 'phone_number') {
+                  $pickup_details .= $pickup_address->phone . ', ';
+                }
+                else if ($field == 'address') {
+                  $pickup_details .= $pickup_address->pickup_address . ', ';
+                }
+                else if ($field == 'city') {
+                  $pickup_details .= $pickup_address->city->name . ', ';
+                }
+              }
+
+              $pickup_details = substr($pickup_details, 0, -2) . PHP_EOL;
+            }
+
+            foreach ($present_fields as $field) {
+              if ($field != $first_field) {
+                $body = str_replace('[' . $field . ']', '', $body);
+              }
+            }
+
+            $body = str_replace('[' . $first_field . ']', $pickup_details, $body);
+
+            self::sms($body, $to);
+          }
         }
       }
     }

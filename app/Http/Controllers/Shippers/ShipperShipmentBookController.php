@@ -92,7 +92,7 @@ class ShipperShipmentBookController extends Controller
 
       $shipment_id = $shipment->id;
 
-      AdminPickupsController::generate($user_id, $shipment_id);
+      AdminPickupsController::generate($shipment_id);
 
       ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
 
@@ -770,6 +770,8 @@ class ShipperShipmentBookController extends Controller
           unset($spreadsheet);
 
           $errors = array();
+          $order_ids = array();
+          $order_id_row = array();
 
           foreach ($rows as $key => $row) {
             $row_id = $key + 1;
@@ -783,6 +785,22 @@ class ShipperShipmentBookController extends Controller
             }
 
             if (empty($errors['Row #' . $row_id])) {
+              if (!empty(trim($row['order_id']))) {
+                if (empty($order_ids)) {
+                  $order_ids[] = $row['order_id'];
+                  $order_id_row[$row['order_id']] = $row_id;
+                }
+                else {
+                  if (in_array($row['order_id'], $order_ids)) {
+                    $errors['Row #' . $row_id][] = 'Same Order ID as of Row #' . $order_id_row[$row['order_id']];
+                  }
+                  else {
+                    $order_ids[] = $row['order_id'];
+                    $order_id_row[$row['order_id']] = $row_id;
+                  }
+                }
+              }
+
               if (!RateStatus::where('user_id', $user_id)->where('shipping_mode_id', $row['shipping_mode_id'])->where('status', 1)->exists()) {
                 $errors['Row #' . $row_id][] = 'Booking is not enabled for Shipping Mode ID #' . $row['shipping_mode_id'] . ' on your Account';
               }
