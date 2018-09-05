@@ -1161,7 +1161,7 @@ class AdminPickupsController extends Controller
 
             $pickup_note_requests = $pickup_note->pickup_note_requests;
 
-            if ($pickup_note_requests->exists()) {
+            if ($pickup_note_requests) {
               if ($bookings == 0) {
                 $pickup_note->pickups = $pickup_note->pickups - 1;
               }
