@@ -958,7 +958,6 @@ class AdminPickupsController extends Controller
           $receiving_sheet_received->user_id = $shipment->user_id;
           $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
           $receiving_sheet_received->shipment_id = $shipment_id;
-          $receiving_sheet_received->status = 0;
 
           $receiving_sheet_received->save();
 
@@ -970,7 +969,6 @@ class AdminPickupsController extends Controller
           $receiving_sheet_received->user_id = $shipment->user_id;
           $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
           $receiving_sheet_received->shipment_id = $shipment_id;
-          $receiving_sheet_received->status = 0;
 
           $receiving_sheet_received->save();
 
