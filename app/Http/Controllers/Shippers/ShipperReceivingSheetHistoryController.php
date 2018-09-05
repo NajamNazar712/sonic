@@ -47,14 +47,6 @@ class ShipperReceivingSheetHistoryController extends Controller
           return '';
         }
       })
-      ->addColumn('booked_count', function($receiving_sheet_received) {
-        if ($receiving_sheet_received->receiving_sheet) {
-          return ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
-        }
-        else {
-          return 0;
-        }
-      })
       ->addColumn('booked', function($receiving_sheet_received) {
        if ($receiving_sheet_received->receiving_sheet) {
          $booked = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
@@ -64,14 +56,6 @@ class ShipperReceivingSheetHistoryController extends Controller
        else {
          return '';
        }
-     })
-      ->addColumn('received_count', function($receiving_sheet_received) {
-        if ($receiving_sheet_received->receiving_sheet) {
-          return ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', session('user_id'))->count();
-        }
-        else {
-          return $receiving_sheet_received->received;
-        }
       })
       ->editColumn('received', function($receiving_sheet_received) {
         if ($receiving_sheet_received->receiving_sheet) {
@@ -94,7 +78,11 @@ class ShipperReceivingSheetHistoryController extends Controller
       ->addColumn('action', function($receiving_sheet_received) {
         if ($receiving_sheet_received->receiving_sheet) {
 
-          if ($receiving_sheet_received->booked_count != $receiving_sheet_received->received_count) {
+          $booked = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
+
+         $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', session('user_id'))->count();
+
+         if ($booked != $received) {
             return '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
