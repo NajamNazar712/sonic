@@ -262,7 +262,7 @@ class NotificationsController extends Controller
 
               $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
-              self::email($subject, $body, $to);
+              self::email($subject, $body, $to, $cc, $bcc);
             }
           }
           else if ($id == 5) {
