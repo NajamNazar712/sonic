@@ -8,8 +8,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipment;
 use App\Http\Models\CargoConsignment;
-use App\Http\Models\CargoConsignment\Admin\DeliveryNote;
-use App\Http\Models\CargoConsignment\Admin\ReturnNote;
+use App\Http\Models\Admin\DeliveryNote;
+use App\Http\Models\Admin\ReturnNote;
 
 use Auth;
 
