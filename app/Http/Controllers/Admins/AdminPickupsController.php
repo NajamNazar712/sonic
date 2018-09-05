@@ -1071,7 +1071,16 @@ class AdminPickupsController extends Controller
             $receving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
 
             if (!in_array($receving_sheet_id, $done_receiving_sheet_ids)) {
-              $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->where('status', 0);
+              $pickup_request_short_received_shipments = PickupRequestShortReceivedShipment::where('pickup_address_id', $pickup_request->id);
+
+              if ($pickup_request_short_received_shipments->exists()) {
+                $pickup_request_short_received_shipments = $pickup_request_short_received_shipments->pluck('shipment_id');
+
+                $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->whereNotIn('shipment_id', $pickup_request_short_received_shipments)->where('status', 0);
+              }
+              else {
+                $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->where('status', 0);
+              }
 
               $pickup_request->short_received = $pickup_request->short_received + $short_received_shipments->count();
 
@@ -1143,45 +1152,47 @@ class AdminPickupsController extends Controller
 
           $pickup_request->save();
 
-          $pickup_note = $pickup_request->pickup_note_request->pickup_note;
+          if ($pickup_request->pickup_note_request) {
+            $pickup_note = $pickup_request->pickup_note_request->pickup_note;
 
-          if ($bookings == 0) {
-            PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
-          }
-
-          $pickup_note_requests = $pickup_note->pickup_note_requests;
-
-          if ($pickup_note_requests->exists()) {
             if ($bookings == 0) {
-              $pickup_note->pickups = $pickup_note->pickups - 1;
+              PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
             }
 
-            $pickup_note->bookings = $pickup_note->bookings - 1;
+            $pickup_note_requests = $pickup_note->pickup_note_requests;
 
-            $weight = $pickup_note->weight - $weight;
+            if ($pickup_note_requests->exists()) {
+              if ($bookings == 0) {
+                $pickup_note->pickups = $pickup_note->pickups - 1;
+              }
 
-            $pickup_note->weight = $weight;
+              $pickup_note->bookings = $pickup_note->bookings - 1;
 
-            if ($weight < $defined_pickup_weight) {
-              $pickup_note->pickup_type = 0;
+              $weight = $pickup_note->weight - $weight;
+
+              $pickup_note->weight = $weight;
+
+              if ($weight < $defined_pickup_weight) {
+                $pickup_note->pickup_type = 0;
+              }
+              else {
+                $pickup_note->pickup_type = 1;
+              }
+
+              $pickup_note->updated_by = Auth::id();
+
+              $pickup_note->save();
             }
             else {
-              $pickup_note->pickup_type = 1;
+              $pickup_note->pickups = 0;
+              $pickup_note->bookings = 0;
+              $pickup_note->total_estimated_weight = 0;
+              $pickup_note->pickup_type = 0;
+              $pickup_note->status_id = 5;
+              $pickup_note->updated_by = Auth::id();
+
+              $pickup_note->save();
             }
-
-            $pickup_note->updated_by = Auth::id();
-
-            $pickup_note->save();
-          }
-          else {
-            $pickup_note->pickups = 0;
-            $pickup_note->bookings = 0;
-            $pickup_note->total_estimated_weight = 0;
-            $pickup_note->pickup_type = 0;
-            $pickup_note->status_id = 5;
-            $pickup_note->updated_by = Auth::id();
-
-            $pickup_note->save();
           }
         }
       }
