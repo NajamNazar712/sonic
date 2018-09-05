@@ -281,7 +281,7 @@ class NotificationsController extends Controller
 
               $origin_hub_id = $pickup_note->city->hub_id;
 
-              $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) {
+              $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_id) {
                 $query->where('hub_id', $origin_hub_id);
               });
 
@@ -510,7 +510,7 @@ class NotificationsController extends Controller
             $origin_hub_id = $cargo_consignment->origin_hub_id;
             $destination_hub_id = $cargo_consignment->destination_hub_id;
 
-            $related_admins = Admin::whereIn('role_id', [8, 9, 10])->where('status', 1)->whereHas('hubs', function ($query) {
+            $related_admins = Admin::whereIn('role_id', [8, 9, 10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_id, $destination_hub_id) {
               $query->where('hub_id', $origin_hub_id)
               ->orWhere('hub_id', $destination_hub_id);
             });
@@ -1150,7 +1150,7 @@ class NotificationsController extends Controller
 
             $hub_id = $dispute->city->hub_id;
 
-            $related_admins = Admin::whereIn('role_id', [8, 11])->where('status', 1)->whereHas('hubs', function ($query) {
+            $related_admins = Admin::whereIn('role_id', [8, 11])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
               $query->where('hub_id', $hub_id);
             });
 
@@ -1403,7 +1403,7 @@ class NotificationsController extends Controller
 
             $hub_id = $shipper->city->hub_id;
 
-            $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) {
+            $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
               $query->where('hub_id', $hub_id);
             });
 
