@@ -36,28 +36,28 @@ class ShipmentsJourneyController extends Controller
         }
       }
       else if (in_array($shipper_status_id, [3, 21, 26, 32])) {
-        $cargo_consignment = CargoConsignment::find($journey->reference_1_id);
+        $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
 
         if ($cargo_consignment) {
           $shipment_journey->city_id = $cargo_consignment->origin_hub_id;
         }
       }
       else if (in_array($shipper_status_id, [4, 22, 27, 33])) {
-        $cargo_consignment = CargoConsignment::find($journey->reference_1_id);
+        $cargo_consignment = CargoConsignment::find($shipment_journey->reference_1_id);
 
         if ($cargo_consignment) {
           $shipment_journey->city_id = $cargo_consignment->destination_hub_id;
         }
       }
       else if (in_array($shipper_status_id, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 28, 29, 30, 34, 35, 36, 37, 45, 46])) {
-        $delivery_note = DeliveryNote::find($journey->reference_1_id);
+        $delivery_note = DeliveryNote::find($shipment_journey->reference_1_id);
 
         if ($delivery_note) {
           $shipment_journey->city_id = $delivery_note->hub_id;
         }
       }
       else if (in_array($shipper_status_id, [23, 24, 25, 31, 38, 44])) {
-        $return_note = ReturnNote::find($journey->reference_1_id);
+        $return_note = ReturnNote::find($shipment_journey->reference_1_id);
 
         if ($return_note) {
           $shipment_journey->city_id = $return_note->hub_id;
