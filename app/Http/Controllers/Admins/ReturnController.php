@@ -131,14 +131,8 @@ class ReturnController extends Controller
             foreach ($shipment_ids as $shipment){
                $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                ShipmentsJourney::create([
-                    'shipment_id'=>$shipment,
-                    'shipper_status_id'=>20,
-                    'consignee_status_id'=>20,
-                    'status_reason_id'=>$shipment_history->status_reason_id,
-                    'remarks'=>$shipment_history->remarks,
-                    'admin_id'=>$admin
-                ]);
+                ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+
 
                 NotificationsController::send(15, 0, $shipment);
                 NotificationsController::send(16, 0, $shipment);
@@ -151,12 +145,7 @@ class ReturnController extends Controller
         }elseif($request->action == 'reattempt'){
             foreach ($shipment_ids as $shipment){
                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-                ShipmentsJourney::create([
-                    'shipment_id'=>$shipment,
-                    'shipper_status_id'=>13,
-                    'consignee_status_id'=>13,
-                    'admin_id'=>$admin
-                ]);
+                ShipmentsJourneyController::add($shipment, 13, 13, NULL, NULL, NULL, Auth::id());
 
                 NotificationsController::send(15, 0, $shipment);
                 NotificationsController::send(16, 0, $shipment);
@@ -170,14 +159,8 @@ class ReturnController extends Controller
         if($request->action == 'confirm'){
             Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
             $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
-            ShipmentsJourney::create([
-                'shipment_id'=>$request->shipment_id,
-                'shipper_status_id'=>20,
-                'consignee_status_id'=>20,
-                'status_reason_id'=>$shipment_history->status_reason_id,
-                'remarks'=>$shipment_history->remarks,
-                'admin_id'=>$admin
-            ]);
+            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+
 
             NotificationsController::send(15, 0, $request->shipment_id);
             NotificationsController::send(16, 0, $request->shipment_id);
@@ -189,12 +172,7 @@ class ReturnController extends Controller
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
         }elseif($request->action == 'reattempt'){
             Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-            ShipmentsJourney::create([
-                'shipment_id'=>$request->shipment_id,
-                'shipper_status_id'=>20,
-                'consignee_status_id'=>20,
-                'admin_id'=>$admin
-            ]);
+            ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
 
             NotificationsController::send(15, 0, $request->shipment_id);
             NotificationsController::send(16, 0, $request->shipment_id);
@@ -663,15 +641,8 @@ class ReturnController extends Controller
                     ReturnNote::where('id',$return_note)->update(['shipments_count'=>$count]);
                 }
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>$shipper_status]);
+                ShipmentsJourneyController::add($parcel->id, $shipper_status, NULL, NULL, NULL, NULL, Auth::id());
 
-                ShipmentsJourney::create([
-                    'shipment_id'=>$parcel->id,
-                    'shipper_status_id'=>$shipper_status,
-                    'consignee_status_id'=>null,
-                    'status_reason_id'=>null,
-                    'remarks'=>null,
-                    'admin_id'=>Auth::id()
-                ]);
                 return ['status' => 0, 'success' => 'Return Shipment is successfully removed'];
             }else{
                 return ['status' => 1, 'error' => 'Something went wrong'];
@@ -764,23 +735,12 @@ class ReturnController extends Controller
 //
 //                }
                 if($request->status_drop[$shipment] == 24 || $request->status_drop[$shipment] == 29 || $request->status_drop[$shipment] == 35){
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment,
-                        'shipper_status_id'=>$request->status_drop[$shipment],
-                        'status_reason_id'=>($request->has($reasonId)? $request->reason_drop[$shipment]:null),
-                        'remarks'=>$request->remarks[$shipment],
-                        'admin_id'=>Auth::id()
-                    ]);
+                    ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment]]);
                 }else{
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment,
-                        'shipper_status_id'=>$request->status_drop[$shipment],
-                        'consignee_status_id'=>$request->status_drop[$shipment],
-                        'status_reason_id'=>($request->has($reasonId)? $request->reason_drop[$shipment]:null),
-                        'remarks'=>$request->remarks[$shipment],
-                        'admin_id'=>Auth::id()
-                    ]);
+                    ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment],'consignee_status_id'=>$request->status_drop[$shipment]]);
                 }
 
@@ -804,33 +764,20 @@ class ReturnController extends Controller
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id',$shipment)->first();
                 if($parcel->booking_type_id == 1){
+                    ShipmentsJourneyController::add($shipment, 25, 25, NULL, NULL, NULL, Auth::id());
 
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment,
-                        'shipper_status_id'=>25,
-                        'consignee_status_id'=>25,
-                        'admin_id'=>Auth::id()
-                    ]);
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
 
                 }else if($parcel->booking_type_id == 2){
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment,
-                        'shipper_status_id'=>31,
-                        'consignee_status_id'=>31,
-                        'admin_id'=>Auth::id()
-                    ]);
+                    ShipmentsJourneyController::add($shipment, 31, 31, NULL, NULL, NULL, Auth::id());
+
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>31,'consignee_status_id'=>31]);
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
 
                 }else if($parcel->booking_type_id == 3){
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment,
-                        'shipper_status_id'=>38,
-                        'consignee_status_id'=>38,
-                        'admin_id'=>Auth::id()
-                    ]);
+                    ShipmentsJourneyController::add($shipment, 38, 38, NULL, NULL, NULL, Auth::id());
+
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>38,'consignee_status_id'=>38]);
                     ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
 

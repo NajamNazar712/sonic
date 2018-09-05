@@ -232,14 +232,7 @@ class DeliveryController extends Controller
                 ]);
                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>5,'consignee_status_id'=>5]);
                 ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(),$note->id,$note->rider_id);
-//                ShipmentsJourney::create([
-//                    'shipment_id'=>$shipment,
-//                    'shipper_status_id'=>5,
-//                    'consignee_status_id'=>5,
-//                    'admin_id'=>$admin,
-//                    'reference_1_id'=>$note->id,
-//                    'reference_2_id'=>$note->rider_id
-//                ]);
+
 
                 NotificationsController::send(10, $note->id, $shipment);
                 NotificationsController::send(11, $note->id, $shipment);
@@ -402,15 +395,8 @@ class DeliveryController extends Controller
                     DeliveryNote::where('id',$delivery_note)->update(['shipments_count'=>$count,'total_cod_amount'=>$cod]);
                 }
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>6]);
+                ShipmentsJourneyController::add($shipment->id, 6, NULL, NULL, NULL, NULL, Auth::id());
 
-                    ShipmentsJourney::create([
-                        'shipment_id' => $shipment->id,
-                        'shipper_status_id' => 6,
-                        'consignee_status_id' => null,
-                        'status_reason_id' => null,
-                        'remarks' => null,
-                        'admin_id' => Auth::id()
-                    ]);
 
 
                 return ['status' => 0, 'success' => 'Shipment is successfully removed'];
@@ -668,14 +654,8 @@ class DeliveryController extends Controller
                     if($request->status_drop[$shipment] != null){
                     if($request->status_drop[$shipment] == 7 || $request->status_drop[$shipment] == 18){
                         if($shipment_status->shipper_status_id != $request->status_drop[$shipment]){
-                            ShipmentsJourney::create([
-                                'shipment_id'=>$shipment,
-                                'shipper_status_id'=>$request->status_drop[$shipment],
-                                'consignee_status_id'=>null,
-                                'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
-                                'remarks'=>$request->remarks[$shipment],
-                                'admin_id'=>Auth::id()
-                            ]);
+                            ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+
                         }
 
                         Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment]]);
@@ -684,55 +664,29 @@ class DeliveryController extends Controller
                         $parcel = Shipment::where('id',$shipment)->first();
                         if($parcel->booking_type_id == 2){
                             if($shipment_status->shipper_status_id != 30){
-                            ShipmentsJourney::create([
-                                'shipment_id'=>$shipment,
-                                'shipper_status_id'=>30,
-                                'consignee_status_id'=>30,
-                                'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
-                                'remarks'=>$request->remarks[$shipment],
-                                'admin_id'=>Auth::id()
-                            ]);
+                                ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
                             }
                             Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>30,'consignee_status_id'=>30]);
                             DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>2]);
                         }elseif($parcel->booking_type_id == 3){
                             if($parcel->package_type == 0){
                                 if($shipment_status->shipper_status_id != 36){
-                                ShipmentsJourney::create([
-                                    'shipment_id'=>$shipment,
-                                    'shipper_status_id'=>36,
-                                    'consignee_status_id'=>36,
-                                    'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
-                                    'remarks'=>$request->remarks[$shipment],
-                                    'admin_id'=>Auth::id()
-                                ]);
+                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
                                 }
                                 Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>36,'consignee_status_id'=>36]);
                                 DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>3]);
                             }else{
                                 if($shipment_status->shipper_status_id != 36){
-                                ShipmentsJourney::create([
-                                    'shipment_id'=>$shipment,
-                                    'shipper_status_id'=>36,
-                                    'consignee_status_id'=>36,
-                                    'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
-                                    'remarks'=>$request->remarks[$shipment],
-                                    'admin_id'=>Auth::id()
-                                ]);
+                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+
                                 }
                                 Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>36,'consignee_status_id'=>36]);
                                 DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>6]);
                             }
                             }else{
                             if($shipment_status->shipper_status_id != $request->status_drop[$shipment]){
-                            ShipmentsJourney::create([
-                                'shipment_id'=>$shipment,
-                                'shipper_status_id'=>$request->status_drop[$shipment],
-                                'consignee_status_id'=>$request->status_drop[$shipment],
-                                'status_reason_id'=>($request->has($statusId)? $request->reason_drop[$shipment]:null),
-                                'remarks'=>$request->remarks[$shipment],
-                                'admin_id'=>Auth::id()
-                            ]);
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+
                             }
                             Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>$request->status_drop[$shipment],'consignee_status_id'=>$request->status_drop[$shipment]]);
                             DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>6]);
@@ -740,14 +694,8 @@ class DeliveryController extends Controller
 
                     }else{
                         if($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
-                            ShipmentsJourney::create([
-                                'shipment_id' => $shipment,
-                                'shipper_status_id' => $request->status_drop[$shipment],
-                                'consignee_status_id' => $request->status_drop[$shipment],
-                                'status_reason_id' => ($request->has($statusId)? $request->reason_drop[$shipment]:null),
-                                'remarks' => $request->remarks[$shipment],
-                                'admin_id' => Auth::id()
-                            ]);
+                            ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+
                         }
                         Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment],'consignee_status_id'=>$request->status_drop[$shipment]]);
                         DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>1]);
@@ -766,51 +714,23 @@ class DeliveryController extends Controller
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id',$shipment)->first();
                 if($parcel->booking_type_id == 2){
-
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment,
-                        'shipper_status_id'=>30,
-                        'consignee_status_id'=>30,
-                        'status_reason_id'=>null,
-                        'remarks'=>null,
-                        'admin_id'=>Auth::id()
-                    ]);
+                    ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id());
                     Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>30,'consignee_status_id'=>30]);
                     DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>2]);
                 }elseif($parcel->booking_type_id == 3){
                     if($parcel->package_type == 0){
-                        ShipmentsJourney::create([
-                            'shipment_id'=>$shipment,
-                            'shipper_status_id'=>37,
-                            'consignee_status_id'=>37,
-                            'status_reason_id'=>null,
-                            'remarks'=>null,
-                            'admin_id'=>Auth::id()
-                        ]);
+                        ShipmentsJourneyController::add($shipment, 37, 37, NULL, NULL, NULL, Auth::id());
+
                         Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>37,'consignee_status_id'=>37]);
                         DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>3]);
                     }else{
-                        ShipmentsJourney::create([
-                            'shipment_id'=>$shipment,
-                            'shipper_status_id'=>36,
-                            'consignee_status_id'=>36,
-                            'status_reason_id'=>null,
-                            'remarks'=>null,
-                            'admin_id'=>Auth::id()
-                        ]);
+                        ShipmentsJourneyController::add($shipment, 36, 36, NULL, NULL, NULL, Auth::id());
                         Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>36,'consignee_status_id'=>36]);
                         DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>6]);
                     }
 
                 }else{
-                    ShipmentsJourney::create([
-                        'shipment_id'=>$shipment,
-                        'shipper_status_id'=>14,
-                        'consignee_status_id'=>14,
-                        'status_reason_id'=>null,
-                        'remarks'=>null,
-                        'admin_id'=>Auth::id()
-                    ]);
+                    ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id());
                     Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>14,'consignee_status_id'=>14]);
                     DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>6]);
                 }
@@ -906,14 +826,7 @@ class DeliveryController extends Controller
             }
             if($checked != $unchecked){
                 Shipment::where('id',$request->trybuy_shipment_id)->update(['received_amount'=>$cod,'shipper_status_id'=>37,'consignee_status_id'=>37]);
-                ShipmentsJourney::create([
-                    'shipment_id'=>$request->trybuy_shipment_id,
-                    'shipper_status_id'=>37,
-                    'consignee_status_id'=>37,
-                    'status_reason_id'=>null,
-                    'remarks'=>null,
-                    'admin_id'=>Auth::id()
-                ]);
+                ShipmentsJourneyController::add($request->trybuy_shipment_id, 37, 37, NULL, NULL, NULL, Auth::id());
             }elseif($checked == $unchecked){
                 Shipment::where('id',$request->trybuy_shipment_id)->update(['received_amount'=>$cod,'shipper_status_id'=>36,'consignee_status_id'=>36]);
             }
@@ -1029,78 +942,38 @@ class DeliveryController extends Controller
                         $shipper_status_id = Shipment::where('id', $shipment)->select('shipper_status_id')->first();
                         if($shipper_status_id->shipper_status_id != $request->status_drop[$shipment]){
                             if ($request->status_drop[$shipment] == 7 || $request->status_drop[$shipment] == 18) {
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
 
-                                ShipmentsJourney::create([
-                                    'shipment_id' => $shipment,
-                                    'shipper_status_id' => $request->status_drop[$shipment],
-                                    'consignee_status_id' => null,
-                                    'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
-                                    'remarks' => $request->remarks[$shipment],
-                                    'admin_id' => Auth::id()
-                                ]);
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             } elseif (in_array($request->status_drop[$shipment],$delivered_status_array)) {
                                 $parcel = Shipment::where('id', $shipment)->first();
                                 if ($parcel->booking_type_id == 2) {
-                                    ShipmentsJourney::create([
-                                        'shipment_id' => $shipment,
-                                        'shipper_status_id' => 30,
-                                        'consignee_status_id' => 30,
-                                        'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
-                                        'remarks' => $request->remarks[$shipment],
-                                        'admin_id' => Auth::id()
-                                    ]);
+                                    ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+
                                     Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 30, 'consignee_status_id' => 30]);
                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 2]);
                                 } elseif ($parcel->booking_type_id == 3) {
                                     if ($parcel->package_type == 0) {
-                                        ShipmentsJourney::create([
-                                            'shipment_id' => $shipment,
-                                            'shipper_status_id' => 36,
-                                            'consignee_status_id' => 36,
-                                            'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
-                                            'remarks' => $request->remarks[$shipment],
-                                            'admin_id' => Auth::id()
-                                        ]);
+                                        ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+
                                         Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 3]);
                                     } else {
-                                        ShipmentsJourney::create([
-                                            'shipment_id' => $shipment,
-                                            'shipper_status_id' => 36,
-                                            'consignee_status_id' => 36,
-                                            'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
-                                            'remarks' => $request->remarks[$shipment],
-                                            'admin_id' => Auth::id()
-                                        ]);
+                                        ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+
                                         Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                                     }
                                 } else {
-                                    ShipmentsJourney::create([
-                                        'shipment_id' => $shipment,
-                                        'shipper_status_id' => $request->status_drop[$shipment],
-                                        'consignee_status_id' => $request->status_drop[$shipment],
-                                        'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
-                                        'remarks' => $request->remarks[$shipment],
-                                        'admin_id' => Auth::id()
-                                    ]);
+                                    ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
                                     Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                 }
 
                                 AdminFinanceController::add_payment($shipment, 0);
                             } else {
-
-                                ShipmentsJourney::create([
-                                    'shipment_id' => $shipment,
-                                    'shipper_status_id' => $request->status_drop[$shipment],
-                                    'consignee_status_id' => $request->status_drop[$shipment],
-                                    'status_reason_id' => ($request->has($reasonId)? $request->reason_drop[$shipment]:null),
-                                    'remarks' => $request->remarks[$shipment],
-                                    'admin_id' => Auth::id()
-                                ]);
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             }
