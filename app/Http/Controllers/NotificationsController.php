@@ -490,7 +490,7 @@ class NotificationsController extends Controller
             if (strpos($body, '[tracking_number]') !== FALSE) {
               $tracking_numbers = '';
 
-              foreach ($cargo_consignment->cargo_consignment_shipments => $cargo_consignment_shipment) {
+              foreach ($cargo_consignment->cargo_consignment_shipments as $cargo_consignment_shipment) {
                 $shipment = $cargo_consignment_shipment->shipment;
 
                 $tracking_numbers .= $shipment->tracking_number . PHP_EOL;
