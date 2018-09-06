@@ -305,7 +305,7 @@
                             reason.append(newOption).trigger('change');
                         });
                     }else{
-                        $('.reasonDrop').empty();
+                        reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });

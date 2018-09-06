@@ -19,7 +19,7 @@
                         <th class="border-primary border-darken-1">No of DNCCs</th>
                         <th class="border-primary border-darken-1">Delivered Shipments</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
-                        <th class="border-primary border-darken-1">Expense</th>
+                        {{--<th class="border-primary border-darken-1">Expense</th>--}}
                         <th class="border-primary border-darken-1">Net Amount</th>
                         <th class="border-primary border-darken-1">Deposited By</th>
                         <th class="border-primary border-darken-1">Company Bank</th>
@@ -166,7 +166,7 @@
                     { data:'dncc_count' ,name: 'dncc_count', class: 'align-middle dncc_count'},
                     { data:'sdn_delivered_shipments' ,name: 'sdn_delivered_shipments', class: 'align-middle sdn_delivered_shipments'},
                     { data:'sdn_amount' ,name: 'sdn_amount', class: 'align-middle sdn_amount'},
-                    { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
+                    // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
                     { data:'sdn_net_amount' ,name: 'sdn_net_amount', class: 'align-middle sdn_net_amount'},
                     { data:'deposited_by' ,name: 'deposited_by', class: 'align-middle deposited_by'},
                     { data:'bank' ,name: 'bank', class: 'align-middle bank'},

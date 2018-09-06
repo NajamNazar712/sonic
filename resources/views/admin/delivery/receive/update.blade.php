@@ -35,7 +35,7 @@
     </div>
 
 
-    </div>
+
 
 @endsection
 
@@ -162,13 +162,14 @@
 
             $('body').on('click','a.deliverynoterow',function () {
                 var shipment_id = $(this).parents('tr').attr('id');
-
+                var delivery_note = $('#delivery_note').val();
                 $.ajax({
                     url:'{{route('admin.delivery.receive.update.remove')}}',
-                    type:'GET',
-                    dataType:'JSON',
+                    type:'POST',
                     data: {
-                        'shipment_id':shipment_id
+                        'shipment_id':shipment_id,
+                        'delivery_note_id':delivery_note,
+                        '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
                     if(data.status == 0){

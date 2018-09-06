@@ -16,6 +16,7 @@
                     <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
                     <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
+                    <input type="hidden" name="submit_button_id" id="submit_button_id">
                     <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                         <thead>
                         <tr role="row" class="bg-primary white">
@@ -27,6 +28,7 @@
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Call Verification</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Shipper</th>
@@ -36,7 +38,10 @@
                     </table>
                     <div class="row justify-content-center">
                         <div class="col-2">
-                            <button id="statusSubmit" type="submit" class="btn btn-primary btn-block">Verify Status</button>
+                            <button id="statusUpdateSubmit" rel="update" type="submit" class="btn btn-primary btn-block">Update Status</button>
+                        </div>
+                        <div class="col-2">
+                            <button id="statusVerifySubmit" rel="verify" type="submit" class="btn btn-primary btn-block">Verify Status</button>
                         </div>
                         @if($delivery_note_status == 1)
                             <div class="col-2">
@@ -47,9 +52,6 @@
                 </form>
             </div>
         </div>
-    </div>
-
-
     </div>
 
 
@@ -86,6 +88,9 @@
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
             border-color: #666EE8;
+        }
+        table.dataTable tbody tr td.call_verification {
+           text-align:center;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -147,6 +152,7 @@
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange'},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect'},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks'},
+                    {data:'call_verification',name: 'call_verification', class: 'align-middle call_verification'},
                     {data:'address',name: 'address', class: 'align-middle address'},
                     {data:'destination',name: 'destination', class: 'align-middle destination'},
                     {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
@@ -176,7 +182,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.status') || $(header).is('.reason') || $(header).is('.remarks') || $(header).is('.action') || $(header).is('.call_verification')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -193,7 +199,8 @@
             });
 
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
-                $('#statusSubmit').removeAttr('disabled');
+                $('#statusUpdateSubmit').removeAttr('disabled');
+                $('#statusVerifySubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
@@ -215,7 +222,7 @@
                         });
                         reason.val('').trigger('change');
                     }else{
-                        $('.reasonDrop').empty();
+                        reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
@@ -231,8 +238,10 @@
             });
             var shipments = [];
             $('#status_update_form').bind('submit', function(event) {
-                var shipment = $('#shipment_ids');
                 event.preventDefault();
+                var btn = $(document.activeElement).attr('id');
+                $('#submit_button_id').val(btn);
+                var shipment = $('#shipment_ids');
                 var id = '';
                 var count = table.data().count();
                 for(var i = 0;i<count;i++){
@@ -240,7 +249,8 @@
                     shipments.push(id);
                 }
                 shipment.val(shipments);
-                $('#statusSubmit').prop('disabled',true);
+                $('#statusVerifySubmit').prop('disabled',true);
+                $('#statusUpdateSubmit').prop('disabled',true);
                 this.submit();
             });
 
