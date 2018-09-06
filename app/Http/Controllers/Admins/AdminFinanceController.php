@@ -453,6 +453,8 @@ class AdminFinanceController extends Controller
 
         ShipmentChargesController::cash_handling($shipment_id);
 
+        $shipment->refresh();
+
         $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment_id);
 
         if ($pending_payment_shipments->exists()) {
