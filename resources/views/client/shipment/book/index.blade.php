@@ -259,9 +259,6 @@
 
 										<div class="form-group">
 											<select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Mode of Shipping is required">
-												@foreach($shipping_modes as $shipping_mode)
-													<option value="{{ $shipping_mode->id }}">{{ $shipping_mode->mode }}</option>
-												@endforeach
 											</select>
 										</div>
 
@@ -351,6 +348,7 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
 @endsection
 
@@ -365,6 +363,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -460,6 +459,61 @@
 				});
 			}
 
+			function shipping_modes() {
+				consignee_city_id = $('#consignee_city').val();
+
+				if (consignee_city_id) {
+					$.ajax({
+						url: '{!! route('cod.shipment.book.shipping_modes') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'service_type_id': service_type,
+							'consignee_city_id': $('#consignee_city').val()
+						}
+					})
+					.done(function(data) {
+						$('#shipping_mode').html('').select2('destroy');
+
+						if (data.status == 0) {
+							$.each(data.shipping_modes, function (index, shipping_mode) {
+								$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
+							});
+
+							present = true;
+						}
+						else {
+							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+							present = false;
+						}
+
+						$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+							width: '100%',
+							placeholder: 'Mode of Shipping*'
+						}).bind('change', function() {
+							if ($(this).hasClass('danger')) {
+								$(this).valid();
+							}
+
+							if (this.value == 4) {
+								$('#shipping_same-day').removeClass('d-none');
+							}
+							else {
+								$('#shipping_same-day').addClass('d-none');
+							}
+						});
+
+						if (present) {
+							$('#shipping_mode').prop('disabled', false);
+						}
+						else {
+							$('#shipping_mode').prop('disabled', true);
+						}
+					});
+				}
+			}
+
 			$('#select_service_type').modal({
 				backdrop: 'static',
 				keyboard: false,
@@ -520,6 +574,8 @@
 					$('#selected_service_type_name').html('(' + selected.html() + ')');
 
 					$('#select_service_type').modal('hide');
+
+					shipping_modes();
 				}
 				else {
 					$('#select_service_type form #service_type-error').removeClass('d-none');
@@ -564,6 +620,8 @@
 				placeholder: 'City*'
 			}).bind('change', function() {
 				$(this).valid();
+
+				shipping_modes();
 
 				if ($('#pickup_address').val() == 0) {
 					var pickup_city = $('#new_pickup_city').val();
@@ -726,7 +784,8 @@
 
 			$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
-				placeholder: 'Mode of Shipping*'
+				placeholder: 'Mode of Shipping*',
+				disabled: true,
 			}).bind('change', function() {
 				if ($(this).hasClass('danger')) {
 					$(this).valid();
