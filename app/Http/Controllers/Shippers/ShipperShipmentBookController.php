@@ -134,14 +134,37 @@ class ShipperShipmentBookController extends Controller
     public function index() {
       $booking_types = BookingType::all();
       $user = User::with('shipping.city')->find(session('user_id'));
-      $cities = City::where('status',1)->where('pickup',1)->orderBy('name')->get();
-      $consignee_cities = City::where('status',1)->orderBy('name')->get();
+      $cities = City::where('status', 1)->where('pickup', 1)->orderBy('name')->get();
+      $consignee_cities = City::where('status', 1)->orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
-      $shipping_modes = ShippingMode::all();
       $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
       $payment_modes = PaymentMode::all();
 
-      return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities'=>$consignee_cities]);
+      return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities]);
+    }
+
+    public function shipping_modes(Request $request) {
+      $shipper_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1);
+
+      if ($shipper_shipping_modes->exists()) {
+        $shipper_shipping_modes = $shipper_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+        $city_shipping_modes = CityDelivery::where('city_id', $request->consignee_city_id)->where('booking_type_id', $request->service_type_id)->whereIn('shipping_mode_id', $shipper_shipping_modes);
+
+        if ($city_shipping_modes->exists()) {
+          $city_shipping_modes = $city_shipping_modes->pluck('shipping_mode_id')->toArray();
+
+          $shipping_modes = ShippingMode::whereIn('id', $city_shipping_modes)->get();
+
+          return ['status' => 0, 'success' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes];
+        }
+        else {
+          return ['status' => 1, 'error' => 'No Shipment Modes Enabled for Selected Service Type and Consignee City'];
+        }
+      }
+      else {
+        return ['status' => 1, 'error' => 'No Shipment Modes has been Enabled for you'];
+      }
     }
 
     public function store(Request $request) {

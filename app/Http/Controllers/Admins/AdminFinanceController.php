@@ -380,7 +380,7 @@ class AdminFinanceController extends Controller
 
                 ShipmentsJourneyController::add($request->id, 42, NULL, NULL, NULL, NULL, Auth::id());
 
-                NotificationsController::send(21, $request->id);
+                NotificationsController::send(21, $request->id, Auth::id());
             }
 
             return ['status' => 0, 'success' => 'Shipment has been marked to be Adjusted in Payment'];
@@ -452,6 +452,8 @@ class AdminFinanceController extends Controller
         $shipment->save();
 
         ShipmentChargesController::cash_handling($shipment_id);
+
+        $shipment->refresh();
 
         $pending_payment_shipments = PendingPaymentShipment::where('shipment_id', $shipment_id);
 
