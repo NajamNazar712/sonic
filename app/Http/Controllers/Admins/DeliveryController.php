@@ -1088,7 +1088,18 @@ class DeliveryController extends Controller
                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                 }
 
-                                AdminFinanceController::add_payment($shipment, 0);
+                                if (in_array($request->status_drop[$shipment], [14, 16, 30, 36, 37])) {
+                                    $parcel = Shipment::find($shipment);
+
+                                    if ($parcel->booking_type_id == 2) {
+                                        ShipmentChargesController::replacement($shipment);
+                                    }
+                                    else if ($parcel->booking_type_id == 3) {
+                                        ShipmentChargesController::try_and_buy($shipment);
+                                    }
+
+                                    AdminFinanceController::add_payment($shipment, 0);
+                                }
                             } else {
 
                                 ShipmentsJourney::create([
@@ -1107,6 +1118,7 @@ class DeliveryController extends Controller
                         else {
                             if (in_array($shipper_status_id->shipper_status_id, [14, 16, 30, 36, 37])) {
                                 $parcel = Shipment::find($shipment);
+
                                 if ($parcel->booking_type_id == 2) {
                                     ShipmentChargesController::replacement($shipment);
                                 }

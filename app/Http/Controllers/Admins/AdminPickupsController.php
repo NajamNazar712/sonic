@@ -1015,25 +1015,27 @@ class AdminPickupsController extends Controller
           }
 
           if (!empty($receiving_sheet_ids)) {
-            $receving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+            if ($shipment->receiving_sheet_shipment) {
+              $receving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
 
-            if (!in_array($receving_sheet_id, $done_receiving_sheet_ids)) {
-              $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->where('status', 0);
+              if (!in_array($receving_sheet_id, $done_receiving_sheet_ids)) {
+                $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->where('status', 0);
 
-              $pickup_request->short_received = $pickup_request->short_received + $short_received_shipments->count();
+                $pickup_request->short_received = $pickup_request->short_received + $short_received_shipments->count();
 
-              foreach ($short_received_shipments->get() as $short_received_shipment) {
-                if (!PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $short_received_shipment->shipment_id)->exists()) {
-                  $pickup_request_short_received_shipment = new PickupRequestShortReceivedShipment();
+                foreach ($short_received_shipments->get() as $short_received_shipment) {
+                  if (!PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id)->where('shipment_id', $short_received_shipment->shipment_id)->exists()) {
+                    $pickup_request_short_received_shipment = new PickupRequestShortReceivedShipment();
 
-                  $pickup_request_short_received_shipment->pickup_request_id = $pickup_request->id;
-                  $pickup_request_short_received_shipment->shipment_id = $short_received_shipment->shipment_id;
+                    $pickup_request_short_received_shipment->pickup_request_id = $pickup_request->id;
+                    $pickup_request_short_received_shipment->shipment_id = $short_received_shipment->shipment_id;
 
-                  $pickup_request_short_received_shipment->save();
+                    $pickup_request_short_received_shipment->save();
+                  }
                 }
-              }
 
-              $done_receiving_sheet_ids[] = $receiving_sheet_id;
+                $done_receiving_sheet_ids[] = $receiving_sheet_id;
+              }
             }
           }
 
