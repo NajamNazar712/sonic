@@ -1009,7 +1009,13 @@ class AdminPickupsController extends Controller
           if ($short_received_shipment->exists()) {
             $short_received_shipment->delete();
 
-            $pickup_request->short_received = $pickup_request->short_received - 1;
+            $short_received = $pickup_request->short_received - 1;
+
+            if ($short_received == 0) {
+              $short_received = NULL;
+            }
+
+            $pickup_request->short_received = $short_received;
 
             $pickup_request->save();
           }
@@ -1064,7 +1070,13 @@ class AdminPickupsController extends Controller
           if ($short_received_shipment->exists()) {
             $short_received_shipment->delete();
 
-            $pickup_request->short_received = $pickup_request->short_received - 1;
+            $short_received = $pickup_request->short_received - 1;
+
+            if ($short_received == 0) {
+              $short_received = NULL;
+            }
+
+            $pickup_request->short_received = $short_received;
 
             $pickup_request->save();
           }
