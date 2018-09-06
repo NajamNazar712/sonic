@@ -12,9 +12,8 @@
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('cod.login');
 });
-//Route::resource('shippers','Shippers\shipperLoginController');
 
 
 Auth::routes();
@@ -32,7 +31,6 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('access_denied', 'Shippers\ShipperDashboardController@access_denied')->name('access_denied');
 
     Route::get('/dashboard', 'Shippers\ShipperDashboardController@orders_index')->name('dashboard');
-//    Route::get('/order/management', 'Shippers\ShipperDashboardController@orderList');
     Route::get('/order/pending', 'Shippers\ShipperDashboardController@orderPending');
 
     Route::prefix('orders')->name('orders.')->group(function(){

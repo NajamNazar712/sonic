@@ -1022,9 +1022,9 @@ class AdminPickupsController extends Controller
 
           if (!empty($receiving_sheet_ids)) {
             if ($shipment->receiving_sheet_shipment) {
-              $receving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+              $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
 
-              if (!in_array($receving_sheet_id, $done_receiving_sheet_ids)) {
+              if (!in_array($receiving_sheet_id, $done_receiving_sheet_ids)) {
                 $short_received_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_id)->where('status', 0);
 
                 $pickup_request->short_received = $pickup_request->short_received + $short_received_shipments->count();
@@ -1082,9 +1082,9 @@ class AdminPickupsController extends Controller
           }
 
           if (!empty($receiving_sheet_ids)) {
-            $receving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
+            $receiving_sheet_id = $shipment->receiving_sheet_shipment->receiving_sheet_id;
 
-            if (!in_array($receving_sheet_id, $done_receiving_sheet_ids)) {
+            if (!in_array($receiving_sheet_id, $done_receiving_sheet_ids)) {
               $pickup_request_short_received_shipments = PickupRequestShortReceivedShipment::where('pickup_request_id', $pickup_request->id);
 
               if ($pickup_request_short_received_shipments->exists()) {
