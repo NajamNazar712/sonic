@@ -347,7 +347,7 @@
                                                         </label>
                                                         {{--<input type="text" class="form-control required" value="{{ old('bank_name') }}"   name="bank_name">--}}
                                                         <div>
-                                                            <select name="bank_city" id="bank_name" class="select2 form-control required" style="width: 100%">
+                                                            <select name="bank_name" id="bank_name" class="select2 form-control required" style="width: 100%">
                                                                 <option value="" selected>Select a Bank</option>
                                                                 @foreach($banks as $bank)
                                                                     <option value="{{$bank->id}}"  {{ old('bank_name') == $bank->id ? 'selected' : '' }} >{{$bank->name}}</option>

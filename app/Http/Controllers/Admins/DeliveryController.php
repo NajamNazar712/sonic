@@ -151,10 +151,7 @@ class DeliveryController extends Controller
                 $shipment = $shipment->first();
 //                return $shipment->consignee_city_id;
                 if(($shipment->consignee_city_id != $shipment->pickup_address->city_id) && $shipment->shipper_status_id == 2){
-
                         return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
-
-
                 }
                 if($request->has('hub_id') ){
                     $hub_id = $shipment->consignee_city->hub_id;
@@ -246,8 +243,7 @@ class DeliveryController extends Controller
         return view('admin.delivery.receive.index');
     }
     public function receive_deliveries_list(Request $request){
-        $deliveries = DeliveryNote::
-        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+        $deliveries = DeliveryNote::join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
@@ -395,7 +391,7 @@ class DeliveryController extends Controller
                     DeliveryNote::where('id',$delivery_note)->update(['shipments_count'=>$count,'total_cod_amount'=>$cod]);
                 }
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>6]);
-                ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id());
+                ShipmentsJourneyController::add($request->shipment_id, 6, NULL, NULL, NULL, NULL, Auth::id(),$request->delivery_note_id);
 
 
 
@@ -668,7 +664,7 @@ class DeliveryController extends Controller
                     if($request->status_drop[$shipment] != null){
                     if($request->status_drop[$shipment] == 7 || $request->status_drop[$shipment] == 18){
                         if($shipment_status->shipper_status_id != $request->status_drop[$shipment]){
-                            ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
 
                         }
 
@@ -678,20 +674,20 @@ class DeliveryController extends Controller
                         $parcel = Shipment::where('id',$shipment)->first();
                         if($parcel->booking_type_id == 2){
                             if($shipment_status->shipper_status_id != 30){
-                                ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
                             }
                             Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>30,'consignee_status_id'=>30]);
                             DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>2]);
                         }elseif($parcel->booking_type_id == 3){
                             if($parcel->package_type == 0){
                                 if($shipment_status->shipper_status_id != 36){
-                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
                                 }
                                 Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>36,'consignee_status_id'=>36]);
                                 DeliveryNoteShipment::where(['delivery_note_id'=>$delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>3]);
                             }else{
                                 if($shipment_status->shipper_status_id != 36){
-                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                    ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
 
                                 }
                                 Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>36,'consignee_status_id'=>36]);
@@ -699,7 +695,7 @@ class DeliveryController extends Controller
                             }
                             }else{
                             if($shipment_status->shipper_status_id != $request->status_drop[$shipment]){
-                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
 
                             }
                             Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>$request->status_drop[$shipment],'consignee_status_id'=>$request->status_drop[$shipment]]);
@@ -708,7 +704,7 @@ class DeliveryController extends Controller
 
                     }else{
                         if($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
-                            ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                            ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($statusId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
 
                         }
                         Shipment::where('id',$shipment)->update(['shipper_status_id'=>$request->status_drop[$shipment],'consignee_status_id'=>$request->status_drop[$shipment]]);
@@ -728,23 +724,23 @@ class DeliveryController extends Controller
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id',$shipment)->first();
                 if($parcel->booking_type_id == 2){
-                    ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment, 30, 30, NULL, NULL, NULL, Auth::id(),$request->delivery_note_id);
                     Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>30,'consignee_status_id'=>30]);
                     DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>2]);
                 }elseif($parcel->booking_type_id == 3){
                     if($parcel->package_type == 0){
-                        ShipmentsJourneyController::add($shipment, 37, 37, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment, 37, 37, NULL, NULL, NULL, Auth::id(),$request->delivery_note_id);
 
                         Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>37,'consignee_status_id'=>37]);
                         DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>3]);
                     }else{
-                        ShipmentsJourneyController::add($shipment, 36, 36, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment, 36, 36, NULL, NULL, NULL, Auth::id(),$request->delivery_note_id);
                         Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>36,'consignee_status_id'=>36]);
                         DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>6]);
                     }
 
                 }else{
-                    ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment, 14, 14, NULL, NULL, NULL, Auth::id(),$request->delivery_note_id);
                     Shipment::where('id',$shipment)->update(['received_amount'=>$parcel->amount,'shipper_status_id'=>14,'consignee_status_id'=>14]);
                     DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>6]);
                 }
@@ -840,7 +836,7 @@ class DeliveryController extends Controller
             }
             if($checked != $unchecked){
                 Shipment::where('id',$request->trybuy_shipment_id)->update(['received_amount'=>$cod,'shipper_status_id'=>37,'consignee_status_id'=>37]);
-                ShipmentsJourneyController::add($request->trybuy_shipment_id, 37, 37, NULL, NULL, NULL, Auth::id());
+                ShipmentsJourneyController::add($request->trybuy_shipment_id, 37, 37, NULL, NULL, NULL, Auth::id(),$request->delivery_note_trybuy);
             }elseif($checked == $unchecked){
                 Shipment::where('id',$request->trybuy_shipment_id)->update(['received_amount'=>$cod,'shipper_status_id'=>36,'consignee_status_id'=>36]);
             }
@@ -972,13 +968,13 @@ class DeliveryController extends Controller
                         $journey = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                         if($shipper_status_id->shipper_status_id != $request->status_drop[$shipment]){
                             if ($request->status_drop[$shipment] == 7 || $request->status_drop[$shipment] == 18) {
-                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id());
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
 
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             }else if($request->status_drop[$shipment] == 20){
-                                ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
-                                ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
+                                ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                                 NotificationsController::send(15, 0, $shipment);
                                 NotificationsController::send(16, 0, $shipment);
@@ -989,24 +985,24 @@ class DeliveryController extends Controller
                             } else if (in_array($request->status_drop[$shipment],$delivered_status_array)) {
                                 $parcel = Shipment::where('id', $shipment)->first();
                                 if ($parcel->booking_type_id == 2) {
-                                    ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                    ShipmentsJourneyController::add($shipment, 30, 30, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
 
                                     Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 30, 'consignee_status_id' => 30]);
                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 2]);
                                 } elseif ($parcel->booking_type_id == 3) {
                                     if ($parcel->package_type == 0) {
-                                        ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                        ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
 
                                         Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 3]);
                                     } else {
-                                        ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                        ShipmentsJourneyController::add($shipment, 36, 36, ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
 
                                         Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 36, 'consignee_status_id' => 36]);
                                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                                     }
                                 } else {
-                                    ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                    ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
                                     Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                 }
@@ -1024,7 +1020,7 @@ class DeliveryController extends Controller
                                     AdminFinanceController::add_payment($shipment, 0);
                                 }
                             } else {
-                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id());
+                                ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId)? $request->reason_drop[$shipment]:null), $request->remarks[$shipment], NULL, Auth::id(),$delivery_note_id);
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                                 DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                             }
@@ -1464,11 +1460,10 @@ class DeliveryController extends Controller
 
     }
     //completed deliveries
-    public function completed_deliveries_index(){
-        return view('admin.delivery.complete.index');
+    public function pending_cash_collection_index(){
+        return view('admin.delivery.complete.pending_cash_collection');
     }
-
-    public function completed_receive_deliveries_list(){
+    public function pending_cash_collection_list(Request $request){
         $deliveries = DeliveryNote::
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -1476,16 +1471,16 @@ class DeliveryController extends Controller
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
             ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count'])
-            ->where('delivery_notes.status',1)
-            ->where('delivery_notes.dncc_status',0);
+            ->where('delivery_notes.cash_collection_status',0)
+            ->whereNotIn('delivery_notes.status',[0,4]);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
-        return Datatables::of($deliveries)
+        $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+                return "<a href='javascript:void(0);' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
             ->setRowAttr([
                 'data-hub' => function($deliveries) {
@@ -1508,9 +1503,109 @@ class DeliveryController extends Controller
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
             })
-            ->editColumn('updated_at', function ($rider) {
-                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y H:i:s A') : '';
+            ->addColumn('action',function ($deliveries){
+                $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                            <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a>
+                        </div>
+                      </div>
+                    ';
+
+                return $dropdown;
+            });
+            if ($tracking_number = $request->get('search_tracking')) {
+                $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+                    ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+                    ->where('s.tracking_number', '=', $tracking_number);
+            }
+            return $datatable->make(true);
+    }
+    public function pending_cash_collect(Request $request){
+        $delivery_note_id = $request->delivery_note_id;
+        if($delivery_note_id != null){
+            $delivery_note_details = DeliveryNote::find($delivery_note_id);
+            if($delivery_note_details->cash_collection_status == 0){
+                $delivery_note_details = DeliveryNote::where('id',$delivery_note_id)->where('cash_collection_status',0)->first();
+                $delivery_note_details->cash_collection_status = 1;
+                $delivery_note_details->save();
+                return response()->json(['status' => 1, 'success' => 'Cash collected successfully!']);
+            }else{
+                return response()->json(['status' => 0, 'error' => 'Cash is already collected!']);
+            }
+        }else{
+            return response()->json(['status' => 0, 'error' => 'Delivery note not found!']);
+        }
+    }
+    public function pending_cash_collect_all(Request $request){
+        $note_ids = explode(',',$request->delivery_note_ids);
+        $notes = array();
+            foreach ($note_ids as $note_id) {
+                $note_details = DeliveryNote::where('id',$note_id)->where('cash_collection_status',0)->first();
+                if($note_details){
+                    $note_details->cash_collection_status = 1;
+                    $note_details->save();
+                }else{
+                    $notes[] = $note_id;
+                }
+            }
+            if(empty($notes)){
+                return response()->json(['status' => 1, 'success' => 'Cash collected successfully!']);
+            }else{
+                return response()->json(['status' => 0, 'error' => 'These delivery notes could not be updated!','notes'=>$notes]);
+            }
+
+
+    }
+    public function cash_collection_search(Request $request){
+
+    }
+    public function completed_deliveries_index(){
+        return view('admin.delivery.complete.index');
+    }
+
+    public function completed_receive_deliveries_list(){
+        $deliveries = DeliveryNote::
+        join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
+            ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
+            ->join('admins','admins.id','=','delivery_notes.admin_id')
+            ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.received_cod_amount as amount','delivery_notes.shipments_count'])
+            ->where('delivery_notes.cash_collection_status',1)
+            ->where('delivery_notes.dncc_status',0);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($deliveries)
+            ->editColumn('delivery_note', function ($deliveries) {
+                return "<a href='javascript:void(0);' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
+            ->setRowAttr([
+                'data-hub' => function($deliveries) {
+                    return $deliveries->hub_id;
+                },
+            ])
+            ->editColumn('route', function ($rider) {
+                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->editColumn('created_at', function ($rider) {
+                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+            })
+//
             ->make(true);
 
     }
@@ -1623,7 +1718,7 @@ class DeliveryController extends Controller
 
         return Datatables::of($sdn)
             ->editColumn('sdn', function ($sdn) {
-                return "<a href='#' class='printSDN'><u>{$sdn->sdn_id}</u></a>";
+                return "<a href='javascript:void(0);' class='printSDN'><u>{$sdn->sdn_id}</u></a>";
             })
             ->editColumn('created_at', function ($sdn) {
                 return $sdn->created_at ? with(new Carbon($sdn->created_at))->format('d/m/Y H:i:s A') : '';
@@ -1641,7 +1736,7 @@ class DeliveryController extends Controller
                 $route = route('admin.delivery.sdn.details',['id'=>$result->sdn_id]);
 
                 $details_button = '<a href="' . $route . '" class="dropdown-item" data-target-id="' . $result->sdn_id . '" class=""><i class="ft-plus-circle primary"></i> Details</a>';
-                $upload_deposit_slip_button = '<a href="#" class="dropdown-item" data-target-id="' . $result->sdn_id . '" class="" data-target="#uploadDepositSlip" data-toggle="modal"><i class="ft-plus-circle primary"></i> Upload Deposit Slip</a>';
+                $upload_deposit_slip_button = '<a href="javascript:void(0);" class="dropdown-item" data-target-id="' . $result->sdn_id . '" class="" data-target="#uploadDepositSlip" data-toggle="modal"><i class="ft-plus-circle primary"></i> Upload Deposit Slip</a>';
 
                 $dropdown = '
                   <div class="btn-group">
@@ -1732,7 +1827,7 @@ class DeliveryController extends Controller
         if($request->has('deposit_slip')){
         $image = $request->file('deposit_slip');
         $imageName = $image->getClientOriginalName();
-        $image_size = $image->getClientSize();
+//        $image_size = $image->getClientSize();
 
         $imageName = explode('.', $imageName);
         $random = rand(1000, 100000);

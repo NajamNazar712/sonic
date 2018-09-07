@@ -256,6 +256,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
 
         });
+        Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
+            Route::prefix('pending')->name('pending.')->group(function () {
+                Route::get('', 'Admins\DeliveryController@pending_cash_collection_index')->name('index');
+                Route::get('list', 'Admins\DeliveryController@pending_cash_collection_list')->name('list');
+                Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
+                Route::post('all','Admins\DeliveryController@pending_cash_collect_all')->name('all');
+                Route::get('tracking/search','Admins\DeliveryController@cash_collection_search')->name('tracking.search');
+
+            });
+        });
         Route::prefix('receive')->name('receive.')->group(function (){
             Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
             Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
