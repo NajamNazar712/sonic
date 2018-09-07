@@ -271,7 +271,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.expense') || $(header).is('.serial_number') || $(header).is('.net_amount')) {
+                        if ($(header).is('.expense') || $(header).is('.serial_number') || $(header).is('.remarks')) {
                             $(td).appendTo($(search));
                         }
                         else {

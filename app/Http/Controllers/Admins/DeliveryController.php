@@ -1565,7 +1565,7 @@ class DeliveryController extends Controller
         return view('admin.delivery.complete.index');
     }
 
-    public function completed_receive_deliveries_list(){
+    public function completed_receive_deliveries_list(Request $request){
         $deliveries = DeliveryNote::
         join('cities AS oc', 'delivery_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
@@ -1580,7 +1580,7 @@ class DeliveryController extends Controller
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
-        return Datatables::of($deliveries)
+        $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
@@ -1604,9 +1604,14 @@ class DeliveryController extends Controller
             })
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
-            })
-//
-            ->make(true);
+            });
+        if ($tracking_number = $request->get('search_tracking')) {
+            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
+                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
+                ->where('s.tracking_number', '=', $tracking_number);
+        }
+
+            return $datatable->make(true);
 
     }
     //for ajax select dncc

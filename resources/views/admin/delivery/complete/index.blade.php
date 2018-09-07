@@ -22,6 +22,14 @@
                             </div>
                         </fieldset>
                     </div>
+                    <div class="col-3">
+                        <fieldset class="position-relative has-icon-left">
+                            <input type="text" class="form-control" placeholder="Scan to select" id="select_dn">
+                            <div class="form-control-position">
+                                <i class="ft-search"></i>
+                            </div>
+                        </fieldset>
+                    </div>
 
 
                 </div>
@@ -161,7 +169,12 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.delivery.completed.list') }}',
+                ajax: {
+                    url:'{{ route('admin.delivery.completed.list') }}',
+                    data:function (d) {
+                        d.search_tracking = $('#search_tracking').val();
+                    }
+                },
                 rowId: 'delivery_note_id',
                 order: [[2, 'asc']],
                 columns: [
@@ -264,45 +277,45 @@
 
             });
 
-            $('#search_tracking').on('change',function () {
-                var input = $(this);
-                var tracking = $(this).val();
-                var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
+            {{--$('#search_tracking').on('change',function () {--}}
+                {{--var input = $(this);--}}
+                {{--var tracking = $(this).val();--}}
+                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
 
-                if(numberRegex.test(tracking)) {
-                    $.ajax({
-                        url:'{{route('admin.delivery.receive.tracking.search')}}',
-                        type:'GET',
-                        dataType:'JSON',
-                        data: {
-                            'tracking':tracking
-                        }
-                    }).done(function(data){
-                        if(data.status == 0){
+                {{--if(numberRegex.test(tracking)) {--}}
+                    {{--$.ajax({--}}
+                        {{--url:'{{route('admin.delivery.receive.tracking.search')}}',--}}
+                        {{--type:'GET',--}}
+                        {{--dataType:'JSON',--}}
+                        {{--data: {--}}
+                            {{--'tracking':tracking--}}
+                        {{--}--}}
+                    {{--}).done(function(data){--}}
+                        {{--if(data.status == 0){--}}
 
-                            table
-                                .columns( 1 )
-                                .search( data.delivery_note )
-                                .draw();
-                            // input.val('');
-                        }else{
-                            table
-                                .columns( 1 )
-                                .search( 0 )
-                                .draw();
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            {{--table--}}
+                                {{--.columns( 1 )--}}
+                                {{--.search( data.delivery_note )--}}
+                                {{--.draw();--}}
+                            {{--// input.val('');--}}
+                        {{--}else{--}}
+                            {{--table--}}
+                                {{--.columns( 1 )--}}
+                                {{--.search( 0 )--}}
+                                {{--.draw();--}}
+                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
 
-                        }
+                        {{--}--}}
 
-                    });
-                }else{
-                    table
-                        .columns( 1 )
-                        .search( 0 )
-                        .draw();
-                    input.val('');
-                }
-            });
+                    {{--});--}}
+                {{--}else{--}}
+                    {{--table--}}
+                        {{--.columns( 1 )--}}
+                        {{--.search( 0 )--}}
+                        {{--.draw();--}}
+                    {{--input.val('');--}}
+                {{--}--}}
+            {{--});--}}
 
             function print(id) {
                 $.ajax({
@@ -371,18 +384,54 @@
                 printDNCC(note_id);
             });
 
-            $('#scan_tracking').on('change',function () {
-                var scan = $(this);
-                var tracking = $(this).val();
-                var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
-                if(numberRegex.test(tracking)) {
-                    var url = "{{route("admin.delivery.receive.status","id")}}";
-                    url = url.replace('id',tracking);
-                    // console.log(url);
-                    window.location.href = url;
+            {{--$('#scan_tracking').on('change',function () {--}}
+                {{--var scan = $(this);--}}
+                {{--var tracking = $(this).val();--}}
+                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
+                {{--if(numberRegex.test(tracking)) {--}}
+                    {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
+                    {{--url = url.replace('id',tracking);--}}
+                    {{--// console.log(url);--}}
+                    {{--window.location.href = url;--}}
+                {{--}else{--}}
+                    {{--scan.val('');--}}
+                {{--}--}}
+            {{--});--}}
+            $('#search_tracking').on('change',function () {
+                table.draw();
+            });
+            $('#select_dn').on('change',function () {
+                var id = $(this).val();
+                row = table.row('#' + id);
+                if(row.length >0) {
+                    row.select();
+
+                    if (hub_ids.length == 0) {
+                        hub_ids.push(row.data().hub_id);
+                    }
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index === -1) {
+                        selected_rows.push(id);
+                    }
+                else {
+                        row.deselect();
+                        selected_rows.splice(index, 1);
+                    }
+
+                    if (selected_rows.length > 0) {
+                        table.button('.delivered').enable();
+                    }
+                    else {
+                        table.button('.delivered').disable();
+                        hub_ids.splice(index, 1);
+                    }
                 }else{
-                    scan.val('');
+                    var error = "Delivery Note not found!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                 }
+                $(this).val('');
+
             });
 
         });
