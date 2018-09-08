@@ -141,10 +141,10 @@
                     {data: 'booked_date', name: 'shipments.created_at', class: 'align-middle booked_date'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'dispatched_time', name: 'dispatched.created_at', class: 'align-middle dispatched_time'},
-                    {data: 'delivered_status', name: 'delivered_status', class: 'align-middle delivered_status'},
+                    {data: 'delivered_status', name: 'delivered_status', class: 'align-middle delivered_status',orderable: false, searchable: false},
                     {data: 'updated_by', name: 'updater.name', class: 'align-middle updated_by'},
-                    {data: 'tat', name: 'tat', class: 'align-middle tat'},
-                    {data: 'remaining_time', name: 'remaining_time', class: 'align-middle remaining_time'},
+                    {data: 'tat', name: 'tat', class: 'align-middle tat', orderable: false, searchable: false},
+                    {data: 'remaining_time', name: 'remaining_time', class: 'align-middle remaining_time', orderable: false, searchable: false},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -165,7 +165,7 @@
                         var header = column.header();
 
 
-                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                        if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.delivered_status') || $(header).is('.tat') || $(header).is('.remaining_time')) {
                             $(td).appendTo($(search));
                         }
                         else {
