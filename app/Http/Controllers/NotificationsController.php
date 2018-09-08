@@ -1075,7 +1075,7 @@ class NotificationsController extends Controller
               $launched_by = $dispute->admins;
             }
             else {
-              $launched_by = $dispute->user;
+              $launched_by = $dispute->shipper;
             }
 
             foreach ($fields as $key => $field) {

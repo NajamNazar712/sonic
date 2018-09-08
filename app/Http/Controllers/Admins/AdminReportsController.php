@@ -970,10 +970,10 @@ class AdminReportsController extends Controller
                 }
             })
             ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->editColumn('updated_at', function ($rider) {
-                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y H:i:s A') : '';
+                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y h:i:s A') : '';
             });
             if($rn_no = $request->get('search_dn_no')){
                 $datatable->where('delivery_notes.id','=',$rn_no);

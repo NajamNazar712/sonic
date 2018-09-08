@@ -4,7 +4,7 @@
 <meta name="description" content="Admin Dashboard Trax">
 <meta name="keywords" content="trax,trax logistics">
 <meta name="csrf-token" content="{{ csrf_token() }}">
-<meta name="author" content="Trax">
+<meta name="author" content="Trax IT">
 <title>Admin Dashboard
 </title>
 <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('img/apple-touch-icon.png') }}">
@@ -25,7 +25,6 @@
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/switchery.min.css')}}">
 {{--This needs to be moved--}}
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
 <!-- BEGIN MODERN CSS-->
 <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/app.css')}}">
 <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>

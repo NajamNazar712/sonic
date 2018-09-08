@@ -511,7 +511,7 @@ class ShipperReceivingSheetController extends Controller
                         </div>
 
                         <div class="text-center mt-2">
-                          <span class="d-block">Plot No. 2, ST-3, Sector 23, Korangi Industrial Area, Karachi, Pakistan.</span>
+                          <span class="d-block">Plot # 4, BMCHS,Block 7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi, Pakistan</span>
                           <span class="d-block">Phone: 03-111-555-065 | Email: info@trax.pk | URL: www.trax.pk</span>
                         </div>
                       </div>

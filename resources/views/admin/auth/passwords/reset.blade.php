@@ -8,9 +8,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta name="description" content="Modern admin is super flexible, powerful, clean &amp; modern responsive bootstrap 4 admin template with unlimited possibilities with bitcoin dashboard.">
     <meta name="keywords" content="admin template, modern admin template, dashboard template, flat admin template, responsive admin template, web app, crypto dashboard, bitcoin dashboard">
-    <meta name="author" content="PIXINVENT">
-    <title>Reset Password - Trax
-    </title>
+    <meta name="author" content="Trax IT">
+    <title>Reset Password - Sonic | Trax</title>
     <link rel="apple-touch-icon" href="{{asset('app-assets/images/ico/apple-icon-120.png')}}">
     <link rel="shortcut icon" type="image/x-icon" href="{{asset('app-assets/images/ico/favicon.ico')}}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
@@ -30,6 +29,13 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
+
+    <style>
+        html body.bg-full-screen-image {
+            background: url('{{ asset('img/bg.png') }}') no-repeat center center fixed;
+            background-size: cover;
+        }
+    </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column bg-full-screen-image menu-expanded blank-page blank-page"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
@@ -45,7 +51,15 @@
                         <div class="card border-grey border-lighten-3 px-2 py-2 m-0">
                             <div class="card-header border-0 pb-0">
                                 <div class="card-title text-center">
-                                    <img src="{{asset('app-assets/images/logo/logo-dark.png')}}" alt="branding logo">
+                                    <div class="row align-items-center">
+                                        <div class="col sonic_logo align-middle text-left">
+                                            <img src="{{asset('img/sonic_logo.png')}}" alt="Sonic" class="d-inline-block mx-auto w-75">
+                                        </div>
+
+                                        <div class="col trax_logo align-middle text-right">
+                                            <img src="{{asset('img/trax_logo.png')}}" alt="Trax" class="d-inline-block mx-auto w-75">
+                                        </div>
+                                    </div>
                                 </div>
                                 <h6 class="card-subtitle line-on-side text-muted text-center font-small-3 pt-2">
                                     <span>We will send you a link to reset password</span>

@@ -283,7 +283,7 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
@@ -1384,10 +1384,10 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->editColumn('updated_at', function ($rider) {
-                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y H:i:s A') : '';
+                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y h:i:s A') : '';
             })
             ->make(true);
 
@@ -1503,7 +1503,7 @@ class DeliveryController extends Controller
                 return "<a href='#' class='printSDN'><u>{$sdn->sdn_id}</u></a>";
             })
             ->editColumn('created_at', function ($sdn) {
-                return $sdn->created_at ? with(new Carbon($sdn->created_at))->format('d/m/Y H:i:s A') : '';
+                return $sdn->created_at ? with(new Carbon($sdn->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn('deposit_slip',function ($sdn){
                 if($sdn->deposit_slip != null){

@@ -129,7 +129,6 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
@@ -162,7 +161,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -242,7 +241,6 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
@@ -302,10 +300,6 @@
                         $('#DisputeModal').modal('show');
                     }
                 }],
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 stateSave: true,

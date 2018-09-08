@@ -63,7 +63,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -96,10 +96,6 @@
     $(document).ready(function() {
         var table = $('.datatable').DataTable({
             dom: 'ltipr',
-            fixedHeader: {
-                header: true,
-                headerOffset: $('.header-navbar').height()
-            },
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,
             stateSave: true,

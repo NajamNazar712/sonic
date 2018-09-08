@@ -22,6 +22,10 @@ Route::get('/home', 'HomeController@index')->name('home');
 Route::get('/ecommerce', 'Shippers\ShipperDashboardController@ecommerce');
 
 Route::prefix('cod')->name('cod.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('cod.login');
+    });
+
     Route::get('/login','Auth\LoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\LoginController@login')->name('login.submit');
     Route::get('/register','Auth\RegisterController@showRegistrationForm')->name('register');
@@ -132,6 +136,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', function () {
+        return redirect()->route('admin.login');
+    });
+
     Route::get('/login','Auth\AdminLoginController@showLoginForm')->name('login');
     Route::post('/login','Auth\AdminLoginController@login')->name('login.submit');
 

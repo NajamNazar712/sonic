@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Book a Shipment')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -23,7 +25,7 @@
 								<input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') }}">
 
 								<div class="row">
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Shipper Information</h4>
 
 										<div class="form-group">
@@ -76,7 +78,7 @@
 										</div>
 									</div>
 
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Consignee Information</h4>
 
 										<div class="form-group">
@@ -108,7 +110,7 @@
 										</div>
 									</div>
 
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Order Information</h4>
 
 										<div class="form-group">
@@ -246,7 +248,7 @@
 										</div>
 									</div>
 
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Shipping Information</h4>
 
 										<div class="form-group input-group">
@@ -273,7 +275,7 @@
 										</div>
 									</div>
 
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Payment Information</h4>
 
 										<div class="form-group input-group">

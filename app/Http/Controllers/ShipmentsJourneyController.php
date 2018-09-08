@@ -55,6 +55,13 @@ class ShipmentsJourneyController extends Controller
         if ($delivery_note) {
           $shipment_journey->city_id = $delivery_note->hub_id;
         }
+        else if ($shipper_status_id == 13) {
+          $shipment = Shipment::find($shipment_id);
+
+          if ($shipment) {
+            $shipment_journey->city_id = $shipment->consignee_city_id;
+          }
+        }
       }
       else if (in_array($shipper_status_id, [23, 24, 25, 31, 38, 44])) {
         $return_note = ReturnNote::find($shipment_journey->reference_1_id);
