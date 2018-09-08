@@ -266,6 +266,7 @@
                 var btn = $(document.activeElement).attr('id');
                 $('#submit_button_id').val(btn);
                 $.each($('#datatable tr td.statusOnChange select'),function (key,value) {
+                    $(this).find(':selected').removeAttr('disabled');
                     var pre_status = $(this).attr('status');
                     var selected = $(this).find(':selected').val();
                     var tracking = $(this).parents('tr').find('td.tracking_number').text();

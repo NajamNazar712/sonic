@@ -24,7 +24,6 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="rider_name" id="rider_name" class="form-control select2" required >
-                                <option value="">Select a rider</option>
                                 @foreach($riders as $rider)
                                     <option value="{{$rider->id}}" data-id="{{$rider->route_id}}">{{$rider->name}}</option>
                                 @endforeach
@@ -35,7 +34,6 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="route" id="route" class="form-control select2" required>
-                                <option value="">Select a route</option>
                                 @foreach($routes as $route)
                                     <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
                                 @endforeach
@@ -218,7 +216,12 @@
         });
 
 
-            $('.select2').select2();
+            $('#rider_name').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select a rider*',
+            });
+            $('#route').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select a route*',
+            });
             $('#rider_name').on('change',function () {
                 var route = $(this).find(":selected").data("id");
                 $('#route').val(route).trigger('change');

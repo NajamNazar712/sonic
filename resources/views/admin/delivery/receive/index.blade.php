@@ -59,8 +59,6 @@
     </div>
 
 
-    </div>
-
 @endsection
 
 @section('css')
@@ -144,14 +142,14 @@
                 order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_note_id', class: 'align-middle delivery_note'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'rider', class: 'align-middle rider'},
+                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle delivery_note'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
-                    { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
-                    { data:'amount' ,name: 'amount', class: 'align-middle amount'},
+                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
+                    { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
+                    { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {

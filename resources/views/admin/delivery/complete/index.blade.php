@@ -24,7 +24,7 @@
                     </div>
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Scan to select" id="select_dn">
+                            <input type="text" class="form-control" placeholder="Scan To Select" id="select_dn">
                             <div class="form-control-position">
                                 <i class="ft-search"></i>
                             </div>

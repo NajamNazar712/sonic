@@ -236,7 +236,7 @@ class DeliveryController extends Controller
                 NotificationsController::send(12, $note->id, $shipment);
             }
         }
-        return redirect()->back()->with(['success'=>'Delivery note created successfully','print'=>$note->id]);
+        return redirect()->back()->with(['success'=>'Delivery note has been created successfully','print'=>$note->id]);
     }
     public function delivery_note_receive_index(){
 

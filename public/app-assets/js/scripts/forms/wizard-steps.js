@@ -70,9 +70,14 @@ $(".steps-validation").steps({
             var caddress = $('input[name="company_address"]').val();
             var cphone = $('input[name="shipper_phone"]').val();
             var cpoc = $('input[name="shipper_poc"]').val();
-            var ccity = $('input[name="shipper_city"]').val();
-            // var shipping_city = $('#shipping_city option[]]')
-            console.log('curent address :'+caddress)
+            var ccity = $('#shipper_city').val();
+            var scity = $('#shipping_city').find('option[value="'+ccity+'"]').val();
+            if(scity !== undefined){
+                $('#pickup_address').val(caddress);
+                $('#pickup_poc').val(cpoc);
+                $('#pickup_phone').val(cphone);
+                $('#shipping_city').val(ccity).trigger('change');
+            }
         }
         // Allways allow previous action even if the current form is not valid!
         if (currentIndex > newIndex)

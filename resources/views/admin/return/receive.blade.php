@@ -139,12 +139,12 @@
                 order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'return_note' ,name: 'return_note_id', class: 'align-middle return_note'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'rider', class: 'align-middle rider'},
-                    { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
-                    { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
+                    { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'shipments_count' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count'},
+                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
+                    { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
