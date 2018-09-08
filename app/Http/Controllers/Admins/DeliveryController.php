@@ -274,7 +274,7 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
@@ -1505,7 +1505,7 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn('action',function ($deliveries){
                 $dropdown = '
@@ -1607,7 +1607,7 @@ class DeliveryController extends Controller
                 }
             })
             ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             });
         if ($tracking_number = $request->get('search_tracking')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -1730,7 +1730,7 @@ class DeliveryController extends Controller
                 return "<a href='javascript:void(0);' class='printSDN'><u>{$sdn->sdn_id}</u></a>";
             })
             ->editColumn('created_at', function ($sdn) {
-                return $sdn->created_at ? with(new Carbon($sdn->created_at))->format('d/m/Y H:i:s A') : '';
+                return $sdn->created_at ? with(new Carbon($sdn->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn('deposit_slip',function ($sdn){
                 if($sdn->deposit_slip != null){

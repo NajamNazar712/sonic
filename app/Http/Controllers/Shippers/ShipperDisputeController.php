@@ -43,7 +43,7 @@ class ShipperDisputeController extends Controller
         return Datatables::of($dispute)
 
             ->editColumn('created_at', function ($dispute) {
-                return $dispute->created_at ? with(new Carbon($dispute->created_at))->format('d/m/Y H:i:s A') : '';
+                return $dispute->created_at ? with(new Carbon($dispute->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->editColumn('status',function($dispute){
                 return $dispute->status == 0? 'Dispute Launched': ($dispute->status == 1? 'Dispute Updated' : ($dispute->status == 2? 'Dispute Resolved':''));
@@ -175,7 +175,7 @@ class ShipperDisputeController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('created_at', function ($shipments) {
-                return $shipments->created_at ? with(new Carbon($shipments->created_at))->format('d/m/Y H:i:s A') : '';
+                return $shipments->created_at ? with(new Carbon($shipments->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn("action", function ($result) {
                 return " <span class='dropdown'>

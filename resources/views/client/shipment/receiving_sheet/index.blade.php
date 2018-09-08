@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Receiving Sheet')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -27,7 +29,7 @@
 										<th class="border-primary border-darken-1">Destination</th>
 										<th class="border-primary border-darken-1">Booking Date</th>
 										<th class="border-primary border-darken-1">Receiving Sheet</th>
-										<th class="border-primary border-darken-1">Action</th>
+										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
 							</table>
@@ -66,60 +68,14 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -167,6 +123,7 @@
 
 			var table = $('.datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				scrollX: true,
 				buttons: [{
 					text: 'Create',
 					className: 'btn btn-primary create',
@@ -202,10 +159,6 @@
 						});
 					}
 				}],
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
 				select: {
 					info: false,
 					style: 'multi',
@@ -346,7 +299,7 @@
 				print(parseInt($(this).children('.id').html()));
 			});
 
-			$('.datatable tbody').on('click', 'tr td.action button', function() {
+			$('.datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				if ($(this).hasClass('add')) {
 					var shipment_id = $(this).parents('tr').attr('id');
 

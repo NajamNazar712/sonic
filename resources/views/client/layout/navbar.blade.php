@@ -5,8 +5,8 @@
           <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
           <li class="nav-item">
             <a class="navbar-brand" href="{{route('cod.dashboard')}}">
-              <img class="brand-logo" alt="modern logo" src="{{ asset('img/logo.png') }}">
-              <h3 class="brand-text">Sonic</h3>
+              <img class="brand-logo" alt="Sonic" src="{{ asset('img/logo.png') }}">
+              <h3 class="brand-text primary">Sonic</h3>
             </a>
           </li>
           <li class="nav-item d-md-none">
@@ -24,21 +24,17 @@
           <ul class="nav navbar-nav float-right">
             <li class="dropdown dropdown-user nav-item">
               <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
-                <span class="mr-1">Hello,
-                  <span class="user-name text-bold-700">{{Auth::user()->name}}</span>
-                </span>
-                <span class="avatar avatar-online">
-                  <img src="{{asset('app-assets/images/portrait/small/avatar-s-19.png')}}" alt="avatar"><i></i></span>
+                <span class="text-bold-700">{{Auth::user()->name}}</span>
+                <i class="ft-chevron-down"></i>
               </a>
-              <div class="dropdown-menu dropdown-menu-right"><a class="dropdown-item" href="#"><i class="ft-user"></i> Edit Profile</a>
-                <div class="dropdown-divider"></div><a class="dropdown-item" href="{{route('cod.logout')}}" onclick="event.preventDefault();
+              <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href="{{route('cod.logout')}}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
                 <form id="logout-form" action="{{ route('cod.logout') }}" method="POST" style="display: none;">
                   @csrf
                 </form>
               </div>
             </li>
-            
           </ul>
         </div>
       </div>

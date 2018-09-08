@@ -96,12 +96,25 @@ class ShipperReceivingSheetController extends Controller
         }
       })
       ->addColumn('action', function($shipment) {
+        $dropdown = '
+            <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+        ';
+
         if ($shipment->receiving_sheet) {
-          return '<button class="btn btn-sm btn-danger void">Void</button>';
+          $dropdown .= '<button type="button" class="dropdown-item void"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Void</div></button>';
         }
         else {
-          return '<button class="btn btn-sm btn-primary add">Add</button>';
+          $dropdown .= '<button type="button" class="dropdown-item add"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Add</div></button>';
         }
+
+        $dropdown .= '
+                </div>
+            </div>
+        ';
+
+        return $dropdown;
       })
       ->filterColumn('receiving_sheet', function($query, $keyword) {
         $keyword = intval($keyword);
@@ -511,7 +524,7 @@ class ShipperReceivingSheetController extends Controller
                         </div>
 
                         <div class="text-center mt-2">
-                          <span class="d-block">Plot No. 2, ST-3, Sector 23, Korangi Industrial Area, Karachi, Pakistan.</span>
+                          <span class="d-block">Plot # 4, BMCHS,Block 7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi, Pakistan</span>
                           <span class="d-block">Phone: 03-111-555-065 | Email: info@trax.pk | URL: www.trax.pk</span>
                         </div>
                       </div>

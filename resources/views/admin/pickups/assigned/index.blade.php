@@ -91,7 +91,7 @@
 
 		table.dataTable tbody tr td.select-checkbox:before {
 			top: 50%;
-			border-color: #666EE8;
+			border-color: #64a0d2;
 		}
 
 		table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -176,10 +176,6 @@
 				@else
 	                dom: 'ltipr',
 	            @endif
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
 				select: {
 					info: false,
 					style: 'multi',
@@ -217,12 +213,10 @@
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-					if (data.status_id == 2) {
-						$('td:eq(0)', row).addClass('select-checkbox');
+					$('td:eq(0)', row).addClass('select-checkbox');
 
-						if ($.inArray(data.id, selected_rows) !== -1) {
-							table.row(row).select();
-						}
+					if ($.inArray(data.id, selected_rows) !== -1) {
+						table.row(row).select();
 					}
 				},
 				initComplete: function() {

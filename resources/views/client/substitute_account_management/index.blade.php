@@ -39,7 +39,6 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 	<style>
@@ -67,7 +66,7 @@
 
 		table.dataTable tbody tr td.select-checkbox:before {
 			top: 50%;
-			border-color: #666EE8;
+			border-color: #64a0d2;
 		}
 
 		table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -94,7 +93,6 @@
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
@@ -109,10 +107,6 @@
 						window.location = '{{ route('cod.substitute_account_management.add.index') }}';
 					}
 				}],
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
 				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
 				pageLength: 25,
 				stateSave: true,

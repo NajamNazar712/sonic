@@ -18,7 +18,11 @@ class DatabaseSeeder extends Seeder
         $this->call(BanksListTableSeeder::class);
         $this->call(BookingTableSeeder::class);
         $this->call(CargoConsignmentStatusTableSeeder::class);
+<<<<<<< .mine
 //        $this->call(CityPickupTableSeeder::class);
+=======
+
+>>>>>>> .theirs
         $this->call(DisputeTypeTableSeeder::class);
         $this->call(ModulePermissionTableSeeder::class);
         $this->call(ModuleTableSeeder::class);
@@ -47,6 +51,5 @@ class DatabaseSeeder extends Seeder
         $this->call(SubstituteUserModulePermissionSeeder::class);
         $this->call(TransportModeTableSeeder::class);
         $this->call(TransportModeVendorTableSeeder::class);
-
     }
 }

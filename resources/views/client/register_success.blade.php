@@ -6,9 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta name="description" content="Modern admin is super flexible, powerful, clean &amp; modern responsive bootstrap 4 admin template with unlimited possibilities with bitcoin dashboard.">
     <meta name="keywords" content="admin template, modern admin template, dashboard template, flat admin template, responsive admin template, web app, crypto dashboard, bitcoin dashboard">
-    <meta name="author" content="PIXINVENT">
-    <title>Registration Successfull - Trax Logistics
-    </title>
+    <meta name="author" content="Trax IT">
+    <title>Registration Success - Sonic | Trax</title>
     <link rel="apple-touch-icon" href="{{asset('app-assets/images/ico/apple-icon-120.png')}}">
     <link rel="shortcut icon" type="image/x-icon" href="{{asset('app-assets/images/ico/favicon.ico')}}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
@@ -29,6 +28,13 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
+
+    <style>
+        html body.bg-full-screen-image {
+            background: url('{{ asset('img/bg.png') }}') no-repeat center center fixed;
+            background-size: cover;
+        }
+    </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column   menu-expanded blank-page blank-page"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
@@ -38,7 +44,7 @@
         <div class="content-header row">
         </div>
         <div class="content-body">
-            <section class="flexbox-container">
+            <section class="flexbox-container"  style="overflow: auto;">
                 <div class="col-12 d-flex align-items-center justify-content-center">
                     <div class="col-md-4 col-10 p-0">
                         <div class="card-header bg-transparent border-0">

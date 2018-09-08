@@ -75,7 +75,6 @@ class ShipperDashboardController extends Controller
             ->leftjoin('products as p','p.id','=','si.product_type_id')
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id'])
             ->where('shipments.user_id', session('user_id'))
-            ->orderBy('shipments.id','desc')
             ->groupBy('shipments.id');
 
         return Datatables::of($shipments)
@@ -91,38 +90,43 @@ class ShipperDashboardController extends Controller
 
             })
             ->addColumn('action',function ($shipments) {
+                $view_charges_button = '<button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div></button>';
+                $cancel_button = '<button type="button" class="dropdown-item cancel_order"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-crosshair"></i></div><div class="col-9 offset-1">Cancel</div></button>';
+                $dispute_button = '<button type="button" class="dropdown-item dispute_modal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-circle"></i></div><div class="col-9 offset-1">Dispute</div></button>';
+
                 if ($shipments->shipper_status_id != 17) {
                     $options = FALSE;
 
-                    $dropdown = "
-                        <span class='dropdown'>
-                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown' aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                            <div class='dropdown-menu open-left arrow'>
-                    ";
+                    $dropdown = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
 
                     if ($shipments->shipper_status_id > 1) {
-                        $dropdown .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-plus-circle primary'></i> View Charges</a>";
+                        $dropdown .= $view_charges_button;
 
                         $options = TRUE;
                     }
 
                     if ($shipments->shipper_status_id == 1 && (session('user_type') == 1 || in_array(2, session('permissions')))) {
-                        $dropdown .= "<a href='javascript:void(0);' class='dropdown-item cancel_order'><i class='ft-crosshair primary'></i> Cancel</a>";
+                        $dropdown .= $cancel_button;
 
                         $options = TRUE;
                     }
 
                     if (session('user_type') == 1 || in_array(6, session('permissions'))) {
-                        $dropdown .= "<a href='javascript:void(0);' class='dropdown-item dispute_modal'><i class='ft-alert-circle primary'></i> Dispute</a>";
+                        $dropdown .= $dispute_button;
 
                         $options = TRUE;
                     }
 
 
-                    $dropdown .= "
+                    $dropdown .= '
                             </div>
-                        </span>
-                    ";
+                        </div>
+                    ';
 
                     if ($options) {
                         return $dropdown;
@@ -147,7 +151,7 @@ class ShipperDashboardController extends Controller
                 $shipment->consignee_status_id = 17;
                 $shipment->save();
 
-                AdminPickupsController::cancel($shipment->id);
+                AdminPickupsController::cancel($shipment_id);
 
                 ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, session('user_id'), NULL);
 

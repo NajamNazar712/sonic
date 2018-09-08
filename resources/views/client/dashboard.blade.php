@@ -1,14 +1,14 @@
 @extends('client.layout.master')
 
+@section('title', 'Dashboard')
+
 @section('content')
 <div class="app-content content">
     <div class="content-wrapper">
       <div class="content-header row">
       </div>
       <div class="content-body">
-        
-        
-       
+
         <!-- Active Orders -->
        <h1 class="pb-2">Welcome To Trax Logistics,
        <span class="user-name text-bold-700 ">{{Auth::user()->name}}</span>
@@ -105,13 +105,13 @@
                       <div class="card-body">
                           <div id="shipment_statistics_chart" class="height-400 echart-container"></div>
                           <div class="row">
-                              <div class="col-3">
+                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
                                   <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
                               </div>
-                              <div class="col-3">
+                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
                                   <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
                               </div>
-                              <div class="col-3">
+                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
                                   <select name="graph_destination" class="select2" id="graph_destination">
                                       {{--<option value="">All</option>--}}
                                 @foreach($cities as $city)
@@ -119,7 +119,7 @@
                                 @endforeach
                                   </select>
                               </div>
-                              <div class="col-3">
+                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
                                <button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
@@ -128,39 +128,38 @@
                   </div>
               </div>
           </div>
-          <hr>
+
           <div class="row">
               <div class="card">
                   <div class="card-content">
-                      <div class="card-body">
+                    <div class="card-body">
+                        <h2>Order Details</h2>
 
-                      <h2>Order Details</h2>
-              <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                  <thead>
-                  <tr role="row" class="bg-primary white">
-
-                      <th class="border-primary border-darken-1"></th>
-                      <th class="border-primary border-darken-1">SN No.</th>
-                      <th class="border-primary border-darken-1">Tracking No.</th>
-                      <th class="border-primary border-darken-1">Order ID</th>
-                      <th class="border-primary border-darken-1">Service Type</th>
-                      <th class="border-primary border-darken-1">Status</th>
-                      <th class="border-primary border-darken-1">Origin</th>
-                      <th class="border-primary border-darken-1">Destination</th>
-                      <th class="border-primary border-darken-1">Consignee Name</th>
-                      <th class="border-primary border-darken-1">Consignee Contact</th>
-                      <th class="border-primary border-darken-1">Consignee Address</th>
-                      <th class="border-primary border-darken-1">COD Amount</th>
-                      <th class="border-primary border-darken-1">Product Type</th>
-                      <th class="border-primary border-darken-1">Booking Date</th>
-                      <th class="border-primary border-darken-1">Instructions</th>
-                      <th class="border-primary border-darken-1">Action</th>
-                  </tr>
-                  </thead>
-              </table>
-                 </div>
+                        <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                          <thead>
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1"></th>
+                                <th class="border-primary border-darken-1">S No.</th>
+                                <th class="border-primary border-darken-1">Tracking No.</th>
+                                <th class="border-primary border-darken-1">Order ID</th>
+                                <th class="border-primary border-darken-1">Service Type</th>
+                                <th class="border-primary border-darken-1">Status</th>
+                                <th class="border-primary border-darken-1">Origin</th>
+                                <th class="border-primary border-darken-1">Destination</th>
+                                <th class="border-primary border-darken-1">Consignee Name</th>
+                                <th class="border-primary border-darken-1">Consignee Contact</th>
+                                <th class="border-primary border-darken-1">Consignee Address</th>
+                                <th class="border-primary border-darken-1">COD Amount</th>
+                                <th class="border-primary border-darken-1">Product Type</th>
+                                <th class="border-primary border-darken-1">Booking Date</th>
+                                <th class="border-primary border-darken-1">Instructions</th>
+                                <th class="border-primary border-darken-1"></th>
+                            </tr>
+                          </thead>
+                        </table>
+                      </div>
+                  </div>
               </div>
-          </div>
           </div>
 
       </div>
@@ -171,15 +170,14 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="shipment_charges_modal_heading">Shipment Charges of # <span></span></h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="shipment_charges_modal_heading">Shipment Charges of #<span></span></h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <input type="hidden" id="shipment_charges_modal_id">
             <div class="modal-body shipment_charges_body text-center" id="shipment_charges_body">
-
             </div>
         </div>
     </div>
@@ -190,8 +188,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white">Launch Dispute</h4>
+            <div class="modal-header">
+                <h4 class="modal-title">Launch Dispute</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -248,70 +246,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/cryptocoins/cryptocoins.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-
-
-    <style>
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #666EE8;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-        .selectize-control {
-            width: 100%;
-        }
-
-        .selectize-control .selectize-input {
-            vertical-align: middle;
-        }
-
-        .selectize-control .selectize-input .item {
-            word-break: break-all;
-        }
-    </style>
 @endsection
 
 @section('js')
@@ -321,8 +257,6 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
-
     <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.common.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
@@ -409,7 +343,7 @@
             }
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                // "scrollX": true,
+                scrollX: true,
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Print',
@@ -425,10 +359,6 @@
 
                     }
                 }],
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
                 select: {
                     info: false,
                     style: 'multi',
@@ -443,7 +373,7 @@
                 serverSide: true,
                 ajax: '{{ route('cod.orders.list') }}',
                 rowId: 'shipment_id',
-                order: [[1, 'asc']],
+                order: [[13, 'asc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -458,7 +388,7 @@
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
-                    {data: 'booking_date', name: 'booking_date', class: 'align-middle booking_date'},
+                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -852,6 +782,13 @@
                     $('#shipment_charges_modal_heading span').text(shipment_id);
                 })
             });
+
+            window.onresize = function() {
+                $(".echart-container").each(function(){
+                    var id = $(this).attr('_echarts_instance_');
+                    window.echarts.getInstanceById(id).resize();
+                });
+            };
 
         });
 

@@ -1,58 +1,70 @@
+<table class="table table-sm table-bordered">
+    <thead>
+        <tr role="row" class="bg-primary white">
+            @if ($shipment->weight_charges != null)
+                <th class="border-primary border-darken-1 align-middle text-center">Weight</th>
+            @endif
 
-<div class="bs-callout-primary  callout-transparent p-1">
+            @if ($shipment->cash_handling_charges != null && $shipment->return_charges == null)
+            <th class="border-primary border-darken-1 align-middle text-center">Cash Handling</th>
+            @endif
 
-    <table class="table table-sm table-bordered">
+            @if ($shipment->insurance_charges != null)
+            <th class="border-primary border-darken-1 align-middle text-center">Insurance</th>
+            @endif
 
-        <tbody>
-        @if($shipment->weight_charges != null)
-            <tr class="bg-primary white border-primary border-darken-1">
-                <th scope="row">Weight Charges</th>
-                <td>{{$shipment->weight_charges}}</td>
-            </tr>
-        @endif
-        @if($shipment->cash_handling_charges != null)
-            <tr class="bg-primary white border-primary border-darken-1">
-                <th scope="row">Cash Handling Charges</th>
-                <td>{{$shipment->cash_handling_charges}}</td>
-            </tr>
-        @endif
-        @if($shipment->insurance_charges != null)
-            <tr class="bg-primary white border-primary border-darken-1">
-                <th scope="row">Insurance Charges</th>
-                <td>{{$shipment->insurance_charges}}</td>
-            </tr>
-        @endif
-        @if($shipment->return_charges != null)
-            <tr class="bg-primary white border-primary border-darken-1">
-                <th scope="row">Return Charges</th>
-                <td>{{$shipment->return_charges}}</td>
-            </tr>
-        @endif
-        @if($shipment->fuel_surcharge != null)
-            <tr class="bg-primary white border-primary border-darken-1">
-                <th scope="row">Fuel Charges</th>
-                <td>{{$shipment->fuel_surcharge}}</td>
-            </tr>
-        @endif
-        @if($shipment->replacement_charges != null)
-            <tr class="bg-primary white border-primary border-darken-1">
-                <th scope="row">Replacement Charges</th>
-                <td>{{$shipment->replacement_charges}}</td>
-            </tr>
-        @endif
-        @if($shipment->try_and_buy_charges != null)
-            <tr class="bg-primary white border-primary border-darken-1">
-                <th scope="row">Try & Buy Charges</th>
-                <td>{{$shipment->try_and_buy_charges}}</td>
-            </tr>
-        @endif
-        @if(($shipment->weight_charges == null) && ($shipment->cash_handling_charges == null) && ($shipment->insurance_charges == null) && ($shipment->return_charges == null) && ($shipment->fuel_surcharge == null) && ($shipment->replacement_charges == null) && ($shipment->try_and_buy_charges == null))
-            <tr class="bg-primary white border-primary border-darken-1">
-                No charges found!
-            </tr>
-        @endif
+            @if ($shipment->return_charges != null)
+            <th class="border-primary border-darken-1 align-middle text-center">Return</th>
+            @endif
 
-        </tbody>
-    </table>
-</div>
+            @if ($shipment->fuel_surcharge != null)
+            <th class="border-primary border-darken-1 align-middle text-center">Fuel</th>
+            @endif
 
+            @if ($shipment->replacement_charges != null)
+            <th class="border-primary border-darken-1 align-middle text-center">Replacement</th>
+            @endif
+
+            @if ($shipment->try_and_buy_charges != null)
+            <th class="border-primary border-darken-1 align-middle text-center">Try & Buy</th>
+            @endif
+        </tr>
+    </thead>
+    <tbody>
+        @if (($shipment->weight_charges == null) && ($shipment->cash_handling_charges == null) && ($shipment->insurance_charges == null) && ($shipment->return_charges == null) && ($shipment->fuel_surcharge == null) && ($shipment->replacement_charges == null) && ($shipment->try_and_buy_charges == null))
+            <tr>
+                <td>No Charges!</td>
+            </tr>
+        @else
+            <tr>
+                @if ($shipment->weight_charges != null)
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->weight_charges) }}</td>
+                @endif
+
+                @if ($shipment->cash_handling_charges != null && $shipment->return_charges == null)
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->cash_handling_charges) }}</td>
+                @endif
+
+                @if ($shipment->insurance_charges != null)
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->insurance_charges) }}</td>
+                @endif
+
+                @if ($shipment->return_charges != null)
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->return_charges) }}</td>
+                @endif
+
+                @if ($shipment->fuel_surcharge != null)
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->fuel_surcharge) }}</td>
+                @endif
+
+                @if ($shipment->replacement_charges != null)
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->replacement_charges) }}</td>
+                @endif
+
+                @if ($shipment->try_and_buy_charges != null)
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->try_and_buy_charges) }}</td>
+                @endif
+            </tr>
+        @endif
+    </tbody>
+</table>

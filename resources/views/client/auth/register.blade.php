@@ -6,11 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta name="description" content="Trax Logistics, Sonic Project">
     <meta name="keywords" content="Trax Logistics">
-    <meta name="author" content="Trax - IT Department">
+    <meta name="author" content="Trax IT">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sonic Login</title>
-    <link rel="apple-touch-icon" href="{{asset('app-assets/images/ico/apple-icon-120.png')}}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{asset('app-assets/images/ico/favicon.ico')}}">
+    <title>Register - Sonic | Trax</title>
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('img/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon-32x32.png') }} ">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon-16x16.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{  asset('img/favicon.ico') }}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
           rel="stylesheet">
     <link href="https://maxcdn.icons8.com/fonts/line-awesome/1.1/css/line-awesome.min.css"
@@ -48,6 +50,13 @@
             opacity: 0.9 !important;
         }
     </style>
+
+    <style>
+        html body.bg-full-screen-image {
+            background: url('{{ asset('img/bg.png') }}') no-repeat center center fixed;
+            background-size: cover;
+        }
+    </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
@@ -58,13 +67,21 @@
         <div class="content-header row">
         </div>
         <div class="content-body">
-            <section class="flexbox-container">
+            <section class="flexbox-container" style="overflow: auto;">
                 <div class="col-12 d-flex align-items-center justify-content-center">
                     <div class="col-md-8 col-10 box-shadow-2 p-0">
                         <div class="card border-grey border-lighten-3 m-0">
                             <div class="card-header border-0 pb-0">
                                 <div class="card-title text-center">
-                                    <img src="{{asset('app-assets/images/logo/logo-dark.png')}}" alt="branding logo">
+                                    <div class="row align-items-center">
+                                        <div class="col sonic_logo align-middle text-left">
+                                            <img src="{{asset('img/sonic_logo.png')}}" alt="Sonic" class="d-inline-block mx-auto w-50">
+                                        </div>
+
+                                        <div class="col trax_logo align-middle text-right">
+                                            <img src="{{asset('img/trax_logo.png')}}" alt="Trax" class="d-inline-block mx-auto w-50">
+                                        </div>
+                                    </div>
                                 </div>
                                 <h6 class="card-subtitle line-on-side text-muted text-center font-small-3 pt-2">
                                     <span>Please Sign Up</span>

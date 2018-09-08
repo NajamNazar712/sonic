@@ -540,7 +540,7 @@ class ReturnController extends Controller
         })
 
         ->editColumn('created_at', function ($rider) {
-            return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
+            return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
         })
         ->addColumn("action", function ($result) {
             $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
