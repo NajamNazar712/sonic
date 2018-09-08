@@ -264,13 +264,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
 
         });
+        Route::prefix('cash_collection')->name('cash_collection.')->group(function (){
+            Route::prefix('pending')->name('pending.')->group(function () {
+                Route::get('', 'Admins\DeliveryController@pending_cash_collection_index')->name('index');
+                Route::get('list', 'Admins\DeliveryController@pending_cash_collection_list')->name('list');
+                Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
+                Route::post('all','Admins\DeliveryController@pending_cash_collect_all')->name('all');
+                Route::get('tracking/search','Admins\DeliveryController@cash_collection_search')->name('tracking.search');
+
+            });
+        });
         Route::prefix('receive')->name('receive.')->group(function (){
             Route::get('','Admins\DeliveryController@delivery_note_receive_index')->name('index');
             Route::get('list','Admins\DeliveryController@receive_deliveries_list')->name('list');
             Route::get('tracking/search','Admins\DeliveryController@receive_delivery_search')->name('tracking.search');
             Route::get('{id}/update','Admins\DeliveryController@receive_delivery_update')->name('update');
             Route::get('{id}/update/list','Admins\DeliveryController@receive_delivery_notes_list')->name('update.list');
-            Route::get('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
+            Route::post('update/remove','Admins\DeliveryController@receive_delivery_remove')->name('update.remove');
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
             Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
@@ -286,6 +296,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/verify/status/list','Admins\DeliveryController@receive_delivery_verify_status_list')->name('verify.status.list');
             Route::put('verify/status/submit','Admins\DeliveryController@receive_delivery_verify_status_submit')->name('verify.status.submit');
             Route::post('dncc/print','Admins\DeliveryController@dncc_print')->name('dncc.print');
+            Route::post('undelivered/print','Admins\DeliveryController@dncc_undelivered_print')->name('undelivered.print');
 
         });
         Route::prefix('completed')->name('completed.')->group(function(){

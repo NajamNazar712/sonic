@@ -21,7 +21,7 @@
                             <th class="border-primary border-darken-1">No. Of Shipments</th>
                             <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
                             <th class="border-primary border-darken-1">DNCC Amount</th>
-                            <th class="border-primary border-darken-1">Emergency Amount</th>
+                            {{--<th class="border-primary border-darken-1">Emergency Amount</th>--}}
                             <th class="border-primary border-darken-1">Net Amount</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                         </tr>
@@ -32,8 +32,6 @@
         </div>
     </div>
 
-
-    </div>
 
 @endsection
 
@@ -135,7 +133,7 @@
                     { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
                     { data:'delivered_shipments' ,name: 'delivered_shipments', class: 'align-middle delivered_shipments'},
                     { data:'received_cod_amount' ,name: 'received_cod_amount', class: 'align-middle received_cod_amount'},
-                    { data:'expense' ,name: 'expense', class: 'align-middle expense'},
+                    // { data:'expense' ,name: 'expense', class: 'align-middle expense'},
                     { data:'net_amount' ,name: 'net_amount', class: 'align-middle net_amount'},
                     { data:'remarks' ,name: 'remarks', class: 'align-middle remarks'},
                 ],

@@ -36,14 +36,23 @@
                     </thead>
                 </table>
                 <div class="row justify-content-center">
+                    @if(!$delivery_note_status == 1)
                     <div class="col-2">
                         <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
                     </div>
+                    @endif
                     @if($delivery_note_status == 1)
                         <div class="col-2">
                             <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
                         </div>
+                        @else
+                        <div class="col-2">
+                            <button id="printTempDNCC" type="button" class="btn btn-warning btn-block">Print Temporary DNCC</button>
+                        </div>
                     @endif
+                    <div class="col-2">
+                        <button id="printUndeliveredDNCC" type="button" class="btn btn-warning btn-block">Print Undelivered Performa</button>
+                    </div>
                 </div>
                 </form>
             </div>
@@ -166,7 +175,12 @@
             margin-bottom: -10px;
             bottom: 50% !important;
         }
-
+        table.dataTable tbody tr.statusUpdated {
+            background-color:yellow;
+        }
+        table.dataTable tbody tr.statusDelivered {
+            background-color:springgreen;
+        }
         table.dataTable tbody tr td {
             padding-left: 0.5em;
             padding-right: 0.5em;
@@ -227,7 +241,8 @@
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+                buttons: [
+                        @if(!$delivery_note_status == 1) {
                     text: 'Delivered',
                     className: 'btn btn-primary delivered',
                     enabled: false,
@@ -251,24 +266,6 @@
 
                                 }
                                 location.reload();
-                                // $.each(selected_rows, function(index, id) {
-                                //     table.row($('#datatable tbody tr#' + id)).deselect();
-                                // });
-                                // checkShipmentStatuses();
-                                // selected_rows = [];
-                                // table.button('.delivered').disable();
-                                // table.ajax.reload();
-                                // $('.reasonDrop','.statusDrop').select2('destroy');
-                                // setTimeout(function () {
-                                //     $(".reasonDrop").select2({
-                                //         placeholder: "Select a Reason",
-                                //         width:'100%'
-                                //     });
-                                //     $(".statusDrop").select2({
-                                //         placeholder: "Select a Status",
-                                //         width:'100%'
-                                //     });
-                                // },2000);
 
                             });
                         }else{
@@ -278,7 +275,8 @@
                         }
                     }
 
-                }],
+                }@endif
+                ],
                 select: {
                     info: false,
                     style: 'multi',
@@ -312,7 +310,6 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
@@ -398,7 +395,7 @@
                         });
                         reason.val('').trigger('change');
                     }else{
-                        $('.reasonDrop').empty();
+                        reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
@@ -611,9 +608,38 @@
             }
             checkShipmentStatuses();
 
-            function print(id) {
+            function print(id,temp = null) {
                 $.ajax({
                     url: '{!! route('admin.delivery.receive.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        'temporary':temp,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            function printUndelivered(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.undelivered.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -643,6 +669,15 @@
             $('#printDNCC').on('click',function () {
                 var note_id = $('#delivery_note').val();
                 print(note_id);
+            });
+            $('#printTempDNCC').on('click',function () {
+                var note_id = $('#delivery_note').val();
+                var temporary = 'temporary';
+                print(note_id,temporary);
+            });
+            $('#printUndeliveredDNCC').on('click',function () {
+                var note_id = $('#delivery_note').val();
+                printUndelivered(note_id);
             });
 
 

@@ -91,6 +91,9 @@
                         @if (session('role_id') == 1 || in_array(36, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.receive.index') }}">Receive</a></li>
                         @endif
+                        {{--@if (session('role_id') == 1 || in_array(36, session('permissions')))--}}
+                            <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.pending.index') }}">Pending Cash Collection</a></li>
+                        {{--@endif--}}
 
                         @if (session('role_id') == 1 || in_array(40, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.completed.index') }}">Completed</a></li>

@@ -2,7 +2,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Completed Deliveries
+        Pending Cash Collection
     </h1>
 
     <div class="card">
@@ -22,21 +22,11 @@
                             </div>
                         </fieldset>
                     </div>
-                    <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Scan to select" id="select_dn">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
-                        </fieldset>
-                    </div>
 
 
                 </div>
-                <form id="post_delivery_note_ids_form" action="{{route('admin.delivery.completed.deposit.dncc')}}" method="post">
-                    @csrf
+
                     <input type="hidden" name="delivery_note_ids" id="delivery_note_ids">
-                </form>
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -55,6 +45,7 @@
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Update Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -95,7 +86,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #64a0d2;
+            border-color: #666EE8;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -129,30 +120,65 @@
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(41, session('permissions')))
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                    buttons: [{
-                        text: 'Deposit DNCC',
-                        className: 'btn btn-primary delivered',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-                                $('#delivery_note_ids').val(selected_rows);
-                                var delivery_note_ids = $('#delivery_note_ids').val();
-                                // console.log(delivery_note_ids)
-                                if(delivery_note_ids != ''){
-                                    $('#post_delivery_note_ids_form').submit();
-                                }
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [{
+                    text: 'Cash Collect',
+                    className: 'btn btn-primary cash_collect_all',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                        if(selected_rows != ''){
+                            $('#delivery_note_ids').val(selected_rows);
+                            var delivery_note_ids = $('#delivery_note_ids').val();
+                            // console.log(delivery_note_ids)
+                            if(delivery_note_ids != ''){
+                                $.ajax({
+                                    url:'{!! route('admin.delivery.cash_collection.pending.all') !!}',
+                                    method:'POST',
+                                    data:{
+                                        'delivery_note_ids':delivery_note_ids,
+                                        '_token':'{{csrf_token()}}'
+                                    }
+                                }).done(function (data) {
+                                    table.button(0).disable();
+                                    if(data.status == 1){
+                                        $('#delivery_note_ids').val('');
+                                        selected_rows = [];
+                                        hub_ids = [];
+                                        table.draw();
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                            }else{
-                                var error = "Something went wrong please refresh page and try again!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        $('#delivery_note_ids').val('');
+                                        table.draw();
+                                        hub_ids = [];
+                                        selected_rows = [];
+                                        $msg = data.error;
+                                        if(data.notes != null){
+                                            $.each(data.notes,function (index,id) {
+                                                $msg += '<br>';
+                                                $msg += 'Delivery Note # '+id;
+                                            });
+                                        }
+                                        toastr.error($msg, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                                    }
+                                });
                             }
+
+                        }else{
+                            var error = "Something went wrong please refresh page and try again!";
+                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
                         }
-                    }],
+                    }
+                }],
                 @else
-                    dom: 'ltipr',
+                dom: 'ltipr',
                 @endif
+                fixedHeader: {
+                    header: true,
+                    headerOffset: $('.header-navbar').height()
+                },
                 select: {
                     info: false,
                     style: 'multi',
@@ -166,11 +192,11 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url:'{{ route('admin.delivery.completed.list') }}',
+                    url:'{{ route('admin.delivery.cash_collection.pending.list') }}',
                     data:function (d) {
                         d.search_tracking = $('#search_tracking').val();
                     }
-                },
+                    },
                 rowId: 'delivery_note_id',
                 order: [[2, 'asc']],
                 columns: [
@@ -187,6 +213,7 @@
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
+                    { data:'action' ,name: 'action', class: 'align-middle action'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -207,7 +234,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -239,10 +266,10 @@
                     }
 
                     if (selected_rows.length > 0) {
-                        table.button('.delivered').enable();
+                        table.button('.cash_collect_all').enable();
                     }
                     else {
-                        table.button('.delivered').disable();
+                        table.button('.cash_collect_all').disable();
                         hub_ids.splice(index, 1);
                     }
                 }else{
@@ -257,11 +284,11 @@
                         }
 
                         if (selected_rows.length > 0) {
-                            table.button('.delivered').enable();
+                            table.button('.cash_collect_all').enable();
                         }
                         else {
                             hub_ids.splice(index, 1);
-                            table.button('.delivered').disable();
+                            table.button('.cash_collect_all').disable();
                         }
                     }else{
                         var error = "Selected hubs should be the same!";
@@ -272,46 +299,26 @@
                 }
 
             });
+            $('body').on('click','.cash_collect',function () {
+                var rowid = $(this).parents('tr').attr('id');
+                $.ajax({
+                    url:'{!! route('admin.delivery.cash_collection.pending.collect') !!}',
+                    method:'POST',
+                    data:{
+                        'delivery_note_id':rowid,
+                        '_token':'{{ csrf_token() }}'
+                    }
+                }).done(function (data) {
+                    if(data.status === 1){
+                        table.draw();
+                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    }else{
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-            {{--$('#search_tracking').on('change',function () {--}}
-                {{--var input = $(this);--}}
-                {{--var tracking = $(this).val();--}}
-                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
+                    }
+                })
+            });
 
-                {{--if(numberRegex.test(tracking)) {--}}
-                    {{--$.ajax({--}}
-                        {{--url:'{{route('admin.delivery.receive.tracking.search')}}',--}}
-                        {{--type:'GET',--}}
-                        {{--dataType:'JSON',--}}
-                        {{--data: {--}}
-                            {{--'tracking':tracking--}}
-                        {{--}--}}
-                    {{--}).done(function(data){--}}
-                        {{--if(data.status == 0){--}}
-
-                            {{--table--}}
-                                {{--.columns( 1 )--}}
-                                {{--.search( data.delivery_note )--}}
-                                {{--.draw();--}}
-                            {{--// input.val('');--}}
-                        {{--}else{--}}
-                            {{--table--}}
-                                {{--.columns( 1 )--}}
-                                {{--.search( 0 )--}}
-                                {{--.draw();--}}
-                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-                        {{--}--}}
-
-                    {{--});--}}
-                {{--}else{--}}
-                    {{--table--}}
-                        {{--.columns( 1 )--}}
-                        {{--.search( 0 )--}}
-                        {{--.draw();--}}
-                    {{--input.val('');--}}
-                {{--}--}}
-            {{--});--}}
 
             function print(id) {
                 $.ajax({
@@ -380,53 +387,8 @@
                 printDNCC(note_id);
             });
 
-            {{--$('#scan_tracking').on('change',function () {--}}
-                {{--var scan = $(this);--}}
-                {{--var tracking = $(this).val();--}}
-                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
-                {{--if(numberRegex.test(tracking)) {--}}
-                    {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
-                    {{--url = url.replace('id',tracking);--}}
-                    {{--// console.log(url);--}}
-                    {{--window.location.href = url;--}}
-                {{--}else{--}}
-                    {{--scan.val('');--}}
-                {{--}--}}
-            {{--});--}}
             $('#search_tracking').on('change',function () {
                 table.draw();
-            });
-            $('#select_dn').on('change',function () {
-                var id = $(this).val();
-                row = table.row('#' + id);
-                if(row.length >0) {
-                    row.select();
-
-                    if (hub_ids.length == 0) {
-                        hub_ids.push(row.data().hub_id);
-                    }
-                    var index = $.inArray(id, selected_rows);
-
-                    if (index === -1) {
-                        selected_rows.push(id);
-                    }
-                else {
-                        row.deselect();
-                        selected_rows.splice(index, 1);
-                    }
-
-                    if (selected_rows.length > 0) {
-                        table.button('.delivered').enable();
-                    }
-                    else {
-                        table.button('.delivered').disable();
-                        hub_ids.splice(index, 1);
-                    }
-                }else{
-                    var error = "Delivery Note not found!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                }
-                $(this).val('');
 
             });
 

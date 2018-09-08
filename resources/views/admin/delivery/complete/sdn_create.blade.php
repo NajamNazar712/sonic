@@ -28,8 +28,8 @@
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
-                        <th class="border-primary border-darken-1">Emergency Amount</th>
-                        <th class="border-primary border-darken-1">Net Amount</th>
+                        {{--<th class="border-primary border-darken-1">Emergency Amount</th>--}}
+                        {{--<th class="border-primary border-darken-1">Total Amount</th>--}}
                         <th class="border-primary border-darken-1">Remarks</th>
                     </tr>
                     </thead>
@@ -66,26 +66,26 @@
                         </fieldset>
                     </div>
 
-                    <div class="col-3">
-                        <fieldset>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">Total Emergency Amount</span>
-                                </div>
-                                <input type="text" class="form-control" name="total_expenses" value="0" id="total_expense" readonly placeholder="Total Emergency Amount">
-                            </div>
-                        </fieldset>
-                    </div>
-                    <div class="col-3">
-                        <fieldset>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">Total Net Amount</span>
-                                </div>
-                                <input type="text" class="form-control" name="total_amount" value="0" id="total_amount" readonly placeholder="Total Net Amount">
-                            </div>
-                        </fieldset>
-                    </div>
+                    {{--<div class="col-3">--}}
+                        {{--<fieldset>--}}
+                            {{--<div class="input-group">--}}
+                                {{--<div class="input-group-prepend">--}}
+                                    {{--<span class="input-group-text">Total Emergency Amount</span>--}}
+                                {{--</div>--}}
+                                {{--<input type="text" class="form-control" name="total_expenses" value="0" id="total_expense" readonly placeholder="Total Emergency Amount">--}}
+                            {{--</div>--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
+                    {{--<div class="col-3">--}}
+                        {{--<fieldset>--}}
+                            {{--<div class="input-group">--}}
+                                {{--<div class="input-group-prepend">--}}
+                                    {{--<span class="input-group-text">Total Net Amount</span>--}}
+                                {{--</div>--}}
+                                {{--<input type="text" class="form-control" name="total_amount" value="0" id="total_amount" readonly placeholder="Total Net Amount">--}}
+                            {{--</div>--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
                     <div class="col-3">
                         <select name="bank_select" class="form-control select2" id="banks_list">
                             @foreach($banks_list as $banks)
@@ -195,8 +195,8 @@
                     { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
                     { data:'delivered_shipments' ,name: 'delivered_shipments', class: 'align-middle delivered_shipments'},
                     { data:'received_cod_amount' ,name: 'received_cod_amount', class: 'align-middle received_cod_amount'},
-                    { data:'expense' ,name: 'expense', class: 'align-middle expense'},
-                    { data:'net_amount' ,name: 'net_amount', class: 'align-middle net_amount'},
+                    // { data:'expense' ,name: 'expense', class: 'align-middle expense'},
+                    // { data:'net_amount' ,name: 'net_amount', class: 'align-middle net_amount'},
                     { data:'remarks' ,name: 'remarks', class: 'align-middle remarks'},
                 ],
                 rowCallback: function(row, data, index) {
@@ -267,7 +267,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.expense') || $(header).is('.serial_number') || $(header).is('.net_amount')) {
+                        if ($(header).is('.expense') || $(header).is('.serial_number') || $(header).is('.remarks')) {
                             $(td).appendTo($(search));
                         }
                         else {
