@@ -2,12 +2,7 @@
   data-scroll-to-active="true">
     <div class="main-menu-content">
       <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-
-        <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Order Management</span></a>
-          <ul class="menu-content">
-            <li><a class="menu-item" href="{{route('cod.orders.index')}}" data-i18n="nav.dash.ecommerce">Order Management</a></li>
-          </ul>
-        </li>
+        <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Order Management</span></a></li>
 
         @if (session('user_type') == 1 || count(array_intersect([1, 3], session('permissions'))) !== 0)
           <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Book Shipments</span></a>
@@ -26,7 +21,7 @@
         @endif
 
         @if(session('packaging_charges_check') && (session('user_type') == 1 || in_array(4, session('permissions'))))
-          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Packaging</span></a>
+          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Packaging Material</span></a>
               <ul class="menu-content">
                   <li><a class="menu-item" href="{{ route('cod.packaging.requests.index') }}">Request</a></li>
               </ul>

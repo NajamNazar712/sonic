@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Packaging Material Request')
+
 @section('content')
     <h1 class="mb-1">
         Packaging Material Request
@@ -92,7 +94,6 @@
                                     </div>
                                 </div>
 
-                                <hr>
                                 <div class="row justify-content-center">
                                     <div class="col-6">
                                     <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block">Request Material</button>

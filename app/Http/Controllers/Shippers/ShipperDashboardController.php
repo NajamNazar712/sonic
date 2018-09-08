@@ -151,7 +151,7 @@ class ShipperDashboardController extends Controller
                 $shipment->consignee_status_id = 17;
                 $shipment->save();
 
-                AdminPickupsController::cancel($shipment->id);
+                AdminPickupsController::cancel($shipment_id);
 
                 ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, session('user_id'), NULL);
 

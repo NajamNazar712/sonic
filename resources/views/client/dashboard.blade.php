@@ -170,8 +170,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="shipment_charges_modal_heading">Shipment Charges of #<span></span></h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="shipment_charges_modal_heading">Shipment Charges of #<span></span></h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -188,8 +188,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white">Launch Dispute</h4>
+            <div class="modal-header">
+                <h4 class="modal-title">Launch Dispute</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>

@@ -77,10 +77,9 @@ class ShipperReceivingSheetHistoryController extends Controller
       })
       ->addColumn('action', function($receiving_sheet_received) {
         if ($receiving_sheet_received->receiving_sheet) {
-
           $booked = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
 
-         $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', session('user_id'))->count();
+          $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', session('user_id'))->count();
 
          if ($booked != $received) {
             return '

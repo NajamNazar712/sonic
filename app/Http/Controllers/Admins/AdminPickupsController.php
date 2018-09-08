@@ -109,6 +109,8 @@ class AdminPickupsController extends Controller
       $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id)->whereIn('status', [0, 1]);
 
       if ($pickup_request_assigned_shipment->exists()) {
+        $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
+
         $pickup_request = $pickup_request_assigned_shipment->pickup_request;
 
         $pickup_request->bookings = $pickup_request->bookings - 1;
