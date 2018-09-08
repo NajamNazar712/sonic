@@ -183,8 +183,8 @@
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'receiving_sheet', name: 'receiving_sheet', class: 'text-center align-middle receiving_sheet p-1'},
-					{data: 'booked', name: 'booked', class: 'align-middle booked'},
-					{data: 'received', name: 'received', class: 'align-middle received'},
+					{data: 'booked', name: 'booked', class: 'align-middle booked', orderable: false, searchable: false},
+					{data: 'received', name: 'received', class: 'align-middle received', orderable: false, searchable: false},
 					{data: 'origin', name: 'ci.city_name', class: 'align-middle origin'},
 					{data: 'booking_date', name: 'rs.created_at', class: 'align-middle booking_date'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -205,7 +205,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.booked') || $(header).is('.received') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else {
