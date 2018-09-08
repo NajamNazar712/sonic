@@ -49,8 +49,26 @@ class ShipperDisputeController extends Controller
                 return $dispute->status == 0? 'Dispute Launched': ($dispute->status == 1? 'Dispute Updated' : ($dispute->status == 2? 'Dispute Resolved':''));
 
             })
+            ->filterColumn('status',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    if (strpos('launched', $keyword) !== FALSE) {
+                        $query->where('disputes.status', '=', 0);
+                    }
+                    else if (strpos('updated', $keyword) !== FALSE) {
+                        $query->where('disputes.status', '=', 1);
+                    }
+                    else if (strpos('resolved', $keyword) !== FALSE) {
+                        $query->where('disputes.status', '=', 2);
+                    }
+                    else {
+                        $query->whereRaw('false');
+                    }
+
+                }
+            })
             ->editColumn('no_of_shipments',function($dispute){
-                return "<a class='font-weight-bold shipment_count' href='#'>{$dispute->no_of_shipments}</a>";
+                return "<a class='font-weight-bold shipment_count' href='javascript:void(0);'>{$dispute->no_of_shipments}</a>";
             })
             ->addColumn("action", function ($dispute) {
                 return " <span class='dropdown'>

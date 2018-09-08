@@ -12,42 +12,7 @@
 
                 <div class="row mb-2 justify-content-center">
 
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_shipper" id="search_shipper" class="form-control select2">--}}
-                                {{--@foreach($shippers as $shipper)--}}
-                                    {{--<option value="{{$shipper->id}}">{{$shipper->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_origin" id="search_origin" class="form-control select2">--}}
-                                {{--@foreach($cities as $origin)--}}
-                                    {{--<option value="{{$origin->id}}">{{$origin->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_destination" id="search_destination" class="form-control select2">--}}
-                                {{--@foreach($cities as $destination)--}}
-                                    {{--<option value="{{$destination->id}}">{{$destination->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_hub" id="search_hub" class="form-control select2">--}}
-                                {{--@foreach($hubs as $hub)--}}
-                                    {{--<option value="{{$hub->id}}">{{$hub->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
+
                     <div class="col-3 ml-5">
                         <fieldset class="form-group">
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
@@ -153,26 +118,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
-            });
-            $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Origin City',
-                width:'100%',
-                allowClear:true
-            });
-            $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Destination City',
-                width:'100%',
-                allowClear:true
-            });
-            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Hub',
-                width:'100%',
-                allowClear:true
-            });
+
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -209,6 +155,42 @@
                     from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.reports.qsr.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_from': $('input[name="from_date_formatted"]').val(),
+                            'search_to': $('input[name="to_date_formatted"]').val()
+                        },
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.shipper);
+                                row.push(values.history_status);
+                                row.push(values.service_type);
+                                row.push(values.arrival);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.amount);
+                                row.push(values.aging);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                }
+            } );
+
             var index_column = [];
             var flag = false;
             var table = $('#datatable').DataTable({
@@ -219,15 +201,6 @@
                         extend: 'excel',
                         title: 'QSR Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( e, dt, column, config ) {
-                                    return (column == 0)? dt+1:e;
-
-                                }
-                            }
-                        }
                     },
 
                 ],
@@ -240,10 +213,7 @@
                 ajax: {
                     url: '{{ route('cod.reports.qsr.list') }}',
                     data: function (d) {
-                        d.search_shipper = $('#search_shipper').val();
-                        d.search_origin = $('#search_origin').val();
-                        d.search_destination = $('#search_destination').val();
-                        d.search_hub = $('#search_hub').val();
+
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -261,7 +231,7 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     // {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging'}
+                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {

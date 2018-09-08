@@ -56,7 +56,7 @@
                             </div>
                             <div class="col-12 form-group">
                                 <select name="dispute_type_select" id="dispute_type_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                    <option></option>
+
                                     @foreach($dispute_types as $dispute)
                                         <option value="{{$dispute->id}}">{{$dispute->type}}</option>
                                     @endforeach
@@ -252,11 +252,12 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#city_select').select2({
+
+            $('#city_select').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select a city',
                 dropdownParent:$('#dispute_form')
             });
-            $('#dispute_type_select').select2({
+            $('#dispute_type_select').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Select a Dispute type',
                 dropdownParent:$('#dispute_form')
             });
@@ -311,12 +312,12 @@
                 order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'dispute_id', name: 'dispute_id', class: 'align-middle dispute_id'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
-                    {data: 'description', name: 'description', class: 'align-middle description'},
-                    {data: 'originated_at', name: 'originated_at', class: 'align-middle originated_at'},
-                    {data: 'dispute_type', name: 'dispute_type', class: 'align-middle dispute_type'},
-                    {data: 'no_of_shipments', name: 'sm.mode', class: 'align-middle mode'},
+                    {data: 'dispute_id', name: 'disputes.id', class: 'align-middle dispute_id'},
+                    {data: 'created_at', name: 'disputes.created_at', class: 'align-middle created_at'},
+                    {data: 'description', name: 'disputes.description', class: 'align-middle description'},
+                    {data: 'originated_at', name: 'cities.name', class: 'align-middle originated_at'},
+                    {data: 'dispute_type', name: 'dt.type', class: 'align-middle dispute_type'},
+                    {data: 'no_of_shipments', name: 'disputes.shipments_count', class: 'align-middle mode'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 

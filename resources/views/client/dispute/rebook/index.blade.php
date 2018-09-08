@@ -270,7 +270,7 @@
                     {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                     {data: 'address', name: 'shipments.consignee_address', class: 'align-middle address'},
                     {data: 'product_name', name: 'products.product_name', class: 'align-middle product_name'},
-                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
+                    {data: 'created_at', name: 'shipments.created_at', class: 'align-middle created_at'},
                     {
                         data: 'action',
                         name: 'action',
