@@ -42,7 +42,7 @@
                 @endif
 
                 @if ($shipment->cash_handling_charges != null && $shipment->return_charges == null)
-                    <td class="align-middle text-center">Rs. {{ floatval($shipment->weight_charges) }}</td>
+                    <td class="align-middle text-center">Rs. {{ floatval($shipment->cash_handling_charges) }}</td>
                 @endif
 
                 @if ($shipment->insurance_charges != null)

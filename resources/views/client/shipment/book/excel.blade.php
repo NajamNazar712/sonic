@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Book Excel Shipment(s)')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -7,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Book a Shipment
+					Book Excel Shipment(s)
 				</h1>
 
 				<div class="card">
