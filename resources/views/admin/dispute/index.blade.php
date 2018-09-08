@@ -142,17 +142,18 @@
                 <div class="modal-body text-center">
                         <h2>Are You Sure?</h2>
                 </div>
+                <div class="modal-footer text-center">
                 <input type="hidden" id="disputeId">
-                    <div class="row justify-content-center no-gutters">
-                        <div class="col">
-                            <button type="button" class="btn btn-outline-danger block padding-right-0 dispute-resolve">Yes</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-outline-primary block padding-left-0" data-dismiss="modal">No</button>
-                        </div>
+                    <div class="row">
+
+                            <button type="button" class="btn btn-danger btn-min-width mr-1 mb-1 dispute-resolve">Yes</button>
+
+
+                            <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">No</button>
+
                     </div>
 
-
+                </div>
 
             </div>
         </div>
