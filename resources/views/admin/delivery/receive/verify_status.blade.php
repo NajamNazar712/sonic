@@ -197,10 +197,35 @@
                     });
                 }
             });
-
+            // var tracking_array = [];
+            // var status_array = [];
+            // var new_status_array = [];
+            // $('body').on('select2:select','.statusOnChange',function (e) {
+            //     var pre_status = $(this).find('select').attr('status');
+            //     var selected = $(this).find(':selected').val();
+            //     if(pre_status !== selected){
+            //         var ind = $.inArray(pre_status, status_array);
+            //         // var inds = $.inArray(selected, new_status_array);
+            //
+            //         if (ind === -1) {
+            //             status_array.push(pre_status);
+            //         }
+            //         // if (inds === -1) {
+            //         //     new_status_array.push(selected);
+            //         // }
+            //     }else{
+            //         var index = $.inArray(pre_status, status_array);
+            //         // var indexs = $.inArray(selected, new_status_array);
+            //         status_array.splice(index, 1);
+            //         // new_status_array.splice(indexs, 1);
+            //     }
+            //
+            //     console.log(status_array)
+            // });
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
                 $('#statusUpdateSubmit').removeAttr('disabled');
                 $('#statusVerifySubmit').removeAttr('disabled');
+
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
@@ -214,6 +239,7 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
+
                     if(data.status == 0){
                         reason.empty().trigger('change');
                         $.each(data.reasons,function (key,value) {
@@ -228,7 +254,6 @@
                 });
             });
             $('body').on('click','.clear',function () {
-                // console.log();
                 var status = $(this).parents().closest('tr').find('.statusDrop');
                 var reason = $(this).parents().closest('tr').find('.reasonDrop');
                 status.val('').trigger("change");
@@ -237,21 +262,87 @@
                 // $('.reasonDrop').val('').trigger("change");
             });
             var shipments = [];
+            var status_array = [];
+            var new_status_array = [];
             $('#status_update_form').bind('submit', function(event) {
+                var verify_form = this;
                 event.preventDefault();
                 var btn = $(document.activeElement).attr('id');
                 $('#submit_button_id').val(btn);
-                var shipment = $('#shipment_ids');
-                var id = '';
-                var count = table.data().count();
-                for(var i = 0;i<count;i++){
-                    id = table.row( i ).id();
-                    shipments.push(id);
+                $.each($('#datatable tr td.statusOnChange select'),function (key,value) {
+                    var pre_status = $(this).attr('status');
+                    var selected = $(this).find(':selected').val();
+                    var tracking = $(this).parents('tr').find('td.tracking_number').text();
+                    if(pre_status !== selected){
+                        var newStatus = $(this).find(':selected').text();
+                        var oldStatus = $(this).find('option[value="'+pre_status+'"]').text();
+                        status_array[key] = {'tracking':tracking,'old':oldStatus,'new':newStatus};
+                    }
+
+
+                });
+
+                if(status_array.length > 0){
+                    var content_dispute = '';
+                    content_dispute += 'These shipments are found different in statuses.'+"<br>";
+                    $.each(status_array,function (key,value) {
+                        content_dispute += value.tracking+' ('+value.old+')'+' ('+value.new+')'+"<br>";
+                    });
+                    content = document.createElement('div');
+                    content.innerHTML = content_dispute;
+                    swal({
+                        title: 'Dispute Different Statuses!',
+                        content: content,
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+
+                            var shipment = $('#shipment_ids');
+                            var id = '';
+                            var count = table.data().count();
+                            for(var i = 0;i<count;i++){
+                                id = table.row( i ).id();
+                                shipments.push(id);
+                            }
+                            shipment.val(shipments);
+                            $('#statusVerifySubmit').prop('disabled',true);
+                            $('#statusUpdateSubmit').prop('disabled',true);
+                            verify_form.submit();
+                        }
+                    });
+                }else{
+
+                    var shipment = $('#shipment_ids');
+                    var id = '';
+                    var count = table.data().count();
+                    for(var i = 0;i<count;i++){
+                        id = table.row( i ).id();
+                        shipments.push(id);
+                    }
+                    shipment.val(shipments);
+                    $('#statusVerifySubmit').prop('disabled',true);
+                    $('#statusUpdateSubmit').prop('disabled',true);
+                    verify_form.submit();
                 }
-                shipment.val(shipments);
-                $('#statusVerifySubmit').prop('disabled',true);
-                $('#statusUpdateSubmit').prop('disabled',true);
-                this.submit();
+
+
             });
 
             function print(id) {

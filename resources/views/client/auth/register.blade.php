@@ -224,7 +224,7 @@
                                                         <div>
                                                             <select name="shipping_city[]" id="shipping_city" class="select2 form-control required" style="width: 100%">
                                                                 <option value="" selected="">Select Shipper City</option>
-                                                                @foreach($cities as $city)
+                                                                @foreach($pickup_city_list as $city)
                                                                     <option value="{{$city->id}}" {{ (collect(old('shipping_city'))->contains($city->id)) ? 'selected' : '' }} >{{$city->name}}</option>
                                                                 @endforeach
                                                             </select>

@@ -868,12 +868,10 @@ class DeliveryController extends Controller
 
             ->addColumn('status', function ($deliveries) {
                 $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
+                $disabled = array(14,16,30,36,37);
                 $statuses = ShipmentStatus::whereIn('id',$where)->get();
                 $drops = '';
 
-//                $shipment_data = Shipment::find($deliveries->shId);
-//                $status_id = $shipment_data->shipment_journey()->latest()->first();
-//                $status_data = ShipmentStatus::where('id',$status_id->shipper_status_id)->select('id','name')->first();
                 $selected_status = '';
                 foreach ($statuses as $status){
                     if($status->id == $deliveries->current_status_id){
@@ -881,9 +879,13 @@ class DeliveryController extends Controller
                     }else{
                         $selected_status = '';
                     }
-                    $drops .= '<option value="'.$status->id.'" '.$selected_status.'>'.$status->name.'</option>';
+                    if(in_array($status->id,$disabled)){
+                        $drops .= '<option value="'.$status->id.'" '.$selected_status.' disabled="disabled">'.$status->name.'</option>';
+                    }else{
+                        $drops .= '<option value="'.$status->id.'" '.$selected_status.'>'.$status->name.'</option>';
+                    }
                 }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status">'.$drops.'</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" status="'.$deliveries->current_status_id.'" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status">'.$drops.'</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
@@ -1065,8 +1067,10 @@ class DeliveryController extends Controller
 
                     NotificationsController::send(13, $delivery_note_id);
                     NotificationsController::send(14, $delivery_note_id);
+                    return redirect()->back()->with('success','Delivery Note verified and updated successfully!');
+                }else{
+                    return redirect()->back()->with('success','Delivery Note updated successfully!');
                 }
-                return redirect()->back()->with('success','Delivery Note verified and updated successfully!');
             }else{
                 return redirect()->back()->with('error','Delivery note not found!');
             }

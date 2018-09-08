@@ -56,10 +56,13 @@
 
         <div class="col-12">
             <h4 class="card-title font-weight-bold">Delivery</h4>
-            @foreach($bookings as $booking)
+            {{--<p class="text-danger" id="service_error_1" style="display:none;">Regular delivery is required</p>--}}
+
+        @foreach($bookings as $booking)
 
             <div class="bs-callout-primary callout-border-left callout-square p-1">
-                <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" class="icheckbox bookingtype{{$booking->id}}" {{($booking->id == 1)? 'checked required':''}}></strong>
+                <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" class="icheckbox bookingtype{{$booking->id}}" {{($booking->id == 1)? 'checked disabled':''}}></strong>
+
                 <div class="mt-1 form-group">
                 @foreach($shippingMode as $shipping)
                     <fieldset class="checkbox-inline mr-1 ">
@@ -143,6 +146,18 @@
 
                }
     });
+        // $('input.bookingtype1').on('ifUnchecked',function (e) {
+        //     var checkbox = $(this);
+        //         $('#service_error_1').css('display','block');
+        //         errors = 1;
+        // });
+        // $('input.bookingtype1').on('ifChecked',function (e) {
+        //
+        //     var checkbox = $(this);
+        //
+        //         $('#service_error_1').css('display','none');
+        //         errors = 0;
+        // });
 
         @foreach($bookings as $booking)
         $('input.bookingtype{{$booking->id}}').on('ifChecked',function () {
@@ -150,7 +165,8 @@
             checkAtleastOne($(this),{{$booking->id}});
             $(shippingmode).iCheck('enable');
         });
-        $('input.bookingtype{{$booking->id}}').on('ifUnchecked',function () {
+        $('input.bookingtype{{$booking->id}}').on('ifUnchecked',function (e) {
+
             var shippingmode = $(this).parent().parent().next().find('input.shippingmode');
             checkAtleastOne($(this),{{$booking->id}});
             $(shippingmode).iCheck('disable');
