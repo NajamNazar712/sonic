@@ -224,6 +224,19 @@
                         success: function (result) {
                             $.each(result.data, function(index, values) {
                                 row = [];
+                                head = [];
+
+                                head.push('S.No');
+                                head.push('Tracking .No');
+                                head.push('Shipper');
+                                head.push('History Status');
+                                head.push('Service Type');
+                                head.push('Arrival');
+                                head.push('Origin');
+                                head.push('Destination');
+                                head.push('Hub');
+                                head.push('Amount');
+                                head.push('Aging');
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
@@ -243,7 +256,7 @@
                         async: false
                     });
 
-                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                    return {body: body, header: head};
                 }
             } );
 
@@ -288,39 +301,14 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging'}
+                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-                initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-
-                        if ($(header).is('.serial_number') || $(header).is('.aging')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-                }
             });
 
 

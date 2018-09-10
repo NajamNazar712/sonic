@@ -1672,7 +1672,7 @@ class DeliveryController extends Controller
 //                return "<input class='form-control net_amount' readonly placeholder='Net Amount' name='net_amount[{$deliveries->delivery_note_id}]'>";
 //            })
             ->addColumn('remarks', function ($deliveries) {
-                $reason = '<input class="form-control" name="remarks['.$deliveries->delivery_note_id.']" placeholder="Enter Remarks" data-rule-required="true" data-msg-required="This field is required">';
+                $reason = '<input class="form-control" name="remarks['.$deliveries->delivery_note_id.']" placeholder="Enter Remarks">';
                 return $reason;
             })
             ->make(true);

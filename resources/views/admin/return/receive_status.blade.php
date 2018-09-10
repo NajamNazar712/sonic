@@ -137,45 +137,53 @@
                         className: 'btn btn-primary returned',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-                                $.ajax({
-                                    url: '{!! route('admin.return.receive.status.delivered') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        'shipment_ids': selected_rows,
-                                        'return_note_id': note_id,
-                                        '_token': '{{ csrf_token() }}'
+                            if(selected_rows !== ''){
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to collect cash!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $.ajax({
+                                            url: '{!! route('admin.return.receive.status.delivered') !!}',
+                                            method: 'POST',
+                                            data: {
+                                                'shipment_ids': selected_rows,
+                                                'return_note_id': note_id,
+                                                '_token': '{{ csrf_token() }}'
+                                            }
+                                        }).done(function (data) {
+                                            if(data.status === 0){
+
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                            }else{
+                                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                                            }
+                                            location.reload();
+
+                                        });
                                     }
-                                }).done(function (data) {
-                                    if(data.status == 0){
-
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                    }else{
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                    }
-                                    location.reload();
-                                    // $.each(selected_rows, function(index, id) {
-                                    //     table.row($('#datatable tbody tr#' + id)).deselect();
-                                    // });
-                                    // checkShipmentStatuses();
-                                    // selected_rows = [];
-                                    // table.button('.returned').disable();
-                                    // table.ajax.reload();
-                                    // $('.reasonDrop','.statusDrop').select2('destroy');
-                                    // setTimeout(function () {
-                                    //     $(".reasonDrop").select2({
-                                    //         placeholder: "Select a Reason",
-                                    //         width:'100%'
-                                    //     });
-                                    //     $(".statusDrop").select2({
-                                    //         placeholder: "Select a Status",
-                                    //         width:'100%'
-                                    //     });
-                                    // },2000);
-
                                 });
+
                             }else{
                                 var error = "Something went wrong please refresh page and try again!";
                                 toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -209,15 +217,15 @@
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
-                    {data:'status',name: 'status', class: 'align-middle status statusOnChange'},
-                    {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect'},
-                    {data:'remarks',name: 'remarks', class: 'align-middle remarks'},
+                    {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data:'shipper',name: 'users.name', class: 'align-middle shipper'},
+                    {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
+                    {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
+                    {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'address',name: 'address', class: 'align-middle address'},
                     {data:'destination',name: 'destination', class: 'align-middle destination'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
-                    {data:'action',name: 'action', class: 'align-middle action'},
+                    {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -299,7 +307,7 @@
                         '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
-                    if(data.status == 0){
+                    if(data.status === 0){
                         $.each(data.reasons,function (key,value) {
                             var newOption = new Option(value.name, value.id, false, false);
                             reason.append(newOption).trigger('change');
@@ -323,14 +331,41 @@
             $('#status_update_form').bind('submit', function(event) {
                 var shipment = $('#shipment_ids');
                 event.preventDefault();
-                var id = '';
-                var count = table.data().count();
-                for(var i = 0;i<count;i++){
-                    id = table.row( i ).id();
-                    shipments.push(id);
-                }
-                shipment.val(shipments);
-                this.submit();
+                var this_form = this;
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to update shipments status!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        var id = '';
+                        var count = table.data().count();
+                        for(var i = 0;i<count;i++){
+                            id = table.row( i ).id();
+                            shipments.push(id);
+                        }
+                        shipment.val(shipments);
+                        this_form.submit();
+                    }
+                });
+
             });
 
 

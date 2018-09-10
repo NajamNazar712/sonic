@@ -18,7 +18,7 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
-                                        <th class="border-primary border-darken-1"></th>
+                                        <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Company</th>
                                         <th class="border-primary border-darken-1">City Name</th>

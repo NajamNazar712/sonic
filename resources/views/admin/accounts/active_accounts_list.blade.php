@@ -18,7 +18,7 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3">
                                 <thead>
                                     <tr class="bg-primary white">
-                                        <th class="border-primary border-darken-1"></th>
+                                        <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">City Name</th>
@@ -161,17 +161,30 @@
                 });
             }
         });
+        $('body').on('change','.blacklist_reason',function() {
+            $(this).val($(this).val().trim());
+        });
         $('body').on('click','a.blacklist',function () {
             var id = $(this).parents('tr').attr('id');
             var status = $(this).attr('rel');
+            // html = '<input class="form-control blacklist_reason">';
+            // content = document.createElement('div');
+            // content.innerHTML = html;
             swal({
-                title: 'Are You Sure?',
-                text: 'Select Yes to Blacklist this account!',
-                icon: 'warning',
+                // title: 'Are You Sure?',
+                text: 'Write a reason to blacklist this account!',
+                content: {
+                    element: "input",
+                    attributes: {
+                        placeholder: "Write a reason",
+                        class: "form-control blacklist_reason",
+                    },
+                },
+                // icon: 'warning',
                 buttons: {
                     cancel: {
                         text: 'No',
-                        value: null,
+                        value: false,
                         visible: true,
                         closeModal: true,
                     },
@@ -179,36 +192,60 @@
                         text: 'Yes',
                         value: true,
                         visible: true,
-                        closeModal: true
+                        closeModal: false
                     }
                 },
                 closeOnClickOutside: false,
                 closeOnEsc: false,
                 dangerMode: true
-            }).then(function (confirm) {
-                if (confirm) {
-                    if(id){
-                        $.ajax({
-                            url: '{!! route('admin.accounts.status.block') !!}',
-                            method: 'POST',
-                            data: {
-                                'id':id,
-                                'status':status,
-                                '_token': '{{ csrf_token() }}'
-                            }
-                        }).done(function (data) {
-                            if(data.status == 1){
-                                table.draw('false');
-                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                            }
+            }).then((value) => {
+                    if (value) {
+                        if (value === '') {
+                            swal("You have not selected any reason!", {
+                                icon: "warning",
+                            });
+                        } else {
+                        if (id) {
+                            $.ajax({
+                                url: '{!! route('admin.accounts.status.block') !!}',
+                                method: 'POST',
+                                data: {
+                                    'id': id,
+                                    'reason': value,
+                                    'status': status,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function (data) {
+                                swal.close();
+                                if (data.status === 1) {
+                                    table.draw('false');
+                                    swal.close();
+                                    toastr.success(data.success, 'Success!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                }
 
-                        });
+                            });
+                        }
+                    }
+                    }else{
+                        swal.close();
                     }
 
-                }
             });
+                {{--.then(reason,function (confirm) {--}}
+                // if (confirm) {
+                //
+                //
+                //
+                // }
+            {{--});--}}
 
         });
         $('body').on('click','a.userenable',function () {
