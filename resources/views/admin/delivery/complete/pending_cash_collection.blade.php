@@ -1,4 +1,5 @@
 @extends('admin.layout.master')
+@section('title','Pending Cash Collection')
 
 @section('content')
     <h1 class="mb-1">
@@ -121,6 +122,7 @@
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(41, session('permissions')))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true,
                 buttons: [{
                     text: 'Cash Collect',
                     className: 'btn btn-primary cash_collect_all',
@@ -272,6 +274,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
             var hub_ids = [];

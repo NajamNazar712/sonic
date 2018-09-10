@@ -1,5 +1,6 @@
 
 @extends('admin.layout.master')
+@section('title','Receive Deliveries')
 
 @section('content')
     <h1 class="mb-1">
@@ -241,6 +242,7 @@
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true,
                 buttons: [
                         @if(!$delivery_note_status == 1) {
                     text: 'Delivered',
@@ -379,6 +381,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
 

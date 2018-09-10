@@ -93,9 +93,7 @@
         $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled','disabled');
 
-        // $('#city_list').change(function () {
-        //
-        // });
+
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
             var id = $('#city_list').val();
@@ -130,7 +128,7 @@
                 $(form).find('button[type=submit]').attr('disabled', 'disabled');
                 swal({
                     title: 'Please Wait!',
-                    text: 'Route is being added!',
+                    text: 'Rider is being added!',
                     icon: 'info',
                     buttons: false,
                     closeOnClickOutside: false,

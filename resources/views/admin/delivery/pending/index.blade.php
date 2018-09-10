@@ -1,5 +1,6 @@
 
 @extends('admin.layout.master')
+@section('title','Pending Deliveries')
 
 @section('content')
                 <h1 class="mb-1">
@@ -121,6 +122,7 @@
     <script type="text/javascript">
         var table = $('#datatable').DataTable({
             dom: 'ltipr',
+            scrollX: true,
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,
             pagingType: 'full_numbers',
@@ -179,6 +181,7 @@
                         }
                     }
                 });
+                this.api().table().columns.adjust();
             }
         });
         $('body').on('click','.dispute_modal',function(){

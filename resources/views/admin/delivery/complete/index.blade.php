@@ -1,5 +1,5 @@
 @extends('admin.layout.master')
-
+@section('title','Completed Deliveries')
 @section('content')
     <h1 class="mb-1">
         Completed Deliveries
@@ -185,6 +185,7 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
+                scrollX: true,
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 pagingType: 'full_numbers',
@@ -245,6 +246,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
             var hub_ids = [];
