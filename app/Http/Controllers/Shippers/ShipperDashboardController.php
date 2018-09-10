@@ -85,10 +85,6 @@ class ShipperDashboardController extends Controller
             ->editColumn('phone1',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
             })
-            ->editColumn('booking_date', function ($shipments) {
-                return $shipments->booking_date ? with(new Carbon($shipments->booking_date))->format('d/m/Y h:i:s A') : '';
-
-            })
             ->addColumn('action',function ($shipments) {
                 $view_charges_button = '<button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div></button>';
                 $cancel_button = '<button type="button" class="dropdown-item cancel_order"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-crosshair"></i></div><div class="col-9 offset-1">Cancel</div></button>';

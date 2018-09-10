@@ -87,9 +87,6 @@ class ShipperFinanceController extends Controller
         })
         ->removeColumn('phone')
         ->removeColumn('phone2')
-        ->editColumn('done_at', function($done_payment) {
-            return Carbon::parse($done_payment->done_at)->format('d/m/Y H:i A');
-        })
         ->editColumn('status', function($done_payment) {
             if ($done_payment->status == 0) {
                 return 'Processed';
@@ -286,7 +283,7 @@ class ShipperFinanceController extends Controller
                             <tr>
                               <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Payment Details</strong></td>
-                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Payment ID</strong></td>

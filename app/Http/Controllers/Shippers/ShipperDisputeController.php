@@ -41,10 +41,6 @@ class ShipperDisputeController extends Controller
             ->where('disputes.raised_by',session('user_id'))
             ->where('disputes.raised_by_status',1);
         return Datatables::of($dispute)
-
-            ->editColumn('created_at', function ($dispute) {
-                return $dispute->created_at ? with(new Carbon($dispute->created_at))->format('d/m/Y h:i:s A') : '';
-            })
             ->editColumn('status',function($dispute){
                 return $dispute->status == 0? 'Dispute Launched': ($dispute->status == 1? 'Dispute Updated' : ($dispute->status == 2? 'Dispute Resolved':''));
 
@@ -195,9 +191,6 @@ class ShipperDisputeController extends Controller
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-            })
-            ->editColumn('created_at', function ($shipments) {
-                return $shipments->created_at ? with(new Carbon($shipments->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn("action", function ($result) {
                 $dropdown = '

@@ -68,12 +68,7 @@ class ShipperReceivingSheetHistoryController extends Controller
         }
       })
       ->editColumn('booking_date', function($receiving_sheet_received) {
-        if ($receiving_sheet_received->booking_date) {
-          return Carbon::parse($receiving_sheet_received->booking_date)->format('d/m/Y H:i A');
-        }
-        else {
-          return '';
-        }
+        return $receiving_sheet_received->booking_date;
       })
       ->addColumn('action', function($receiving_sheet_received) {
         if ($receiving_sheet_received->receiving_sheet) {

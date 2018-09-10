@@ -31,9 +31,6 @@ class ShipperSubstituteAccountManagementController extends Controller
       ->where('substitute_users.user_id', session('user_id'));
 
       $datatables = Datatables::of($substitute_users)
-      ->editColumn('updated_at', function($substitute_user) {
-        return Carbon::parse($substitute_user->updated_at)->format('d/m/Y H:i A');
-      })
       ->editColumn('status', function ($substitute_user) {
         return (($substitute_user->status) ? 'Enabled' : 'Disabled');
       })

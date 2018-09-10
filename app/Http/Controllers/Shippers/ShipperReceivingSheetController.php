@@ -84,9 +84,6 @@ class ShipperReceivingSheetController extends Controller
       });
 
       return Datatables::of($shipments)
-      ->editColumn('booking_date', function($shipment) {
-        return Carbon::parse($shipment->booking_date)->format('d/m/Y H:i A');
-      })
       ->editColumn('receiving_sheet', function($shipment) {
         if ($shipment->receiving_sheet) {
           return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($shipment->receiving_sheet, 12, "0", STR_PAD_LEFT) . '</span></button>';
@@ -431,7 +428,7 @@ class ShipperReceivingSheetController extends Controller
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Receiving Sheet</strong></td>
-                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Shipper</strong></td>

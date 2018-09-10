@@ -73,7 +73,7 @@ class ShipperTrackingController extends Controller
         			foreach ($shipment->shipment_journey as $journey) {
         				$journey_details = array();
 
-        				$journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y H:i A');
+        				$journey_details['date_time'] = $journey->created_at;
         				$journey_details['status'] = $journey->shipment_status_shipper->name;
         				$journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
                         $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';

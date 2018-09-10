@@ -45,6 +45,10 @@ table.dataTable {
 	font-size: 12px;
 }
 
+table.table.table-sm td {
+	padding: .3rem;
+}
+
 table thead tr th,
 table.dataTable thead tr th {
 	padding-left: 0.5em;

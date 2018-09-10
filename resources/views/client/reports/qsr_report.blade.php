@@ -1,8 +1,10 @@
 @extends('client.layout.master')
 
+@section('title', 'Report - Quality of Service')
+
 @section('content')
     <h1 class="mb-1">
-        QSR Report
+        Report - Quality of Service
     </h1>
 
     <div class="card">
