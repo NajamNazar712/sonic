@@ -221,9 +221,9 @@
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
-                    {data:'address',name: 'address', class: 'align-middle address'},
-                    {data:'destination',name: 'destination', class: 'align-middle destination'},
-                    {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
+                    {data:'address',name: 'usi.pickup_address', class: 'align-middle address'},
+                    {data:'destination',name: 'oc.name', class: 'align-middle destination'},
+                    {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -234,15 +234,18 @@
                         table.row(row).select();
                     }
                 },
-                initComplete: function() {
-                    $(".reasonDrop").select2({
+                drawCallback: function (settings) {
+                    $(".reasonDrop").prepend('<option value="" ></option>').select2({
                         placeholder: "Select a Reason",
                         width:'100%'
                     });
-                    $(".statusDrop").select2({
+                    $(".statusDrop").prepend('<option value="" ></option>').select2({
                         placeholder: "Select a Status",
                         width:'100%'
                     });
+                },
+                initComplete: function() {
+
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';

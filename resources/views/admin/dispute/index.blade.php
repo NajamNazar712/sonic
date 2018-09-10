@@ -501,32 +501,60 @@
         });
         $('body').on('click','.resolve',function () {
             var disputeId = parseInt($(this).parents('tr').attr('id'));
-           $('#ResolveModal').modal('show');
-           $('#disputeId').val(disputeId);
-        });
-        $('body').on('click','.dispute-resolve',function () {
-            var resolve_id = $('#disputeId').val();
-            // console.log(resolve_id);
-            if(resolve_id !== '') {
-                $.ajax({
-                    url: '{!! route('admin.dispute.resolve') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': resolve_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    $('#ResolveModal').modal('hide');
-                    if(data.status === 1){
-                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        table.draw('false');
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+            if(disputeId){
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to resolve this dispute!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.dispute.resolve') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': disputeId,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            // $('#ResolveModal').modal('hide');
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw('false');
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                            }
+                        });
                     }
                 });
             }
+           // $('#ResolveModal').modal('show');
+           // $('#disputeId').val(disputeId);
         });
+        // $('body').on('click','.dispute-resolve',function () {
+        //     var resolve_id = $('#disputeId').val();
+        //     // console.log(resolve_id);
+        //     if(resolve_id !== '') {
+        //
+        //     }
+        // });
         $('body').on('click','.update',function(){
             var disputeId = parseInt($(this).parents('tr').attr('id'));
             // console.log(disputeId)

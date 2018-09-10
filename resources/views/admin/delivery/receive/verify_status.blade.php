@@ -36,13 +36,15 @@
                         </tr>
                         </thead>
                     </table>
-                    <div class="row justify-content-center">
+                    <div class="row justify-content-center preventsubmit">
+                        @if($delivery_note_status == 0)
                         <div class="col-2">
-                            <button id="statusUpdateSubmit" rel="update" type="submit" class="btn btn-primary btn-block">Update Status</button>
+                            <button id="statusUpdateSubmit" rel="update" disabled type="submit" class="btn btn-primary btn-block">Update Status</button>
                         </div>
                         <div class="col-2">
-                            <button id="statusVerifySubmit" rel="verify" type="submit" class="btn btn-primary btn-block">Verify Status</button>
+                            <button id="statusVerifySubmit" rel="verify" disabled type="submit" class="btn btn-primary btn-block">Verify Status</button>
                         </div>
+                        @endif
                         @if($delivery_note_status == 1)
                             <div class="col-2">
                                 <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
@@ -259,114 +261,123 @@
                 $('.remarks input').val('');
                 // $('.reasonDrop').val('').trigger("change");
             });
+            $('div.preventsubmit').bind('mouseenter mouseover',function(event){
+               $('#statusUpdateSubmit').removeAttr('disabled');
+               $('#statusVerifySubmit').removeAttr('disabled');
+            });
+            $('#statusUpdateSubmit, #statusVerifySubmit').bind('mouseleave mouseout',function(event){
+               $('#statusUpdateSubmit').prop('disabled',true);
+               $('#statusVerifySubmit').prop('disabled',true);
+            });
             var shipments = [];
             var status_array = [];
-            var new_status_array = [];
             $('#status_update_form').bind('submit', function(event) {
-                var verify_form = this;
-                event.preventDefault();
-                var btn = $(document.activeElement).attr('id');
-                $('#submit_button_id').val(btn);
-                $.each($('#datatable tr td.statusOnChange select'),function (key,value) {
-                    $(this).find(':selected').removeAttr('disabled');
-                    var pre_status = $(this).attr('status');
-                    var selected = $(this).find(':selected').val();
-                    var tracking = $(this).parents('tr').find('td.tracking_number').text();
-                    if(pre_status !== selected){
-                        var newStatus = $(this).find(':selected').text();
-                        var oldStatus = $(this).find('option[value="'+pre_status+'"]').text();
-                        status_array[key] = {'tracking':tracking,'old':oldStatus,'new':newStatus};
+
+                    var verify_form = this;
+                    event.preventDefault();
+                    var btn = $(document.activeElement).attr('id');
+                    $('#submit_button_id').val(btn);
+                    $.each($('#datatable tr td.statusOnChange select'), function (key, value) {
+                        $(this).find(':selected').removeAttr('disabled');
+                        var pre_status = $(this).attr('status');
+                        var selected = $(this).find(':selected').val();
+                        var tracking = $(this).parents('tr').find('td.tracking_number').text();
+                        if (pre_status !== selected) {
+                            var newStatus = $(this).find(':selected').text();
+                            var oldStatus = $(this).find('option[value="' + pre_status + '"]').text();
+                            status_array[key] = {'tracking': tracking, 'old': oldStatus, 'new': newStatus};
+                        }
+
+
+                    });
+
+                    if (status_array.length > 0) {
+                        var content_dispute = '';
+                        content_dispute += 'These shipments are found different in statuses.' + "<br>";
+                        $.each(status_array, function (key, value) {
+                            if (value !== undefined) {
+                                content_dispute += value.tracking + ' (' + value.old + ')' + ' (' + value.new + ')' + "<br>";
+                            }
+                        });
+                        content = document.createElement('div');
+                        content.innerHTML = content_dispute;
+                        swal({
+                            title: 'Dispute Different Statuses!',
+                            content: content,
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+
+                                var shipment = $('#shipment_ids');
+                                var id = '';
+                                var count = table.data().count();
+                                for (var i = 0; i < count; i++) {
+                                    id = table.row(i).id();
+                                    shipments.push(id);
+                                }
+                                shipment.val(shipments);
+                                $('#statusVerifySubmit').prop('disabled', true);
+                                $('#statusUpdateSubmit').prop('disabled', true);
+                                verify_form.submit();
+                            }
+                        });
+                    } else {
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to update/verify the status of shipments!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                var shipment = $('#shipment_ids');
+                                var id = '';
+                                var count = table.data().count();
+                                for (var i = 0; i < count; i++) {
+                                    id = table.row(i).id();
+                                    shipments.push(id);
+                                }
+                                shipment.val(shipments);
+                                $('#statusVerifySubmit').prop('disabled', true);
+                                $('#statusUpdateSubmit').prop('disabled', true);
+                                verify_form.submit();
+                            }
+                        });
+
+
                     }
-
-
-                });
-                if(status_array.length > 0){
-                    var content_dispute = '';
-                    content_dispute += 'These shipments are found different in statuses.'+"<br>";
-                    $.each(status_array,function (key,value) {
-                        if(value !== undefined){
-                            content_dispute += value.tracking+' ('+value.old+')'+' ('+value.new+')'+"<br>";
-                        }
-                    });
-                    content = document.createElement('div');
-                    content.innerHTML = content_dispute;
-                    swal({
-                        title: 'Dispute Different Statuses!',
-                        content: content,
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if (confirm) {
-
-                            var shipment = $('#shipment_ids');
-                            var id = '';
-                            var count = table.data().count();
-                            for(var i = 0;i<count;i++){
-                                id = table.row( i ).id();
-                                shipments.push(id);
-                            }
-                            shipment.val(shipments);
-                            $('#statusVerifySubmit').prop('disabled',true);
-                            $('#statusUpdateSubmit').prop('disabled',true);
-                            verify_form.submit();
-                        }
-                    });
-                }else{
-                    swal({
-                        title: 'Are You Sure?',
-                        text: 'Select Yes to update/verify the status of shipments!',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'No',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Yes',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function (confirm) {
-                        if (confirm) {
-                            var shipment = $('#shipment_ids');
-                            var id = '';
-                            var count = table.data().count();
-                            for(var i = 0;i<count;i++){
-                                id = table.row( i ).id();
-                                shipments.push(id);
-                            }
-                            shipment.val(shipments);
-                            $('#statusVerifySubmit').prop('disabled',true);
-                            $('#statusUpdateSubmit').prop('disabled',true);
-                            verify_form.submit();
-                        }
-                    });
-
-
-                }
 
 
             });
