@@ -3200,46 +3200,38 @@ class AdminDashboardController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                        aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
 
-                        <div class='dropdown-menu open-left arrow'>
-                            <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                            <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
-                ";
+                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
+
+                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
 
                 if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
-                    $dropdown .= "
-                            <a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>
-                    ";
+                    $dropdown .= '<button onclick="location.href=\'' . route('admin.edit.rates', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                 }
                 if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
-                    $dropdown .= "
-                            <a href='javascript:void(0);' class='dropdown-item blacklist' rel='block'><i class='ft-user-x primary'></i> Block</a>
-                    ";
+                    $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
                 }
 
                 if (session('role_id') == 1 || in_array(13, session('permissions'))) {
                     if ($result->status == 3) {
-                        $dropdown .="
-                                <a href='javascript:void(0);' class='dropdown-item userdisable'><i class='ft-user-minus primary'></i> Disable</a>
-                        ";
+                        $dropdown .= '<button type="button" class="dropdown-item userdisable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-minus"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
                     }
                     else {
-                        $dropdown .="
-                                <a href='javascript:void(0);' class='dropdown-item userenable'><i class='ft-user-plus primary'></i> Enable</a>
-                        ";
+                        $dropdown .= '<button type="button" class="dropdown-item userenable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Enable</div></button>';
 
                     }
                 }
 
-                $dropdown .="
-                        </div>
-                    </span>
-                ";
+                $dropdown .= '
+                    </div>
+                  </div>
+                ';
 
                 return $dropdown;
             })
@@ -3330,26 +3322,24 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)->addColumn("action", function ($result) {
-            $dropdown = "
-                <span class='dropdown'>
-                    <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                            aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+            $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
 
-                    <div class='dropdown-menu open-left arrow'>
-                      <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                      <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
-            ";
+            $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
+
+            $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
 
             if (session('role_id') == 1 || in_array(16, session('permissions'))) {
-                $dropdown .= "
-                        <a href='javascript:void(0);' class='dropdown-item blacklist' rel='unblock'><i class='ft-user-plus primary'></i> Unblock</a>
-                ";
+                $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="unblock"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus "></i></div><div class="col-9 offset-1">Unblock</div></button>';
             }
 
-            $dropdown .= "
-                    </div>
-                </span>
-            ";
+            $dropdown .= '
+                </div>
+              </div>
+            ';
 
             return $dropdown;
         })
