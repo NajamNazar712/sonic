@@ -436,6 +436,9 @@ class ShipperFinanceController extends Controller
         }
 
         $spreadsheet = new Spreadsheet();
+
+        $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+
         $spreadsheet->getActiveSheet()->fromArray($details);
 
         $writer = new Xlsx($spreadsheet);

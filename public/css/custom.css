@@ -6,6 +6,10 @@ html body a:hover {
 	color: #6496be;
 }
 
+html body .content .content-wrapper {
+	padding: 0.7rem 2.2rem;
+}
+
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     color: #284155 !important;
     opacity: 1 !important; /* Firefox */
@@ -40,13 +44,18 @@ html body a:hover {
 	max-width: 95%;
 }
 
+.select2-container--classic .select2-results__options .select2-results__option[aria-selected=true],
+.select2-container--default .select2-results__options .select2-results__option[aria-selected=true] {
+	background: #64a0d2 !important;
+}
+
 table,
 table.dataTable {
 	font-size: 12px;
 }
 
-table.table.table-sm td {
-	padding: .3rem;
+table.table-sm {
+	margin: 0 !important;
 }
 
 table thead tr th,
@@ -54,6 +63,15 @@ table.dataTable thead tr th {
 	padding-left: 0.5em;
 	white-space: normal;
 	word-wrap: break-word;
+
+}
+
+table.table-sm.table-borderless thead tr th {
+	padding-left: 0.3em !important;
+}
+
+table.table.table-borderless thead tr th {
+	border: 0 !important;
 }
 
 table.dataTable thead tr th:before,
@@ -61,6 +79,19 @@ table.dataTable thead tr th:after {
 	height: 20px;
 	margin-bottom: -10px;
 	bottom: 50% !important;
+}
+
+table.table-sm thead tr th:before,
+table.table-sm thead tr th:after {
+	top: auto !important;
+}
+
+table.table-sm thead tr th:before {
+	right: 0.65em !important;
+}
+
+table.table-sm thead tr th:after {
+	right: 0.3em !important;
 }
 
 table.dataTable tbody tr.selected a {
@@ -71,6 +102,10 @@ table tbody tr td,
 table.dataTable tbody tr td {
 	padding-left: 0.5em;
 	padding-right: 0.5em;
+}
+
+table.table-sm tbody tr td {
+	padding: 0.3em !important;
 }
 
 table.dataTable tbody tr td.select-checkbox:before {
@@ -104,6 +139,10 @@ table.dataTable tbody tr.selected td.select-checkbox:after {
 	display: table;
 	width: auto !important;
 	text-align: left;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+	color: #284155 !important;
 }
 
 .selectize-control {
@@ -144,6 +183,12 @@ p.comment {
 	border-bottom: 1px solid #5587b4;
 }
 
+@media (max-width: 991.98px) {
+	.dataTables_wrapper table {
+		overflow-x: initial;
+	}
+}
+
 @media (max-width: 767.98px) {
 	.header-navbar .navbar-header .menu-toggle {
 		top: 7px;
@@ -173,6 +218,11 @@ p.comment {
 @media (min-width: 1200px) {
 	.col_custom {
 		min-width: 0;
-		max-width: 20%;
+		max-width: 19%;
+	}
+
+	.col_custom_middle {
+		min-width: 0;
+		max-width: 24%;
 	}
 }

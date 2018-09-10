@@ -10,10 +10,6 @@
       <div class="content-body">
 
         <!-- Active Orders -->
-       <h1 class="pb-2">Welcome To Trax Logistics,
-       <span class="user-name text-bold-700 ">{{Auth::user()->name}}</span>
-     </h1>
-        <!-- Active Orders -->
           <div class="row">
               <div class="col">
                   <div class="card pull-up">
@@ -103,7 +99,7 @@
               <div class="card col-12">
                   <div class="card-content collapse show">
                       <div class="card-body">
-                          <div id="shipment_statistics_chart" class="height-400 echart-container"></div>
+                          <div id="shipment_statistics_chart" class="height-300 echart-container"></div>
                           <div class="row">
                               <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
                                   <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
@@ -113,7 +109,6 @@
                               </div>
                               <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
                                   <select name="graph_destination" class="select2" id="graph_destination">
-                                      {{--<option value="">All</option>--}}
                                 @foreach($cities as $city)
                                       <option value="{{$city->id}}">{{$city->name}}</option>
                                 @endforeach

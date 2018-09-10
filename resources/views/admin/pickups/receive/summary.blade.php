@@ -111,7 +111,7 @@
 		$(document).ready(function() {
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
+				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',
 				processing: true,

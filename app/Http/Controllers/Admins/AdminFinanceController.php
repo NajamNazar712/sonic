@@ -30,6 +30,7 @@ use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class AdminFinanceController extends Controller
 {
@@ -1577,7 +1578,12 @@ class AdminFinanceController extends Controller
         }
 
         $spreadsheet = new Spreadsheet();
+
+        $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+
         $spreadsheet->getActiveSheet()->fromArray($details);
+
+        // var_dump($spreadsheet->getActiveSheet()->getStyle('B:B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT));
 
         $writer = new Xlsx($spreadsheet);
 
