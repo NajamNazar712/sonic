@@ -142,32 +142,35 @@
                 order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
-                    {data:'amount',name: 'amount', class: 'align-middle amount'},
-                    {data:'status',name: 'status', class: 'align-middle status statusOnChange'},
-                    {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect'},
-                    {data:'remarks',name: 'remarks', class: 'align-middle remarks'},
-                    {data:'call_verification',name: 'call_verification', class: 'align-middle call_verification'},
-                    {data:'address',name: 'address', class: 'align-middle address'},
-                    {data:'destination',name: 'destination', class: 'align-middle destination'},
-                    {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
-                    {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
+                    {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data:'amount',name: 'shipments.amount', class: 'align-middle amount'},
+                    {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
+                    {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
+                    {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
+                    {data:'call_verification',name: 'call_verification', class: 'align-middle call_verification',orderable: false, searchable: false},
+                    {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
+                    {data:'destination',name: 'oc.name', class: 'align-middle destination'},
+                    {data:'shipper',name: 'users.name', class: 'align-middle shipper'},
+                    {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-                initComplete: function() {
-                    $(".reasonDrop").select2({
+                drawCallback: function (settings) {
+                    $(".reasonDrop").prepend('<option value="" ></option>').select2({
                         placeholder: "Select a Reason",
                         width:'100%'
                     });
-                    $(".statusDrop").select2({
+                    $(".statusDrop").prepend('<option value="" ></option>').select2({
                         placeholder: "Select a Status",
                         width:'100%'
                     });
+                },
+                initComplete: function() {
+
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -278,12 +281,13 @@
 
 
                 });
-
                 if(status_array.length > 0){
                     var content_dispute = '';
                     content_dispute += 'These shipments are found different in statuses.'+"<br>";
                     $.each(status_array,function (key,value) {
-                        content_dispute += value.tracking+' ('+value.old+')'+' ('+value.new+')'+"<br>";
+                        if(value !== undefined){
+                            content_dispute += value.tracking+' ('+value.old+')'+' ('+value.new+')'+"<br>";
+                        }
                     });
                     content = document.createElement('div');
                     content.innerHTML = content_dispute;
@@ -325,18 +329,44 @@
                         }
                     });
                 }else{
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to update/verify the status of shipments!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            var shipment = $('#shipment_ids');
+                            var id = '';
+                            var count = table.data().count();
+                            for(var i = 0;i<count;i++){
+                                id = table.row( i ).id();
+                                shipments.push(id);
+                            }
+                            shipment.val(shipments);
+                            $('#statusVerifySubmit').prop('disabled',true);
+                            $('#statusUpdateSubmit').prop('disabled',true);
+                            verify_form.submit();
+                        }
+                    });
 
-                    var shipment = $('#shipment_ids');
-                    var id = '';
-                    var count = table.data().count();
-                    for(var i = 0;i<count;i++){
-                        id = table.row( i ).id();
-                        shipments.push(id);
-                    }
-                    shipment.val(shipments);
-                    $('#statusVerifySubmit').prop('disabled',true);
-                    $('#statusUpdateSubmit').prop('disabled',true);
-                    verify_form.submit();
+
                 }
 
 

@@ -158,25 +158,52 @@
         $('body').on('click','a.blacklist',function () {
             var id = $(this).parents('tr').attr('id');
             var status = $(this).attr('rel');
-            if(id){
-                $.ajax({
-                    url: '{!! route('admin.accounts.status.block') !!}',
-                    method: 'POST',
-                    data: {
-                        'id':id,
-                        'status':status,
-                        '_token': '{{ csrf_token() }}'
+            swal({
+                title: 'Are You Sure?',
+                text: 'Select Yes to Blacklist this account!',
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
                     }
-                }).done(function (data) {
-                    if(data.status == 1){
-                        table.draw('false');
-                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function (confirm) {
+                if (confirm) {
+                    if(id){
+                        $.ajax({
+                            url: '{!! route('admin.accounts.status.block') !!}',
+                            method: 'POST',
+                            data: {
+                                'id':id,
+                                'status':status,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status === 1){
+                                table.draw('false');
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+
+                        });
                     }
 
-                });
-            }
+                }
+            });
+
         });
     });
 

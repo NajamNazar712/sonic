@@ -621,11 +621,11 @@ class DeliveryController extends Controller
                 foreach ($statuses as $status){
                     $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
                 }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" ><option></option>'.$drops.'</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" >'.$drops.'</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" ><option></option></select>';
+                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" ></select>';
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {
@@ -885,7 +885,7 @@ class DeliveryController extends Controller
                         $drops .= '<option value="'.$status->id.'" '.$selected_status.'>'.$status->name.'</option>';
                     }
                 }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" status="'.$deliveries->current_status_id.'" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status">'.$drops.'</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" status="'.$deliveries->current_status_id.'" name="status_drop['.$deliveries->shId.']">'.$drops.'</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
@@ -901,7 +901,7 @@ class DeliveryController extends Controller
                     $reason_name = $status_reason->name;
                     $reason_id = $status_reason->id;
                 }
-                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" placeholder="Select a Reason"><option value="'.$reason_id.'">'.$reason_name.'</option></select>';
+                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" ><option value="'.$reason_id.'">'.$reason_name.'</option></select>';
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {
