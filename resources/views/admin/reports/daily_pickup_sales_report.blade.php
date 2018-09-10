@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Daily Pickup & Sales Report')
+
 @section('content')
     <h1 class="mb-1">
         Daily Pickup & Sales Report

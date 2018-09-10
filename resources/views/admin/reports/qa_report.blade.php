@@ -1,8 +1,10 @@
 @extends('admin.layout.master')
 
+@section('title', 'Quality Assurance Report')
+
 @section('content')
     <h1 class="mb-1">
-       QA Report
+       Quality Assurance Report
     </h1>
 
     <div class="card">
@@ -298,7 +300,7 @@
                         shipment += '</table>';
                         $('#qa_table').html(shipment);
                         var table = $('#datatable').DataTable({
-                            "scrollX": true,
+                            scrollX: true,
                             dom: '<"d-inline-block"><"pull-right"B>t',
                             buttons: [
                                 {
@@ -333,7 +335,10 @@
                                 {name: 'grand_total_pendings', class: 'align-middle grand_total_pendings'},
                                 {name: 'grand_total_resolved', class: 'align-middle grand_total_resolved'},
                                 {name: 'grand_total_unresolved', class: 'align-middle grand_total_unresolved'}
-                            ]
+                            ],
+                            initComplete: function() {
+                                this.api().table().columns.adjust();
+                            }
                         });
 
                     });

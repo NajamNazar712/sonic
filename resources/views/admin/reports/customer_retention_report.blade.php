@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Customer Retention Report')
+
 @section('content')
     <h1 class="mb-1">
         Customer Retention Report

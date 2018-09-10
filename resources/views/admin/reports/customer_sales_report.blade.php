@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Monthwise Customer Sales Report')
+
 @section('content')
     <h1 class="mb-1">
         Monthwise Customer Sales Report

@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Outstanding Shipments Report')
+
 @section('content')
     <h1 class="mb-1">
         Outstanding Shipments Report
@@ -252,6 +254,7 @@
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true,
                 buttons: [
                     {
                         extend: 'excelHtml5',
@@ -323,6 +326,8 @@
                             }
                         }
                     });
+
+                    this.api().table().columns.adjust();
                 }
             });
 

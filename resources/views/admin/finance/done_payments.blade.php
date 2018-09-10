@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Done Payments')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -145,61 +147,6 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		.modal .modal-dialog.modal-lg.modal-full-length {
-			max-width: 95%;
-		}
-
-		table,
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table thead tr th,
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table tbody tr td,
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #64a0d2;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -302,6 +249,7 @@
 				@else
 					dom: 'ltipr',
 				@endif
+				scrollX: true,
 				select: {
 					info: false,
 					style: 'multi',
@@ -327,12 +275,12 @@
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
-					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount'},
-					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
-					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
-					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable'},
+					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', orderable: false},
+					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', orderable: false},
+					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'ubi.bank_name', class: 'align-middle text-center bank'},
-					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging'},
+					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
 					{data:'company_bank', name: 'b.name', class: 'align-middle text-center company_bank'},
@@ -372,6 +320,8 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				}
 			});
 

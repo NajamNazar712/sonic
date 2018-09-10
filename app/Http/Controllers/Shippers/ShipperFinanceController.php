@@ -162,8 +162,8 @@ class ShipperFinanceController extends Controller
             else {
                 $query->whereRaw('false');
             }
-        });
-
+        })
+        ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
         return $datatables->make(true);
     }
