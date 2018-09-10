@@ -31,7 +31,6 @@
 										<th class="border-primary border-darken-1">Assigned Date</th>
 										<th class="border-primary border-darken-1">Assigned By</th>
 										<th class="border-primary border-darken-1">Pickup Note No.</th>
-										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -147,6 +146,8 @@
 						tab.document.close();
 						tab.focus();
 					}
+
+					table.draw('false');
 				});
 			}
 
@@ -205,7 +206,6 @@
 					{data: 'assigned_date', name: 'pickup_notes.created_at', class: 'align-middle assigned_date'},
 					{data: 'assigned_by', name: 'a.name', class: 'align-middle assigned_by'},
 					{data: 'pickup_note_no', name: 'pickup_note_no', class: 'align-middle pickup_note_no'},
-					{data: 'status', name: 'status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -360,54 +360,102 @@
 					});
 				}
 				else if ($(this).hasClass('print_pickup_note')) {
-					print([pickup_note_id]);
+					swal({
+						text: 'Are you sure, you want to Dispatch this Pickup Note?',
+						icon: 'warning',
+						buttons: {
+							cancel: {
+								text: 'No',
+								value: null,
+								visible: true,
+								closeModal: true,
+							},
+							confirm: {
+								text: 'Yes',
+								value: true,
+								visible: true,
+								closeModal: true
+							}
+						},
+						closeOnClickOutside: false,
+						closeOnEsc: false,
+						dangerMode: true
+					}).then(function(confirm) {
+						if (confirm) {
+							print([pickup_note_id]);
 
-					var index = $.inArray(pickup_note_id, selected_rows);
+							var index = $.inArray(pickup_note_id, selected_rows);
 
-					if (index !== -1) {
-						selected_rows.splice(index, 1);
-					}
+							if (index !== -1) {
+								selected_rows.splice(index, 1);
+							}
 
-					if (selected_rows.length > 0) {
-						table.button('.print').enable();
-					}
-					else {
-						table.button('.print').disable();
-					}
+							if (selected_rows.length > 0) {
+								table.button('.print').enable();
+							}
+							else {
+								table.button('.print').disable();
+							}
 
-					table.draw('false');
+							table.draw('false');
+						}
+					});
 				}
 				else if ($(this).hasClass('sms_rider')) {
-					$.ajax({
-						url: '{!! route('admin.pickups.assigned.sms') !!}',
-						method: 'POST',
-						data: {
-							'pickup_note_id': pickup_note_id,
-							'_token': '{{ csrf_token() }}'
-						}
-					})
-					.done(function(data) {
-						if (data.status == 0) {
-							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-						else {
-							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
+					swal({
+						text: 'Are you sure, you want to Dispatch this Pickup Note?',
+						icon: 'warning',
+						buttons: {
+							cancel: {
+								text: 'No',
+								value: null,
+								visible: true,
+								closeModal: true,
+							},
+							confirm: {
+								text: 'Yes',
+								value: true,
+								visible: true,
+								closeModal: true
+							}
+						},
+						closeOnClickOutside: false,
+						closeOnEsc: false,
+						dangerMode: true
+					}).then(function(confirm) {
+						if (confirm) {
+							$.ajax({
+								url: '{!! route('admin.pickups.assigned.sms') !!}',
+								method: 'POST',
+								data: {
+									'pickup_note_id': pickup_note_id,
+									'_token': '{{ csrf_token() }}'
+								}
+							})
+							.done(function(data) {
+								if (data.status == 0) {
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
+								else {
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
 
-						var index = $.inArray(pickup_note_id, selected_rows);
+								var index = $.inArray(pickup_note_id, selected_rows);
 
-						if (index !== -1) {
-							selected_rows.splice(index, 1);
-						}
+								if (index !== -1) {
+									selected_rows.splice(index, 1);
+								}
 
-						if (selected_rows.length > 0) {
-							table.button('.print').enable();
-						}
-						else {
-							table.button('.print').disable();
-						}
+								if (selected_rows.length > 0) {
+									table.button('.print').enable();
+								}
+								else {
+									table.button('.print').disable();
+								}
 
-						table.draw('false');
+								table.draw('false');
+							});
+						}
 					});
 				}
 			});
