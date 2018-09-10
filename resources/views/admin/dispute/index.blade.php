@@ -1,5 +1,6 @@
-
 @extends('admin.layout.master')
+
+@section('title', 'Disputes')
 
 @section('content')
     <h1 class="mb-1">
@@ -167,7 +168,6 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-{{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/ui/perfect-scrollbar.min.css')}}">--}}
 
 
 
@@ -282,7 +282,6 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    {{--<script src="{{asset('app-assets/vendors/js/ui/perfect-scrollbar.jquery.min.js')}}" type="text/javascript"></script>--}}
 
 
     <script type="text/javascript">
@@ -338,6 +337,7 @@
             @else
                 dom: 'ltipr',
             @endif
+            scrollX: true,
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,
             pagingType: 'full_numbers',
@@ -389,6 +389,8 @@
                         }
                     }
                 });
+
+                this.api().table().columns.adjust();
             }
         });
         // $('.dispute_modal').on('click',function () {
