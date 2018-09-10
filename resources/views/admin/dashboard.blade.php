@@ -401,8 +401,8 @@
 
                 // Setup grid
                 grid: {
-                    x: 40,
-                    x2: 20
+                    x: 60,
+                    x2: 40
                 },
 
                 // Add tooltip

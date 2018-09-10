@@ -2,10 +2,10 @@
   data-scroll-to-active="true">
     <div class="main-menu-content">
       <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
-        <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Order Management</span></a></li>
+        <li class=" nav-item"><a href="{{route('cod.orders.index')}}"><span class="menu-title" data-i18n="nav.dash.main">Order Management</span></a></li>
 
         @if (session('user_type') == 1 || count(array_intersect([1, 3], session('permissions'))) !== 0)
-          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Book Shipments</span></a>
+          <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Book Shipments</span></a>
             <ul class="menu-content">
               @if (session('user_type') == 1 || in_array(1, session('permissions')))
                 <li><a class="menu-item" href="{{ route('cod.shipment.book.index') }}">Book by Order Form</a></li>
@@ -21,7 +21,7 @@
         @endif
 
         @if(session('packaging_charges_check') && (session('user_type') == 1 || in_array(4, session('permissions'))))
-          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Packaging Material</span></a>
+          <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Packaging Material</span></a>
               <ul class="menu-content">
                   <li><a class="menu-item" href="{{ route('cod.packaging.requests.index') }}">Request</a></li>
               </ul>
@@ -29,11 +29,11 @@
         @endif
 
         @if (session('user_type') == 1 || in_array(5, session('permissions')))
-          <li class=" nav-item"><a href="{{ route('cod.finance.payments.index') }}"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Finance Payments</span></a></li>
+          <li class=" nav-item"><a href="{{ route('cod.finance.payments.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Finance Payments</span></a></li>
         @endif
 
         @if (session('user_type') == 1 || count(array_intersect([6, 7], session('permissions'))) !== 0)
-          <li class=" nav-item"><a href="#"><i class="la la-exclamation-circle"></i><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
+          <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
               <ul class="menu-content">
                   @if (session('user_type') == 1 || in_array(6, session('permissions')))
                     <li><a class="menu-item" href="{{ route('cod.dispute.index') }}">Log</a></li>
@@ -47,18 +47,18 @@
         @endif
 
         @if (session('user_type') == 1)
-          <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Substitute Accounts</span></a></li>
+          <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Substitute Accounts</span></a></li>
         @endif
 
         @if (session('user_type') == 1 || in_array(8, session('permissions')))
-          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a>
+          <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a>
               <ul class="menu-content">
                   <li><a class="menu-item" href="{{ route('cod.reports.qsr.index') }}">QSR</a></li>
               </ul>
           </li>
         @endif
 
-        <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><i class="la la-home"></i><span class="menu-title">Tracking</span></a></li>
+        <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title">Tracking</span></a></li>
       </ul>
     </div>
   </div>
