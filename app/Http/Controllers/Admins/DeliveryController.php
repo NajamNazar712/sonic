@@ -1621,11 +1621,8 @@ class DeliveryController extends Controller
     //for ajax select dncc
     public function completed_deliveries_selected_dncc(Request $request){
         $note_ids = explode(',',$request->delivery_note_ids);
-//        return $note_ids;
         $updated = DeliveryNote::where('dncc_status',1)->whereIn('id',$note_ids)->exists();
         if(!$updated){
-//            dd($updated);
-//            return 132;
             session(['dncc_ids'=> $note_ids]);
             $delivery_note = DeliveryNote::find($note_ids[0]);
             $hub_name = $delivery_note->hub->name;

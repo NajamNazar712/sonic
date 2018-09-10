@@ -116,26 +116,52 @@
                             className: 'btn btn-primary confirm',
                             enabled: false,
                             action: function (e, dt, node, config) {
-                                if(selected_rows != ''){
-                                    $.ajax({
-                                        url:"{{route('admin.return.marked.status')}}",
-                                        method:'POST',
-                                        data:{
-                                            'shipment_ids':selected_rows,
-                                            '_token':'{{ csrf_token() }}',
-                                            'action': 'confirm'
-                                        }
-                                    }).done(function (data) {
-                                        $.each(selected_rows, function(index, id) {
-                                            table.row($('#datatable tbody tr#' + id)).deselect();
-                                        });
-                                        selected_rows = [];
-                                        table.button('.confirm').disable();
-                                        table.button('.re-attempt').disable();
-                                        table.draw('false');
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                if(selected_rows !== ''){
+                                    swal({
+                                        title: 'Are You Sure?',
+                                        text: 'Select Yes to change shipment status to Return-Confirm!',
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function (confirm) {
+                                        if (confirm) {
+                                            $.ajax({
+                                                url:"{{route('admin.return.marked.status')}}",
+                                                method:'POST',
+                                                data:{
+                                                    'shipment_ids':selected_rows,
+                                                    '_token':'{{ csrf_token() }}',
+                                                    'action': 'confirm'
+                                                }
+                                            }).done(function (data) {
+                                                $.each(selected_rows, function(index, id) {
+                                                    table.row($('#datatable tbody tr#' + id)).deselect();
+                                                });
+                                                selected_rows = [];
+                                                table.button('.confirm').disable();
+                                                table.button('.re-attempt').disable();
+                                                table.draw('false');
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                                            });
+                                        }
                                     });
+
 
                                 }else{
                                     var error = "Not selected any shipments!";
@@ -152,25 +178,51 @@
                             enabled: false,
                             action: function (e, dt, node, config) {
                                 if(selected_rows != ''){
-                                    $.ajax({
-                                        url:"{{route('admin.return.marked.status')}}",
-                                        method:'POST',
-                                        data:{
-                                            'shipment_ids':selected_rows,
-                                            '_token':'{{ csrf_token() }}',
-                                            'action': 'reattempt'
-                                        }
-                                    }).done(function (data) {
-                                        selected_rows = [];
-                                        table.button('.confirm').disable();
-                                        table.button('.re-attempt').disable();
-                                        table.draw('false');
-                                        $.each(selected_rows, function(index, id) {
-                                            table.row($('#datatable tbody tr#' + id)).deselect();
-                                        });
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    swal({
+                                        title: 'Are You Sure?',
+                                        text: 'Select Yes to change shipment status to Re-Attempt!',
+                                        icon: 'warning',
+                                        buttons: {
+                                            cancel: {
+                                                text: 'No',
+                                                value: null,
+                                                visible: true,
+                                                closeModal: true,
+                                            },
+                                            confirm: {
+                                                text: 'Yes',
+                                                value: true,
+                                                visible: true,
+                                                closeModal: true
+                                            }
+                                        },
+                                        closeOnClickOutside: false,
+                                        closeOnEsc: false,
+                                        dangerMode: true
+                                    }).then(function (confirm) {
+                                        if (confirm) {
+                                            $.ajax({
+                                                url:"{{route('admin.return.marked.status')}}",
+                                                method:'POST',
+                                                data:{
+                                                    'shipment_ids':selected_rows,
+                                                    '_token':'{{ csrf_token() }}',
+                                                    'action': 'reattempt'
+                                                }
+                                            }).done(function (data) {
+                                                selected_rows = [];
+                                                table.button('.confirm').disable();
+                                                table.button('.re-attempt').disable();
+                                                table.draw('false');
+                                                $.each(selected_rows, function(index, id) {
+                                                    table.row($('#datatable tbody tr#' + id)).deselect();
+                                                });
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                                            });
+                                        }
                                     });
+
                                 }
                             }
                             @endif
@@ -305,26 +357,57 @@
             $('body').on('click','.returnMarkStatus',function () {
                 var action = $(this).data('action');
                 var row_id = $(this).parents('tr').attr('id');
+                if(action === 'confirm'){
+                    atext = 'Select Yes to change shipment status to Return-Confirm!';
+                }else if(action === 'reattempt'){
+                    atext = 'Select Yes to change shipment status to Re-Attempt!';
+                }
                 if(row_id != '' && action != ''){
-                        $.ajax({
-                            url:"{{route('admin.return.marked.status.single')}}",
-                            method:'POST',
-                            data:{
-                                'shipment_id':row_id,
-                                '_token':'{{ csrf_token() }}',
-                                'action': action
+                    swal({
+                        title: 'Are You Sure?',
+                        text: atext,
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
                             }
-                        }).done(function (data) {
-                           if(data.status == 1){
-                               table.draw('false');
-                               toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $.ajax({
+                                url:"{{route('admin.return.marked.status.single')}}",
+                                method:'POST',
+                                data:{
+                                    'shipment_id':row_id,
+                                    '_token':'{{ csrf_token() }}',
+                                    'action': action
+                                }
+                            }).done(function (data) {
+                                if(data.status == 1){
+                                    table.draw('false');
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                           }else{
-                               toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                }else{
+                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                           }
+                                }
 
-                        });
+                            });
+                        }
+                    });
+
 
                 }
             });

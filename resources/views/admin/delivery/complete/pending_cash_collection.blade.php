@@ -127,43 +127,69 @@
                     enabled: false,
                     action: function (e, dt, node, config) {
                         if(selected_rows != ''){
-                            $('#delivery_note_ids').val(selected_rows);
-                            var delivery_note_ids = $('#delivery_note_ids').val();
-                            // console.log(delivery_note_ids)
-                            if(delivery_note_ids != ''){
-                                $.ajax({
-                                    url:'{!! route('admin.delivery.cash_collection.pending.all') !!}',
-                                    method:'POST',
-                                    data:{
-                                        'delivery_note_ids':delivery_note_ids,
-                                        '_token':'{{csrf_token()}}'
+                            swal({
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to collect cash!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
                                     }
-                                }).done(function (data) {
-                                    table.button(0).disable();
-                                    if(data.status == 1){
-                                        $('#delivery_note_ids').val('');
-                                        selected_rows = [];
-                                        hub_ids = [];
-                                        table.draw();
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    $('#delivery_note_ids').val(selected_rows);
+                                    var delivery_note_ids = $('#delivery_note_ids').val();
+                                    // console.log(delivery_note_ids)
+                                    if(delivery_note_ids != ''){
+                                        $.ajax({
+                                            url:'{!! route('admin.delivery.cash_collection.pending.all') !!}',
+                                            method:'POST',
+                                            data:{
+                                                'delivery_note_ids':delivery_note_ids,
+                                                '_token':'{{csrf_token()}}'
+                                            }
+                                        }).done(function (data) {
+                                            table.button(0).disable();
+                                            if(data.status == 1){
+                                                $('#delivery_note_ids').val('');
+                                                selected_rows = [];
+                                                hub_ids = [];
+                                                table.draw();
+                                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                                    }else{
-                                        $('#delivery_note_ids').val('');
-                                        table.draw();
-                                        hub_ids = [];
-                                        selected_rows = [];
-                                        $msg = data.error;
-                                        if(data.notes != null){
-                                            $.each(data.notes,function (index,id) {
-                                                $msg += '<br>';
-                                                $msg += 'Delivery Note # '+id;
-                                            });
-                                        }
-                                        toastr.error($msg, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            }else{
+                                                $('#delivery_note_ids').val('');
+                                                table.draw();
+                                                hub_ids = [];
+                                                selected_rows = [];
+                                                $msg = data.error;
+                                                if(data.notes != null){
+                                                    $.each(data.notes,function (index,id) {
+                                                        $msg += '<br>';
+                                                        $msg += 'Delivery Note # '+id;
+                                                    });
+                                                }
+                                                toastr.error($msg, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                                            }
+                                        });
                                     }
-                                });
-                            }
+
+                                }
+                            });
 
                         }else{
                             var error = "Something went wrong please refresh page and try again!";
@@ -301,22 +327,48 @@
             });
             $('body').on('click','.cash_collect',function () {
                 var rowid = $(this).parents('tr').attr('id');
-                $.ajax({
-                    url:'{!! route('admin.delivery.cash_collection.pending.collect') !!}',
-                    method:'POST',
-                    data:{
-                        'delivery_note_id':rowid,
-                        '_token':'{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status === 1){
-                        table.draw();
-                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to collect cash!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url:'{!! route('admin.delivery.cash_collection.pending.collect') !!}',
+                            method:'POST',
+                            data:{
+                                'delivery_note_id':rowid,
+                                '_token':'{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status === 1){
+                                table.draw();
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                            }
+                        });
                     }
-                })
+                });
+
             });
 
 
