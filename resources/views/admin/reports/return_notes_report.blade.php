@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Return Notes Report')
+
 @section('content')
     <h1 class="mb-1">
         Return Notes Report
@@ -219,6 +221,7 @@
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true,
                 buttons: [
                     {
                     extend: 'excelHtml5',
@@ -259,7 +262,9 @@
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-
+                initComplete: function() {
+                    this.api().table().columns.adjust();
+                }
             });
 
             $('#search_filter_btn').on('click',function () {

@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Make Payments')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -211,60 +213,6 @@
 @endsection
 
 @section('css')
-	<style>
-		.modal .modal-dialog.modal-lg.modal-full-length {
-			max-width: 95%;
-		}
-
-		table,
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table thead tr th,
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table tbody tr td,
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #64a0d2;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -311,6 +259,7 @@
 				@else
 					dom: 'ltipr',
 				@endif
+				scrollX: true,
 				select: {
 					info: false,
 					style: 'multi',
@@ -336,19 +285,19 @@
 					{data:'delivered_shipments', name: 'pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'pending_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
-					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount'},
-					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
-					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
-					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable'},
+					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', orderable: false},
+					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', orderable: false},
+					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'ubi.bank_name', class: 'align-middle text-center bank'},
 					{data:'bank_branch', name: 'ubi.bank_branch', class: 'align-middle text-center bank_branch'},
 					{data:'account_no', name: 'ubi.account_no', class: 'align-middle text-center account_no'},
-					{data:'account_title', name: 'ub.account_title', class: 'align-middle text-center account_title'},
+					{data:'account_title', name: 'ubi.account_title', class: 'align-middle text-center account_title'},
 					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
 					{data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
 					{data:'payment_mode', name: 'ubi.payment_mode', class: 'align-middle text-center payment_mode'},
 					{data:'payment_cycle', name: 'ubi.payment_cycle', class: 'align-middle text-center payment_cycle'},
-					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging'},
+					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -380,11 +329,14 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				}
 			});
 
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
 				dom: 'tr',
+				scrollX: true,
 				paging: false,
 				select: {
 					info: false,
@@ -440,6 +392,8 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				},
 				drawCallback: function() {
 					initial_total_hold = this.api().column('.payable').data().reduce(function (a, b) {

@@ -507,7 +507,9 @@ class AdminPickupsController extends Controller
       })
       ->filterColumn('pickup_note_no', function($query, $keyword) {
         $query->where('pickup_notes.id', '=', $keyword);
-      });
+      })
+      ->orderColumn('rider', 'r.name $1, r.phone $1')
+      ->orderColumn('route', 'ro.code $1, ro.start $1, ro.end $1');
 
       return $datatables->make(true);
     }
@@ -843,7 +845,9 @@ class AdminPickupsController extends Controller
       })
       ->filterColumn('pickup_note_no', function($query, $keyword) {
         $query->where('pickup_notes.id', '=', $keyword);
-      });
+      })
+      ->orderColumn('rider', 'r.name $1, r.phone $1')
+      ->orderColumn('route', 'ro.code $1, ro.start $1, ro.end $1');
 
       return $datatables->make(true);
     }

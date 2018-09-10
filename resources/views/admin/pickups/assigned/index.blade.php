@@ -173,9 +173,9 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data: 'rider', name: 'r.name', class: 'align-middle rider'},
+					{data: 'rider', name: 'rider', class: 'align-middle rider'},
 					{data: 'rider_type', name: 'rc.name', class: 'align-middle rider_type'},
-					{data: 'route', name: 'ro.name', class: 'align-middle route'},
+					{data: 'route', name: 'route', class: 'align-middle route'},
 					{data: 'city', name: 'c.name', class: 'align-middle city'},
 					{data: 'pickups', name: 'pickup_notes.pickups', class: 'align-middle pickups'},
 					{data: 'bookings', name: 'pickup_notes.bookings', class: 'align-middle bookings'},
