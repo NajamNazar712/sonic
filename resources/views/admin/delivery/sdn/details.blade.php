@@ -1,4 +1,5 @@
 @extends('admin.layout.master')
+@section('title','Station Delivery Note')
 
 @section('content')
     <h1 class="mb-1">
@@ -136,6 +137,7 @@
             } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true,
                 buttons: [{
                     extend: 'excelHtml5',
                     title: 'Station Deposit Note',
@@ -191,6 +193,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
 

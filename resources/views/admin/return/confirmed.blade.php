@@ -1,4 +1,5 @@
 @extends('admin.layout.master')
+@section('title','Return Confirmed Shipments')
 
 @section('content')
     <h1 class="mb-1">
@@ -139,6 +140,7 @@
             });
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
+                scrollX: true,
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 pagingType: 'full_numbers',
@@ -201,6 +203,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
         // $('#select_type').on('change',function () {

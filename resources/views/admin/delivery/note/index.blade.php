@@ -1,5 +1,6 @@
 
 @extends('admin.layout.master')
+@section('title','Create Delivery Note')
 
 @section('content')
     <h1 class="mb-1">
@@ -182,6 +183,7 @@
             var shipment_ids = [];
         var table = $('#datatable').DataTable({
             dom: 'ltipr',
+            scrollX: true,
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,
             pagingType: 'full_numbers',
@@ -211,7 +213,7 @@
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
 
-
+                this.api().table().columns.adjust();
             }
         });
 
