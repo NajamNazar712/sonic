@@ -307,6 +307,7 @@
 
 
             $('#create_return_note_form').bind('submit', function(event) {
+                var this_form = this;
                 event.preventDefault();
                 var count = table.rows().count();
                 var errors = 0;
@@ -336,18 +337,36 @@
                     if (errors == 0) {
                         $('#create_return_note_form button[type="submit"]').attr('disabled', 'disabled');
                         swal({
-                            title: 'Please Wait!',
-                            text: 'Return note is being created!',
-                            icon: 'info',
-                            buttons: false,
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to create the Return Note!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
                             closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-                        $('#create_return_note_form input#shipment_ids').val(shipment_ids);
-                        $('#create_return_note_form input#selected_rider_id').val(rider);
-                        $('#create_return_note_form input#selected_route_id').val(route);
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                $('#create_return_note_form input#shipment_ids').val(shipment_ids);
+                                $('#create_return_note_form input#selected_rider_id').val(rider);
+                                $('#create_return_note_form input#selected_route_id').val(route);
 
-                        this.submit();
+                                this_form.submit();
+
+                            }
+                        });
 
                     }
                 }else{

@@ -318,6 +318,7 @@
                 event.preventDefault();
                 // riderFormValid();
                 var count = 0;
+                var this_form = this;
                 count = table.rows().count();
 
                     var errors = 0;
@@ -346,18 +347,37 @@
                         if (errors == 0) {
                             $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
                             swal({
-                                title: 'Please Wait!',
-                                text: 'Delivery Note is being created!',
-                                icon: 'info',
-                                buttons: false,
+                                title: 'Are You Sure?',
+                                text: 'Select Yes to create the Delivery Note!',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
                                 closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                            $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                            $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                            $('#create_delivery_note_form input#selected_route_id').val(route);
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if(confirm){
+                                    $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                    $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                    $('#create_delivery_note_form input#selected_route_id').val(route);
 
-                            this.submit();
+                                    this_form.submit();
+                                }
+                            });
+
+
                         }
                     }else{
                             var error = "Select at-least one shipment!";
