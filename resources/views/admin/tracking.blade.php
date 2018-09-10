@@ -318,7 +318,8 @@
 								{name: 'status', class: 'align-middle status'},
 								{name: 'reason', class: 'align-middle reason'},
 								{name: 'remarks', class: 'align-middle remarks'},
-								{name: 'user', class: 'align-middle user'}
+								{name: 'user', class: 'align-middle user'},
+								{name: 'city', class: 'align-middle city'}
 							]
 						});
 					}

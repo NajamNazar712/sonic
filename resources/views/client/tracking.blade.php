@@ -41,6 +41,12 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
+    <style>
+        .selectize-control {
+            width: 300px !important;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -272,7 +278,6 @@
                                 });
 
                                 shipment += '</tbody>';
-                                shipment += '</thead>';
                                 shipment += '</table>';
 
                                 shipment += '</div>';
@@ -293,7 +298,8 @@
                                 columns: [
                                     {name: 'date_time', class: 'align-middle date_time'},
                                     {name: 'status', class: 'align-middle status'},
-                                    {name: 'reason', class: 'align-middle reason'}
+                                    {name: 'reason', class: 'align-middle reason'},
+                                    {name: 'city', class: 'align-middle city'}
                                 ]
                             });
                         }

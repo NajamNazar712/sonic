@@ -45,8 +45,8 @@ table.dataTable {
 	font-size: 12px;
 }
 
-table.table.table-sm td {
-	padding: .3rem;
+table.table-sm {
+	margin: 0 !important;
 }
 
 table thead tr th,
@@ -54,6 +54,15 @@ table.dataTable thead tr th {
 	padding-left: 0.5em;
 	white-space: normal;
 	word-wrap: break-word;
+
+}
+
+table.table-sm thead tr th {
+	padding-left: 0.3em !important;
+}
+
+table.table.table-borderless thead tr th {
+	border: 0 !important;
 }
 
 table.dataTable thead tr th:before,
@@ -61,6 +70,19 @@ table.dataTable thead tr th:after {
 	height: 20px;
 	margin-bottom: -10px;
 	bottom: 50% !important;
+}
+
+table.table-sm thead tr th:before,
+table.table-sm thead tr th:after {
+	top: auto !important;
+}
+
+table.table-sm thead tr th:before {
+	right: 0.65em !important;
+}
+
+table.table-sm thead tr th:after {
+	right: 0.3em !important;
 }
 
 table.dataTable tbody tr.selected a {
@@ -71,6 +93,10 @@ table tbody tr td,
 table.dataTable tbody tr td {
 	padding-left: 0.5em;
 	padding-right: 0.5em;
+}
+
+table.table-sm tbody tr td {
+	padding: 0.3em !important;
 }
 
 table.dataTable tbody tr td.select-checkbox:before {
