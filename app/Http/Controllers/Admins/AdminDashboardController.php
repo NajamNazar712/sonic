@@ -3380,36 +3380,29 @@ class AdminDashboardController extends Controller
         })
         ->addColumn("action", function ($result) {
             if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
-                $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                        <div class='dropdown-menu open-left arrow'>
-                ";
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
 
                 if (session('role_id') == 1 || in_array(90, session('permissions'))) {
-                    $dropdown .= "
-                            <a href='#' class='dropdown-item' data-target-id='{$result->city_id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update City Status</a>
-                    ";
+                    $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
                 }
 
                 if (session('role_id') == 1 || in_array(91, session('permissions'))) {
                     if ($result->status == 1) {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityInactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Deactivate City</a>
-                        ";
+                        $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityInactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate City</div></button>';
                     }
                     else {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Activate City</a>
-                        ";
+                        $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityInactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate City</div></button>';
                     }
                 }
 
-                $dropdown .= "
-                        </div>
-                    </span>
-                ";
+                $dropdown .= '
+                    </div>
+                  </div>
+                ';
 
                 return $dropdown;
             }
@@ -3625,38 +3618,31 @@ class AdminDashboardController extends Controller
             })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([94, 95], session('permissions'))) !== 0) {
-                $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                        <div class='dropdown-menu open-left arrow'>
-                ";
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
 
-                if (session('role_id') == 1 || in_array(94, session('permissions'))) {
-                    $dropdown .= "
-                            <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editroute' data-toggle='modal' data-target='#editRoute'><i class='ft-plus-circle primary'></i> Update Route</a>
-                    ";
-                }
-
-                if (session('role_id') == 1 || in_array(95, session('permissions'))) {
-                    if ($result->status == 1) {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeInactive'  data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Deactivate Route</a>
-                        ";
+                    if (session('role_id') == 1 || in_array(94, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->id . ' rel="editroute" data-toggle="modal" data-target="#editRoute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Route</div></button>';
                     }
-                    else {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeActive' data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Activate Route</a>
-                        ";
-                    }
-                }
 
-                $dropdown .= "
+                    if (session('role_id') == 1 || in_array(95, session('permissions'))) {
+                        if ($result->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' data-toggle="modal" rel="routeInactive" data-target="#ConfirmModalRoute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Route</div></button>';
+                        }
+                        else {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' data-toggle="modal" rel="routeActive" data-target="#ConfirmModalRoute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Route</div></button>';
+                        }
+                    }
+
+                    $dropdown .= '
                         </div>
-                    </span>
-                ";
+                      </div>
+                    ';
 
-                return $dropdown;
+                    return $dropdown;
             }
             else {
                 return '';
@@ -3787,44 +3773,37 @@ class AdminDashboardController extends Controller
             })
             ->addColumn("action", function ($rider) {
                 if (session('role_id') == 1 || count(array_intersect([98, 99], session('permissions'))) !== 0) {
-                $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                        <div class='dropdown-menu open-left arrow'>
-                ";
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
 
-                if (session('role_id') == 1 || in_array(98, session('permissions'))) {
-                    $dropdown .= "
-                            <a href='#' class='dropdown-item' data-target-id='{$rider->id}' rel='editRider' data-toggle='modal' data-target='#editRider'><i class='ft-plus-circle primary'></i> Update Rider</a>
-                    ";
-                }
-
-                if (session('role_id') == 1 || in_array(99, session('permissions'))) {
-                    if ($rider->status == 1) {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderInactive'  data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Deactivate Rider</a>
-                        ";
+                    if (session('role_id') == 1 || in_array(98, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $rider->id . ' rel="editRider" data-toggle="modal" data-target="#editRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
                     }
-                    else {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderActive' data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Activate Rider</a>
-                        ";
-                    }
-                }
 
-                $dropdown .= "
+                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                        if ($rider->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . ' data-toggle="modal" rel="riderInactive" data-target="#ConfirmModalRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+                        }
+                        else {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . ' data-toggle="modal" rel="riderActive" data-target="#ConfirmModalRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                        }
+                    }
+
+                    $dropdown .= '
                         </div>
-                    </span>
-                ";
+                      </div>
+                    ';
 
-                return $dropdown;
-            }
-            else {
-                return '';
-            }
-        })
-        ->make(true);
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            })
+            ->make(true);
     }
     public function addRiderView(){
         $city = City::select(['id','name'])->where('status',1)->get();

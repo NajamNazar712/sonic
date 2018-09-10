@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Rider Management')
+
 @section('content')
     <h1>Rider Management</h1>
 
@@ -8,32 +10,24 @@
             <div class="col-12">
                 <div class="card">
 
-                    <div class="card-header">
-                        <span class="font-large-1 card-title">Riders List</span>
-                        {{--<button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRider" data-toggle="modal">Add Rider</button>--}}
-
-                        <div class="mt-1">
-                            @include('admin.inc.messages')
-                        </div>
-                    </div>
-
-
                     <div class="card-content">
                         <div class="card-body card-dashboard">
-                            <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
+                            @include('admin.inc.messages')
+
+                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th>S No.</th>
-                                    <th>City</th>
-                                    <th>Name</th>
-                                    <th>Phone No</th>
-                                    <th>CNIC</th>
-                                    <th>Address</th>
-                                    <th>Route</th>
-                                    <th>Category</th>
-                                    <th>Added On</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th class="border-primary border-darken-1">S No.</th>
+                                    <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Name</th>
+                                    <th class="border-primary border-darken-1">Phone No</th>
+                                    <th class="border-primary border-darken-1">CNIC</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Route</th>
+                                    <th class="border-primary border-darken-1">Category</th>
+                                    <th class="border-primary border-darken-1">Added On</th>
+                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -48,54 +42,6 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <style>
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-
-        }
-        /*table.dataTable tbody tr td.junction{*/
-            /*word-wrap: break-word;*/
-            /*background: #606060;*/
-        /*}*/
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-    </style>
 @endsection
 
 @section('js')
@@ -120,6 +66,7 @@
                 @else
                     dom: 'ltipr',
                 @endif
+                scrollX: true,
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 pagingType: 'full_numbers',
@@ -129,16 +76,16 @@
                 ajax: '{{ route('admin.management.rider.ajax') }}',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'city', name: 'cities.name', class: 'city'},
-                    {data: 'rider', name: 'riders.name', class: 'name'},
-                    {data: 'phone', name: 'riders.phone', class: 'phone'},
-                    {data: 'cnic', name: 'riders.cnic', class: 'cnic'},
-                    {data: 'address', name: 'riders.address', class: 'address'},
-                    {data: 'route', name: 'route', class: 'route'},
-                    {data: 'category', name: 'rider_categories.name', class: 'category'},
-                    {data: 'created_at', name: 'created_at', class: 'created_at'},
-                    {data: 'status', name: 'status', class: 'status'},
-                    {data: 'action', name: 'action', class: 'text-center action', orderable: false, searchable: false}
+                    {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'rider', name: 'riders.name', class: 'align-middle name'},
+                    {data: 'phone', name: 'riders.phone', class: 'align-middle phone'},
+                    {data: 'cnic', name: 'riders.cnic', class: 'align-middle cnic'},
+                    {data: 'address', name: 'riders.address', class: 'align-middle address'},
+                    {data: 'route', name: 'route', class: 'align-middle route'},
+                    {data: 'category', name: 'rider_categories.name', class: 'align-middle category'},
+                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -169,6 +116,8 @@
                             }
                         }
                     });
+
+                    this.api().table().columns.adjust();
                 }
             });
 

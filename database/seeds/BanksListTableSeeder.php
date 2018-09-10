@@ -63,7 +63,7 @@ class BanksListTableSeeder extends Seeder
             'United Bank Limited
         ');
 
-        $affilate = array(0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
+        $affilate = array(0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0);
 
         for($i=0;$i<count($names);$i++)
         {

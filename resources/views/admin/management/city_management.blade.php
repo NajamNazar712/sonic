@@ -1,5 +1,6 @@
 @extends('admin.layout.master')
 
+@section('title', 'City Management')
 
 @section('content')
     <h1>City Management</h1>
@@ -9,28 +10,20 @@
             <div class="col-12">
                 <div class="card">
 
-                    <div class="card-header">
-                        <span class="font-large-1 card-title">Cities List</span>
-                        {{--<button type="button" rel="addcity" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addCity" data-toggle="modal">Add City</button>--}}
-
-                        <div class="mt-1">
-                            @include('admin.inc.messages')
-                        </div>
-                    </div>
-
-
                     <div class="card-content">
                         <div class="card-body card-dashboard">
-                            <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
+                            @include('admin.inc.messages')
+
+                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th>S No.</th>
-                                    <th>City Name</th>
-                                    <th>City Code</th>
-                                    <th>Hub Name</th>
-                                    <th>Hub Code</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th class="border-primary border-darken-1">S No.</th>
+                                    <th class="border-primary border-darken-1">City Name</th>
+                                    <th class="border-primary border-darken-1">City Code</th>
+                                    <th class="border-primary border-darken-1">Hub Name</th>
+                                    <th class="border-primary border-darken-1">Hub Code</th>
+                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -47,51 +40,6 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-
-
-    <style type="text/css">
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-    </style>
 @endsection
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
@@ -126,6 +74,7 @@
                 @else
                     dom: 'ltipr',
                 @endif
+                scrollX: true,
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 pagingType: 'full_numbers',
@@ -170,6 +119,8 @@
                            }
                        }
                    });
+
+                   this.api().table().columns.adjust();
                }
             });
 
