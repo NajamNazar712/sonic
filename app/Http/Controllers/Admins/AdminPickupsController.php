@@ -148,9 +148,9 @@ class AdminPickupsController extends Controller
 
               $pickup_note->bookings = $pickup_note->bookings - 1;
 
-              $weight = $pickup_note->weight - $weight;
+              $weight = $pickup_note->total_estimated_weight - $weight;
 
-              $pickup_note->weight = $weight;
+              $pickup_note->total_estimated_weight = $weight;
 
               $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
 
@@ -1240,9 +1240,9 @@ class AdminPickupsController extends Controller
 
               $pickup_note->bookings = $pickup_note->bookings - 1;
 
-              $weight = $pickup_note->weight - $weight;
+              $weight = $pickup_note->total_estimated_weight - $weight;
 
-              $pickup_note->weight = $weight;
+              $pickup_note->total_estimated_weight = $weight;
 
               if ($weight < $defined_pickup_weight) {
                 $pickup_note->pickup_type = 0;

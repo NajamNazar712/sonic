@@ -356,34 +356,36 @@
 				});
 			});
 
-			$('#arrival_of_shipments_form').validate({
-				submitHandler: function(form) {
-					swal({
-						text: 'Are you sure, you want to Receive these Shipments?',
-						icon: 'warning',
-						buttons: {
-							cancel: {
-								text: 'No',
-								value: null,
-								visible: true,
-								closeModal: true,
-							},
-							confirm: {
-								text: 'Yes',
-								value: true,
-								visible: true,
-								closeModal: true
-							}
+			$('#arrival_of_shipments_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				var form = this;
+
+				swal({
+					text: 'Are you sure, you want to Receive these Shipments?',
+					icon: 'warning',
+					buttons: {
+						cancel: {
+							text: 'No',
+							value: null,
+							visible: true,
+							closeModal: true,
 						},
-						closeOnClickOutside: false,
-						closeOnEsc: false,
-						dangerMode: true
-					}).then(function(confirm) {
-						if (confirm) {
-							form.submit;
+						confirm: {
+							text: 'Yes',
+							value: true,
+							visible: true,
+							closeModal: true
 						}
-					});
-				}
+					},
+					closeOnClickOutside: false,
+					closeOnEsc: false,
+					dangerMode: true
+				}).then(function(confirm) {
+					if (confirm) {
+						form.submit;
+					}
+				});
 			});
 		});
 	</script>
