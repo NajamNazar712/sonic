@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Arrival of Shipments')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -26,7 +28,7 @@
 									<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required">
 								</div>
 
-								<div class="form-group text-center ml-1 p-1 border border-light rounded">
+								<div class="form-group text-center mt-1 mb-1 ml-1 p-1 border border-light rounded">
 									<label class="mr-1">Volumetric Weight</label>
 									<input type="checkbox" name="volumetric_weight" class="switch hidden volumetric_weight" data-group-cls="btn-group-sm">
 								</div>
@@ -86,50 +88,6 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #64a0d2;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -146,6 +104,7 @@
 
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
+				scrollX: true,
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',
@@ -158,7 +117,7 @@
 					{name: 'cod_amount', class: 'align-middle cod_amount'},
 					{name: 'estimated_weight', class: 'align-middle estimated_weight'},
 					{name: 'actual_weight', class: 'align-middle actual_weight'},
-					{name: 'remove', class: 'align-middle remove'}
+					{name: 'remove', class: 'align-middle remove', sortable: false}
 				],
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
@@ -189,6 +148,8 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				}
 			});
 

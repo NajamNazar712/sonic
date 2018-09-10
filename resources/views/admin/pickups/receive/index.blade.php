@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Receive Pickups')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -77,54 +79,6 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #64a0d2;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -165,6 +119,7 @@
 
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
+				scrollX: true,
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				stateSave: true,
@@ -176,16 +131,16 @@
 				order: [[4, 'asc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data: 'rider', name: 'rider', class: 'align-middle rider'},
+					{data: 'rider', name: 'r.name', class: 'align-middle rider'},
 					{data: 'rider_type', name: 'rc.name', class: 'align-middle rider_type'},
-					{data: 'route', name: 'route', class: 'align-middle route'},
+					{data: 'route', name: 'ro.name', class: 'align-middle route'},
 					{data: 'city', name: 'c.name', class: 'align-middle city'},
 					{data: 'pickups', name: 'pickup_notes.pickups', class: 'align-middle pickups'},
 					{data: 'bookings', name: 'pickup_notes.bookings', class: 'align-middle bookings'},
-					{data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},
+					{data: 'pickup_type', name: 'pickup_notes.pickup_type', class: 'align-middle pickup_type'},
 					{data: 'assigned_date', name: 'pickup_notes.created_at', class: 'align-middle assigned_date'},
 					{data: 'assigned_by', name: 'a.name', class: 'align-middle assigned_by'},
-					{data: 'pickup_note_no', name: 'pickup_note_no', class: 'align-middle pickup_note_no'},
+					{data: 'pickup_note_no', name: 'pickup_notes.id', class: 'align-middle pickup_note_no'},
 					{data: 'status', name: 'status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
@@ -218,6 +173,8 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				}
 			});
 
