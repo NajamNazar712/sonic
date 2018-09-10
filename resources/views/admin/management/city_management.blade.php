@@ -17,7 +17,18 @@
                             @include('admin.inc.messages')
                         </div>
                     </div>
+                    <div style="display: none;">
+                        <form id="city_active" action="{{route('admin.management.city.status')}}" method="post" class="mt-2">
+                            {{csrf_field()}}
+                            <input type="hidden" name="_method" value="PUT">
+                            <input type="hidden" name="cid" id="cid">
+                            <input type="hidden" name="status" id="cstatus">
+                            <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
+                            <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
 
+
+                        </form>
+                    </div>
 
                     <div class="card-content">
                         <div class="card-body card-dashboard">
@@ -208,10 +219,41 @@
             var rel = $(this).attr('rel');
             var isHub = $(this).attr('hub');
             if(isHub == 0){
-                $('.modal-body #cid').val(id);
-                $('.modal-body #cstatus').val(rel);
-                $('#ConfirmModalCity').modal('show');
-            }else if(isHub == 1){
+                $('.city_active #cid').val(id);
+                $('.city_active #cstatus').val(rel);
+                if(rel == 'cityInactive'){
+                    atext = 'Select Yes to inactive this city!';
+                }else if(rel == 'cityactive'){
+                    atext = 'Select Yes to active this city!';
+                }
+                swal({
+                    title: 'Are You Sure?',
+                    text: atext,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $('#city_active').submit();
+                    }
+                });
+                // $('#ConfirmModalCity').modal('show');
+            }else if(isHub === 1){
                 $.ajax({
                     url:'/admin/management/city/'+id+'/status/ajax',
                     type:'GET',
