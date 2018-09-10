@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Tracking')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -39,66 +41,6 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.table.table-sm td {
-			padding: .3rem;
-		}
-
-		table.dataTable {
-			margin: 0 !important;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.3em !important;
-			white-space: normal;
-			word-wrap: break-word;
-			border: 0 !important;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			top: auto !important;
-			bottom: 50% !important;
-		}
-
-		table.dataTable thead tr th:before {
-			right: 0.65em !important;
-		}
-
-		table.dataTable thead tr th:after {
-			right: 0.3em !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.3em;
-			padding-right: 0.3em;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-
-		.selectize-control {
-			width: 300px;
-		}
-
-		.selectize-control .selectize-input {
-			vertical-align: middle;
-		}
-
-		.selectize-control .selectize-input .item {
-			word-break: break-all;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -211,7 +153,7 @@
                                 shipment += '<div class="p-1">';
                                 shipment += '<div class="row justify-content-between">';
 
-                                shipment += '<div class="col-5 mt-1">';
+                                shipment += '<div class="col-md-12 col-lg-5 mt-md-2 mt-lg-1">';
                                 shipment += '<h4><u>Shipper Information</u></h4>';
                                 shipment += '<div class="border">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
@@ -244,7 +186,7 @@
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-                                shipment += '<div class="col-5 mt-1">';
+                                shipment += '<div class="col-md-12 col-lg-5 mt-md-2 mt-lg-1">';
                                 shipment += '<h4><u>Consignee Information</u></h4>';
                                 shipment += '<div class="border">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';

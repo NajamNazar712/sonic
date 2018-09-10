@@ -113,7 +113,9 @@ class AdminPickupsController extends Controller
 
         $pickup_request = $pickup_request_assigned_shipment->pickup_request;
 
-        $pickup_request->bookings = $pickup_request->bookings - 1;
+        $bookings = $pickup_request->bookings - 1;
+
+        $pickup_request->bookings = $bookings;
 
         if ($pickup_request_assigned_shipment->status == 1) {
           $pickup_request->pending_bookings = $pickup_request->pending_bookings - 1;
@@ -123,12 +125,63 @@ class AdminPickupsController extends Controller
 
         $pickup_request_assigned_shipment->delete();
 
-        if ($pickup_request->bookings == 0) {
+        if ($bookings == 0) {
           $pickup_request->total_estimated_weight = 0;
           $pickup_request->pickup_type = 0;
           $pickup_request->status = 3;
 
           $pickup_request->save();
+
+          if ($pickup_request->pickup_note_request) {
+            $pickup_note = $pickup_request->pickup_note_request->pickup_note;
+
+            if ($bookings == 0) {
+              PickupNoteRequest::where('pickup_note_id', $pickup_note->id)->where('pickup_request_id', $pickup_request->id)->delete();
+            }
+
+            $pickup_note_requests = $pickup_note->pickup_note_requests;
+
+            if ($pickup_note_requests) {
+              if ($bookings == 0) {
+                $pickup_note->pickups = $pickup_note->pickups - 1;
+              }
+
+              $pickup_note->bookings = $pickup_note->bookings - 1;
+
+              $weight = $pickup_note->weight - $weight;
+
+              $pickup_note->weight = $weight;
+
+              $defined_pickup_weight = GlobalSettings::where('type', 'pickup_weight');
+
+              if ($defined_pickup_weight->exists()) {
+                $defined_pickup_weight = $defined_pickup_weight->first();
+
+                $defined_pickup_weight = $defined_pickup_weight->setting_value;
+              }
+              else {
+                $defined_pickup_weight = 10;
+              }
+
+              if ($weight < $defined_pickup_weight) {
+                $pickup_note->pickup_type = 0;
+              }
+              else {
+                $pickup_note->pickup_type = 1;
+              }
+
+              $pickup_note->save();
+            }
+            else {
+              $pickup_note->pickups = 0;
+              $pickup_note->bookings = 0;
+              $pickup_note->total_estimated_weight = 0;
+              $pickup_note->pickup_type = 0;
+              $pickup_note->status_id = 5;
+
+              $pickup_note->save();
+            }
+          }
         }
         else {
           $shipment = Shipment::find($shipment_id);

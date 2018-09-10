@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Disputes')
+
 @section('content')
     <h1 class="mb-1">
         Disputes
@@ -8,7 +10,7 @@
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
-                @include('admin.inc.messages')
+                @include('client.inc.messages')
 
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
@@ -22,7 +24,7 @@
                         <th class="border-primary border-darken-1">Dispute Type</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Action</th>
+                        <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
                 </table>
@@ -89,8 +91,8 @@
          aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Dispute Shipments List</h4>
+                <div class="modal-header">
+                    <h4 class="modal-title">Dispute Shipments List</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -111,8 +113,8 @@
          aria-hidden="true">
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
-                <div class="modal-header bg-primary white">
-                    <h4 class="modal-title white">Dispute Comments</h4>
+                <div class="modal-header">
+                    <h4 class="modal-title">Dispute Comments</h4>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
@@ -132,110 +134,6 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-    {{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/ui/perfect-scrollbar.min.css')}}">--}}
-
-
-
-    <style>
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-        .dispute_comments_section{
-            max-height: 300px;
-            overflow-y:scroll;
-            overflow-x:hidden;
-            /*overflow:hidden;*/
-            /*position: absolute;*/
-            padding: 10px;
-        }
-
-        p.comment{
-            text-align: left;
-            -ms-word-wrap: break-word;
-            word-wrap: break-word;
-        }
-        .description-div .border{
-            -webkit-border-radius: 5px;
-            -moz-border-radius: 5px;
-            border-radius: 5px;
-        }
-        .description-div{
-            text-align: left;
-        }
-        .description-div p{
-            padding:10px;
-            word-wrap: break-word;
-        }
-        .comment-post{
-            padding-top: 10px;
-        }
-        .comment-row{
-            border-radius: 5px;
-            background: #f3f3f3;
-            margin-bottom: 10px;
-            padding: 10px;
-        }
-        .comment-date{
-            font-size: 11px;
-            border-bottom: 1px solid #606060;
-        }
-        .selectize-control {
-            width: 100%;
-        }
-
-        .selectize-control .selectize-input {
-            vertical-align: middle;
-        }
-
-        .selectize-control .selectize-input .item {
-            word-break: break-all;
-        }
-        td.align-middle.description {
-            word-break: break-word;
-        }
-    </style>
 @endsection
 
 @section('js')
@@ -247,8 +145,6 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    {{--<script src="{{asset('app-assets/vendors/js/ui/perfect-scrollbar.jquery.min.js')}}" type="text/javascript"></script>--}}
-
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -291,7 +187,7 @@
             });
 
             var table = $('#datatable').DataTable({
-                // "scrollX": true,
+                scrollX: true,
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Launch Dispute',
@@ -303,7 +199,6 @@
                 }],
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
-                stateSave: true,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
@@ -351,6 +246,8 @@
                             }
                         }
                     });
+
+                    this.api().table().columns.adjust();
                 }
             });
             var max_char = 190;

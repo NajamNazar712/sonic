@@ -44,9 +44,6 @@ class ShipperReportsController extends Controller
                 }else{
                     return $days;
                 }
-            })
-            ->editColumn('arrival', function ($shipments) {
-                return $shipments->arrival ? with(new Carbon($shipments->arrival))->format('d/m/Y h:i:s A') : '';
             });
 //        if ($shipper = $request->get('search_shipper')) {
 //            $datatable->where('u.id', '=', $shipper);

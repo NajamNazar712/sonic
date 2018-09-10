@@ -41,22 +41,8 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
-    <style>
-        .hide{
-            display: none;
-        }
 
-        .ps-theme-dark > .ps-scrollbar-y-rail {
-            opacity: 0.9 !important;
-        }
-    </style>
-
-    <style>
-        html body.bg-full-screen-image {
-            background: url('{{ asset('img/bg.png') }}') no-repeat center center fixed;
-            background-size: cover;
-        }
-    </style>
+    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}">
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">

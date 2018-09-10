@@ -6,6 +6,19 @@ html body a:hover {
 	color: #6496be;
 }
 
+::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+    color: #284155 !important;
+    opacity: 1 !important; /* Firefox */
+}
+
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+    color: #284155 !important;
+}
+
+::-ms-input-placeholder { /* Microsoft Edge */
+    color: #284155 !important;
+}
+
 .col_custom {
 	min-width: 100%;
 }
@@ -14,10 +27,29 @@ html body a:hover {
 	border-right-color: #64a0d2;
 }
 
+.btn-group .dropdown-menu .dropdown-item {
+	white-space: normal;
+}
+
+.btn-outline-primary:not(:disabled):not(.disabled):active {
+	background: #5a8cb9;
+	border-color: #5a8cb9;
+}
+
+.modal .modal-dialog.modal-lg.modal-full-length {
+	max-width: 95%;
+}
+
+table,
 table.dataTable {
 	font-size: 12px;
 }
 
+table.table.table-sm td {
+	padding: .3rem;
+}
+
+table thead tr th,
 table.dataTable thead tr th {
 	padding-left: 0.5em;
 	white-space: normal;
@@ -35,6 +67,7 @@ table.dataTable tbody tr.selected a {
 	color: #6496be;
 }
 
+table tbody tr td,
 table.dataTable tbody tr td {
 	padding-left: 0.5em;
 	padding-right: 0.5em;
@@ -63,10 +96,6 @@ table.dataTable tbody tr.selected td.select-checkbox:after {
 	visibility: collapse;
 }
 
-.btn-group .dropdown-menu .dropdown-item {
-	white-space: normal;
-}
-
 #toast-bottom-center.toast-container {
 	text-align: center;
 }
@@ -87,6 +116,32 @@ table.dataTable tbody tr.selected td.select-checkbox:after {
 
 .selectize-control .selectize-input .item {
 	word-break: break-all;
+}
+
+.dispute_comments_section {
+	max-height: 300px;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 10px;
+}
+
+p.comment {
+	text-align: left;
+	-ms-word-wrap: break-word;
+	word-wrap: break-word;
+}
+
+.comment-row {
+	border-radius: 5px;
+	background: #ebf5ff;
+	margin-bottom: 10px;
+	padding: 10px;
+	border-color: #5587b4 !important;
+}
+
+.comment-date {
+	font-size: 11px;
+	border-bottom: 1px solid #5587b4;
 }
 
 @media (max-width: 767.98px) {

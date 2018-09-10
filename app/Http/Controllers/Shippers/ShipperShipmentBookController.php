@@ -159,11 +159,11 @@ class ShipperShipmentBookController extends Controller
           return ['status' => 0, 'success' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes];
         }
         else {
-          return ['status' => 1, 'error' => 'No Shipment Modes Enabled for Selected Service Type and Consignee City'];
+          return ['status' => 1, 'error' => 'No Shipping Modes Enabled for Selected Service Type and Consignee City'];
         }
       }
       else {
-        return ['status' => 1, 'error' => 'No Shipment Modes has been Enabled for you'];
+        return ['status' => 1, 'error' => 'No Shipping Modes has been Enabled for you'];
       }
     }
 
@@ -480,9 +480,9 @@ class ShipperShipmentBookController extends Controller
                             </td>
 
                             <td class="color primary border twice-left"><strong>Date</strong></td>
-                            <td>' . $shipment->created_at->format('d/m/Y') . '</td>
+                            <td>' . $shipment->created_at->format('Y-m-d') . '</td>
                             <td class="color primary"><strong>Time</strong></td>
-                            <td>' . $shipment->created_at->format('H:i A') . '</td>
+                            <td>' . $shipment->created_at->format('H:i:s') . '</td>
                           </tr>
                           <tr>
                             <td class="color primary border twice-left"><strong>Service</strong></td>
