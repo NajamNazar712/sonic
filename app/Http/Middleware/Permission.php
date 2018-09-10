@@ -263,6 +263,14 @@ class Permission
             'packaging.requests.index' => 4,
             'packaging.requests.submit' => 4,
 
+            'finance.payments.index' => 5,
+            'finance.payments.list' => 5,
+            'finance.payments.delivered_shipments' => 5,
+            'finance.payments.returned_shipments' => 5,
+            'finance.payments.adjusted_shipments' => 5,
+            'finance.payments.details_print' => 5,
+            'finance.payments.export_to_excel' => 5,
+
             'dispute.index' => 6,
             'dispute.list' => 6,
             'dispute.create' => 6,

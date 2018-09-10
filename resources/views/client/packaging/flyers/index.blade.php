@@ -18,7 +18,7 @@
                         <div class="col-12">
                             <div class="form-body">
                                 <div class="row justify-content-center">
-                                    <div class="col-6">
+                                    <div class="col-md-12 col-lg-6">
                                         <div class="form-group">
                                             <select name="address_select" id="address_select" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                                 <option value="0">New</option>
@@ -30,7 +30,7 @@
                                     </div>
                                 </div>
                                 <div class="row justify-content-center">
-                                    <div class="col-6">
+                                    <div class="col-md-12 col-lg-6">
                                         <div id="new_pickup_address" class="d-none">
                                             <div class="form-group">
                                                 <textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>
@@ -55,25 +55,25 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col">
+                                    <div class="col-md-6 col-lg-3">
                                         <div class="form-group">
                                             <label for="sm_flyer">Small Flyers</label>
                                             <input type="text" id="sm_flyer" class="form-control numeric flyer" placeholder="Small Flyers Quantity" name="sm_flyer">
                                         </div>
                                     </div>
-                                    <div class="col">
+                                    <div class="col-md-6 col-lg-3">
                                         <div class="form-group">
                                             <label for="md_flyer">Medium Flyers</label>
                                             <input type="text" id="md_flyer" class="form-control numeric flyer" placeholder="Medium Flyers Quantity" name="md_flyer">
                                         </div>
                                     </div>
-                                    <div class="col">
+                                    <div class="col-md-6 col-lg-3">
                                         <div class="form-group">
                                             <label for="lg_flyer">Large Flyers</label>
                                             <input type="text" id="lg_flyer" class="form-control numeric flyer" placeholder="Large Flyers Quantity" name="lg_flyer">
                                         </div>
                                     </div>
-                                    <div class="col">
+                                    <div class="col-md-6 col-lg-3">
                                         <div class="form-group">
                                             <label for="boxes">Boxes</label>
                                             <input type="text" id="boxes" class="form-control numeric flyer" placeholder="Boxes Quantity" name="boxes">
@@ -81,7 +81,7 @@
                                     </div>
                                 </div>
                                 <div class="row justify-content-center">
-                                    <div class="col-6">
+                                    <div class="col-md-12 col-lg-6">
                                         <div class="form-group">
                                             <label for="boxes">Flyer Mode of Payment</label>
                                             <select name="mode_of_payment" class="select2" id="mode_of_payment" data-rule-required="true" data-msg-required="Payment mode is required">
@@ -95,7 +95,7 @@
                                 </div>
 
                                 <div class="row justify-content-center">
-                                    <div class="col-6">
+                                    <div class="col-md-12 col-lg-6">
                                     <button id="RequestMaterialBtn" type="submit" class="btn btn-primary btn-block">Request Material</button>
 
                                     </div>

@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'QSR Report')
+
 @section('content')
     <h1 class="mb-1">
         QSR Report
@@ -11,54 +13,17 @@
                 @include('client.inc.messages')
 
                 <div class="row mb-2 justify-content-center">
-
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_shipper" id="search_shipper" class="form-control select2">--}}
-                                {{--@foreach($shippers as $shipper)--}}
-                                    {{--<option value="{{$shipper->id}}">{{$shipper->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_origin" id="search_origin" class="form-control select2">--}}
-                                {{--@foreach($cities as $origin)--}}
-                                    {{--<option value="{{$origin->id}}">{{$origin->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_destination" id="search_destination" class="form-control select2">--}}
-                                {{--@foreach($cities as $destination)--}}
-                                    {{--<option value="{{$destination->id}}">{{$destination->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_hub" id="search_hub" class="form-control select2">--}}
-                                {{--@foreach($hubs as $hub)--}}
-                                    {{--<option value="{{$hub->id}}">{{$hub->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    <div class="col-3 ml-5">
+                    <div class="col-md-4 col-lg-3">
                         <fieldset class="form-group">
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-md-4 col-lg-3">
                         <fieldset class="form-group">
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
                         </fieldset>
                     </div>
-                    <div class="col-2">
+                    <div class="col-md-4 col-lg-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
@@ -74,7 +39,6 @@
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
-                        {{--<th class="border-primary border-darken-1">Hub</th>--}}
                         <th class="border-primary border-darken-1">COD Amount</th>
                         <th class="border-primary border-darken-1">Aging</th>
                     </tr>
@@ -91,57 +55,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
-    <style>
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-        a.btn.btn-secondary{
-            border-radius: 20px;
-            background: #64a0d2;
-        }
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-    </style>
 @endsection
+
 @section('js')
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
@@ -213,12 +128,14 @@
             var flag = false;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true,
                 buttons: [
 
                     {
                         extend: 'excel',
                         title: 'QSR Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                        className: 'btn btn-primary',
                         exportOptions: {
                             columns: ':visible',
                             format: {
@@ -233,7 +150,6 @@
                 ],
                 lengthMenu: [[10, 50, 100], [10, 50, 100]],
                 pageLength: 10,
-                stateSave: true,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
@@ -259,7 +175,6 @@
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-                    // {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging'}
 
@@ -293,6 +208,8 @@
                             }
                         }
                     });
+
+                    this.api().table().columns.adjust();
                 }
             });
 

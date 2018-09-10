@@ -29,7 +29,7 @@
         @endif
 
         @if (session('user_type') == 1 || in_array(5, session('permissions')))
-          <li class=" nav-item"><a href="#"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Finance Payments</span></a></li>
+          <li class=" nav-item"><a href="{{ route('cod.finance.payments.index') }}"><i class="la la-home"></i><span class="menu-title" data-i18n="nav.dash.main">Finance Payments</span></a></li>
         @endif
 
         @if (session('user_type') == 1 || count(array_intersect([6, 7], session('permissions'))) !== 0)

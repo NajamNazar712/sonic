@@ -122,6 +122,18 @@ Route::prefix('cod')->name('cod.')->group(function () {
         });
     });
 
+    Route::prefix('finance')->name('finance.')->group(function () {
+        Route::prefix('payments')->name('payments.')->group(function () {
+            Route::get('', 'Shippers\ShipperFinanceController@payments_index')->name('index');
+            Route::get('list', 'Shippers\ShipperFinanceController@payments_list')->name('list');
+            Route::post('delivered_shipments', 'Shippers\ShipperFinanceController@payments_delivered_shipments')->name('delivered_shipments');
+            Route::post('returned_shipments', 'Shippers\ShipperFinanceController@payments_returned_shipments')->name('returned_shipments');
+            Route::post('adjusted_shipments', 'Shippers\ShipperFinanceController@payments_adjusted_shipments')->name('adjusted_shipments');
+            Route::post('details_print', 'Shippers\ShipperFinanceController@payments_details_print')->name('details_print');
+            Route::get('export_to_excel', 'Shippers\ShipperFinanceController@payments_export_to_excel')->name('export_to_excel');
+        });
+    });
+
     Route::prefix('reports')->name('reports.')->group(function (){
         Route::prefix('qsr')->name('qsr.')->group(function (){
             Route::get('','Shippers\ShipperReportsController@qsr_index')->name('index');

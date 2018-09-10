@@ -155,7 +155,7 @@ class ShipperDashboardController extends Controller
 
                 ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, session('user_id'), NULL);
 
-                return response()->json(['status'=>1,'success'=>'Shipment has been canceled successfully']);
+                return response()->json(['status'=>1,'success'=>'Shipment has been cancelled successfully']);
             }else{
                 return response()->json(['status'=>0,'error'=>'Shipment not found']);
             }

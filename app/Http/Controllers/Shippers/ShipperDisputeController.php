@@ -53,12 +53,16 @@ class ShipperDisputeController extends Controller
                 return "<a class='font-weight-bold shipment_count' href='#'>{$dispute->no_of_shipments}</a>";
             })
             ->addColumn("action", function ($dispute) {
-                return " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                            <a href='#' class='dropdown-item view-comments'><i class='ft-plus-circle primary'></i> View Comments</a>                                   
-                                            </div></span>";
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                        <button type="button" class="dropdown-item view-comments"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Comments</div></button>
+                    </div>
+                  </div>
+                ';
+
+                return $dropdown;
             })
 
             ->make(true);
@@ -178,13 +182,17 @@ class ShipperDisputeController extends Controller
                 return $shipments->created_at ? with(new Carbon($shipments->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn("action", function ($result) {
-                return " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item details print_airway'><i class='ft-plus-circle primary'></i> View Details</a>                                         
-                                              <a href='#' class='dropdown-item rebook'><i class='ft-plus-circle primary'></i> Re-book</a>                                         
-                                            </div></span>";
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                        <button type="button" class="dropdown-item print_airway"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>
+                        <button type="button" class="dropdown-item rebook"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Re-book</div></button>
+                    </div>
+                  </div>
+                ';
+
+                return $dropdown;
             })
             ->make(true);
     }

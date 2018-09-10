@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Tracking')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -211,7 +213,7 @@
                                 shipment += '<div class="p-1">';
                                 shipment += '<div class="row justify-content-between">';
 
-                                shipment += '<div class="col-5 mt-1">';
+                                shipment += '<div class="col-md-12 col-lg-5 mt-md-2 mt-lg-1">';
                                 shipment += '<h4><u>Shipper Information</u></h4>';
                                 shipment += '<div class="border">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
@@ -244,7 +246,7 @@
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-                                shipment += '<div class="col-5 mt-1">';
+                                shipment += '<div class="col-md-12 col-lg-5 mt-md-2 mt-lg-1">';
                                 shipment += '<h4><u>Consignee Information</u></h4>';
                                 shipment += '<div class="border">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
