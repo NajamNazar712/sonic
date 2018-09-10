@@ -35,6 +35,10 @@ html body .content .content-wrapper {
 	white-space: normal;
 }
 
+.dropdown-item:active {
+	background: #64a0d2;
+}
+
 .btn-outline-primary:not(:disabled):not(.disabled):active {
 	background: #5a8cb9;
 	border-color: #5a8cb9;

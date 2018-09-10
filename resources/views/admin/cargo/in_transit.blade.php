@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Cargo in Transit')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -293,66 +295,6 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
-
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #64a0d2;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-		.selectize-control {
-			width: 100%;
-		}
-
-		.selectize-control .selectize-input {
-			vertical-align: middle;
-		}
-
-		.selectize-control .selectize-input .item {
-			word-break: break-all;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -446,9 +388,9 @@
 				@else
                 	dom: 'ltipr',
 				@endif
+				scrollX: true,
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
-				stateSave: true,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
@@ -503,6 +445,8 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				}
 			});
 
@@ -511,6 +455,7 @@
 			@if (session('role_id') == 1 || in_array(30, session('permissions')))
 				var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
 					dom: 'tr',
+					scrollX: true,
 					paging: false,
 					columns: [
 						{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -523,6 +468,9 @@
 						var info = receive_at_link_table.page.info();
 
 						$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					},
+					initComplete: function() {
+						this.api().table().columns.adjust();
 					}
 				});
 			@endif
