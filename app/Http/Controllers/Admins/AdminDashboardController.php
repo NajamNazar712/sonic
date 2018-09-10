@@ -462,21 +462,21 @@ class AdminDashboardController extends Controller
                 return $shipments->booking_date ? with(new Carbon($shipments->booking_date))->format('d/m/Y h:i:s A') : '';
 
             })
-            ->addColumn('action',function ($shipments){
-                $drop = " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>";
-                if($shipments->shipper_status_id > 1) {
-                    $drop .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-eye primary'></i> View Charges</a>";
-                }else{
-                    $drop .= "<a href='javascript:void(0);' class='dropdown-item '><i class='ft-plus-circle primary'></i> No Action</a>";
-                }
-               
-                $drop .= "</div></span>";
-                if($shipments->shipper_status_id != 17){
+            ->addColumn('action',function ($shipments) {
+                if ($shipments->shipper_status_id != 17 && $shipments->shipper_status_id > 1) {
+                    $dropdown = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div></button>
+                            </div>
+                        </div>
+                    ';
 
-                    return $drop;
+                    return $dropdown;
+                }
+                else {
+                    return '';
                 }
             })
             ->make(true);

@@ -66,7 +66,7 @@ table.dataTable thead tr th {
 
 }
 
-table.table-sm thead tr th {
+table.table-sm.table-borderless thead tr th {
 	padding-left: 0.3em !important;
 }
 
@@ -141,6 +141,10 @@ table.dataTable tbody tr.selected td.select-checkbox:after {
 	text-align: left;
 }
 
+.select2-container--default .select2-selection--single .select2-selection__placeholder {
+	color: #284155 !important;
+}
+
 .selectize-control {
 	width: 100%;
 }
@@ -177,6 +181,12 @@ p.comment {
 .comment-date {
 	font-size: 11px;
 	border-bottom: 1px solid #5587b4;
+}
+
+@media (max-width: 991.98px) {
+	.dataTables_wrapper table {
+		overflow-x: initial;
+	}
 }
 
 @media (max-width: 767.98px) {

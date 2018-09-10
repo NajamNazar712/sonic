@@ -122,7 +122,7 @@
                                       @endforeach
                                   </select>
                               </div>
-                              <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
+                              <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
                                   <button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
@@ -141,9 +141,8 @@
               <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                   <thead>
                   <tr role="row" class="bg-primary white">
-
                       <th class="border-primary border-darken-1"></th>
-                      <th class="border-primary border-darken-1">SN No.</th>
+                      <th class="border-primary border-darken-1">S No.</th>
                       <th class="border-primary border-darken-1">Tracking No.</th>
                       <th class="border-primary border-darken-1">Order ID</th>
                       <th class="border-primary border-darken-1">Account No.</th>
@@ -159,7 +158,7 @@
                       <th class="border-primary border-darken-1">Product Type</th>
                       <th class="border-primary border-darken-1">Booking Date</th>
                       <th class="border-primary border-darken-1">Instructions</th>
-                      <th class="border-primary border-darken-1">Action</th>
+                      <th class="border-primary border-darken-1"></th>
                   </tr>
                   </thead>
               </table>
@@ -184,72 +183,10 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-
-    <style>
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-        .selectize-control {
-            width: 100%;
-        }
-
-        .selectize-control .selectize-input {
-            vertical-align: middle;
-        }
-
-        .selectize-control .selectize-input .item {
-            word-break: break-all;
-        }
-    </style>
 @endsection
 
 @section('js')
-
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-{{--    <script src="{{asset('app-assets/js/scripts/forms/select/form-select2.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
@@ -346,7 +283,7 @@
             }
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                // "scrollX": true,
+                scrollX: true,
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Print',
@@ -435,6 +372,8 @@
                             }
                         }
                     });
+
+                    this.api().table().columns.adjust();
                 }
             });
             $('.datatable tbody').on('click', 'tr td.select-checkbox', function() {

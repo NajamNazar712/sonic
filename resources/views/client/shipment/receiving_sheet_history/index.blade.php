@@ -133,7 +133,7 @@
 				rowId: 'id',
 				order: [[5, 'asc']],
 				columns: [
-					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'receiving_sheet', name: 'receiving_sheet', class: 'text-center align-middle receiving_sheet p-1'},
 					{data: 'booked', name: 'booked', class: 'align-middle booked', orderable: false, searchable: false},
 					{data: 'received', name: 'received', class: 'align-middle received', orderable: false, searchable: false},
@@ -144,7 +144,7 @@
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
 
-					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
+					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
