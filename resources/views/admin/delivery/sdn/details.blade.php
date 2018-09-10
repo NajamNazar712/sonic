@@ -101,20 +101,45 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.delivery.sdn.ajax',['id'=>$sdn_id]) }}',
+                        data: {
+                            'page': 'all'
+                        },
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.dncc);
+                                row.push(values.hub);
+                                row.push(values.rider);
+                                row.push(values.route);
+                                row.push(values.shipments_count);
+                                row.push(values.delivered_shipments);
+                                row.push(values.received_cod_amount);
+                                row.push(values.net_amount);
+                                row.push(values.remarks);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                }
+            } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     extend: 'excelHtml5',
                     title: 'Station Deposit Note',
-                    text: 'Export',
-                    exportOptions: {
-                        columns: ':visible',
-                        format: {
-                            body: function ( data, row, column, node ) {
-                                return (column == 0)? row+1:data;
-                            }
-                        }
-                    }
+                    text: '<i class="la la-file-excel-o"></i> Excel',
                 }
                 ],
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
@@ -126,16 +151,16 @@
                 ajax: '{{ route('admin.delivery.sdn.ajax',['id'=>$sdn_id]) }}',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'dncc' ,name: 'dncc', class: 'align-middle text-center dncc'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'rider', class: 'align-middle rider'},
+                    { data:'dncc' ,name: 'delivery_notes.id', class: 'align-middle text-center dncc'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
-                    { data:'delivered_shipments' ,name: 'delivered_shipments', class: 'align-middle delivered_shipments'},
-                    { data:'received_cod_amount' ,name: 'received_cod_amount', class: 'align-middle received_cod_amount'},
+                    { data:'shipments_count' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count'},
+                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
+                    { data:'received_cod_amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle received_cod_amount'},
                     // { data:'expense' ,name: 'expense', class: 'align-middle expense'},
-                    { data:'net_amount' ,name: 'net_amount', class: 'align-middle net_amount'},
-                    { data:'remarks' ,name: 'remarks', class: 'align-middle remarks'},
+                    { data:'net_amount' ,name: 'delivery_notes.net_amount', class: 'align-middle net_amount'},
+                    { data:'remarks' ,name: 'delivery_notes.remarks', class: 'align-middle remarks'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

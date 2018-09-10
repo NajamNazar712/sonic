@@ -1075,7 +1075,6 @@ class AdminReportsController extends Controller
                 }
             }
         }
-
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
         $style =[
@@ -1119,18 +1118,20 @@ class AdminReportsController extends Controller
         $col = 14;
         $serials = 1;
         $dateIndex = 3;
-        foreach ($shippers['name'] as $id => $shipper){
-            $sheet->setCellValue('A'.$col,$serials);
-            $sheet->setCellValue('B'.$col,$shipper);
-            foreach ($months_array as $m){
-                $cellIndexShipper = Coordinate::stringFromColumnIndex($dateIndex);
-                $sheet->setCellValue($cellIndexShipper.$col,$shippers['parcels'][$id][$m]);
-                $dateIndex++;
-            }
+        if(!empty($shippers['shipper'])) {
+            foreach ($shippers['name'] as $id => $shipper) {
+                $sheet->setCellValue('A' . $col, $serials);
+                $sheet->setCellValue('B' . $col, $shipper);
+                foreach ($months_array as $m) {
+                    $cellIndexShipper = Coordinate::stringFromColumnIndex($dateIndex);
+                    $sheet->setCellValue($cellIndexShipper . $col, $shippers['parcels'][$id][$m]);
+                    $dateIndex++;
+                }
 //            $sheet->setCellValue($dateIndex.$col,$shippers['total'][$id]);
-            $col++;
-            $serials++;
-            $dateIndex = 3;
+                $col++;
+                $serials++;
+                $dateIndex = 3;
+            }
         }
         $writer = new Xlsx($spreadsheet);
 

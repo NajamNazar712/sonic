@@ -179,13 +179,6 @@
                     $('#to_date_root button.picker__button--today').removeAttr('disabled');
                     $('#from_date_root button.picker__button--today').removeAttr('disabled');
                 }
-                // onClear: function() {
-                    // from_date.pickadate('picker').set('clear');
-                    // $('input[name="from_date_formatted"]').val('');
-                    // var from_month = $('.picker__select--month').val('');
-                    // var from_year = $('.picker__select--year').val('');
-                    // from_date.pickadate('picker').clear();
-                // },
 
             });
             var to_date = $('#to_date').pickadate({

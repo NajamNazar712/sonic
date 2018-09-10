@@ -275,40 +275,13 @@
                     {data: 'transit_by', name: 'si.name', class: 'align-middle transit_by'},
                     {data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
                     {data: 'received_by', name: 'ri.name', class: 'align-middle received_by'},
-                    {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'}
-                    // {data: 'received_shipments', name: 'cargo_consignments.received_shipments', class: 'align-middle received_shipments'},
-                    // {data: 'short_received', name: 'short_received', class: 'align-middle short_received'},
+                    {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
-                initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-
-                        if ($(header).is('.serial_number') || $(header).is('.received_shipments') || $(header).is('.short_received')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-                }
             });
 
             $('#search_filter_btn').on('click',function () {

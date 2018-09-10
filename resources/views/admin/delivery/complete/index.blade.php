@@ -136,12 +136,38 @@
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows != ''){
-                                $('#delivery_note_ids').val(selected_rows);
-                                var delivery_note_ids = $('#delivery_note_ids').val();
-                                // console.log(delivery_note_ids)
-                                if(delivery_note_ids != ''){
-                                    $('#post_delivery_note_ids_form').submit();
-                                }
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to Deposit DNCC!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $('#delivery_note_ids').val(selected_rows);
+                                        var delivery_note_ids = $('#delivery_note_ids').val();
+                                        // console.log(delivery_note_ids)
+                                        if(delivery_note_ids != ''){
+                                            $('#post_delivery_note_ids_form').submit();
+                                        }
+                                    }
+                                });
+
 
                             }else{
                                 var error = "Something went wrong please refresh page and try again!";

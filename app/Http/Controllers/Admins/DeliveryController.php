@@ -1621,11 +1621,8 @@ class DeliveryController extends Controller
     //for ajax select dncc
     public function completed_deliveries_selected_dncc(Request $request){
         $note_ids = explode(',',$request->delivery_note_ids);
-//        return $note_ids;
         $updated = DeliveryNote::where('dncc_status',1)->whereIn('id',$note_ids)->exists();
         if(!$updated){
-//            dd($updated);
-//            return 132;
             session(['dncc_ids'=> $note_ids]);
             $delivery_note = DeliveryNote::find($note_ids[0]);
             $hub_name = $delivery_note->hub->name;
@@ -1675,7 +1672,7 @@ class DeliveryController extends Controller
 //                return "<input class='form-control net_amount' readonly placeholder='Net Amount' name='net_amount[{$deliveries->delivery_note_id}]'>";
 //            })
             ->addColumn('remarks', function ($deliveries) {
-                $reason = '<input class="form-control" name="remarks['.$deliveries->delivery_note_id.']" placeholder="Enter Remarks" data-rule-required="true" data-msg-required="This field is required">';
+                $reason = '<input class="form-control" name="remarks['.$deliveries->delivery_note_id.']" placeholder="Enter Remarks">';
                 return $reason;
             })
             ->make(true);

@@ -534,6 +534,7 @@ class AdminDashboardController extends Controller
     }
     public function UserStatusBlock(Request $request){
         $user_id = $request->id;
+        $reason = $request->reason;
         $status = $request->status;
         $user = User::where('id',$user_id);
         if($user->exists()){
@@ -541,6 +542,7 @@ class AdminDashboardController extends Controller
             if($status == 'block'){
                 if($user->blacklist == 0){
                     $user->blacklist = 1;
+                    $user->blacklist_reason = $reason;
                     $user->save();
                     return response()->json(['status'=>1,'success'=>"User added to the blacklist!"]);
                 }else{
@@ -3183,6 +3185,18 @@ class AdminDashboardController extends Controller
                     return "Enable";
                 }else{
                     return "Disable";
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if (strpos('enable', $keyword) !== FALSE) {
+                    $query->where('users.status', '=', 3);
+                }
+                else if (strpos('disable', $keyword) !== FALSE) {
+                    $query->where('users.status', '=', 4);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn("action", function ($result) {

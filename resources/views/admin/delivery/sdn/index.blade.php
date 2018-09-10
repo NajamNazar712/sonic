@@ -157,19 +157,19 @@
                 //order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'sdn' ,name: 'sdn_id', class: 'align-middle text-center sdn'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'dncc_count' ,name: 'dncc_count', class: 'align-middle dncc_count'},
-                    { data:'sdn_delivered_shipments' ,name: 'sdn_delivered_shipments', class: 'align-middle sdn_delivered_shipments'},
-                    { data:'sdn_amount' ,name: 'sdn_amount', class: 'align-middle sdn_amount'},
+                    { data:'sdn' ,name: 'station_deposit_notes.id', class: 'align-middle text-center sdn'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'dncc_count' ,name: 'station_deposit_notes.dncc_count', class: 'align-middle dncc_count'},
+                    { data:'sdn_delivered_shipments' ,name: 'station_deposit_notes.sdn_delivered_shipments', class: 'align-middle sdn_delivered_shipments'},
+                    { data:'sdn_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle sdn_amount'},
                     // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
-                    { data:'sdn_net_amount' ,name: 'sdn_net_amount', class: 'align-middle sdn_net_amount'},
-                    { data:'deposited_by' ,name: 'deposited_by', class: 'align-middle deposited_by'},
-                    { data:'bank' ,name: 'bank', class: 'align-middle bank'},
-                    { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
+                    { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
+                    { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
+                    { data:'bank' ,name: 'banks_lists.name', class: 'align-middle bank'},
+                    { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
                     { data:'status' ,name: 'status', class: 'align-middle status'},
-                    { data:'deposit_slip' ,name: 'deposit_slip', class: 'align-middle deposit_slip'},
-                    { data:'action' ,name: 'action', class: 'align-middle action'},
+                    { data:'deposit_slip' ,name: 'deposit_slip', class: 'align-middle deposit_slip',orderable: false, searchable: false},
+                    { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -188,7 +188,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.sdn') || $(header).is('.hub') || $(header).is('.bank') || $(header).is('.deposit_slip') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.deposit_slip') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {
