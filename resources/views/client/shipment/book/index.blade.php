@@ -110,7 +110,7 @@
 										</div>
 									</div>
 
-									<div class="col col_custom">
+									<div class="col col_custom_middle">
 										<h4 class="form-section mb-2 text-center">Order Information</h4>
 
 										<div class="form-group">

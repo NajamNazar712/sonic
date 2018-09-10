@@ -1,18 +1,14 @@
 @extends('admin.layout.master')
 
+@section('title', 'Dashboard')
+
 @section('content')
 <div class="app-content content">
     <div class="content-wrapper">
       <div class="content-header row">
       </div>
       <div class="content-body">
-        
-        
-       
-        <!-- Active Orders -->
-       <h1>Welcome To Trax Logistics,
-       <span class="user-name text-bold-700 ">{{Auth::user()->name}}</span>
-     </h1>
+
         <!-- Active Orders -->
           <div class="row">
               <div class="col">
@@ -103,15 +99,15 @@
               <div class="card col-12">
                   <div class="card-content collapse show">
                       <div class="card-body">
-                          <div id="shipment_statistics_chart" class="height-400 echart-container"></div>
+                          <div id="shipment_statistics_chart" class="height-300 echart-container"></div>
                           <div class="row">
-                              <div class="col-3">
+                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
                                   <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
                               </div>
-                              <div class="col-3">
+                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
                                   <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
                               </div>
-                              <div class="col-2">
+                              <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
                                   <select name="graph_destination" id="graph_destination" class="select2 form-control">
                                       {{--<option value="">All</option>--}}
                                       @foreach($cities as $city)
@@ -119,15 +115,14 @@
                                       @endforeach
                                   </select>
                               </div>
-                              <div class="col-2">
+                              <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
                                   <select name="graph_shipper" id="graph_shipper" class="select2 form-control">
-                                      {{--<option value="">All</option>--}}
                                       @foreach($shippers as $shipper)
                                           <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                       @endforeach
                                   </select>
                               </div>
-                              <div class="col-2">
+                              <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
                                   <button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
@@ -136,7 +131,6 @@
                   </div>
               </div>
           </div>
-          <hr>
 
           <div class="row">
               <div class="card">

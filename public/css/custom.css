@@ -6,6 +6,10 @@ html body a:hover {
 	color: #6496be;
 }
 
+html body .content .content-wrapper {
+	padding: 0.7rem 2.2rem;
+}
+
 ::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
     color: #284155 !important;
     opacity: 1 !important; /* Firefox */
@@ -38,6 +42,11 @@ html body a:hover {
 
 .modal .modal-dialog.modal-lg.modal-full-length {
 	max-width: 95%;
+}
+
+.select2-container--classic .select2-results__options .select2-results__option[aria-selected=true],
+.select2-container--default .select2-results__options .select2-results__option[aria-selected=true] {
+	background: #64a0d2 !important;
 }
 
 table,
@@ -199,6 +208,11 @@ p.comment {
 @media (min-width: 1200px) {
 	.col_custom {
 		min-width: 0;
-		max-width: 20%;
+		max-width: 19%;
+	}
+
+	.col_custom_middle {
+		min-width: 0;
+		max-width: 24%;
 	}
 }
