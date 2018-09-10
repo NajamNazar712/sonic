@@ -187,7 +187,6 @@
                 },
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
-                stateSave: true,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,

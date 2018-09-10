@@ -312,7 +312,6 @@
                 },
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
-                stateSave: true,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: false,
@@ -514,7 +513,6 @@
                                 dom: 'ltipr',
                                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                                 pageLength: 25,
-                                stateSave: true,
                                 pagingType: 'full_numbers',
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -606,7 +604,6 @@
                                 dom: 'ltipr',
                                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                                 pageLength: 25,
-                                stateSave: true,
                                 pagingType: 'full_numbers',
 
                                 columns: [
