@@ -14,18 +14,7 @@
                         <div class="card-body card-dashboard">
                             @include('admin.inc.messages')
 
-                            <div style="display: none;">
-                                <form id="city_active" action="{{route('admin.management.city.status')}}" method="post" class="mt-2">
-                                    {{csrf_field()}}
-                                    <input type="hidden" name="_method" value="PUT">
-                                    <input type="hidden" name="cid" id="cid">
-                                    <input type="hidden" name="status" id="cstatus">
-                                    <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
-                                    <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
 
-
-                                </form>
-                            </div>
 
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
@@ -41,6 +30,19 @@
                                 </thead>
                             </table>
                         </div>
+                    </div>
+
+                    <div style="display: none;">
+                        <form id="city_active_form" action="{{route('admin.management.city.status')}}" method="post" class="mt-2">
+                            {{csrf_field()}}
+                            <input type="hidden" name="_method" value="PUT">
+                            <input type="hidden" name="cid" id="cid">
+                            <input type="hidden" name="status" id="cstatus">
+                            <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
+                            <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+
+
+                        </form>
                     </div>
 
                 </div>
@@ -172,9 +174,40 @@
             var rel = $(this).attr('rel');
             var isHub = $(this).attr('hub');
             if(isHub == 0){
-                $('.modal-body #cid').val(id);
-                $('.modal-body #cstatus').val(rel);
-                $('#ConfirmModalCity').modal('show');
+                $('#city_active_form #cid').val(id);
+                $('#city_active_form #cstatus').val(rel);
+                if(rel == 'cityInactive'){
+                    var atext = "Select Yes to Deactive this city!";
+                }else{
+                    var atext = "Select Yes to active this city!";
+                }
+                swal({
+                    title: 'Are You Sure?',
+                    text: atext,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $('#city_active_form').submit();
+                    }
+                });
+                // $('#ConfirmModalCity').modal('show');
             }else if(isHub == 1){
                 $.ajax({
                     url:'/admin/management/city/'+id+'/status/ajax',
@@ -208,9 +241,39 @@
                             });
 
                         }else{
-                            $('.modal-body #cid').val(id);
-                            $('.modal-body #cstatus').val(rel);
-                            $('#ConfirmModalCity').modal('show');
+                            $('#city_active_form #cid').val(id);
+                            $('#city_active_form #cstatus').val(rel);
+                            if(rel == 'cityInactive'){
+                                var atext = "Select Yes to Deactive this Hub!";
+                            }else{
+                                var atext = "Select Yes to active this Hub!";
+                            }
+                            swal({
+                                title: 'Are You Sure?',
+                                text: atext,
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    $('#city_active_form').submit();
+                                }
+                            });
                         }
                         
                     }

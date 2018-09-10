@@ -3396,7 +3396,7 @@ class AdminDashboardController extends Controller
                         $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityInactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate City</div></button>';
                     }
                     else {
-                        $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityInactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate City</div></button>';
+                        $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate City</div></button>';
                     }
                 }
 
@@ -3631,10 +3631,10 @@ class AdminDashboardController extends Controller
 
                     if (session('role_id') == 1 || in_array(95, session('permissions'))) {
                         if ($result->status == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' data-toggle="modal" rel="routeInactive" data-target="#ConfirmModalRoute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Route</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Route</div></button>';
                         }
                         else {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' data-toggle="modal" rel="routeActive" data-target="#ConfirmModalRoute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Route</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Route</div></button>';
                         }
                     }
 
@@ -3786,10 +3786,10 @@ class AdminDashboardController extends Controller
 
                     if (session('role_id') == 1 || in_array(99, session('permissions'))) {
                         if ($rider->status == 1) {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . ' data-toggle="modal" rel="riderInactive" data-target="#ConfirmModalRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
                         }
                         else {
-                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . ' data-toggle="modal" rel="riderActive" data-target="#ConfirmModalRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
                         }
                     }
 

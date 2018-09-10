@@ -33,7 +33,18 @@
                             </table>
                         </div>
                     </div>
+                <div style="display: none;">
+                    <form id="rider_active_form" action="{{route('admin.management.rider.status')}}" method="post" class="mt-2">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="cid" id="cid">
+                        <input type="hidden" name="status" id="cstatus">
+                        <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
+                        <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
 
+
+                    </form>
+                </div>
                 </div>
             </div>
         </div>
@@ -141,8 +152,39 @@
                 var id = $(this).data('target-id');
                 var rel = $(this).attr('rel');
 
-                $('.riderConfirmation #cid').val(id);
-                $('.riderConfirmation #cstatus').val(rel);
+                $('#rider_active_form #cid').val(id);
+                $('#rider_active_form #cstatus').val(rel);
+                if(rel == 'riderInactive'){
+                    var atext = "Select Yes to Deactive this Rider!";
+                }else{
+                    var atext = "Select Yes to active this Rider!";
+                }
+                swal({
+                    title: 'Are You Sure?',
+                    text: atext,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $('#rider_active_form').submit();
+                    }
+                });
 
             });
         });
