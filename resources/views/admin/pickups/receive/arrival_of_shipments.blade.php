@@ -318,7 +318,33 @@
 
 				$('#arrival_of_shipments_form input.shipment_ids').val(shipment_ids);
 
-				this.submit();
+				var form = this;
+
+				swal({
+					text: 'Are you sure, you want to Receive these Shipments?',
+					icon: 'warning',
+					buttons: {
+						cancel: {
+							text: 'No',
+							value: null,
+							visible: true,
+							closeModal: true,
+						},
+						confirm: {
+							text: 'Yes',
+							value: true,
+							visible: true,
+							closeModal: true
+						}
+					},
+					closeOnClickOutside: false,
+					closeOnEsc: false,
+					dangerMode: true
+				}).then(function(confirm) {
+					if (confirm) {
+						form.submit();
+					}
+				});
 			});
 
 			$('#datatable tbody').on('click', 'tr td.remove button', function() {
@@ -352,38 +378,6 @@
 					}
 					else {
 						toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-					}
-				});
-			});
-
-			$('#arrival_of_shipments_form').bind('submit', function(e) {
-				e.preventDefault();
-
-				var form = this;
-
-				swal({
-					text: 'Are you sure, you want to Receive these Shipments?',
-					icon: 'warning',
-					buttons: {
-						cancel: {
-							text: 'No',
-							value: null,
-							visible: true,
-							closeModal: true,
-						},
-						confirm: {
-							text: 'Yes',
-							value: true,
-							visible: true,
-							closeModal: true
-						}
-					},
-					closeOnClickOutside: false,
-					closeOnEsc: false,
-					dangerMode: true
-				}).then(function(confirm) {
-					if (confirm) {
-						form.submit;
 					}
 				});
 			});
