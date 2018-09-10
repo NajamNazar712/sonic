@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Add Rates')
+
 @section('content')
     <h1>Add Rates</h1>
 

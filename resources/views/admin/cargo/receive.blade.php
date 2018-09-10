@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Receive Cargo')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -69,54 +71,6 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #64a0d2;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -133,6 +87,7 @@
 
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
+				scrollX: true,
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',
@@ -151,6 +106,9 @@
 					var info = table.page.info();
 
 					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+				},
+				initComplete: function() {
+					this.api().table().columns.adjust();
 				}
 			});
 

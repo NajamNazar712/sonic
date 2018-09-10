@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Edit Rates')
+
 @section('content')
     @if(!empty($shipper))
 

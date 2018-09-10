@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Active Accounts List')
+
 @section('content')
     <h1>Active Accounts List</h1>
 
@@ -33,7 +35,7 @@
                                         <th class="border-primary border-darken-1">Rate Approved By</th>
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
-                                        <th class="border-primary border-darken-1">Action</th>
+                                        <th class="border-primary border-darken-1"></th>
                                     </tr>
                                 </thead>
                             </table>
@@ -104,11 +106,10 @@
     <script type="text/javascript">
     $(document).ready(function() {
        var table = $('#datatable').DataTable({
-           "scrollX": true,
             dom: 'ltipr',
+            scrollX: true,
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,
-            stateSave: true,
             pagingType: 'full_numbers',
             processing: true,
             serverSide: true,
@@ -159,12 +160,14 @@
                         }
                     }
                 });
+
+                this.api().table().columns.adjust();
             }
         });
         $('body').on('change','.blacklist_reason',function() {
             $(this).val($(this).val().trim());
         });
-        $('body').on('click','a.blacklist',function () {
+        $('body').on('click','button.blacklist',function () {
             var id = $(this).parents('tr').attr('id');
             var status = $(this).attr('rel');
             // html = '<input class="form-control blacklist_reason">';
@@ -248,7 +251,7 @@
             {{--});--}}
 
         });
-        $('body').on('click','a.userenable',function () {
+        $('body').on('click','button.userenable',function () {
             var status  = "enable";
             var id = $(this).parents('tr').attr('id');
             swal({
@@ -297,7 +300,7 @@
             });
 
         });
-        $('body').on('click','a.userdisable',function () {
+        $('body').on('click','button.userdisable',function () {
             var status  = "disable";
             var id = $(this).parents('tr').attr('id');
             swal({
