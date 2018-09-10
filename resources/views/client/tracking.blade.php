@@ -159,7 +159,7 @@
                                 shipment += '<div class="p-1">';
                                 shipment += '<div class="row justify-content-between">';
 
-                                shipment += '<div class="col-md-12 col-lg-5 mt-md-2 mt-lg-1">';
+                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5">';
                                 shipment += '<h4><u>Shipper Information</u></h4>';
                                 shipment += '<div class="border">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';
@@ -192,7 +192,7 @@
                                 shipment += '</div>';
                                 shipment += '</div>';
 
-                                shipment += '<div class="col-md-12 col-lg-5 mt-md-2 mt-lg-1">';
+                                shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-xs-2 mt-sm-2 mt-md-2 mt-lg-0">';
                                 shipment += '<h4><u>Consignee Information</u></h4>';
                                 shipment += '<div class="border">';
                                 shipment += '<table class="table table-sm table-borderless mb-0">';

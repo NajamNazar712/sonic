@@ -20,7 +20,6 @@
 							<table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
-										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Receiving Sheet</th>
 										<th class="border-primary border-darken-1">Booked</th>
@@ -132,14 +131,13 @@
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet_history.list') }}',
 				rowId: 'id',
-				order: [[6, 'asc']],
+				order: [[5, 'asc']],
 				columns: [
-					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'receiving_sheet', name: 'receiving_sheet', class: 'text-center align-middle receiving_sheet p-1'},
 					{data: 'booked', name: 'booked', class: 'align-middle booked', orderable: false, searchable: false},
 					{data: 'received', name: 'received', class: 'align-middle received', orderable: false, searchable: false},
-					{data: 'origin', name: 'ci.city_name', class: 'align-middle origin'},
+					{data: 'origin', name: 'c.name', class: 'align-middle origin'},
 					{data: 'booking_date', name: 'rs.created_at', class: 'align-middle booking_date'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
