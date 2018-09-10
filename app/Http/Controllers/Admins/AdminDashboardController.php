@@ -3185,6 +3185,18 @@ class AdminDashboardController extends Controller
                     return "Disable";
                 }
             })
+            ->filterColumn('status',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if (strpos('enable', $keyword) !== FALSE) {
+                    $query->where('users.status', '=', 3);
+                }
+                else if (strpos('disable', $keyword) !== FALSE) {
+                    $query->where('users.status', '=', 4);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn("action", function ($result) {
                 $dropdown = "
                     <span class='dropdown'>

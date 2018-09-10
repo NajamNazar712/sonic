@@ -268,47 +268,21 @@
                 order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_note_id', class: 'align-middle text-center delivery_note'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'rider', class: 'align-middle rider'},
+                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
-                    { data:'delivered_shipments' ,name: 'delivered_shipments', class: 'align-middle delivered_shipments'},
-                    { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
-                    { data:'updated_by' ,name: 'updated_by', class: 'align-middle updated_by'},
-                    { data:'updated_at' ,name: 'updated_at', class: 'align-middle updated_at'},
-                    { data:'amount' ,name: 'amount', class: 'align-middle amount'},
+                    { data:'shipments_count' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count'},
+                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
+                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
+                    { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
+                    { data:'updated_by' ,name: 'ub.name.updated_by', class: 'align-middle updated_by'},
+                    { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
+                    { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                },
-                initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-                        if ($(header).is('.serial_number')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
                 }
             });
             $('#search_filter_btn').on('click',function () {

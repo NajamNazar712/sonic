@@ -96,7 +96,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-2">
-                        <button id="sdnSubmit" type="submit" disabled class="btn btn-primary btn-block">Confirm</button>
+                        <button id="sdnSubmit" type="submit"  class="btn btn-primary btn-block">Confirm</button>
 
                     </div>
                 </div>
@@ -188,16 +188,16 @@
                 order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note_id' ,name: 'delivery_note_id', class: 'align-middle text-center delivery_note'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'rider', class: 'align-middle rider'},
+                    { data:'delivery_note_id' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
-                    { data:'delivered_shipments' ,name: 'delivered_shipments', class: 'align-middle delivered_shipments'},
-                    { data:'received_cod_amount' ,name: 'received_cod_amount', class: 'align-middle received_cod_amount'},
+                    { data:'shipments_count' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count'},
+                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
+                    { data:'received_cod_amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle received_cod_amount'},
                     // { data:'expense' ,name: 'expense', class: 'align-middle expense'},
                     // { data:'net_amount' ,name: 'net_amount', class: 'align-middle net_amount'},
-                    { data:'remarks' ,name: 'remarks', class: 'align-middle remarks'},
+                    { data:'remarks' ,name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -332,7 +332,7 @@
                 // this.submit();
             $('body').on('change','td.remarks input',function() {
                 $(this).val($(this).val().trim());
-                $('#sdnSubmit').prop('disabled',false);
+
             });
             $( "#sdn_form" ).validate({
                 errorClass:"danger",
@@ -340,19 +340,34 @@
                     error.addClass('w-100').appendTo(element.parent('.remarks'));
                 },
                 submitHandler: function(form) {
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Station deposit note is being created!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-
-                       form.submit();
-
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to create Station Deposit Note!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                            form.submit();
+                        }
+                    });
 
                 }
             });
