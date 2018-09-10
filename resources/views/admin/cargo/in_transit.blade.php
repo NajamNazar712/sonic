@@ -713,8 +713,8 @@
 	                            'cargo_id':id
 	                        }
 	                    }).done(function (data) {
-	                        if(data.success == 1){
-	                            $('#universal_city_select').select2({
+	                        if(data.success === 1){
+	                            $('#universal_city_select').prepend('<option value="" selected="selected"></option>').select2({
 	                                placeholder:'Select a city',
 	                                dropdownParent:$('#universal_dispute_form')
 	                            });
@@ -722,7 +722,7 @@
 	                                var newOption = new Option(value.name, value.id, false, false);
 	                                $('#universal_city_select').append(newOption).trigger('select');
 	                            });
-	                            $('#universal_dispute_type_select').select2({
+	                            $('#universal_dispute_type_select').prepend('<option value="" selected="selected"></option>').select2({
 	                                placeholder:'Select a Dispute type',
 	                                dropdownParent:$('#universal_dispute_form')
 	                            });

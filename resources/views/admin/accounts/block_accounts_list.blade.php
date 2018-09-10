@@ -24,6 +24,7 @@
                                         <th class="border-primary border-darken-1">Phone Number</th>
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">Email Address</th>
+                                        <th class="border-primary border-darken-1">Reason</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -106,13 +107,14 @@
             ajax: '{{ route('admin.accounts.block.ajax') }}',
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'id', name: 'id', class: 'account_id'},
-                {data: 'name', name: 'name', class: 'company_name'},
+                {data: 'id', name: 'users.id', class: 'account_id'},
+                {data: 'name', name: 'users.name', class: 'company_name'},
                 {data: 'city', name: 'cities.name', class: 'city'},
-                {data: 'poc', name: 'poc', class: 'contact_person'},
-                {data: 'phone', name: 'phone', class: 'phone'},
-                {data: 'address', name: 'address', class: 'address'},
-                {data: 'email', name: 'email', class: 'email'},
+                {data: 'poc', name: 'users.poc', class: 'contact_person'},
+                {data: 'phone', name: 'users.phone', class: 'phone'},
+                {data: 'address', name: 'users.address', class: 'address'},
+                {data: 'email', name: 'users.email', class: 'email'},
+                {data: 'reason', name: 'users.blacklist_reason', class: 'reason'},
                 {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
             ],
             rowCallback: function(row, data, index) {
