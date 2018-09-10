@@ -217,13 +217,13 @@
 								icon: 'warning',
 								buttons: {
 									cancel: {
-										text: 'Close',
+										text: 'No',
 										value: null,
 										visible: true,
 										closeModal: true,
 									},
 									confirm: {
-										text: 'Done',
+										text: 'Yes',
 										value: true,
 										visible: true,
 										closeModal: true
@@ -274,13 +274,13 @@
 						icon: 'warning',
 						buttons: {
 							cancel: {
-								text: 'Close',
+								text: 'No',
 								value: null,
 								visible: true,
 								closeModal: true,
 							},
 							confirm: {
-								text: 'Not Done',
+								text: 'Yes',
 								value: true,
 								visible: true,
 								closeModal: true
@@ -306,7 +306,7 @@
 									if (data.complete) {
 										setTimeout(function() {
 											window.location.href = '{{ route('admin.pickups.receive.index') }}';
-										}, 5000);
+										}, 2500);
 									}
 								}
 								else {

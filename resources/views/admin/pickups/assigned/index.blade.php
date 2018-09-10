@@ -161,17 +161,41 @@
 						className: 'btn btn-primary print',
 						enabled: false,
 						action: function (e, dt, node, config) {
-							print(selected_rows);
+							swal({
+								text: 'Are you sure, you want to Dispatch these Pickup Notes?',
+								icon: 'warning',
+								buttons: {
+									cancel: {
+										text: 'No',
+										value: null,
+										visible: true,
+										closeModal: true,
+									},
+									confirm: {
+										text: 'Yes',
+										value: true,
+										visible: true,
+										closeModal: true
+									}
+								},
+								closeOnClickOutside: false,
+								closeOnEsc: false,
+								dangerMode: true
+							}).then(function(confirm) {
+								if (confirm) {
+									print(selected_rows);
 
-							$.each(selected_rows, function(index, id) {
-								table.row($('#datatable tbody tr#' + id)).deselect();
+									$.each(selected_rows, function(index, id) {
+										table.row($('#datatable tbody tr#' + id)).deselect();
+									});
+
+									selected_rows = [];
+
+									table.button('.print').disable();
+
+									table.draw('false');
+								}
 							});
-
-							selected_rows = [];
-
-							table.button('.print').disable();
-
-							table.draw('false');
 						}
 					}],
 				@else
@@ -275,13 +299,13 @@
 						icon: 'warning',
 						buttons: {
 							cancel: {
-								text: 'Close',
+								text: 'No',
 								value: null,
 								visible: true,
 								closeModal: true,
 							},
 							confirm: {
-								text: 'Cancel',
+								text: 'Yes',
 								value: true,
 								visible: true,
 								closeModal: true

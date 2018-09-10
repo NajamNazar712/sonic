@@ -166,13 +166,13 @@
 									icon: 'warning',
 									buttons: {
 										cancel: {
-											text: 'Close',
+											text: 'No',
 											value: null,
 											visible: true,
 											closeModal: true,
 										},
 										confirm: {
-											text: 'Cancel',
+											text: 'Yes',
 											value: true,
 											visible: true,
 											closeModal: true
@@ -367,13 +367,13 @@
 					icon: 'warning',
 					buttons: {
 						cancel: {
-							text: 'Close',
+							text: 'No',
 							value: null,
 							visible: true,
 							closeModal: true,
 						},
 						confirm: {
-							text: 'Cancel',
+							text: 'Yes',
 							value: true,
 							visible: true,
 							closeModal: true
