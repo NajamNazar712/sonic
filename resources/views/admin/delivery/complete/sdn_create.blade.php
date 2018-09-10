@@ -96,7 +96,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-2">
-                        <button id="sdnSubmit" type="submit" class="btn btn-primary btn-block">Confirm</button>
+                        <button id="sdnSubmit" type="submit" disabled class="btn btn-primary btn-block">Confirm</button>
 
                     </div>
                 </div>
@@ -332,6 +332,7 @@
                 // this.submit();
             $('body').on('change','td.remarks input',function() {
                 $(this).val($(this).val().trim());
+                $('#sdnSubmit').prop('disabled',false);
             });
             $( "#sdn_form" ).validate({
                 errorClass:"danger",

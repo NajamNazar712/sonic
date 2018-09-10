@@ -23,7 +23,7 @@
                                         <h3 class="card-title lead success">Overnight</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a href="#" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" /></a>
+                                        <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" /></a>
                                     </div>
                                 </div>
                             </div>
@@ -453,7 +453,7 @@
                                         <h3 class="card-title lead success">Overland</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="ol_main_switch" href="#" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm"/></a>
+                                        <a id="ol_main_switch" href="javascript:void(0);" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
@@ -881,7 +881,7 @@
                                         <h3 class="card-title lead success">Detain</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="detain_main_switch" href="#" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm"/></a>
+                                        <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
@@ -1312,7 +1312,7 @@
                                         <h3 class="card-title lead success">Sameday</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="sameday_main_switch" href="#" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm"/></a>
+                                        <a id="sameday_main_switch" href="javascript:void(0);" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 

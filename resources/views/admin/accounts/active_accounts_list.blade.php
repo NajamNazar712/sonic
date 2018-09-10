@@ -126,9 +126,9 @@
                 {data: 'product_name', name: 'p.product_name', class: 'align-middle product_name'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
-                {data: 'added_by', name: 'rab.added_by', class: 'align-middle added_by'},
-                {data: 'approved_by', name: 'rabb.approved_by', class: 'align-middle approved_by'},
-                {data: 'account_activated_by', name: 'rabba.account_activated_by', class: 'align-middle account_activated_by'},
+                {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
+                {data: 'approved_by', name: 'rabb.name', class: 'align-middle approved_by'},
+                {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],

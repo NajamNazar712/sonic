@@ -188,7 +188,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.sdn') || $(header).is('.hub') || $(header).is('.bank') || $(header).is('.deposit_slip') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {

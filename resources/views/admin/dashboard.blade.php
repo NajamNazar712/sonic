@@ -352,7 +352,7 @@
             }
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                "scrollX": true,
+                // "scrollX": true,
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Print',
@@ -362,7 +362,7 @@
                         table.button('.print').disable();
                         print(selected_rows);
                         $.each(selected_rows, function(index, id) {
-                            table.row($('#datatable tbody tr#' + id)).deselect();
+                            table.row($('tbody tr#' + id)).deselect();
                         });
                         selected_rows = [];
 
@@ -382,7 +382,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.orders.list') }}',
                 rowId: 'shipment_id',
-                order: [[1, 'asc']],
+                order: [[15, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -408,7 +408,7 @@
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-                    if (data.shipper_status_id == 1) {
+                    if (data.shipper_status_id === 1) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.id, selected_rows) !== -1) {

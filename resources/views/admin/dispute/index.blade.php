@@ -142,17 +142,18 @@
                 <div class="modal-body text-center">
                         <h2>Are You Sure?</h2>
                 </div>
+                <div class="modal-footer text-center">
                 <input type="hidden" id="disputeId">
-                    <div class="row justify-content-center no-gutters">
-                        <div class="col">
-                            <button type="button" class="btn btn-outline-danger block padding-right-0 dispute-resolve">Yes</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-outline-primary block padding-left-0" data-dismiss="modal">No</button>
-                        </div>
+                    <div class="row">
+
+                            <button type="button" class="btn btn-danger btn-min-width mr-1 mb-1 dispute-resolve">Yes</button>
+
+
+                            <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">No</button>
+
                     </div>
 
-
+                </div>
 
             </div>
         </div>
@@ -348,14 +349,14 @@
             order: [[1, 'asc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'dispute_id', name: 'dispute_id', class: 'align-middle dispute_id'},
-                {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
-                {data: 'description', name: 'description', class: 'align-middle description'},
-                {data: 'originated_at', name: 'originated_at', class: 'align-middle originated_at'},
-                {data: 'dispute_type', name: 'dispute_type', class: 'align-middle dispute_type'},
-                {data: 'no_of_shipments', name: 'sm.mode', class: 'align-middle mode'},
-                {data: 'launched_by', name: 'launched_by', class: 'align-middle launched_by'},
-                {data: 'updated_by', name: 'updated_by', class: 'align-middle updated_by'},
+                {data: 'dispute_id', name: 'disputes.id', class: 'align-middle dispute_id'},
+                {data: 'created_at', name: 'disputes.created_at', class: 'align-middle created_at'},
+                {data: 'description', name: 'disputes.description', class: 'align-middle description'},
+                {data: 'originated_at', name: 'cities.name', class: 'align-middle originated_at'},
+                {data: 'dispute_type', name: 'dt.type', class: 'align-middle dispute_type'},
+                {data: 'no_of_shipments', name: 'disputes.shipments_count', class: 'align-middle mode'},
+                {data: 'launched_by', name: 'launched_by', class: 'align-middle launched_by',orderable: false, searchable: false},
+                {data: 'updated_by', name: 'au.name', class: 'align-middle updated_by'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -376,7 +377,7 @@
                     var header = column.header();
 
 
-                    if ($(header).is('.action') || $(header).is('.serial_number')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.launched_by')) {
                         $(td).appendTo($(search));
                     }
                     else {

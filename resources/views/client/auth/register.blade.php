@@ -99,11 +99,10 @@
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group">
-                                                        <label for="company_name">
+                                                        <label for="name">
                                                             Company Name:
                                                             <span class="danger">*</span>
                                                         </label>
-
                                                         <input type="text" class="form-control required" value="{{ old('name') }}"  name="name">
 
                                                     </div>
@@ -147,7 +146,7 @@
                                                 <div class="col-md-6">
                                                     <div class="form-group">
                                                         <label for="shipper_phone2">Phone Number 2:</label>
-                                                        <input type="tel" class="form-control" placeholder="0345-9999999 / 0213-9999999"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">
+                                                        <input type="text" class="form-control" placeholder="0345-9999999 / 0213-9999999"  value="{{ old('shipper_phone2') }}" name="shipper_phone2">
                                                     </div>
                                                 </div>
                                             </div>
@@ -174,7 +173,6 @@
                                                         </label>
                                                         <div>
                                                             <select name="shipper_city" id="shipper_city" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected>Select City</option>
                                                                 @foreach($all_cities as $city)
                                                                     <option value="{{$city->id}}" {{ old('shipper_city') == $city->id ? 'selected' : '' }} >{{$city->name}}</option>
                                                                 @endforeach
@@ -194,14 +192,14 @@
                                                             Pickup Address:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('pickup_address.0') }}"  name="pickup_address[]" placeholder="Pickup Address">
+                                                        <input type="text" id="pickup_address" class="form-control required" value="{{ old('pickup_address.0') }}"  name="pickup_address[]" placeholder="Pickup Address">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_poc">
                                                             Person of Contact:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" placeholder="Person Name" value="{{ old('shipping_poc.0') }}"  name="shipping_poc[]">
+                                                        <input type="text" id="pickup_poc" class="form-control required" placeholder="Person Name" value="{{ old('shipping_poc.0') }}"  name="shipping_poc[]">
                                                     </div>
                                                     <div class="form-group">
 
@@ -210,7 +208,6 @@
                                                         </label>
                                                         <div>
                                                             <select name="product_type[]" id="product_select" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected="">Select Product Type</option>
                                                                 @foreach($products as $product)
                                                                     <option value="{{$product->id}}" {{ (collect(old('product_type'))->contains($product->id)) ? 'selected' : '' }} >{{$product->product_name}}</option>
                                                                 @endforeach
@@ -224,7 +221,7 @@
                                                             Phone Number:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="tel" class="form-control required" placeholder="0345-9999999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">
+                                                        <input type="text" id="pickup_phone" class="form-control required" placeholder="0345-9999999" name="shipping_phone[]" value="{{ old('shipping_phone.0') }}">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="shipping_phone">
@@ -240,9 +237,8 @@
                                                         </label>
                                                         <div>
                                                             <select name="shipping_city[]" id="shipping_city" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected="">Select Shipper City</option>
-                                                                @foreach($cities as $city)
-                                                                    <option value="{{$city->id}}" {{ (collect(old('shipping_city'))->contains($city->id)) ? 'selected' : '' }} >{{$city->name}}</option>
+                                                                @foreach($pickup_city_list as $pickup_city)
+                                                                    <option value="{{$pickup_city->id}}" {{ (collect(old('shipping_city'))->contains($pickup_city->id)) ? 'selected' : '' }} >{{$pickup_city->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
@@ -296,7 +292,6 @@
                                                                 </label>
                                                                 <div>
                                                                     <select name="product_type[]" class="select2 form-control required" style="width: 100%">
-                                                                        <option value="" selected>Select Product Type</option>
                                                                         @foreach($products as $product)
                                                                             <option value="{{$product->id}}" {{ (collect(old('product_type.'.$i))->contains($product->id)) ? 'selected' : '' }} >{{$product->product_name}}</option>
                                                                         @endforeach
@@ -310,7 +305,7 @@
                                                                     Phone Number:
                                                                     <span class="danger">*</span>
                                                                 </label>
-                                                                <input type="tel" class="form-control required" placeholder="0345-9999999" value="{{ old('shipping_phone.'.$i) }}" name="shipping_phone[]">
+                                                                <input type="text" class="form-control required" placeholder="0399-9999999" value="{{ old('shipping_phone.'.$i) }}" name="shipping_phone[]">
                                                             </div>
                                                             <div class="form-group">
                                                                 <label for="shipping_email">Email Address:
@@ -325,7 +320,6 @@
                                                                 </label>
                                                                 <div>
                                                                     <select name="shipping_city[]" class="select2 form-control required" style="width: 100%">
-                                                                        <option value="" selected>Select Shipper City</option>
                                                                         @foreach($pickup_city_list as $city)
                                                                             <option value="{{$city->id}}" {{ (collect(old('shipping_city.'.$i))->contains($city->id)) ? 'selected' : '' }} >{{$city->name}}</option>
                                                                         @endforeach
@@ -365,7 +359,7 @@
                                                         {{--<input type="text" class="form-control required" value="{{ old('bank_name') }}"   name="bank_name">--}}
                                                         <div>
                                                             <select name="bank_name" id="bank_name" class="select2 form-control required" style="width: 100%">
-                                                                <option value="" selected>Select a Bank</option>
+
                                                                 @foreach($banks as $bank)
                                                                     <option value="{{$bank->id}}"  {{ old('bank_name') == $bank->id ? 'selected' : '' }} >{{$bank->name}}</option>
                                                                 @endforeach
@@ -389,8 +383,7 @@
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                        <select name="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value=""  selected="">Select Mode of Payment</option>
+                                                        <select name="mode_of_payment" id="mode_of_payment" class="select2 form-control required" style="width: 100%;">
                                                             <option value="ibft" {{ old('mode_of_payment') == 'ibft' ? 'selected' : '' }}>IBFT Reimbursements</option>
                                                             <option value="invoices" {{ old('mode_of_payment') == 'invoices' ? 'selected' : '' }}>Invoices</option>
                                                         </select>
@@ -422,9 +415,8 @@
                                                             </label>
                                                             <div>
                                                                 <select name="bank_city" id="bank_city" class="select2 form-control required" style="width: 100%">
-                                                                    <option value="" selected>Select Bank City</option>
-                                                                    @foreach($all_cities as $city)
-                                                                       <option value="{{$city->id}}"  {{ old('bank_city') == $city->id ? 'selected' : '' }} >{{$city->name}}</option>
+                                                                    @foreach($all_cities as $bank_city)
+                                                                       <option value="{{$bank_city->id}}"  {{ old('bank_city') == $bank_city->id ? 'selected' : '' }} >{{$bank_city->name}}</option>
                                                                     @endforeach
                                                                 </select>
                                                             </div>
@@ -435,8 +427,7 @@
                                                                 <span class="danger">*</span>
                                                             </label>
                                                         <div>
-                                                        <select name="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="" selected="">Select Cycle of Payment</option>
+                                                        <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
                                                             <option value="daily" {{ old('cycle_of_payment') == 'daily' ? 'selected' : '' }}>Daily</option>
                                                             <option value="weekly" {{ old('cycle_of_payment') == 'weekly' ? 'selected' : '' }}>Weekly</option>
                                                             <option value="fortnight" {{ old('cycle_of_payment') == 'fortnight' ? 'selected' : '' }}>Fortnight</option>
@@ -533,10 +524,34 @@
     //$('.pickadate').pickadate();
     $(document).ready(function () {
 
-       $('.select2').select2({
+
+       $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
+           placeholder:'Select a city',
            dropdownParent:$('#registership')
        });
-        $('#product_select').select2({
+       $('#bank_name').prepend('<option value="" selected="selected"></option>').select2({
+           placeholder:'Select a bank',
+           dropdownParent:$('#registership')
+       });
+       $('#mode_of_payment').prepend('<option value="" selected="selected"></option>').select2({
+           placeholder:'Select Mode of Payment',
+           dropdownParent:$('#registership')
+       });
+       $('#bank_city').prepend('<option value="" selected="selected"></option>').select2({
+           placeholder:'Select bank city',
+           dropdownParent:$('#registership')
+       });
+       $('#cycle_of_payment').prepend('<option value="" selected="selected"></option>').select2({
+           placeholder:'Select Cycle of Payment',
+           dropdownParent:$('#registership')
+       });
+
+       $('select[name="shipping_city[]"]').prepend('<option value="" selected="selected"></option>').select2({
+           placeholder:'Select pickup city',
+           dropdownParent:$('#registership')
+       });
+        $('select[name="product_type[]"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select product type',
             dropdownParent:$('#registership')
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});

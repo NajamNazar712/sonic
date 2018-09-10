@@ -141,7 +141,7 @@ class ReturnController extends Controller
 
                 AdminFinanceController::add_payment($shipment, 1);
             }
-            return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
+            return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
         }elseif($request->action == 'reattempt'){
             foreach ($shipment_ids as $shipment){
                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
@@ -150,7 +150,7 @@ class ReturnController extends Controller
                 NotificationsController::send(15, 0, $shipment);
                 NotificationsController::send(16, 0, $shipment);
             }
-            return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Re-Attempt"];
+            return ['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )"];
 
         }
     }
@@ -513,7 +513,7 @@ class ReturnController extends Controller
                         }
                     }
                 }
-                return redirect()->back()->with(['success' => "Return note created with Return Note Number:" . $note->id,'print'=>$note->id]);
+                return redirect()->back()->with(['success' => "Return note has been created with Return Note Number:" . $note->id,'print'=>$note->id]);
             }
         }else{
             return ['error'=>"No shipments scanned"];
@@ -756,7 +756,7 @@ class ReturnController extends Controller
             NotificationsController::send(15, $return_note_id);
             NotificationsController::send(16, $return_note_id);
 
-            return redirect()->back()->with(['success'=>'Return note statuses updates']);
+            return redirect()->back()->with(['success'=>'Return Note Status Has Been Updated']);
         }
     }
     public function return_status_delivered(Request $request){

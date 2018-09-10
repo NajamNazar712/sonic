@@ -122,8 +122,8 @@
                 {data: 'product_name', name: 'products.product_name', class: 'align-middle product_name'},
                 {data: 'created_at', name: 'created_at', class: 'align-middle created'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
-                {data: 'rates_added_by', name: 'rab.rates_added_by', class: 'align-middle rates_added_by'},
-                {data: 'rates_authorized_by', name: 'rabb.rates_authorized_by', class: 'align-middle rates_authorized_by'},
+                {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
+                {data: 'rates_authorized_by', name: 'rabb.name', class: 'align-middle rates_authorized_by'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
                rowCallback: function(row, data, index) {

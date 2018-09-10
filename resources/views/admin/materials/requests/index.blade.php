@@ -141,7 +141,7 @@
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.mode', class: 'align-middle mode'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'action', name: 'action', class: 'align-middle action'}
+                    {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {

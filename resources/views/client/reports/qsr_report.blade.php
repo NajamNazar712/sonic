@@ -1,7 +1,5 @@
 @extends('client.layout.master')
 
-@section('title', 'QSR Report')
-
 @section('content')
     <h1 class="mb-1">
         QSR Report
@@ -13,17 +11,19 @@
                 @include('client.inc.messages')
 
                 <div class="row mb-2 justify-content-center">
-                    <div class="col-md-4 col-lg-3">
+
+
+                    <div class="col-xs-6 col-sm-4 col-md-4 col-lg-3">
                         <fieldset class="form-group">
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
                         </fieldset>
                     </div>
-                    <div class="col-md-4 col-lg-3">
+                    <div class="col-xs-6 col-sm-4 col-md-4 col-lg-3">
                         <fieldset class="form-group">
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
                         </fieldset>
                     </div>
-                    <div class="col-md-4 col-lg-2">
+                    <div class="col-xs-6 col-sm-4 col-md-4 col-lg-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
@@ -56,7 +56,6 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
-
 @section('js')
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
@@ -68,26 +67,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Shipper',
-                width:'100%',
-                allowClear:true
-            });
-            $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Origin City',
-                width:'100%',
-                allowClear:true
-            });
-            $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Destination City',
-                width:'100%',
-                allowClear:true
-            });
-            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select Hub',
-                width:'100%',
-                allowClear:true
-            });
+
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -124,6 +104,42 @@
                     from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.reports.qsr.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_from': $('input[name="from_date_formatted"]').val(),
+                            'search_to': $('input[name="to_date_formatted"]').val()
+                        },
+                        success: function (result) {
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.shipper);
+                                row.push(values.history_status);
+                                row.push(values.service_type);
+                                row.push(values.arrival);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.amount);
+                                row.push(values.aging);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                }
+            } );
+
             var index_column = [];
             var flag = false;
             var table = $('#datatable').DataTable({
@@ -136,15 +152,6 @@
                         title: 'QSR Report',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                         className: 'btn btn-primary',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( e, dt, column, config ) {
-                                    return (column == 0)? dt+1:e;
-
-                                }
-                            }
-                        }
                     },
 
                 ],
@@ -156,10 +163,7 @@
                 ajax: {
                     url: '{{ route('cod.reports.qsr.list') }}',
                     data: function (d) {
-                        d.search_shipper = $('#search_shipper').val();
-                        d.search_origin = $('#search_origin').val();
-                        d.search_destination = $('#search_destination').val();
-                        d.search_hub = $('#search_hub').val();
+
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
@@ -176,7 +180,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging'}
+                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {

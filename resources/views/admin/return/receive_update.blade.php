@@ -110,12 +110,12 @@
                 rowId: 'shId',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {data:'destination',name: 'destination', class: 'align-middle destination'},
-                    {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
-                    {data:'phone',name: 'phone', class: 'align-middle phone'},
-                    {data:'address',name: 'address', class: 'align-middle address'},
-                    {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
+                    {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data:'destination',name: 'oc.name', class: 'align-middle destination'},
+                    {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data:'phone',name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
+                    {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
+                    {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data:'action',name: 'action', class: 'align-middle action'}
                 ],
                 rowCallback: function(row, data, index) {

@@ -66,14 +66,26 @@ $(".steps-validation").steps({
     },
     onStepChanging: function (event, currentIndex, newIndex)
     {
-        console.log('curent:'+currentIndex)
+        if(currentIndex === 0){
+            var caddress = $('input[name="company_address"]').val();
+            var cphone = $('input[name="shipper_phone"]').val();
+            var cpoc = $('input[name="shipper_poc"]').val();
+            var ccity = $('#shipper_city').val();
+            var scity = $('#shipping_city').find('option[value="'+ccity+'"]').val();
+            if(scity !== undefined){
+                $('#pickup_address').val(caddress);
+                $('#pickup_poc').val(cpoc);
+                $('#pickup_phone').val(cphone);
+                $('#shipping_city').val(ccity).trigger('change');
+            }
+        }
         // Allways allow previous action even if the current form is not valid!
         if (currentIndex > newIndex)
         {
 
             return true;
         }
-        console.log('new:'+newIndex)
+
 
         // Forbid next action on "Warning" step if the user is to young
         // if (newIndex === 3 && Number($("#age-2").val()) < 18)

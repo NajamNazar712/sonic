@@ -24,7 +24,7 @@
                     {{--</div>--}}
 
                 </div>
-                </form>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -158,7 +158,7 @@
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'origin', name: 'on.name', class: 'align-middle origin'},
+                    {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
@@ -167,10 +167,10 @@
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.mode', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'reason', name: 'reason', class: 'align-middle reason'},
+                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
-                    {data: 'arrival', name: 'arrival', class: 'align-middle arrival'},
+                    {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
 
                 ],

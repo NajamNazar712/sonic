@@ -28,7 +28,7 @@
                                         <h3 class="card-title lead success">Overnight</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a href="#" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox" id="" class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox" id="" class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
                             </div>
@@ -721,7 +721,7 @@
                                         <h3 class="card-title lead success">Overland</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a href="#" class="pull-right" id="ol_main_switch"><input name="ol_main_switch" type="checkbox" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a href="javascript:void(0);" class="pull-right" id="ol_main_switch"><input name="ol_main_switch" type="checkbox" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
 
@@ -1412,7 +1412,7 @@
                                         <h3 class="card-title lead success">Detain</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="detain_main_switch" href="#" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
 
@@ -2110,7 +2110,7 @@
                                         <h3 class="card-title lead success">Sameday</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="sameday_main_switch" href="#" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a id="sameday_main_switch" href="javascript:void(0);" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
 
