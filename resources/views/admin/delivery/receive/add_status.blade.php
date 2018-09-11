@@ -344,7 +344,14 @@
                     }
                 },
                 drawCallback: function (settings) {
+                    var api = new $.fn.dataTable.Api( settings );
+                    var data = api.rows( {page:'current'} ).data();
+                    // Output the data for the visible rows to the browser's console
+                    // You might do something more useful with it!
+                    $.each(data,function (key,value) {
+                        console.log( value.shId );
 
+                    })
                     // var sta = $('select[name="status_drop[175]"]').val();
                     // console.log(sta)
                     $(".reasonDrop").prepend('<option value="" selected="selected"></option>').select2({
@@ -372,7 +379,7 @@
                             $(td).appendTo($(search));
                         }
                         else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                            var current = $(input).appendTo($(search)).on('change keypress', function() {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
@@ -443,6 +450,11 @@
                reason.val('').trigger("change");
                $('.remarks input').val('');
                 // $('.reasonDrop').val('').trigger("change");
+            });
+            $('#status_update_form').on('keypress',function (e) {
+                if(e.which == 13) {
+                    e.preventDefault();
+                }
             });
             var shipments = [];
             $('#status_update_form').bind('submit', function(event) {

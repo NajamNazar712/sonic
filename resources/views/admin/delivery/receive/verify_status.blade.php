@@ -40,10 +40,10 @@
                     <div class="row justify-content-center preventsubmit">
                         @if($delivery_note_status == 0)
                         <div class="col-2">
-                            <button id="statusUpdateSubmit" rel="update" disabled type="submit" class="btn btn-primary btn-block">Update Status</button>
+                            <button id="statusUpdateSubmit" rel="update" type="submit" class="btn btn-primary btn-block">Update Status</button>
                         </div>
                         <div class="col-2">
-                            <button id="statusVerifySubmit" rel="verify" disabled type="submit" class="btn btn-primary btn-block">Verify Status</button>
+                            <button id="statusVerifySubmit" rel="verify" type="submit" class="btn btn-primary btn-block">Verify Status</button>
                         </div>
                         @endif
                         @if($delivery_note_status == 1)
@@ -139,7 +139,7 @@
                 pageLength: 25,
                 pagingType: 'full_numbers',
                 processing: true,
-                serverSide: true,
+                serverSide: false,
                 ajax: '{{ route('admin.delivery.receive.verify.status.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
                 order: [[2, 'asc']],
@@ -188,7 +188,7 @@
                             $(td).appendTo($(search));
                         }
                         else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                            var current = $(input).appendTo($(search)).on('change keypress', function() {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
@@ -264,13 +264,18 @@
                 $('.remarks input').val('');
                 // $('.reasonDrop').val('').trigger("change");
             });
-            $('div.preventsubmit').bind('mouseenter mouseover',function(event){
-               $('#statusUpdateSubmit').removeAttr('disabled');
-               $('#statusVerifySubmit').removeAttr('disabled');
-            });
-            $('#statusUpdateSubmit, #statusVerifySubmit').bind('mouseleave mouseout',function(event){
-               $('#statusUpdateSubmit').prop('disabled',true);
-               $('#statusVerifySubmit').prop('disabled',true);
+            // $('div.preventsubmit').bind('mouseenter mouseover',function(event){
+            //    $('#statusUpdateSubmit').removeAttr('disabled');
+            //    $('#statusVerifySubmit').removeAttr('disabled');
+            // });
+            // $('#statusUpdateSubmit, #statusVerifySubmit').bind('mouseleave mouseout',function(event){
+            //    $('#statusUpdateSubmit').prop('disabled',true);
+            //    $('#statusVerifySubmit').prop('disabled',true);
+            // });
+            $('#status_update_form').on('keypress',function (e) {
+                if(e.which == 13) {
+                    e.preventDefault();
+                }
             });
             var shipments = [];
             var status_array = [];

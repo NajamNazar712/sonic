@@ -146,9 +146,10 @@
                 });
             }
         });
-        $('body').on('click','a.blacklist',function () {
+        $('body').on('click','button.blacklist',function () {
             var id = $(this).parents('tr').attr('id');
             var status = $(this).attr('rel');
+            console.log(status);
             swal({
                 title: 'Are You Sure?',
                 text: 'Select Yes to Unblock this account!',

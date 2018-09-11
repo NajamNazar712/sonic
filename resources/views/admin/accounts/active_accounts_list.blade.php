@@ -170,9 +170,6 @@
         $('body').on('click','button.blacklist',function () {
             var id = $(this).parents('tr').attr('id');
             var status = $(this).attr('rel');
-            // html = '<input class="form-control blacklist_reason">';
-            // content = document.createElement('div');
-            // content.innerHTML = html;
             swal({
                 // title: 'Are You Sure?',
                 text: 'Write a reason to blacklist this account!',
@@ -183,7 +180,6 @@
                         class: "form-control blacklist_reason",
                     },
                 },
-                // icon: 'warning',
                 buttons: {
                     cancel: {
                         text: 'No',
@@ -242,13 +238,7 @@
                     }
 
             });
-                {{--.then(reason,function (confirm) {--}}
-                // if (confirm) {
-                //
-                //
-                //
-                // }
-            {{--});--}}
+
 
         });
         $('body').on('click','button.userenable',function () {

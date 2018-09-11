@@ -211,7 +211,7 @@
                 pageLength: 25,
                 pagingType: 'full_numbers',
                 processing: true,
-                serverSide: true,
+                serverSide: false,
                 ajax: '{{ route('admin.return.receive.status.list',['id'=>$return_note_id]) }}',
                 rowId: 'shId',
                 order: [[2, 'asc']],
@@ -262,7 +262,7 @@
                             $(td).appendTo($(search));
                         }
                         else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                            var current = $(input).appendTo($(search)).on('change keypress', function() {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
@@ -331,6 +331,11 @@
                 reason.val('').trigger("change");
                 $('.remarks input').val('');
                 // $('.reasonDrop').val('').trigger("change");
+            });
+            $('#status_update_form').on('keypress',function (e) {
+                if(e.which == 13) {
+                    e.preventDefault();
+                }
             });
             var shipments = [];
             $('#status_update_form').bind('submit', function(event) {
