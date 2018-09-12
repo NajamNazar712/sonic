@@ -462,6 +462,13 @@
 			}
 
 			function shipping_modes() {
+				if ($('#pickup_address').val() == 0) {
+					var pickup_city_id = $('#new_pickup_city').val();
+				}
+				else {
+					var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+				}
+
 				consignee_city_id = $('#consignee_city').val();
 
 				if (consignee_city_id) {
@@ -471,7 +478,8 @@
 						data: {
 							'_token': '{{ csrf_token() }}',
 							'service_type_id': service_type,
-							'consignee_city_id': $('#consignee_city').val()
+							'pickup_city_id': pickup_city_id,
+							'consignee_city_id': consignee_city_id
 						}
 					})
 					.done(function(data) {
@@ -590,6 +598,8 @@
 			}).bind('change', function() {
 				$(this).valid();
 
+				shipping_modes();
+
 				if (this.value == 0) {
 					$('#new_pickup_address').removeClass('d-none');
 				}
@@ -608,6 +618,8 @@
 				placeholder: 'City*'
 			}).bind('change', function() {
 				$(this).valid();
+
+				shipping_modes();
 
 				var pickup_city = $(this).val();
 				var consignee_city = $('#consignee_city').val();

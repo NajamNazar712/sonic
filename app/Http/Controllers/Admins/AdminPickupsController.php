@@ -1395,6 +1395,8 @@ class AdminPickupsController extends Controller
           }
         }
 
+        $pickup_request = PickupRequest::find($pickup_request_id);
+
         //for dispute start
         $pickup_request_short_received_shipments = $pickup_request->pickup_request_short_received_shipments;
 

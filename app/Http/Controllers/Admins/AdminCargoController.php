@@ -350,7 +350,7 @@ class AdminCargoController extends Controller
       ->whereIn('cargo_consignments.status_id', [1, 2, 4]);
 
       if (session('role_id') != 1) {
-        $cargo_consignments = $cargo_consignments->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+        $cargo_consignments = $cargo_consignments->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('cargo_consignments.junction_hub_1_id', session('hubs'))->orWhereIn('cargo_consignments.junction_hub_1_id', session('hubs'));
       }
 
       $datatables = Datatables::of($cargo_consignments)

@@ -154,9 +154,18 @@ class ShipperShipmentBookController extends Controller
         if ($city_shipping_modes->exists()) {
           $city_shipping_modes = $city_shipping_modes->pluck('shipping_mode_id')->toArray();
 
-          $shipping_modes = ShippingMode::whereIn('id', $city_shipping_modes)->get();
+          if ($request->pickup_city_id != $request->consignee_city_id) {
+            $city_shipping_modes = array_diff($city_shipping_modes, [4]);
+          }
 
-          return ['status' => 0, 'success' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes];
+          if (!empty($city_shipping_modes)) {
+            $shipping_modes = ShippingMode::whereIn('id', $city_shipping_modes)->get();
+
+            return ['status' => 0, 'success' => 'Shipping Modes Updated', 'shipping_modes' => $shipping_modes];
+          }
+          else {
+            return ['status' => 1, 'error' => 'No Shipping Modes Enabled for Selected Service Type, Pickup City and Consignee City'];
+          }
         }
         else {
           return ['status' => 1, 'error' => 'No Shipping Modes Enabled for Selected Service Type and Consignee City'];
@@ -613,27 +622,27 @@ class ShipperShipmentBookController extends Controller
             $shipment_details .= $table_end;
           }
           else if ($shipment->booking_type_id == 3) {
+            $shipment_details .= $table_start;
+
             foreach ($shipment->items as $item) {
-              $shipment_details .= $table_start;
-
               $shipment_details .= '
-                          <tr>
-                            <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
-                            <td class="color secondary border twice-top"><strong>Type</strong></td>
-                            <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
-                            <td class="color secondary border twice-top"><strong>Quantity</strong></td>
-                            <td>' . $item->quantity . '</td>
-                            <td class="color secondary border twice-top"><strong>Price</strong></td>
-                            <td class="border twice-top">Rs ' . number_format($item->price) . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary border twice-bottom"><strong>Description</strong></td>
-                            <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
-                          </tr>
+                        <tr>
+                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                          <td class="color secondary border twice-top"><strong>Type</strong></td>
+                          <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
+                          <td class="color secondary border twice-top"><strong>Quantity</strong></td>
+                          <td>' . $item->quantity . '</td>
+                          <td class="color secondary border twice-top"><strong>Price</strong></td>
+                          <td class="border twice-top">Rs ' . number_format($item->price) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary border twice-bottom"><strong>Description</strong></td>
+                          <td colspan="6" class="border twice-bottom">' . $item->description . '</td>
+                        </tr>
               ';
-
-              $shipment_details .= $table_end;
             }
+
+            $shipment_details .= $table_end;
           }
         }
       }
@@ -660,8 +669,18 @@ class ShipperShipmentBookController extends Controller
       $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->where('hidden', 0)->get();
       $cities = City::all();
       $products = Product::all();
-      $shipping_modes = ShippingMode::all();
-      $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
+
+      $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+
+      $shipping_modes = ShippingMode::whereIn('shipping_mode_id', $user_shipping_modes)->get();
+
+      if (in_array(4, $user_shipping_modes)) {
+        $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
+      }
+      else {
+        $shipping_mode_same_day_timings = NULL;
+      }
+
       $payment_modes = PaymentMode::all();
 
       return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes]);
@@ -734,7 +753,7 @@ class ShipperShipmentBookController extends Controller
         'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })],
-        'information_display' => ['required', 'string', 'in:No,Yes,no,yes'],
+        'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
         'consignee_name' => ['required', 'between:1,100'],
         'consignee_address' => ['required', 'between:1,190'],
@@ -748,8 +767,8 @@ class ShipperShipmentBookController extends Controller
         'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
         'item_description' => ['nullable', 'between:0,190'],
         'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
-        'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:No,Yes,no,yes'],
-        'item_price' => ['required_if:item_insurance,Yes,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
+        'item_insurance' => ['required_if:service_type_id,1,2', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
+        'item_price' => ['required_if:item_insurance,YES,YEs,YeS,Yes,yES,yEs,yeS,yes', 'nullable', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
         'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'nullable', 'integer', 'digits_between:1,10', 'exists:products,id'],
         'replacement_item_description' => ['nullable', 'between:0,190'],
@@ -865,7 +884,7 @@ class ShipperShipmentBookController extends Controller
               $service_type_id = $row['service_type_id'];
               $pickup_address_id = $row['pickup_address_id'];
 
-              if ($row['information_display'] == 'Yes' || $row['information_display'] == 'yes') {
+              if (strtolower($row['information_display']) == 'yes') {
                 $information_display = TRUE;
               }
               else {
@@ -938,7 +957,7 @@ class ShipperShipmentBookController extends Controller
 
                 $item_quantity = $row['item_quantity'];
 
-                if ($row['item_insurance'] == 'Yes' || $row['item_insurance'] == 'yes') {
+                if (strtolower($row['item_insurance']) == 'yes') {
                   $item_price = str_replace(',', '', $row['item_price']);
                   $item_insurance = TRUE;
                 }
@@ -963,7 +982,7 @@ class ShipperShipmentBookController extends Controller
 
                 $item_quantity = $row['item_quantity'];
 
-                if ($row['item_insurance'] == 'Yes' || $row['item_insurance'] == 'yes') {
+                if (strtolower($row['item_insurance']) == 'yes') {
                   $item_price = str_replace(',', '', $row['item_price']);
                   $item_insurance = TRUE;
                 }

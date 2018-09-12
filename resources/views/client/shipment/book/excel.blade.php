@@ -111,25 +111,27 @@
 										</tbody>
 									</table>
 
-									<table class="table table-bordered">
-										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Same Day Timings</th>
-											</tr>
-											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="text-center border-primary border-lighten-2">ID</th>
-												<th class="border-primary border-lighten-2">Name</th>
-											</tr>
-										</thead>
-										<tbody>
-											@foreach ($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
-												<tr role="row">
-													<td class="text-center">{{ $shipping_mode_same_day_timing->id }}</td>
-													<td>{{ $shipping_mode_same_day_timing->timing }}</td>
+									@if ($shipping_mode_same_day_timings)
+										<table class="table table-bordered">
+											<thead>
+												<tr role="row" class="bg-primary white text-center">
+													<th colspan="2" class="border-primary border-darken-1">Same Day Timings</th>
 												</tr>
-											@endforeach
-										</tbody>
-									</table>
+												<tr role="row" class="bg-primary bg-lighten-1 white">
+													<th class="text-center border-primary border-lighten-2">ID</th>
+													<th class="border-primary border-lighten-2">Name</th>
+												</tr>
+											</thead>
+											<tbody>
+												@foreach ($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
+													<tr role="row">
+														<td class="text-center">{{ $shipping_mode_same_day_timing->id }}</td>
+														<td>{{ $shipping_mode_same_day_timing->timing }}</td>
+													</tr>
+												@endforeach
+											</tbody>
+										</table>
+									@endif
 
 									<table class="table table-bordered">
 										<thead>
