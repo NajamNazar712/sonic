@@ -208,6 +208,17 @@
                                 'search_completed_date': $('input[name="completed_date_formatted"]').val()
                         },
                         success: function (result) {
+                            head = [];
+                            head.push('S. No');
+                            head.push('Pickup Note No.');
+                            head.push('City');
+                            head.push('No. Of Pickups');
+                            head.push('No. Of Shipments');
+                            head.push('Rider');
+                            head.push('Assigned Date');
+                            head.push('Assigned By');
+                            head.push('Completed By');
+                            head.push('Completed Date');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -228,7 +239,7 @@
                         async: false
                     });
 
-                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                    return {body: body, header: head};
                 }
             } );
 

@@ -256,36 +256,37 @@
                             'search_to': $('input[name="to_date_formatted"]').val()
                         },
                         success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Tracking .No');
+                            head.push('Account No.');
+                            head.push('Shipper');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Current Status');
+                            head.push('Arrival Date(A)');
+                            head.push('Reached At Destination Date(B)');
+                            head.push('Transit TAT(A-B)');
+                            head.push('First Status');
+                            head.push('First Status Date(C)');
+                            head.push('Attempt TAT(A-C)');
+                            head.push('Dispatch TAT(B-C)');
+                            head.push('Delivered Date(D)');
+                            head.push('Return Confirm(E)');
+                            head.push('Reached At Origin(F)');
+                            head.push('Return Transit TAT(E-F)');
+                            head.push('Return Status');
+                            head.push('Return Status Date(G)');
+                            head.push('Return Dispatch TAT(F-G)');
+                            head.push('Return TAT(E-G)');
+                            head.push('Payment Done Date(H)');
+                            head.push('Payment TAT(D-H,G-H)');
+                            head.push('Total TAT');
                             $.each(result.data, function(index, values) {
                                 row = [];
-                                head = [];
 
-                                head.push('S.No');
-                                head.push('Tracking .No');
-                                head.push('Account No.');
-                                head.push('Shipper');
-                                head.push('Origin');
-                                head.push('Destination');
-                                head.push('Hub');
-                                head.push('Current Status');
-                                head.push('Arrival Date(A)');
-                                head.push('Reached At Destination Date(B)');
-                                head.push('Transit TAT(A-B)');
-                                head.push('First Status');
-                                head.push('First Status Date(C)');
-                                head.push('Attempt TAT(A-C)');
-                                head.push('Dispatch TAT(B-C)');
-                                head.push('Delivered Date(D)');
-                                head.push('Return Confirm(E)');
-                                head.push('Reached At Origin(F)');
-                                head.push('Return Transit TAT(E-F)');
-                                head.push('Return Status');
-                                head.push('Return Status Date(G)');
-                                head.push('Return Dispatch TAT(F-G)');
-                                head.push('Return TAT(E-G)');
-                                head.push('Payment Done Date(H)');
-                                head.push('Payment TAT(D-H,G-H)');
-                                head.push('Total TAT');
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);

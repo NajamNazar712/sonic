@@ -209,6 +209,20 @@
                             'search_submission': $('input[name="submission_date_formatted"]').val()
                         },
                         success: function (result) {
+                            head = [];
+
+                            head.push('S. No.');
+                            head.push('Delivery Note No.');
+                            head.push('Hub');
+                            head.push('Rider');
+                            head.push('Route');
+                            head.push('No Of Shipment(s)');
+                            head.push('No Of Shipment(s) Delivered');
+                            head.push('Assigned By');
+                            head.push('Assigned Date');
+                            head.push('Updated By');
+                            head.push('Updated Date');
+                            head.push('DNCC Amount');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -231,7 +245,7 @@
                         async: false
                     });
 
-                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                    return {body: body, header:head};
                 }
             } );
             var table = $('#datatable').DataTable({

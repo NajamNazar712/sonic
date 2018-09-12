@@ -200,31 +200,7 @@
                     this.api().table().columns.adjust();
                 }
             });
-            // var tracking_array = [];
-            // var status_array = [];
-            // var new_status_array = [];
-            // $('body').on('select2:select','.statusOnChange',function (e) {
-            //     var pre_status = $(this).find('select').attr('status');
-            //     var selected = $(this).find(':selected').val();
-            //     if(pre_status !== selected){
-            //         var ind = $.inArray(pre_status, status_array);
-            //         // var inds = $.inArray(selected, new_status_array);
-            //
-            //         if (ind === -1) {
-            //             status_array.push(pre_status);
-            //         }
-            //         // if (inds === -1) {
-            //         //     new_status_array.push(selected);
-            //         // }
-            //     }else{
-            //         var index = $.inArray(pre_status, status_array);
-            //         // var indexs = $.inArray(selected, new_status_array);
-            //         status_array.splice(index, 1);
-            //         // new_status_array.splice(indexs, 1);
-            //     }
-            //
-            //     console.log(status_array)
-            // });
+
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
                 $('#statusUpdateSubmit').removeAttr('disabled');
                 $('#statusVerifySubmit').removeAttr('disabled');
@@ -264,14 +240,7 @@
                 $('.remarks input').val('');
                 // $('.reasonDrop').val('').trigger("change");
             });
-            // $('div.preventsubmit').bind('mouseenter mouseover',function(event){
-            //    $('#statusUpdateSubmit').removeAttr('disabled');
-            //    $('#statusVerifySubmit').removeAttr('disabled');
-            // });
-            // $('#statusUpdateSubmit, #statusVerifySubmit').bind('mouseleave mouseout',function(event){
-            //    $('#statusUpdateSubmit').prop('disabled',true);
-            //    $('#statusVerifySubmit').prop('disabled',true);
-            // });
+
             $('#status_update_form').on('keypress',function (e) {
                 if(e.which == 13) {
                     e.preventDefault();

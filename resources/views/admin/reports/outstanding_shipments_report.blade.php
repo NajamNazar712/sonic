@@ -220,6 +220,24 @@
                             'delivery_date_to': $('#search_form input[name="delivery_date_to_formatted"]').val()
                         },
                         success: function (result) {
+                            head = [];
+
+                            head.push('S. No');
+                            head.push('Tracking Number');
+                            head.push('Consignee');
+                            head.push('Address');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Shipper');
+                            head.push('Service Type');
+                            head.push('Amount');
+                            head.push('Recovery Status');
+                            head.push('Current Status');
+                            head.push('Status Updated at');
+                            head.push('Remarks');
+                            head.push('DNCC');
+                            head.push('SDN');
+                            head.push('Aging');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -247,7 +265,7 @@
                         async: false
                     });
 
-                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                    return {body: body, header: head};
                 }
             } );
 

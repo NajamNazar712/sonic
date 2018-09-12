@@ -22,7 +22,6 @@
                             <th class="border-primary border-darken-1">No. Of Shipments</th>
                             <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
                             <th class="border-primary border-darken-1">DNCC Amount</th>
-                            {{--<th class="border-primary border-darken-1">Emergency Amount</th>--}}
                             <th class="border-primary border-darken-1">Net Amount</th>
                             <th class="border-primary border-darken-1">Remarks</th>
                         </tr>
@@ -112,6 +111,17 @@
                             'page': 'all'
                         },
                         success: function (result) {
+                            head = [];
+                            head.push('S. No');
+                            head.push('DNCC No.');
+                            head.push('Hub');
+                            head.push('Rider');
+                            head.push('Route');
+                            head.push('No. Of Shipments');
+                            head.push('No. Of Shipments Delivered');
+                            head.push('DNCC Amount');
+                            head.push('Net Amount');
+                            head.push('Remarks');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -132,7 +142,7 @@
                         async: false
                     });
 
-                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                    return {body: body, header: head};
                 }
             } );
             var table = $('#datatable').DataTable({
