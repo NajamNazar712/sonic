@@ -224,21 +224,22 @@
                             'search_to': $('input[name="to_date_formatted"]').val()
                         },
                         success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Tracking .No');
+                            head.push('Shipper');
+                            head.push('History Status');
+                            head.push('Service Type');
+                            head.push('Arrival');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Amount');
+                            head.push('Aging');
                             $.each(result.data, function(index, values) {
                                 row = [];
-                                head = [];
 
-                                head.push('S.No');
-                                head.push('Tracking .No');
-                                head.push('Shipper');
-                                head.push('History Status');
-                                head.push('Service Type');
-                                head.push('Arrival');
-                                head.push('Origin');
-                                head.push('Destination');
-                                head.push('Hub');
-                                head.push('Amount');
-                                head.push('Aging');
 
                                 row.push(index + 1);
                                 row.push(values.tracking_number);

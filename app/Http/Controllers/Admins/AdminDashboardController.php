@@ -502,9 +502,11 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.block_accounts_list');
     }
     public function UserStatus(Request $request){
+//        return $request;
         $id = $request->shid; //shipper id
         $status = $request->status;
-        if($status == 'active'){
+//        return $request;
+        if($status == 'activate'){
             $user = User::find($id);
             if($user->status == 2){
                 $now = Carbon::now();
@@ -521,17 +523,6 @@ class AdminDashboardController extends Controller
             }
         }
 
-//        if($status == 'unblock'){
-//            $user = User::where('id',$id)->where('blacklist',1)->update(['blacklist'=>0]);
-//            $active = User::find($id)->first()->active;
-//            if($user == 1){
-//                if($active == 1){
-//                    return redirect()->route('admin.accounts.active');
-//                }elseif($active == 0){
-//                    return redirect()->route('admin.accounts.pending');
-//                }
-//            }
-//        }
     }
     public function UserStatusBlock(Request $request){
         $user_id = $request->id;
@@ -3287,7 +3278,7 @@ class AdminDashboardController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
 
                 if($result->status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
-                    $dropdown .= '<button type="button" class="dropdown-item" rel="activate" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ConfirmModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
                 }
 

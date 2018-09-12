@@ -214,6 +214,18 @@
                             'search_received_date': $('input[name="received_date_formatted"]').val()
                         },
                         success: function (result) {
+                            head = [];
+
+                            head.push('S. No');
+                            head.push('Cargo No.');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Shipment(s)');
+                            head.push('Shipping Mode');
+                            head.push('Transitted By');
+                            head.push('Transit Date');
+                            head.push('Received By');
+                            head.push('Received Date');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -234,7 +246,7 @@
                         async: false
                     });
 
-                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                    return {body: body, header: head};
                 }
             } );
             var index_column = 0;

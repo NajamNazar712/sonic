@@ -39,6 +39,16 @@
                             </table>
                         </div>
                     </div>
+                    <div style="display: none;">
+                        <form id="account_active_form" action="{{route('admin.accounts.status')}}" method="post" class="mt-2">
+                            {{csrf_field()}}
+                            <input type="hidden" name="_method" value="PUT">
+                            <input type="hidden" name="shid" id="shid">
+                            <input type="hidden" name="status" id="shstatus">
+
+
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
@@ -111,6 +121,38 @@
                 this.api().table().columns.adjust();
             }
         });
+       $('body').on('click','button.active_account',function () {
+           var id = $(this).parents('tr').attr('id');
+           var status = $(this).attr('rel');
+           swal({
+               title: 'Are You Sure?',
+               text: 'Select Yes to Activate this account!',
+               icon: 'warning',
+               buttons: {
+                   cancel: {
+                       text: 'No',
+                       value: null,
+                       visible: true,
+                       closeModal: true,
+                   },
+                   confirm: {
+                       text: 'Yes',
+                       value: true,
+                       visible: true,
+                       closeModal: true
+                   }
+               },
+               closeOnClickOutside: false,
+               closeOnEsc: false,
+               dangerMode: true
+           }).then(function (confirm) {
+               if (confirm) {
+                $('#account_active_form #shid').val(id);
+                $('#account_active_form #shstatus').val(status);
+                $('#account_active_form').submit();
+               }
+           });
+       });
         $('body').on('click','button.blacklist',function () {
             var id = $(this).parents('tr').attr('id');
             var status = $(this).attr('rel');

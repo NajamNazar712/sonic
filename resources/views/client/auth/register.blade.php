@@ -166,6 +166,21 @@
                                                         </div>
                                                     </div>
                                                 </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group">
+
+                                                        <label for="shipper_product_type">Product Type:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="shipper_product_type" id="shipper_product_type" class="select2 form-control required" style="width: 100%">
+                                                                @foreach($products as $product)
+                                                                    <option value="{{$product->id}}" {{ old('shipper_product_type') == $product->id ? 'selected' : '' }} >{{$product->product_name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </fieldset>
                                         <!-- Step 2 -->
@@ -357,12 +372,12 @@
                                                             Bank Branch:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type="text" class="form-control required" value="{{ old('bank_branch') }}" name="bank_branch">
+                                                        <input type="text" class="form-control required" value="{{ old('bank_branch') }}" name="bank_branch" placeholder="Branch Name*">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="account_name">Account Number:
                                                             <span class="danger">*</span></label>
-                                                        <input type="text" class="form-control required" value="{{ old('account_no') }}" name="account_no">
+                                                        <input type="text" class="form-control required" value="{{ old('account_no') }}" name="account_no" placeholder="Account Number*">
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="mode_of_payment">Mode of Payment:
@@ -382,7 +397,7 @@
                                                             Account Title:
                                                             <span class="danger">*</span>
                                                         </label>
-                                                        <input type='text' class="form-control required" value="{{ old('account_title') }}" name="account_title">
+                                                        <input type='text' class="form-control required" value="{{ old('account_title') }}" name="account_title" placeholder="Account Title*">
 
                                                     </div>
 
@@ -537,6 +552,10 @@
            dropdownParent:$('#registership')
        });
         $('select[name="product_type[]"]').prepend('<option value="" selected="selected"></option>').select2({
+            placeholder:'Select product type',
+            dropdownParent:$('#registership')
+        });
+        $('select[name="shipper_product_type"]').prepend('<option value="" selected="selected"></option>').select2({
             placeholder:'Select product type',
             dropdownParent:$('#registership')
         });

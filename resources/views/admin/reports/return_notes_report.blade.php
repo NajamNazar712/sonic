@@ -67,7 +67,7 @@
                         <th class="border-primary border-darken-1">Return Note No.</th>
                         <th class="border-primary border-darken-1">Submitted By</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
-                        <th class="border-primary border-darken-1">Submition Date</th>
+                        <th class="border-primary border-darken-1">Submission Date</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Creation Date</th>
@@ -197,6 +197,15 @@
                             'search_submission': $('input[name="submission_date_formatted"]').val(),
                         },
                         success: function (result) {
+                            head = [];
+                            head.push('S. No');
+                            head.push('Return Note No.');
+                            head.push('Submitted By');
+                            head.push('No Of Shipment(s)');
+                            head.push('Submission Date');
+                            head.push('Rider Name');
+                            head.push('Created By');
+                            head.push('Creation Date');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -215,7 +224,7 @@
                         async: false
                     });
 
-                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                    return {body: body, header: head};
                 }
             } );
             var index_column = 0;

@@ -79,14 +79,15 @@ class RegisterController extends Controller
 //            'ntn_no'=>'string|max:255',
 //            'url'=>'string|max:255',
             'shipper_city'=>'required|string|max:255',
+            'shipper_product_type'=>'required|string|max:255',
             'shipping_city.*'=>'required|string|max:255',
             'pickup_address.*'=>'required|string|max:255',
             'shipping_poc.*'=>'required|string|max:255',
             'shipping_phone.*'=>'required|string|max:255',
             'shipping_email.*'=>'required|string|max:255',
-            'product_type.*'=>'required|string|max:255',
+            'product_type.*'=>'required|max:255',
             'bank_city'=>'required|string|max:255',
-            'bank_name'=>'required|string|max:255',
+            'bank_name'=>'required|max:255',
             'bank_branch'=>'required|string|max:255',
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
@@ -135,7 +136,7 @@ class RegisterController extends Controller
             'ntn_no' => $data['ntn_no'],
             'url' => $data['url'],
             'city_id'=>$data['shipper_city'],
-            'product_id'=>$data['product_type'],
+            'product_id'=>$data['shipper_product_type'],
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);

@@ -24,7 +24,7 @@
                 <ul class="nav navbar-nav float-right">
                     <li class="dropdown dropdown-user nav-item">
                         <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
-                            <span class="text-bold-700">{{Auth::user()->name}}</span>
+                            <span class="text-bold-700">{{ucfirst(Auth::user()->name)}}</span>
                             <i class="ft-chevron-down"></i>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right">
