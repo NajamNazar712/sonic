@@ -60,6 +60,22 @@ class AdminCargoController extends Controller
       ->editColumn('tracking_number', function ($shipments) {
           $route = route('admin.tracking.index');
           return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+      })
+      ->editColumn('origin', function ($shipments) {
+        if ($shipments->shipper_status_id == 20) {
+          return $shipments->destination;
+        }
+        else {
+          return $shipments->origin;
+        }
+      })
+      ->editColumn('destination', function ($shipments) {
+        if ($shipments->shipper_status_id == 20) {
+          return $shipments->origin;
+        }
+        else {
+          return $shipments->destination;
+        }
       });
 
       if ($shipment_type = $request->get('shipment_type')) {
@@ -148,14 +164,26 @@ class AdminCargoController extends Controller
                 $details['hub']['name'] = $hub->name;
 
                 if ($request->hub_id == 0) {
-                  $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
-                  ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-                  ->join('cities as dc', function($join) {
-                    $join->on('shipments.consignee_city_id', '=', 'dc.id')
-                    ->on('oc.hub_id', '!=', 'dc.hub_id');
-                  })
-                  ->select(DB::raw('count(shipments.id) as count'))
-                  ->where('dc.hub_id', $hub->id);
+                  if ($cargo_type == 1) {
+                    $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                    ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+                    ->join('cities as dc', function($join) {
+                      $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                      ->on('oc.hub_id', '!=', 'dc.hub_id');
+                    })
+                    ->select(DB::raw('count(shipments.id) as count'))
+                    ->where('dc.hub_id', $hub->id);
+                  }
+                  else {
+                    $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                    ->join('cities as dc', 'usi.city_id', '=', 'dc.id')
+                    ->join('cities as oc', function($join) {
+                      $join->on('shipments.consignee_city_id', '=', 'oc.id')
+                      ->on('dc.hub_id', '!=', 'oc.hub_id');
+                    })
+                    ->select(DB::raw('count(shipments.id) as count'))
+                    ->where('dc.hub_id', $hub->id);
+                  }
 
                   if ($shipment->shipper_status_id == 2) {
                     $shipments = $shipments->where('shipments.shipper_status_id', 2);

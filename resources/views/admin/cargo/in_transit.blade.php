@@ -393,7 +393,7 @@
 				@else
                 	dom: 'ltipr',
 				@endif
-				scrollX: true, scrollY: '300px',
+				scrollX: true, 
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',
