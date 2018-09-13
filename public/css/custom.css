@@ -27,6 +27,23 @@ html body .content .content-wrapper {
 	min-width: 100%;
 }
 
+.header-navbar .navbar-header .navbar-brand .brand-logo {
+	width: auto;
+}
+
+.header-navbar .navbar-header .navbar-brand .brand-logo.sonic {
+	height: 35px;
+}
+
+.header-navbar .navbar-header .navbar-brand .brand-logo.trax {
+	height: 22.5px;
+	margin-left: 12.5px;
+}
+
+.header-navbar .navbar-container ul.nav li a.dropdown-user-link {
+	padding: 0.8rem 1rem;
+}
+
 .main-menu.menu-light .navigation > li.open > a {
 	border-right-color: #64a0d2;
 }

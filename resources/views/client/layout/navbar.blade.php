@@ -5,8 +5,8 @@
           <li class="nav-item mobile-menu d-md-none mr-auto"><a class="nav-link nav-menu-main menu-toggle hidden-xs" href="#"><i class="ft-menu font-large-1"></i></a></li>
           <li class="nav-item">
             <a class="navbar-brand" href="{{route('cod.dashboard')}}">
-              <img class="brand-logo" alt="Sonic" src="{{ asset('img/logo.png') }}">
-              <h3 class="brand-text primary">Sonic</h3>
+                <img class="brand-logo sonic" alt="Sonic" src="{{ asset('img/sonic_logo_white.png') }}">
+                <img class="brand-logo trax" alt="Trax" src="{{ asset('img/trax_logo_white.png') }}">
             </a>
           </li>
           <li class="nav-item d-md-none">
@@ -24,7 +24,15 @@
           <ul class="nav navbar-nav float-right">
             <li class="dropdown dropdown-user nav-item">
               <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
-                <span class="text-bold-700">{{Auth::user()->name}}</span>
+                <span class="d-inline-block align-middle">
+                    @if (session('user_type') == 1)
+                      <div class="text-bold-700">{{ucfirst(Auth::user()->name)}}</div>
+                    @else
+                      <div class="text-bold-700 border-bottom-white text-right">{{ucfirst(Auth::user()->name)}}</div>
+                      <div class="border-top-white text-right">{{Auth::user()->shipper->name}}</div>
+                    @endif
+                </span>
+
                 <i class="ft-chevron-down"></i>
               </a>
               <div class="dropdown-menu dropdown-menu-right">
