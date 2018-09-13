@@ -346,7 +346,11 @@ class AdminCargoController extends Controller
       ->join('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
       ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
       ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
-      ->select('cargo_consignments.id' , 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status')
+      ->join('cities as jh1', 'cargo_consignments.junction_hub_1_id', '=', 'jh1.id')
+      ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
+      ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
+      ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
+      ->select('cargo_consignments.id' , 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status')
       ->whereIn('cargo_consignments.status_id', [1, 2, 4]);
 
       if (session('role_id') != 1) {

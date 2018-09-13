@@ -65,6 +65,11 @@
 										<th class="border-primary border-darken-1">Destination</th>
 										<th class="border-primary border-darken-1">Shipment(s)</th>
 										<th class="border-primary border-darken-1">Shipping Mode</th>
+										<th class="border-primary border-darken-1">Junction 1</th>
+										<th class="border-primary border-darken-1">Junction 2</th>
+										<th class="border-primary border-darken-1">Transport Mode</th>
+										<th class="border-primary border-darken-1">Vendor</th>
+										<th class="border-primary border-darken-1">Builty No.</th>
 										<th class="border-primary border-darken-1">Transit At</th>
 										<th class="border-primary border-darken-1">Transitted By</th>
 										<th class="border-primary border-darken-1">Status</th>
@@ -388,7 +393,7 @@
 				@else
                 	dom: 'ltipr',
 				@endif
-				scrollX: true,
+				scrollX: true, scrollY: '300px',
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',
@@ -411,6 +416,11 @@
 					{data: 'destination', name: 'dh.name', class: 'align-middle destination'},
 					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle shipments'},
 					{data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
+					{data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},
+					{data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
+					{data: 'transport_mode', name: 'tm.name', class: 'align-middle transport_mode'},
+					{data: 'vendor', name: 'tmv.name', class: 'align-middle vendor'},
+					{data: 'builty_number', name: 'cargo_consignments.builty_number', class: 'align-middle builty_number'},
 					{data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
 					{data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
 					{data: 'status', name: 'ccs.name', class: 'align-middle status'},
