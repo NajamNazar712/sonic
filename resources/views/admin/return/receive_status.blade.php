@@ -206,7 +206,7 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                scrollX: true,
+                scrollX: true, scrollY: '300px',
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 pagingType: 'full_numbers',
@@ -216,7 +216,7 @@
                 rowId: 'shId',
                 order: [[2, 'asc']],
                 columns: [
-                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
+                    {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'shipper',name: 'users.name', class: 'align-middle shipper'},
@@ -232,8 +232,13 @@
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
-                        table.row(row).select();
+
+                    if ((data.shipper_status_id != 25) && (data.shipper_status_id != 31) && (data.shipper_status_id != 38)) {
+                        $('td:eq(0)', row).addClass('select-checkbox');
+                        console.log(data.shipper_status_id)
+                        if ($.inArray(data.id, selected_rows) !== -1) {
+                            table.row(row).select();
+                        }
                     }
                 },
                 drawCallback: function (settings) {

@@ -119,7 +119,7 @@
 	<script>
 		$(document).ready(function() {
 			var table = $('#datatable').DataTable({
-				scrollX: true,
+				scrollX: true, scrollY: '300px',
 				dom: 'ltipr',
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,

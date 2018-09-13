@@ -633,7 +633,7 @@ class ReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name'])
             ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
@@ -643,29 +643,46 @@ class ReturnController extends Controller
         return Datatables::of($deliveries)
 
             ->addColumn('status', function ($deliveries) {
+                $delivered_array = array(25,31,38);
+                if(in_array($deliveries->shipper_status_id,$delivered_array)){
+                    return $deliveries->current_status_name;
+                }else{
+                    if($deliveries->booking_type_id == 1){
+                        $where = array(24);
+                    }else if($deliveries->booking_type_id == 2){
+                        $where = array(29);
+                    }else if($deliveries->booking_type_id == 3){
+                        $where = array(35);
+                    }
+                    $statuses = ShipmentStatus::whereIn('id',$where)->get();
+                    $drops = '';
+                    foreach ($statuses as $status){
+                        $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
+                    }
+                    $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" ><option></option>'.$drops.'</select>';
+                    return $select;
+                }
 
-                if($deliveries->booking_type_id == 1){
-                    $where = array(24);
-                }else if($deliveries->booking_type_id == 2){
-                    $where = array(29);
-                }else if($deliveries->booking_type_id == 3){
-                    $where = array(35);
-                }
-                $statuses = ShipmentStatus::whereIn('id',$where)->get();
-                $drops = '';
-                foreach ($statuses as $status){
-                    $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
-                }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" ><option></option>'.$drops.'</select>';
-                return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" ><option></option></select>';
-                return $reason;
+                $delivered_array = array(25,31,38);
+                if(in_array($deliveries->shipper_status_id,$delivered_array)) {
+                    return '';
+                }else{
+                    $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" ><option></option></select>';
+                    return $reason;
+                }
+
             })
             ->addColumn('remarks', function ($deliveries) {
-                $reason = '<input class="form-control form-control-sm" name="remarks['.$deliveries->shId.']" placeholder="Enter Remarks">';
-                return $reason;
+                $delivered_array = array(25,31,38);
+                if(in_array($deliveries->shipper_status_id,$delivered_array)) {
+                    return '';
+                }else{
+                    $reason = '<input class="form-control form-control-sm" name="remarks['.$deliveries->shId.']" placeholder="Enter Remarks">';
+                    return $reason;
+                }
+
             })
             ->addColumn('action',function($deliveries){
                 return " <span class='dropdown'>

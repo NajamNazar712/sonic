@@ -300,7 +300,7 @@
                         shipment += '</table>';
                         $('#qa_table').html(shipment);
                         var table = $('#datatable').DataTable({
-                            scrollX: true,
+                            scrollX: true, scrollY: '300px',
                             dom: '<"d-inline-block"><"pull-right"B>t',
                             buttons: [
                                 {
