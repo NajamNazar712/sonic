@@ -62,7 +62,7 @@ class AdminCargoController extends Controller
           return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
       })
       ->editColumn('origin', function ($shipments) {
-        if ($shipments->shipper_status_id == 20) {
+        if (in_array($shipments->shipper_status_id, [20, 30, 36, 37])) {
           return $shipments->destination;
         }
         else {
@@ -70,13 +70,29 @@ class AdminCargoController extends Controller
         }
       })
       ->editColumn('destination', function ($shipments) {
-        if ($shipments->shipper_status_id == 20) {
+        if (in_array($shipments->shipper_status_id, [20, 30, 36, 37])) {
           return $shipments->origin;
         }
         else {
           return $shipments->destination;
         }
-      });
+      })
+      ->filterColumn('oc.name', function ($query, $keyword) {
+          $query->where(function ($sub_query) use ($keyword) {
+            $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+            ->where('dc.name', 'like', '%' . $keyword . '%');
+          })
+          ->orWhere('oc.name', 'like', '%' . $keyword . '%');
+      })
+        ->filterColumn('dc.name', function ($query, $keyword) {
+          $query->where(function ($sub_query) use ($keyword) {
+            $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+            ->where('oc.name', 'like', '%' . $keyword . '%');
+          })
+          ->orWhere('dc.name', 'like', '%' . $keyword . '%');
+      })
+      ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), dc.name, oc.name)') . ' $1')
+      ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), oc.name, dc.name)') . ' $1');
 
       if ($shipment_type = $request->get('shipment_type')) {
         if ($shipment_type == 0) {
