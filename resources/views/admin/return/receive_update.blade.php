@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Update Receive Return Deliveries
+        Update Return Receive Deliveries
     </h1>
 
     <div class="card">

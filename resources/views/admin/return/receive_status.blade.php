@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Receive Return Deliveries(Return Note: {{$return_note_id}})
+        Return Receive Deliveries(Return Note: {{$return_note_id}})
     </h1>
 
     <div class="card">
@@ -141,7 +141,7 @@
                             if(selected_rows !== ''){
                                 swal({
                                     title: 'Are You Sure?',
-                                    text: 'Select Yes to collect cash!',
+                                    text: 'Select Yes to change this shipment\'s status!',
                                     icon: 'warning',
                                     buttons: {
                                         cancel: {
@@ -344,7 +344,7 @@
                 var this_form = this;
                 swal({
                     title: 'Are You Sure?',
-                    text: 'Select Yes to update shipments status!',
+                    text: 'Select Yes to change shipment\'s status!',
                     icon: 'warning',
                     buttons: {
                         cancel: {

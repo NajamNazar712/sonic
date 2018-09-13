@@ -131,6 +131,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var shipment_status = [];
+            var shipment_reason = [];
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -171,6 +173,23 @@
                         placeholder: "Select a Status",
                         width:'100%'
                     });
+                    var api = new $.fn.dataTable.Api( settings );
+                    var data = api.rows( {page:'current'} ).data();
+                    $.each(data,function (key,value) {
+
+                        if(shipment_status.length !== 0){
+                            $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
+                        }else{
+                            $('select[name="status_drop['+value.shId+']"]').val(value.current_status_id).trigger('change');
+                        }
+                        if(shipment_reason.length !== 0){
+                            $('select[name="reason_drop['+value.shId+']"]').val(shipment_reason[value.shId]).trigger('change');
+                        }else{
+                            var reasonId = $('select[name="reason_drop['+value.shId+']"]').attr('reasonId');
+                            $('select[name="reason_drop['+value.shId+']"]').val(reasonId).trigger('change');
+
+                        }
+                    });
                 },
                 initComplete: function() {
 
@@ -202,11 +221,14 @@
             });
 
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
+                var rowid = parseInt($(this).parents('tr').attr('id'));
+
                 $('#statusUpdateSubmit').removeAttr('disabled');
                 $('#statusVerifySubmit').removeAttr('disabled');
 
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
+                shipment_status[rowid] = status;
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
 
                 $.ajax({

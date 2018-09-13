@@ -536,7 +536,7 @@ class ReturnController extends Controller
 
         $datatables = Datatables::of($deliveries)
         ->editColumn('return_note', function ($deliveries) {
-            return "<a href='#' class='printreturnnote'><u>$deliveries->return_note_id</u></a>";
+            return "<a href='javascript:void(0);' class='printreturnnote'><u>$deliveries->return_note_id</u></a>";
         })
 
         ->editColumn('created_at', function ($rider) {
@@ -546,7 +546,7 @@ class ReturnController extends Controller
             $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
             $route = route('admin.return.receive.update',['id'=>$result->return_note]);
 
-            $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
+            $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item"><i class="ft-plus-circle primary"></i> Receive</a>';
             $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item returnnoteupdate"><i class="ft-plus-circle primary"></i> Shift Shipment</a>';
 
             if (session('role_id') == 1 || count(array_intersect([50, 51], session('permissions'))) !== 0) {
@@ -606,7 +606,7 @@ class ReturnController extends Controller
 
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-                return "<a href='#' class='returnnoterow'>Remove</a>";
+                return "<a href='javascript:void(0);' class='returnnoterow'>Remove</a>";
 
             })
             ->make(true);
@@ -687,11 +687,11 @@ class ReturnController extends Controller
                 foreach ($statuses as $status){
                     $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
                 }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status"><option></option>'.$drops.'</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" ><option></option>'.$drops.'</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" placeholder="Select a Reason"><option></option></select>';
+                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" ><option></option></select>';
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {
@@ -703,7 +703,7 @@ class ReturnController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
+                                              <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
                                             </div></span>";
             })
             ->make(true);

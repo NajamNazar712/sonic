@@ -155,7 +155,6 @@
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    console.log(info)
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
