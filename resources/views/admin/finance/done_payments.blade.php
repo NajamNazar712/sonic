@@ -168,7 +168,7 @@
 			var selected_rows = [];
 
 			var table = $('#datatable').DataTable({
-				scrollX: true,
+				scrollX: true, scrollY: '300px',
 				@if (session('role_id') == 1 || count(array_intersect([62, 63], session('permissions'))) !== 0)
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
 					buttons: [
@@ -249,7 +249,7 @@
 				@else
 					dom: 'ltipr',
 				@endif
-				scrollX: true,
+				scrollX: true, scrollY: '300px',
 				select: {
 					info: false,
 					style: 'multi',

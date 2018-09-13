@@ -307,7 +307,7 @@
             }
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                scrollX: true,
+                scrollX: true, scrollY: '300px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
                     text: 'Print',

@@ -173,7 +173,7 @@
 				@else
 					dom: 'ltipr',
 				@endif
-				scrollX: true,
+				scrollX: true, scrollY: '300px',
 				select: {
 					info: false,
 					style: 'multi',

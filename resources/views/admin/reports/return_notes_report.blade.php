@@ -230,7 +230,7 @@
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true,
+                scrollX: true, scrollY: '300px',
                 buttons: [
                     {
                     extend: 'excelHtml5',

@@ -227,7 +227,7 @@
 			var initial_total_hold = 0;
 
 			var table = $('#datatable').DataTable({
-				scrollX: true,
+				scrollX: true, scrollY: '300px',
 				@if (session('role_id') == 1 || in_array(60, session('permissions')))
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
 					buttons: [{
@@ -259,7 +259,7 @@
 				@else
 					dom: 'ltipr',
 				@endif
-				scrollX: true,
+				scrollX: true, scrollY: '300px',
 				select: {
 					info: false,
 					style: 'multi',
@@ -336,7 +336,7 @@
 
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
 				dom: 'tr',
-				scrollX: true,
+				scrollX: true, scrollY: '300px',
 				paging: false,
 				select: {
 					info: false,
