@@ -902,13 +902,20 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','bt.booking_type as service_type','ss.name as current_status','ss.id as current_status_id','dns.call_verification'])
+            ->select(['delivery_notes.id as delivery_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','shipments.consignee_name','shipments.consignee_address as address','shipments.amount as amount','users.name as shipper','shipments.booking_type_id','bt.booking_type as service_type','ss.name as current_status','ss.id as current_status_id','dns.call_verification'])
             ->where('delivery_notes.id',$id);
 
         return Datatables::of($deliveries)
 
             ->addColumn('status', function ($deliveries) {
-                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
+                if($deliveries->booking_type_id == 1){
+                    $where = array(7,8,9,10,11,12,13,15,18);
+                }else if($deliveries->booking_type_id == 2){
+                    $where = array(29,30);
+                }else if($deliveries->booking_type_id == 3){
+                    $where = array(35);
+                }
+//                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
                 $delivered_statuses = array(14,16,30,36,37);
                 $statuses = ShipmentStatus::whereIn('id',$where)->get();
                 $drops = '';
