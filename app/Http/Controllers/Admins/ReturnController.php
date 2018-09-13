@@ -842,10 +842,13 @@ class ReturnController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+                      .page-always-break {
+                        page-break-before: always;
+                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1">
+                    <div class="p-1 page-always-break">
       ';
         $return_note = ReturnNote::where('id',$request->id);
         if($return_note->exists()) {
@@ -863,7 +866,7 @@ class ReturnController extends Controller
                             <td class="color primary"><strong>Contact Person Phone</strong></td>
                             <td class="color primary"><strong>Client Address</strong></td>
                             <td class="color primary"><strong>No. of items</strong></td>
-                            <td class="color primary"><strong>Sign</strong></td>
+                            <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
                           </tr>
         ';
 
