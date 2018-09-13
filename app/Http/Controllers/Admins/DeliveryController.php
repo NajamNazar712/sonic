@@ -909,11 +909,11 @@ class DeliveryController extends Controller
 
             ->addColumn('status', function ($deliveries) {
                 if($deliveries->booking_type_id == 1){
-                    $where = array(7,8,9,10,11,12,13,15,18);
+                    $where = array(7,8,9,10,11,12,13,15,18,20);
                 }else if($deliveries->booking_type_id == 2){
-                    $where = array(29,30);
+                    $where = array(20,29,30);
                 }else if($deliveries->booking_type_id == 3){
-                    $where = array(35);
+                    $where = array(20,35);
                 }
 //                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
                 $delivered_statuses = array(14,16,30,36,37);
