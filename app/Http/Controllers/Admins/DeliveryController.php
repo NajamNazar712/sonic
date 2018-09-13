@@ -493,10 +493,13 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+                      .page-always-break {
+                        page-break-before: always;
+                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1">
+                    <div class="p-1 page-always-break">
       ';
         $delivery_note = DeliveryNote::where('id',$request->id);
         if($delivery_note->exists()) {
