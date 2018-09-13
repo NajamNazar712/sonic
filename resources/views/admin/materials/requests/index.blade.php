@@ -31,6 +31,7 @@
                         <th class="border-primary border-darken-1">Medium Flyers</th>
                         <th class="border-primary border-darken-1">Large Flyers</th>
                         <th class="border-primary border-darken-1">Boxes</th>
+                        <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Payment Mode</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -79,6 +80,7 @@
                     {data: 'medium_flyers', name: 'packaging_material_requests.medium_flyers', class: 'align-middle medium_flyers'},
                     {data: 'large_flyers', name: 'packaging_material_requests.large_flyers', class: 'align-middle large_flyers'},
                     {data: 'boxes', name: 'packaging_material_requests.boxes', class: 'align-middle boxes'},
+                    {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.mode', class: 'align-middle mode'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
@@ -121,25 +123,51 @@
             //dispatch
             $('body').on('click','.dispatch',function(){
                 var request_id = parseInt($(this).parents('tr').attr('id'));
-                $.ajax({
-                    url: '{!! route('admin.packaging.requests.dispatch') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': request_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to Dispatch Packaging Material!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.packaging.requests.dispatch') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': request_id,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
 
-                    if(data.status === 1){
-                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        setTimeout(function(){
-                            window.location.reload();
-                        },2000);
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                setTimeout(function(){
+                                    window.location.reload();
+                                },2000);
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                            }
+                        });
                     }
                 });
+
             });
 
         });
