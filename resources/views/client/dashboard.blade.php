@@ -29,7 +29,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card pull-up">
+                  <div class="card booking-css pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -38,7 +38,7 @@
                                   </div>
                                   <div class="media-body text-right">
                                       <h3 class="">{{$stats['booked']}}</h3>
-                                      <span>Booked</span>
+                                      <span>Pending</span>
                                   </div>
                               </div>
                           </div>
@@ -260,6 +260,12 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style type="text/css">
+        .card.booking-css{
+            background-color:#CECECE;
+            color:#000000;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -504,7 +510,7 @@
 
                 // Add legend
                 legend: {
-                    data: ['Booked', 'Received', 'Delivered', 'Return', 'In Process']
+                    data: ['Pending', 'Received', 'Delivered', 'Return', 'In Process']
                 },
 
                 // Add custom colors
@@ -528,7 +534,7 @@
                 // Add series
                 series: [
                     {
-                        name: 'Booked',
+                        name: 'Pending',
                         type: 'line',
                         data: @json($graph['booked'])
                     },
@@ -590,7 +596,7 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Booked', 'Received', 'Delivered', 'Return', 'In Process']
+                                data: ['Pending', 'Received', 'Delivered', 'Return', 'In Process']
                             },
                             color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
@@ -608,7 +614,7 @@
                             }],
                             series: [
                                 {
-                                    name: 'Booked',
+                                    name: 'Pending',
                                     type: 'line',
                                     data: data.graph['booked']
                                 },

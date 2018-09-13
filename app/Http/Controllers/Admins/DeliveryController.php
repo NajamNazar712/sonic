@@ -260,7 +260,7 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
-            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.pending_status'])
             ->where('delivery_notes.status',0);
 
         if (session('role_id') != 1) {
@@ -271,7 +271,7 @@ class DeliveryController extends Controller
 
 
             ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='#' class='printdeliverynote'><u>$deliveries->delivery_note</u></a>";
+                return "<a href='javascript:void(0);' class='printdeliverynote'><u>$deliveries->delivery_note</u></a>";
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
@@ -289,22 +289,32 @@ class DeliveryController extends Controller
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
-            ->addColumn('dn_status',function ($result){
-                $statusCheck = DeliveryNoteShipment::where(['delivery_note_id'=>$result->delivery_note,'status'=>0])->count();
-                if($statusCheck == 0){
-                    return 'Pending for Verification';
-                }else{
+            ->editColumn('pending_status',function ($result){
+                if($result->pending_status == 0){
                     return 'Pending for Update';
+                }else{
+                    return 'Pending for Verification';
                 }
             })
-
+            ->filterColumn('pending_status',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if (strpos('pending for update', $keyword) !== FALSE) {
+                    $query->where('delivery_notes.pending_status', '=', 0);
+                }
+                else if (strpos('pending for verification', $keyword) !== FALSE) {
+                    $query->where('delivery_notes.pending_status', '=', 1);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
                 $route = route('admin.delivery.receive.update',['note'=>$result->delivery_note]);
                 $verifyStatus = route('admin.delivery.receive.status.verify',['note'=>$result->delivery_note]);
 
                 $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item" data-target-id="' . $result->delivery_note . '" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
-                $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-plus-circle primary"></i> Shift Shipment</a>';
+                $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item deliverynoteupdate" data-target-id="' . $result->delivery_note . '"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
                 $verify_statuses_button = '<a href="' . $verifyStatus . '" class="dropdown-item" data-target-id="' . $result->id . '"><i class="ft-plus-circle primary"></i> Verify Statuses</a>';
 
                 if (session('role_id') == 1 || count(array_intersect([37, 38, 39], session('permissions'))) !== 0) {
@@ -736,6 +746,10 @@ class DeliveryController extends Controller
                 }
 
             }
+            $updates_count = DeliveryNoteShipment::where('delivery_note_id',$delivery_note_id)->where('status',0)->count();
+            if($updates_count == 0){
+                DeliveryNote::where('id',$delivery_note_id)->update(['pending_status'=>1]);
+            }
             return redirect()->back()->with('success','Statuses updated successfully!');
         }else{
             return redirect()->back()->with('error','Delivery note not found!');
@@ -768,6 +782,10 @@ class DeliveryController extends Controller
                     DeliveryNoteShipment::where(['delivery_note_id'=>$request->delivery_note_id,'shipment_id'=>$shipment])->update(['status'=>6]);
                 }
 
+            }
+            $updates_count = DeliveryNoteShipment::where('delivery_note_id',$request->delivery_note_id)->where('status',0)->count();
+            if($updates_count == 0){
+                DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>1]);
             }
             return ['status'=>0,'success'=>'Shipments status Delivered updated!'];
         }else{
@@ -1914,7 +1932,7 @@ class DeliveryController extends Controller
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                    <title>Delivery Note</title>
+                    <title>Station Deposit Note</title>
 
                     <style>
                       @page {
@@ -1977,13 +1995,11 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color primary"><strong>S. No.</strong></td>
                             <td class="color primary"><strong>DN No.</strong></td>
-                            <td class="color primary"><strong>Rider Name</strong></td>
+                            <td class="color primary"><strong>Hub Name</strong></td>
                             <td class="color primary"><strong>Route</strong></td>
-                            <td class="color primary"><strong>Total No of Shipments</strong></td>
-                            <td class="color primary"><strong>No of Delivered Shipments</strong></td>
+                            <td class="color primary"><strong>Total No. Of Shipments</strong></td>
+                            <td class="color primary"><strong>No. Of Delivered Shipments</strong></td>
                             <td class="color primary"><strong>Collected Amount</strong></td>
-                            <td class="color primary"><strong>Expense</strong></td>
-                            <td class="color primary"><strong>Net Amount</strong></td>
                           </tr>
         ';
 
@@ -2001,8 +2017,6 @@ class DeliveryController extends Controller
                             <td>' . $dncc_note->shipments_count . '</td>
                             <td>' . $dncc_note->delivered_shipments . '</td>
                             <td>Rs ' . number_format($dncc_note->received_cod_amount) . '</td>
-                            <td>Rs ' . number_format($dncc_note->expense) . '</td>
-                            <td>Rs ' . number_format($dncc_note->net_amount) . '</td>
                             
                           </tr>
             ';
@@ -2024,7 +2038,7 @@ class DeliveryController extends Controller
                             <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>Rider Name</strong></td>
+                            <td class="color secondary"><strong>City Name</strong></td>
                             <td>' . $city_name . '</td>
                             <td rowspan="7" class="text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">

@@ -152,7 +152,7 @@
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
-                    { data:'dn_status' ,name: 'dn_status', class: 'align-middle dn_status',orderable: false, searchable: false},
+                    { data:'pending_status' ,name: 'pending_status', class: 'align-middle pending_status'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -170,7 +170,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.dn_status') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {

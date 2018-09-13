@@ -213,10 +213,10 @@
 
 
             $('#rider_name').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select a rider*',
+                placeholder:'Select Rider*',
             });
             $('#route').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select a route*',
+                placeholder:'Select Route*',
             });
             $('#rider_name').on('change',function () {
                 var route = $(this).find(":selected").data("id");
@@ -248,7 +248,7 @@
                             $('input#scan_tracking').focus();
                         } else {
                             var rowNo = table.rows().count();
-                            var remove = '<a href="#" class="deliverynoterow">Delete</a>';
+                            var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
                             table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
                             table.draw(false);
                             shipment_ids.push(data.shId);

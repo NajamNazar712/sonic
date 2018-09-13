@@ -34,7 +34,7 @@
                     </table>
                     <div class="row justify-content-center">
                         <div class="col-2">
-                            <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
+                            <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Verify Status</button>
                         </div>
 
                     </div>

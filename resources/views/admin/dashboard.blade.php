@@ -38,7 +38,7 @@
                                   </div>
                                   <div class="media-body text-right">
                                       <h3 class="">{{$stats['booked']}}</h3>
-                                      <span>Pendings</span>
+                                      <span>Pending</span>
                                   </div>
                               </div>
                           </div>
@@ -205,9 +205,7 @@
             background-color:#CECECE;
             color:#000000;
         }
-        /*.card.booking-css h3{*/
-            /*color:#000000;*/
-        /*}*/
+
     </style>
 @endsection
 
@@ -438,7 +436,7 @@
 
                 // Add legend
                 legend: {
-                    data: ['Pendings', 'Received', 'Delivered', 'Return', 'In Progress']
+                    data: ['Pending', 'Received', 'Delivered', 'Return', 'In Progress']
                 },
 
                 // Add custom colors
@@ -462,7 +460,7 @@
                 // Add series
                 series: [
                     {
-                        name: 'Pendings',
+                        name: 'Pending',
                         type: 'line',
                         data: @json($graph['booked'])
                     },
@@ -528,7 +526,7 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pendings', 'Received', 'Delivered', 'Return', 'In Progress']
+                                data: ['Pending', 'Received', 'Delivered', 'Return', 'In Progress']
                             },
                             color: ['#CECECE', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
@@ -546,7 +544,7 @@
                             }],
                             series: [
                                 {
-                                    name: 'Pendings',
+                                    name: 'Pending',
                                     type: 'line',
                                     data: data.graph['booked']
                                 },
