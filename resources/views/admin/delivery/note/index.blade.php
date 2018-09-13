@@ -219,10 +219,10 @@
 
 
             $('#rider_name').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select a rider*',
+                placeholder:'Select Rider*',
             });
             $('#route').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Select a route*',
+                placeholder:'Select Route*',
             });
             $('#rider_name').on('change',function () {
                 var route = $(this).find(":selected").data("id");

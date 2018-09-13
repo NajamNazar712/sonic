@@ -149,10 +149,14 @@ class DeliveryController extends Controller
             $remarks = '';$status = '';
             if($shipment->exists()) {
                 $shipment = $shipment->first();
-                $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment->id)->orderBy('delivery_note_id','desc')->first();
-                $is_updateable = DeliveryNoteShipment::where('delivery_note_id',$old_delivery_note_id->delivery_note_id)->where('status',0)->count();
+                $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment->id)->orderBy('delivery_note_id','desc');
+                if($old_delivery_note_id->exists()){
+                    $old_delivery_note_id = $old_delivery_note_id->first();
+                    $is_updateable = DeliveryNoteShipment::where('delivery_note_id',$old_delivery_note_id->delivery_note_id)->where('status',0)->count();
+                }else{
+                    $is_updateable = 0;
+                }
 
-//                $old_delivery_note = DeliveryNote::where('id',$old_delivery_note_id->delivery_note_id)->first();
                 if ($is_updateable == 0) {
 //                return $shipment->consignee_city_id
                 if (($shipment->consignee_city_id != $shipment->pickup_address->city_id) && $shipment->shipper_status_id == 2) {
@@ -285,6 +289,15 @@ class DeliveryController extends Controller
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
+            ->addColumn('dn_status',function ($result){
+                $statusCheck = DeliveryNoteShipment::where(['delivery_note_id'=>$result->delivery_note,'status'=>0])->count();
+                if($statusCheck == 0){
+                    return 'Pending for Verification';
+                }else{
+                    return 'Pending for Update';
+                }
+            })
+
             ->addColumn("action", function ($result) {
                 $statusUpdate = route('admin.delivery.receive.status',['id'=>$result->delivery_note]);
                 $route = route('admin.delivery.receive.update',['note'=>$result->delivery_note]);
