@@ -912,14 +912,14 @@ class DeliveryController extends Controller
 
             ->addColumn('status', function ($deliveries) {
                 if($deliveries->booking_type_id == 1){
-                    $where = array(7,8,9,10,11,12,13,15,18,20);
+                    $where = array(7,8,9,10,11,12,15,18,20);
                 }else if($deliveries->booking_type_id == 2){
-                    $where = array(20,29,30);
+                    $where = array(7,8,9,10,11,12,15,18,20);
                 }else if($deliveries->booking_type_id == 3){
-                    $where = array(20,35);
+                    $where = array(7,8,9,10,11,12,15,18,20);
                 }
 //                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
-                $delivered_statuses = array(14,16,30,36,37);
+                $delivered_statuses = array(14,30,36,37);
                 $statuses = ShipmentStatus::whereIn('id',$where)->get();
                 $drops = '';
                 $disable = '';
@@ -1215,10 +1215,13 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+                      .page-always-break {
+                        page-break-before: always;
+                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1">
+                    <div class="p-1 page-always-break">
       ';
             $delivery_note = DeliveryNote::where('id',$request->id);
             if($delivery_note->exists()) {
@@ -1411,10 +1414,13 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+                      .page-always-break {
+                        page-break-before: always;
+                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1">
+                    <div class="p-1 page-always-break">
       ';
         $delivery_note = DeliveryNote::where('id',$request->id);
         if($delivery_note->exists()) {
@@ -1987,10 +1993,13 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+                      .page-always-break {
+                        page-break-before: always;
+                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1">
+                    <div class="p-1 page-always-break">
       ';
 
         $sdn = StationDepositNote::where('id',$request->id);
