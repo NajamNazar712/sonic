@@ -13,4 +13,8 @@ class SubstituteUser extends Authenticatable
     public function permissions() {
         return $this->hasMany('App\Http\Models\Shipper\SubstituteUserPermission', 'substitute_user_id', 'id');
     }
+
+    public function shipper() {
+        return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
+    }
 }
