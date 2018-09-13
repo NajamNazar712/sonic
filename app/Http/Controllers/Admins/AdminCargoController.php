@@ -103,31 +103,46 @@ class AdminCargoController extends Controller
                     if ($shipment->shipper_status_id != 2) {
                       return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
                     }
+
+                    $cargo_type = 1;
                   }
                   else {
                     if (!in_array($shipment->shipper_status_id, [20, 30, 36, 37])) {
                       return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
                     }
+
+                    $cargo_type = 2;
                   }
                 }
                 else {
                   if ($shipment->shipper_status_id == 2) {
                     $details['cargo_type'] = 1;
+
+                    $cargo_type = 1;
                   }
                   else {
                     $details['cargo_type'] = 2;
+
+                    $cargo_type = 2;
                   }
+                }
+
+                if ($cargo_type == 1) {
+                  $destination = $shipment->consignee_city;
+                }
+                else {
+                  $destination = $shipment->pickup_address->city;
                 }
 
                 $details['id'] = $shipment->id;
                 $details['tracking_number'] = $shipment->tracking_number;
                 $details['order_id'] = $shipment->order_id;
                 $details['service_type'] = $shipment->booking_type->booking_type;
-                $details['destination'] = $shipment->consignee_city->name;
+                $details['destination'] = $destination->name;
                 $details['amount'] = $shipment->amount;
                 $details['shipping_mode'] = $shipment->shipping_mode->mode;
 
-                $hub = $shipment->consignee_city->hub_city;
+                $hub = $destination->hub_city;
 
                 $details['hub']['id'] = $hub->id;
                 $details['hub']['name'] = $hub->name;
