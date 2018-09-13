@@ -72,7 +72,7 @@ class AdminTrackingController extends Controller
     			foreach ($shipment->shipment_journey as $journey) {
     				$journey_details = array();
 
-    				$journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y H:i A');
+    				$journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
     				$journey_details['status'] = $journey->shipment_status_shipper->name;
 
     				if ($journey->reference_1_id) {
