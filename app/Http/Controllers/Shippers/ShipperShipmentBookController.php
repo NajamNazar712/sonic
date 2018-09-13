@@ -672,7 +672,7 @@ class ShipperShipmentBookController extends Controller
 
       $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
 
-      $shipping_modes = ShippingMode::whereIn('shipping_mode_id', $user_shipping_modes)->get();
+      $shipping_modes = ShippingMode::whereIn('id', $user_shipping_modes)->get();
 
       if (in_array(4, $user_shipping_modes)) {
         $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
