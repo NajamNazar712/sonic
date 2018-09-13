@@ -36,7 +36,8 @@ class ShipperDashboardController extends Controller
         $graph = array();
         $graph_dates = array();
 
-        $stats['booked'] = Shipment::where('user_id', session('user_id'))->count();
+        $stats['total'] = Shipment::where('user_id', session('user_id'))->count();
+        $stats['booked'] = Shipment::where('user_id', session('user_id'))->where('shipper_status_id',1)->count();
         $stats['received'] = Shipment::where('user_id', session('user_id'))->whereIn('shipper_status_id',[2,3,4])->count();
         $stats['delivered'] = Shipment::where('user_id', session('user_id'))->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
         $stats['return'] = Shipment::where('user_id', session('user_id'))->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
@@ -49,7 +50,7 @@ class ShipperDashboardController extends Controller
             $date = Carbon::now()->subDays($counter);
             $comparison_date = $date->toDateString();
             $graph['dates'][] = $date->format('d M');
-            $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->count();
+            $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->where('shipper_status_id',1)->count();
             $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[2,3,4])->count();
             $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
             $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
@@ -188,14 +189,14 @@ class ShipperDashboardController extends Controller
             $comparison_date = $this_date;
             if($destination == ''){
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
-                $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->count();
+                $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->where('shipper_status_id',1)->count();
                 $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[2,3,4])->count();
                 $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
                 $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
                 $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
             }else{
                 $graph['dates'][] = Carbon::parse($this_date)->format('d M');
-                $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id'=> session('user_id'),'consignee_city_id'=>$destination])->count();
+                $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id'=> session('user_id'),'consignee_city_id'=>$destination,'shipper_status_id'=>1])->count();
                 $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id'=> session('user_id'),'consignee_city_id'=>$destination])->whereIn('shipper_status_id',[2,3,4])->count();
                 $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id'=> session('user_id'),'consignee_city_id'=>$destination])->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
                 $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where(['user_id'=> session('user_id'),'consignee_city_id'=>$destination])->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();

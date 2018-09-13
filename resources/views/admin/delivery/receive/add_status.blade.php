@@ -237,7 +237,8 @@
                 'min': 0.00,
                 'max': 1000
             });
-
+            var shipment_status = [];
+            var shipment_reason = [];
             var selected_rows = [];
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
@@ -344,16 +345,7 @@
                     }
                 },
                 drawCallback: function (settings) {
-                    var api = new $.fn.dataTable.Api( settings );
-                    var data = api.rows( {page:'current'} ).data();
-                    // Output the data for the visible rows to the browser's console
-                    // You might do something more useful with it!
-                    $.each(data,function (key,value) {
-                        console.log( value.shId );
 
-                    })
-                    // var sta = $('select[name="status_drop[175]"]').val();
-                    // console.log(sta)
                     $(".reasonDrop").prepend('<option value="" selected="selected"></option>').select2({
                         placeholder: "Select a Reason",
                         width:'100%'
@@ -361,6 +353,16 @@
                     $(".statusDrop").prepend('<option value="" selected="selected"></option>').select2({
                         placeholder: "Select a Status",
                         width:'100%'
+                    });
+                    var api = new $.fn.dataTable.Api( settings );
+                    var data = api.rows( {page:'current'} ).data();
+                    $.each(data,function (key,value) {
+                        if(shipment_status.length !== 0){
+                            $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
+                        }
+                        if(shipment_reason.length !== 0){
+                            $('select[name="reason_drop['+value.shId+']"]').val(shipment_reason[value.shId]).trigger('change');
+                        }
                     });
                 },
                 initComplete: function() {
@@ -414,10 +416,15 @@
                 }
             });
 
+
+
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
+                var rowid = parseInt($(this).parents('tr').attr('id'));
+
                 $('#statusSubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
+                shipment_status[rowid] = status;
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
 
                 $.ajax({
@@ -441,6 +448,12 @@
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
+            });
+            $('body').on('select2:select','.reasonSelect .reasonDrop',function (e) {
+                var rowid = parseInt($(this).parents('tr').attr('id'));
+                var reasonSelection = $(this).find(':selected');
+                var reason_status = reasonSelection.val();
+                shipment_reason[rowid] = reason_status;
             });
             $('body').on('click','.clear',function () {
                 // console.log();

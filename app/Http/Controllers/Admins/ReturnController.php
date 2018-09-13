@@ -286,6 +286,8 @@ class ReturnController extends Controller
     }
     public function get_shipment_details(Request $request){
         if($request->tracking != ''){
+//            $shipment_not_arrived = array(20,24,27,29,33,35,42,44,45,46);
+//            $shipment_arrived = array(22,24,27,29,30,33,35,44,45,46);
             $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46);
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$allowed_statuses);
             $status = '';
@@ -430,7 +432,6 @@ class ReturnController extends Controller
     }
     public function return_create_note(Request $request)
     {
-//        return $request;
         $trackings = explode(',', $request->shipment_ids);
         $count = count($trackings);
         $rider = $request->rider_id;
@@ -438,6 +439,7 @@ class ReturnController extends Controller
         $hub_id = $request->hub_id;
         $admin = Auth::id();
         //$errors_not_arrived = array();
+
         if(!empty($trackings)) {
             $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider,'route_id'=>$route, 'shipments_count' => $count, 'admin_id' => $admin]);
             if($note) {
@@ -447,12 +449,7 @@ class ReturnController extends Controller
 //                    return $shipment->get();
                     if ($shipment->exists()) {
                         $shipment = $shipment->first();
-                        $shipper_city_id = $shipment->pickup_address->city_id;
-                        $destination = City::where('id', $shipper_city_id)->select('hub_id')->first();
-                        $origin = $shipment->consignee_city->hub_id;
-                        if ($origin != $destination->hub_id) {
-//                            return 123;
-                            if ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46) {
+
                             if ($shipment->booking_type_id == 1) { //attempt failed and arrived at origin center
 
                                 ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
@@ -483,41 +480,13 @@ class ReturnController extends Controller
                             }
                         }
 
-                        } else if ($origin == $destination->hub_id) {
-                            //if status == 20
-                            if ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27|| $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46) {
-                                if ($shipment->booking_type_id == 1) {
-                                    ReturnNoteShipment::create(['return_note_id'=>$note->id,'shipment_id'=>$tracking]);
-                                    $shipment->shipper_status_id = 23;
-                                    $shipment->consignee_status_id = 23;
-                                    $shipment->save();
-                                    ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(),$note->id,$rider);
-
-                                } else if ($shipment->booking_type_id == 2) {
-                                    ReturnNoteShipment::create(['return_note_id'=>$note->id,'shipment_id'=>$tracking]);
-                                    $shipment->shipper_status_id = 28;
-                                    $shipment->consignee_status_id = 28;
-                                    $shipment->save();
-                                    ShipmentsJourneyController::add($shipment->id, 28, 28, NULL, NULL, NULL, Auth::id(),$note->id,$rider);
-
-                                } else if ($shipment->booking_type_id == 3) {
-                                    ReturnNoteShipment::create(['return_note_id'=>$note->id,'shipment_id'=>$tracking]);
-                                    $shipment->shipper_status_id = 34;
-                                    $shipment->consignee_status_id = 34;
-                                    $shipment->save();
-                                    ShipmentsJourneyController::add($shipment->id, 34, 34, NULL, NULL, NULL, Auth::id(),$note->id,$rider);
-
-                                }
-
-                            }
-                        }
                     }
                 }
                 return redirect()->back()->with(['success' => "Return note has been created with Return Note Number:" . $note->id,'print'=>$note->id]);
+            }else{
+
+                return ['error'=>"No shipments scanned"];
             }
-        }else{
-            return ['error'=>"No shipments scanned"];
-        }
     }
     public function return_receive_deliveries_view(){
         return view('admin.return.receive');
@@ -536,7 +505,7 @@ class ReturnController extends Controller
 
         $datatables = Datatables::of($deliveries)
         ->editColumn('return_note', function ($deliveries) {
-            return "<a href='#' class='printreturnnote'><u>$deliveries->return_note_id</u></a>";
+            return "<a href='javascript:void(0);' class='printreturnnote'><u>$deliveries->return_note_id</u></a>";
         })
 
         ->editColumn('created_at', function ($rider) {
@@ -546,8 +515,8 @@ class ReturnController extends Controller
             $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
             $route = route('admin.return.receive.update',['id'=>$result->return_note]);
 
-            $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item" class=""><i class="ft-plus-circle primary"></i> Receive</a>';
-            $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item returnnoteupdate"><i class="ft-plus-circle primary"></i> Shift Shipment</a>';
+            $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item"><i class="ft-plus-circle primary"></i> Receive</a>';
+            $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item returnnoteupdate"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
 
             if (session('role_id') == 1 || count(array_intersect([50, 51], session('permissions'))) !== 0) {
                 $dropdown = "
@@ -606,7 +575,7 @@ class ReturnController extends Controller
 
         return Datatables::of($deliveries)
             ->addColumn("action", function ($deliveries) {
-                return "<a href='#' class='returnnoterow'>Remove</a>";
+                return "<a href='javascript:void(0);' class='returnnoterow'>Remove</a>";
 
             })
             ->make(true);
@@ -665,7 +634,7 @@ class ReturnController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id'])
-            ->where('return_notes.id',$request->id)->where('dns.status',0);
+            ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('return_notes.hub_id', session('hubs'));
@@ -676,22 +645,22 @@ class ReturnController extends Controller
             ->addColumn('status', function ($deliveries) {
 
                 if($deliveries->booking_type_id == 1){
-                    $where = array(24,25);
+                    $where = array(24);
                 }else if($deliveries->booking_type_id == 2){
-                    $where = array(29,31);
+                    $where = array(29);
                 }else if($deliveries->booking_type_id == 3){
-                    $where = array(35,38);
+                    $where = array(35);
                 }
                 $statuses = ShipmentStatus::whereIn('id',$where)->get();
                 $drops = '';
                 foreach ($statuses as $status){
                     $drops .= '<option value="'.$status->id.'">'.$status->name.'</option>';
                 }
-                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" placeholder="Select a Status"><option></option>'.$drops.'</select>';
+                $select = '<select class="form-control form-control-sm select2 statusDrop" name="status_drop['.$deliveries->shId.']" ><option></option>'.$drops.'</select>';
                 return $select;
             })
             ->addColumn('reason', function ($deliveries) {
-                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" placeholder="Select a Reason"><option></option></select>';
+                $reason = '<select class="form-control form-control-sm select2 reasonDrop" name="reason_drop['.$deliveries->shId.']" ><option></option></select>';
                 return $reason;
             })
             ->addColumn('remarks', function ($deliveries) {
@@ -703,7 +672,7 @@ class ReturnController extends Controller
                                             <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                                     aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                                             <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
+                                              <a href='javascript:void(0);' class='dropdown-item clear'><i class='ft-rotate-cw primary'></i> Clear</a>                                         
                                             </div></span>";
             })
             ->make(true);

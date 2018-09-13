@@ -50,6 +50,7 @@
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Total COD</th>
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -151,11 +152,11 @@
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
+                    { data:'pending_status' ,name: 'pending_status', class: 'align-middle pending_status'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-                    console.log(info)
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
@@ -169,9 +170,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
-                            $(td).appendTo($(search));
-                        }else if($(header).is('.action')){
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }
                         else {

@@ -22,7 +22,7 @@
                             <th class="border-primary border-darken-1">No. Of Shipments</th>
                             <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
                             <th class="border-primary border-darken-1">DNCC Amount</th>
-                            <th class="border-primary border-darken-1">Net Amount</th>
+                            {{--<th class="border-primary border-darken-1">Net Amount</th>--}}
                             <th class="border-primary border-darken-1">Remarks</th>
                         </tr>
                         </thead>
@@ -120,7 +120,7 @@
                             head.push('No. Of Shipments');
                             head.push('No. Of Shipments Delivered');
                             head.push('DNCC Amount');
-                            head.push('Net Amount');
+                            // head.push('Net Amount');
                             head.push('Remarks');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -133,7 +133,7 @@
                                 row.push(values.shipments_count);
                                 row.push(values.delivered_shipments);
                                 row.push(values.received_cod_amount);
-                                row.push(values.net_amount);
+                                // row.push(values.net_amount);
                                 row.push(values.remarks);
 
                                 body.push(row);
@@ -170,7 +170,7 @@
                     { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
                     { data:'received_cod_amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle received_cod_amount'},
                     // { data:'expense' ,name: 'expense', class: 'align-middle expense'},
-                    { data:'net_amount' ,name: 'delivery_notes.net_amount', class: 'align-middle net_amount'},
+                    // { data:'net_amount' ,name: 'delivery_notes.net_amount', class: 'align-middle net_amount'},
                     { data:'remarks' ,name: 'delivery_notes.remarks', class: 'align-middle remarks'},
                 ],
                 rowCallback: function(row, data, index) {

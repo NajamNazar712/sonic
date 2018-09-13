@@ -20,8 +20,25 @@
                                       <i class="icon-book-open font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-right">
+                                      <h3 class="">{{$stats['total']}}</h3>
+                                      <span>Total Orders</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="col">
+                  <div class="card booking-css pull-up">
+                      <div class="card-content">
+                          <div class="card-body">
+                              <div class="media d-flex">
+                                  <div class="align-self-center">
+                                      <i class="icon-notebook font-large-2 float-left"></i>
+                                  </div>
+                                  <div class="media-body text-right">
                                       <h3 class="">{{$stats['booked']}}</h3>
-                                      <span>Booked</span>
+                                      <span>Pending</span>
                                   </div>
                               </div>
                           </div>
@@ -87,7 +104,7 @@
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['pending']}}</h3>
-                                      <span>Pendings</span>
+                                      <span>In Process</span>
                                   </div>
                               </div>
                           </div>
@@ -183,6 +200,13 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style type="text/css">
+        .card.booking-css{
+            background-color:#CECECE;
+            color:#000000;
+        }
+
+    </style>
 @endsection
 
 @section('js')
@@ -412,7 +436,7 @@
 
                 // Add legend
                 legend: {
-                    data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
+                    data: ['Pending', 'Received', 'Delivered', 'Return', 'In Progress']
                 },
 
                 // Add custom colors
@@ -436,7 +460,7 @@
                 // Add series
                 series: [
                     {
-                        name: 'Booked',
+                        name: 'Pending',
                         type: 'line',
                         data: @json($graph['booked'])
                     },
@@ -456,7 +480,7 @@
                         data: @json($graph['return'])
                     },
                     {
-                        name: 'Pending',
+                        name: 'In Progress',
                         type: 'line',
                         data: @json($graph['pending'])
                     }
@@ -502,7 +526,7 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
+                                data: ['Pending', 'Received', 'Delivered', 'Return', 'In Progress']
                             },
                             color: ['#CECECE', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
@@ -520,7 +544,7 @@
                             }],
                             series: [
                                 {
-                                    name: 'Booked',
+                                    name: 'Pending',
                                     type: 'line',
                                     data: data.graph['booked']
                                 },
@@ -540,7 +564,7 @@
                                     data: data.graph['return']
                                 },
                                 {
-                                    name: 'Pending',
+                                    name: 'In Progress',
                                     type: 'line',
                                     data: data.graph['pending']
                                 }

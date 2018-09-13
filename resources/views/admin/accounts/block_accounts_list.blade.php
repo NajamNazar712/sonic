@@ -1,5 +1,5 @@
 @extends('admin.layout.master')
-
+@section('title','Blocked Accounts List')
 @section('content')
     <h1>Blocked Accounts List</h1>
 
