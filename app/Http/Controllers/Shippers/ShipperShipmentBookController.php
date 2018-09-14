@@ -132,7 +132,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function index() {
-      $booking_types = BookingType::all();
+      $booking_types = BookingType::where('id', '!=', 3)->get();
       $user = User::with('shipping.city')->find(session('user_id'));
       $cities = City::where('status', 1)->where('pickup', 1)->orderBy('name')->get();
       $consignee_cities = City::where('status', 1)->orderBy('name')->get();
@@ -466,6 +466,22 @@ class ShipperShipmentBookController extends Controller
                       .border.twice-right {
                         border-right-width: 2px !important;
                       }
+
+                      td.replacement {
+                        position: relative;
+                      }
+
+                      td.replacement span {
+                        width: 22px;
+                      }
+
+                      td.replacement span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
                     </style>
                   </head>
                   <body>
@@ -495,7 +511,25 @@ class ShipperShipmentBookController extends Controller
                           </tr>
                           <tr>
                             <td class="color primary border twice-left"><strong>Service</strong></td>
-                            <td><strong>' . $shipment->booking_type->booking_type . (($shipment->booking_type_id == 3) ? ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' : '') . '</strong></td>
+          ';
+
+          if ($shipment->booking_type_id == 1) {
+            $table_start  .= '
+                            <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+            ';
+          }
+          else if ($shipment->booking_type_id == 2) {
+            $table_start  .= '
+                            <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+            ';
+          }
+          else {
+            $table_start  .= '
+                            <td><strong>' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' . '</strong></td>
+            ';
+          }
+
+          $table_start .= '
                             <td class="color primary"><strong>Order ID</strong></td>
                             <td>' . $shipment->order_id . '</td>
                           </tr>
@@ -740,7 +774,7 @@ class ShipperShipmentBookController extends Controller
         'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
         'in' => ':attribute must be No or Yes.',
 
-        'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
+        'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
         'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
         'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.'
@@ -757,8 +791,8 @@ class ShipperShipmentBookController extends Controller
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
         'consignee_name' => ['required', 'between:1,100'],
         'consignee_address' => ['required', 'between:1,190'],
-        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}$/'],
-        'consignee_phone_number_2' => ['nullable', 'regex:/[0-9]{4}-[0-9]{7}$/'],
+        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{11}$/'],
+        'consignee_phone_number_2' => ['nullable', 'regex:/[0-9]{11}$/'],
         'consignee_email_address' => ['nullable', 'email'],
         'order_id' => ['nullable', Rule::unique('shipments')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
@@ -894,10 +928,10 @@ class ShipperShipmentBookController extends Controller
               $consignee_city_id = $row['consignee_city_id'];
               $consignee_name = $row['consignee_name'];
               $consignee_address = $row['consignee_address'];
-              $consignee_phone_number_1 = $row['consignee_phone_number_1'];
+              $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
 
               if (!empty(trim($row['consignee_phone_number_2']))) {
-                  $consignee_phone_number_2 = $row['consignee_phone_number_2'];
+                  $consignee_phone_number_2 = substr_replace($row['consignee_phone_number_2'], '-', 4, 0);
               }
               else {
                 $consignee_phone_number_2 = NULL;

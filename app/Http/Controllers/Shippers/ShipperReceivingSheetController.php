@@ -308,6 +308,7 @@ class ShipperReceivingSheetController extends Controller
                             <td class="color primary"><strong>Description</strong></td>
                             <td class="color primary"><strong>Quantity</strong></td>
                             <td class="color primary"><strong>Destination</strong></td>
+                            <td class="color primary"><strong>Estimated Weight</strong></td>
                             <td class="color primary"><strong>Amount</strong></td>
                           </tr>
         ';
@@ -329,6 +330,7 @@ class ShipperReceivingSheetController extends Controller
 
             $shipment_details_row_end = '
                             <td>' . $shipment->consignee_city->name . '</td>
+                            <td>' . number_format($shipment->estimated_weight) . '</td>
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
           ';
@@ -347,6 +349,7 @@ class ShipperReceivingSheetController extends Controller
 
             $shipment_details_row_end = '
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_city->name . '</td>
+                            <td rowspan=' . $number_of_items . ' class="align-middle">' . number_format($shipment->estimated_weight) . '</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
             ';
