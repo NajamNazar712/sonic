@@ -3895,55 +3895,7 @@
 
             }
         }
-        //Main switches
-        // overnightSwitch.onchange = function() {
-        //     if(overnightSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(overnightSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // overlandSwitch.onchange = function() {
-        //     if(overlandSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(overlandSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // detainSwitch.onchange = function() {
-        //     if(detainSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(detainSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // samedayDiscountSwitch.onchange = function() {
-        //     if(samedaySwitch.checked === true){
-        //         errors = 0;
-        //     }else if(samedaySwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        //
 
-
-        // var overnight_switch = new Switchery('#overnight_switch');
-
-        // $('#overnight_switch').bind('change', function() {
-        //     // var switchery = new Switchery(overnightSwitch);
-        //     // overnight_switch.disable();
-        //     // setTimeout(function(){ overnightSwitch.disable(); }, 1000);
-        //     if(this.checked == true){
-        //         $('#overnight').collapse('show');
-        //     }else{
-        //         $('#overnight').collapse('hide');
-        //     }
-        // });
-        // $("#overnight_switch").dblclick(function (event)
-        // {
-        //     console.log('double');
-        //     event.preventDefault();
-        // });
 
 
         var overnightSwitch = document.querySelector('.switchery.on-main-switch');
@@ -3960,10 +3912,17 @@
             submitHandler: function(form) {
                 if (overnightSwitch.checked == true || overlandSwitch.checked == true || detainSwitch.checked == true || samedaySwitch.checked == true) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    var msg = "";
+                    if($('#authorize').val() == 1){
+                        msg = "Rates are being authorized!"
+                    }else{
+                        msg = 'Rates are being added!';
+                    }
+
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Your rates are being added!',
+                        text: msg,
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,
