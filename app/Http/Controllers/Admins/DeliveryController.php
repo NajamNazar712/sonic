@@ -2057,7 +2057,7 @@ class DeliveryController extends Controller
                             <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>City Name</strong></td>
+                            <td class="color secondary"><strong>Hub Name</strong></td>
                             <td>' . $city_name . '</td>
                             <td rowspan="7" class="text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
