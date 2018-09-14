@@ -816,7 +816,7 @@ class ShipperShipmentBookController extends Controller
           $order_id_row = array();
 
           foreach ($rows as $key => $row) {
-            $row_id = $key + 1;
+            $row_id = $key + 2;
 
             $validate = Validator::make($row, $rules, $messages);
 

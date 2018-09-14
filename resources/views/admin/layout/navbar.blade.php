@@ -26,7 +26,7 @@
                         <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
                             <span class="d-inline-block align-middle">
                                 <div class="text-bold-700 border-bottom-white text-right">{{ucfirst(Auth::user()->name)}}</div>
-                                <div class="border-top-white text-right">{{Auth::user()->role->name}}</div>
+                                <div class="border-top-white text-right">{{Auth::user()->role->department->name}}</div>
                             </span>
 
                             <i class="ft-chevron-down"></i>
