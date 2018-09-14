@@ -374,8 +374,9 @@
 					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
 					method: 'POST',
 					data: {
+						'_token': '{{ csrf_token() }}',
 						'ids[]': '{{ session('print') }}',
-						'_token': '{{ csrf_token() }}'
+						'twice': true
 					}
 				})
 				.done(function(data) {

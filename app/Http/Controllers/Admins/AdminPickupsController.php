@@ -596,7 +596,6 @@ class AdminPickupsController extends Controller
                     <style>
                       @page {
                         size: A4 portrait;
-                        margin: 0mm;
                       }
 
                       * {
@@ -639,7 +638,7 @@ class AdminPickupsController extends Controller
                     </style>
                   </head>
                   <body>
-                    <div class="p-1">
+                    <div>
       ';
 
       foreach($request->ids as $id) {
