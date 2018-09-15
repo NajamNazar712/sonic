@@ -511,7 +511,9 @@
 			$('#tracking_number_search_form').bind('submit', function(e) {
 				e.preventDefault();
 
-				if (this.value.length == 0 || this.value.length >= 12) {
+				length = $('#tracking_number_search_form #tracking_number').val().length;
+
+				if (length == 0 || length >= 12) {
 					table.draw();
 				}
 			});
