@@ -131,7 +131,6 @@ class Permission
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,
             'finance.outstanding_sdn.delivery_notes_list' => 52,
-            'finance.outstanding_sdn.delivery_note_expense_edit' => 52,
             'finance.outstanding_sdn.reconcile_delivery_notes' => 53,
             'finance.outstanding_sdn.export_to_excel' => 52,
             'finance.outstanding_shipments.index' => 54,

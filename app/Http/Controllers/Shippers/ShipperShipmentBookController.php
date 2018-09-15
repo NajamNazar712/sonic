@@ -466,10 +466,6 @@ class ShipperShipmentBookController extends Controller
                         border-right-width: 2px !important;
                       }
 
-                      td.replacement {
-                        position: relative;
-                      }
-
                       td.replacement span {
                         width: 22px;
                       }
@@ -755,7 +751,7 @@ class ShipperShipmentBookController extends Controller
         'item_description' => 'Item Description',
         'item_quantity' => 'Item Quantity',
         'item_insurance' => 'Item Insurance',
-        'item_price' => 'Item Price',
+        'item_price' => 'Product Value',
 
         'replacement_item_product_type_id' => 'Replacement Item Product Type ID',
         'replacement_item_description' => 'Replacement Item Description',
@@ -766,7 +762,7 @@ class ShipperShipmentBookController extends Controller
         'estimated_weight' => 'Estimated Weight',
         'shipping_mode_id' => 'Shipping Mode ID',
         'same_day_timing_id' => 'Same Day Timing ID',
-        'amount' => 'Amount',
+        'amount' => 'Collection Amount',
         'payment_mode_id' => 'Payment Mode ID'
       ];
 
@@ -786,8 +782,8 @@ class ShipperShipmentBookController extends Controller
 
         'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
-        'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
-        'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.'
+        'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+        'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
       ];
 
       $rules = [
@@ -835,7 +831,7 @@ class ShipperShipmentBookController extends Controller
       $spreadsheet->setReadDataOnly(true);
       $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-      $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City ID', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (0300-0000000)', 'Consignee Phone Number 2 (0300-0000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Item Price', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Amount', 'Mode of Payment ID'];
+      $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City ID', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID'];
 
       if ($spreadsheet[0] == $header) {
         unset($spreadsheet[0]);
@@ -923,7 +919,7 @@ class ShipperShipmentBookController extends Controller
             $tracking_numbers = array();
 
             foreach ($rows as $key => $row) {
-              $row_id = $key + 1;
+              $row_id = $key + 2;
 
               $service_type_id = $row['service_type_id'];
               $pickup_address_id = $row['pickup_address_id'];
@@ -1066,7 +1062,7 @@ class ShipperShipmentBookController extends Controller
               return $row . ': ' . $tracking_number;
             }, array_keys($tracking_numbers), $tracking_numbers));
 
-            return redirect()->back()->with(['success' => 'Shipment(s) Booked with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+            return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Booked with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
           }
           else {
             $errors = array_map(function ($row, $errors) {

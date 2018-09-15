@@ -803,7 +803,6 @@ class ReturnController extends Controller
                     <style>
                       @page {
                         size: A4 portrait;
-                        margin: 0mm;
                       }
 
                       * {
@@ -843,13 +842,10 @@ class ReturnController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
-                      .page-always-break {
-                        page-break-before: always;
-                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1 page-always-break">
+                    <div>
       ';
         $return_note = ReturnNote::where('id',$request->id);
         if($return_note->exists()) {
@@ -912,7 +908,7 @@ class ReturnController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
-                            <td rowspan="7" class="text-center align-middle">
+                            <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>

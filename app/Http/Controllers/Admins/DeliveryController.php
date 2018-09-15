@@ -453,7 +453,6 @@ class DeliveryController extends Controller
                     <style>
                       @page {
                         size: A4 portrait;
-                        margin: 0mm;
                       }
 
                       * {
@@ -493,13 +492,22 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
-                      .page-always-break {
-                        page-break-before: always;
+
+                      td.replacement span {
+                        width: 22px;
+                      }
+
+                      td.replacement span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
                       }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1 page-always-break">
+                    <div>
       ';
         $delivery_note = DeliveryNote::where('id',$request->id);
         if($delivery_note->exists()) {
@@ -516,7 +524,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
                             <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
-                            <td class="color primary"><strong>Collect Amount</strong></td>
+                            <td class="color primary"><strong>Collection Amount</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
                           </tr>
         ';
@@ -532,7 +540,25 @@ class DeliveryController extends Controller
                             <td>' . $shipment->tracking_number . '</td>
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                             <td>' . $shipment->consignee_address . '</td>
-                            <td>' . $shipment->booking_type->booking_type . '</td>
+                ';
+
+            if ($shipment->booking_type_id == 1) {
+                $shipment_details_row_start .= '
+                    <td>' . $shipment->booking_type->booking_type . '</td>
+                ';
+            }
+            else if ($shipment->booking_type_id == 2) {
+                $shipment_details_row_start .= '
+                    <td class="replacement"><span class="align-middle">' . $shipment->booking_type->booking_type . '</span><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+                ';
+            }
+            else {
+                $shipment_details_row_start .= '
+                    <td>' . $shipment->booking_type->booking_type . '</td>
+                ';
+            }
+
+                $shipment_details_row_start .= '
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                             <td></td>
                           </tr>
@@ -561,7 +587,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
-                            <td rowspan="7" class="text-center align-middle">
+                            <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
@@ -1175,7 +1201,6 @@ class DeliveryController extends Controller
                     <style>
                       @page {
                         size: A4 portrait;
-                        margin: 0mm;
                       }
 
                       * {
@@ -1215,13 +1240,10 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
-                      .page-always-break {
-                        page-break-before: always;
-                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1 page-always-break">
+                    <div>
       ';
             $delivery_note = DeliveryNote::where('id',$request->id);
             if($delivery_note->exists()) {
@@ -1299,7 +1321,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
-                            <td rowspan="7" class="text-center align-middle">
+                            <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
@@ -1374,7 +1396,6 @@ class DeliveryController extends Controller
                     <style>
                       @page {
                         size: A4 portrait;
-                        margin: 0mm;
                       }
 
                       * {
@@ -1414,13 +1435,10 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
-                      .page-always-break {
-                        page-break-before: always;
-                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1 page-always-break">
+                    <div>
       ';
         $delivery_note = DeliveryNote::where('id',$request->id);
         if($delivery_note->exists()) {
@@ -1492,7 +1510,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
-                            <td rowspan="7" class="text-center align-middle">
+                            <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
@@ -1953,7 +1971,6 @@ class DeliveryController extends Controller
                     <style>
                       @page {
                         size: A4 portrait;
-                        margin: 0mm;
                       }
 
                       * {
@@ -1993,13 +2010,10 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
-                      .page-always-break {
-                        page-break-before: always;
-                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-1 page-always-break">
+                    <div>
       ';
 
         $sdn = StationDepositNote::where('id',$request->id);
@@ -2059,7 +2073,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Hub Name</strong></td>
                             <td>' . $city_name . '</td>
-                            <td rowspan="7" class="text-center align-middle">
+                            <td rowspan="7" class="text-center align-middle pl-1 pr-1">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>

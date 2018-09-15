@@ -26,8 +26,6 @@
 										<th class="border-primary border-darken-1">DNCCs</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">DNCC Amount</th>
-										<th class="border-primary border-darken-1">Expense</th>
-										<th class="border-primary border-darken-1">Net Amount</th>
 										<th class="border-primary border-darken-1">Deposited by</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
 										<th class="border-primary border-darken-1">Deposited at</th>
@@ -63,8 +61,6 @@
 														<th class="border-primary border-darken-1">Updated by</th>
 														<th class="border-primary border-darken-1">Updated at</th>
 														<th class="border-primary border-darken-1">DNCC Amount</th>
-														<th class="border-primary border-darken-1">Expense</th>
-														<th class="border-primary border-darken-1"></th>
 													</tr>
 												</thead>
 											</table>
@@ -75,51 +71,10 @@
 												<input type="hidden" name="station_deposit_note_id" class="station_deposit_note_id">
 												<input type="hidden" name="delivery_note_ids" class="delivery_note_ids">
 
-												<div class="form-group">
-													<input type="text" name="total_dncc_amount" class="form-control total_dncc_amount" placeholder="Total DNCC Amount" readonly="readonly">
-												</div>
-
-												<div class="form-group ml-1">
-													<input type="text" name="total_expense" class="form-control total_expense" placeholder="Total Expense" readonly="readonly">
-												</div>
-
-												<div class="form-group ml-1">
-													<input type="text" name="total_net_amount" class="form-control total_net_amount" placeholder="Total Net Amount" readonly="readonly">
-												</div>
-
-												<div class="w-100"></div>
-
 												<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
 												<button type="submit" name="reconcile" class="btn btn-primary reconcile">Reconcile</button>
 											</form>
 										</div>
-									</div>
-								</div>
-							</div>
-
-							<div class="modal fade" id="edit_expense" role="dialog" aria-labelledby="edit_expense_title" aria-hidden="true">
-								<div class="modal-dialog modal-sm" role="document">
-									<div class="modal-content">
-										<form class="form-horizontal" novalidate="novalidate">
-											<input type="hidden" name="id" class="id">
-
-											<div class="modal-header">
-												<h4 class="modal-title" id="edit_expense_title">Edit Expense of DNCC #<span></span></h4>
-
-												<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-													<span aria-hidden="true">×</span>
-												</button>
-											</div>
-											<div class="modal-body">
-												<div class="form-group m-0">
-													<input type="text" name="expense" class="form-control expense" placeholder="Expense">
-												</div>
-											</div>
-											<div class="modal-footer">
-												<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-												<button type="submit" class="btn btn-primary ml-auto">Edit</button>
-											</div>
-										</form>
 									</div>
 								</div>
 							</div>
@@ -189,8 +144,6 @@
 					{data:'dncc_count', name: 'station_deposit_notes.dncc_count', class: 'align-middle dnccs'},
 					{data:'sdn_delivered_shipments', name: 'sdn_delivered_shipments', class: 'align-middle delivered_shipments'},
 					{data:'sdn_amount', name: 'station_deposit_notes.sdn_amount', class: 'align-middle amount'},
-					{data:'sdn_expense', name: 'station_deposit_notes.sdn_expense', class: 'align-middle expense'},
-					{data:'sdn_net_amount', name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle net_amount'},
 					{data:'deposited_by', name: 'a.name', class: 'align-middle deposited_by'},
 					{data:'bank', name: 'b.name', class: 'align-middle bank'},
 					{data:'deposited_at', name: 'station_deposit_notes.created_at', class: 'align-middle deposited_at'},
@@ -267,9 +220,7 @@
 					{data:'assigned_at', name: 'dn.created_at', class: 'align-middle assigned_at'},
 					{data:'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data:'updated_at', name: 'dn.updated_at', class: 'align-middle updated_at'},
-					{data:'dncc_amount', name: 'dn.received_cod_amount', class: 'align-middle dncc_amount'},
-					{data:'expense', name: 'dn.expense', class: 'align-middle expense'},
-					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
+					{data:'dncc_amount', name: 'dn.received_cod_amount', class: 'align-middle dncc_amount'}
 				],
 				rowCallback: function(row, data, index) {
 					$('td:eq(1)', row).html(index + 1);
@@ -339,98 +290,14 @@
 
 				var index = $.inArray(id, selected_rows);
 
-				total_dncc_amount_selector = $('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_dncc_amount');
-				total_expense_selector = $('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_expense');
-				total_net_amount_selector = $('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_net_amount');
-
 				if (index === -1) {
 					selected_rows.push(id);
-
-					var total_dncc_amount = ((total_dncc_amount_selector.val() != '') ? parseInt(total_dncc_amount_selector.val()) : 0) + ((parent.children('td.dncc_amount').html() != '') ? parseInt(parent.children('td.dncc_amount').html()) : 0);
-					var total_expense = ((total_expense_selector.val() != '') ? parseInt(total_expense_selector.val()) : 0) + ((parent.children('td.expense').html() != '') ? parseInt(parent.children('td.expense').html()) : 0);
 				}
 				else {
 					selected_rows.splice(index, 1);
-
-					var total_dncc_amount = ((total_dncc_amount_selector.val() != '') ? parseInt(total_dncc_amount_selector.val()) : 0) - ((parent.children('td.dncc_amount').html() != '') ? parseInt(parent.children('td.dncc_amount').html()) : 0);
-					var total_expense = ((total_expense_selector.val() != '') ? parseInt(total_expense_selector.val()) : 0) - ((parent.children('td.expense').html() != '') ? parseInt(parent.children('td.expense').html()) : 0);
-				}
-
-				var total_net_amount = total_dncc_amount - total_expense;
-
-				if (selected_rows.length > 0) {
-					total_dncc_amount_selector.val(total_dncc_amount);
-					total_expense_selector.val(total_expense);
-					total_net_amount_selector.val(total_net_amount);
-				}
-				else {
-					total_dncc_amount_selector.val('');
-					total_expense_selector.val('');
-					total_net_amount_selector.val('');
 				}
 
 				$('#reconcile_delivery_notes #reconcile_delivery_notes_form .delivery_note_ids').val(selected_rows);
-			});
-
-			$('#edit_expense form input.expense').inputmask({
-				'alias': 'integer',
-				'allowMinus': false,
-				'allowPlus': false
-			});
-
-			$('#edit_expense form').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parent('.form-group'));
-				},
-				submitHandler: function(form) {
-					var id = $(form).find('input.id').val();
-					var expense = $(form).find('input.expense').val();
-
-					$.ajax({
-						url: '{!! route('admin.finance.outstanding_sdn.delivery_note_expense_edit') !!}',
-						method: 'PUT',
-						data: {
-							'id': id,
-							'expense': expense,
-							'_token': '{{ csrf_token() }}'
-						}
-					})
-					.done(function(data) {
-						if (data.status == 0) {
-							toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-						else {
-							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-						}
-
-						$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_dncc_amount').val('');
-						$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_expense').val('');
-						$('#reconcile_delivery_notes #reconcile_delivery_notes_form .total_net_amount').val('');
-
-						selected_rows = [];
-
-						reconcile_delivery_notes_table.clear().draw();
-
-						$('#edit_expense').modal('hide');
-					});
-
-					return false;
-				}
-			});
-
-			$('#reconcile_delivery_notes #reconcile_delivery_notes_datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.edit_expense', function() {
-				var parent = $(this).parents('tr');
-				var id = parseInt(parent.attr('id'));
-				var value = parent.children('td.expense').html();
-
-				$('#edit_expense form #edit_expense_title span').html(id);
-
-				$('#edit_expense form input.id').val(id);
-				$('#edit_expense form input.expense').val(value);
-
-				$('#edit_expense').modal('show');
 			});
 		});
 	</script>

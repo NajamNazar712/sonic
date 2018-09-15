@@ -44,14 +44,14 @@ class APIController extends Controller
       'estimated_weight' => 'Estimated Weight',
       'shipping_mode_id' => 'Shipping Mode ID',
       'same_day_timing_id' => 'Same Day Timing ID',
-      'amount' => 'Amount',
+      'amount' => 'Collection Amount',
       'payment_mode_id' => 'Payment Mode ID',
 
       'item_product_type_id' => 'Item Product Type ID',
       'item_description' => 'Item Description',
       'item_quantity' => 'Item Quantity',
       'item_insurance' => 'Item Insurance',
-      'item_price' => 'Item Price',
+      'product_value' => 'Product Value',
 
       'replacement_item_product_type_id' => 'Replacement Item Product Type ID',
       'replacement_item_description' => 'Replacement Item Description',
@@ -62,7 +62,7 @@ class APIController extends Controller
       'items.*.item_description' => 'Item Description',
       'items.*.item_quantity' => 'Item Quantity',
       'items.*.item_insurance' => 'Item Insurance',
-      'items.*.item_price' => 'Item Price',
+      'items.*.product_value' => 'Product Value',
 
       'tracking_number' => 'Tracking Number',
       'type' => 'Type'
@@ -81,10 +81,10 @@ class APIController extends Controller
       'unique' => ':attribute is already Present.',
       'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
 
-      'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
+      'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
-      'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
-      'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.'
+      'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+      'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
     ];
 
     public function pickup_addresses(Request $request) {
@@ -134,7 +134,7 @@ class APIController extends Controller
 
       $rules = [
         'person_of_contact' => ['required', 'between:1,190'],
-        'phone_number' => ['required', 'regex:/[0-9]{4}-[0-9]{7}$/'],
+        'phone_number' => ['required', 'regex:/[0-9]{11}$/'],
         'email_address' => ['required', 'email'],
         'address' => ['required', 'between:1,190'],
         'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id']
@@ -159,7 +159,7 @@ class APIController extends Controller
         }
 
         $person_of_contact = $request->input('person_of_contact');
-        $phone_number = $request->input('phone_number');
+        $phone_number = substr_replace($request->input('phone_number'), '-', 4, 0);
         $email_address = $request->input('email_address');
         $address = $request->input('address');
         $city_id = $request->input('city_id');
@@ -193,8 +193,8 @@ class APIController extends Controller
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
         'consignee_name' => ['required', 'between:1,100'],
         'consignee_address' => ['required', 'between:1,190'],
-        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}$/'],
-        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{4}-[0-9]{7}$/'],
+        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{11}$/'],
+        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{11}$/'],
         'consignee_email_address' => ['nullable', 'filled', 'email'],
         'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
@@ -212,7 +212,7 @@ class APIController extends Controller
         'item_description' => ['nullable', 'between:0,190'],
         'item_quantity' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'between:1,1000'],
         'item_insurance' => ['required_if:service_type_id,1,2', 'boolean'],
-        'item_price' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
+        'product_value' => ['required_if:item_insurance,1', 'integer', 'digits_between:1,20', 'between:1,100000'],
 
         'replacement_item_product_type_id' => ['required_if:service_type_id,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
         'replacement_item_description' => ['nullable', 'between:0,190'],
@@ -223,7 +223,7 @@ class APIController extends Controller
         'items.*.item_description' => ['nullable', 'between:0,190'],
         'items.*.item_quantity' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,10', 'between:1,1000'],
         'items.*.item_insurance' => ['required_if:service_type_id,3', 'boolean'],
-        'items.*.item_price' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
+        'items.*.product_value' => ['required_if:service_type_id,3', 'integer', 'digits_between:1,20', 'between:1,100000']
       ];
 
       $validate = Validator::make($request->all(), $rules, $this->messages);
@@ -270,10 +270,10 @@ class APIController extends Controller
         $consignee_city_id = $request->input('consignee_city_id');
         $consignee_name = $request->input('consignee_name');
         $consignee_address = $request->input('consignee_address');
-        $consignee_phone_number_1 = $request->input('consignee_phone_number_1');
+        $consignee_phone_number_1 = substr_replace($request->input('consignee_phone_number_1'), '-', 4, 0);
 
         if ($request->filled('consignee_phone_number_2')) {
-            $consignee_phone_number_2 = $request->input('consignee_phone_number_2');
+            $consignee_phone_number_2 = substr_replace($request->input('consignee_phone_number_2'), '-', 4, 0);
         }
         else {
           $consignee_phone_number_2 = NULL;
@@ -339,7 +339,7 @@ class APIController extends Controller
           $item_quantity = $request->input('item_quantity');
 
           if ($request->input('item_insurance') == 1) {
-            $item_price = str_replace(',', '', $request->input('item_price'));
+            $item_price = str_replace(',', '', $request->input('product_value'));
             $item_insurance = TRUE;
           }
           else {
@@ -364,7 +364,7 @@ class APIController extends Controller
           $item_quantity = $request->input('item_quantity');
 
           if ($request->input('item_insurance') == 1) {
-            $item_price = str_replace(',', '', $request->input('item_price'));
+            $item_price = str_replace(',', '', $request->input('product_value'));
             $item_insurance = TRUE;
           }
           else {
@@ -405,7 +405,7 @@ class APIController extends Controller
             }
 
             $item_quantity = $item['item_quantity'];
-            $item_price = $item['item_price'];
+            $item_price = $item['product_value'];
 
             if (isset($item['item_insurance']) && !empty($item['item_insurance'])) {
               $item_insurance = TRUE;

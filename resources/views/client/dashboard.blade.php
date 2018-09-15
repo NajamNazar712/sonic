@@ -374,9 +374,31 @@
                             table.row($('#datatable tbody tr#' + id)).deselect();
                         });
                         selected_rows = [];
+                      }
+                    },
+                    {
+                      text: 'Select All',
+                      className: 'btn btn-secondary',
+                      action: function () {
+                        // table.rows().deselect();
 
+                        // table.row().every(function(row_id, table_loop, row_loop) {
+                        //   var row = this;
+                        //   console.log(row.columns('.select-checkbox'));
+                        // });
+
+                        console.log(table.columns('.select').data());
+
+                        // table.columns('.select-checkbox').every(function(column_id) {
+                        //   var column = this;
+                        //   console.log(column.data());
+                        // });
+
+                        // table.rows().select();
+                      }
                     }
-                }],
+                // }, 'selectAll'],
+                ],
                 select: {
                     info: false,
                     style: 'multi',
