@@ -1098,7 +1098,7 @@ class AdminCargoController extends Controller
                 DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_1_id);
             }
         }
-        if($cargo_consignment->destination_hub_id != $junction_hub_2_id) {
+        if($junction_hub_2_id && $cargo_consignment->destination_hub_id != $junction_hub_2_id) {
             $junction2 = CargoConsignmentJunctionReceival::where(['cargo_consignment_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_2_id])->exists();
             if(!$junction2){
                 DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_2_id);
