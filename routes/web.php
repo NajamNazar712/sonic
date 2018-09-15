@@ -367,6 +367,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@create_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminCargoController@create_shipment_details')->name('shipment_details');
             Route::post('consignment_details', 'Admins\AdminCargoController@create_consignment_details')->name('consignment_details');
+            Route::get('seal_number', 'Admins\AdminCargoController@create_consignment_seal_number')->name('seal_number');
             Route::post('', 'Admins\AdminCargoController@create_store')->name('store');
         });
 

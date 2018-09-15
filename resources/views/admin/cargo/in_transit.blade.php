@@ -160,7 +160,7 @@
 
 														<div class="col">
 															<div class="form-group">
-																<select name="junction_2" class="select2 junction_2" data-rule-required="true" data-msg-required="Junction 2 is required">
+																<select name="junction_2" class="select2 junction_2">
 																</select>
 															</div>
 														</div>
@@ -862,9 +862,8 @@
 
 							$('#add_forwarding_details form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
 								width: '100%',
-								placeholder: 'Junction 2*'
-							}).bind('change', function() {
-								$(this).valid();
+								placeholder: 'Junction 2',
+								allowClear: true
 							});
 
 							if (picker) {
@@ -1000,7 +999,7 @@
 						var details = '<table class="table table-sm table-bordered"><tbody>';
 
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 1</strong></td><td class="align-middle text-center">' + cargo_consignment.junction_hub_1 + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + cargo_consignment.junction_hub_2 + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + ((cargo_consignment.junction_hub_2) ? cargo_consignment.junction_hub_2 : '') + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Expected Arrival Date</strong></td><td class="align-middle text-center">' + cargo_consignment.expected_arrival_date + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipping Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.shipping_mode + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode + '</td></tr>';
