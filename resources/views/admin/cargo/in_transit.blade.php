@@ -508,6 +508,14 @@
 				table.draw();
 			});
 
+			$('#tracking_number_search_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				if (this.value.length == 0 || this.value.length >= 12) {
+					table.draw();
+				}
+			});
+
 			$('#tracking_number_search_form #tracking_number').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
@@ -516,6 +524,12 @@
 				if (this.value.length == 0 || this.value.length >= 12) {
 					table.draw();
 				}
+			});
+
+			$('#seal_number_search_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				table.draw();
 			});
 
 			$('#seal_number_search_form #seal_number').inputmask({
