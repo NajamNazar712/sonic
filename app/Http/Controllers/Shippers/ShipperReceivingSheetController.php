@@ -76,7 +76,7 @@ class ShipperReceivingSheetController extends Controller
       ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
       ->leftjoin('receiving_sheet_shipments as rss', 'shipments.id', '=', 'rss.shipment_id')
       ->leftjoin('receiving_sheets AS rs', 'rss.receiving_sheet_id', '=', 'rs.id')
-      ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet')
+      ->select('shipments.id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type AS service_type', 'usi.pickup_address', 'oc.name AS origin_city', 'dc.name AS destination_city', 'shipments.created_at AS booking_date', 'rs.id AS receiving_sheet')
       ->where('shipments.user_id', session('user_id'))
       ->where('shipments.shipper_status_id', 1)
       ->where(function ($query) {
@@ -308,6 +308,7 @@ class ShipperReceivingSheetController extends Controller
                             <td class="color primary"><strong>Description</strong></td>
                             <td class="color primary"><strong>Quantity</strong></td>
                             <td class="color primary"><strong>Destination</strong></td>
+                            <td class="color primary"><strong>Estimated Weight</strong></td>
                             <td class="color primary"><strong>Amount</strong></td>
                           </tr>
         ';
@@ -329,6 +330,7 @@ class ShipperReceivingSheetController extends Controller
 
             $shipment_details_row_end = '
                             <td>' . $shipment->consignee_city->name . '</td>
+                            <td>' . number_format($shipment->estimated_weight) . '</td>
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
           ';
@@ -347,6 +349,7 @@ class ShipperReceivingSheetController extends Controller
 
             $shipment_details_row_end = '
                             <td rowspan=' . $number_of_items . ' class="align-middle">' . $shipment->consignee_city->name . '</td>
+                            <td rowspan=' . $number_of_items . ' class="align-middle">' . number_format($shipment->estimated_weight) . '</td>
                             <td rowspan=' . $number_of_items . ' class="align-middle">Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
             ';

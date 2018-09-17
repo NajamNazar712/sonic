@@ -374,9 +374,9 @@
                             table.row($('#datatable tbody tr#' + id)).deselect();
                         });
                         selected_rows = [];
-
+                      }
                     }
-                }],
+                ],
                 select: {
                     info: false,
                     style: 'multi',

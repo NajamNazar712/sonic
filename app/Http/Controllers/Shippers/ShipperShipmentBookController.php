@@ -132,7 +132,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function index() {
-      $booking_types = BookingType::all();
+      $booking_types = BookingType::where('id', '!=', 3)->get();
       $user = User::with('shipping.city')->find(session('user_id'));
       $cities = City::where('status', 1)->where('pickup', 1)->orderBy('name')->get();
       $consignee_cities = City::where('status', 1)->orderBy('name')->get();
@@ -405,7 +405,6 @@ class ShipperShipmentBookController extends Controller
                     <style>
                       @page {
                         size: A4 portrait;
-                        margin: 0mm;
                       }
 
                       * {
@@ -466,10 +465,22 @@ class ShipperShipmentBookController extends Controller
                       .border.twice-right {
                         border-right-width: 2px !important;
                       }
+
+                      td.replacement span {
+                        width: 22px;
+                      }
+
+                      td.replacement span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
                     </style>
                   </head>
                   <body>
-                    <div class="p-2">
+                    <div>
       ';
 
       $shipment_details = '';
@@ -483,19 +494,40 @@ class ShipperShipmentBookController extends Controller
                         <tbody>
                           <tr>
                             <td rowspan="3" class="text-center align-middle border twice-bottom twice-right"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
-                            <td rowspan="3" colspan="3" class="text-center align-middle border twice-bottom twice-left twice-right">
+                            <td rowspan="3" colspan="3" class="text-center align-middle pl-1 pr-1 border twice-bottom twice-left twice-right">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($shipment->tracking_number, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . $shipment->tracking_number . '</strong></span>
                             </td>
 
-                            <td class="color primary border twice-left"><strong>Date</strong></td>
-                            <td>' . $shipment->created_at->format('Y-m-d') . '</td>
-                            <td class="color primary"><strong>Time</strong></td>
-                            <td>' . $shipment->created_at->format('H:i:s') . '</td>
+                            <td class="color primary border twice-left"><strong>Serivce</strong></td>
+          ';
+
+          if ($shipment->booking_type_id == 1) {
+            $table_start  .= '
+                            <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
+            ';
+          }
+          else if ($shipment->booking_type_id == 2) {
+            $table_start  .= '
+                            <td class="replacement"><strong class="align-middle">' . $shipment->booking_type->booking_type . '</strong><span class="d-inline-block align-middle float-right"><img src="' . asset('img/replacement.png') . '"></span></td>
+            ';
+          }
+          else {
+            $table_start  .= '
+                            <td><strong>' . $shipment->booking_type->booking_type . ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' . '</strong></td>
+            ';
+          }
+
+          $table_start  .= '
+                            <td class="color primary"><strong>Datetime</strong></td>
+                            <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                           </tr>
                           <tr>
-                            <td class="color primary border twice-left"><strong>Service</strong></td>
-                            <td><strong>' . $shipment->booking_type->booking_type . (($shipment->booking_type_id == 3) ? ' (' . (($shipment->package_type == 1) ? 'Complete' : 'Partial') . ')' : '') . '</strong></td>
+                            <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
+                            <td>' . $shipment->shipping_mode->mode . '</td>
+          ';
+
+          $table_start .= '
                             <td class="color primary"><strong>Order ID</strong></td>
                             <td>' . $shipment->order_id . '</td>
                           </tr>
@@ -540,17 +572,21 @@ class ShipperShipmentBookController extends Controller
 
           $table_end = '
                           <tr>
-                            <td rowspan="2" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
-                            <td rowspan="2" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
+                            <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
+                            <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
+                            <td class="color primary border twice-top twice-bottom twice-left"><strong>Estimated Weight</strong></td>
+                            <td class="border twice-top twice-bottom twice-left"><strong>' . number_format($shipment->estimated_weight) . ' kg</strong></td>
+                          </tr>
+                          <tr>
                             <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->payment_mode->mode . '</strong></td>
                           </tr>
                           <tr>
-                            <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>COD</strong></td>
+                            <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
                             <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
                           </tr>
                           <tr>
-                            <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier</em></td>
+                            <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>
                           </tr>
                         </tbody>
                       </table>
@@ -585,11 +621,11 @@ class ShipperShipmentBookController extends Controller
 
             $items = $shipment->items;
 
-            $item = $items[1];
+            $item = $items[0];
 
             $shipment_details .= '
                         <tr>
-                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Replacement Item</strong></td>
+                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Delivery Item</strong></td>
                           <td class="color secondary border twice-top"><strong>Type</strong></td>
                           <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
                           <td class="color secondary border twice-top"><strong>Quantity</strong></td>
@@ -602,11 +638,11 @@ class ShipperShipmentBookController extends Controller
                         </tr>
             ';
 
-            $item = $items[0];
+            $item = $items[1];
 
             $shipment_details .= '
                         <tr>
-                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Item</strong></td>
+                          <td rowspan="2" class="align-middle color primary border twice-top twice-bottom"><strong>Replacement Item</strong></td>
                           <td class="color secondary border twice-top"><strong>Type</strong></td>
                           <td colspan="2" class="border twice-top">' . $item->product->product_name . '</td>
                           <td class="color secondary border twice-top"><strong>Quantity</strong></td>
@@ -648,6 +684,10 @@ class ShipperShipmentBookController extends Controller
       }
 
       $html .= $shipment_details;
+
+      if ($request->has('twice')) {
+        $html .= $shipment_details;
+      }
 
       $html .= '
                     </div>
@@ -711,7 +751,7 @@ class ShipperShipmentBookController extends Controller
         'item_description' => 'Item Description',
         'item_quantity' => 'Item Quantity',
         'item_insurance' => 'Item Insurance',
-        'item_price' => 'Item Price',
+        'item_price' => 'Product Value',
 
         'replacement_item_product_type_id' => 'Replacement Item Product Type ID',
         'replacement_item_description' => 'Replacement Item Description',
@@ -722,7 +762,7 @@ class ShipperShipmentBookController extends Controller
         'estimated_weight' => 'Estimated Weight',
         'shipping_mode_id' => 'Shipping Mode ID',
         'same_day_timing_id' => 'Same Day Timing ID',
-        'amount' => 'Amount',
+        'amount' => 'Collection Amount',
         'payment_mode_id' => 'Payment Mode ID'
       ];
 
@@ -740,10 +780,10 @@ class ShipperShipmentBookController extends Controller
         'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
         'in' => ':attribute must be No or Yes.',
 
-        'phone_number.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
+        'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
-        'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.',
-        'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 0300-0000000.'
+        'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
+        'consignee_phone_number_2.regex' => ':attribute format is Invalid, required Format is: 03000000000.'
       ];
 
       $rules = [
@@ -757,8 +797,8 @@ class ShipperShipmentBookController extends Controller
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
         'consignee_name' => ['required', 'between:1,100'],
         'consignee_address' => ['required', 'between:1,190'],
-        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{4}-[0-9]{7}$/'],
-        'consignee_phone_number_2' => ['nullable', 'regex:/[0-9]{4}-[0-9]{7}$/'],
+        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{11}$/'],
+        'consignee_phone_number_2' => ['nullable', 'regex:/[0-9]{11}$/'],
         'consignee_email_address' => ['nullable', 'email'],
         'order_id' => ['nullable', Rule::unique('shipments')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
@@ -791,7 +831,7 @@ class ShipperShipmentBookController extends Controller
       $spreadsheet->setReadDataOnly(true);
       $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-      $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City ID', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (0300-0000000)', 'Consignee Phone Number 2 (0300-0000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Item Price', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Amount', 'Mode of Payment ID'];
+      $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City ID', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID'];
 
       if ($spreadsheet[0] == $header) {
         unset($spreadsheet[0]);
@@ -879,7 +919,7 @@ class ShipperShipmentBookController extends Controller
             $tracking_numbers = array();
 
             foreach ($rows as $key => $row) {
-              $row_id = $key + 1;
+              $row_id = $key + 2;
 
               $service_type_id = $row['service_type_id'];
               $pickup_address_id = $row['pickup_address_id'];
@@ -894,10 +934,10 @@ class ShipperShipmentBookController extends Controller
               $consignee_city_id = $row['consignee_city_id'];
               $consignee_name = $row['consignee_name'];
               $consignee_address = $row['consignee_address'];
-              $consignee_phone_number_1 = $row['consignee_phone_number_1'];
+              $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);
 
               if (!empty(trim($row['consignee_phone_number_2']))) {
-                  $consignee_phone_number_2 = $row['consignee_phone_number_2'];
+                  $consignee_phone_number_2 = substr_replace($row['consignee_phone_number_2'], '-', 4, 0);
               }
               else {
                 $consignee_phone_number_2 = NULL;
@@ -1022,7 +1062,7 @@ class ShipperShipmentBookController extends Controller
               return $row . ': ' . $tracking_number;
             }, array_keys($tracking_numbers), $tracking_numbers));
 
-            return redirect()->back()->with(['success' => 'Shipment(s) Booked with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
+            return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Booked with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
           }
           else {
             $errors = array_map(function ($row, $errors) {

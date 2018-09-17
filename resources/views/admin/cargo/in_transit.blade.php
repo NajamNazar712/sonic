@@ -160,7 +160,7 @@
 
 														<div class="col">
 															<div class="form-group">
-																<select name="junction_2" class="select2 junction_2" data-rule-required="true" data-msg-required="Junction 2 is required">
+																<select name="junction_2" class="select2 junction_2">
 																</select>
 															</div>
 														</div>
@@ -508,6 +508,16 @@
 				table.draw();
 			});
 
+			$('#tracking_number_search_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				length = $('#tracking_number_search_form #tracking_number').val().length;
+
+				if (length == 0 || length >= 12) {
+					table.draw();
+				}
+			});
+
 			$('#tracking_number_search_form #tracking_number').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
@@ -516,6 +526,12 @@
 				if (this.value.length == 0 || this.value.length >= 12) {
 					table.draw();
 				}
+			});
+
+			$('#seal_number_search_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				table.draw();
 			});
 
 			$('#seal_number_search_form #seal_number').inputmask({
@@ -846,9 +862,8 @@
 
 							$('#add_forwarding_details form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
 								width: '100%',
-								placeholder: 'Junction 2*'
-							}).bind('change', function() {
-								$(this).valid();
+								placeholder: 'Junction 2',
+								allowClear: true
 							});
 
 							if (picker) {
@@ -983,21 +998,21 @@
 
 						var details = '<table class="table table-sm table-bordered"><tbody>';
 
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Junction 1</strong></td><td>' + cargo_consignment.junction_hub_1 + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Junction 2</strong></td><td>' + cargo_consignment.junction_hub_2 + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Expected Arrival Date</strong></td><td>' + cargo_consignment.expected_arrival_date + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Shipping Mode</strong></td><td>' + cargo_consignment.shipping_mode + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Transport Mode</strong></td><td>' + cargo_consignment.transport_mode + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Transport Mode Vendor</strong></td><td>' + cargo_consignment.transport_mode_vendor + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Seal Number</strong></td><td>' + cargo_consignment.seal_number + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Builty Number</strong></td><td>' + cargo_consignment.builty_number + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Weight Charges / kg</strong></td><td>' + cargo_consignment.weight_charges_per_kg + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Shipments Weight</strong></td><td>' + cargo_consignment.shipments_weight + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Actual Weight</strong></td><td>' + cargo_consignment.actual_weight + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Extra Charges</strong></td><td>' + cargo_consignment.extra_charges + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Total Weight Charges</strong></td><td>' + cargo_consignment.total_weight_charges + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Sender Name</strong></td><td>' + cargo_consignment.sender_name + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Receiver Name</strong></td><td>' + cargo_consignment.receiver_name + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 1</strong></td><td class="align-middle text-center">' + cargo_consignment.junction_hub_1 + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + ((cargo_consignment.junction_hub_2) ? cargo_consignment.junction_hub_2 : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Expected Arrival Date</strong></td><td class="align-middle text-center">' + cargo_consignment.expected_arrival_date + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipping Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.shipping_mode + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode_vendor + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + cargo_consignment.seal_number + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((cargo_consignment.builty_number) ? cargo_consignment.builty_number : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((cargo_consignment.weight_charges_per_kg) ? cargo_consignment.weight_charges_per_kg : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.shipments_weight + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.actual_weight + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Extra Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.extra_charges) ? cargo_consignment.extra_charges : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Weight Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.total_weight_charges) ? cargo_consignment.total_weight_charges : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Sender Name</strong></td><td class="align-middle text-center">' + cargo_consignment.sender_name + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Receiver Name</strong></td><td class="align-middle text-center">' + cargo_consignment.receiver_name + '</td></tr>';
 
 						details += '</tbody></table>';
 

@@ -25,6 +25,7 @@
 										<th class="border-primary border-darken-1">Tracking Number</th>
 										<th class="border-primary border-darken-1">Order ID</th>
 										<th class="border-primary border-darken-1">Service Type</th>
+										<th class="border-primary border-darken-1">Pickup Address</th>
 										<th class="border-primary border-darken-1">Origin</th>
 										<th class="border-primary border-darken-1">Destination</th>
 										<th class="border-primary border-darken-1">Booking Date</th>
@@ -179,6 +180,7 @@
 					{data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
 					{data: 'order_id', name: 'order_id', class: 'align-middle order_id'},
 					{data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
+					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 					{data: 'origin_city', name: 'oc.name', class: 'align-middle origin_city'},
 					{data: 'destination_city', name: 'dc.name', class: 'align-middle destination_city'},
 					{data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},

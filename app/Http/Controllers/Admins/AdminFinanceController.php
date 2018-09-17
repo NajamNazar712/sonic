@@ -48,7 +48,7 @@ class AdminFinanceController extends Controller
         $station_deposit_notes = StationDepositNote::join('cities as h', 'station_deposit_notes.hub_id', '=', 'h.id')
         ->join('admins as a', 'station_deposit_notes.deposited_by', '=', 'a.id')
         ->join('banks_lists as b', 'station_deposit_notes.banks_list_id', '=', 'b.id')
-        ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_amount', 'station_deposit_notes.sdn_expense', 'station_deposit_notes.sdn_net_amount', 'a.name as deposited_by', 'b.name as bank', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip')
+        ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_amount', 'a.name as deposited_by', 'b.name as bank', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip')
         ->where('station_deposit_notes.status', 1);
 
         if (session('role_id') != 1) {
@@ -104,7 +104,7 @@ class AdminFinanceController extends Controller
         ->join('riders as ri', 'dn.rider_id', '=', 'ri.id')
         ->join('admins as a', 'dn.admin_id', '=', 'a.id')
         ->join('admins as au', 'dn.updated_by', '=', 'au.id')
-        ->select('dn.id', 'dn.id as delivery_note_number', 'h.name as hub', 'ri.name as rider', 'dn.shipments_count as shipments', 'dn.delivered_shipments', 'a.name as assigned_by', 'dn.created_at as assigned_at', 'au.name as updated_by', 'dn.updated_at', 'dn.received_cod_amount as dncc_amount', 'dn.expense');
+        ->select('dn.id', 'dn.id as delivery_note_number', 'h.name as hub', 'ri.name as rider', 'dn.shipments_count as shipments', 'dn.delivered_shipments', 'a.name as assigned_by', 'dn.created_at as assigned_at', 'au.name as updated_by', 'dn.updated_at', 'dn.received_cod_amount as dncc_amount');
 
         if ($request->has('id')) {
            $delivery_notes->where('station_deposit_notes.id', $request->id);
@@ -125,17 +125,6 @@ class AdminFinanceController extends Controller
         });
 
         return $datatables->make(true);
-    }
-
-    public function outstanding_sdn_delivery_note_expense_edit(Request $request) {
-        $delivery_note = DeliveryNote::find($request->id);
-
-        $delivery_note->expense = $request->expense;
-        $delivery_note->net_amount = $delivery_note->received_cod_amount - $request->expense;
-
-        $delivery_note->save();
-
-        return ['status' => 0, 'success' => 'Delivery Note Expense has been updated'];
     }
 
     public function outstanding_sdn_reconcile_delivery_notes(Request $request) {
@@ -190,7 +179,7 @@ class AdminFinanceController extends Controller
 
             $details = array();
 
-            $details[] = ['S. No.', 'DNCC No.', 'Hub', 'Rider', 'Route', 'Shipments', 'Delivered Shipments', 'DNCC Amount', 'Expense', 'Net Amount'];
+            $details[] = ['S. No.', 'DNCC No.', 'Hub', 'Rider', 'Route', 'Shipments', 'Delivered Shipments', 'DNCC Amount'];
 
             $serial_number = 1;
 
@@ -207,8 +196,6 @@ class AdminFinanceController extends Controller
                 $row[] = $delivery_note->shipments_count;
                 $row[] = $delivery_note->delivered_shipments;
                 $row[] = $delivery_note->received_cod_amount;
-                $row[] = $delivery_note->expense;
-                $row[] = ($delivery_note->net_amount) ? $delivery_note->net_amount : '0';
 
                 $details[] = $row;
 

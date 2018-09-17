@@ -367,6 +367,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@create_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminCargoController@create_shipment_details')->name('shipment_details');
             Route::post('consignment_details', 'Admins\AdminCargoController@create_consignment_details')->name('consignment_details');
+            Route::get('seal_number', 'Admins\AdminCargoController@create_consignment_seal_number')->name('seal_number');
             Route::post('', 'Admins\AdminCargoController@create_store')->name('store');
         });
 
@@ -446,7 +447,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@outstanding_sdn_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@outstanding_sdn_list')->name('list');
             Route::get('delivery_notes_list', 'Admins\AdminFinanceController@outstanding_sdn_delivery_notes_list')->name('delivery_notes_list');
-            Route::put('delivery_note_expense_edit', 'Admins\AdminFinanceController@outstanding_sdn_delivery_note_expense_edit')->name('delivery_note_expense_edit');
             Route::post('reconcile_delivery_notes', 'Admins\AdminFinanceController@outstanding_sdn_reconcile_delivery_notes')->name('reconcile_delivery_notes');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@outstanding_sdn_export_to_excel')->name('export_to_excel');
         });

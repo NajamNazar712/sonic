@@ -28,7 +28,7 @@
 							</form>
 
 							<div id="information" class="information text-center">
-								Hub: <span class="hub">None</span> | Scanned: <span class="scanned">0</span>/<span class="total">0</span>
+								Hub: <span class="hub">None</span> | Shipping Mode: <span class="shipping_mode">None</span> | Scanned: <span class="scanned">0</span>/<span class="total">0</span>
 							</div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -40,7 +40,6 @@
 										<th class="border-primary border-darken-1">Service Type</th>
 										<th class="border-primary border-darken-1">Destination</th>
 										<th class="border-primary border-darken-1">Amount</th>
-										<th class="border-primary border-darken-1">Shipping Mode</th>
 									</tr>
 								</thead>
 							</table>
@@ -54,6 +53,8 @@
 											{{ csrf_field() }}
 
 											<input type="hidden" name="cargo_type" class="cargo_type">
+
+											<input type="hidden" name="shipping_mode_id" class="shipping_mode_id">
 
 											<input type="hidden" name="shipment_ids" class="shipment_ids">
 
@@ -91,19 +92,12 @@
 
 													<div class="col">
 														<div class="form-group">
-															<select name="junction_2" class="select2 junction_2" data-rule-required="true" data-msg-required="Junction 2 is required">
+															<select name="junction_2" class="select2 junction_2">
 															</select>
 														</div>
 													</div>
 
 													<div class="w-100"></div>
-
-													<div class="col">
-														<div class="form-group">
-															<select name="shipping_mode" class="select2 shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
-															</select>
-														</div>
-													</div>
 
 													<div class="col">
 														<div class="form-group">
@@ -129,7 +123,7 @@
 
 													<div class="col">
 														<div class="form-group">
-															<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
+															<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-minlength="6" data-msg-minlength="Seal Number needs to be at-least 6 numbers" data-rule-remote="{{ route('admin.cargo.create.seal_number') }}" data-msg-remote="Seal Number must be unique">
 														</div>
 													</div>
 
@@ -192,6 +186,7 @@
 
 			var hub_id = 0;
 			var cargo_type = 0;
+			var shipping_mode_id = 0;
 
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
@@ -205,8 +200,7 @@
 					{name: 'order_id', class: 'align-middle order_id'},
 					{name: 'service_type', class: 'align-middle service_type'},
 					{name: 'destination', class: 'align-middle destination'},
-					{name: 'amount', class: 'align-middle amount'},
-					{name: 'shipping_mode', class: 'align-middle shipping_mode'}
+					{name: 'amount', class: 'align-middle amount'}
 				],
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
@@ -244,6 +238,7 @@
 							data: {
 								'tracking_number': tracking_number,
 								'hub_id': hub_id,
+								'shipping_mode_id': shipping_mode_id,
 								'cargo_type': cargo_type,
 								'_token': '{{ csrf_token() }}'
 							}
@@ -252,7 +247,7 @@
 							$('#add_shipment_form button.add').prop('disabled', false);
 
 							if (data.status == 0) {
-								table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount, data.details.shipping_mode]);
+								table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount]);
 								table.draw(false);
 
 								shipment_ids.push(data.details.id);
@@ -265,6 +260,12 @@
 									$('#information .hub').html(data.details.hub.name);
 
 									$('#information .total').html(data.details.total);
+								}
+
+								if (shipping_mode_id == 0) {
+									shipping_mode_id = data.details.shipping_mode.id;
+
+									$('#information .shipping_mode').html(data.details.shipping_mode.name);
 								}
 
 								if (cargo_type == 0) {
@@ -299,10 +300,6 @@
 					$('#cargo_consignment form .junction_2').html('').select2('destroy');
 				}
 
-				if ($('#cargo_consignment form .shipping_mode').hasClass('select2-hidden-accessible')) {
-					$('#cargo_consignment form .shipping_mode').html('').select2('destroy');
-				}
-
 				if ($('#cargo_consignment form .transport_mode').hasClass('select2-hidden-accessible')) {
 					$('#cargo_consignment form .transport_mode').html('').select2('destroy');
 				}
@@ -326,6 +323,7 @@
 				})
 				.done(function(data) {
 					$('#cargo_consignment form .cargo_type').val(cargo_type);
+					$('#cargo_consignment form .shipping_mode_id').val(shipping_mode_id);
 					$('#cargo_consignment form .shipment_ids').val(shipment_ids);
 
 					$('#cargo_consignment form .origin_hub_id').val(data.origin.id);
@@ -349,9 +347,8 @@
 
 					$('#cargo_consignment form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
 						width: '100%',
-						placeholder: 'Junction 2*'
-					}).bind('change', function() {
-						$(this).valid();
+						placeholder: 'Junction 2',
+						allowClear: true
 					});
 
 					$('#cargo_consignment form input.seal_number').inputmask({
@@ -371,13 +368,6 @@
 
 					$.each(data.shipping_modes, function(index, shipping_mode) {
 						$('#cargo_consignment form .shipping_mode').append('<option value="' + shipping_mode.id + '">' + shipping_mode.mode + '</option>');
-					});
-
-					$('#cargo_consignment form .shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-						width: '100%',
-						placeholder: 'Shipment Mode*'
-					}).bind('change', function() {
-						$(this).valid();
 					});
 
 					$.each(data.transport_modes, function(index, transport_mode) {

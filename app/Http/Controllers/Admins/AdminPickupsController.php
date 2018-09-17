@@ -596,7 +596,6 @@ class AdminPickupsController extends Controller
                     <style>
                       @page {
                         size: A4 portrait;
-                        margin: 0mm;
                       }
 
                       * {
@@ -639,7 +638,7 @@ class AdminPickupsController extends Controller
                     </style>
                   </head>
                   <body>
-                    <div class="p-1">
+                    <div>
       ';
 
       foreach($request->ids as $id) {
@@ -666,7 +665,7 @@ class AdminPickupsController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider->name . '</td>
-                            <td rowspan="7" class="text-center align-middle">
+                            <td rowspan="7" class="text-center align-middle pl-1 pr-1">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($id, 12, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>

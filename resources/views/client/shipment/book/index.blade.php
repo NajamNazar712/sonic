@@ -11,7 +11,7 @@
 				<h1 class="mb-1">
 					Book a Shipment
 					<span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
-					<button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
+					<button type="button" class="btn btn-primary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
 				</h1>
 
 				<div class="card">
@@ -127,11 +127,16 @@
 											</div>
 
 											<div class="form-group">
-												<textarea name="item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
+												<textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
 											</div>
 
 											<div class="form-group input-group">
 												<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
+											</div>
+
+											<div class="form-group text-center p-1 border border-light rounded">
+												<label class="d-block">Insurance</label>
+												<input type="checkbox" name="insurance" class="switch hidden insurance">
 											</div>
 
 											<div class="form-group input-group d-none">
@@ -139,12 +144,7 @@
 													<span class="input-group-text">Rs</span>
 												</div>
 
-												<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Price*" data-rule-required="true" data-msg-required="Price is required">
-											</div>
-
-											<div class="form-group text-center p-1 border border-light rounded">
-												<label class="d-block">Insurance</label>
-												<input type="checkbox" name="insurance" class="switch hidden insurance">
+												<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Product Value*" data-rule-required="true" data-msg-required="Product Value is required">
 											</div>
 										</div>
 
@@ -161,7 +161,7 @@
 												</div>
 
 												<div class="form-group">
-													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
+													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
 												</div>
 
 												<div class="form-group input-group">
@@ -189,7 +189,7 @@
 															</div>
 
 															<div class="form-group">
-																<textarea name="item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
+																<textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
 															</div>
 
 															<div class="form-group input-group">
@@ -201,7 +201,7 @@
 																	<span class="input-group-text">Rs</span>
 																</div>
 
-																<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Price*" data-rule-required="true" data-msg-required="Price is required">
+																<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Product Value*" data-rule-required="true" data-msg-required="Product Value is required">
 															</div>
 
 															<div class="form-group text-center p-1 border border-light rounded">
@@ -222,7 +222,7 @@
 											</div>
 
 											<div class="form-group">
-												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Price: Rs <span>0</span></p>
+												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
 											</div>
 
 											<div class="form-group">
@@ -251,13 +251,15 @@
 									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Shipping Information</h4>
 
-										<div class="form-group input-group">
+										<div class="form-group input-group mb-0">
 											<input type="text" name="estimated_weight" class="form-control weight" placeholder="Estimated Weight*" data-rule-required="true" data-msg-required="Estimated Weight is required">
 
 											<div class="input-group-append">
 												<span class="input-group-text">kg</span>
 											</div>
 										</div>
+
+										<h6 class="form-text mb-1 text-justify text-muted text-italic">*Charges will be subjected to the Final Weight measured at the time of Shipment Arrival.</h6>
 
 										<div class="form-group">
 											<select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Mode of Shipping is required">
@@ -283,7 +285,7 @@
 												<span class="input-group-text">Rs</span>
 											</div>
 
-											<input type="text" name="amount" class="form-control rounded-right amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">
+											<input type="text" name="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
 										</div>
 
 										<div class="form-group">
@@ -374,8 +376,9 @@
 					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
 					method: 'POST',
 					data: {
+						'_token': '{{ csrf_token() }}',
 						'ids[]': '{{ session('print') }}',
-						'_token': '{{ csrf_token() }}'
+						'twice': true
 					}
 				})
 				.done(function(data) {
@@ -657,7 +660,7 @@
 			});
 
 			$('#regular .insurance').checkboxpicker().bind('change', function() {
-				var parent = $(this).parent('.form-group').prev('.form-group');
+				var parent = $(this).parent('.form-group').next('.form-group');
 
 				if (this.checked) {
 					parent.removeClass('d-none');
