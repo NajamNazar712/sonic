@@ -32,19 +32,7 @@
           <li class=" nav-item"><a href="{{ route('cod.finance.payments.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Finance Payments</span></a></li>
         @endif
 
-        @if (session('user_type') == 1 || count(array_intersect([6, 7], session('permissions'))) !== 0)
-          <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
-              <ul class="menu-content">
-                  @if (session('user_type') == 1 || in_array(6, session('permissions')))
-                    <li><a class="menu-item" href="{{ route('cod.dispute.index') }}">Log</a></li>
-                  @endif
-
-                  @if (session('user_type') == 1 || in_array(7, session('permissions')))
-                    <li><a class="menu-item" href="{{ route('cod.dispute.rebook.index') }}">Rebook</a></li>
-                  @endif
-              </ul>
-          </li>
-        @endif
+        <li class=" nav-item"><a href="https://form.jotform.me/81993400128456" target="_blank"><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a></li>
 
         @if (session('user_type') == 1)
           <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Substitute Accounts</span></a></li>

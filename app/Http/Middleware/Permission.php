@@ -270,16 +270,19 @@ class Permission
             'finance.payments.details_print' => 5,
             'finance.payments.export_to_excel' => 5,
 
-            'dispute.index' => 6,
-            'dispute.list' => 6,
-            'dispute.create' => 6,
-            'dispute.get.shipments' => 6,
-            'dispute.get.comments' => 6,
-            'dispute.data' => 6,
-            'dispute.rebook.index' => 7,
-            'dispute.rebook.list' => 7,
-            'dispute.rebook.shipment.info' => 7,
-            'dispute.rebook.shipment.update' => 7
+            'dispute.index' => 0,    //6
+            'dispute.list' => 0,    //6
+            'dispute.create' => 0,    //6
+            'dispute.get.shipments' => 0,    //6
+            'dispute.get.comments' => 0,    //6
+            'dispute.data' => 0,    //6
+            'dispute.rebook.index' => 0,  //7
+            'dispute.rebook.list' => 0,   //7
+            'dispute.rebook.shipment.info' => 0,      //7
+            'dispute.rebook.shipment.update' => 0 ,    //7
+
+            'reports.qsr.index' => 8,
+            'reports.qsr.list' => 8
         ]
     ];
 
