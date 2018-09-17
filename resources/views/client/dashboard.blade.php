@@ -112,34 +112,34 @@
                   </div>
               </div>
           </div>
-          <div class="row">
-              <div class="card col-12">
-                  <div class="card-content collapse show">
-                      <div class="card-body">
-                          <div id="shipment_statistics_chart" class="height-300 echart-container"></div>
-                          <div class="row">
-                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
-                                  <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
-                              </div>
-                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
-                                  <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
-                              </div>
-                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
-                                  <select name="graph_destination" class="select2" id="graph_destination">
-                                @foreach($cities as $city)
-                                      <option value="{{$city->id}}">{{$city->name}}</option>
-                                @endforeach
-                                  </select>
-                              </div>
-                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
-                               <button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
-                              </div>
-                          </div>
+          {{--<div class="row">--}}
+              {{--<div class="card col-12">--}}
+                  {{--<div class="card-content collapse show">--}}
+                      {{--<div class="card-body">--}}
+                          {{--<div id="shipment_statistics_chart" class="height-300 echart-container"></div>--}}
+                          {{--<div class="row">--}}
+                              {{--<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">--}}
+                                  {{--<input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">--}}
+                              {{--</div>--}}
+                              {{--<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">--}}
+                                  {{--<input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">--}}
+                              {{--</div>--}}
+                              {{--<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">--}}
+                                  {{--<select name="graph_destination" class="select2" id="graph_destination">--}}
+                                {{--@foreach($cities as $city)--}}
+                                      {{--<option value="{{$city->id}}">{{$city->name}}</option>--}}
+                                {{--@endforeach--}}
+                                  {{--</select>--}}
+                              {{--</div>--}}
+                              {{--<div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">--}}
+                               {{--<button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>--}}
+                              {{--</div>--}}
+                          {{--</div>--}}
 
-                      </div>
-                  </div>
-              </div>
-          </div>
+                      {{--</div>--}}
+                  {{--</div>--}}
+              {{--</div>--}}
+          {{--</div>--}}
 
           <div class="row">
               <div class="card">
@@ -275,7 +275,7 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.common.min.js')}}" type="text/javascript"></script>
+{{--    <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.common.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/pagination/moment.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>
@@ -285,52 +285,52 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';
-           var from_date = $('#from_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                max: new Date(old_date_limit),
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#from_date_root').css('top', '-350px');
-                },
-                onSet: function(context) {
-                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
-                    var contractMoment = moment(old_date_formatted);
-                    var current = moment(contractMoment).add(29, 'days');
-                    to_date.pickadate('picker').set({'select': current.toDate()},{muted: true});
-                }
-            });
+            {{--var old_date_limit = '{{ Carbon\Carbon::now()->subDays(29)->toDateString() }}';--}}
+           {{--var from_date = $('#from_date').pickadate({--}}
+                {{--firstDay: 1,--}}
+                {{--clear: '',--}}
+                {{--max: new Date(old_date_limit),--}}
+                {{--format:'dd mmmm, yyyy',--}}
+                {{--selectYears: true,--}}
+                {{--selectMonths: true,--}}
+                {{--formatSubmit: 'yyyy-mm-dd 00:00:00',--}}
+                {{--hiddenSuffix: '_formatted',--}}
+                {{--onOpen: function() {--}}
+                    {{--$('#from_date_root').css('top', '-350px');--}}
+                {{--},--}}
+                {{--onSet: function(context) {--}}
+                    {{--var old_date_formatted = $('input[name="from_date_formatted"]').val();--}}
+                    {{--var contractMoment = moment(old_date_formatted);--}}
+                    {{--var current = moment(contractMoment).add(29, 'days');--}}
+                    {{--to_date.pickadate('picker').set({'select': current.toDate()},{muted: true});--}}
+                {{--}--}}
+            {{--});--}}
 
-            var to_date = $('#to_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                max: '{{ Carbon\Carbon::now() }}',
-                format:'dd mmmm, yyyy',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#to_date_root').css('top', '-350px');
-                },
-                onSet: function(context) {
-                    var current_date_formatted = $('input[name="to_date_formatted"]').val();
-                    var currentMoment = moment(current_date_formatted);
-                    var currentDate = moment(currentMoment).subtract(29, 'days');
-                    from_date.pickadate('picker').set({'select': currentDate.toDate()},{muted: true});
-                }
-            });
+            {{--var to_date = $('#to_date').pickadate({--}}
+                {{--firstDay: 1,--}}
+                {{--clear: '',--}}
+                {{--max: '{{ Carbon\Carbon::now() }}',--}}
+                {{--format:'dd mmmm, yyyy',--}}
+                {{--selectYears: true,--}}
+                {{--selectMonths: true,--}}
+                {{--formatSubmit: 'yyyy-mm-dd 00:00:00',--}}
+                {{--hiddenSuffix: '_formatted',--}}
+                {{--onOpen: function() {--}}
+                    {{--$('#to_date_root').css('top', '-350px');--}}
+                {{--},--}}
+                {{--onSet: function(context) {--}}
+                    {{--var current_date_formatted = $('input[name="to_date_formatted"]').val();--}}
+                    {{--var currentMoment = moment(current_date_formatted);--}}
+                    {{--var currentDate = moment(currentMoment).subtract(29, 'days');--}}
+                    {{--from_date.pickadate('picker').set({'select': currentDate.toDate()},{muted: true});--}}
+                {{--}--}}
+            {{--});--}}
 
-            $('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({
-                width:'100%',
-                placeholder:"Select a Destination",
-                allowClear:true
-            });
+            {{--$('#graph_destination').prepend('<option value="" selected="selected"></option>').select2({--}}
+                {{--width:'100%',--}}
+                {{--placeholder:"Select a Destination",--}}
+                {{--allowClear:true--}}
+            {{--});--}}
             function print(selected_rows) {
                 $.ajax({
                     url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
@@ -493,161 +493,161 @@
                 }
             });
            //echar
-            var myChart = echarts.init(document.getElementById('shipment_statistics_chart'));
+            {{--var myChart = echarts.init(document.getElementById('shipment_statistics_chart'));--}}
 
-            chartOptions = {
+            {{--chartOptions = {--}}
 
-            // Setup grid
-                grid: {
-                    x: 60,
-                    x2: 40
-                },
+            {{--// Setup grid--}}
+                {{--grid: {--}}
+                    {{--x: 60,--}}
+                    {{--x2: 40--}}
+                {{--},--}}
 
-                // Add tooltip
-                tooltip: {
-                    trigger: 'axis'
-                },
+                {{--// Add tooltip--}}
+                {{--tooltip: {--}}
+                    {{--trigger: 'axis'--}}
+                {{--},--}}
 
-                // Add legend
-                legend: {
-                    data: ['Pending', 'Received', 'Delivered', 'Return', 'In Process']
-                },
+                {{--// Add legend--}}
+                {{--legend: {--}}
+                    {{--data: ['Pending', 'Received', 'Delivered', 'Return', 'In Process']--}}
+                {{--},--}}
 
-                // Add custom colors
-                color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                {{--// Add custom colors--}}
+                {{--color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],--}}
 
-                // Hirozontal axis
-                xAxis: [{
-                    type: 'category',
-                    boundaryGap: false,
-                    axisLabel: {
-                        rotate: 45
-                    },
-                    data: @json($graph['dates'])
+                {{--// Hirozontal axis--}}
+                {{--xAxis: [{--}}
+                    {{--type: 'category',--}}
+                    {{--boundaryGap: false,--}}
+                    {{--axisLabel: {--}}
+                        {{--rotate: 45--}}
+                    {{--},--}}
+                    {{--data: @json($graph['dates'])--}}
 
-                }
-                ],
-                // Vertical axis
-                yAxis: [{
-                    type: 'value'
-                }],
-                // Add series
-                series: [
-                    {
-                        name: 'Pending',
-                        type: 'line',
-                        data: @json($graph['booked'])
-                    },
-                    {
-                        name: 'Received',
-                        type: 'line',
-                        data: @json($graph['received'])
-                    },
-                    {
-                        name: 'Delivered',
-                        type: 'line',
-                        data: @json($graph['delivered'])
-                    },
-                    {
-                        name: 'Return',
-                        type: 'line',
-                        data: @json($graph['return'])
-                    },
-                    {
-                        name: 'In Process',
-                        type: 'line',
-                        data: @json($graph['pending'])
-                    }
-                ]
-            };
+                {{--}--}}
+                {{--],--}}
+                {{--// Vertical axis--}}
+                {{--yAxis: [{--}}
+                    {{--type: 'value'--}}
+                {{--}],--}}
+                {{--// Add series--}}
+                {{--series: [--}}
+                    {{--{--}}
+                        {{--name: 'Pending',--}}
+                        {{--type: 'line',--}}
+                        {{--data: @json($graph['booked'])--}}
+                    {{--},--}}
+                    {{--{--}}
+                        {{--name: 'Received',--}}
+                        {{--type: 'line',--}}
+                        {{--data: @json($graph['received'])--}}
+                    {{--},--}}
+                    {{--{--}}
+                        {{--name: 'Delivered',--}}
+                        {{--type: 'line',--}}
+                        {{--data: @json($graph['delivered'])--}}
+                    {{--},--}}
+                    {{--{--}}
+                        {{--name: 'Return',--}}
+                        {{--type: 'line',--}}
+                        {{--data: @json($graph['return'])--}}
+                    {{--},--}}
+                    {{--{--}}
+                        {{--name: 'In Process',--}}
+                        {{--type: 'line',--}}
+                        {{--data: @json($graph['pending'])--}}
+                    {{--}--}}
+                {{--]--}}
+            {{--};--}}
 
 
-            myChart.setOption(chartOptions);
+            {{--myChart.setOption(chartOptions);--}}
 
-            $('.statistics_search').on('click',function(){
-                var search_btn = $(this);
-                search_btn.prop('disabled',true);
-                var destination = $('#graph_destination').val();
-                var current_date = $('input[name="to_date_formatted"]').val();
-                var old_date = $('input[name="from_date_formatted"]').val();
-                console.log("Old Date: = "+old_date);
-                console.log("New Date: = "+current_date);
-                console.log("Destination: = "+destination);
-                $.ajax({
-                  url: '{!! route('cod.orders.search') !!}',
-                        method: 'POST',
-                        data: {
-                            'destination': destination,
-                            'current_date': current_date,
-                            'old_date': old_date,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                }).done(function(data){
-                    if(data.status == 1){
-                        myChart.clear();
-                        updateChartOptions = {
+            {{--$('.statistics_search').on('click',function(){--}}
+                {{--var search_btn = $(this);--}}
+                {{--search_btn.prop('disabled',true);--}}
+                {{--var destination = $('#graph_destination').val();--}}
+                {{--var current_date = $('input[name="to_date_formatted"]').val();--}}
+                {{--var old_date = $('input[name="from_date_formatted"]').val();--}}
+                {{--console.log("Old Date: = "+old_date);--}}
+                {{--console.log("New Date: = "+current_date);--}}
+                {{--console.log("Destination: = "+destination);--}}
+                {{--$.ajax({--}}
+                  {{--url: '{!! route('cod.orders.search') !!}',--}}
+                        {{--method: 'POST',--}}
+                        {{--data: {--}}
+                            {{--'destination': destination,--}}
+                            {{--'current_date': current_date,--}}
+                            {{--'old_date': old_date,--}}
+                            {{--'_token': '{{ csrf_token() }}'--}}
+                        {{--}--}}
+                {{--}).done(function(data){--}}
+                    {{--if(data.status == 1){--}}
+                        {{--myChart.clear();--}}
+                        {{--updateChartOptions = {--}}
 
-                            grid: {
-                                x: 40,
-                                x2: 20
-                            },
+                            {{--grid: {--}}
+                                {{--x: 40,--}}
+                                {{--x2: 20--}}
+                            {{--},--}}
 
-                            tooltip: {
-                                trigger: 'axis'
-                            },
-                            legend: {
-                                data: ['Pending', 'Received', 'Delivered', 'Return', 'In Process']
-                            },
-                            color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                            {{--tooltip: {--}}
+                                {{--trigger: 'axis'--}}
+                            {{--},--}}
+                            {{--legend: {--}}
+                                {{--data: ['Pending', 'Received', 'Delivered', 'Return', 'In Process']--}}
+                            {{--},--}}
+                            {{--color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],--}}
 
-                            xAxis: [{
-                                type: 'category',
-                                boundaryGap: false,
-                                axisLabel: {
-                                    rotate: 45
-                                },
-                                data: data.graph['dates']
+                            {{--xAxis: [{--}}
+                                {{--type: 'category',--}}
+                                {{--boundaryGap: false,--}}
+                                {{--axisLabel: {--}}
+                                    {{--rotate: 45--}}
+                                {{--},--}}
+                                {{--data: data.graph['dates']--}}
 
-                            }],
-                            yAxis: [{
-                                type: 'value'
-                            }],
-                            series: [
-                                {
-                                    name: 'Pending',
-                                    type: 'line',
-                                    data: data.graph['booked']
-                                },
-                                {
-                                    name: 'Received',
-                                    type: 'line',
-                                    data: data.graph['received']
-                                },
-                                {
-                                    name: 'Delivered',
-                                    type: 'line',
-                                    data: data.graph['delivered']
-                                },
-                                {
-                                    name: 'Return',
-                                    type: 'line',
-                                    data: data.graph['return']
-                                },
-                                {
-                                    name: 'In Process',
-                                    type: 'line',
-                                    data: data.graph['pending']
-                                }
-                            ]
-                        };
-                        myChart.setOption(updateChartOptions);
-                        // setTimeout(function () {
-                            search_btn.removeAttr('disabled');
-                        // },3000);
+                            {{--}],--}}
+                            {{--yAxis: [{--}}
+                                {{--type: 'value'--}}
+                            {{--}],--}}
+                            {{--series: [--}}
+                                {{--{--}}
+                                    {{--name: 'Pending',--}}
+                                    {{--type: 'line',--}}
+                                    {{--data: data.graph['booked']--}}
+                                {{--},--}}
+                                {{--{--}}
+                                    {{--name: 'Received',--}}
+                                    {{--type: 'line',--}}
+                                    {{--data: data.graph['received']--}}
+                                {{--},--}}
+                                {{--{--}}
+                                    {{--name: 'Delivered',--}}
+                                    {{--type: 'line',--}}
+                                    {{--data: data.graph['delivered']--}}
+                                {{--},--}}
+                                {{--{--}}
+                                    {{--name: 'Return',--}}
+                                    {{--type: 'line',--}}
+                                    {{--data: data.graph['return']--}}
+                                {{--},--}}
+                                {{--{--}}
+                                    {{--name: 'In Process',--}}
+                                    {{--type: 'line',--}}
+                                    {{--data: data.graph['pending']--}}
+                                {{--}--}}
+                            {{--]--}}
+                        {{--};--}}
+                        {{--myChart.setOption(updateChartOptions);--}}
+                        {{--// setTimeout(function () {--}}
+                            {{--search_btn.removeAttr('disabled');--}}
+                        {{--// },3000);--}}
 
-                    }
-                });
-            });
+                    {{--}--}}
+                {{--});--}}
+            {{--});--}}
 
             //Dispute
             $('#city_select').select2({
