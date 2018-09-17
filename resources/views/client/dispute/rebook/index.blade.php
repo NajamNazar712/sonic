@@ -357,14 +357,6 @@
             // $('.rebook_modal').on('click', function () {
             //     // $('#RebookModal').modal('show');
             //     console.log(selected_rows)
-            // });
-
-
-            $('body').on('click','.rebook',function () {
-                var shipment_id = parseInt($(this).parents('tr').attr('id'));
-                    $('#RebookModal').modal('show');
-                    get_shipment_info(shipment_id);
-            });
             function get_shipment_info(shipment_id) {
                 $('#shipment_id').val(shipment_id);
                 if(shipment_id != null){
@@ -379,6 +371,14 @@
                         if(data.status == 1){
                             // var city = data.cities;
                             if(!$('#consignee_city').hasClass('select2-hidden-accessible')){
+            // });
+
+
+            $('body').on('click','.rebook',function () {
+                var shipment_id = parseInt($(this).parents('tr').attr('id'));
+                    $('#RebookModal').modal('show');
+                    get_shipment_info(shipment_id);
+            });
                                 $('#consignee_city').select2({
                                     placeholder: 'Select a city',
                                     dropdownParent: $('#RebookModal')

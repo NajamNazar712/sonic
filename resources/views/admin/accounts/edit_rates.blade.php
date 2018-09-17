@@ -3021,6 +3021,8 @@
             var switches = document.querySelector('.switchery.weightAdditionOvernight'+count);
             var switchery = new Switchery(switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 1,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -3211,6 +3213,8 @@
             var ol_weight_switches = document.querySelector('.switchery.weightAdditionOverland'+overland_count);
             var switchery = new Switchery(ol_weight_switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 1,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -3400,6 +3404,8 @@
             var detain_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+detain_count);
             var switchery = new Switchery(detain_weight_switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 1,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -3589,6 +3595,8 @@
             var sameday_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+sameday_count);
             var switchery = new Switchery(sameday_weight_switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 1,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
