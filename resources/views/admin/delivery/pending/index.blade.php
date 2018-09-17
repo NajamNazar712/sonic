@@ -88,7 +88,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -120,8 +123,70 @@
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
+
+        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            if ( this.context.length ) {
+                body = [];
+
+                var jsonResult = $.ajax({
+                    url: '{{ route('admin.delivery.pending.list') }}',
+                    data: {
+                        'page': 'all',
+                    },
+                    success: function (result) {
+                        head = [];
+
+                        head.push('S.No');
+                        head.push('Tracking .No');
+                        head.push('Shipper');
+                        head.push('Origin');
+                        head.push('Destination');
+                        head.push('Hub');
+                        head.push('Phone');
+                        head.push('Address');
+                        head.push('COD Amount');
+                        head.push('Shipping Mode');
+                        head.push('Service Type');
+                        head.push('Status');
+                        head.push('Reason');
+                        head.push('Remarks');
+                        head.push('Arrival Date');
+                        head.push('Status Date');
+                        $.each(result.data, function(index, values) {
+                            row = [];
+
+
+                            row.push(index + 1);
+                            row.push(values.tracking_number);
+                            row.push(values.shipper);
+                            row.push(values.history_status);
+                            row.push(values.service_type);
+                            row.push(values.arrival);
+                            row.push(values.origin);
+                            row.push(values.destination);
+                            row.push(values.hub);
+                            row.push(values.amount);
+                            row.push(values.aging);
+
+                            body.push(row);
+                        });
+                    },
+                    async: false
+                });
+
+                return {body: body, header: head};
+            }
+        } );
+
         var table = $('#datatable').DataTable({
-            dom: 'ltipr',
+            dom: '<"d-inline-block"l><"pull-right"B>tipr',
+            buttons: [
+                {
+                    extend: 'excel',
+                    title: 'Pending Deliveries',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                },
+            ],
             scrollX: true, scrollY: '300px',
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,

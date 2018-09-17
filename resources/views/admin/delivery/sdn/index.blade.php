@@ -43,7 +43,7 @@
                         <th class="border-primary border-darken-1">Delivered Shipments</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                         {{--<th class="border-primary border-darken-1">Expense</th>--}}
-                        <th class="border-primary border-darken-1">Net Amount</th>
+                        {{--<th class="border-primary border-darken-1">Net Amount</th>--}}
                         <th class="border-primary border-darken-1">Deposited By</th>
                         <th class="border-primary border-darken-1">Company Bank</th>
                         <th class="border-primary border-darken-1">Deposited Date</th>
@@ -53,15 +53,6 @@
                     </tr>
                     </thead>
                 </table>
-
-                {{--<div class="row justify-content-center">--}}
-                    {{--<div class="col-5">--}}
-                        {{--<form id="dpz-single-file" class="dropzone dropzone-area dz-clickable" action="{{route('admin.delivery.sdn.slip')}}" method="post" enctype="multipart/form-data">--}}
-                            {{--@csrf--}}
-                            {{--<input type="hidden" name="sdn_id" id="sdn_id"/>--}}
-                        {{--</form>--}}
-                    {{--</div>--}}
-                {{--</div>--}}
 
             </div>
         </div>
@@ -180,7 +171,7 @@
                 ajax: {
                     url: '{{ route('admin.delivery.sdn.list') }}',
                     data: function (d) {
-                        d.delivery_note_number = $('#scan_dncc').val();
+                        d.scan_dncc = $('#scan_dncc').val();
                         d.search_tracking = $('#search_tracking').val();
                     }
                 },
@@ -194,7 +185,7 @@
                     { data:'sdn_delivered_shipments' ,name: 'station_deposit_notes.sdn_delivered_shipments', class: 'align-middle sdn_delivered_shipments'},
                     { data:'sdn_amount' ,name: 'station_deposit_notes.sdn_amount', class: 'align-middle sdn_amount'},
                     // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
-                    { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
+                    // { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
                     { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
                     { data:'bank' ,name: 'banks_lists.name', class: 'align-middle bank'},
                     { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},

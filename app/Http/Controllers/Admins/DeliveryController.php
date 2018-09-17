@@ -1223,6 +1223,17 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+                      .w-200 {
+                        width: 200px;
+                      }
+
+                      .line {
+                        border-bottom: 1px solid #09262e !important;
+                      }
+
+                      .manual_form {
+                        page-break-inside: avoid;
+                      }
                     </style>
                   </head>
                   <body>
@@ -1338,7 +1349,68 @@ class DeliveryController extends Controller
         ';
                 $html .= $main_details;
                 $html .= $shipment_details;
-
+                $html .= '
+                      <div class="mt-2 manual_form">
+                        <hr>
+                        <div class="row justify-content-between align-items-end mt-2">
+                          <div class="col">
+                            <div>
+                              <strong class="d-inline-block w-200">Rider:</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Name</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Signature</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row justify-content-between align-items-end mt-2">
+                          <div class="col">
+                            <div>
+                              <strong class="d-inline-block w-200">Operation Staff:</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Name</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Signature</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row justify-content-between align-items-end mt-2">
+                          <div class="col">
+                            <div>
+                              <strong class="d-inline-block w-200">Cashier:</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Name</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Signature</strong>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+        ';
             }
 
 //        return $shipments;
@@ -1527,7 +1599,68 @@ class DeliveryController extends Controller
         ';
             $html .= $main_details;
             $html .= $shipment_details;
-
+            $html .= '
+                      <div class="mt-2 manual_form">
+                        <hr>
+                        <div class="row justify-content-between align-items-end mt-2">
+                          <div class="col">
+                            <div>
+                              <strong class="d-inline-block w-200">Rider:</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Name</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Signature</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row justify-content-between align-items-end mt-2">
+                          <div class="col">
+                            <div>
+                              <strong class="d-inline-block w-200">Operation Staff:</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Name</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Signature</strong>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="row justify-content-between align-items-end mt-2">
+                          <div class="col">
+                            <div>
+                              <strong class="d-inline-block w-200">Cashier:</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Name</strong>
+                            </div>
+                          </div>
+                          <div class="col text-left mt-4">
+                            <div class="d-inline-block text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Signature</strong>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+        ';
         }
 
 //        return $shipments;
@@ -2076,13 +2209,17 @@ class DeliveryController extends Controller
                             <td class="color secondary"><strong>Total DNCC Amount</strong></td>
                             <td>Rs ' . number_format($station_note_details->sdn_amount) . '</td>
                           </tr>
-                          <tr>
+                         <!-- <tr>
                             <td class="color secondary"><strong>Total Expenses</strong></td>
                             <td>' . number_format($station_note_details->sdn_expense) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Total Net Amount</strong></td>
                             <td>' . number_format($station_note_details->sdn_net_amount) . '</td>
+                          </tr>-->
+                          <tr>
+                            <td class="color secondary"><strong>Total Net Amount</strong></td>
+                            <td>Rs ' . number_format($station_note_details->sdn_net_amount) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Bank Name</strong></td>
