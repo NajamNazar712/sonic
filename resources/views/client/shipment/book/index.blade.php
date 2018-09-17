@@ -106,7 +106,7 @@
 										</div>
 
 										<div class="form-group">
-											<input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address">
+											<input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
 										</div>
 									</div>
 
@@ -114,7 +114,7 @@
 										<h4 class="form-section mb-2 text-center">Order Information</h4>
 
 										<div class="form-group">
-											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique" data-rule-maxlength="190" data-msg-maxlength="Order ID can be maximum 190 characters">
+											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
 										</div>
 
 										<div id="regular">

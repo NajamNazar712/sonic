@@ -134,7 +134,7 @@ class ShipperShipmentBookController extends Controller
     public function index() {
       $booking_types = BookingType::where('id', '!=', 3)->get();
       $user = User::with('shipping.city')->find(session('user_id'));
-      $cities = City::where('status', 1)->where('pickup', 1)->orderBy('name')->get();
+      $cities = City::where('pickup', 1)->where('status', 1)->orderBy('name')->get();
       $consignee_cities = City::where('status', 1)->orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
@@ -706,8 +706,10 @@ class ShipperShipmentBookController extends Controller
 
     public function excel_index() {
       $booking_types = BookingType::where('id', '!=', 3)->get();
-      $pickup_addresses = UserShippingInfo::with('city')->where('user_id', session('user_id'))->where('hidden', 0)->get();
-      $cities = City::all();
+      $pickup_addresses = UserShippingInfo::with(['city' => function ($query) {
+        $query->where('pickup', 1)->where('status', 1);
+      }])->where('user_id', session('user_id'))->where('hidden', 0)->get();
+      $cities = City::where('status', 1)->orderBy('name')->pluck('name');
       $products = Product::all();
 
       $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
@@ -730,16 +732,10 @@ class ShipperShipmentBookController extends Controller
       $user_id = session('user_id');
 
       $names = [
-        'person_of_contact' => 'Person of Contact',
-        'phone_number' => 'Phone Number',
-        'email_address' => 'Email Address',
-        'address' => 'Address',
-        'city_id' => 'City ID',
-
         'service_type_id' => 'Service Type ID',
         'pickup_address_id' => 'Pickup Address ID',
         'information_display' => 'Information Display',
-        'consignee_city_id' => 'Consignee City ID',
+        'consignee_city_name' => 'Consignee City Name',
         'consignee_name' => 'Consignee Name',
         'consignee_address' => 'Consignee Address',
         'consignee_phone_number_1' => 'Consignee Phone Number 1',
@@ -780,6 +776,8 @@ class ShipperShipmentBookController extends Controller
         'date_format' => ':attribute must be of valid Format, required Format is: YYYY-MM-DD.',
         'in' => ':attribute must be No or Yes.',
 
+        'consignee_city_name.exists' => 'Given :attribute is of Invalid Name.',
+
         'phone_number.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
 
         'consignee_phone_number_1.regex' => ':attribute format is Invalid, required Format is: 03000000000.',
@@ -794,13 +792,13 @@ class ShipperShipmentBookController extends Controller
           $query->where('user_id', $user_id);
         })],
         'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
-        'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
+        'consignee_city_name' => ['required', 'string', 'between:1,100', 'exists:cities,name'],
         'consignee_name' => ['required', 'between:1,100'],
         'consignee_address' => ['required', 'between:1,190'],
         'consignee_phone_number_1' => ['required', 'regex:/[0-9]{11}$/'],
         'consignee_phone_number_2' => ['nullable', 'regex:/[0-9]{11}$/'],
-        'consignee_email_address' => ['nullable', 'email'],
-        'order_id' => ['nullable', Rule::unique('shipments')->where(function($query) use($user_id) {
+        'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
+        'order_id' => ['nullable', 'between:0,100', Rule::unique('shipments')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
         })],
 
@@ -823,7 +821,7 @@ class ShipperShipmentBookController extends Controller
         'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:payment_modes,id']
       ];
 
-      $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_id', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'pickup_date', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id'];
+      $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'pickup_date', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id'];
 
       $file = $request->file('shipments');
 
@@ -831,7 +829,7 @@ class ShipperShipmentBookController extends Controller
       $spreadsheet->setReadDataOnly(true);
       $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-      $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City ID', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID'];
+      $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID'];
 
       if ($spreadsheet[0] == $header) {
         unset($spreadsheet[0]);
@@ -890,27 +888,27 @@ class ShipperShipmentBookController extends Controller
               $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
 
               if (!$user_shipping_info->city->status) {
-                $errors['Row #' . $row_id][] = 'Pickup Address\'s City ID #' . $user_shipping_info->city_id . ' is deactivated';
+                $errors['Row #' . $row_id][] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
               }
 
               if (!$user_shipping_info->city->pickup) {
-                 $errors['Row #' . $row_id][] = 'Pickup is not allowed for City ID #' . $user_shipping_info->city_id;
+                 $errors['Row #' . $row_id][] = 'Pickup is not allowed for City: ' . $user_shipping_info->city->name;
               }
 
-              $consignee_city = City::find($row['consignee_city_id']);
+              $consignee_city = City::where('name', $row['consignee_city_name'])->first();
 
               if (!$consignee_city->status) {
-                $errors['Row #' . $row_id][] = 'Consignee City ID #' . $row['consignee_city_id'] . ' is deactivated';
+                $errors['Row #' . $row_id][] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
               }
 
               $pickup_city_id = $user_shipping_info->city_id;
 
-              if ($row['consignee_city_id'] != $pickup_city_id && $row['shipping_mode_id'] == 4) {
+              if ($consignee_city->id != $pickup_city_id && $row['shipping_mode_id'] == 4) {
                 $errors['Row #' . $row_id][] = 'Same Day Delivery is not available for Different City Shipment';
               }
 
-              if (!CityDelivery::where('city_id', $row['consignee_city_id'])->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {
-                $errors['Row #' . $row_id][] = 'Delivery is not allowed for City ID #' . $row['consignee_city_id'] . ' with Service Type ID #' . $row['service_type_id'] . ' and Shipping Mode ID #' . $row['shipping_mode_id'];
+              if (!CityDelivery::where('city_id', $consignee_city->id)->where('booking_type_id', $row['service_type_id'])->where('shipping_mode_id', $row['shipping_mode_id'])->exists()) {
+                $errors['Row #' . $row_id][] = 'Delivery is not allowed for City: ' . $consignee_city->name . ' with Service Type ID #' . $row['service_type_id'] . ' and Shipping Mode ID #' . $row['shipping_mode_id'];
               }
             }
           }
@@ -931,7 +929,7 @@ class ShipperShipmentBookController extends Controller
                 $information_display = FALSE;
               }
 
-              $consignee_city_id = $row['consignee_city_id'];
+              $consignee_city_id = City::where('name', $row['consignee_city_name'])->first()->id;
               $consignee_name = $row['consignee_name'];
               $consignee_address = $row['consignee_address'];
               $consignee_phone_number_1 = substr_replace($row['consignee_phone_number_1'], '-', 4, 0);

@@ -174,6 +174,72 @@
 											@endforeach
 										</tbody>
 									</table>
+
+									<table class="table table-bordered">
+										<thead>
+											<tr role="row" class="bg-primary white text-center">
+												<th colspan="2" class="border-primary border-darken-1">Character Limits</th>
+											</tr>
+											<tr role="row" class="bg-primary bg-lighten-1 white">
+												<th class="border-primary border-lighten-2">Field</th>
+												<th class="text-center border-primary border-lighten-2">Limit</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr role="row">
+												<td>Consignee City Name</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Consignee Name</td>
+												<td class="text-center">100</td>
+											</tr>
+											<tr role="row">
+												<td>Consignee Address</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Consignee Email Address</td>
+												<td class="text-center">100</td>
+											</tr>
+											<tr role="row">
+												<td>Order ID</td>
+												<td class="text-center">100</td>
+											</tr>
+											<tr role="row">
+												<td>Item Description</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Item Quantity</td>
+												<td class="text-center">1000</td>
+											</tr>
+											<tr role="row">
+												<td>Product Value</td>
+												<td class="text-center">100000</td>
+											</tr>
+											<tr role="row">
+												<td>Replacement Item Description</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Replacement Item Quantity</td>
+												<td class="text-center">1000</td>
+											</tr>
+											<tr role="row">
+												<td>Special Instructions</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Estimated Weight (kg)</td>
+												<td class="text-center">1000</td>
+											</tr>
+											<tr role="row">
+												<td>Collection Amount</td>
+												<td class="text-center">1000000</td>
+											</tr>
+										</tbody>
+									</table>
 								</div>
 
 								<div class="col">
@@ -205,15 +271,13 @@
 												<th colspan="2" class="border-primary border-darken-1">Cities</th>
 											</tr>
 											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="text-center border-primary border-lighten-2">ID</th>
 												<th class="border-primary border-lighten-2">Name</th>
 											</tr>
 										</thead>
 										<tbody>
 											@foreach ($cities as $city)
 												<tr role="row">
-													<td class="text-center">{{ $city->id }}</td>
-													<td>{{ $city->name }}</td>
+													<td>{{ $city }}</td>
 												</tr>
 											@endforeach
 										</tbody>
