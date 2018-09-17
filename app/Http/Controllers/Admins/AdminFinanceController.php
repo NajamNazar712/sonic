@@ -388,7 +388,7 @@ class AdminFinanceController extends Controller
         if ($shipment->exists()) {
             $shipment = $shipment->first();
 
-            if (!in_array($shipment->shipper_status_id, [39, 40, 41, 42])) {
+            if (!in_array($shipment->shipper_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46])) {
                 $details = array();
 
                 $shipper = $shipment->user;
@@ -646,7 +646,7 @@ class AdminFinanceController extends Controller
         ->groupBy('pending_payments.id');
 
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('c.hub_id', session('hubs'));
+            $pending_payments = $pending_payments->whereIn('c.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($pending_payments)
