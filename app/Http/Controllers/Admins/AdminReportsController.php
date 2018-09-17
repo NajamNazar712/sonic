@@ -294,6 +294,9 @@ class AdminReportsController extends Controller
             ->addColumn('attempt_tat',function ($shipments){
                 return ($shipments->arrival_date && $shipments->first_status_date)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->first_status_date) :'-';
             })
+            ->addColumn('delivered_tat',function ($shipments){
+                return ($shipments->arrival_date && $shipments->delivered_date)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->delivered_date) :'-';
+            })
             ->addColumn('dispatch_tat',function ($shipments){
                 return ($shipments->reached_at_destination && $shipments->first_status_date)? with(new Carbon($shipments->reached_at_destination, 'UTC'))->diffInDays($shipments->first_status_date) :'-';
             })
@@ -331,9 +334,7 @@ class AdminReportsController extends Controller
             ->editColumn('delivered_date', function ($shipments) {
                 return $shipments->delivered_date ? with(new Carbon($shipments->delivered_date))->format('d/m/Y h:i:s A') : '';
             })
-            ->editColumn('delivered_date', function ($shipments) {
-                return $shipments->delivered_date ? with(new Carbon($shipments->delivered_date))->format('d/m/Y h:i:s A') : '';
-            })
+
             ->editColumn('return_confirm', function ($shipments) {
                 return $shipments->return_confirm ? with(new Carbon($shipments->return_confirm))->format('d/m/Y h:i:s A') : '';
             })

@@ -91,6 +91,7 @@
                         <th class="border-primary border-darken-1">Attempt TAT(A-C)</th>
                         <th class="border-primary border-darken-1">Dispatch TAT(B-C)</th>
                         <th class="border-primary border-darken-1">Delivered Date(D)</th>
+                        <th class="border-primary border-darken-1">Delivered TAT(A-D)</th>
                         <th class="border-primary border-darken-1">Return Confirm(E)</th>
                         <th class="border-primary border-darken-1">Reached At Origin(F)</th>
                         <th class="border-primary border-darken-1">Return Transit TAT(E-F)</th>
@@ -100,7 +101,7 @@
                         <th class="border-primary border-darken-1">Return TAT(E-G)</th>
                         <th class="border-primary border-darken-1">Payment Done Date(H)</th>
                         <th class="border-primary border-darken-1">Payment TAT(D-H,G-H)</th>
-                        <th class="border-primary border-darken-1">Total TAT</th>
+                        <th class="border-primary border-darken-1">Shipment TAT</th>
                     </tr>
                     </thead>
                 </table>
@@ -274,6 +275,7 @@
                             head.push('Attempt TAT(A-C)');
                             head.push('Dispatch TAT(B-C)');
                             head.push('Delivered Date(D)');
+                            head.push('Delivered TAT(A-D)');
                             head.push('Return Confirm(E)');
                             head.push('Reached At Origin(F)');
                             head.push('Return Transit TAT(E-F)');
@@ -283,7 +285,7 @@
                             head.push('Return TAT(E-G)');
                             head.push('Payment Done Date(H)');
                             head.push('Payment TAT(D-H,G-H)');
-                            head.push('Total TAT');
+                            head.push('Shipment TAT');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -303,6 +305,7 @@
                                 row.push(values.attempt_tat);
                                 row.push(values.dispatch_tat);
                                 row.push(values.delivered_date);
+                                row.push(values.delivered_tat);
                                 row.push(values.return_confirm);
                                 row.push(values.return_reached_at_destination);
                                 row.push(values.return_transit_tat);
@@ -370,6 +373,7 @@
                     {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat'},////
                     {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat'},
                     {data: 'delivered_date', name: 'delivered_date', class: 'align-middle delivered_date'},
+                    {data: 'delivered_tat', name: 'delivered_tat', class: 'align-middle delivered_tat'},
                     {data: 'return_confirm', name: 'return_confirm', class: 'align-middle return_confirm'},
                     {data: 'return_reached_at_destination', name: 'return_reached_at_destination', class: 'align-middle return_reached_at_destination'},
                     {data: 'return_transit_tat', name: 'return_transit_tat', class: 'align-middle return_transit_tat'},
