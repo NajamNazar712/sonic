@@ -646,7 +646,7 @@ class AdminFinanceController extends Controller
         ->groupBy('pending_payments.id');
 
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('c.hub_id', session('hubs'));
+            $pending_payments = $pending_payments->whereIn('c.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($pending_payments)
