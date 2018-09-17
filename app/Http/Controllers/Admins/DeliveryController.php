@@ -2217,10 +2217,7 @@ class DeliveryController extends Controller
                             <td class="color secondary"><strong>Total Net Amount</strong></td>
                             <td>' . number_format($station_note_details->sdn_net_amount) . '</td>
                           </tr>-->
-                          <tr>
-                            <td class="color secondary"><strong>Total Net Amount</strong></td>
-                            <td>Rs ' . number_format($station_note_details->sdn_net_amount) . '</td>
-                          </tr>
+                          
                           <tr>
                             <td class="color secondary"><strong>Bank Name</strong></td>
                             <td>' . $station_note_details->bank->name . '</td>
