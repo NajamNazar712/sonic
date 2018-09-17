@@ -192,7 +192,7 @@
                 'allowMinus': false,
                 'allowPlus': false
             }).bind('input', function() {
-                if (this.value.length == 0 || this.value.length >= 10) {
+                if (this.value.length == 0 || this.value.length >= 12) {
                     table.draw();
                 }
             });

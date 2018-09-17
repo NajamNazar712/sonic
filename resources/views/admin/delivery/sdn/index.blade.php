@@ -11,6 +11,28 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
+                <div class="row mb-2 justify-content-center">
+
+                    <div class="col-3">
+                        <fieldset class="position-relative has-icon-left">
+                            <input type="text" class="form-control" placeholder="Scan DNCC" name="scan_dncc" id="scan_dncc">
+                            <div class="form-control-position">
+                                <i class="ft-search"></i>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="position-relative has-icon-left">
+                            <input type="text" class="form-control" placeholder="Search By Tracking Number" name="search_tracking" id="search_tracking">
+                            <div class="form-control-position">
+                                <i class="ft-search"></i>
+                            </div>
+                        </fieldset>
+                    </div>
+
+
+                </div>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -140,7 +162,9 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/dropzone.min.js')}}" type="text/javascript"></script>
-{{--    <script src="{{asset('app-assets/js/scripts/extensions/dropzone.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+
+    {{--    <script src="{{asset('app-assets/js/scripts/extensions/dropzone.js')}}" type="text/javascript"></script>--}}
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -153,7 +177,13 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.delivery.sdn.list') }}',
+                ajax: {
+                    url: '{{ route('admin.delivery.sdn.list') }}',
+                    data: function (d) {
+                        d.delivery_note_number = $('#scan_dncc').val();
+                        d.search_tracking = $('#search_tracking').val();
+                    }
+                },
                 rowId: 'sdn_id',
                 //order: [[2, 'asc']],
                 columns: [
@@ -206,6 +236,23 @@
                 }
             });
 
+            $('#search_tracking').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function() {
+                if (this.value.length == 0 || this.value.length >= 12) {
+                    table.draw();
+                }
+            });
+
+            $('#scan_dncc').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function() {
+                table.draw();
+            });
 
             $('#sdn_upload_form').bind('submit',function (e) {
                 e.preventDefault();
