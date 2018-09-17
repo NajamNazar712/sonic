@@ -2851,6 +2851,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $(".touchspin-color").trigger("touchspin.updatesettings", {min: 1});
             // var on_main_switch = document.querySelector('#on_main_switch');
             $('#on_main_switch').on('change',function(){
 
