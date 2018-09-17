@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Qaulity of Service Report
+        Quality of Service Report
     </h1>
 
     <div class="card">

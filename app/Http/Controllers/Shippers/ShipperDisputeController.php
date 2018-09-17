@@ -30,6 +30,8 @@ class ShipperDisputeController extends Controller
         $this->middleware('Permission');
     }
     public function dispute_index(){
+        return redirect()->route('cod.access_denied');
+
         $cities = City::all();
         $dispute_types = DisputeType::whereIn('id',[5,9])->get();
         return view('client.dispute.index')->with(['cities'=>$cities,'dispute_types'=>$dispute_types]);
@@ -173,6 +175,8 @@ class ShipperDisputeController extends Controller
 
     //Rebook Starts
     public function rebook_index(Request $request){
+        return redirect()->route('cod.access_denied');
+
         return view('client.dispute.rebook.index');
     }
     public function rebook_list(Request $request){

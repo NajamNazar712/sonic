@@ -114,11 +114,11 @@ class ShipperDashboardController extends Controller
                         $options = TRUE;
                     }
 
-                    if (session('user_type') == 1 || in_array(6, session('permissions'))) {
-                        $dropdown .= $dispute_button;
+                    // if (session('user_type') == 1 || in_array(6, session('permissions'))) {
+                    //     $dropdown .= $dispute_button;
 
-                        $options = TRUE;
-                    }
+                    //     $options = TRUE;
+                    // }
 
 
                     $dropdown .= '

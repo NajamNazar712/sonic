@@ -279,7 +279,10 @@ class Permission
             'dispute.rebook.index' => 7,
             'dispute.rebook.list' => 7,
             'dispute.rebook.shipment.info' => 7,
-            'dispute.rebook.shipment.update' => 7
+            'dispute.rebook.shipment.update' => 7,
+
+            'reports.qsr.index' => 8,
+            'reports.qsr.list' => 8
         ]
     ];
 

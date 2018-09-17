@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Access Denied')
+
 @section('content')
 	<div class="card">
 		<div class="card-content" aria-expanded="true">
