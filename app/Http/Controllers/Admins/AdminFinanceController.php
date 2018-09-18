@@ -34,6 +34,17 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class AdminFinanceController extends Controller
 {
+    private function gst($hub_id) {
+        $hub_ids = [101, 106, 109, 110, 111, 119, 122, 125, 128, 130, 134, 135, 144, 158, 165, 174, 176, 186, 465, 199, 223, 414, 238, 244, 251, 255, 264, 267, 271, 281, 283, 284, 293, 302, 315, 304, 319, 339, 340];
+
+        if (in_array($hub_id, $hub_ids)) {
+            return 0.16;
+        }
+        else {
+            return 0.13;
+        }
+    }
+
     public function __construct() {
       $this->middleware('auth:admin');
 
@@ -449,7 +460,7 @@ class AdminFinanceController extends Controller
             foreach ($pending_payment_shipments->get() as $pending_payment_shipment) {
                 if ($pending_payment_shipment->type == 0) {
                     $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
-                    $gst = $charges * 0.13; //Should be Dynamic
+                    $gst = $charges * gst($shipment->pickup_address->city->hub_id);
                     $payable = $amount - ($charges + $gst);
 
                     $pending_payment_shipment->amount = $amount;
@@ -477,13 +488,13 @@ class AdminFinanceController extends Controller
 
         if (!$shipment->return_charges) {
             $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
-            $gst = $charges * 0.13; //Should be Dynamic
+            $gst = $charges * gst($shipment->pickup_address->city->hub_id);
 
             $payable = $amount - ($charges + $gst);
         }
         else {
             $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
-            $gst = $charges * 0.13; //Should be Dynamic
+            $gst = $charges * gst($shipment->pickup_address->city->hub_id);
 
             $payable = 0 - ($charges + $gst);
         }
@@ -582,7 +593,7 @@ class AdminFinanceController extends Controller
 
         $amount = 0 - $done_payment_shipment->payable;
         $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
-        $gst = $charges * 0.13; //Should be Dynamic
+        $gst = $charges * gst($shipment->pickup_address->city->hub_id);
         $payable = $amount - ($charges + $gst);
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
