@@ -855,7 +855,8 @@ class AdminFinanceController extends Controller
     public function make_payments_shipment_list(Request $request) {
         $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
         ->join('users as u', 's.user_id', '=', 'u.id')
-        ->select('pending_payment_shipments.shipment_id as id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
+        ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
+        ->select('pending_payment_shipments.shipment_id as id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
 
         if ($request->has('ids')) {
            $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);

@@ -144,6 +144,7 @@
 														<th class="border-primary border-darken-1">Shipper</th>
 														<th class="border-primary border-darken-1">Shipment</th>
 														<th class="border-primary border-darken-1">Type</th>
+														<th class="border-primary border-darken-1">Status</th>
 														<th class="border-primary border-darken-1">Amount</th>
 														<th class="border-primary border-darken-1">Charges</th>
 														<th class="border-primary border-darken-1">GST</th>
@@ -371,6 +372,7 @@
 					{data:'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data:'shipment', name: 's.tracking_number', class: 'align-middle shipment'},
 					{data:'type', name: 'pending_payment_shipments.type', class: 'align-middle type'},
+					{data:'status', name: 'ss.name', class: 'align-middle status'},
 					{data:'amount', name: 'pending_payment_shipments.amount', class: 'align-middle amount'},
 					{data:'charges', name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
 					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
@@ -416,7 +418,7 @@
 				drawCallback: function() {
 					if (selected_rows_shipments.length == 0) {
 						initial_total_hold = this.api().column('.payable').data().reduce(function (a, b) {
-							return parseInt(a.replace(/,/g, '')) + parseInt(b.replace(/,/g, ''));
+							return parseInt(a.toString().replace(/,/g, '')) + parseInt(b.toString().replace(/,/g, ''));
 						}, 0);
 
 						$('#make_payments #make_payments_form .total_hold').val(parseInt(initial_total_hold));

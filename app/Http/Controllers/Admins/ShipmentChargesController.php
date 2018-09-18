@@ -396,7 +396,7 @@ class ShipmentChargesController extends Controller
                         $shipment->replacement_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->replacement_charges = (ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->replacement_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -458,7 +458,7 @@ class ShipmentChargesController extends Controller
                         $shipment->replacement_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->replacement_charges = (ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+                        $shipment->replacement_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
