@@ -85,9 +85,10 @@
                         @if (session('role_id') == 1 || in_array(36, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.receive.index') }}">Receive</a></li>
                         @endif
-                        {{--@if (session('role_id') == 1 || in_array(36, session('permissions')))--}}
+
+                        @if (session('role_id') == 1 || in_array(105, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.cash_collection.pending.index') }}">Pending Cash Collection</a></li>
-                        {{--@endif--}}
+                        @endif
 
                         @if (session('role_id') == 1 || in_array(40, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.completed.index') }}">Completed</a></li>
@@ -96,7 +97,10 @@
                         @if (session('role_id') == 1 || in_array(42, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.sdn.index') }}">Station Deposit Notes</a></li>
                         @endif
+
+                        @if (session('role_id') == 1 || in_array(107, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.misroute.index') }}">Misroute</a></li>
+                        @endif
 
                     </ul>
                 </li>

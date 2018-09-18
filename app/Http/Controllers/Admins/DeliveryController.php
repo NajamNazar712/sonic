@@ -1738,16 +1738,19 @@ class DeliveryController extends Controller
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn('action',function ($deliveries){
-                $dropdown = '
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                            <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a>
-                        </div>
-                      </div>
-                    ';
+                if (session('role_id') == 1 || in_array(106, session('permissions'))) {
+                    $dropdown = '
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a>
+                            </div>
+                          </div>
+                        ';
 
-                return $dropdown;
+                    return $dropdown;
+                }
+                return '';
             });
             if ($tracking_number = $request->get('search_tracking')) {
                 $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -1792,9 +1795,7 @@ class DeliveryController extends Controller
 
 
     }
-    public function cash_collection_search(Request $request){
 
-    }
     public function completed_deliveries_index(){
         return view('admin.delivery.complete.index');
     }
@@ -2316,7 +2317,7 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || in_array(34, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(108, session('permissions'))) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>

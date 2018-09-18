@@ -282,8 +282,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('list', 'Admins\DeliveryController@pending_cash_collection_list')->name('list');
                 Route::post('collect', 'Admins\DeliveryController@pending_cash_collect')->name('collect');
                 Route::post('all','Admins\DeliveryController@pending_cash_collect_all')->name('all');
-                Route::get('tracking/search','Admins\DeliveryController@cash_collection_search')->name('tracking.search');
-
             });
         });
         Route::prefix('receive')->name('receive.')->group(function (){
