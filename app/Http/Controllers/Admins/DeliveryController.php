@@ -2394,8 +2394,8 @@ class DeliveryController extends Controller
                     $shipment->consignee_phone_number_1 = $request->phone1;
                     $shipment->consignee_phone_number_2 = $request->phone2;
                     $shipment->consignee_email = $request->email;
-                    $shipment->shipper_status_id = 2;
-                    $shipment->consignee_status_id = 2;
+                    $shipment->shipper_status_id = 4;
+                    $shipment->consignee_status_id = 4;
                     $shipment->save();
 
                     ShipmentsJourneyController::add($shipment->id, 4, 4, NULL, 'Misrouted shipment updated to new destination.', NULL,Auth::id());

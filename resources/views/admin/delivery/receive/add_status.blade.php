@@ -51,7 +51,7 @@
                             <button id="printTempDNCC" type="button" class="btn btn-warning btn-block">Print Temporary DNCC</button>
                         </div>
                     @endif
-                    <div class="col-2">
+                    <div class="col-3">
                         <button id="printUndeliveredDNCC" type="button" class="btn btn-warning btn-block">Print Undelivered Performa</button>
                     </div>
                 </div>
