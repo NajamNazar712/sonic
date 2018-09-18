@@ -488,13 +488,13 @@ class AdminFinanceController extends Controller
 
         if (!$shipment->return_charges) {
             $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
-            $gst = ROUND(($charges * $this->gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
+            $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
 
             $payable = $amount - ($charges + $gst);
         }
         else {
             $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
-            $gst = ROUND(($charges * $this->gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
+            $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
 
             $payable = 0 - ($charges + $gst);
         }
@@ -593,7 +593,7 @@ class AdminFinanceController extends Controller
 
         $amount = 0 - $done_payment_shipment->payable;
         $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
-        $gst = ROUND(($charges * $this->gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
+        $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
         $payable = $amount - ($charges + $gst);
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
