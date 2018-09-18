@@ -34,7 +34,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class AdminFinanceController extends Controller
 {
-    private function gst($hub_id) {
+    static private function gst($hub_id) {
         $hub_ids = [101, 106, 109, 110, 111, 119, 122, 125, 128, 130, 134, 135, 144, 158, 165, 174, 176, 186, 465, 199, 223, 414, 238, 244, 251, 255, 264, 267, 271, 281, 283, 284, 293, 302, 315, 304, 319, 339, 340];
 
         if (in_array($hub_id, $hub_ids)) {
@@ -481,20 +481,20 @@ class AdminFinanceController extends Controller
         return redirect()->route('admin.finance.change_shipment_amount.index')->with('success', 'Shipment\'s amount has been changed');
     }
 
-    public static function add_payment($shipment_id, $type) {
+    static public function add_payment($shipment_id, $type) {
         $shipment = Shipment::find($shipment_id);
 
         $amount = $shipment->amount;
 
         if (!$shipment->return_charges) {
             $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
-            $gst = ROUND(($charges * $this->gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
+            $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
 
             $payable = $amount - ($charges + $gst);
         }
         else {
             $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
-            $gst = ROUND(($charges * $this->gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
+            $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
 
             $payable = 0 - ($charges + $gst);
         }

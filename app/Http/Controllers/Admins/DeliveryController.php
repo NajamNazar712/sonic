@@ -1132,6 +1132,9 @@ class DeliveryController extends Controller
                         }//main if condition
 
                     }
+                    else {
+                        AdminFinanceController::add_payment($shipment, 0);
+                    }
                 }else{
                         if ($request->has($status_drop) && $request->status_drop[$shipment] != null) {
                             if($shipper_status_id->shipper_status_id != $request->status_drop[$shipment]){
