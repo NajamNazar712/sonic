@@ -106,7 +106,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -126,6 +129,58 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.delivery.completed.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_tracking': $('#search_tracking').val()
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Delivery Note No.');
+                            head.push('Hub');
+                            head.push('Rider');
+                            head.push('Route');
+                            head.push('No. Of Shipments');
+                            head.push('No. Of Shipments Delivered');
+                            head.push('Assigned By');
+                            head.push('Assigned Date');
+                            head.push('Updated By');
+                            head.push('Updated Date');
+                            head.push('DNCC Amount');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.delivery_note_id);
+                                row.push(values.hub);
+                                row.push(values.rider);
+                                row.push(values.route);
+                                row.push(values.shipments_count);
+                                row.push(values.delivered_shipments);
+                                row.push(values.assignee);
+                                row.push(values.created_at);
+                                row.push(values.updated_by);
+                                row.push(values.updated_at);
+                                row.push(values.amount);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(41, session('permissions')))
@@ -175,6 +230,10 @@
 
                             }
                         }
+                    },{
+                        extend: 'excel',
+                        title: 'Completed Deliveries',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 @else
                     dom: 'ltipr',

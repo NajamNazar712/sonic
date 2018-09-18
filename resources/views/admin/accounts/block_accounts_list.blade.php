@@ -75,7 +75,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -95,9 +98,60 @@
 
 <script>
     $(document).ready(function() {
+        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            if ( this.context.length ) {
+                body = [];
+
+                var jsonResult = $.ajax({
+                    url: '{{ route('admin.accounts.block.ajax') }}',
+                    data: {
+                        'page': 'all',
+                    },
+                    success: function (result) {
+                        head = [];
+
+                        head.push('S.No');
+                        head.push('Account ID');
+                        head.push('Company Name');
+                        head.push('City Name');
+                        head.push('Contact Person');
+                        head.push('Phone No.');
+                        head.push('Company Address');
+                        head.push('Email Address');
+                        head.push('Reason');
+                        $.each(result.data, function(index, values) {
+                            row = [];
+
+
+                            row.push(index + 1);
+                            row.push(values.id);
+                            row.push(values.name);
+                            row.push(values.city);
+                            row.push(values.poc);
+                            row.push(values.phone);
+                            row.push(values.address);
+                            row.push(values.email);
+                            row.push(values.reason);
+
+                            body.push(row);
+                        });
+                    },
+                    async: false
+                });
+
+                return {body: body, header: head};
+            }
+        } );
         var table = $('.datatable').DataTable({
-            dom: 'ltipr',
+            dom: '<"d-inline-block"l><"pull-right"B>tipr',
             scrollX: true, scrollY: '300px',
+            buttons: [
+                {
+                    extend: 'excel',
+                    title: 'Blocked Accounts',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                },
+            ],
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,
             stateSave: true,

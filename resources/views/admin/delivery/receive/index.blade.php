@@ -103,7 +103,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -125,9 +128,64 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                            url: '{{ route('admin.delivery.receive.list') }}',
+                            data: {
+                                'page': 'all',
+                                'delivery_note_number' : $('#scan_delivery_note').val(),
+                                'search_tracking' : $('#search_tracking').val(),
+                            },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Delivery Note No.');
+                            head.push('Hub');
+                            head.push('Rider');
+                            head.push('Route');
+                            head.push('No. Of Shipments');
+                            head.push('Assigned By');
+                            head.push('Assigned Date');
+                            head.push('Total COD');
+                            head.push('Status');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.delivery_note_id);
+                                row.push(values.hub);
+                                row.push(values.rider);
+                                row.push(values.route);
+                                row.push(values.shipments_count);
+                                row.push(values.assignee);
+                                row.push(values.created_at);
+                                row.push(values.amount);
+                                row.push(values.pending_status);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '300px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Receive Deliveries',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
+                ],
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 pagingType: 'full_numbers',

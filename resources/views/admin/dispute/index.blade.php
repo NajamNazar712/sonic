@@ -203,7 +203,10 @@
             top: 50%;
             text-shadow: none;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
@@ -322,18 +325,70 @@
                     }
                 }
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.dispute.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Dispute .No');
+                            head.push('Dispute Date');
+                            head.push('Description');
+                            head.push('Originated At');
+                            head.push('Dispute Type');
+                            head.push('No. Of Shipments');
+                            head.push('Launched By');
+                            head.push('Updated By');
+                            head.push('Status');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.dispute_id);
+                                row.push(values.created_at);
+                                row.push(values.description);
+                                row.push(values.originated_at);
+                                row.push(values.dispute_type);
+                                row.push(values.shipments_count);
+                                row.push(values.launched_by);
+                                row.push(values.updated_by);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 
         var table = $('#datatable').DataTable({
             @if (session('role_id') == 1 || in_array(2, session('permissions')))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
-                    text: 'Launch Dispute',
+                    text: '<i class="la la-calendar-times-o"></i> Launch',
                     className: 'btn btn-primary dispute_modal',
                     enabled: true,
                     action: function (e, dt, node, config) {
                         $('#DisputeModal').modal('show');
                     }
-                }],
+                },
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-primary',
+                        title: 'Disputes',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
             @else
                 dom: 'ltipr',
             @endif

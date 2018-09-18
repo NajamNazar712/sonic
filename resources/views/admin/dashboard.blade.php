@@ -38,7 +38,7 @@
                                   </div>
                                   <div class="media-body text-right">
                                       <h3 class="">{{$stats['booked']}}</h3>
-                                      <span>Pending</span>
+                                      <span>PND Bookings</span>
                                   </div>
                               </div>
                           </div>
@@ -436,7 +436,7 @@
 
                 // Add legend
                 legend: {
-                    data: ['Pending', 'Received', 'Delivered', 'Return', 'In Progress']
+                    data: ['PND Bookings', 'Received', 'Delivered', 'Return', 'In Progress']
                 },
 
                 // Add custom colors
@@ -460,7 +460,7 @@
                 // Add series
                 series: [
                     {
-                        name: 'Pending',
+                        name: 'PND Bookings',
                         type: 'line',
                         data: @json($graph['booked'])
                     },
@@ -526,7 +526,7 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pending', 'Received', 'Delivered', 'Return', 'In Progress']
+                                data: ['PND Bookings', 'Received', 'Delivered', 'Return', 'In Progress']
                             },
                             color: ['#CECECE', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
@@ -544,7 +544,7 @@
                             }],
                             series: [
                                 {
-                                    name: 'Pending',
+                                    name: 'PND Bookings',
                                     type: 'line',
                                     data: data.graph['booked']
                                 },

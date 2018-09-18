@@ -49,7 +49,7 @@ class DisputeController extends Controller
                     DB::raw('(select max(created_at) from dispute_comments where dispute_comments.dispute_id = disputes.id)'));
                 })
             ->leftJoin('admins as au', 'dc.admin_id', '=', 'au.id')
-            ->select(['disputes.id as dispute_id','disputes.created_at as created_at','disputes.description','cities.name as originated_at','dt.type as dispute_type','disputes.shipments_count as no_of_shipments','ad.name as admin','us.name as shipper','disputes.raised_by_status as rbstatus','au.name as updated_by','disputes.status as status']);
+            ->select(['disputes.id as dispute_id','disputes.created_at as created_at','disputes.description','cities.name as originated_at','dt.type as dispute_type','disputes.shipments_count as no_of_shipments','disputes.shipments_count as shipments_count','ad.name as admin','us.name as shipper','disputes.raised_by_status as rbstatus','au.name as updated_by','disputes.status as status']);
 
         if (session('role_id') != 1) {
             $dispute = $dispute->whereIn('cities.hub_id', session('hubs'));
