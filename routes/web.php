@@ -328,6 +328,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
            Route::post('print','Admins\DeliveryController@sdn_deposit_slip_print')->name('print');
 
         });
+        Route::prefix('misroute')->name('misroute.')->group(function (){
+           Route::get('','Admins\DeliveryController@misroute_index')->name('index');
+           Route::get('list','Admins\DeliveryController@misroute_list')->name('list');
+           Route::post('shipment/info','Admins\DeliveryController@get_shipment_info')->name('shipment.info');
+           Route::post('shipment/update','Admins\DeliveryController@misroute_shipment_update')->name('shipment.update');
+
+        });
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');

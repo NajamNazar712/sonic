@@ -64,7 +64,7 @@ class DeliveryController extends Controller
                     DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-                ->select('shipments.id as shId','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
+                ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as current_status_date','sj.created_at as arrival')
 
             ->whereRaw('IF (shipments.shipper_status_id = 2, (oc.hub_id = dc.hub_id), TRUE)')
             ->whereIn('shipments.shipper_status_id',$status)
@@ -75,7 +75,7 @@ class DeliveryController extends Controller
         }
 
         return Datatables::of($shipments)
-            ->editColumn('tracking_number',function ($shipments){
+            ->editColumn('tracking_number_link',function ($shipments){
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
@@ -1490,6 +1490,17 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+                      .w-200 {
+                        width: 200px;
+                      }
+
+                      .line {
+                        border-bottom: 1px solid #09262e !important;
+                      }
+
+                      .manual_form {
+                        page-break-inside: avoid;
+                      }
                     </style>
                   </head>
                   <body>
@@ -1565,7 +1576,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
                             <td>' . $rider_name . '</td>
-                            <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
+                            <td rowspan="7" class="p-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
@@ -2247,5 +2258,143 @@ class DeliveryController extends Controller
 
         return $html;
     }
+    public function misroute_index(){
+        return view('admin.delivery.misroute.index');
+    }
+    public function misroute_list(Request $request){
 
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
+            ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as current_status_date','sj.created_at as arrival')
+
+            ->where('shipments.shipper_status_id',11)
+            ->groupBy('shipments.id');
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+        }
+
+        return Datatables::of($shipments)
+            ->editColumn('tracking_number_link',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('status_date',function ($shipments){
+                if($shipments->status_date) {
+                    if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
+                        $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                        return "<span class='danger font-weight-bold'>$older</span>";
+                    } else {
+                        return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                    }
+                }else{
+                    return " - ";
+                }
+            })
+            ->editColumn('arrival',function($shipments){
+                if($shipments->arrival){
+                    return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
+                }else{
+                    return " - ";
+                }
+            })
+            ->addColumn("action", function ($result) {
+                if (session('role_id') == 1 || in_array(34, session('permissions'))) {
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                            <a href="#" class="dropdown-item misroute_modal"><i class="ft-alert-circle primary"></i> Update</a>
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+
+                }
+                else {
+                    return '';
+                }
+            })
+            ->make(true);
+    }
+    public function get_shipment_info(Request $request){
+        $shipment_id = $request->shipment_id;
+        if($shipment_id != ''){
+            $shipment = Shipment::where('id',$shipment_id)->where('shipper_status_id',11);
+            if($shipment->exists()){
+                $data = array();
+                $shipment = $shipment->first();
+                $cities = City::where('status',1)->select('id','name')->get();
+
+                $data['tracking_number'] = $shipment->tracking_number;
+                $data['consignee_city_id'] = $shipment->consignee_city->id;
+//                $data['consignee_city_name'] = $shipment->consignee_city->name;
+                $data['consignee_name'] = $shipment->consignee_name;
+                $data['consignee_address'] = $shipment->consignee_address;
+                $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
+                $data['consignee_phone2'] = $shipment->consignee_phone_number_2;
+                $data['consignee_email'] = $shipment->consignee_email;
+
+                return response()->json(['status'=>1,'data'=>$data,'cities'=>$cities]);
+
+            }else{
+                return response()->json(['status'=>0,'error'=>'Shipment not found']);
+            }
+
+        }
+    }
+
+    public function misroute_shipment_update(Request $request){
+        $shipment_id = $request->shipment_id;
+        if($shipment_id != ''){
+            $shipment = Shipment::where('id',$shipment_id)->where('shipper_status_id',11);
+            if($shipment->exists()){
+                $shipment = $shipment->first();
+
+                if(($request->consignee_city_id != $shipment->consignee_city_id) && $shipment->shipper_status_id == 11){
+                    $shipment->consignee_city_id = $request->consignee_city_id;
+                    $shipment->consignee_name = $request->consignee;
+                    $shipment->consignee_address = $request->address;
+                    $shipment->consignee_phone_number_1 = $request->phone1;
+                    $shipment->consignee_phone_number_2 = $request->phone2;
+                    $shipment->consignee_email = $request->email;
+                    $shipment->shipper_status_id = 2;
+                    $shipment->consignee_status_id = 2;
+                    $shipment->save();
+
+                    ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, session('user_id'), NULL);
+
+//                    NotificationsController::send(17, $shipment->id, $newShipment->id);
+//                    NotificationsController::send(18, $shipment->id, $newShipment->id);
+
+//                    ShipmentsJourneyController::add($newShipment->id, 2, 2, NULL, 'Shipment has been Re-Booked and arrived at origin center', session('user_id'), NULL);
+                    return response()->json(['status'=>1,'success'=>'Shipment has been updated successfully']);
+
+                }else{
+                    return response()->json(['status'=>0,'error'=>'Please select new city!']);
+                }
+            }else{
+                return response()->json(['status'=>0,'error'=>'Shipment with Misroute Status not found!']);
+
+            }
+        }
+    }
 }

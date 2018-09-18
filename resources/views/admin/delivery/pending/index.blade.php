@@ -142,6 +142,7 @@
                         head.push('Origin');
                         head.push('Destination');
                         head.push('Hub');
+                        head.push('Consignee Name');
                         head.push('Phone');
                         head.push('Address');
                         head.push('COD Amount');
@@ -159,14 +160,20 @@
                             row.push(index + 1);
                             row.push(values.tracking_number);
                             row.push(values.shipper);
-                            row.push(values.history_status);
-                            row.push(values.service_type);
-                            row.push(values.arrival);
                             row.push(values.origin);
                             row.push(values.destination);
                             row.push(values.hub);
+                            row.push(values.consignee_name);
+                            row.push(values.phone);
+                            row.push(values.consignee_address);
                             row.push(values.amount);
-                            row.push(values.aging);
+                            row.push(values.mode);
+                            row.push(values.service_type);
+                            row.push(values.status);
+                            row.push(values.reason);
+                            row.push(values.remarks);
+                            row.push(values.arrival);
+                            row.push(values.current_status_date);
 
                             body.push(row);
                         });
@@ -198,7 +205,7 @@
             order: [[15, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                 {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                 {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
