@@ -294,6 +294,7 @@
 
                             $('#tracking table.datatable').DataTable({
                                 dom: 't',
+                                paging: false,
                                 order: [[0, 'desc']],
                                 columns: [
                                     {name: 'date_time', class: 'align-middle date_time'},
