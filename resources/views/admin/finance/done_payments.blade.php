@@ -33,6 +33,7 @@
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
+										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
@@ -278,6 +279,7 @@
 					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', orderable: false},
 					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', orderable: false},
 					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
 					{data:'bank', name: 'ubi.bank_name', class: 'align-middle text-center bank'},
 					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
@@ -307,7 +309,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else {
