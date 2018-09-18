@@ -2380,12 +2380,8 @@ class DeliveryController extends Controller
                     $shipment->consignee_status_id = 2;
                     $shipment->save();
 
-                    ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, session('user_id'), NULL);
+                    ShipmentsJourneyController::add($shipment->id, 4, 4, NULL, 'Misrouted shipment updated to new destination.', session('user_id'), NULL);
 
-//                    NotificationsController::send(17, $shipment->id, $newShipment->id);
-//                    NotificationsController::send(18, $shipment->id, $newShipment->id);
-
-//                    ShipmentsJourneyController::add($newShipment->id, 2, 2, NULL, 'Shipment has been Re-Booked and arrived at origin center', session('user_id'), NULL);
                     return response()->json(['status'=>1,'success'=>'Shipment has been updated successfully']);
 
                 }else{
