@@ -35,7 +35,7 @@
                                         <th class="border-primary border-darken-1">Rate Approved By</th>
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
-                                        <th class="border-primary border-darken-1"></th>
+                                        <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -51,7 +51,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-    <style>
+    <style type="text/css">
         table.dataTable {
             font-size: 12px;
         }
@@ -83,7 +83,10 @@
             top: 50%;
             text-shadow: none;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
@@ -105,9 +108,73 @@
 
     <script type="text/javascript">
     $(document).ready(function() {
+        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            if ( this.context.length ) {
+                body = [];
+
+                var jsonResult = $.ajax({
+                    url: '{{ route('admin.accounts.active.ajax') }}',
+                    data: {
+                        'page': 'all',
+                    },
+                    success: function (result) {
+                        head = [];
+
+                        head.push('S.No');
+                        head.push('Account ID');
+                        head.push('Company Name');
+                        head.push('City Name');
+                        head.push('Contact Person');
+                        head.push('Phone No.');
+                        head.push('Company Address');
+                        head.push('Email Address');
+                        head.push('Product Type');
+                        head.push('Status');
+                        head.push('Request Date');
+                        head.push('Rates Added By');
+                        head.push('Rates Approved By');
+                        head.push('Account Activated By');
+                        head.push('Account Activation Date');
+                        $.each(result.data, function(index, values) {
+                            row = [];
+
+
+                            row.push(index + 1);
+                            row.push(values.id);
+                            row.push(values.name);
+                            row.push(values.city);
+                            row.push(values.poc);
+                            row.push(values.phone);
+                            row.push(values.address);
+                            row.push(values.email);
+                            row.push(values.product_name);
+                            row.push(values.status);
+                            row.push(values.created_at);
+                            row.push(values.added_by);
+                            row.push(values.approved_by);
+                            row.push(values.account_activated_by);
+                            row.push(values.activated_date);
+
+                            body.push(row);
+                        });
+                    },
+                    async: false
+                });
+
+                return {body: body, header: head};
+            }
+        } );
+
        var table = $('#datatable').DataTable({
-            dom: 'ltipr',
-            scrollX: true, scrollY: '300px',
+           dom: '<"d-inline-block"l><"pull-right"B>tipr',
+           scrollX: true, scrollY: '300px',
+           buttons: [
+               {
+                   extend: 'excel',
+                   title: 'Active Accounts',
+                   text: '<i class="la la-file-excel-o"></i> Excel',
+               },
+           ],
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,
             pagingType: 'full_numbers',

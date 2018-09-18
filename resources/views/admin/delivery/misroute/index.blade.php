@@ -1,6 +1,6 @@
 
 @extends('admin.layout.master')
-@section('title','Pending Deliveries')
+@section('title','Misrouted Deliveries')
 
 @section('content')
     <h1 class="mb-1">
@@ -43,7 +43,7 @@
 
     <div class="modal fade text-left" id="RebookModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RebookModal"
          aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title">Rebook Shipment</h4>

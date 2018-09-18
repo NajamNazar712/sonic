@@ -33,7 +33,7 @@
                         <th class="border-primary border-darken-1">Delivered Time</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">TAT</th>
-                        <th class="border-primary border-darken-1">Time Remining</th>
+                        <th class="border-primary border-darken-1">Time Remaining</th>
                         <th class="border-primary border-darken-1">Instructions</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -48,6 +48,56 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style type="text/css">
+        table.dataTable {
+            font-size: 12px;
+        }
+
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -57,10 +107,80 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.sameday.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Tracking .No');
+                            head.push('Shipper');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Consignee Name');
+                            head.push('Consignee Phone');
+                            head.push('Consignee Address');
+                            head.push('Product Type');
+                            head.push('Same-day Type');
+                            head.push('Status');
+                            head.push('Booked Date');
+                            head.push('Arrival Date');
+                            head.push('Dispatched Time');
+                            head.push('Delivered Time');
+                            head.push('Updated By');
+                            head.push('TAT');
+                            head.push('Time Remaining');
+                            head.push('Instructions');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.tracking_no);
+                                row.push(values.shipper);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_phone);
+                                row.push(values.consignee_address);
+                                row.push(values.product_name);
+                                row.push(values.timing);
+                                row.push(values.current_status);
+                                row.push(values.booked_date);
+                                row.push(values.arrival);
+                                row.push(values.dispatched_time);
+                                row.push(values.delivered_status);
+                                row.push(values.updated_by);
+                                row.push(values.tat);
+                                row.push(values.remaining_time);
+                                row.push(values.instructions);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '300px',
-                dom: 'ltipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Sameday Deliveries',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
+                ],
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 pagingType: 'full_numbers',

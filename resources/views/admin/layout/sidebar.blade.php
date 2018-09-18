@@ -96,7 +96,7 @@
                         @if (session('role_id') == 1 || in_array(42, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.sdn.index') }}">Station Deposit Notes</a></li>
                         @endif
-                            <li><a class="menu-item" href="{{ route('admin.delivery.misroute.index') }}">Misroute</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.delivery.misroute.index') }}">Misrouted</a></li>
 
                     </ul>
                 </li>

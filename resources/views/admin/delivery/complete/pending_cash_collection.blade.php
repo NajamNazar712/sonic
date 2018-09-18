@@ -62,7 +62,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-    <style>
+    <style type="text/css">
         table.dataTable {
             font-size: 12px;
         }
@@ -98,7 +98,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -118,13 +121,66 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.delivery.cash_collection.pending.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_tracking': $('#search_tracking').val()
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Delivery Note No.');
+                            head.push('Hub');
+                            head.push('Rider');
+                            head.push('Route');
+                            head.push('No. Of Shipments');
+                            head.push('No. Of Shipments Delivered');
+                            head.push('Assigned By');
+                            head.push('Assigned Date');
+                            head.push('Updated By');
+                            head.push('Updated Date');
+                            head.push('DNCC Amount');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.delivery_note_id);
+                                row.push(values.hub);
+                                row.push(values.rider);
+                                row.push(values.route);
+                                row.push(values.shipments_count);
+                                row.push(values.delivered_shipments);
+                                row.push(values.assignee);
+                                row.push(values.created_at);
+                                row.push(values.updated_by);
+                                row.push(values.updated_at);
+                                row.push(values.amount);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(41, session('permissions')))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '300px',
-                buttons: [{
-                    text: 'Cash Collect',
+                buttons: [
+                    {
+                    text: '<i class="la la-creative-commons"></i> Cash Collect',
                     className: 'btn btn-primary cash_collect_all',
                     enabled: false,
                     action: function (e, dt, node, config) {
@@ -199,7 +255,12 @@
 
                         }
                     }
-                }],
+                },
+                    {
+                        extend: 'excel',
+                        title: 'Pending Cash Collection',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
                 @else
                 dom: 'ltipr',
                 @endif
@@ -240,7 +301,7 @@
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
                     { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'action' ,name: 'action', class: 'align-middle action'},
+                    { data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -362,6 +423,11 @@
                         }).done(function (data) {
                             if(data.status === 1){
                                 table.draw();
+                                selected_rows = [];
+                                hub_ids = [];
+                                if(selected_rows.length == 0){
+                                    table.button('.cash_collect_all').disable();
+                                }
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                             }else{
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});

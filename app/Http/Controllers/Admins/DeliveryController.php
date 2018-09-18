@@ -1737,6 +1737,9 @@ class DeliveryController extends Controller
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
+            ->editColumn('updated_at', function ($rider) {
+                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y h:i:s A') : '';
+            })
             ->addColumn('action',function ($deliveries){
                 $dropdown = '
                       <div class="btn-group">
@@ -1838,6 +1841,9 @@ class DeliveryController extends Controller
             })
             ->editColumn('created_at', function ($rider) {
                 return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
+            })
+            ->editColumn('updated_at', function ($rider) {
+                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y h:i:s A') : '';
             });
         if ($tracking_number = $request->get('search_tracking')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -2380,7 +2386,7 @@ class DeliveryController extends Controller
                     $shipment->consignee_status_id = 2;
                     $shipment->save();
 
-                    ShipmentsJourneyController::add($shipment->id, 4, 4, NULL, 'Misrouted shipment updated to new destination.', session('user_id'), NULL);
+                    ShipmentsJourneyController::add($shipment->id, 4, 4, NULL, 'Misrouted shipment updated to new destination.', NULL,Auth::id());
 
                     return response()->json(['status'=>1,'success'=>'Shipment has been updated successfully']);
 

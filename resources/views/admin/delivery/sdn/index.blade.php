@@ -135,7 +135,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -159,10 +162,63 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.delivery.sdn.list') }}',
+                        data: {
+                            'page':'all',
+                            'scan_dncc':$('#scan_dncc').val(),
+                            'search_tracking': $('#search_tracking').val()
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('SDN No.');
+                            head.push('Hub');
+                            head.push('No. of DNCCs');
+                            head.push('Delivered Shipments');
+                            head.push('DNCC Amount');
+                            head.push('Deposited By');
+                            head.push('Company Bank');
+                            head.push('Deposited Date');
+                            head.push('Status');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.sdn_id);
+                                row.push(values.hub);
+                                row.push(values.dncc_count);
+                                row.push(values.sdn_delivered_shipments);
+                                row.push(values.sdn_amount);
+                                row.push(values.deposited_by);
+                                row.push(values.bank);
+                                row.push(values.created_at);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '300px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Station Deposit Notes',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 pagingType: 'full_numbers',

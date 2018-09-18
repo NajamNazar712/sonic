@@ -33,7 +33,7 @@
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
                                         <th class="border-primary border-darken-1">Rates Approved By</th>
-                                        <th class="border-primary border-darken-1"></th>
+                                        <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
                             </table>
@@ -57,6 +57,56 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style type="text/css">
+        table.dataTable {
+            font-size: 12px;
+        }
+
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -64,9 +114,71 @@
 
     <script>
     $(document).ready(function() {
-       var table = $('#datatable').DataTable({
-            dom: 'ltipr',
+
+        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            if ( this.context.length ) {
+                body = [];
+
+                var jsonResult = $.ajax({
+                    url: '{{ route('admin.accounts.pending.ajax') }}',
+                    data: {
+                        'page': 'all',
+                    },
+                    success: function (result) {
+                        head = [];
+
+                        head.push('S.No');
+                        head.push('Account ID');
+                        head.push('Company Name');
+                        head.push('City Name');
+                        head.push('Contact Person');
+                        head.push('Phone No.');
+                        head.push('Company Address');
+                        head.push('Email Address');
+                        head.push('Product Type');
+                        head.push('Request Date');
+                        head.push('Status');
+                        head.push('Rates Added By');
+                        head.push('Rates Approved By');
+                        $.each(result.data, function(index, values) {
+                            row = [];
+
+
+                            row.push(index + 1);
+                            row.push(values.id);
+                            row.push(values.name);
+                            row.push(values.city);
+                            row.push(values.poc);
+                            row.push(values.phone);
+                            row.push(values.address);
+                            row.push(values.email);
+                            row.push(values.product_name);
+                            row.push(values.created_at);
+                            row.push(values.status);
+                            row.push(values.rates_added_by);
+                            row.push(values.rates_authorized_by);
+
+                            body.push(row);
+                        });
+                    },
+                    async: false
+                });
+
+                return {body: body, header: head};
+            }
+        } );
+
+
+        var table = $('#datatable').DataTable({
+            dom: '<"d-inline-block"l><"pull-right"B>tipr',
             scrollX: true, scrollY: '300px',
+            buttons: [
+                {
+                    extend: 'excel',
+                    title: 'Pending Accounts',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                },
+            ],
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
             pageLength: 25,
             pagingType: 'full_numbers',
