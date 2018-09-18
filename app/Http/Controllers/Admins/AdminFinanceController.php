@@ -34,7 +34,7 @@ use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 
 class AdminFinanceController extends Controller
 {
-    private function gst($hub_id) {
+    private static function gst($hub_id) {
         $hub_ids = [101, 106, 109, 110, 111, 119, 122, 125, 128, 130, 134, 135, 144, 158, 165, 174, 176, 186, 465, 199, 223, 414, 238, 244, 251, 255, 264, 267, 271, 281, 283, 284, 293, 302, 315, 304, 319, 339, 340];
 
         if (in_array($hub_id, $hub_ids)) {
