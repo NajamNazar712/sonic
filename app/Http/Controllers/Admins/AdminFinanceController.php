@@ -460,7 +460,7 @@ class AdminFinanceController extends Controller
             foreach ($pending_payment_shipments->get() as $pending_payment_shipment) {
                 if ($pending_payment_shipment->type == 0) {
                     $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
-                    $gst = $charges * gst($shipment->pickup_address->city->hub_id);
+                    $gst = ROUND(($charges * $this->gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
                     $payable = $amount - ($charges + $gst);
 
                     $pending_payment_shipment->amount = $amount;
@@ -488,13 +488,13 @@ class AdminFinanceController extends Controller
 
         if (!$shipment->return_charges) {
             $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
-            $gst = $charges * gst($shipment->pickup_address->city->hub_id);
+            $gst = ROUND(($charges * $this->gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
 
             $payable = $amount - ($charges + $gst);
         }
         else {
             $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
-            $gst = $charges * gst($shipment->pickup_address->city->hub_id);
+            $gst = ROUND(($charges * $this->gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
 
             $payable = 0 - ($charges + $gst);
         }
@@ -593,7 +593,7 @@ class AdminFinanceController extends Controller
 
         $amount = 0 - $done_payment_shipment->payable;
         $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
-        $gst = $charges * gst($shipment->pickup_address->city->hub_id);
+        $gst = ROUND(($charges * $this->gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
         $payable = $amount - ($charges + $gst);
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -651,9 +651,10 @@ class AdminFinanceController extends Controller
         $pending_payments = PendingPayment::join('users as u', 'pending_payments.user_id', '=', 'u.id')
         ->join('cities as c', 'u.city_id', '=', 'c.id')
         ->join('user_bank_infos as ubi', 'pending_payments.user_id', '=', 'ubi.user_id')
+        ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
         ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
         ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
-        ->select('pending_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.returned_shipments', 'pending_payments.adjusted_shipments', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ubi.bank_name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle')
+        ->select('pending_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.returned_shipments', 'pending_payments.adjusted_shipments', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle')
         ->groupBy('pending_payments.id');
 
         if (session('role_id') != 1) {
@@ -661,6 +662,9 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($pending_payments)
+        ->addColumn('total_deductable', function($pending_payments) {
+            return number_format($pending_payments->total_charges + $pending_payments->total_gst);
+        })
         ->editColumn('delivered_shipments', function($pending_payment) {
             if ($pending_payment->delivered_shipments != 0) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->delivered_shipments . '</button>';
@@ -686,16 +690,16 @@ class AdminFinanceController extends Controller
             }
         })
         ->editColumn('total_amount', function($pending_payment) {
-            return floatval($pending_payment->total_amount);
+            return number_format($pending_payment->total_amount);
         })
         ->editColumn('total_charges', function($pending_payment) {
-            return floatval($pending_payment->total_charges);
+            return number_format($pending_payment->total_charges);
         })
         ->editColumn('total_gst', function($pending_payment) {
-            return floatval($pending_payment->total_gst);
+            return number_format($pending_payment->total_gst);
         })
         ->editColumn('total_payable', function($pending_payment) {
-            return floatval($pending_payment->total_payable);
+            return number_format($pending_payment->total_payable);
         })
         ->addColumn('phone_numbers', function($pending_payment) {
             $phone_numbers = $pending_payment->phone;
@@ -836,10 +840,11 @@ class AdminFinanceController extends Controller
                 $detail['type'] = 'Adjusted';
             }
 
-            $detail['amount'] = floatval($pending_payment_shipment->amount);
-            $detail['charges'] = floatval($pending_payment_shipment->charges);
-            $detail['gst'] = floatval($pending_payment_shipment->gst);
-            $detail['payable'] = floatval($pending_payment_shipment->payable);
+            $detail['amount'] = number_format($pending_payment_shipment->amount);
+            $detail['charges'] = number_format($pending_payment_shipment->charges);
+            $detail['gst'] = number_format($pending_payment_shipment->gst);
+            $detail['deductable'] = number_format($pending_payment_shipment->charges + $pending_payment_shipment->gst);
+            $detail['payable'] = number_format($pending_payment_shipment->payable);
 
             $details[] = $detail;
         }
@@ -860,17 +865,20 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($pending_payment_shipments)
+        ->addColumn('deductable', function($pending_payment_shipments) {
+            return number_format($pending_payment_shipments->charges + $pending_payment_shipments->gst);
+        })
         ->editColumn('amount', function($pending_payment_shipment) {
-            return floatval($pending_payment_shipment->amount);
+            return number_format($pending_payment_shipment->amount);
         })
         ->editColumn('charges', function($pending_payment_shipment) {
-            return floatval($pending_payment_shipment->charges);
+            return number_format($pending_payment_shipment->charges);
         })
         ->editColumn('gst', function($pending_payment_shipment) {
-            return floatval($pending_payment_shipment->gst);
+            return number_format($pending_payment_shipment->gst);
         })
         ->editColumn('payable', function($pending_payment_shipment) {
-            return floatval($pending_payment_shipment->payable);
+            return number_format($pending_payment_shipment->payable);
         })
         ->editColumn('type', function($pending_payment_shipment) {
             if ($pending_payment_shipment->type == 0) {
@@ -882,7 +890,11 @@ class AdminFinanceController extends Controller
             else {
                 return 'Adjusted';
             }
-        });
+        })
+        ->filterColumn('deductable', function ($query, $keyword) {
+            $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst'), '=', $keyword);
+        })
+        ->orderColumn('deductable', DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst') . ' $1');
 
         return $datatables->make(true);
     }
@@ -908,7 +920,7 @@ class AdminFinanceController extends Controller
 
             $shipper = User::find($pending_payment->user_id);
 
-            $payable = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->whereIn('shipment_id', $shipment_ids)->sum('payable');
+            $payable = number_format(PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->whereIn('shipment_id', $shipment_ids)->sum('payable'));
 
             $row = array();
 
@@ -1101,9 +1113,10 @@ class AdminFinanceController extends Controller
         $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
         ->join('cities as c', 'u.city_id', '=', 'c.id')
         ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
+        ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
         ->join('done_payment_shipments as pps', 'done_payments.id', '=', 'pps.done_payment_id')
         ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-        ->select('done_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.returned_shipments', 'done_payments.adjusted_shipments', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ubi.bank_name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
+        ->select('done_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.returned_shipments', 'done_payments.adjusted_shipments', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
         ->groupBy('done_payments.id');
 
         if (session('role_id') != 1) {
@@ -1111,6 +1124,9 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($done_payments)
+        ->addColumn('total_deductable', function($done_payments) {
+            return number_format($done_payments->total_charges + $done_payments->total_gst);
+        })
         ->editColumn('delivered_shipments', function($done_payment) {
             if ($done_payment->delivered_shipments != 0) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->delivered_shipments . '</button>';
@@ -1136,16 +1152,16 @@ class AdminFinanceController extends Controller
             }
         })
         ->editColumn('total_amount', function($done_payment) {
-            return floatval($done_payment->total_amount);
+            return number_format($done_payment->total_amount);
         })
         ->editColumn('total_charges', function($done_payment) {
-            return floatval($done_payment->total_charges);
+            return number_format($done_payment->total_charges);
         })
         ->editColumn('total_gst', function($done_payment) {
-            return floatval($done_payment->total_gst);
+            return number_format($done_payment->total_gst);
         })
         ->editColumn('total_payable', function($done_payment) {
-            return floatval($done_payment->total_payable);
+            return number_format($done_payment->total_payable);
         })
         ->addColumn('phone_numbers', function($done_payment) {
             $phone_numbers = $done_payment->phone;
@@ -1407,7 +1423,7 @@ class AdminFinanceController extends Controller
                             <tr>
                               <td class="color secondary"><strong>Payment ID</strong></td>
                               <td>' . $done_payment->id . '</td>
-                              <td rowspan="7" class="text-center align-middle">
+                              <td rowspan="11" class="text-center align-middle">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($done_payment->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                 <span><strong>' . $done_payment->id . '</strong></span>
                               </td>
@@ -1436,6 +1452,60 @@ class AdminFinanceController extends Controller
                               <td class="color secondary"><strong>Reference Number</strong></td>
                               <td>' . $done_payment->reference_number . '</td>
                             </tr>
+      ';
+
+      $shipment_details = '';
+
+      $serial_number = 1;
+
+      $total_amount = 0;
+      $total_charges = 0;
+      $total_gst = 0;
+      $total_payable = 0;
+
+      foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $shipment_details .= '
+                            <tr>
+                              <td>' . $serial_number . '</td>
+                              <td>' . $shipment->tracking_number . '</td>
+                              <td>' . $shipment->order_id . '</td>
+                              <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
+                              <td>' . $shipment->consignee_city->name . '</td>
+                              <td>' . $shipment->booking_type->booking_type . '</td>
+                              <td>' . $shipment->actual_weight . '</td>
+                              <td>' . number_format($done_payment_shipment->amount) . '</td>
+                              <td>' . number_format($done_payment_shipment->charges) . '</td>
+                              <td>' . number_format($done_payment_shipment->payable) . '</td>
+                            </tr>
+            ';
+
+            $serial_number++;
+
+            $total_amount += $done_payment_shipment->amount;
+            $total_charges += $done_payment_shipment->charges;
+            $total_gst += $done_payment_shipment->gst;
+            $total_payable += $done_payment_shipment->payable;
+      }
+
+      $html .= '
+                            <tr>
+                              <td class="color secondary"><strong>Total Amount</strong></td>
+                              <td>' . number_format($total_amount) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total Charges</strong></td>
+                              <td>' . number_format($total_charges) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total GST</strong></td>
+                              <td>' . number_format($total_gst) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total Payable</strong></td>
+                              <td>' . number_format($total_payable) . '</td>
+                            </tr>
                           </tbody>
                         </table>
 
@@ -1452,62 +1522,14 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>Amount</strong></td>
                               <td class="color primary"><strong>Charges</strong></td>
                               <td class="color primary"><strong>Payable</strong></td>
+                            </tr>
       ';
 
-      $serial_number = 1;
-
-      $total_amount = 0;
-      $total_charges = 0;
-      $total_gst = 0;
-      $total_payable = 0;
-
-      foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-            $shipment = $done_payment_shipment->shipment;
-
-            $html .= '
-                            <tr>
-                              <td>' . $serial_number . '</td>
-                              <td>' . $shipment->tracking_number . '</td>
-                              <td>' . $shipment->order_id . '</td>
-                              <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
-                              <td>' . $shipment->consignee_city->name . '</td>
-                              <td>' . $shipment->booking_type->booking_type . '</td>
-                              <td>' . $shipment->actual_weight . '</td>
-                              <td>' . $done_payment_shipment->amount . '</td>
-                              <td>' . $done_payment_shipment->charges . '</td>
-                              <td>' . $done_payment_shipment->payable . '</td>
-                            </tr>
-            ';
-
-            $serial_number++;
-
-            $total_amount += $done_payment_shipment->amount;
-            $total_charges += $done_payment_shipment->charges;
-            $total_gst += $done_payment_shipment->gst;
-            $total_payable += $done_payment_shipment->payable;
-      }
+      $html .= $shipment_details;
 
       $html .= '
                           </tbody>
                         </table>
-
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                              <td class="color primary"><strong>Total Amount</strong></td>
-                              <td class="color primary"><strong>Total Charges</strong></td>
-                              <td class="color primary"><strong>Total GST</strong></td>
-                              <td class="color primary"><strong>Total Payable</strong></td>
-                            </tr>
-                            <tr>
-                              <td>' . $total_amount . '</td>
-                              <td>' . $total_charges . '</td>
-                              <td>' . $total_gst . '</td>
-                              <td>' . $total_payable . '</td>
-                            </tr>
-                          </tbody>
-                        </table>
-
                       </div>
                     </div>
 
@@ -1567,9 +1589,9 @@ class AdminFinanceController extends Controller
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
-            $row[] = $done_payment_shipment->amount;
-            $row[] = $done_payment_shipment->charges;
-            $row[] = $done_payment_shipment->payable;
+            $row[] = number_format($done_payment_shipment->amount);
+            $row[] = number_format($done_payment_shipment->charges);
+            $row[] = number_format($done_payment_shipment->payable);
 
             $details[] = $row;
 

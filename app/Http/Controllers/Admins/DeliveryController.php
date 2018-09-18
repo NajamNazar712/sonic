@@ -1741,16 +1741,19 @@ class DeliveryController extends Controller
                 return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn('action',function ($deliveries){
-                $dropdown = '
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                            <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a>
-                        </div>
-                      </div>
-                    ';
+                if (session('role_id') == 1 || in_array(106, session('permissions'))) {
+                    $dropdown = '
+                          <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <a href="javascript:void(0);" class="dropdown-item cash_collect"><i class="la la-money primary"></i> Collect Cash</a>
+                            </div>
+                          </div>
+                        ';
 
-                return $dropdown;
+                    return $dropdown;
+                }
+                return '';
             });
             if ($tracking_number = $request->get('search_tracking')) {
                 $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -1795,9 +1798,7 @@ class DeliveryController extends Controller
 
 
     }
-    public function cash_collection_search(Request $request){
 
-    }
     public function completed_deliveries_index(){
         return view('admin.delivery.complete.index');
     }
@@ -2277,11 +2278,18 @@ class DeliveryController extends Controller
             ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+//            ->join('delivery_note_shipments as dns','dns.shipment_id','=','shipments.id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
                     ->where('shipments_journey.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
+            ->leftJoin('delivery_note_shipments as dns', function ($join) {
+                $join->on('dns.shipment_id', '=', 'shipments.id')
+                    ->where('dns.delivery_note_id','=',
+                        DB::raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftJoin('delivery_notes as dn','dn.id','=','dns.delivery_note_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.created_at','=',
@@ -2291,6 +2299,7 @@ class DeliveryController extends Controller
             ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as current_status_date','sj.created_at as arrival')
 
             ->where('shipments.shipper_status_id',11)
+            ->where('dn.status',1)
             ->groupBy('shipments.id');
 
         if (session('role_id') != 1) {
@@ -2322,7 +2331,7 @@ class DeliveryController extends Controller
                 }
             })
             ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || in_array(34, session('permissions'))) {
+                if (session('role_id') == 1 || in_array(108, session('permissions'))) {
                     $dropdown = '
                       <div class="btn-group">
                         <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
