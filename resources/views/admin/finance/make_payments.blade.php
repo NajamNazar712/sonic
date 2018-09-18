@@ -570,6 +570,7 @@
 					$('#make_payments #make_payments_form .total_amount').val(0);
 					$('#make_payments #make_payments_form .total_charges').val(0);
 					$('#make_payments #make_payments_form .total_gst').val(0);
+					$('#make_payments #make_payments_form .total_deductable').val(0);
 					$('#make_payments #make_payments_form .total_payable').val(0);
 					$('#make_payments #make_payments_form .total_hold').val(0);
 
