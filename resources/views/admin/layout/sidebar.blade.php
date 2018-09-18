@@ -71,7 +71,7 @@
                 <li class=" nav-item"><a href="{{route('admin.sameday.index')}}"></i><span class="menu-title">Same-Day Delivery</span></a></li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([33, 35, 36, 40], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([33, 35, 36, 40, 105, 107], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"></i><span class="menu-title" data-i18n="nav.dash.main">Delivery</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(33, session('permissions')))
