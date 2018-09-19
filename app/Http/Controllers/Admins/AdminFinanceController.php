@@ -856,7 +856,7 @@ class AdminFinanceController extends Controller
         $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
         ->join('users as u', 's.user_id', '=', 'u.id')
         ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
-        ->select('pending_payment_shipments.shipment_id as id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
+        ->select('pending_payment_shipments.shipment_id as id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
 
         if ($request->has('ids')) {
            $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -868,6 +868,13 @@ class AdminFinanceController extends Controller
         $datatables = Datatables::of($pending_payment_shipments)
         ->addColumn('deductable', function($pending_payment_shipments) {
             return number_format($pending_payment_shipments->charges + $pending_payment_shipments->gst);
+        })
+        ->addColumn('aging', function($pending_payment_shipments) {
+            $now = Carbon::now()->startOfDay();
+
+            $created_at = Carbon::parse($pending_payment_shipments->created_at)->startOfDay();
+
+            return $created_at->diffInDays($now) . 'd';
         })
         ->editColumn('amount', function($pending_payment_shipment) {
             return number_format($pending_payment_shipment->amount);

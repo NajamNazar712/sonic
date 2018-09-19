@@ -145,6 +145,8 @@
 														<th class="border-primary border-darken-1">Shipment</th>
 														<th class="border-primary border-darken-1">Type</th>
 														<th class="border-primary border-darken-1">Status</th>
+														<th class="border-primary border-darken-1">Delivery / Return Datetime</th>
+														<th class="border-primary border-darken-1">Aging</th>
 														<th class="border-primary border-darken-1">Amount</th>
 														<th class="border-primary border-darken-1">Charges</th>
 														<th class="border-primary border-darken-1">GST</th>
@@ -373,6 +375,8 @@
 					{data:'shipment', name: 's.tracking_number', class: 'align-middle shipment'},
 					{data:'type', name: 'pending_payment_shipments.type', class: 'align-middle type'},
 					{data:'status', name: 'ss.name', class: 'align-middle status'},
+					{data:'created_at', name: 'pending_payment_shipments.created_at', class: 'align-middle created_at'},
+					{data:'aging', name: 'aging', class: 'align-middle aging', orderable: false},
 					{data:'amount', name: 'pending_payment_shipments.amount', class: 'align-middle amount'},
 					{data:'charges', name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
 					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
@@ -399,7 +403,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging')) {
 							$(td).appendTo($(search));
 						}
 						else {
