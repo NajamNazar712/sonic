@@ -85,7 +85,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -105,6 +108,66 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.return.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Tracking No.');
+                            head.push('Order ID');
+                            head.push('Shipper Name / Phone');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Consignee Name / Phone');
+                            head.push('Address');
+                            head.push('COD Amount');
+                            head.push('Shipping Mode');
+                            head.push('Service Type');
+                            head.push('Status');
+                            head.push('Reason');
+                            head.push('Remarks');
+                            head.push('Arrival Date');
+                            head.push('Status Date');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.tracking);
+                                row.push(values.order_id);
+                                row.push(values.shipper);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_address);
+                                row.push(values.amount);
+                                row.push(values.mode);
+                                row.push(values.service_type);
+                                row.push(values.status);
+                                row.push(values.reason);
+                                row.push(values.remarks);
+                                row.push(values.arrival);
+                                row.push(values.status_date);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 scrollX:true,
@@ -227,8 +290,13 @@
                                 }
                             }
                             @endif
+                        },
+                        {
+                            extend: 'excel',
+                            title: 'Return Marked',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
                         }
-                    ],
+                        ],
                 @else
                     dom: 'ltipr',
                 @endif

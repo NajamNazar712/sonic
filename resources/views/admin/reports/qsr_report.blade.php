@@ -14,7 +14,7 @@
 
                 <div class="row mb-2 justify-content-center">
 
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shipper" id="search_shipper" class="form-control select2">
                                 @foreach($shippers as $shipper)
@@ -23,7 +23,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                         <select name="search_origin" id="search_origin" class="form-control select2">
                             @foreach($cities as $origin)
@@ -32,7 +32,7 @@
                         </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                         <select name="search_destination" id="search_destination" class="form-control select2">
                             @foreach($cities as $destination)
@@ -41,7 +41,7 @@
                         </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                         <select name="search_hub" id="search_hub" class="form-control select2">
                             @foreach($hubs as $hub)
@@ -50,15 +50,25 @@
                         </select>
                         </fieldset>
                     </div>
-                    <div class="col-3 ml-5">
-                        <fieldset class="form-group">
+                    <div class="col-4 ">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
-                        </fieldset>
+                        </div>
                     </div>
-                    <div class="col-3">
-                        <fieldset class="form-group">
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
-                        </fieldset>
+                        </div>
                     </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
