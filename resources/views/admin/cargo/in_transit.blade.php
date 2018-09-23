@@ -70,7 +70,7 @@
 										<th class="border-primary border-darken-1">Transport Mode</th>
 										<th class="border-primary border-darken-1">Vendor</th>
 										<th class="border-primary border-darken-1">Builty No.</th>
-										<th class="border-primary border-darken-1">Transit At</th>
+										<th class="border-primary border-darken-1">Transit Datetime</th>
 										<th class="border-primary border-darken-1">Transitted By</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
