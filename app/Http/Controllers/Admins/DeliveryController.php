@@ -1058,15 +1058,29 @@ class DeliveryController extends Controller
                                     Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                 } else if ($request->status_drop[$shipment] == 20) {
-                                    ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
-                                    ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
-                                    Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                                    NotificationsController::send(15, 0, $shipment);
-                                    NotificationsController::send(16, 0, $shipment);
+                                    $parcel = Shipment::find($shipment);
 
-                                    ShipmentChargesController::return ($shipment);
+                                    if (!$parcel->packaging_material_request) {
+                                        ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
+                                        ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
+                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                        NotificationsController::send(15, 0, $shipment);
+                                        NotificationsController::send(16, 0, $shipment);
 
-                                    AdminFinanceController::add_payment($shipment, 1);
+                                        ShipmentChargesController::return($shipment);
+
+                                        AdminFinanceController::add_payment($shipment, 1);
+                                    }
+                                    else {
+                                        ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
+
+                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+
+                                        PackagingMaterial::readd_stock();
+
+                                        NotificationsController::send(15, 0, $shipment);
+                                        NotificationsController::send(16, 0, $shipment);
+                                    }
                                 } else if (in_array($request->status_drop[$shipment], $delivered_status_array)) {
                                     $parcel = Shipment::where('id', $shipment)->first();
                                     if ($parcel->booking_type_id == 2) {
@@ -1133,6 +1147,14 @@ class DeliveryController extends Controller
 
                     }
                     else {
+                        $parcel = Shipment::find($shipment);
+
+                        if ($parcel->booking_type_id == 2) {
+                            ShipmentChargesController::replacement($shipment);
+                        } else if ($parcel->booking_type_id == 3) {
+                            ShipmentChargesController::try_and_buy($shipment);
+                        }
+
                         AdminFinanceController::add_payment($shipment, 0);
                     }
                 }else{

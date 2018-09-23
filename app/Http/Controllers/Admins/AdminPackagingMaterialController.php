@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+
 use App\Http\Models\Admin\PackagingMaterialStockHead;
 use App\Http\Models\Admin\PackagingMaterialStockHub;
 use App\Http\Models\Admin\PackagingStockHistory;
@@ -305,6 +307,9 @@ class AdminPackagingMaterialController extends Controller
                $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
                 $this->add_item($shipment->id,24,null,1,null,0,0);
                ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, $request_details->user_id, NULL);
+
+               ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $request_details->amount);
+
                 $this->sub_head_stock($request_details->small_flyers,$request_details->medium_flyers,$request_details->large_flyers,$request_details->boxes);
                 $request_details->status = 1;
                 $request_details->save();
@@ -348,7 +353,10 @@ class AdminPackagingMaterialController extends Controller
         $shipment->shipper_status_id = $shipper_status_id;
         $shipment->consignee_status_id = $consignee_status_id;
 
+        $shipment->packaging_material_request = 1;
+
         $shipment->save();
+
         return $shipment;
     }
     private function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {

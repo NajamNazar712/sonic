@@ -509,4 +509,41 @@ class ShipmentChargesController extends Controller
             $shipment->save();
         }
     }
+
+    static public function packaging_material($id, $type, $charges) {
+        $shipment = Shipment::find($id);
+
+        $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+        if ($discount_charge->exists()) {
+            $discount_charge = $discount_charge->first();
+
+            $discount = $discount_charge->packaging;
+
+            if (strpos($discount, '%') !== FALSE) {
+                $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+            }
+            else {
+                $discount = floatval($discount);
+            }
+        }
+        else {
+            $discount = 0;
+        }
+
+        if ($charges < $discount) {
+            $charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+        }
+        else {
+            $charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+        }
+
+        if ($type == 1) {
+            $shipment->amount = $charges;
+        }
+
+        $shipment->packaging_material_charges = $charges;
+
+        $shipment->save();
+    }
 }
