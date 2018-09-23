@@ -1109,6 +1109,10 @@ class AdminPickupsController extends Controller
             }
           }
 
+          if ($shipment->receiving_sheet_shipment) {
+            $pickup_request->over_received = $pickup_request->over_received + 1;
+          }
+
           $pickup_request->save();
 
           $pickup_request_assigned_shipment->status = 2;
@@ -1119,6 +1123,13 @@ class AdminPickupsController extends Controller
 
           $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
           $pickup_request_received_shipment->shipment_id = $shipment_id;
+
+          if ($shipment->receiving_sheet_shipment) {
+            $pickup_request_received_shipment->over_received = 0;
+          }
+          else {
+            $pickup_request_received_shipment->over_received = 1;
+          }
 
           $pickup_request_received_shipment->save();
         }
@@ -1176,12 +1187,23 @@ class AdminPickupsController extends Controller
             }
           }
 
+          if ($shipment->receiving_sheet_shipment) {
+            $pickup_request->over_received = $pickup_request->over_received + 1;
+          }
+
           $pickup_request->save();
 
           $pickup_request_received_shipment = new PickupRequestReceivedShipment();
 
           $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
           $pickup_request_received_shipment->shipment_id = $shipment_id;
+
+          if ($shipment->receiving_sheet_shipment) {
+            $pickup_request_received_shipment->over_received = 0;
+          }
+          else {
+            $pickup_request_received_shipment->over_received = 1;
+          }
 
           $pickup_request_received_shipment->save();
 
@@ -1295,10 +1317,26 @@ class AdminPickupsController extends Controller
       ->join('pickup_note_requests as pnr', 'pickup_requests.id', '=', 'pnr.pickup_request_id')
       ->join('pickup_notes as pn', 'pnr.pickup_note_id', '=', 'pn.id')
       ->join('admins as a', 'pn.assigned_by_user_id', '=', 'a.id')
-      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
+      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.over_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
       ->where('pn.id', $request->pickup_receive_pickup_note_id);
 
       $datatables = Datatables::of($pickup_requests)
+      ->editColumn('short_received', function($pickup_request) {
+          if ($pickup_request->short_received != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->short_received . '</button>';
+          }
+          else {
+              return 0;
+          }
+      })
+      ->editColumn('over_received', function($pickup_request) {
+          if ($pickup_request->over_received != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->over_received . '</button>';
+          }
+          else {
+              return 0;
+          }
+      })
       ->editColumn('pickup_type', function($pickup_request) {
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
       })
@@ -1347,6 +1385,29 @@ class AdminPickupsController extends Controller
       });
 
       return $datatables->make(true);
+    }
+
+    public function receive_summary_request_over_received(Request $request) {
+      $pickup_request_id = $request->input('pickup_request_id');
+
+      $pickup_request_over_received_shipments = PickupRequestReceivedShipment::where('pickup_request_id', $pickup_request_id)->('over_received', 1);
+
+      if ($pickup_request_over_received_shipments->exists()) {
+        $pickup_request_over_received_shipments = $pickup_request_over_received_shipments->get();
+
+        $over_received_shipments = array();
+
+        foreach ($pickup_request_over_received_shipments as $pickup_request_over_received_shipment) {
+          $shipment = $pickup_request_over_received_shipment->shipment;
+
+          $over_received_shipments[] = $shipment->tracking_number;
+        }
+
+        return ['status' => 0, 'success' => 'Shipments found Over Received', 'over_received' => $over_received_shipments];
+      }
+      else {
+        return ['status' => 0, 'success' => 'No Over Received Shipments', 'over_received' => FALSE];
+      }
     }
 
     public function receive_summary_request_short_received(Request $request) {
