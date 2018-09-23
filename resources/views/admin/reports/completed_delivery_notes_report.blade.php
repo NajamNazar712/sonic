@@ -12,19 +12,19 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
+                <div id="search_form" class="row mb-2 justify-content-center">
 
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search delivery Note Number">
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
@@ -33,7 +33,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_assigned_by" id="search_assigned_by" class="form-control select2">
                                 @foreach($admins as $admin)
@@ -42,7 +42,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_updated_by" id="search_updated_by" class="form-control select2">
                                 @foreach($admins as $admin)
@@ -51,10 +51,39 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
-                        <fieldset class="form-group">
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
                             <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
-                        </fieldset>
+                        </div>
+                    </div>
+                    <div class="col-4">
+
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-4 ">
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                        </div>
+
                     </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -192,6 +221,33 @@
                 onSet: function(context) {
                 }
             });
+            $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -206,7 +262,9 @@
                             'search_assigned_by': $('#search_assigned_by').val(),
                             'search_updated_by': $('#search_updated_by').val(),
                             'search_hub': $('#search_hub').val(),
-                            'search_submission': $('input[name="submission_date_formatted"]').val()
+                            'search_submission': $('input[name="submission_date_formatted"]').val(),
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val()
                         },
                         success: function (result) {
                             head = [];
@@ -279,6 +337,8 @@
                     d.search_updated_by = $('#search_updated_by').val();
                     d.search_hub = $('#search_hub').val();
                     d.search_submission = $('input[name="submission_date_formatted"]').val();
+                    d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                    d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                 }
                 },
                 order: [[2, 'asc']],

@@ -67,8 +67,7 @@ class DeliveryController extends Controller
                 ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as current_status_date','sj.created_at as arrival')
 
             ->whereRaw('IF (shipments.shipper_status_id = 2, (oc.hub_id = dc.hub_id), TRUE)')
-            ->whereIn('shipments.shipper_status_id',$status)
-            ->groupBy('shipments.id');
+            ->whereIn('shipments.shipper_status_id',$status);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -1076,8 +1075,6 @@ class DeliveryController extends Controller
 
                                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
 
-                                        PackagingMaterial::readd_stock();
-
                                         NotificationsController::send(15, 0, $shipment);
                                         NotificationsController::send(16, 0, $shipment);
                                     }
@@ -1377,60 +1374,45 @@ class DeliveryController extends Controller
                 $html .= '
                       <div class="mt-2 manual_form">
                         <hr>
-                        <div class="row justify-content-between align-items-end mt-2">
-                          <div class="col">
-                            <div>
-                              <strong class="d-inline-block w-200">Rider:</strong>
+                        <div class="row justify-content-center align-items-end mt-5">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Rider Name</strong>
                             </div>
                           </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
                               <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Name</strong>
-                            </div>
-                          </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Signature</strong>
+                              <strong class="d-inline-block w-200">Rider Signature</strong>
                             </div>
                           </div>
                         </div>
-                        <div class="row justify-content-between align-items-end mt-2">
-                          <div class="col">
-                            <div>
-                              <strong class="d-inline-block w-200">Operation Staff:</strong>
+                        <div class="row justify-content-between align-items-end mt-5">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Operation Staff Name</strong>
                             </div>
                           </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
                               <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Name</strong>
-                            </div>
-                          </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Signature</strong>
+                              <strong class="d-inline-block w-200">Operation Staff Signature</strong>
                             </div>
                           </div>
                         </div>
-                        <div class="row justify-content-between align-items-end mt-2">
-                          <div class="col">
-                            <div>
-                              <strong class="d-inline-block w-200">Cashier:</strong>
+                        <div class="row justify-content-between align-items-end mt-5">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Cashier Name</strong>
                             </div>
                           </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
                               <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Name</strong>
-                            </div>
-                          </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Signature</strong>
+                              <strong class="d-inline-block w-200">Cashier Signature</strong>
                             </div>
                           </div>
                         </div>
@@ -1638,60 +1620,45 @@ class DeliveryController extends Controller
             $html .= '
                       <div class="mt-2 manual_form">
                         <hr>
-                        <div class="row justify-content-between align-items-end mt-2">
-                          <div class="col">
-                            <div>
-                              <strong class="d-inline-block w-200">Rider:</strong>
+                        <div class="row justify-content-center align-items-end mt-5">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Rider Name</strong>
                             </div>
                           </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
                               <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Name</strong>
-                            </div>
-                          </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Signature</strong>
+                              <strong class="d-inline-block w-200">Rider Signature</strong>
                             </div>
                           </div>
                         </div>
-                        <div class="row justify-content-between align-items-end mt-2">
-                          <div class="col">
-                            <div>
-                              <strong class="d-inline-block w-200">Operation Staff:</strong>
+                        <div class="row justify-content-between align-items-end mt-5">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Operation Staff Name</strong>
                             </div>
                           </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
                               <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Name</strong>
-                            </div>
-                          </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Signature</strong>
+                              <strong class="d-inline-block w-200">Operation Staff Signature</strong>
                             </div>
                           </div>
                         </div>
-                        <div class="row justify-content-between align-items-end mt-2">
-                          <div class="col">
-                            <div>
-                              <strong class="d-inline-block w-200">Cashier:</strong>
+                        <div class="row justify-content-between align-items-end mt-5">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
+                              <span class="d-block w-200 mx-auto line"></span>
+                              <strong class="d-inline-block w-200">Cashier Name</strong>
                             </div>
                           </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
+                          <div class="col justify-content-center ">
+                            <div class="text-center">
                               <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Name</strong>
-                            </div>
-                          </div>
-                          <div class="col text-left mt-4">
-                            <div class="d-inline-block text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Signature</strong>
+                              <strong class="d-inline-block w-200">Cashier Signature</strong>
                             </div>
                           </div>
                         </div>
@@ -2309,12 +2276,12 @@ class DeliveryController extends Controller
                     ->where('shipments_journey.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftJoin('delivery_note_shipments as dns', function ($join) {
+            ->join('delivery_note_shipments as dns', function ($join) {
                 $join->on('dns.shipment_id', '=', 'shipments.id')
                     ->where('dns.delivery_note_id','=',
                         DB::raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
             })
-            ->leftJoin('delivery_notes as dn','dn.id','=','dns.delivery_note_id')
+            ->join('delivery_notes as dn','dn.id','=','dns.delivery_note_id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.created_at','=',
@@ -2324,8 +2291,7 @@ class DeliveryController extends Controller
             ->select('shipments.id as shId','shipments.tracking_number as tracking_number_link','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as current_status_date','sj.created_at as arrival')
 
             ->where('shipments.shipper_status_id',11)
-            ->where('dn.status',1)
-            ->groupBy('shipments.id');
+            ->where('dn.status',1);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));

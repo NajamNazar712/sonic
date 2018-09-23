@@ -11,14 +11,14 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="row mb-2 justify-content-center">
+                <div id="search_form" class="row mb-2 justify-content-center">
 
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_cargo_no" id="search_cargo_no" placeholder="Search Cargo Number">
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
                                 @foreach($cities as $city)
@@ -27,7 +27,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_destination" id="search_destination" class="form-control select2">
                                 @foreach($cities as $city)
@@ -36,7 +36,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_shippimg_modes" id="search_shippimg_modes" class="form-control select2">
                                 @foreach($shippimg_modes as $shippimg_mode)
@@ -45,17 +45,54 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
-                        <fieldset class="form-group">
-                            <input type="text" name="transit_date" class="form-control bg-primary border-primary white rounded-right" id="transit_date" placeholder="Transit Date" data-value="">
-                        </fieldset>
-                    </div>
-                    <div class="col-3">
-                        <fieldset class="form-group">
-                            <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" data-value="">
-                        </fieldset>
-                    </div>
+                    <div class="col-4">
 
+                            <div class="form-group input-group ">
+                                <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                </div>
+                            <input type="text" name="transit_date" class="form-control bg-primary border-primary white rounded-right" id="transit_date" placeholder="Transit Date" data-value="">
+                            </div>
+
+                    </div>
+                    <div class="col-4">
+
+                            <div class="form-group input-group">
+                                <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                                </div>
+                            <input type="text" name="received_date" class="form-control bg-primary border-primary white rounded-right" id="received_date" placeholder="Received Date" data-value="">
+                            </div>
+
+                    </div>
+                    <div class="col-4 ">
+
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-4 ">
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                        </div>
+
+                    </div>
 
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -198,6 +235,32 @@
                 onSet: function(context) {
                 }
             });
+            $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -211,7 +274,9 @@
                             'search_destination': $('#search_destination').val(),
                             'search_shippimg_modes': $('#search_shippimg_modes').val(),
                             'search_transit_date': $('input[name="transit_date_formatted"]').val(),
-                            'search_received_date': $('input[name="received_date_formatted"]').val()
+                            'search_received_date': $('input[name="received_date_formatted"]').val(),
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val()
                         },
                         success: function (result) {
                             head = [];
@@ -275,6 +340,8 @@
                         d.search_shippimg_modes = $('#search_shippimg_modes').val();
                         d.search_transit_date = $('input[name="transit_date_formatted"]').val();
                         d.search_received_date = $('input[name="received_date_formatted"]').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 rowId: 'cargo_id',

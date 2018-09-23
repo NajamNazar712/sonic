@@ -127,6 +127,11 @@ class AdminReportsController extends Controller
             if($submission_date = $request->get('search_submission')){
                 $return->whereDate('return_notes.updated_at',$submission_date);
             }
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $return->whereBetween('return_notes.created_at', [$from,$to]);
+            }
             return $return->make(true);
     }
     public function pickup_note_index(Request $request){
@@ -167,6 +172,11 @@ class AdminReportsController extends Controller
             }
             if($submission_date = $request->get('search_completed_date')){
                 $return->whereDate('pickup_notes.updated_at',$submission_date);
+            }
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $return->whereBetween('pickup_notes.created_at', [$from,$to]);
             }
         return $return->make(true);
     }
@@ -214,6 +224,11 @@ class AdminReportsController extends Controller
             }
             if($received_date = $request->get('search_received_date')){
                 $cargo->whereDate('cargo_consignments.updated_at',$received_date);
+            }
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $cargo->whereBetween('cargo_consignments.created_at', [$from,$to]);
             }
             return $cargo->make(true);
     }
@@ -374,7 +389,8 @@ class AdminReportsController extends Controller
             return view('admin.reports.qa_report');
      }
      public function qa_list(Request $request){
-        $search_date = $request->search_date;
+        $from = $request->search_date_from;
+        $to = $request->search_date_to;
         $qa_data = array();
         $stations = City::where('hub',1)->select('id','name')->get();
         foreach ($stations as $hub) {
@@ -383,28 +399,28 @@ class AdminReportsController extends Controller
             })
             ->whereHas('consignee_city', function($query) use ($hub) {
                 $query->where('hub_id', '!=', $hub->id);
-            })->whereHas('shipment_journey', function($query) use ($search_date) {
+            })->whereHas('shipment_journey', function($query) use ($from,$to) {
                 $query->where('shipper_status_id', '=', 2)
-                ->whereDate('created_at', '<=', $search_date);
+                ->whereBetween('created_at', [$from,$to]);
             })->count();
             $qa_data[$hub->name]['cargo_resolved'] = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
                 ->whereHas('consignee_city', function($query) use ($hub) {
                     $query->where('hub_id', '!=', $hub->id);
-                })->whereHas('shipment_journey', function($query) use ($search_date) {
+                })->whereHas('shipment_journey', function($query) use ($from,$to) {
                     $query->where('shipper_status_id', '=', 3)
-                        ->whereDate('created_at','=', $search_date);
+                        ->whereBetween('created_at',[$from,$to]);
                 })->count();
-            $qa_data[$hub->name]['cargo_transit_pending'] = CargoConsignment::whereDate('created_at','<=',$search_date)->where('status_id','!=',3)->where('origin_hub_id',$hub->id)->count();
-            $qa_data[$hub->name]['cargo_transit_resolved'] = CargoConsignment::whereDate('updated_at','=',$search_date)->where('status_id','=',3)->where('origin_hub_id',$hub->id)->count();
+            $qa_data[$hub->name]['cargo_transit_pending'] = CargoConsignment::whereBetween('created_at',[$from,$to])->where('status_id','!=',3)->where('origin_hub_id',$hub->id)->count();
+            $qa_data[$hub->name]['cargo_transit_resolved'] = CargoConsignment::whereBetween('updated_at',[$from,$to])->where('status_id','=',3)->where('origin_hub_id',$hub->id)->count();
             $pending_status = array(2, 4, 6, 7, 8, 9, 13, 15); //for pending deliveries
             $not_pending_status = array(1, 3, 5, 10, 11,12,14,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47); //for pending deliveries
             $qa_data[$hub->name]['deliveries_pending'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereDoesntHave('shipment_journey', function($query) use ($search_date,$not_pending_status) {
-                    $query->whereDate('created_at', '<=', $search_date)
+                ->whereDoesntHave('shipment_journey', function($query) use ($from,$to,$not_pending_status) {
+                    $query->whereBetween('created_at', [$from,$to])
                         ->whereIn('shipper_status_id', $not_pending_status);
                 })
                 ->count();
@@ -412,71 +428,71 @@ class AdminReportsController extends Controller
             $qa_data[$hub->name]['deliveries_resolved'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereHas('shipment_journey', function($query) use ($search_date) {
-                    $query->whereDate('created_at',$search_date)
+                ->whereHas('shipment_journey', function($query) use ($from,$to) {
+                    $query->whereBetween('created_at',[$from,$to])
                         ->where('shipper_status_id', 5);
                 })
                 ->count();
-            $qa_data[$hub->name]['receive_deliveries_pending'] = DeliveryNote::whereDate('created_at','<=',$search_date)->where('status',0)->count();
-            $qa_data[$hub->name]['receive_deliveries_resolved'] = DeliveryNote::whereDate('created_at',$search_date)->where('status',1)->count();
+            $qa_data[$hub->name]['receive_deliveries_pending'] = DeliveryNote::whereBetween('created_at',[$from,$to])->where('status',0)->count();
+            $qa_data[$hub->name]['receive_deliveries_resolved'] = DeliveryNote::whereBetween('created_at',[$from,$to])->where('status',1)->count();
             $qa_data[$hub->name]['return_marked_pending'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereHas('shipment_journey',function ($query) use ($search_date){
-                $query->whereDate('created_at','<=',$search_date)
+                ->whereHas('shipment_journey',function ($query) use ($from,$to){
+                $query->whereBetween('created_at',[$from,$to])
                     ->where('shipper_status_id', 12);
             })->count();
             $qa_data[$hub->name]['return_marked_resolved'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-            ->whereHas('shipment_journey',function ($query) use ($search_date){
-                $query->whereDate('created_at',$search_date)
+            ->whereHas('shipment_journey',function ($query) use ($from,$to){
+                $query->whereBetween('created_at',[$from,$to])
                     ->whereIn('shipper_status_id', [13,20]);
             })->count();
             $qa_data[$hub->name]['return_confirmed_pending'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereHas('shipment_journey',function ($query) use ($search_date){
-                    $query->whereDate('created_at','<=',$search_date)
+                ->whereHas('shipment_journey',function ($query) use ($from,$to){
+                    $query->whereBetween('created_at',[$from,$to])
                         ->where('shipper_status_id', 20);
                 })->count();
             $qa_data[$hub->name]['return_confirmed_resolved'] = Shipment::whereHas('consignee_city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereHas('shipment_journey',function ($query) use ($search_date){
-                    $query->whereDate('created_at',$search_date)
+                ->whereHas('shipment_journey',function ($query) use ($from,$to){
+                    $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [21,23]);
                 })->count();
             $qa_data[$hub->name]['return_cargo_pending'] = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereHas('shipment_journey',function ($query) use ($search_date){
-                    $query->whereDate('created_at','<=',$search_date)
+                ->whereHas('shipment_journey',function ($query) use ($from,$to){
+                    $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [21,26,32]);
                 })->count();
             $qa_data[$hub->name]['return_cargo_resolved'] = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereHas('shipment_journey',function ($query) use ($search_date){
-                    $query->whereDate('created_at',$search_date)
+                ->whereHas('shipment_journey',function ($query) use ($from,$to){
+                    $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [22,27,33]);
                 })->count();
             $qa_data[$hub->name]['return_delivery_pending'] = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereHas('shipment_journey',function ($query) use ($search_date){
-                    $query->whereDate('created_at','<=',$search_date)
+                ->whereHas('shipment_journey',function ($query) use ($from,$to){
+                    $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [22,24,27,29,33,35]);
                 })->count();
             $qa_data[$hub->name]['return_delivery_resolved'] = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub->id);
             })
-                ->whereHas('shipment_journey',function ($query) use ($search_date){
-                    $query->whereDate('created_at','<=',$search_date)
+                ->whereHas('shipment_journey',function ($query) use ($from,$to){
+                    $query->whereBetween('created_at',[$from,$to])
                         ->whereIn('shipper_status_id', [22,24,27,29,33,35]);
                 })->count();
-            $qa_data[$hub->name]['return_receive_pending'] = ReturnNote::whereDate('created_at','<=',$search_date)->where('hub_id',$hub->id)->where('status',0)->count();
-            $qa_data[$hub->name]['return_receive_resolved'] = ReturnNote::whereDate('updated_at',$search_date)->where('hub_id',$hub->id)->where('status',1)->count();
+            $qa_data[$hub->name]['return_receive_pending'] = ReturnNote::whereBetween('created_at',[$from,$to])->where('hub_id',$hub->id)->where('status',0)->count();
+            $qa_data[$hub->name]['return_receive_resolved'] = ReturnNote::whereBetween('updated_at',[$from,$to])->where('hub_id',$hub->id)->where('status',1)->count();
             }
 
        return $qa_data;
@@ -500,9 +516,9 @@ class AdminReportsController extends Controller
                      ->where('sjd.created_at', '=', DB::raw('(SELECT MAX(created_at) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
              })
              ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
-             ->join('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
+             ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
              ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status')
-             ->whereIn('delivery_note_shipments.status', [7,8,9]);
+             ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,9]);
          $datatables = Datatables::of($shipments)
              ->editColumn('status_updated_at', function($shipment) {
                  return Carbon::parse($shipment->status_updated_at)->format('d/m/Y H:i A');
@@ -547,7 +563,7 @@ class AdminReportsController extends Controller
              }else if($status == 2){
                  $datatables->where('delivery_note_shipments.status','=',8);
 
-             }else{
+             }else {
                  $datatables->where('delivery_note_shipments.status','=',9);
 
              }
@@ -995,6 +1011,11 @@ class AdminReportsController extends Controller
             }
             if($submission_date = $request->get('search_submission')){
                 $datatable->whereDate('delivery_notes.updated_at',$submission_date);
+            }
+            if ($request->get('search_date_from') && $request->get('search_date_to')) {
+                $from = $request->get('search_date_from');
+                $to = $request->get('search_date_to');
+                $datatable->whereBetween('delivery_notes.created_at', [$from,$to]);
             }
             return $datatable->make(true);
 

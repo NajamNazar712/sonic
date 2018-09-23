@@ -38,20 +38,20 @@
                 </table>
                 <div class="row justify-content-center">
                     @if(!$delivery_note_status == 1)
-                    <div class="col-2">
+                    <div class="mr-1">
                         <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
                     </div>
                     @endif
                     @if($delivery_note_status == 1)
-                        <div class="col-2">
+                        <div class="mr-1">
                             <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
                         </div>
                         @else
-                        <div class="col-2">
+                        <div class="mr-1">
                             <button id="printTempDNCC" type="button" class="btn btn-warning btn-block">Print Temporary DNCC</button>
                         </div>
                     @endif
-                    <div class="col-3">
+                    <div class="mr-1 ml-1">
                         <button id="printUndeliveredDNCC" type="button" class="btn btn-warning btn-block">Print Undelivered Performa</button>
                     </div>
                 </div>

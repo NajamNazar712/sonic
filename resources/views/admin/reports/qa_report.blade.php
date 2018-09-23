@@ -13,12 +13,34 @@
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
 
-                    <div class="col-3">
-                        <fieldset class="form-group">
-                            <input type="text" name="search_date" class="form-control bg-primary border-primary white rounded-right" id="search_date" placeholder="Search Date" data-value="">
-                        </fieldset>
+                    {{--<div class="col-3">--}}
+                        {{--<fieldset class="form-group">--}}
+                            {{--<input type="text" name="search_date" class="form-control bg-primary border-primary white rounded-right" id="search_date" placeholder="Search Date" data-value="">--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
+                    <form id="search_form" class="form-inline mb-1 " nonvalidate="nonvalidate">
+
+                    <div class="form-group input-group ml-1">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                        </div>
+
+                        <input type="text" name="qa_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="qa_date_from" placeholder="Date (From)">
                     </div>
 
+                    <div class="form-group input-group ml-1">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                        </div>
+
+                        <input type="text" name="qa_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="qa_date_to" placeholder="Date (To)">
+                    </div>
+
+                    </form>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
@@ -35,6 +57,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+
     <style>
         .nodisplay{
             display: none;
@@ -95,39 +119,53 @@
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
 
             var from_max = '{{ Carbon\Carbon::yesterday()}}';
 
-            var from_date = $('#search_date').pickadate({
+
+            $('#search_form #qa_date_from').pickadate({
                 firstDay: 1,
-                clear: 'Clear',
-                max: from_max,
-                format:'dd mmmm, yyyy',
+                clear: '',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#search_date_root').css('top','40px');
-                },
                 onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #qa_date_to').pickadate('picker').set('min', $('#search_form #qa_date_from').pickadate('picker').get('select'));
+                    }
                 }
             });
-
+            $('#search_form #qa_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #qa_date_from').pickadate('picker').set('max', $('#search_form #qa_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
 
             $('#search_filter_btn').on('click',function () {
                 // var table = '';
 
-                var search_date = $('input[name="search_date_formatted"]').val();
-                if(search_date !== ''){
+                var search_date_from = $('input[name="qa_date_from_formatted"]').val();
+                var search_date_to = $('input[name="qa_date_to_formatted"]').val();
+                if((search_date_from !== '') && (search_date_to !== '' )){
                     $.ajax({
                         url: '{!! route('admin.reports.qa.list') !!}',
                         method: 'POST',
                         data: {
-                            'search_date': search_date,
+                            'search_date_from': search_date_from,
+                            'search_date_to': search_date_to,
                             '_token': '{{ csrf_token() }}'
                         }
                     }).done(function (data) {
@@ -308,6 +346,75 @@
                                     footer: true,
                                     title: 'QA Report',
                                     text:'<i class="la la-file-excel-o"></i> Excel',
+
+                                    customize: function (xlsx) {
+                                        var sheet = xlsx.xl.worksheets['sheet1.xml'];
+                                        var numrows = 1;
+                                        var rows = $('row', sheet);
+                                        console.log(rows)
+                                        //     //update Row
+
+
+                                        var new_sheet = rows.slice(1);
+                                        $.each(new_sheet,function () {
+                                            var attr = $(this).attr('r');
+                                            var ind = parseInt(attr);
+                                            ind = ind + numrows;
+                                            $(this).attr("r",ind);
+
+                                        });
+
+                                        // console.log(clR);
+                                    //
+                                    //     // Create row before data
+                                    //     console.log($('row c ', sheet));
+                                    //     rows = $('row c ', sheet);
+                                    //     r1 = rows.shift();
+                                    //     console.log($('row c ', sheet));
+                                        row_columns = $('row c', sheet);
+
+                                        // console.log(row_columns);
+                                        $('row c', sheet).each(function () {
+                                                var attr = $(this).attr('r');
+                                                // if(attr !== 'A1'){
+                                                var pre = attr.substring(0, 1);
+                                                var ind = parseInt(attr.substring(1, attr.length));
+                                                ind = ind + numrows;
+                                                $(this).attr("r", pre + ind);
+
+                                        });
+
+                                        var merge_cells = '';
+                                        // first_row = '<row r="1"><c r="A1" s="51"><is><t>QA Report</t></is></c></row>';
+                                        function Addrow(index,data) {
+                                            msg='<row r="'+index+'">';
+                                            for(i=0;i<data.length;i++){
+                                                var key=data[i].key;
+                                                var range=data[i].range;
+                                                var value=data[i].value;
+                                                msg += '<c t="inlineStr" s="2" r="' + key + index + '">';
+                                                msg += '<is>';
+                                                msg +=  '<t>'+value+'</t>';
+                                                msg+=  '</is>';
+                                                msg+='</c>';
+
+                                                merge_cells += '<mergeCell ref="' + key + index + ':' + range + index + '"/>';
+                                            }
+                                            msg += '</row>';
+
+                                            return msg;
+                                        }
+
+                                    //     //insert
+                                        var second_row = Addrow(2, [{ key: 'A',range:'A', value: '' }, { key: 'B',range:'C', value: 'Parcel Pending for Cargo' },{ key: 'D',range:'E', value: 'Cargo In Transit' },{ key: 'F',range:'G', value: 'Pending Deliveries' },{ key: 'H',range:'I', value: 'Receive Delivery Note' },{ key: 'J',range:'K', value: 'Return Marked' },{ key: 'L',range:'M', value: 'Confirmed Returns' },{ key: 'N',range:'O', value: 'Return Cargo In Transit' },{ key: 'P',range:'Q', value: 'Return Pending for Delivery' },{ key: 'R',range:'S', value: 'Receive Return Note' },{ key: 'T',range:'V', value: 'Grand Total' }]);
+
+                                        sheet.childNodes[0].childNodes[1].innerHTML = second_row + sheet.childNodes[0].childNodes[1].innerHTML;
+                                        sheet.childNodes[0].childNodes[2].innerHTML =  sheet.childNodes[0].childNodes[2].innerHTML + merge_cells;
+
+                                        // console.log(sheet.childNodes[0].childNodes[1].innerHTML);
+
+                                        // console.log(sheet.childNodes[0].childNodes[2].innerHTML);
+                                    }
                                 },
                             ],
                             paging:false,
@@ -342,11 +449,63 @@
                         });
 
                     });
+                }else{
+                    var error = "Select all dates!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                 }
 
 
 
             });
+            {{--jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {--}}
+                {{--if ( this.context.length ) {--}}
+                    {{--body = [];--}}
+                    {{--head = [];--}}
+                    {{--var jsonResult = $.ajax({--}}
+                        {{--url: '{{ route('admin.reports.qa.list') }}',--}}
+                        {{--data: {--}}
+                            {{--'page': 'all',--}}
+                            {{--'search_date': $('input[name="search_date_formatted"]').val(),--}}
+                        {{--},--}}
+                        {{--success: function (result) {--}}
+
+
+                            {{--head.push('Stations');--}}
+                            {{--head.push('Parcel Pending for Cargo');--}}
+                            {{--head.push('Cargo In Transit');--}}
+                            {{--head.push('Pending Deliveries');--}}
+                            {{--head.push('Receive Delivery Note');--}}
+                            {{--head.push('Return Marked');--}}
+                            {{--head.push('Confirmed Returns');--}}
+                            {{--head.push('Return Cargo In Transit');--}}
+                            {{--head.push('Return Pending for Delivery');--}}
+                            {{--head.push('Receive Return Note');--}}
+                            {{--head.push('Grand Total');--}}
+                            {{--// $.each(result.data, function(index, values) {--}}
+                            {{--//     row = [];--}}
+                            {{--//--}}
+                            {{--//--}}
+                            {{--//     row.push(index + 1);--}}
+                            {{--//     row.push(values.tracking_number);--}}
+                            {{--//     row.push(values.shipper);--}}
+                            {{--//     row.push(values.history_status);--}}
+                            {{--//     row.push(values.service_type);--}}
+                            {{--//     row.push(values.arrival);--}}
+                            {{--//     row.push(values.origin);--}}
+                            {{--//     row.push(values.destination);--}}
+                            {{--//     row.push(values.hub);--}}
+                            {{--//     row.push(values.amount);--}}
+                            {{--//     row.push(values.aging);--}}
+                            {{--//--}}
+                            {{--//     body.push(row);--}}
+                            {{--// });--}}
+                        {{--},--}}
+                        {{--async: false--}}
+                    {{--});--}}
+
+                    {{--return {body: body, header: head};--}}
+                {{--}--}}
+            {{--} );--}}
 
         });
 
