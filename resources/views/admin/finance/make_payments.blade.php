@@ -662,7 +662,91 @@
 			$('#make_payments #make_payments_form .export_bank_order').bind('click', function(e) {
 				e.preventDefault();
 
-				window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?pending_payment_ids=' + selected_pending_payment_ids + '&shipment_ids=' + selected_rows_shipments, '_blank');
+				$.ajax({
+					url: '{!! route('admin.finance.make_payments.verify') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'pending_payment_ids': $('#make_payments #make_payments_form .pending_payment_ids').val(),
+						'shipment_ids': $('#make_payments #make_payments_form .shipment_ids').val()
+					}
+				})
+				.done(function(data) {
+					if (data.status == 0) {
+						window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?pending_payment_ids=' + selected_pending_payment_ids + '&shipment_ids=' + selected_rows_shipments, '_blank');
+					}
+					else {
+						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
+
+						$.each(data.negative_payments, function(index, shipper) {
+							html += shipper + '<br/>';
+						});
+
+						content = document.createElement('div');
+						content.innerHTML = html;
+
+						swal({
+							content: content,
+							icon: 'warning',
+							buttons: {
+								cancel: {
+									text: 'Close',
+									value: null,
+									visible: true,
+									closeModal: true,
+								}
+							},
+							closeOnClickOutside: false,
+							closeOnEsc: false,
+							dangerMode: true
+						});
+					}
+				});
+			});
+
+			$('#make_payments #make_payments_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				$.ajax({
+					url: '{!! route('admin.finance.make_payments.verify') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'pending_payment_ids': $('#make_payments #make_payments_form .pending_payment_ids').val(),
+						'shipment_ids': $('#make_payments #make_payments_form .shipment_ids').val()
+					}
+				})
+				.done(function(data) {
+					if (data.status == 0) {
+						this.submit();
+					}
+					else {
+						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
+
+						$.each(data.negative_payments, function(index, shipper) {
+							html += shipper + '<br/>';
+						});
+
+						content = document.createElement('div');
+						content.innerHTML = html;
+
+						swal({
+							content: content,
+							icon: 'warning',
+							buttons: {
+								cancel: {
+									text: 'Close',
+									value: null,
+									visible: true,
+									closeModal: true,
+								}
+							},
+							closeOnClickOutside: false,
+							closeOnEsc: false,
+							dangerMode: true
+						});
+					}
+				});
 			});
 		});
 	</script>
