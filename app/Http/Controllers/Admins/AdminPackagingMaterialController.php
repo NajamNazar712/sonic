@@ -41,10 +41,6 @@ class AdminPackagingMaterialController extends Controller
             ->join('admins as ad','ad.id','=','packaging_stock_histories.admin_id')
             ->select(['packaging_stock_histories.id as psh_id','packaging_stock_histories.reference_number','packaging_stock_histories.entry_type','packaging_stock_histories.created_at','packaging_stock_histories.small_flyers','packaging_stock_histories.medium_flyers','packaging_stock_histories.large_flyers','packaging_stock_histories.boxes','ad.name as admin','cities.name as hub']);
         return Datatables::of($packaging)
-
-            ->editColumn('created_at', function ($packaging) {
-                return $packaging->created_at ? with(new Carbon($packaging->created_at))->format('d/m/Y h:i:s A') : '';
-            })
             ->editColumn('entry_type',function($packaging){
                 if($packaging->entry_type == 0){
                     return "Inbound";
@@ -232,10 +228,6 @@ class AdminPackagingMaterialController extends Controller
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
             ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.small_flyers','packaging_material_requests.medium_flyers','packaging_material_requests.large_flyers','packaging_material_requests.boxes','packaging_material_requests.address','ppm.mode','packaging_material_requests.status','packaging_material_requests.amount']);
         return Datatables::of($requests)
-
-            ->editColumn('created_at', function ($packaging) {
-                return $packaging->created_at ? with(new Carbon($packaging->created_at))->format('d/m/Y h:i:s A') : '';
-            })
             ->editColumn('status',function($packaging){
                 if($packaging->status == 0){
                     return "Booked";

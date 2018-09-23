@@ -239,9 +239,6 @@ class AdminPickupsController extends Controller
       }
 
       $datatables = Datatables::of($pickup_requests)
-      ->editColumn('requested_at', function($pickup_request) {
-        return Carbon::parse($pickup_request->requested_at)->format('d/m/Y H:i A');
-      })
       ->editColumn('total_estimated_weight', '{{ floatval($total_estimated_weight) }}')
       ->editColumn('pickup_type', function($pickup_request) {
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
@@ -445,9 +442,6 @@ class AdminPickupsController extends Controller
       })
       ->addColumn('route', function($pickup_note) {
         return $pickup_note->route_code . ' (' . $pickup_note->route_start . ' to ' . $pickup_note->route_end . ')';
-      })
-      ->editColumn('assigned_date', function($pickup_note) {
-        return Carbon::parse($pickup_note->assigned_date)->format('d/m/Y H:i A');
       })
       ->editColumn('total_estimated_weight', '{{ floatval($total_estimated_weight) }}')
       ->editColumn('pickup_type', function($pickup_note) {
@@ -660,7 +654,7 @@ class AdminPickupsController extends Controller
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Pickup Note</strong></td>
-                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
@@ -788,9 +782,6 @@ class AdminPickupsController extends Controller
       })
       ->editColumn('pickup_type', function($pickup_note) {
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
-      })
-      ->editColumn('assigned_date', function($pickup_note) {
-        return Carbon::parse($pickup_note->assigned_date)->format('d/m/Y H:i A');
       })
       ->editColumn('pickup_note_no', function($pickup_note) {
         return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $pickup_note->pickup_note_no . '</span></button>';
@@ -1339,12 +1330,6 @@ class AdminPickupsController extends Controller
       })
       ->editColumn('pickup_type', function($pickup_request) {
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
-      })
-      ->editColumn('booking_date', function($pickup_request) {
-        return Carbon::parse($pickup_request->booking_date)->format('d/m/Y H:i A');
-      })
-      ->editColumn('assigned_date', function($pickup_request) {
-        return Carbon::parse($pickup_request->assigned_date)->format('d/m/Y H:i A');
       })
       ->addColumn('action', function($pickup_request) {
         $cancel_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';

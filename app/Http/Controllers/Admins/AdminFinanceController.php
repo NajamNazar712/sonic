@@ -70,9 +70,6 @@ class AdminFinanceController extends Controller
         ->editColumn('sdn_number', function($station_deposit_note) {
             return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $station_deposit_note->sdn_number . '</span></button>';
         })
-        ->editColumn('deposited_at', function($station_deposit_note) {
-            return Carbon::parse($station_deposit_note->deposited_at)->format('d/m/Y H:i A');
-        })
         ->editColumn('deposit_slip', function($station_deposit_note) {
             if ($station_deposit_note->deposit_slip) {
                 return '<a class="btn btn-sm btn-outline-info align-middle" href="' . asset('uploads/sdn/' . $station_deposit_note->deposit_slip) . '" target="_blank"><i class="la la-lg la-image align-middle"></i> <span class="align-middle">View</span></a>';
@@ -259,12 +256,9 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($shipments)
-            ->editColumn('tracking_number',function ($shipments){
-                $route = route('admin.tracking.index');
-                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-            })
-        ->editColumn('status_updated_at', function($shipment) {
-            return Carbon::parse($shipment->status_updated_at)->format('d/m/Y H:i A');
+        ->editColumn('tracking_number',function ($shipments){
+            $route = route('admin.tracking.index');
+            return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
         })
         ->addColumn('aging', function($shipment) {
             $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
@@ -1190,9 +1184,6 @@ class AdminFinanceController extends Controller
         })
         ->removeColumn('phone')
         ->removeColumn('phone2')
-        ->editColumn('done_at', function($done_payment) {
-            return Carbon::parse($done_payment->done_at)->format('d/m/Y H:i A');
-        })
         ->editColumn('status', function($done_payment) {
             if ($done_payment->status == 0) {
                 return 'Processed';
@@ -1434,7 +1425,7 @@ class AdminFinanceController extends Controller
                             <tr>
                               <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Payment Details</strong></td>
-                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Payment ID</strong></td>

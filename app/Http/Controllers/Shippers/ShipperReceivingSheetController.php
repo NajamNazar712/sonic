@@ -431,7 +431,7 @@ class ShipperReceivingSheetController extends Controller
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Receiving Sheet</strong></td>
-                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Shipper</strong></td>

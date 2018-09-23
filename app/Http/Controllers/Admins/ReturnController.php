@@ -76,10 +76,9 @@ class ReturnController extends Controller
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                        $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
-                        return "<span class='danger font-weight-bold'>$older</span>";
+                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
                     } else {
-                        return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                        return $shipments->status_date;
                     }
                 }else{
                     return " - ";
@@ -87,7 +86,7 @@ class ReturnController extends Controller
             })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
-                    return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
+                    return $shipments->arrival;
                 }else{
                     return " - ";
                 }
@@ -247,10 +246,9 @@ class ReturnController extends Controller
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                        $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
-                        return "<span class='danger font-weight-bold'>$older</span>";
+                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
                     } else {
-                        return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                        return $shipments->status_date;
                     }
                 }else{
                     return " - ";
@@ -258,7 +256,7 @@ class ReturnController extends Controller
             })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
-                    return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
+                    return $shipments->arrival;
                 }else{
                     return " - ";
                 }
@@ -531,10 +529,6 @@ class ReturnController extends Controller
         $datatables = Datatables::of($deliveries)
         ->editColumn('return_note', function ($deliveries) {
             return "<a href='javascript:void(0);' class='printreturnnote'><u>$deliveries->return_note_id</u></a>";
-        })
-
-        ->editColumn('created_at', function ($rider) {
-            return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
         })
         ->addColumn("action", function ($result) {
             $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
@@ -926,7 +920,7 @@ class ReturnController extends Controller
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Return Note ['.$return_note_details->id.']</strong></td>
-                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                          
                           <tr>
