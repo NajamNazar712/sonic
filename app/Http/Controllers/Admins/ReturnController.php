@@ -210,7 +210,7 @@ class ReturnController extends Controller
         return view('admin.return.confirmed');
     }
     public function return_confirmed_list(Request $request){
-        $status_return = array(20,22,24,27,29,30,33,35,37,42,44,45,46);
+        $status_return = array(20,22,24,27,29,30,33,35,37,44,45,46);
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -230,15 +230,27 @@ class ReturnController extends Controller
                     DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->select('shipments.id as shipment_id','shipments.id as shId','shipments.tracking_number as tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
-            ->whereIn('shipments.shipper_status_id',$status_return)
-            ->groupBy('shipments.id');
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
+            ->whereIn('shipments.shipper_status_id',$status_return);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($shipments)
+            ->addColumn('return_pending_for', function ($shipment) {
+                if (in_array($shipment->shipper_status_id, [22, 24, 27, 29, 33, 35, 44, 45, 46])) {
+                    return 'Shipper';
+                }
+                else {
+                    if ($shipment->origin_hub_id == $shipment->destination_hub_id) {
+                        return 'Shipper';
+                    }
+                    else {
+                        return 'Cargo';
+                    }
+                }
+            })
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -260,28 +272,23 @@ class ReturnController extends Controller
                 }else{
                     return " - ";
                 }
+            })
+            ->filterColumn('return_pending_for', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if (strpos('shipper', $keyword) !== FALSE) {
+                    $query->whereIn('shipments.shipper_status_id', [22, 24, 27, 29, 33, 35, 44, 45, 46])
+                    ->orWhereRaw('`oc`.`hub_id` = `dc`.`hub_id`');
+                }
+                else if (strpos('cargo', $keyword) !== FALSE) {
+                    $query->whereIn('shipments.shipper_status_id', [20, 30, 37])
+                    ->whereRaw('`oc`.`hub_id` != `dc`.`hub_id`');
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             });
-            if ($select_type = $request->get('select_type')) {
-                if ($select_type == 0) {
-                    $datatables->join('cities AS dco', 'shipments.consignee_city_id', '=', 'dco.id');
-                }
-                else if ($select_type == 1) {
-                    $datatables->join('cities as dco', function($join) {
-                        $join->on('shipments.consignee_city_id', '=', 'dco.id')
-                            ->on('oc.hub_id', '=', 'dco.hub_id');
-                    });
-                }
-                else if ($select_type == 2) {
-                    $datatables->join('cities as dco', function($join) {
-                        $join->on('shipments.consignee_city_id', '=', 'dco.id')
-                            ->on('oc.hub_id', '!=', 'dco.hub_id');
-                    });
-                }
-            }
-            else {
-//                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37]);
-                $datatables->whereIn('shipments.shipper_status_id', $status_return);
-            }
+
            return $datatables->make(true);
     }
   public function return_create_index(){

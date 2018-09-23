@@ -87,13 +87,17 @@ class AdminCargoController extends Controller
         }
       })
       ->filterColumn('oc.name', function ($query, $keyword) {
+          $keyword = strtolower($keyword);
+
           $query->where(function ($sub_query) use ($keyword) {
             $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
             ->where('dc.name', 'like', '%' . $keyword . '%');
           })
           ->orWhere('oc.name', 'like', '%' . $keyword . '%');
       })
-        ->filterColumn('dc.name', function ($query, $keyword) {
+      ->filterColumn('dc.name', function ($query, $keyword) {
+          $keyword = strtolower($keyword);
+
           $query->where(function ($sub_query) use ($keyword) {
             $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
             ->where('oc.name', 'like', '%' . $keyword . '%');

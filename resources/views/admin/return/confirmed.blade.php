@@ -11,21 +11,6 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                <div class="row mb-2 justify-content-center">
-
-                    <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <select name="select_type" class="form-control select2" id="select_type">
-                                <option></option>
-                            </select>
-                        </fieldset>
-                    </div>
-                    {{--<div class="col-2">--}}
-                        {{--<button id="search_button" type="submit" class="btn btn-primary btn-block" disabled>Search</button>--}}
-                    {{--</div>--}}
-
-                </div>
-
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -43,6 +28,7 @@
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Return Pending for</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
@@ -118,26 +104,6 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            var data = [
-                {
-                    id: 0,
-                    text: 'All'
-                },
-                {
-                    id: 1,
-                    text: 'Same City'
-                },
-                {
-                    id: 2,
-                    text: 'Different City'
-                }
-            ];
-            $('#select_type').select2({
-                placeholder: "Select Return Type",
-                data:data
-            }).bind('change', function() {
-                table.draw();
-            });
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: true, scrollY: '300px',
@@ -146,12 +112,7 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax:{
-                    url:'{{ route('admin.return.confirmed.list') }}',
-                    data: function (d) {
-                        d.select_type = $('#select_type').val();
-                    }
-                },
+                ajax: '{{ route('admin.return.confirmed.list') }}',
                 rowId: 'shId',
                 // order: [[2, 'asc']],
                 columns: [
@@ -169,6 +130,7 @@
                     {data: 'mode', name: 'sm.mode', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'return_pending_for', name: 'return_pending_for', class: 'align-middle return_pending_for', orderable: false},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
@@ -206,17 +168,6 @@
                     this.api().table().columns.adjust();
                 }
             });
-        // $('#select_type').on('change',function () {
-        //     $('#search_button').removeAttr('disabled');
-        // });
-        // $('#search_type_form').bind('submit',function (e) {
-        //     e.preventDefault();
-        //     var search =$('#select_type').find('option:selected').val();
-        //     console.log(search)
-        //     if(search != ''){
-        //         this.submit();
-        //     }
-        // });
         });
     </script>
 @endsection
