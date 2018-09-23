@@ -259,6 +259,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
                 Route::prefix('request')->name('request.')->group(function () {
                     Route::post('short_received', 'Admins\AdminPickupsController@receive_summary_request_short_received')->name('short_received');
+                    Route::post('over_received', 'Admins\AdminPickupsController@receive_summary_request_over_received')->name('over_received');
                     Route::put('done', 'Admins\AdminPickupsController@receive_summary_request_done')->name('done');
                     Route::put('not_done', 'Admins\AdminPickupsController@receive_summary_request_not_done')->name('not_done');
                 });
