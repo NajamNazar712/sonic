@@ -300,6 +300,12 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
+	<style type="text/css">
+		a.btn.btn-secondary{
+			border-radius: 20px;
+			background: #64a0d2;
+		}
+	</style>
 @endsection
 
 @section('js')
@@ -347,7 +353,63 @@
 			@if (session('print'))
 				print('{{ session('print') }}');
 			@endif
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.cargo.in_transit.list') }}',
+                        data: {
+                            'page': 'all',
+                            'cargo_type': $('#cargo_type_search_form #cargo_type').val(),
+                    		'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
+                    		'seal_number': $('#seal_number_search_form #seal_number').val(),
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Cargo No.');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Shipment(s)');
+                            head.push('Shipping Mode');
+                            head.push('Junction 1');
+                            head.push('Junction 2');
+                            head.push('Transport Mode');
+                            head.push('Vendor');
+                            head.push('Builty No.');
+                            head.push('Transit Datetime');
+                            head.push('Transitted By');
+                            head.push('Status');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.id);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.shipments);
+                                row.push(values.shipping_mode);
+                                row.push(values.junction_1);
+                                row.push(values.junction_2);
+                                row.push(values.transport_mode);
+                                row.push(values.vendor);
+                                row.push(values.builty_number);
+                                row.push(values.transit_at);
+                                row.push(values.transitted_by);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
 				@if (session('role_id') == 1 || in_array(30, session('permissions')))
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -389,7 +451,12 @@
 
 							$('#receive_at_link').modal('show');
 						}
-					}],
+					},
+                        {
+                            extend: 'excel',
+                            title: 'Pending Cargo',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
+                        }],
 				@else
                 	dom: 'ltipr',
 				@endif

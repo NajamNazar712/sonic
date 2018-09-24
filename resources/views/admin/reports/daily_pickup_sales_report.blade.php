@@ -131,7 +131,7 @@
                     $('#search_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-                    // console.log($())
+
                 }
             });
             $('#search_form').on('submit',function (e) {

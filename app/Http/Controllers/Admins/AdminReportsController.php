@@ -65,7 +65,7 @@ class AdminReportsController extends Controller
                 }else{
                     return $days;
                 }
-            })
+            });
             if ($shipper = $request->get('search_shipper')) {
                 $datatable->where('u.id', '=', $shipper);
             }
@@ -933,7 +933,7 @@ class AdminReportsController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
+            });
             if($rn_no = $request->get('search_dn_no')){
                 $datatable->where('delivery_notes.id','=',$rn_no);
             }

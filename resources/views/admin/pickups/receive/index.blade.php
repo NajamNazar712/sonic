@@ -79,6 +79,12 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<style type="text/css">
+		a.btn.btn-secondary{
+			border-radius: 20px;
+			background: #64a0d2;
+		}
+	</style>
 @endsection
 
 @section('js')
@@ -116,10 +122,67 @@
 					}
 				});
 			}
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.pickups.receive.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Rider');
+                            head.push('Rider Type');
+                            head.push('Route');
+                            head.push('City');
+                            head.push('Pickup(s)');
+                            head.push('Booking(s)');
+                            head.push('Pickup Type');
+                            head.push('Assigned Date');
+                            head.push('Assigned By');
+                            head.push('Pickup Note No.');
+                            head.push('Status');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.rider_name+" | "+values.rider_phone);
+                                row.push(values.rider_type);
+                                row.push(values.route);
+                                row.push(values.city);
+                                row.push(values.pickups);
+                                row.push(values.bookings);
+                                row.push(values.pickup_type);
+                                row.push(values.assigned_date);
+                                row.push(values.assigned_by);
+                                row.push(values.pickup_note_id);
+                                row.push(values.status);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
-				dom: 'ltipr',
-				scrollX: true, scrollY: '300px',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '300px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Receive Pickups',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }
+                ],
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',
