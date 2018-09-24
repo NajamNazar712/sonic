@@ -1375,7 +1375,7 @@ class AdminPickupsController extends Controller
     public function receive_summary_request_over_received(Request $request) {
       $pickup_request_id = $request->input('pickup_request_id');
 
-      $pickup_request_over_received_shipments = PickupRequestReceivedShipment::where('pickup_request_id', $pickup_request_id)->('over_received', 1);
+      $pickup_request_over_received_shipments = PickupRequestReceivedShipment::where('pickup_request_id', $pickup_request_id)->where('over_received', 1);
 
       if ($pickup_request_over_received_shipments->exists()) {
         $pickup_request_over_received_shipments = $pickup_request_over_received_shipments->get();
