@@ -406,8 +406,9 @@
                 }
             } );
 			var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || in_array(30, session('permissions')))
-					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
 					buttons: [{
 						text: 'Update at Link',
 						className: 'btn btn-primary receive_at_link',
@@ -449,12 +450,17 @@
 					},
                         {
                             extend: 'excel',
-                            title: 'Pending Cargo',
+                            title: 'Cargo In-transit',
                             className: 'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
                         }],
 				@else
-                	dom: 'ltipr',
+                	buttons:[{
+                    extend: 'excel',
+                    title: 'Cargo In-transit',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                	}],
 				@endif
 				scrollX: true, scrollY: '300px',
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],

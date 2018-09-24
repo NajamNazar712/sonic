@@ -306,6 +306,69 @@
                         }
                     });
             }
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.orders.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Tracking No.');
+                            head.push('Order ID');
+                            head.push('Account No.');
+                            head.push('Shipper');
+                            head.push('Service Type');
+                            head.push('Status');
+                            head.push('Payment Status');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Consignee Name');
+                            head.push('Consignee Contact');
+                            head.push('Consignee Address');
+                            head.push('COD Amount');
+                            head.push('Product Type');
+                            head.push('Booking Date');
+                            head.push('Instructions');
+
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking);
+                                row.push(values.order_id);
+                                row.push(values.account_no);
+                                row.push(values.shipper);
+                                row.push(values.service_type);
+                                row.push(values.status);
+                                row.push(values.payment_status);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.consignee_name);
+                                row.push(values.phone1 + " | " + values.phone2);
+                                row.push(values.consignee_address);
+                                row.push(values.amount);
+                                row.push(values.product_type);
+                                row.push(values.booking_date);
+                                row.push(values.instructions);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '300px',
@@ -323,7 +386,13 @@
                         selected_rows = [];
 
                     }
-                }],
+                },
+                    {
+                        extend: 'excel',
+                        title: 'Order Details',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
                 select: {
                     info: false,
                     style: 'multi',
@@ -351,7 +420,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone1', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone1'},
+                    {data: 'phone', name: 'phone', class: 'align-middle phone',orderable:false,searchable:false},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},

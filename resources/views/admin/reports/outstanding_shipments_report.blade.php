@@ -295,7 +295,7 @@
                     }
                 },
                 rowId: 'id',
-                order: [[1, 'desc']],
+                order: [[3, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number', name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -306,13 +306,13 @@
                     {data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
                     {data:'service_type', name: 'bt.booking_type', class: 'align-middle text-center service_type'},
                     {data:'amount', name: 's.amount', class: 'align-middle text-center amount'},
-                    {data:'recovery_status', name: 'ss.name as status', class: 'align-middle text-center recovery_status'},
-                    {data:'current_status', name: 'ss.name as status', class: 'align-middle text-center current_status'},
+                    {data:'recovery_status', name: 'ss.name as status', class: 'align-middle text-center recovery_status', orderable: false, searchable: false},
+                    {data:'current_status', name: 'ss.name', class: 'align-middle text-center current_status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
                     {data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
                     {data:'dncc', name: 'delivery_note_shipments.delivery_note_id', class: 'align-middle text-center dncc'},
                     {data:'sdn', name: 'dnsdn.station_deposit_note_id', class: 'align-middle text-center sdn'},
-                    {data:'aging', name: 'aging', class: 'align-middle text-center aging'}
+                    {data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -320,30 +320,6 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-
-                        if ($(header).is('.serial_number') || $(header).is('.recovery_status')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
 
                     this.api().table().columns.adjust();
                 }

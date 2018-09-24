@@ -457,55 +457,7 @@
 
 
             });
-            {{--jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {--}}
-                {{--if ( this.context.length ) {--}}
-                    {{--body = [];--}}
-                    {{--head = [];--}}
-                    {{--var jsonResult = $.ajax({--}}
-                        {{--url: '{{ route('admin.reports.qa.list') }}',--}}
-                        {{--data: {--}}
-                            {{--'page': 'all',--}}
-                            {{--'search_date': $('input[name="search_date_formatted"]').val(),--}}
-                        {{--},--}}
-                        {{--success: function (result) {--}}
 
-
-                            {{--head.push('Stations');--}}
-                            {{--head.push('Parcel Pending for Cargo');--}}
-                            {{--head.push('Cargo In Transit');--}}
-                            {{--head.push('Pending Deliveries');--}}
-                            {{--head.push('Receive Delivery Note');--}}
-                            {{--head.push('Return Marked');--}}
-                            {{--head.push('Confirmed Returns');--}}
-                            {{--head.push('Return Cargo In Transit');--}}
-                            {{--head.push('Return Pending for Delivery');--}}
-                            {{--head.push('Receive Return Note');--}}
-                            {{--head.push('Grand Total');--}}
-                            {{--// $.each(result.data, function(index, values) {--}}
-                            {{--//     row = [];--}}
-                            {{--//--}}
-                            {{--//--}}
-                            {{--//     row.push(index + 1);--}}
-                            {{--//     row.push(values.tracking_number);--}}
-                            {{--//     row.push(values.shipper);--}}
-                            {{--//     row.push(values.history_status);--}}
-                            {{--//     row.push(values.service_type);--}}
-                            {{--//     row.push(values.arrival);--}}
-                            {{--//     row.push(values.origin);--}}
-                            {{--//     row.push(values.destination);--}}
-                            {{--//     row.push(values.hub);--}}
-                            {{--//     row.push(values.amount);--}}
-                            {{--//     row.push(values.aging);--}}
-                            {{--//--}}
-                            {{--//     body.push(row);--}}
-                            {{--// });--}}
-                        {{--},--}}
-                        {{--async: false--}}
-                    {{--});--}}
-
-                    {{--return {body: body, header: head};--}}
-                {{--}--}}
-            {{--} );--}}
 
         });
 

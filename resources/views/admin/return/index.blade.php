@@ -170,9 +170,9 @@
             } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                scrollX:true,
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0)
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
                     buttons: [
                     @if (session('role_id') == 1 || in_array(45, session('permissions')))
                         {
@@ -294,11 +294,17 @@
                         {
                             extend: 'excel',
                             title: 'Return Marked',
+                            className: 'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
                         }
                         ],
                 @else
-                    dom: 'ltipr',
+                   buttons:[{
+                    extend: 'excel',
+                    title: 'Return Marked',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
                 @endif
                 select: {
                     info: false,

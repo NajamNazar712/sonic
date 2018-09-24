@@ -66,12 +66,6 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-	<style type="text/css">
-		a.btn.btn-secondary{
-			border-radius: 20px;
-			background: #64a0d2;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -165,8 +159,9 @@
 			var selected_rows = [];
 
 			var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || in_array(22, session('permissions')))
-					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
 					buttons: [{
 						text: '<i class="la la-print"></i> Print',
 						className: 'btn btn-primary print',
@@ -212,10 +207,16 @@
                         {
                             extend: 'excel',
                             title: 'Assigned Pickups',
+                            className:'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
                         }],
 				@else
-	                dom: 'ltipr',
+	               buttons:[{
+                    extend: 'excel',
+                    title: 'Assigned Pickups',
+                    className:'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
 	            @endif
 	            scrollX: true, scrollY: '300px',
 				select: {

@@ -315,9 +315,9 @@
                 }
             } );
             var table = $('#datatable').DataTable({
-                // "scrollX": true,
-                @if (session('role_id') == 1 || count(array_intersect([77, 78], session('permissions'))) !== 0)
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                @if (session('role_id') == 1 || count(array_intersect([77, 78], session('permissions'))) !== 0)
+
                     buttons: [
                     @if (session('role_id') == 1 || in_array(77, session('permissions')))
                         {
@@ -345,11 +345,17 @@
                         {
                             extend: 'excel',
                             title: 'Packaging Material Stock',
+                            className:'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
                         }],
 
                 @else
-                    dom: 'ltipr',
+                    buttons:[{
+                    extend: 'excel',
+                    title: 'Packaging Material Stock',
+                    className:'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
                 @endif
                 scrollX: true, scrollY: '300px',
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],

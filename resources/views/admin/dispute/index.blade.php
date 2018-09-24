@@ -203,10 +203,7 @@
             top: 50%;
             text-shadow: none;
         }
-        a.btn.btn-secondary{
-            border-radius: 20px;
-            background: #64a0d2;
-        }
+
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
@@ -373,8 +370,9 @@
             } );
 
         var table = $('#datatable').DataTable({
+            dom: '<"d-inline-block"l><"pull-right"B>tipr',
             @if (session('role_id') == 1 || in_array(2, session('permissions')))
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
                 buttons: [{
                     text: '<i class="la la-calendar-times-o"></i> Launch',
                     className: 'btn btn-primary dispute_modal',
@@ -390,7 +388,13 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
             @else
-                dom: 'ltipr',
+            buttons: [
+                {
+                    extend: 'excel',
+                    className: 'btn btn-primary',
+                    title: 'Disputes',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
             @endif
             scrollX: true, scrollY: '300px',
             lengthMenu: [[25, 50, 100], [25, 50, 100]],
