@@ -933,7 +933,7 @@ class AdminReportsController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
+            });
             if($rn_no = $request->get('search_dn_no')){
                 $datatable->where('delivery_notes.id','=',$rn_no);
             }
