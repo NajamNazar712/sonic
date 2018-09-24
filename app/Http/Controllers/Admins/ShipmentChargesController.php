@@ -513,6 +513,8 @@ class ShipmentChargesController extends Controller
     static public function packaging_material($id, $type, $charges) {
         $shipment = Shipment::find($id);
 
+        $today = Carbon::today();
+
         $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
 
         if ($discount_charge->exists()) {

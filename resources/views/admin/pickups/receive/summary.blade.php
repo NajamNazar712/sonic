@@ -170,7 +170,7 @@
 				}
 			});
 
-			$('#datatable tbody').on('click', 'tr td.short_received_shipments button', function() {
+			$('#datatable tbody').on('click', 'tr td.short_received button', function() {
 				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
 
 				$('#short_received_shipments .modal-body').html('');
@@ -204,7 +204,7 @@
 				});
 			});
 
-			$('#datatable tbody').on('click', 'tr td.over_received_shipments button', function() {
+			$('#datatable tbody').on('click', 'tr td.over_received button', function() {
 				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
 
 				$('#over_received_shipments .modal-body').html('');

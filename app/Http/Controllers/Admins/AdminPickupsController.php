@@ -1100,7 +1100,7 @@ class AdminPickupsController extends Controller
             }
           }
 
-          if ($shipment->receiving_sheet_shipment) {
+          if (!$shipment->receiving_sheet_shipment) {
             $pickup_request->over_received = $pickup_request->over_received + 1;
           }
 
@@ -1178,7 +1178,7 @@ class AdminPickupsController extends Controller
             }
           }
 
-          if ($shipment->receiving_sheet_shipment) {
+          if (!$shipment->receiving_sheet_shipment) {
             $pickup_request->over_received = $pickup_request->over_received + 1;
           }
 
