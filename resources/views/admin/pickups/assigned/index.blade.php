@@ -66,6 +66,12 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<style type="text/css">
+		a.btn.btn-secondary{
+			border-radius: 20px;
+			background: #64a0d2;
+		}
+	</style>
 @endsection
 
 @section('js')
@@ -105,13 +111,64 @@
 				});
 			}
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.pickups.assigned.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Rider');
+                            head.push('Rider Type');
+                            head.push('Route');
+                            head.push('City');
+                            head.push('Pickup(s)');
+                            head.push('Booking(s)');
+                            head.push('Total Estimated Weight (kg)');
+                            head.push('Pickup Type');
+                            head.push('Assigned Date');
+                            head.push('Assigned By');
+                            head.push('Pickup Note No.');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.rider_name+" | "+values.rider_phone);
+                                row.push(values.rider_type);
+                                row.push(values.route);
+                                row.push(values.city);
+                                row.push(values.pickups);
+                                row.push(values.bookings);
+                                row.push(values.total_estimated_weight);
+                                row.push(values.pickup_type);
+                                row.push(values.assigned_date);
+                                row.push(values.assigned_by);
+                                row.push(values.pickup_note_no);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
 			var selected_rows = [];
 
 			var table = $('#datatable').DataTable({
 				@if (session('role_id') == 1 || in_array(22, session('permissions')))
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
 					buttons: [{
-						text: 'Print',
+						text: '<i class="la la-print"></i> Print',
 						className: 'btn btn-primary print',
 						enabled: false,
 						action: function (e, dt, node, config) {
@@ -151,7 +208,12 @@
 								}
 							});
 						}
-					}],
+					},
+                        {
+                            extend: 'excel',
+                            title: 'Assigned Pickups',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
+                        }],
 				@else
 	                dom: 'ltipr',
 	            @endif

@@ -50,6 +50,56 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style type="text/css">
+        table.dataTable {
+            font-size: 12px;
+        }
+
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -59,10 +109,66 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.packaging.requests.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Shipper');
+                            head.push('Requested Date/Time');
+                            head.push('City');
+                            head.push('Small Flyers');
+                            head.push('Medium Flyers');
+                            head.push('Large Flyers');
+                            head.push('Boxes');
+                            head.push('Amount');
+                            head.push('Address');
+                            head.push('Payment Mode');
+                            head.push('Status');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.shipper);
+                                row.push(values.created_at);
+                                row.push(values.city);
+                                row.push(values.small_flyers);
+                                row.push(values.medium_flyers);
+                                row.push(values.large_flyers);
+                                row.push(values.boxes);
+                                row.push(values.amount);
+                                row.push(values.address);
+                                row.push(values.mode);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '300px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Packaging Material Requests',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }
+                ],
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
                 pageLength: 25,
                 pagingType: 'full_numbers',

@@ -148,6 +148,56 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style type="text/css">
+        table.dataTable {
+            font-size: 12px;
+        }
+
+        table.dataTable thead tr th {
+            padding-left: 0.5em;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        table.dataTable thead tr th:before,
+        table.dataTable thead tr th:after {
+            height: 20px;
+            margin-bottom: -10px;
+            bottom: 50% !important;
+        }
+
+        table.dataTable tbody tr td {
+            padding-left: 0.5em;
+            padding-right: 0.5em;
+        }
+
+        table.dataTable tbody tr td.select-checkbox:before {
+            top: 50%;
+            border-color: #64a0d2;
+        }
+
+        table.dataTable tbody tr.selected td.select-checkbox:after {
+            top: 50%;
+            text-shadow: none;
+        }
+
+        .btn-group .dropdown-menu .dropdown-item {
+            white-space: normal;
+        }
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
+        #toast-bottom-center.toast-container {
+            text-align: center;
+        }
+
+        #toast-bottom-center.toast-container .toast {
+            display: table;
+            width: auto !important;
+            text-align: left;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -219,7 +269,51 @@
                 'min': 0,
                 'max': 10000
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.packaging.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Invoice No./Cargo ID');
+                            head.push('Entry Type');
+                            head.push('Entered Date/Time');
+                            head.push('Entered By');
+                            head.push('Small Flyers');
+                            head.push('Medium Flyers');
+                            head.push('Large Flyers');
+                            head.push('Boxes');
+                            head.push('Hub');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.reference_number);
+                                row.push(values.entry_type);
+                                row.push(values.created_at);
+                                row.push(values.small_flyers);
+                                row.push(values.medium_flyers);
+                                row.push(values.large_flyers);
+                                row.push(values.boxes);
+                                row.push(values.hub);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var table = $('#datatable').DataTable({
                 // "scrollX": true,
                 @if (session('role_id') == 1 || count(array_intersect([77, 78], session('permissions'))) !== 0)
@@ -246,9 +340,14 @@
                                 $('#SendStockModal').modal('show');
 
                             }
-                        }
+                        },
                     @endif
-                    ],
+                        {
+                            extend: 'excel',
+                            title: 'Packaging Material Stock',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
+                        }],
+
                 @else
                     dom: 'ltipr',
                 @endif
