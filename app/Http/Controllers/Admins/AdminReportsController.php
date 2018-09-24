@@ -66,9 +66,6 @@ class AdminReportsController extends Controller
                     return $days;
                 }
             })
-            ->editColumn('arrival', function ($shipments) {
-                return $shipments->arrival ? with(new Carbon($shipments->arrival))->format('d/m/Y h:i:s A') : '';
-            });
             if ($shipper = $request->get('search_shipper')) {
                 $datatable->where('u.id', '=', $shipper);
             }
@@ -99,13 +96,7 @@ class AdminReportsController extends Controller
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
             ->select(['return_notes.id as return_note_id','up.name as updated_by','return_notes.shipments_count as count','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at']);
-        $return = Datatables::of($return_note)
-            ->editColumn('submission_date', function ($return_note) {
-                return $return_note->submission_date ? with(new Carbon($return_note->submission_date))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('created_at', function ($return_note) {
-                return $return_note->created_at ? with(new Carbon($return_note->created_at))->format('d/m/Y h:i:s A') : '';
-            });
+        $return = Datatables::of($return_note);
 
             if($rn_no = $request->get('search_rn_no')){
                 $return->where('return_notes.id','=',$rn_no);
@@ -147,13 +138,7 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as up','up.id','=','pickup_notes.updated_by')
             ->select(['pickup_notes.id as pn_id','cities.name as city','pickup_notes.pickups','pickup_notes.bookings as count','riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
             ->where('pickup_notes.status_id',4);
-        $return = Datatables::of($pickup_note)
-            ->editColumn('assigned_date', function ($pickup_note) {
-                return $pickup_note->assigned_date ? with(new Carbon($pickup_note->assigned_date))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('completed_date', function ($pickup_note) {
-                return $pickup_note->completed_date ? with(new Carbon($pickup_note->completed_date))->format('d/m/Y h:i:s A') : '';
-            });
+        $return = Datatables::of($pickup_note);
 
             if($pn_no = $request->get('search_pn_no')){
                 $return->where('pickup_notes.id','=',$pn_no);
@@ -193,19 +178,7 @@ class AdminReportsController extends Controller
             ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
             ->select(['cargo_consignments.id as cargo_id','oc.name as origin','h.name as destination','cargo_consignments.shipments','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments'])
             ->where('cargo_consignments.status_id',3);
-        $cargo = Datatables::of($cargo_received)
-//            ->addColumn('short_received',function ($cargo){
-//                return $cargo->shipments - $cargo->received_shipments;
-//            })
-//            ->editColumn('received_shipments',function($cargo){
-//                return "<a class='received_shipments'>$cargo->received_shipments</a>";
-//            })
-            ->editColumn('transit_at', function ($cargo) {
-                return $cargo->transit_at ? with(new Carbon($cargo->transit_at))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('received_at', function ($cargo) {
-                return $cargo->received_at ? with(new Carbon($cargo->received_at))->format('d/m/Y h:i:s A') : '';
-            });
+        $cargo = Datatables::of($cargo_received);
 
             if($cargo_no = $request->get('search_cargo_no')){
                 $cargo->where('cargo_consignments.id','=',$cargo_no);
@@ -336,31 +309,6 @@ class AdminReportsController extends Controller
             ->addColumn('total_tat',function ($shipments){
                     return ($shipments->arrival_date && $shipments->latest_journey_date)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->latest_journey_date) :'-';
 
-            })
-            ->editColumn('arrival_date', function ($shipments) {
-                return $shipments->arrival_date ? with(new Carbon($shipments->arrival_date))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('reached_at_destination', function ($shipments) {
-                return $shipments->reached_at_destination ? with(new Carbon($shipments->reached_at_destination))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('first_status_date', function ($shipments) {
-                return $shipments->first_status_date ? with(new Carbon($shipments->first_status_date))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('delivered_date', function ($shipments) {
-                return $shipments->delivered_date ? with(new Carbon($shipments->delivered_date))->format('d/m/Y h:i:s A') : '';
-            })
-
-            ->editColumn('return_confirm', function ($shipments) {
-                return $shipments->return_confirm ? with(new Carbon($shipments->return_confirm))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('return_reached_at_destination', function ($shipments) {
-                return $shipments->return_reached_at_destination ? with(new Carbon($shipments->return_reached_at_destination))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('return_delivered_date', function ($shipments) {
-                return $shipments->return_delivered_date ? with(new Carbon($shipments->return_delivered_date))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('payment_done_date', function ($shipments) {
-                return $shipments->payment_done_date ? with(new Carbon($shipments->payment_done_date))->format('d/m/Y h:i:s A') : '';
             });
 
             if($tracking = $request->get('search_tracking_no')){
@@ -521,7 +469,7 @@ class AdminReportsController extends Controller
              ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,9]);
          $datatables = Datatables::of($shipments)
              ->editColumn('status_updated_at', function($shipment) {
-                 return Carbon::parse($shipment->status_updated_at)->format('d/m/Y H:i A');
+                 return $shipment->status_updated_at;
              })
              ->addColumn('aging', function($shipment) {
                  $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
@@ -986,12 +934,6 @@ class AdminReportsController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('updated_at', function ($rider) {
-                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y h:i:s A') : '';
-            });
             if($rn_no = $request->get('search_dn_no')){
                 $datatable->where('delivery_notes.id','=',$rn_no);
             }

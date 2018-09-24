@@ -239,9 +239,6 @@ class AdminPickupsController extends Controller
       }
 
       $datatables = Datatables::of($pickup_requests)
-      ->editColumn('requested_at', function($pickup_request) {
-        return Carbon::parse($pickup_request->requested_at)->format('d/m/Y H:i A');
-      })
       ->editColumn('total_estimated_weight', '{{ floatval($total_estimated_weight) }}')
       ->editColumn('pickup_type', function($pickup_request) {
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
@@ -445,9 +442,6 @@ class AdminPickupsController extends Controller
       })
       ->addColumn('route', function($pickup_note) {
         return $pickup_note->route_code . ' (' . $pickup_note->route_start . ' to ' . $pickup_note->route_end . ')';
-      })
-      ->editColumn('assigned_date', function($pickup_note) {
-        return Carbon::parse($pickup_note->assigned_date)->format('d/m/Y H:i A');
       })
       ->editColumn('total_estimated_weight', '{{ floatval($total_estimated_weight) }}')
       ->editColumn('pickup_type', function($pickup_note) {
@@ -660,7 +654,7 @@ class AdminPickupsController extends Controller
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Pickup Note</strong></td>
-                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
@@ -788,9 +782,6 @@ class AdminPickupsController extends Controller
       })
       ->editColumn('pickup_type', function($pickup_note) {
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
-      })
-      ->editColumn('assigned_date', function($pickup_note) {
-        return Carbon::parse($pickup_note->assigned_date)->format('d/m/Y H:i A');
       })
       ->editColumn('pickup_note_no', function($pickup_note) {
         return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $pickup_note->pickup_note_no . '</span></button>';
@@ -1109,6 +1100,10 @@ class AdminPickupsController extends Controller
             }
           }
 
+          if ($shipment->receiving_sheet_shipment) {
+            $pickup_request->over_received = $pickup_request->over_received + 1;
+          }
+
           $pickup_request->save();
 
           $pickup_request_assigned_shipment->status = 2;
@@ -1119,6 +1114,13 @@ class AdminPickupsController extends Controller
 
           $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
           $pickup_request_received_shipment->shipment_id = $shipment_id;
+
+          if ($shipment->receiving_sheet_shipment) {
+            $pickup_request_received_shipment->over_received = 0;
+          }
+          else {
+            $pickup_request_received_shipment->over_received = 1;
+          }
 
           $pickup_request_received_shipment->save();
         }
@@ -1176,12 +1178,23 @@ class AdminPickupsController extends Controller
             }
           }
 
+          if ($shipment->receiving_sheet_shipment) {
+            $pickup_request->over_received = $pickup_request->over_received + 1;
+          }
+
           $pickup_request->save();
 
           $pickup_request_received_shipment = new PickupRequestReceivedShipment();
 
           $pickup_request_received_shipment->pickup_request_id = $pickup_request->id;
           $pickup_request_received_shipment->shipment_id = $shipment_id;
+
+          if ($shipment->receiving_sheet_shipment) {
+            $pickup_request_received_shipment->over_received = 0;
+          }
+          else {
+            $pickup_request_received_shipment->over_received = 1;
+          }
 
           $pickup_request_received_shipment->save();
 
@@ -1295,18 +1308,28 @@ class AdminPickupsController extends Controller
       ->join('pickup_note_requests as pnr', 'pickup_requests.id', '=', 'pnr.pickup_request_id')
       ->join('pickup_notes as pn', 'pnr.pickup_note_id', '=', 'pn.id')
       ->join('admins as a', 'pn.assigned_by_user_id', '=', 'a.id')
-      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
+      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.over_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
       ->where('pn.id', $request->pickup_receive_pickup_note_id);
 
       $datatables = Datatables::of($pickup_requests)
+      ->editColumn('short_received', function($pickup_request) {
+          if ($pickup_request->short_received != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->short_received . '</button>';
+          }
+          else {
+              return 0;
+          }
+      })
+      ->editColumn('over_received', function($pickup_request) {
+          if ($pickup_request->over_received != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->over_received . '</button>';
+          }
+          else {
+              return 0;
+          }
+      })
       ->editColumn('pickup_type', function($pickup_request) {
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
-      })
-      ->editColumn('booking_date', function($pickup_request) {
-        return Carbon::parse($pickup_request->booking_date)->format('d/m/Y H:i A');
-      })
-      ->editColumn('assigned_date', function($pickup_request) {
-        return Carbon::parse($pickup_request->assigned_date)->format('d/m/Y H:i A');
       })
       ->addColumn('action', function($pickup_request) {
         $cancel_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
@@ -1347,6 +1370,29 @@ class AdminPickupsController extends Controller
       });
 
       return $datatables->make(true);
+    }
+
+    public function receive_summary_request_over_received(Request $request) {
+      $pickup_request_id = $request->input('pickup_request_id');
+
+      $pickup_request_over_received_shipments = PickupRequestReceivedShipment::where('pickup_request_id', $pickup_request_id)->('over_received', 1);
+
+      if ($pickup_request_over_received_shipments->exists()) {
+        $pickup_request_over_received_shipments = $pickup_request_over_received_shipments->get();
+
+        $over_received_shipments = array();
+
+        foreach ($pickup_request_over_received_shipments as $pickup_request_over_received_shipment) {
+          $shipment = $pickup_request_over_received_shipment->shipment;
+
+          $over_received_shipments[] = $shipment->tracking_number;
+        }
+
+        return ['status' => 0, 'success' => 'Shipments found Over Received', 'over_received' => $over_received_shipments];
+      }
+      else {
+        return ['status' => 0, 'success' => 'No Over Received Shipments', 'over_received' => FALSE];
+      }
     }
 
     public function receive_summary_request_short_received(Request $request) {

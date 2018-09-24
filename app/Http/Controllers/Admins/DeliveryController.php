@@ -81,10 +81,9 @@ class DeliveryController extends Controller
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                        $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
-                        return "<span class='danger font-weight-bold'>$older</span>";
+                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
                     } else {
-                        return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                        return $shipments->status_date;
                     }
                 }else{
                     return " - ";
@@ -92,7 +91,7 @@ class DeliveryController extends Controller
             })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
-                    return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
+                    return $shipments->arrival;
                 }else{
                     return " - ";
                 }
@@ -284,9 +283,6 @@ class DeliveryController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
-            ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->editColumn('pending_status',function ($result){
                 if($result->pending_status == 0){
@@ -581,7 +577,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Delivery Note</strong></td>
-                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Rider Name</strong></td>
@@ -1057,15 +1053,27 @@ class DeliveryController extends Controller
                                     Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
                                     DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
                                 } else if ($request->status_drop[$shipment] == 20) {
-                                    ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
-                                    ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
-                                    Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                                    NotificationsController::send(15, 0, $shipment);
-                                    NotificationsController::send(16, 0, $shipment);
+                                    $parcel = Shipment::find($shipment);
 
-                                    ShipmentChargesController::return ($shipment);
+                                    if (!$parcel->packaging_material_request) {
+                                        ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
+                                        ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
+                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                                        NotificationsController::send(15, 0, $shipment);
+                                        NotificationsController::send(16, 0, $shipment);
 
-                                    AdminFinanceController::add_payment($shipment, 1);
+                                        ShipmentChargesController::return($shipment);
+
+                                        AdminFinanceController::add_payment($shipment, 1);
+                                    }
+                                    else {
+                                        ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
+
+                                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+
+                                        NotificationsController::send(15, 0, $shipment);
+                                        NotificationsController::send(16, 0, $shipment);
+                                    }
                                 } else if (in_array($request->status_drop[$shipment], $delivered_status_array)) {
                                     $parcel = Shipment::where('id', $shipment)->first();
                                     if ($parcel->booking_type_id == 2) {
@@ -1130,6 +1138,17 @@ class DeliveryController extends Controller
                             }
                         }//main if condition
 
+                    }
+                    else {
+                        $parcel = Shipment::find($shipment);
+
+                        if ($parcel->booking_type_id == 2) {
+                            ShipmentChargesController::replacement($shipment);
+                        } else if ($parcel->booking_type_id == 3) {
+                            ShipmentChargesController::try_and_buy($shipment);
+                        }
+
+                        AdminFinanceController::add_payment($shipment, 0);
                     }
                 }else{
                         if ($request->has($status_drop) && $request->status_drop[$shipment] != null) {
@@ -1304,7 +1323,7 @@ class DeliveryController extends Controller
                 }
 
 
-                           $main_details .= '<td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                           $main_details .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Delivery Note No.</strong></td>
@@ -1550,7 +1569,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Undelivered Performa</strong></td>
-                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Delivery Note No.</strong></td>
@@ -1703,12 +1722,6 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('updated_at', function ($rider) {
-                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y h:i:s A') : '';
-            })
             ->addColumn('action',function ($deliveries){
                 if (session('role_id') == 1 || in_array(106, session('permissions'))) {
                     $dropdown = '
@@ -1808,12 +1821,6 @@ class DeliveryController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
-            ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
-            })
-            ->editColumn('updated_at', function ($rider) {
-                return $rider->updated_at ? with(new Carbon($rider->updated_at))->format('d/m/Y h:i:s A') : '';
             });
         if ($tracking_number = $request->get('search_tracking')) {
             $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
@@ -1931,9 +1938,6 @@ class DeliveryController extends Controller
         $datatable =  Datatables::of($sdn)
             ->editColumn('sdn', function ($sdn) {
                 return "<a href='javascript:void(0);' class='printSDN'><u>{$sdn->sdn_id}</u></a>";
-            })
-            ->editColumn('created_at', function ($sdn) {
-                return $sdn->created_at ? with(new Carbon($sdn->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn('deposit_slip',function ($sdn){
                 if($sdn->deposit_slip != null){
@@ -2182,7 +2186,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Station Deposit Note</strong></td>
-                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Hub Name</strong></td>
@@ -2282,10 +2286,9 @@ class DeliveryController extends Controller
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                        $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
-                        return "<span class='danger font-weight-bold'>$older</span>";
+                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
                     } else {
-                        return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                        return $shipments->status_date;
                     }
                 }else{
                     return " - ";
@@ -2293,7 +2296,7 @@ class DeliveryController extends Controller
             })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
-                    return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
+                    return $shipments->arrival;
                 }else{
                     return " - ";
                 }

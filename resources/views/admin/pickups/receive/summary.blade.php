@@ -29,6 +29,7 @@
 										<th class="border-primary border-darken-1">Bookings</th>
 										<th class="border-primary border-darken-1">Received</th>
 										<th class="border-primary border-darken-1">Short Received</th>
+										<th class="border-primary border-darken-1">Over Received</th>
 										<th class="border-primary border-darken-1">Pickup Type</th>
 										<th class="border-primary border-darken-1">Booking Date</th>
 										<th class="border-primary border-darken-1">Assigned Date</th>
@@ -38,6 +39,44 @@
 									</tr>
 								</thead>
 							</table>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal fade" id="short_received_shipments" role="dialog" aria-labelledby="delivered_shipments_title" aria-hidden="true">
+					<div class="modal-dialog modal-sm" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title" id="short_received_title">Short Received Shipment(s)</h4>
+
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">×</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal fade" id="over_received_shipments" role="dialog" aria-labelledby="delivered_shipments_title" aria-hidden="true">
+					<div class="modal-dialog modal-sm" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title" id="over_received_title">Over Received Shipment(s)</h4>
+
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">×</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -89,6 +128,7 @@
 					{data: 'bookings', name: 'pickup_requests.bookings', class: 'align-middle bookings'},
 					{data: 'received', name: 'pickup_requests.received', class: 'align-middle received'},
 					{data: 'short_received', name: 'pickup_requests.short_received', class: 'align-middle short_received'},
+					{data: 'over_received', name: 'pickup_requests.over_received', class: 'align-middle over_received'},
 					{data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},
 					{data: 'booking_date', name: 'pickup_requests.created_at', class: 'align-middle booking_date'},
 					{data: 'assigned_date', name: 'pn.created_at', class: 'align-middle assigned_date'},
@@ -128,6 +168,68 @@
 
 					this.api().table().columns.adjust();
 				}
+			});
+
+			$('#datatable tbody').on('click', 'tr td.short_received_shipments button', function() {
+				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#short_received_shipments .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.pickups.receive.summary.request.short_received') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'pickup_request_id': pickup_request_id
+					}
+				})
+				.done(function(data) {
+					if (data) {
+						var shipments = '';
+
+						$.each(data.short_received, function(receiving_sheet_id, tracking_numbers) {
+							var receiving_sheet_number = receiving_sheet_id.toString();
+
+							while (receiving_sheet_number.length < 12) {
+								receiving_sheet_number = '0' + receiving_sheet_number;
+							}
+
+							shipments += receiving_sheet_number + ': ' + tracking_numbers.join(' - ') + '<br/>';
+						});
+
+						$('#short_received_shipments .modal-body').html(shipments);
+
+						$('#short_received_shipments').modal('show');
+					}
+				});
+			});
+
+			$('#datatable tbody').on('click', 'tr td.over_received_shipments button', function() {
+				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#over_received_shipments .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.pickups.receive.summary.request.over_received') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'pickup_request_id': pickup_request_id
+					}
+				})
+				.done(function(data) {
+					if (data) {
+						var shipments = '';
+
+						$.each(data.over_received, function(index, tracking_number) {
+							shipments += tracking_number + '<br/>';
+						});
+
+						$('#over_received_shipments .modal-body').html(shipments);
+
+						$('#over_received_shipments').modal('show');
+					}
+				});
 			});
 
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {

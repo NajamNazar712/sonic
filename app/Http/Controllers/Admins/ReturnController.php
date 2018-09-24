@@ -54,7 +54,7 @@ class ReturnController extends Controller
                     DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival')
+            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
             ->where('shipments.shipper_status_id', 12)
             ->groupBy('shipments.id');
 
@@ -76,10 +76,9 @@ class ReturnController extends Controller
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                        $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
-                        return "<span class='danger font-weight-bold'>$older</span>";
+                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
                     } else {
-                        return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                        return $shipments->status_date;
                     }
                 }else{
                     return " - ";
@@ -87,14 +86,13 @@ class ReturnController extends Controller
             })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
-                    return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
+                    return $shipments->arrival;
                 }else{
                     return " - ";
                 }
             })
             ->addColumn("action", function ($result) {
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
-                $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';
                 $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';
 
                 if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0) {
@@ -130,17 +128,28 @@ class ReturnController extends Controller
         $admin = Auth::id();
         if($request->action == 'confirm'){
             foreach ($shipment_ids as $shipment){
-               $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
-                Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+                $parcel = Shipment::find($shipment);
 
+                if (!$parcel->packaging_material_request) {
+                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
+                    Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+                    ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
 
-                NotificationsController::send(15, 0, $shipment);
-                NotificationsController::send(16, 0, $shipment);
+                    NotificationsController::send(15, 0, $shipment);
+                    NotificationsController::send(16, 0, $shipment);
 
-                ShipmentChargesController::return($shipment);
+                    ShipmentChargesController::return($shipment);
 
-                AdminFinanceController::add_payment($shipment, 1);
+                    AdminFinanceController::add_payment($shipment, 1);
+                }
+                else {
+                    $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
+                    Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
+                    ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+
+                    NotificationsController::send(15, 0, $shipment);
+                    NotificationsController::send(16, 0, $shipment);
+                }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
         }elseif($request->action == 'reattempt'){
@@ -158,17 +167,30 @@ class ReturnController extends Controller
     public function return_marked_single_status(Request $request){
         $admin = Auth::id();
         if($request->action == 'confirm'){
-            Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-            $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
-            ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+            $parcel = Shipment::find($request->shipment_id);
+
+            if (!$parcel->packaging_material_request) {
+                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+                $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
+                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
 
 
-            NotificationsController::send(15, 0, $request->shipment_id);
-            NotificationsController::send(16, 0, $request->shipment_id);
+                NotificationsController::send(15, 0, $request->shipment_id);
+                NotificationsController::send(16, 0, $request->shipment_id);
 
-            ShipmentChargesController::return($request->shipment_id);
+                ShipmentChargesController::return($request->shipment_id);
 
-            AdminFinanceController::add_payment($request->shipment_id, 1);
+                AdminFinanceController::add_payment($request->shipment_id, 1);
+            }
+            else {
+                Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
+                $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
+                ShipmentsJourneyController::add($request->shipment_id, 17, 17, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+
+
+                NotificationsController::send(15, 0, $request->shipment_id);
+                NotificationsController::send(16, 0, $request->shipment_id);
+            }
 
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
         }elseif($request->action == 'reattempt'){
@@ -188,7 +210,7 @@ class ReturnController extends Controller
         return view('admin.return.confirmed');
     }
     public function return_confirmed_list(Request $request){
-        $status_return = array(20,22,24,27,29,30,33,35,37,42,44,45,46);
+        $status_return = array(20,22,24,27,29,30,33,35,37,44,45,46);
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -208,15 +230,27 @@ class ReturnController extends Controller
                     DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->select('shipments.id as shipment_id','shipments.id as shId','shipments.tracking_number as tracking','shipments.tracking_number as tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival')
-            ->whereIn('shipments.shipper_status_id',$status_return)
-            ->groupBy('shipments.id');
+            ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','sj.created_at as arrival')
+            ->whereIn('shipments.shipper_status_id',$status_return);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($shipments)
+            ->addColumn('return_pending_for', function ($shipment) {
+                if (in_array($shipment->shipper_status_id, [22, 24, 27, 29, 33, 35, 44, 45, 46])) {
+                    return 'Shipper';
+                }
+                else {
+                    if ($shipment->origin_hub_id == $shipment->destination_hub_id) {
+                        return 'Shipper';
+                    }
+                    else {
+                        return 'Cargo';
+                    }
+                }
+            })
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -224,10 +258,9 @@ class ReturnController extends Controller
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
-                        $older = Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
-                        return "<span class='danger font-weight-bold'>$older</span>";
+                        return "<span class='danger font-weight-bold'>" . $shipments->status_date . "</span>";
                     } else {
-                        return Carbon::parse($shipments->status_date)->format('d/m/Y H:i A');
+                        return $shipments->status_date;
                     }
                 }else{
                     return " - ";
@@ -235,32 +268,27 @@ class ReturnController extends Controller
             })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
-                    return Carbon::parse($shipments->arrival)->format('d/m/Y H:i A');
+                    return $shipments->arrival;
                 }else{
                     return " - ";
                 }
+            })
+            ->filterColumn('return_pending_for', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                if (strpos('shipper', $keyword) !== FALSE) {
+                    $query->whereIn('shipments.shipper_status_id', [22, 24, 27, 29, 33, 35, 44, 45, 46])
+                    ->orWhereRaw('`oc`.`hub_id` = `dc`.`hub_id`');
+                }
+                else if (strpos('cargo', $keyword) !== FALSE) {
+                    $query->whereIn('shipments.shipper_status_id', [20, 30, 37])
+                    ->whereRaw('`oc`.`hub_id` != `dc`.`hub_id`');
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             });
-            if ($select_type = $request->get('select_type')) {
-                if ($select_type == 0) {
-                    $datatables->join('cities AS dco', 'shipments.consignee_city_id', '=', 'dco.id');
-                }
-                else if ($select_type == 1) {
-                    $datatables->join('cities as dco', function($join) {
-                        $join->on('shipments.consignee_city_id', '=', 'dco.id')
-                            ->on('oc.hub_id', '=', 'dco.hub_id');
-                    });
-                }
-                else if ($select_type == 2) {
-                    $datatables->join('cities as dco', function($join) {
-                        $join->on('shipments.consignee_city_id', '=', 'dco.id')
-                            ->on('oc.hub_id', '!=', 'dco.hub_id');
-                    });
-                }
-            }
-            else {
-//                $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37]);
-                $datatables->whereIn('shipments.shipper_status_id', $status_return);
-            }
+
            return $datatables->make(true);
     }
   public function return_create_index(){
@@ -508,10 +536,6 @@ class ReturnController extends Controller
         $datatables = Datatables::of($deliveries)
         ->editColumn('return_note', function ($deliveries) {
             return "<a href='javascript:void(0);' class='printreturnnote'><u>$deliveries->return_note_id</u></a>";
-        })
-
-        ->editColumn('created_at', function ($rider) {
-            return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
         })
         ->addColumn("action", function ($result) {
             $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
@@ -903,7 +927,7 @@ class ReturnController extends Controller
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                             <td class="text-center align-middle color primary"><strong>Return Note ['.$return_note_details->id.']</strong></td>
-                            <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                          
                           <tr>

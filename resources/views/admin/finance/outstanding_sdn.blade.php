@@ -28,7 +28,7 @@
 										<th class="border-primary border-darken-1">DNCC Amount</th>
 										<th class="border-primary border-darken-1">Deposited by</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
-										<th class="border-primary border-darken-1">Deposited at</th>
+										<th class="border-primary border-darken-1">Deposited Datetime</th>
 										<th class="border-primary border-darken-1">Deposit Slip</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -57,9 +57,9 @@
 														<th class="border-primary border-darken-1">Shipments</th>
 														<th class="border-primary border-darken-1">Shipments Delivered</th>
 														<th class="border-primary border-darken-1">Assigned by</th>
-														<th class="border-primary border-darken-1">Assigned at</th>
+														<th class="border-primary border-darken-1">Assigned Datetime</th>
 														<th class="border-primary border-darken-1">Updated by</th>
-														<th class="border-primary border-darken-1">Updated at</th>
+														<th class="border-primary border-darken-1">Updated Datetime</th>
 														<th class="border-primary border-darken-1">DNCC Amount</th>
 													</tr>
 												</thead>

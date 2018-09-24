@@ -23,7 +23,7 @@
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Designation</th>
 										<th class="border-primary border-darken-1">Department</th>
-										<th class="border-primary border-darken-1">Updated at</th>
+										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>

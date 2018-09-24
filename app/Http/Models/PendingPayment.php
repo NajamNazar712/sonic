@@ -9,4 +9,8 @@ class PendingPayment extends Model
 	public function pending_payment_shipments() {
 		return $this->hasMany('App\Http\Models\PendingPaymentShipment');
 	}
+
+	public function shipper() {
+		return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
+	}
 }

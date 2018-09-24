@@ -83,8 +83,7 @@ class SamedayController extends Controller
             })
             ->editColumn('dispatched_time',function ($shipments){
                 if($shipments->dispatched_time) {
-
-                        return Carbon::parse($shipments->dispatched_time)->format('d/m/Y h:i A');
+                    return $shipments->dispatched_time;
 
                 }else{
                     return " - ";
@@ -92,14 +91,14 @@ class SamedayController extends Controller
             })
             ->editColumn('booked_date',function($shipments){
                 if($shipments->booked_date){
-                    return Carbon::parse($shipments->booked_date)->format('d/m/Y h:i A');
+                    return $shipments->booked_date;
                 }else{
                     return " - ";
                 }
             })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
-                    return Carbon::parse($shipments->arrival)->format('d/m/Y h:i A');
+                    return $shipments->arrival;
                 }else{
                     return " - ";
                 }
@@ -107,11 +106,11 @@ class SamedayController extends Controller
             ->addColumn('delivered_status',function ($shipments){
                 if($shipments->delivered_time != '' || $shipments->replacement_delivered != '' || $shipments->trybuy_delivered != ''){
                     if($shipments->booking_type_id == 1){
-                        return Carbon::parse($shipments->delivered_time)->format('d/m/Y h:i A');
+                        return $shipments->delivered_time;
                     }else if($shipments->booking_type_id == 2){
-                        return Carbon::parse($shipments->replacement_delivered)->format('d/m/Y h:i A');
+                        return $shipments->replacement_delivered;
                     }else if($shipments->booking_type_id == 3){
-                        return Carbon::parse($shipments->trybuy_delivered)->format('d/m/Y h:i A');
+                        return $shipments->trybuy_delivered;
                     }
                 }
                 else{
@@ -122,7 +121,7 @@ class SamedayController extends Controller
 //                Carbon::createFromFormat('Y-m-d H:i:s', $shipments->booked_date)->format('h:m:s A');
                 $now = Carbon::now();
                return Carbon::parse($now)->diffForHumans($shipments->booked_date,true);
-//                return Carbon::parse($shipments->booked_date)->format('d/m/Y h:i A');
+
             })
             ->addColumn('remaining_time',function ($shipments){
                 $now = Carbon::now();

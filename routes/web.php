@@ -259,6 +259,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
                 Route::prefix('request')->name('request.')->group(function () {
                     Route::post('short_received', 'Admins\AdminPickupsController@receive_summary_request_short_received')->name('short_received');
+                    Route::post('over_received', 'Admins\AdminPickupsController@receive_summary_request_over_received')->name('over_received');
                     Route::put('done', 'Admins\AdminPickupsController@receive_summary_request_done')->name('done');
                     Route::put('not_done', 'Admins\AdminPickupsController@receive_summary_request_not_done')->name('not_done');
                 });
@@ -477,6 +478,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('adjusted_shipments', 'Admins\AdminFinanceController@make_payments_adjusted_shipments')->name('adjusted_shipments');
             Route::post('shipment_details', 'Admins\AdminFinanceController@make_payments_shipment_details')->name('shipment_details');
             Route::get('shipment_list', 'Admins\AdminFinanceController@make_payments_shipment_list')->name('shipment_list');
+            Route::post('verify', 'Admins\AdminFinanceController@make_payments_verify')->name('verify');
             Route::get('export_bank_order', 'Admins\AdminFinanceController@make_payments_export_bank_order')->name('export_bank_order');
             Route::post('store', 'Admins\AdminFinanceController@make_payments_store')->name('store');
         });

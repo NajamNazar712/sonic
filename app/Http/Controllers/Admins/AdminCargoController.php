@@ -54,7 +54,14 @@ class AdminCargoController extends Controller
 
       if (session('role_id') != 1) {
         $shipments = $shipments->where(function ($query) {
-          $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+          $query->where(function ($sub_query) {
+            $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+            ->whereIn('oc.hub_id', session('hubs'));
+          })
+          ->orWhere(function ($sub_query) {
+            $sub_query->where('shipments.shipper_status_id', 2)
+            ->whereIn('dc.hub_id', session('hubs'));
+          });
         });
       }
 
@@ -80,13 +87,17 @@ class AdminCargoController extends Controller
         }
       })
       ->filterColumn('oc.name', function ($query, $keyword) {
+          $keyword = strtolower($keyword);
+
           $query->where(function ($sub_query) use ($keyword) {
             $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
             ->where('dc.name', 'like', '%' . $keyword . '%');
           })
           ->orWhere('oc.name', 'like', '%' . $keyword . '%');
       })
-        ->filterColumn('dc.name', function ($query, $keyword) {
+      ->filterColumn('dc.name', function ($query, $keyword) {
+          $keyword = strtolower($keyword);
+
           $query->where(function ($sub_query) use ($keyword) {
             $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
             ->where('oc.name', 'like', '%' . $keyword . '%');
@@ -460,9 +471,6 @@ class AdminCargoController extends Controller
       }
 
       $datatables = Datatables::of($cargo_consignments)
-      ->editColumn('transit_at', function($cargo_consignment) {
-        return Carbon::parse($cargo_consignment->transit_at)->format('d/m/Y H:i A');
-      })
       ->addColumn('action', function($cargo_consignment) {
         $print_button = '<button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>';
         $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Forwarding Details</div></button>';
@@ -594,8 +602,8 @@ class AdminCargoController extends Controller
                             <tr>
                               <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Slip</strong></td>
-                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
-                            </tr>
+                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                              </tr>
                             <tr>
                               <td class="color secondary"><strong>Destination Hub</strong></td>
                               <td>' . $cargo_consignment->destination_hub->name . '</td>
@@ -606,7 +614,7 @@ class AdminCargoController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Transit Date</strong></td>
-                              <td>' . Carbon::parse($cargo_consignment->created_at)->format('d/m/Y H:i A') . '</td>
+                              <td>' . $cargo_consignment->created_at . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Shipping Mode</strong></td>
@@ -680,7 +688,7 @@ class AdminCargoController extends Controller
                             <tr>
                               <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Checklist</strong></td>
-                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Origin Hub</strong></td>
@@ -696,7 +704,7 @@ class AdminCargoController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Transit Date</strong></td>
-                              <td>' . Carbon::parse($cargo_consignment->created_at)->format('d/m/Y H:i A') . '</td>
+                              <td>' . $cargo_consignment->created_at . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Expected Arrival Date</strong></td>

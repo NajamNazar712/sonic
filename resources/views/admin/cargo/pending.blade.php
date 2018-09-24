@@ -41,8 +41,8 @@
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Amount</th>
 										<th class="border-primary border-darken-1">Shipping Mode</th>
-										<th class="border-primary border-darken-1">Booked At</th>
-										<th class="border-primary border-darken-1">Arrival At</th>
+										<th class="border-primary border-darken-1">Booked Datetime</th>
+										<th class="border-primary border-darken-1">Arrival Datetime</th>
 									</tr>
 								</thead>
 							</table>

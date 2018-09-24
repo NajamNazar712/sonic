@@ -468,10 +468,6 @@ class AdminDashboardController extends Controller
             ->editColumn('phone1',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
             })
-            ->editColumn('booking_date', function ($shipments) {
-                return $shipments->booking_date ? with(new Carbon($shipments->booking_date))->format('d/m/Y h:i:s A') : '';
-
-            })
             ->addColumn('action',function ($shipments) {
                 if ($shipments->shipper_status_id != 17 && $shipments->shipper_status_id > 1) {
                     $dropdown = '
@@ -3253,9 +3249,6 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)
-            ->editColumn('created_at', function ($users) {
-                return $users->created_at ? with(new Carbon($users->created_at))->format('d/m/Y h:i:s A') : '';
-            })
             ->editColumn('status', function ($users) {
                 return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
             })
@@ -3614,9 +3607,6 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('created_at', function ($routes) {
-                return $routes->created_at ? with(new Carbon($routes->created_at))->format('d/m/Y h:i:s A') : '';
-            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([94, 95], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -3768,9 +3758,6 @@ class AdminDashboardController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
-            ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y h:i:s A') : '';
             })
             ->addColumn("action", function ($rider) {
                 if (session('role_id') == 1 || count(array_intersect([98, 99], session('permissions'))) !== 0) {

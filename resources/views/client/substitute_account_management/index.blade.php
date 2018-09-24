@@ -25,7 +25,7 @@
 										<th class="border-primary border-darken-1">Phone Number</th>
 										<th class="border-primary border-darken-1">Email</th>
 										<th class="border-primary border-darken-1">CNIC</th>
-										<th class="border-primary border-darken-1">Updated at</th>
+										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>

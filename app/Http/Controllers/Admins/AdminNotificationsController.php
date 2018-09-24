@@ -36,9 +36,6 @@ class AdminNotificationsController extends Controller
                 return $notification->type_id;
             },
         ])
-        ->editColumn('updated_at', function($notifications) {
-            return Carbon::parse($notifications->updated_at)->format('d/m/Y H:i A');
-        })
         ->editColumn('status', function ($notification) {
             return (($notification->status) ? 'Enabled' : 'Disabled');
         })

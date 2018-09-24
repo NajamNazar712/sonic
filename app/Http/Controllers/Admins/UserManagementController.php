@@ -38,9 +38,6 @@ class UserManagementController extends Controller
         ->where('ar.id', '!=', 1);
 
         $datatables = Datatables::of($users)
-        ->editColumn('updated_at', function($user) {
-            return Carbon::parse($user->updated_at)->format('d/m/Y H:i A');
-        })
         ->editColumn('role', function($user) {
             return $user->role . ' - ' . $user->department;
         })
@@ -241,9 +238,6 @@ class UserManagementController extends Controller
         ->where('admin_roles.id', '!=', 1);
 
         $datatables = Datatables::of($roles)
-        ->editColumn('updated_at', function($role) {
-            return Carbon::parse($role->updated_at)->format('d/m/Y H:i A');
-        })
         ->addColumn('action', function($role) {
             if (session('role_id') == 1 || in_array(87, session('permissions'))) {
                 return '<div class="btn-group">

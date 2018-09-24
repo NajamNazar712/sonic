@@ -71,7 +71,7 @@
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Recovery Status</th>
                         <th class="border-primary border-darken-1">Current Status</th>
-                        <th class="border-primary border-darken-1">Status Updated at</th>
+                        <th class="border-primary border-darken-1">Status Updated Datetime</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">DNCC</th>
                         <th class="border-primary border-darken-1">SDN</th>

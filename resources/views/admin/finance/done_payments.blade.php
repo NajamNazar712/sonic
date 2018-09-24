@@ -38,7 +38,7 @@
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
 										<th class="border-primary border-darken-1">Reference No.</th>
-										<th class="border-primary border-darken-1">Done at</th>
+										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>

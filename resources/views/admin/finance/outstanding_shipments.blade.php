@@ -76,7 +76,7 @@
 										<th class="border-primary border-darken-1">Service Type</th>
 										<th class="border-primary border-darken-1">Amount</th>
 										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1">Status Updated at</th>
+										<th class="border-primary border-darken-1">Status Updated Datetime</th>
 										<th class="border-primary border-darken-1">Remarks</th>
 										<th class="border-primary border-darken-1">DNCC</th>
 										<th class="border-primary border-darken-1">SDN</th>
