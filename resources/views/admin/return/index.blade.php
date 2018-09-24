@@ -157,7 +157,7 @@
                                 row.push(values.reason);
                                 row.push(values.remarks);
                                 row.push(values.arrival);
-                                row.push(values.status_date);
+                                row.push(values.last_status_date);
 
                                 body.push(row);
                             });
