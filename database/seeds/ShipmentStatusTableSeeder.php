@@ -51,15 +51,9 @@ class ShipmentStatusTableSeeder extends Seeder
 			array('id' => 36, 'code' => 'TB-DE', 'name' => 'Try & Buy - Delivered', 'description' => 'Try & Buy shipment is delivered to the consignee'),
 			array('id' => 37, 'code' => 'TB-PD', 'name' => 'Try & Buy - Partial Delivered', 'description' => 'Some contents of the Try & Buy shipment are delivered and the rest are to be returned to the shipper'),
 			array('id' => 38, 'code' => 'TB-DS', 'name' => 'Try & Buy - Delivered to Shipper', 'description' => 'Try & Buy shipment is sent back to the shipper'),
-			array('id' => 39, 'code' => 'P-PR', 'name' => 'Payment - Processed', 'description' => 'Payment for the shipment is processed by TRAX'),
-			array('id' => 40, 'code' => 'P-PA', 'name' => 'Payment - Paid', 'description' => 'Payment reimbursed to the shipper'),
-			array('id' => 41, 'code' => 'P-RE', 'name' => 'Payment - Reverted', 'description' => 'Payment is reverted from the bank\'s end'),
-			array('id' => 42, 'code' => 'P-AD', 'name' => 'Payment - Adjusted', 'description' => 'Shipment is wrongly paid and the amount is adjusted in next payment'),
-			array('id' => 43, 'code' => 'P-CD', 'name' => 'Payment - Charges Deducted', 'description' => 'Charges have been deducted of the Return Shipment'),
 			array('id' => 44, 'code' => 'R-RE', 'name' => 'Return - Rider Exchange', 'description' => 'Return shipment not pertain\'s to assigned rider\'s route'),
 			array('id' => 45, 'code' => 'RP-RE', 'name' => 'Replacement - Rider Exchange', 'description' => 'Replacement shipment not pertain\'s to assigned rider\'s route'),
-			array('id' => 46, 'code' => 'TB-RE', 'name' => 'Try & Buy - Rider Exchange', 'description' => 'Try & Buy shipment not pertain\'s to assigned rider\'s route'),
-			array('id' => 47, 'code' => 'P-REC', 'name' => 'Payment - Rectified', 'description' => 'Shipment amount is wrongly paid and the difference is adjusted in next payment'),
+			array('id' => 46, 'code' => 'TB-RE', 'name' => 'Try & Buy - Rider Exchange', 'description' => 'Try & Buy shipment not pertain\'s to assigned rider\'s route')
         ));
     }
 }

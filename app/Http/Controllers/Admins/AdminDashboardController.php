@@ -452,7 +452,8 @@ class AdminDashboardController extends Controller
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftjoin('shipment_items as si','si.shipment_id','=','shipments.id')
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id'])
+            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status'])
             //->where('shipments.user_id',Auth::id())
             ->groupBy('shipments.id');
 

@@ -257,7 +257,7 @@
                                 shipment += '<h4><u>Tracking History</u></h4>';
                                 shipment += '<div class="border">';
 
-                                shipment += '<table class="table table-sm table-borderless datatable">';
+                                shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
                                 shipment += '<thead>';
                                 shipment += '<tr role="row">';
                                 shipment += '<th><strong>Date / Time</strong></th>';
@@ -283,6 +283,36 @@
                                 shipment += '</div>';
                                 shipment += '</div>';
 
+                                if ('payment_history' in details) {
+                                    shipment += '<div class="col-12 mt-2">';
+                                    shipment += '<h4><u>Payment History</u></h4>';
+                                    shipment += '<div class="border">';
+
+                                    shipment += '<table class="table table-sm table-borderless datatable payment_history">';
+                                    shipment += '<thead>';
+                                    shipment += '<tr role="row">';
+                                    shipment += '<th><strong>Date / Time</strong></th>';
+                                    shipment += '<th><strong>Status</strong></th>';
+                                    shipment += '<th><strong>User</strong></th>';
+                                    shipment += '</tr>';
+                                    shipment += '</thead>';
+                                    shipment += '<tbody>';
+
+                                    $.each(details.payment_history, function(index, history) {
+                                        shipment += '<tr>';
+                                        shipment += '<td>' + history.date_time + '</td>';
+                                        shipment += '<td>' + history.status + '</td>';
+                                        shipment += '<td>' + history.user + '</td>';
+                                        shipment += '</tr>';
+                                    });
+
+                                    shipment += '</tbody>';
+                                    shipment += '</table>';
+
+                                    shipment += '</div>';
+                                    shipment += '</div>';
+                                }
+
                                 shipment += '</div>';
                                 shipment += '</div>';
 
@@ -292,7 +322,7 @@
                                 $('#tracking').append(shipment);
                             });
 
-                            $('#tracking table.datatable').DataTable({
+                            $('#tracking table.datatable.tracking_history').DataTable({
                                 dom: 't',
                                 paging: false,
                                 order: [[0, 'desc']],
@@ -301,6 +331,17 @@
                                     {name: 'status', class: 'align-middle status'},
                                     {name: 'reason', class: 'align-middle reason'},
                                     {name: 'city', class: 'align-middle city'}
+                                ]
+                            });
+
+                            $('#tracking table.datatable.payment_history').DataTable({
+                                dom: 't',
+                                paging: false,
+                                order: [[0, 'desc']],
+                                columns: [
+                                    {name: 'date_time', class: 'align-middle date_time'},
+                                    {name: 'status', class: 'align-middle status'},
+                                    {name: 'user', class: 'align-middle user'}
                                 ]
                             });
                         }

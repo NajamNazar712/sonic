@@ -38,8 +38,13 @@ class Shipment extends Model
 	public function receiving_sheet_shipment() {
 		return $this->hasOne('App\Http\Models\ReceivingSheetShipment');
 	}
+
 	public function shipment_journey(){
 	    return $this->hasMany('App\Http\Models\ShipmentsJourney');
+    }
+
+    public function shipment_payment_journey(){
+	    return $this->hasMany('App\Http\Models\ShipmentsPaymentJourney');
     }
 
     public function status_shipper() {
@@ -48,5 +53,9 @@ class Shipment extends Model
 
     public function status_consignee() {
     	return $this->belongsTo('App\Http\Models\ShipmentStatus', 'consignee_status_id', 'id');
+    }
+
+    public function payment_status() {
+    	return $this->belongsTo('App\Http\Models\ShipmentPaymentStatus', 'payment_status_id', 'id');
     }
 }

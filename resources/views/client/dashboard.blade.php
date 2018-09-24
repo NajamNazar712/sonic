@@ -156,6 +156,7 @@
                                 <th class="border-primary border-darken-1">Order ID</th>
                                 <th class="border-primary border-darken-1">Service Type</th>
                                 <th class="border-primary border-darken-1">Status</th>
+                                <th class="border-primary border-darken-1">Payment Status</th>
                                 <th class="border-primary border-darken-1">Origin</th>
                                 <th class="border-primary border-darken-1">Destination</th>
                                 <th class="border-primary border-darken-1">Consignee Name</th>
@@ -398,6 +399,7 @@
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'payment_status', name: 'sps.name', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},

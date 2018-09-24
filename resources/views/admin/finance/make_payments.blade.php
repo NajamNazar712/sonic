@@ -209,8 +209,7 @@
 												<div class="w-100"></div>
 
 												<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-												<button type="submit" name="make" class="mr-1 btn btn-primary make">Make</button>
-												<button type="button" name="export_bank_order" class="btn btn-info export_bank_order">Export Bank Order</button>
+												<button type="submit" name="make" class="mr-1 btn btn-primary make">Make & Export Bank Order</button>
 											</form>
 										</div>
 									</div>
@@ -230,6 +229,10 @@
 @section('js')
 	<script>
 		$(document).ready(function() {
+			@if (session('print'))
+				window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?done_payment_ids=' + '{{ implode(',', session('print')) }}', '_blank');
+			@endif
+
 			var selected_rows = [];
 
 			var selected_pending_payment_ids = [];
@@ -659,54 +662,11 @@
 				$('#make_payments #make_payments_form .shipment_ids').val(selected_rows_shipments);
 			});
 
-			$('#make_payments #make_payments_form .export_bank_order').bind('click', function(e) {
-				e.preventDefault();
-
-				$.ajax({
-					url: '{!! route('admin.finance.make_payments.verify') !!}',
-					method: 'POST',
-					data: {
-						'_token': '{{ csrf_token() }}',
-						'pending_payment_ids': $('#make_payments #make_payments_form .pending_payment_ids').val(),
-						'shipment_ids': $('#make_payments #make_payments_form .shipment_ids').val()
-					}
-				})
-				.done(function(data) {
-					if (data.status == 0) {
-						window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?pending_payment_ids=' + selected_pending_payment_ids + '&shipment_ids=' + selected_rows_shipments, '_blank');
-					}
-					else {
-						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
-
-						$.each(data.negative_payments, function(index, shipper) {
-							html += shipper + '<br/>';
-						});
-
-						content = document.createElement('div');
-						content.innerHTML = html;
-
-						swal({
-							content: content,
-							icon: 'warning',
-							buttons: {
-								cancel: {
-									text: 'Close',
-									value: null,
-									visible: true,
-									closeModal: true,
-								}
-							},
-							closeOnClickOutside: false,
-							closeOnEsc: false,
-							dangerMode: true
-						});
-					}
-				});
-			});
-
 			$('#make_payments #make_payments_form').bind('submit', function(e) {
 				e.preventDefault();
 
+				var form = this;
+
 				$.ajax({
 					url: '{!! route('admin.finance.make_payments.verify') !!}',
 					method: 'POST',
@@ -718,7 +678,7 @@
 				})
 				.done(function(data) {
 					if (data.status == 0) {
-						this.submit();
+						form.submit();
 					}
 					else {
 						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
