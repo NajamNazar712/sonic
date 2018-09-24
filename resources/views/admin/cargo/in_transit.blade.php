@@ -300,12 +300,7 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
-	<style type="text/css">
-		a.btn.btn-secondary{
-			border-radius: 20px;
-			background: #64a0d2;
-		}
-	</style>
+
 @endsection
 
 @section('js')
@@ -455,6 +450,7 @@
                         {
                             extend: 'excel',
                             title: 'Pending Cargo',
+                            className: 'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
                         }],
 				@else

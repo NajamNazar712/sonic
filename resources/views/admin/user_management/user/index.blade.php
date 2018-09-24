@@ -43,25 +43,81 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<style type="text/css">
+		a.btn.btn-secondary{
+			border-radius: 20px;
+			background: #64a0d2;
+		}
+	</style>
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
-	<script>
+	<script type="text/javascript">
 		$(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.user_management.users.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Name');
+                            head.push('Phone Number');
+                            head.push('Email');
+                            head.push('CNIC');
+                            head.push('Role');
+                            head.push('Updated Datetime');
+                            head.push('Updated by');
+                            head.push('Status');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+                                row.push(index + 1);
+                                row.push(values.name);
+                                row.push(values.phone_number);
+                                row.push(values.email);
+                                row.push(values.cnic);
+                                row.push(values.role);
+                                row.push(values.updated_at);
+                                row.push(values.updated_by);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || in_array(82, session('permissions')))
-					dom: '<"d-inline-block"l><"pull-right"B>tipr',
 					buttons: [{
-						text: 'Add',
+						text: '<i class="la la-user-plus"></i> Add',
 						className: 'btn btn-primary add',
 						action: function (e, dt, node, config) {
 							window.location = '{{ route('admin.user_management.users.add.index') }}';
 						}
-					}],
+					},{
+                        extend: 'excel',
+                        title: 'Pending Cargo',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
 				@else
-	                dom: 'ltipr',
+                buttons: [{
+						extend: 'excel',
+						title: 'Users',
+                    	className: 'btn btn-primary',
+						text: '<i class="la la-file-excel-o"></i> Excel',
+					}],
 	            @endif
 	            scrollX: true, scrollY: '300px',
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],

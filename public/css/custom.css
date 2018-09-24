@@ -19,7 +19,7 @@ html body .content .content-wrapper {
     color: #284155 !important;
 }
 
-::-ms-input-placeholder { /* Microsoft Edge */
+:-ms-input-placeholder { /* Microsoft Edge */
     color: #284155 !important;
 }
 
@@ -151,6 +151,9 @@ table.dataTable tbody tr.selected td.select-checkbox:after {
 .dataTables_scrollBody thead tr {
 	visibility: collapse;
 }
+.dt-buttons.btn-group a.btn.btn-secondary{
+	 border-radius: 20px;
+ }
 
 #toast-bottom-center.toast-container {
 	text-align: center;

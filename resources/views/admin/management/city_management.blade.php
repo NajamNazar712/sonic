@@ -66,9 +66,48 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.management.city.ajax') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('City Name');
+                            head.push('City Code');
+                            head.push('Hub Name');
+                            head.push('Hub Code');
+                            head.push('Status');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.name);
+                                row.push(values.city_id);
+                                row.push(values.hub);
+                                row.push(values.hub_id);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
            var table =  $('.datatable').DataTable({
+               dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(89, session('permissions')))
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
                     buttons: [{
                        text: 'Add City',
                        className: 'btn btn-primary',
@@ -85,9 +124,19 @@
                            }
                        }
 
+                    },{
+                    extend: 'excel',
+                    title: 'City Management',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 @else
-                    dom: 'ltipr',
+                buttons: [{
+                    extend: 'excel',
+                    title: 'City Management',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
                 @endif
                 scrollX: true, scrollY: '300px',
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
