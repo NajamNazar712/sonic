@@ -296,8 +296,11 @@ class AdminPackagingMaterialController extends Controller
                }else{
                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
                }
-               $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
+               $new_tracking_number = $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
                 $this->add_item($shipment->id,24,null,1,null,0,0);
+                PackagingMaterialRequest::where('id',$request_id)->update([
+                   'tracking_number'=>$new_tracking_number
+                ]);
                ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, $request_details->user_id, NULL);
 
                ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $request_details->amount);
