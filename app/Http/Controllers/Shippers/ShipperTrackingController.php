@@ -81,6 +81,20 @@ class ShipperTrackingController extends Controller
         				$details['tracking_history'][] = $journey_details;
         			}
 
+                    $shipment_payment_journey = $shipment->shipment_payment_journey;
+
+                    if ($shipment_payment_journey) {
+                        foreach ($shipment_payment_journey as $journey) {
+                            $journey_details = array();
+
+                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                            $journey_details['status'] = $journey->status->name;
+                            $journey_details['user'] = $journey->admin->name;
+
+                            $details['payment_history'][] = $journey_details;
+                        }
+                    }
+
         			$tracking['shipments'][$shipment->id] = $details;
                 }
                 else {

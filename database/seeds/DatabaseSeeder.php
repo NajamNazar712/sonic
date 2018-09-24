@@ -35,6 +35,7 @@ class DatabaseSeeder extends Seeder
         $this->call(ShipmentStatusReasonTableSeeder::class);
         $this->call(ShipmentStatusShipmentStatusReasonTableSeeder::class);
         $this->call(ShipmentStatusTableSeeder::class);
+        $this->call(ShipmentPaymentStatusTableSeeder::class);
         $this->call(ShippingModeSameDayTimingTableSeeder::class);
         $this->call(ShippingModeTableSeeder::class);
         $this->call(StandardBookingTypeChargesTableSeeder::class);
