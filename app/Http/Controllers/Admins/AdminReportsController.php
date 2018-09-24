@@ -65,7 +65,7 @@ class AdminReportsController extends Controller
                 }else{
                     return $days;
                 }
-            })
+            });
             if ($shipper = $request->get('search_shipper')) {
                 $datatable->where('u.id', '=', $shipper);
             }
