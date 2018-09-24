@@ -57,17 +57,82 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<style type="text/css">
+		a.btn.btn-secondary{
+			border-radius: 20px;
+			background: #64a0d2;
+		}
+	</style>
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
-	<script>
+	<script type="text/javascript">
 		$(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.cargo.pending.list') }}',
+                        data: {
+                            'page': 'all',
+                            'shipment_type': $('#shipment_type_search_form #shipment_type').val()
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Tracking Number');
+                            head.push('Order ID');
+                            head.push('Service Type');
+                            head.push('Status');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Shipper');
+                            head.push('Amount');
+                            head.push('Shipping Mode');
+                            head.push('Booked Datetime');
+                            head.push('Arrival Datetime');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking);
+                                row.push(values.order_id);
+                                row.push(values.service_type);
+                                row.push(values.status);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.shipper);
+                                row.push(values.amount);
+                                row.push(values.shipping_mode);
+                                row.push(values.booked_at);
+                                row.push(values.arrival_at);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
-				dom: 'ltipr',
-				scrollX: true, scrollY: '300px',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '300px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Pending Cargo',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }
+                ],
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',

@@ -50,7 +50,7 @@ class AdminCargoController extends Controller
         $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
         ->on('shipments_journey.shipper_status_id', '=', DB::raw(2));
       })
-      ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at');
+      ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at');
 
       if (session('role_id') != 1) {
         $shipments = $shipments->where(function ($query) {
