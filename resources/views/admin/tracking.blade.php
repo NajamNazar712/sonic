@@ -29,6 +29,25 @@
 
 							<div class="tracking" id="tracking">
 							</div>
+
+							<div class="modal fade" id="rider_information" role="dialog" aria-labelledby="rider_information_title" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="rider_information_title">Rider Information</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -366,6 +385,34 @@
 				id = $(this).attr('id');
 
 				print(id);
+			});
+
+			$('#tracking').on('click', '.rider_information', function() {
+				id = $(this).attr('data-id');
+
+				$.ajax({
+				url: '{!! route('admin.tracking.rider_information') !!}',
+				method: 'POST',
+				data: {
+					'_token': '{{ csrf_token() }}',
+					'id': id
+				}
+			})
+			.done(function(data) {
+				var details = '<table class="table table-sm table-bordered"><tbody>';
+
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' + data.name + '</td></tr>';
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' + data.phone_number + '</td></tr>';
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' + data.city + '</td></tr>';
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' + data.category + '</td></tr>';
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' + data.route + '</td></tr>';
+
+				details += '</tbody></table>';
+
+				$('#rider_information .modal-body').html(details);
+
+				$('#rider_information').modal('show');
+			});
 			});
 		});
 	</script>
