@@ -119,9 +119,83 @@
 
 	<script>
 		$(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.finance.payments.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Payment ID');
+                            head.push('Shipper');
+                            head.push('City');
+                            head.push('Phone No(s).');
+                            head.push('Address');
+                            head.push('Total Shipments');
+                            head.push('Delivered Shipments');
+                            head.push('Returned Shipments');
+                            head.push('Adjusted Shipments');
+                            head.push('Total Amount');
+                            head.push('Total Charges');
+                            head.push('Total GST');
+                            head.push('Total Payable');
+                            head.push('Bank');
+                            head.push('Return Shipments Avg. Aging');
+                            head.push('Reference No.');
+                            head.push('Done Datetime');
+                            head.push('Company Bank');
+                            head.push('Status');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.id);
+                                row.push(values.shipper);
+                                row.push(values.city);
+                                row.push(values.phone_numbers);
+                                row.push(values.address);
+                                row.push(values.total_shipments);
+                                row.push(values.delivered_shipments_count);
+                                row.push(values.returned_shipments_count);
+                                row.push(values.adjusted_shipments_count);
+                                row.push(values.total_amount);
+                                row.push(values.total_charges);
+                                row.push(values.total_gst);
+                                row.push(values.total_payable);
+                                row.push(values.bank);
+                                row.push(values.return_shipments_average_aging);
+                                row.push(values.reference_number);
+                                row.push(values.done_at);
+                                row.push(values.company_bank);
+                                row.push(values.status);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
-				scrollX: true, scrollY: '300px',
-				dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '300px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Finance Payments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
+                ],
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',

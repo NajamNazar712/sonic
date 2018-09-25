@@ -52,16 +52,61 @@
 
 	<script>
 		$(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.substitute_account_management.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Name');
+                            head.push('Phone Number');
+                            head.push('Email');
+                            head.push('CNIC');
+                            head.push('Updated Datetime');
+                            head.push('Status');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.name);
+                                row.push(values.phone_number);
+                                row.push(values.email);
+                                row.push(values.cnic);
+                                row.push(values.updated_at);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				scrollX: true, scrollY: '300px',
 				buttons: [{
-					text: 'Add',
+					text: '<i class="la la-user-plus"></i> Add',
 					className: 'btn btn-primary add',
 					action: function (e, dt, node, config) {
 						window.location = '{{ route('cod.substitute_account_management.add.index') }}';
 					}
-				}],
+				},{
+                    extend: 'excel',
+                    title: 'Substitute Accounts',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',
