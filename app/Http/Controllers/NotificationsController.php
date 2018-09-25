@@ -1598,8 +1598,6 @@ class NotificationsController extends Controller
               $to = array_merge($to, $general_admins->pluck('email')->toArray());
             }
 
-            $origin_hub_id = $pickup_note->city->hub_id;
-
             $to[] = Admin::find($reference_2_id)->email;
 
             self::email($subject, $body, $to);
