@@ -86,7 +86,7 @@ class ShipperReceivingSheetController extends Controller
       return Datatables::of($shipments)
       ->editColumn('receiving_sheet', function($shipment) {
         if ($shipment->receiving_sheet) {
-          return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($shipment->receiving_sheet, 12, "0", STR_PAD_LEFT) . '</span></button>';
+          return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($shipment->receiving_sheet, 6, "0", STR_PAD_LEFT) . '</span></button>';
         }
         else {
           return '';
@@ -438,7 +438,7 @@ class ShipperReceivingSheetController extends Controller
                             <td>' . Auth::user()->name . '</td>
                             <td rowspan="7" class="text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
                           <tr>

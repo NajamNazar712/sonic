@@ -320,7 +320,7 @@
 								var id = receiving_sheet['id'];
 								var text = receiving_sheet['id'].toString();
 
-								while (text.length < 12) {
+								while (text.length < 6) {
 									text = '0' + text;
 								}
 

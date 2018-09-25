@@ -20,7 +20,7 @@
                         <th class="border-primary border-darken-1">Dispute No.</th>
                         <th class="border-primary border-darken-1">Dispute Date/Time</th>
                         <th class="border-primary border-darken-1">Description</th>
-                        <th class="border-primary border-darken-1">Originated Datetime</th>
+                        <th class="border-primary border-darken-1">Originated At</th>
                         <th class="border-primary border-darken-1">Dispute Type</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Launched By</th>
@@ -335,7 +335,7 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Dispute .No');
+                            head.push('Dispute No.');
                             head.push('Dispute Date');
                             head.push('Description');
                             head.push('Originated At');

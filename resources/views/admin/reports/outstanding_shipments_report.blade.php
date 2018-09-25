@@ -233,7 +233,7 @@
                             head.push('Amount');
                             head.push('Recovery Status');
                             head.push('Current Status');
-                            head.push('Status Updated at');
+                            head.push('Status Updated Datetime');
                             head.push('Remarks');
                             head.push('DNCC');
                             head.push('SDN');

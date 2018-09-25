@@ -45,7 +45,7 @@ class ShipperTrackingController extends Controller
         			$shipper = $shipment->user;
 
         			$details['shipper']['name'] = $shipper->name;
-        			$details['shipper']['account_number'] = $shipper->id;
+        			$details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
         			$details['shipper']['phone_number_1'] = $shipper->phone;
         			$details['shipper']['phone_number_2'] = $shipper->phone2;
         			$details['shipper']['origin'] = $shipper->city->name;
