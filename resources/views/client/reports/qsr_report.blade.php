@@ -15,17 +15,27 @@
                 <div class="row mb-2 justify-content-center">
 
 
-                    <div class="col-xs-6 col-sm-4 col-md-4 col-lg-3">
-                        <fieldset class="form-group">
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
-                        </fieldset>
+                        </div>
                     </div>
-                    <div class="col-xs-6 col-sm-4 col-md-4 col-lg-3">
-                        <fieldset class="form-group">
+                    <div class="col-3">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
-                        </fieldset>
+                        </div>
                     </div>
-                    <div class="col-xs-6 col-sm-4 col-md-4 col-lg-2">
+                    <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
@@ -118,6 +128,18 @@
                             'search_to': $('input[name="to_date_formatted"]').val()
                         },
                         success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Tracking .No');
+                            head.push('Shipper');
+                            head.push('History Status');
+                            head.push('Service Type');
+                            head.push('Arrival');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Amount');
+                            head.push('Aging');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -138,7 +160,7 @@
                         async: false
                     });
 
-                    return {body: body, header: $("#datatable thead tr th").map(function() { return this.innerHTML; }).get()};
+                    return {body: body, header: head};
                 }
             } );
 
@@ -190,31 +212,6 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-
-                        if ($(header).is('.serial_number') || $(header).is('.aging')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
-
                     this.api().table().columns.adjust();
                 }
             });

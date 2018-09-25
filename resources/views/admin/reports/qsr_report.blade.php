@@ -280,9 +280,10 @@
                 scrollX: true, scrollY: '300px',
                 buttons: [
                     {
-                    extend: 'excel',
-                    title: 'QSR Report',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
+                        extend: 'excel',
+                        title: 'QSR Report',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],
