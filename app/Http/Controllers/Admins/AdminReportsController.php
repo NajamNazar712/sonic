@@ -54,8 +54,8 @@ class AdminReportsController extends Controller
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount'])
-        ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47])
-            ->orderBy('shipments.id');
+        ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47]);
+//            ->orderBy('shipments.id');
         $datatable = Datatables::of($shipments)
             ->addColumn('aging',function ($shipments){
 

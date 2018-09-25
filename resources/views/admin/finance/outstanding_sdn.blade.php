@@ -125,9 +125,61 @@
 					}
 				});
 			}
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.finance.outstanding_sdn.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('SDN No.');
+                            head.push('Hub');
+                            head.push('DNCCs');
+                            head.push('Delivered Shipments');
+                            head.push('DNCC Amount');
+                            head.push('Deposited By');
+                            head.push('Company Bank');
+                            head.push('Deposited Datetime');
+
+
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.delivery_note_number);
+                                row.push(values.hub);
+                                row.push(values.dncc_count);
+                                row.push(values.sdn_delivered_shipments);
+                                row.push(values.sdn_amount);
+                                row.push(values.deposited_by);
+                                row.push(values.bank);
+                                row.push(values.deposited_at);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
-				dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Outstanding SDN',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
 				scrollX: true, scrollY: '300px',
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
