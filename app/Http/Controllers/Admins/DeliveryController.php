@@ -1909,7 +1909,7 @@ class DeliveryController extends Controller
 //                return "<input class='form-control net_amount' readonly placeholder='Net Amount' name='net_amount[{$deliveries->delivery_note_id}]'>";
 //            })
             ->addColumn('remarks', function ($deliveries) {
-                $reason = '<input class="form-control" name="remarks['.$deliveries->delivery_note_id.']" placeholder="Enter Remarks">';
+                $reason = '<input class="form-control" name="remarks['.str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT).']" placeholder="Enter Remarks">';
                 return $reason;
             })
             ->make(true);
