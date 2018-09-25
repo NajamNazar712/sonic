@@ -23,6 +23,7 @@ class DisputeTypeTableSeeder extends Seeder
             array('id'=>8,'type'=>'Different Status'),
             array('id'=>9,'type'=>'Delay'),
             array('id'=>10,'type'=>'Junction - Cargo  Not Updated'),
+            array('id'=>11,'type'=>'Pickup - Over Received'),
 
 
         ));
