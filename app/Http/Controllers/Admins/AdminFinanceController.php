@@ -148,35 +148,13 @@ class AdminFinanceController extends Controller
     public function outstanding_sdn_reconcile_delivery_notes(Request $request) {
         $station_deposit_note = StationDepositNote::find($request->station_deposit_note_id);
 
-        $station_deposit_note->sdn_amount = $request->total_dncc_amount;
-        $station_deposit_note->sdn_expense = $request->total_expense;
-        $station_deposit_note->sdn_net_amount = $request->total_net_amount;
         $station_deposit_note->status = 2;
 
         $station_deposit_note->save();
 
-        $station_deposit_delivery_note_ids = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $request->station_deposit_note_id)->pluck('delivery_note_id')->toArray();
-
         $delivery_note_ids = explode(',', $request->delivery_note_ids);
 
-        $update_delivery_note_ids = array_intersect($delivery_note_ids, $station_deposit_delivery_note_ids);
-        $update_station_deposit_delivery_note_ids = array_diff($station_deposit_delivery_note_ids, $delivery_note_ids);
-
-        foreach ($update_delivery_note_ids as $delivery_note_id) {
-            $delivery_note = DeliveryNote::find($delivery_note_id);
-
-            $delivery_note->status = 2;
-
-            $delivery_note->save();
-        }
-
-        foreach ($update_station_deposit_delivery_note_ids as $delivery_note_id) {
-            $delivery_note = DeliveryNote::find($delivery_note_id);
-
-            $delivery_note->status = 3;
-
-            $delivery_note->save();
-
+        foreach ($delivery_note_ids as $delivery_note_id) {
             foreach (DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->get() as $delivery_note_shipment) {
                 if (in_array($delivery_note_shipment->status, [4, 5, 6])) {
                     $delivery_note_shipment->status = 7;
@@ -186,7 +164,7 @@ class AdminFinanceController extends Controller
             }
         }
 
-        return redirect()->back()->with('success', 'Station Deposit No.' . $request->station_deposit_note_id . ' has been Reconciled');
+        return redirect()->back()->with('success', 'Station Deposit No.' . str_pad($request->station_deposit_note_id, 6, '0', STR_PAD_LEFT) . ' has been Reconciled');
     }
 
     public function outstanding_sdn_export_to_excel(Request $request) {
@@ -257,9 +235,9 @@ class AdminFinanceController extends Controller
             ->where('sjd.created_at', '=', DB::raw('(SELECT MAX(created_at) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
         })
         ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
-        ->join('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
+        ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
         ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at')
-        ->where('delivery_note_shipments.status', '=', 7);
+        ->whereIn('delivery_note_shipments.status', [4, 5, 6]);
 
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
@@ -369,7 +347,7 @@ class AdminFinanceController extends Controller
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
 
-            $delivery_note_shipment->status = 8;
+            $delivery_note_shipment->status = 7;
 
             $delivery_note_shipment->save();
 
@@ -386,7 +364,7 @@ class AdminFinanceController extends Controller
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
 
-            $delivery_note_shipment->status = 9;
+            $delivery_note_shipment->status = 8;
 
             $delivery_note_shipment->save();
 
