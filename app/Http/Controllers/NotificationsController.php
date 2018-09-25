@@ -484,7 +484,8 @@ class NotificationsController extends Controller
             $cargo_consignment = CargoConsignment::find($reference_1_id);
 
             foreach ($fields as $key => $field) {
-              if ($key == 'cargo_number') {
+              if (strpos($subject, '[' . $key . ']') !== FALSE) {
+                if ($key == 'cargo_number') {
                   $subject = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $subject);
                 }
                 else {
