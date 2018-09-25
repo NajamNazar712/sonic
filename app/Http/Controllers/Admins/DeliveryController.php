@@ -269,7 +269,10 @@ class DeliveryController extends Controller
 
 
             ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='javascript:void(0);' class='printdeliverynote'><u>$deliveries->delivery_note</u></a>";
+                return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->filterColumn('delivery_notes.id', function ($query, $keyword) {
+                return $query->where('delivery_notes.id', '=', $keyword);
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
@@ -375,7 +378,7 @@ class DeliveryController extends Controller
             }
     }
     public function receive_delivery_update(Request $request,$id){
-        return view('admin.delivery.receive.update')->with('delivery_note_id',$id);
+        return view('admin.delivery.receive.update')->with('delivery_note_id', str_pad($id, 6, '0', STR_PAD_LEFT));
     }
     public function receive_delivery_notes_list(Request $request,$id){
         $deliveries = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
@@ -584,7 +587,7 @@ class DeliveryController extends Controller
                             <td>' . $rider_name . '</td>
                             <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
                           <tr>
@@ -600,7 +603,7 @@ class DeliveryController extends Controller
                             <td>' . $city_name  . '</td>
                           </tr>
                           <tr>
-                            <td class="color secondary"><strong>Total COD Amount</strong></td>
+                            <td class="color secondary"><strong>Total Collection Amount</strong></td>
                             <td>Rs ' . number_format($total_cod_amount) . '</td>
                           </tr>
                           <tr>
@@ -637,7 +640,7 @@ class DeliveryController extends Controller
         $note_data = DeliveryNote::where('id',$id)->first();
         if($note_data){
 
-            return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status]);
+            return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>str_pad($id, 6, '0', STR_PAD_LEFT),'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status]);
         }else{
             return redirect()->back()->with('error','Delivery note not found!');
         }
@@ -917,7 +920,7 @@ class DeliveryController extends Controller
 
         $note_data = DeliveryNote::where('id',$id)->first();
 
-        return view('admin.delivery.receive.verify_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status]);
+        return view('admin.delivery.receive.verify_status')->with(['delivery_note_id'=>str_pad($request->id, 6, '0', STR_PAD_LEFT),'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status]);
     }
     public function receive_delivery_verify_status_list(Request $request,$id){
         $deliveries = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
@@ -1276,7 +1279,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Weight</strong></td>
-                            <td class="color primary"><strong>Collect Amount</strong></td>
+                            <td class="color primary"><strong>Collection Amount</strong></td>
                           </tr>
         ';
 
@@ -1327,7 +1330,7 @@ class DeliveryController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Delivery Note No.</strong></td>
-                            <td>' . $delivery_note_details->id . '</td>
+                            <td>' . str_pad($delivery_note_details->id, 6, '0', STR_PAD_LEFT) . '</td>
                           </tr>
                           <tr>
                           <tr>
@@ -1335,7 +1338,7 @@ class DeliveryController extends Controller
                             <td>' . $rider_name . '</td>
                             <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
                           <tr>
@@ -1528,7 +1531,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Status</strong></td>
-                            <td class="color primary"><strong>Collect Amount</strong></td>
+                            <td class="color primary"><strong>Collection Amount</strong></td>
                           </tr>
         ';
 
@@ -1573,7 +1576,7 @@ class DeliveryController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Delivery Note No.</strong></td>
-                            <td>' . $delivery_note_details->id . '</td>
+                            <td>' . str_pad($delivery_note_details->id, 6, '0', STR_PAD_LEFT) . '</td>
                           </tr>
                           <tr>
                           <tr>
@@ -1581,7 +1584,7 @@ class DeliveryController extends Controller
                             <td>' . $rider_name . '</td>
                             <td rowspan="7" class="p-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
                           <tr>
@@ -1702,7 +1705,13 @@ class DeliveryController extends Controller
 
         $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='javascript:void(0);' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+                return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+            })
+            ->editColumn('delivery_note_id', function ($deliveries) {
+                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('delivery_notes.id', function ($query, $keyword) {
+                return $query->where('delivery_notes.id', '=', $keyword);
             })
             ->setRowAttr([
                 'data-hub' => function($deliveries) {
@@ -1802,7 +1811,13 @@ class DeliveryController extends Controller
 
         $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
-                return "<a href='javascript:void(0);' class='printdeliverynote'><u>$deliveries->delivery_note</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+                return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+            })
+            ->editColumn('delivery_note_id', function ($deliveries) {
+                return str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('delivery_notes.id', function ($query, $keyword) {
+                return $query->where('delivery_notes.id', '=', $keyword);
             })
             ->setRowAttr([
                 'data-hub' => function($deliveries) {
@@ -1860,6 +1875,12 @@ class DeliveryController extends Controller
         }
 
         return Datatables::of($deliveries)
+            ->editColumn('delivery_note_id', function ($deliveries) {
+                return str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('delivery_notes.id', function ($query, $keyword) {
+                return $query->where('delivery_notes.id', '=', $keyword);
+            })
             ->setRowAttr([
                 'data-hub' => function($deliveries) {
                     return $deliveries->hub_id;
@@ -1937,7 +1958,13 @@ class DeliveryController extends Controller
 
         $datatable =  Datatables::of($sdn)
             ->editColumn('sdn', function ($sdn) {
-                return "<a href='javascript:void(0);' class='printSDN'><u>{$sdn->sdn_id}</u></a>";
+                return "<a href='javascript:void(0);' class='printSDN'><u>" . str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->editColumn('sdn_id', function ($sdn) {
+                return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
+                return $query->where('station_deposit_notes.id', '=', $keyword);
             })
             ->addColumn('deposit_slip',function ($sdn){
                 if($sdn->deposit_slip != null){
@@ -2003,7 +2030,7 @@ class DeliveryController extends Controller
             return $datatable->make(true);
     }
     public function sdn_details(Request $request,$id){
-        return view('admin.delivery.sdn.details')->with('sdn_id',$id);
+        return view('admin.delivery.sdn.details')->with('sdn_id', str_pad($id, 6, '0', STR_PAD_LEFT));
     }
     public function sdn_details_ajax(Request $request,$id){
         $deliveries = StationDepositNote::
@@ -2020,7 +2047,12 @@ class DeliveryController extends Controller
         }
 
         return Datatables::of($deliveries)
-
+            ->editColumn('dncc', function ($deliveries) {
+                return str_pad($deliveries->dncc, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('delivery_notes.id', function ($query, $keyword) {
+                return $query->where('delivery_notes.id', '=', $keyword);
+            })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
             })
@@ -2150,7 +2182,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Route</strong></td>
                             <td class="color primary"><strong>Total No. Of Shipments</strong></td>
                             <td class="color primary"><strong>No. Of Delivered Shipments</strong></td>
-                            <td class="color primary"><strong>Collected Amount</strong></td>
+                            <td class="color primary"><strong>Collection Amount</strong></td>
                           </tr>
         ';
 
@@ -2162,7 +2194,7 @@ class DeliveryController extends Controller
                 $shipment_details_row_start = '
                           <tr>
                             <td>' . $total_dncc . '</td>
-                            <td>' . $dncc_note->id . '</td>
+                            <td>' . str_pad($dncc_note->id, 6, '0', STR_PAD_LEFT) . '</td>
                             <td>' . $dncc_note->rider->name. '</td>
                             <td>' . $dncc_note->route->code .'( '.$dncc_note->route->start.' to '.$dncc_note->route->end.' )' . '</td>
                             <td>' . $dncc_note->shipments_count . '</td>
@@ -2193,7 +2225,7 @@ class DeliveryController extends Controller
                             <td>' . $city_name . '</td>
                             <td rowspan="7" class="text-center align-middle p-1">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>                         
                           <tr>

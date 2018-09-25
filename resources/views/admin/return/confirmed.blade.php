@@ -24,7 +24,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
+                        <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
@@ -129,7 +129,7 @@
                             head.push('Consignee Name');
                             head.push('Phone');
                             head.push('Address');
-                            head.push('COD Amount');
+                            head.push('Collection Amount');
                             head.push('Shipping Mode');
                             head.push('Service Type');
                             head.push('Status');

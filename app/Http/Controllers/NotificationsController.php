@@ -484,12 +484,21 @@ class NotificationsController extends Controller
             $cargo_consignment = CargoConsignment::find($reference_1_id);
 
             foreach ($fields as $key => $field) {
-              if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+              if ($key == 'cargo_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                if ($key == 'cargo_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                }
               }
             }
 
@@ -576,11 +585,21 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $delivery_note[$field], $subject);
+                if ($key == 'delivery_note_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $delivery_note[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -627,7 +646,12 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -662,7 +686,12 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -695,11 +724,21 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $delivery_note[$field], $subject);
+                if ($key == 'delivery_note_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $delivery_note[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -766,7 +805,12 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -814,11 +858,21 @@ class NotificationsController extends Controller
 
               foreach ($return_note_fields as $key => $field) {
                 if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                  $subject = str_replace('[' . $key . ']', $return_note[$field], $subject);
+                  if ($key == 'return_note_number') {
+                    $subject = str_replace('[' . $key . ']', str_pad($return_note[$field], 6, '0', STR_PAD_LEFT), $subject);
+                  }
+                  else {
+                    $subject = str_replace('[' . $key . ']', $return_note[$field], $subject);
+                  }
                 }
 
                 if (strpos($body, '[' . $key . ']') !== FALSE) {
-                  $body = str_replace('[' . $key . ']', $return_note[$field], $body);
+                  if ($key == 'return_note_number') {
+                    $body = str_replace('[' . $key . ']', str_pad($return_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                  }
+                  else {
+                    $body = str_replace('[' . $key . ']', $return_note[$field], $body);
+                  }
                 }
               }
 
@@ -940,7 +994,12 @@ class NotificationsController extends Controller
 
               foreach ($return_note_fields as $key => $field) {
                 if (strpos($body, '[' . $key . ']') !== FALSE) {
-                  $body = str_replace('[' . $key . ']', $return_note[$field], $body);
+                  if ($key == 'return_note_number') {
+                    $body = str_replace('[' . $key . ']', str_pad($return_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                  }
+                  else {
+                    $body = str_replace('[' . $key . ']', $return_note[$field], $body);
+                  }
                 }
               }
 
@@ -1036,11 +1095,11 @@ class NotificationsController extends Controller
             }
 
             if (strpos($subject, '[account_id]') !== FALSE) {
-              $subject = str_replace('[account_id]', $shipper->id, $subject);
+              $subject = str_replace('[account_id]', str_pad($shipper->id, 6, '0', STR_PAD_LEFT), $subject);
             }
 
             if (strpos($body, '[account_id]') !== FALSE) {
-              $body = str_replace('[account_id]', $shipper->id, $body);
+              $body = str_replace('[account_id]', str_pad($shipper->id, 6, '0', STR_PAD_LEFT), $body);
             }
 
             if (strpos($subject, '[company_name]') !== FALSE) {
@@ -1118,11 +1177,21 @@ class NotificationsController extends Controller
 
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $dispute[$field], $subject);
+                if ($key == 'dispute_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($dispute[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $dispute[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $dispute[$field], $body);
+                if ($key == 'dispute_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($dispute[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $dispute[$field], $body);
+                }
               }
             }
 
@@ -1312,11 +1381,11 @@ class NotificationsController extends Controller
             }
 
             if (strpos($subject, '[payment_done_id]') !== FALSE) {
-              $subject = str_replace('[payment_done_id]', $done_payment->id, $subject);
+              $subject = str_replace('[payment_done_id]', str_pad($done_payment->id, 6, '0', STR_PAD_LEFT), $subject);
             }
 
             if (strpos($body, '[payment_done_id]') !== FALSE) {
-              $body = str_replace('[payment_done_id]', $done_payment->id, $body);
+              $body = str_replace('[payment_done_id]', str_pad($done_payment->id, 6, '0', STR_PAD_LEFT), $body);
             }
 
             if (strpos($subject, '[payment_done_at]') !== FALSE) {

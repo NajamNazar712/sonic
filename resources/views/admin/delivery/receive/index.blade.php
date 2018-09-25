@@ -49,7 +49,7 @@
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
-                        <th class="border-primary border-darken-1">Total COD</th>
+                        <th class="border-primary border-darken-1">Total Collection</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>

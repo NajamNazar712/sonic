@@ -58,7 +58,7 @@
 										<th class="border-primary border-darken-1">Receiving Sheet No.</th>
 										<th class="border-primary border-darken-1">Order ID</th>
 										<th class="border-primary border-darken-1">Destination</th>
-										<th class="border-primary border-darken-1">COD Amount</th>
+										<th class="border-primary border-darken-1">Collection Amount</th>
 										<th class="border-primary border-darken-1">Estimated Weight (kg)</th>
 										<th class="border-primary border-darken-1">Actual Weight (kg)</th>
 										<th class="border-primary border-darken-1"></th>

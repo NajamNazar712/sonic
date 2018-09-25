@@ -148,7 +148,9 @@ class AdminPickupsController extends Controller
 
               $pickup_note->bookings = $pickup_note->bookings - 1;
 
-              $weight = $pickup_note->total_estimated_weight - $weight;
+              $shipment = Shipment::find($shipment_id);
+
+              $weight = $pickup_request->total_estimated_weight - $shipment->estimated_weight;
 
               $pickup_note->total_estimated_weight = $weight;
 
