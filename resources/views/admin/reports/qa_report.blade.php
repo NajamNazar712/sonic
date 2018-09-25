@@ -351,32 +351,22 @@
                                         var sheet = xlsx.xl.worksheets['sheet1.xml'];
                                         var numrows = 1;
                                         var rows = $('row', sheet);
-                                        console.log(rows)
-                                        //     //update Row
+
+                                      //update Row
 
 
-                                        var new_sheet = rows.slice(1);
-                                        $.each(new_sheet,function () {
+                                        // var new_sheet = rows.slice(1);
+                                        $.each(rows,function () {
                                             var attr = $(this).attr('r');
-                                            var ind = parseInt(attr);
-                                            ind = ind + numrows;
-                                            $(this).attr("r",ind);
-
+                                                var ind = parseInt(attr);
+                                                ind = ind + numrows;
+                                                $(this).attr("r", ind);
                                         });
 
-                                        // console.log(clR);
-                                    //
                                     //     // Create row before data
-                                    //     console.log($('row c ', sheet));
-                                    //     rows = $('row c ', sheet);
-                                    //     r1 = rows.shift();
-                                    //     console.log($('row c ', sheet));
-                                        row_columns = $('row c', sheet);
 
-                                        // console.log(row_columns);
                                         $('row c', sheet).each(function () {
                                                 var attr = $(this).attr('r');
-                                                // if(attr !== 'A1'){
                                                 var pre = attr.substring(0, 1);
                                                 var ind = parseInt(attr.substring(1, attr.length));
                                                 ind = ind + numrows;
@@ -384,8 +374,9 @@
 
                                         });
 
+
                                         var merge_cells = '';
-                                        // first_row = '<row r="1"><c r="A1" s="51"><is><t>QA Report</t></is></c></row>';
+                                        first_row = '<row r="1"><c r="A1" t="inlineStr" s="51"><is><t>QA Report</t></is></c></row>';
                                         function Addrow(index,data) {
                                             msg='<row r="'+index+'">';
                                             for(i=0;i<data.length;i++){
@@ -408,7 +399,7 @@
                                     //     //insert
                                         var second_row = Addrow(2, [{ key: 'A',range:'A', value: '' }, { key: 'B',range:'C', value: 'Parcel Pending for Cargo' },{ key: 'D',range:'E', value: 'Cargo In Transit' },{ key: 'F',range:'G', value: 'Pending Deliveries' },{ key: 'H',range:'I', value: 'Receive Delivery Note' },{ key: 'J',range:'K', value: 'Return Marked' },{ key: 'L',range:'M', value: 'Confirmed Returns' },{ key: 'N',range:'O', value: 'Return Cargo In Transit' },{ key: 'P',range:'Q', value: 'Return Pending for Delivery' },{ key: 'R',range:'S', value: 'Receive Return Note' },{ key: 'T',range:'V', value: 'Grand Total' }]);
 
-                                        sheet.childNodes[0].childNodes[1].innerHTML = second_row + sheet.childNodes[0].childNodes[1].innerHTML;
+                                        sheet.childNodes[0].childNodes[1].innerHTML = first_row + second_row + sheet.childNodes[0].childNodes[1].innerHTML;
                                         sheet.childNodes[0].childNodes[2].innerHTML =  sheet.childNodes[0].childNodes[2].innerHTML + merge_cells;
 
                                         // console.log(sheet.childNodes[0].childNodes[1].innerHTML);
