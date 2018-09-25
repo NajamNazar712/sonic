@@ -23,6 +23,7 @@
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Designation</th>
 										<th class="border-primary border-darken-1">Department</th>
+										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
 										<th class="border-primary border-darken-1"></th>
@@ -64,11 +65,12 @@
 				serverSide: true,
 				ajax: '{{ route('admin.user_management.roles.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[3, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'admin_roles.name', class: 'align-middle name'},
 					{data: 'department', name: 'ad.name', class: 'align-middle department'},
+					{data: 'created_at', name: 'admin_roles.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'admin_roles.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

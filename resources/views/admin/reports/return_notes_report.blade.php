@@ -316,7 +316,7 @@
                     }
                 },
                 rowId: 'return_note_id',
-                order: [[1, 'asc']],
+                order: [[4, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'return_note_id', name: 'return_notes.id', class: 'align-middle return_note_id'},

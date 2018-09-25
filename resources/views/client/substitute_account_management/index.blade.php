@@ -25,6 +25,7 @@
 										<th class="border-primary border-darken-1">Phone Number</th>
 										<th class="border-primary border-darken-1">Email</th>
 										<th class="border-primary border-darken-1">CNIC</th>
+										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
@@ -68,6 +69,7 @@
                             head.push('Phone Number');
                             head.push('Email');
                             head.push('CNIC');
+                            head.push('Created Datetime');
                             head.push('Updated Datetime');
                             head.push('Status');
 
@@ -80,6 +82,7 @@
                                 row.push(values.phone_number);
                                 row.push(values.email);
                                 row.push(values.cnic);
+                                row.push(values.created_at);
                                 row.push(values.updated_at);
                                 row.push(values.status);
 
@@ -114,13 +117,14 @@
 				serverSide: true,
 				ajax: '{{ route('cod.substitute_account_management.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[5, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'substitute_users.name', class: 'align-middle name'},
 					{data: 'phone_number', name: 'substitute_users.phone_number', class: 'align-middle phone_number'},
 					{data: 'email', name: 'substitute_users.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'substitute_users.cnic', class: 'align-middle cnic'},
+					{data: 'created_at', name: 'substitute_users.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'substitute_users.updated_at', class: 'align-middle updated_at'},
 					{data: 'status', name: 'substitute_users.status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

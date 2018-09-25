@@ -26,6 +26,7 @@
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
 										<th class="border-primary border-darken-1">Address</th>
+										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Total Shipments</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Returned Shipments</th>
@@ -376,7 +377,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.finance.make_payments.list') }}',
 				rowId: 'id',
-				order: [[2, 'asc']],
+				order: [[6, 'asc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -384,6 +385,7 @@
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
 					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
+					{data:'created_at', name: 'pending_payments.created_at', class: 'align-middle text-center created_at'},
 					{data:'total_shipments', name: 'pending_payments.total_shipments', class: 'align-middle text-center total_shipments'},
 					{data:'delivered_shipments', name: 'pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'pending_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},

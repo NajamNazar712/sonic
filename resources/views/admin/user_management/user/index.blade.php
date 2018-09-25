@@ -26,6 +26,7 @@
 										<th class="border-primary border-darken-1">Email</th>
 										<th class="border-primary border-darken-1">CNIC</th>
 										<th class="border-primary border-darken-1">Role</th>
+										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
 										<th class="border-primary border-darken-1">Status</th>
@@ -127,7 +128,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.user_management.users.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[6, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'admins.name', class: 'align-middle name'},
@@ -135,6 +136,7 @@
 					{data: 'email', name: 'admins.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'admins.cnic', class: 'align-middle cnic'},
 					{data: 'role', name: 'role', class: 'align-middle role'},
+					{data: 'created_at', name: 'admins.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'admins.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'status', name: 'admins.status', class: 'align-middle status'},

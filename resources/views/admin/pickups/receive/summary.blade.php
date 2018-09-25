@@ -117,7 +117,7 @@
 					}
 				},
 				rowId: 'id',
-				order: [[9, 'asc']],
+				order: [[12, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},

@@ -331,7 +331,7 @@
                     }
                 },
                 rowId: 'pn_id',
-                order: [[1, 'asc']],
+                order: [[6, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'pn_id', name: 'pickup_notes.id', class: 'align-middle pn_id'},

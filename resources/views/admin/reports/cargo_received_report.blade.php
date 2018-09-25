@@ -345,7 +345,7 @@
                     }
                 },
                 rowId: 'cargo_id',
-                order: [[1, 'asc']],
+                order: [[7, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'cargo_id', name: 'cargo_consignments.id', class: 'align-middle cargo_id'},

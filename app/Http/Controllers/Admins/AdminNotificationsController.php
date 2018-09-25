@@ -82,7 +82,7 @@ class AdminNotificationsController extends Controller
             else {
                 $query->whereRaw('false');
             }
-        })
+        });
 
         return $datatables->make(true);
     }

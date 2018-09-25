@@ -194,7 +194,7 @@
                     }
                 },
                 rowId: 'shId',
-                // order: [[2, 'asc']],
+                order: [[18, 'asc'], [17, 'asc']],
                 columns: [
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},

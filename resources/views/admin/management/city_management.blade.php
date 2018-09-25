@@ -145,6 +145,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.management.city.ajax') }}',
+                order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'cities.name', class: 'align-middle city'},

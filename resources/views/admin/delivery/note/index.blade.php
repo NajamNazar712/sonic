@@ -187,7 +187,6 @@
             lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
             pageLength: 50,
             pagingType: 'full_numbers',
-            order: [[1, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {name: 'tracking_number', class: 'align-middle tracking_number'},

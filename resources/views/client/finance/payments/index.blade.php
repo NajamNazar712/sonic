@@ -203,7 +203,7 @@
 				serverSide: true,
 				ajax: '{{ route('cod.finance.payments.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[1, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'id', name: 'done_payments.id', class: 'align-middle text-center id'},

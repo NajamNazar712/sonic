@@ -388,7 +388,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[2, 'asc']],
+                order: [[7, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},

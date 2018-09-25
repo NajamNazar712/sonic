@@ -27,7 +27,7 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function list() {
-      $substitute_users = SubstituteUser::select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.updated_at', 'substitute_users.status')
+      $substitute_users = SubstituteUser::select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status')
       ->where('substitute_users.user_id', session('user_id'));
 
       $datatables = Datatables::of($substitute_users)
