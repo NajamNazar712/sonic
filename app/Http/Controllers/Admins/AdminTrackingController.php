@@ -80,10 +80,10 @@ class AdminTrackingController extends Controller
     					$journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
 
     					if ($journey->reference_2_id) {
-                            if (in_array($journey->shipper_status_id, [5, 23])) {
+                            if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
                                 $rider = Rider::find($journey->reference_2_id);
 
-                                $journey_details['status'] .= ' | ' . $rider->name;
+                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
                             }
                             else {
                                 $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
@@ -130,6 +130,20 @@ class AdminTrackingController extends Controller
     	}
 
     	return $tracking;
+    }
+
+    public function rider_information(Request $request) {
+        $rider = Rider::find($request->id);
+
+        $information = array();
+
+        $information['name'] = $rider->name;
+        $information['phone_number'] = $rider->phone;
+        $information['city'] = $rider->city->name;
+        $information['category'] = $rider->rider_category->name;
+        $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
+
+        return $information;
     }
 
 }
