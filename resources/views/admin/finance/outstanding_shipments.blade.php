@@ -163,8 +163,78 @@
 				}
 			});
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.finance.outstanding_shipments.list') }}',
+                        data: {
+                            'page': 'all',
+                            'hub': $('#search_form #hub').val(),
+                    		'service': $('#search_form #service').val(),
+                    		'delivery_date_from': $('#search_form input[name="delivery_date_from_formatted"]').val(),
+                    		'delivery_date_to': $('#search_form input[name="delivery_date_to_formatted"]').val(),
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Tracking Number');
+                            head.push('Consignee');
+                            head.push('Address');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Shipper');
+                            head.push('Service Type');
+                            head.push('Amount');
+                            head.push('Status');
+                            head.push('Status Updated Datetime');
+                            head.push('Remarks');
+                            head.push('DNCC');
+                            head.push('SDN');
+                            head.push('Aging');
+
+
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.consignee);
+                                row.push(values.address);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.shipper);
+                                row.push(values.service_type);
+                                row.push(values.amount);
+                                row.push(values.status);
+                                row.push(values.status_updated_at);
+                                row.push(values.remarks);
+                                row.push(values.dncc);
+                                row.push(values.sdn);
+                                row.push(values.aging);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
 			var table = $('#datatable').DataTable({
-				dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Outstanding Shipments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
 				scrollX: true, scrollY: '300px',
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,

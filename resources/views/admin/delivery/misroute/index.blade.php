@@ -143,10 +143,6 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-        a.btn.btn-secondary{
-            border-radius: 20px;
-            background: #64a0d2;
-        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -250,6 +246,7 @@
                 {
                     extend: 'excel',
                     title: 'Misrouted Deliveries',
+                    className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 },
             ],

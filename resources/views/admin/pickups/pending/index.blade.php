@@ -75,12 +75,7 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-	<style type="text/css">
-		a.btn.btn-secondary{
-			border-radius: 20px;
-			background: #64a0d2;
-		}
-	</style>
+
 @endsection
 
 @section('js')
@@ -149,8 +144,9 @@
 			var selected_rows = [];
 
 			var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || count(array_intersect([18, 19], session('permissions'))) !== 0)
-					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
 					buttons: [
 					@if (session('role_id') == 1 || in_array(19, session('permissions')))
 						{
@@ -228,10 +224,18 @@
                         {
                             extend: 'excel',
                             title: 'Pending Pickups',
+                        	className: 'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
                         }],
 				@else
-					dom: 'ltipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Pending Pickups',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }
+                    ],
 				@endif
 				scrollX: true, scrollY: '300px',
 				select: {

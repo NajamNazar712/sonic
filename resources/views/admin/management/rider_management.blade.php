@@ -61,9 +61,56 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.management.rider.ajax') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('City Name');
+                            head.push('Rider Name');
+                            head.push('Phone No.');
+                            head.push('CNIC');
+                            head.push('Address');
+                            head.push('Route');
+                            head.push('Category');
+                            head.push('Added On');
+                            head.push('Status');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.city);
+                                row.push(values.rider);
+                                row.push(values.phone);
+                                row.push(values.cnic);
+                                row.push(values.address);
+                                row.push(values.route);
+                                row.push(values.category);
+                                row.push(values.created_at);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var table =  $('.datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(97, session('permissions')))
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
                     buttons: [{
                         text: 'Add Rider',
                         className: 'btn btn-primary',
@@ -73,9 +120,20 @@
 
                         }
 
+                    },
+                    {
+                        extend: 'excel',
+                        title: 'Route Management',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 @else
-                    dom: 'ltipr',
+                buttons: [{
+                    extend: 'excel',
+                    title: 'Route Management',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
                 @endif
                 scrollX: true, scrollY: '300px',
                 lengthMenu: [[25, 50, 100], [25, 50, 100]],

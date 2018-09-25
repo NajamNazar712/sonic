@@ -79,12 +79,6 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-	<style type="text/css">
-		a.btn.btn-secondary{
-			border-radius: 20px;
-			background: #64a0d2;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -180,6 +174,7 @@
                     {
                         extend: 'excel',
                         title: 'Receive Pickups',
+						className:'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }
                 ],

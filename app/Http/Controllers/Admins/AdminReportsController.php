@@ -54,8 +54,8 @@ class AdminReportsController extends Controller
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount'])
-        ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47])
-            ->orderBy('shipments.id');
+        ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47]);
+//            ->orderBy('shipments.id');
         $datatable = Datatables::of($shipments)
             ->addColumn('aging',function ($shipments){
 
@@ -273,7 +273,6 @@ class AdminReportsController extends Controller
             ->leftJoin('shipment_status as fs','fs.id','=','fstatus.shipper_status_id')
             ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
             ->select('shipments.id as Shipment_id','shipments.tracking_number','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date')
-            ->orderBy('shipments.id','desc' )
             ->groupBy('shipments.id');
         $lead_time = Datatables::of($shipments)
             ->addColumn('transit_tat',function ($shipments){
@@ -685,7 +684,11 @@ class AdminReportsController extends Controller
          $sheet->getDefaultColumnDimension()->setWidth(20);
          $sheet->fromArray($details,NULL,'A1');
          $sheet->getStyle('A21:I21')->applyFromArray($cell_st);
-         $sheet->fromArray($details_shipper,NULL,'A21');
+         $count_hubs = count($hubs);
+         $count_hubs += 3;
+//         $cellIndexShipper = Coordinate::stringFromColumnIndex($count_hubs+2);
+         $shipper_cell = 'A'.$count_hubs;
+         $sheet->fromArray($details_shipper,NULL,$shipper_cell);
 //         $sheet->insertNewRowBefore(9, 8);
          $sheet->setTitle('Daily Pickup Sales Report');
 //         $sheet->setCellValue('A1','S. No.');
@@ -1008,7 +1011,7 @@ class AdminReportsController extends Controller
             $shippers['header'][] = $month;
 
          }
-        $shippers['header'][] = 'Grand Total';
+//        $shippers['header'][] = 'Grand Total';
         if($hub != null){
             $shippers['shipper'] = User::whereHas('city.hub', function($query) use ($hub) {
                 $query->where('hub_id', '=', $hub);

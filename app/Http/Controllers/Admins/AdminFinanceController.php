@@ -60,7 +60,7 @@ class AdminFinanceController extends Controller
         $station_deposit_notes = StationDepositNote::join('cities as h', 'station_deposit_notes.hub_id', '=', 'h.id')
         ->join('admins as a', 'station_deposit_notes.deposited_by', '=', 'a.id')
         ->join('banks_lists as b', 'station_deposit_notes.banks_list_id', '=', 'b.id')
-        ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_amount', 'a.name as deposited_by', 'b.name as bank', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip')
+        ->select('station_deposit_notes.id', 'station_deposit_notes.id as sdn_number', 'station_deposit_notes.id as delivery_note_number', 'h.name as hub', 'station_deposit_notes.dncc_count', 'station_deposit_notes.sdn_delivered_shipments', 'station_deposit_notes.sdn_amount', 'a.name as deposited_by', 'b.name as bank', 'station_deposit_notes.created_at as deposited_at', 'station_deposit_notes.deposit_slip')
         ->where('station_deposit_notes.status', 1);
 
         if (session('role_id') != 1) {

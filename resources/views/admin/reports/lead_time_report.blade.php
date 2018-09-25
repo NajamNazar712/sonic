@@ -369,7 +369,7 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'account_no', name: 'ubi.account_no', class: 'align-middle account_no'},
+                    {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
@@ -377,23 +377,23 @@
                     {data: 'current_status', name: 'ss.name', class: 'align-middle current_status'},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date'},
                     {data: 'reached_at_destination', name: 'reached_at_destination', class: 'align-middle reached_at_destination'},
-                    {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat'},
+                    {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat', orderable: false, searchable: false},
                     {data: 'first_status', name: 'fs.name', class: 'align-middle first_status'},////
                     {data: 'first_status_date', name: 'first_status_date', class: 'align-middle first_status_date'},////
-                    {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat'},////
-                    {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat'},
+                    {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat', orderable: false, searchable: false},////
+                    {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat', orderable: false, searchable: false},
                     {data: 'delivered_date', name: 'delivered_date', class: 'align-middle delivered_date'},
-                    {data: 'delivered_tat', name: 'delivered_tat', class: 'align-middle delivered_tat'},
+                    {data: 'delivered_tat', name: 'delivered_tat', class: 'align-middle delivered_tat', orderable: false, searchable: false},
                     {data: 'return_confirm', name: 'return_confirm', class: 'align-middle return_confirm'},
                     {data: 'return_reached_at_destination', name: 'return_reached_at_destination', class: 'align-middle return_reached_at_destination'},
-                    {data: 'return_transit_tat', name: 'return_transit_tat', class: 'align-middle return_transit_tat'},
+                    {data: 'return_transit_tat', name: 'return_transit_tat', class: 'align-middle return_transit_tat', orderable: false, searchable: false},
                     {data: 'return_delivered_status', name: 'return_delivered_status', class: 'align-middle return_delivered_status'},
                     {data: 'return_delivered_date', name: 'return_delivered_date', class: 'align-middle return_delivered_date'},
-                    {data: 'return_dispatch_tat', name: 'return_dispatch_tat', class: 'align-middle return_dispatch_tat'},
-                    {data: 'return_tat', name: 'return_tat', class: 'align-middle return_tat'},
+                    {data: 'return_dispatch_tat', name: 'return_dispatch_tat', class: 'align-middle return_dispatch_tat', orderable: false, searchable: false},
+                    {data: 'return_tat', name: 'return_tat', class: 'align-middle return_tat', orderable: false, searchable: false},
                     {data: 'payment_done_date', name: 'payment_done_date', class: 'align-middle payment_done_date'},
-                    {data: 'payment_tat', name: 'payment_tat', class: 'align-middle payment_tat'},
-                    {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat'}
+                    {data: 'payment_tat', name: 'payment_tat', class: 'align-middle payment_tat', orderable: false, searchable: false},
+                    {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat', orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
