@@ -163,7 +163,7 @@ class DisputeController extends Controller
             'raised_by'=>$admin,
             'raised_by_status'=>0,
             'city_id'=>$city_id,
-            'dispute_type_id'=>2,
+            'dispute_type_id'=>11,
             'shipments_count'=>$count
         ]);
        if($dispute){
