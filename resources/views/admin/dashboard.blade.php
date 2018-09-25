@@ -172,7 +172,7 @@
                       <th class="border-primary border-darken-1">Consignee Name</th>
                       <th class="border-primary border-darken-1">Consignee Contact</th>
                       <th class="border-primary border-darken-1">Consignee Address</th>
-                      <th class="border-primary border-darken-1">COD Amount</th>
+                      <th class="border-primary border-darken-1">Collection Amount</th>
                       <th class="border-primary border-darken-1">Product Type</th>
                       <th class="border-primary border-darken-1">Booking Date</th>
                       <th class="border-primary border-darken-1">Instructions</th>
@@ -331,7 +331,7 @@
                             head.push('Consignee Name');
                             head.push('Consignee Contact');
                             head.push('Consignee Address');
-                            head.push('COD Amount');
+                            head.push('Collection Amount');
                             head.push('Product Type');
                             head.push('Booking Date');
                             head.push('Instructions');

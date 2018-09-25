@@ -23,7 +23,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Consignee</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
+                        <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
@@ -131,7 +131,7 @@
                         </table>
                         <div class="row justify-content-center mb-2">
                             <div class="col">
-                                <h4><U>Total Cod Amount:</U> Rs: <span id="cod"></span></h4>
+                                <h4><U>Total Collection Amount:</U> Rs: <span id="cod"></span></h4>
                             </div>
                         </div>
                         <input type="hidden" name="trybuy_id_list" id="trybuy_id_list">

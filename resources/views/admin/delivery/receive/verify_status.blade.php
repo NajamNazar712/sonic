@@ -25,7 +25,7 @@
                             <th class="border-primary border-darken-1">S. No.</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Consignee</th>
-                            <th class="border-primary border-darken-1">COD Amount</th>
+                            <th class="border-primary border-darken-1">Collection Amount</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>

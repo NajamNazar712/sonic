@@ -755,7 +755,7 @@ class AdminReportsController extends Controller
          unset($months_array[0]);
 
          $details['header'] = ['Origin', 'Client Name' ];
-         $details['subheader'] = ['Parcels', 'Weight','COD Amount','Revenue' ];
+         $details['subheader'] = ['Parcels', 'Weight','Collection Amount','Revenue' ];
 
          foreach ($months_array as $month){
              $details['months'][] = $month;
