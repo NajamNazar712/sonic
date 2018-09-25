@@ -313,8 +313,8 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: false,
@@ -539,8 +539,8 @@
 
                             var repl = $('#replacementtable').DataTable({
                                 dom: 'ltipr',
-                                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                                pageLength: 25,
+                                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                                pageLength: 50,
                                 pagingType: 'full_numbers',
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -630,8 +630,8 @@
 
                             trybuy = $('#trybuytable').DataTable({
                                 dom: 'ltipr',
-                                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                                pageLength: 25,
+                                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                                pageLength: 50,
                                 pagingType: 'full_numbers',
 
                                 columns: [
