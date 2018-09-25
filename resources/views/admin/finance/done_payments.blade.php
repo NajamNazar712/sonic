@@ -202,10 +202,6 @@
                             head.push('Company Bank');
                             head.push('Status');
 
-
-
-
-
                             $.each(result.data, function(index, values) {
                                 row = [];
 
