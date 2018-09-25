@@ -108,7 +108,7 @@
 						}
 					},{
                         extend: 'excel',
-                        title: 'Pending Cargo',
+                        title: 'Users',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
 				@else

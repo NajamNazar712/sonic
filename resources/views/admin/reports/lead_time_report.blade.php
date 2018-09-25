@@ -93,6 +93,7 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Current Status</th>
+                        <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Arrival Date(A)</th>
                         <th class="border-primary border-darken-1">Reached At Destination Date(B)</th>
                         <th class="border-primary border-darken-1">Transit TAT(A-B)</th>
@@ -277,6 +278,7 @@
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Current Status');
+                            head.push('Payment Status');
                             head.push('Arrival Date(A)');
                             head.push('Reached At Destination Date(B)');
                             head.push('Transit TAT(A-B)');
@@ -307,6 +309,7 @@
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.current_status);
+                                row.push(values.payment_status);
                                 row.push(values.arrival_date);
                                 row.push(values.reached_at_destination);
                                 row.push(values.transit_tat);
@@ -375,6 +378,7 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'current_status', name: 'ss.name', class: 'align-middle current_status'},
+                    {data: 'payment_status', name: 'sps.name', class: 'align-middle payment_status'},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date'},
                     {data: 'reached_at_destination', name: 'reached_at_destination', class: 'align-middle reached_at_destination'},
                     {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat', orderable: false, searchable: false},

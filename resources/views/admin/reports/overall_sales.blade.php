@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Completed Delivery Notes Report')
+@section('title', 'Overall Sales Report')
 
 @section('content')
     <h1 class="mb-1">
@@ -12,83 +12,92 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-                {{--<div id="search_form" class="row mb-2 justify-content-center">--}}
+                <div id="search_form" class="row mb-2 justify-content-center">
 
                     {{--<div class="col-4">--}}
                         {{--<fieldset class="form-group">--}}
                             {{--<input type="text" class="form-control" name="search_dn_no" id="search_dn_no" placeholder="Search delivery Note Number">--}}
                         {{--</fieldset>--}}
                     {{--</div>--}}
-                    {{--<div class="col-4">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-4">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_rider" id="search_rider" class="form-control select2">--}}
-                                {{--@foreach($riders as $rider)--}}
-                                    {{--<option value="{{$rider->id}}">{{$rider->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-4">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_assigned_by" id="search_assigned_by" class="form-control select2">--}}
-                                {{--@foreach($admins as $admin)--}}
-                                    {{--<option value="{{$admin->id}}">{{$admin->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-4">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_updated_by" id="search_updated_by" class="form-control select2">--}}
-                                {{--@foreach($admins as $admin)--}}
-                                    {{--<option value="{{$admin->id}}">{{$admin->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-4">--}}
-                        {{--<div class="form-group input-group">--}}
-                            {{--<div class="input-group-prepend">--}}
-                            {{--<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-                                {{--<span class="la la-calendar-o"></span>--}}
-                            {{--</span>--}}
-                            {{--</div>--}}
-                            {{--<input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">--}}
-                        {{--</div>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-4">--}}
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                @foreach($shippers as $shipper)
+                                    <option value="{{$shipper->id}}">{{$shipper->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_origin" id="search_origin" class="form-control select2">
+                                @foreach($cities as $origin)
+                                    <option value="{{$origin->id}}">{{$origin->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_destination" id="search_destination" class="form-control select2">
+                                @foreach($cities as $destination)
+                                    <option value="{{$destination->id}}">{{$destination->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $hub)
+                                    <option value="{{$hub->id}}">{{$hub->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_status" id="search_status" class="form-control select2">
+                                @foreach($statuses as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
 
-                        {{--<div class="form-group input-group ml-1">--}}
-                            {{--<div class="input-group-prepend">--}}
-                            {{--<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-                                {{--<span class="la la-calendar-o"></span>--}}
-                            {{--</span>--}}
-                            {{--</div>--}}
+                    <div class="col-4">
 
-                            {{--<input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">--}}
-                        {{--</div>--}}
-                    {{--</div>--}}
-                    {{--<div class="col-4 ">--}}
-                        {{--<div class="form-group input-group ml-1">--}}
-                            {{--<div class="input-group-prepend">--}}
-                            {{--<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">--}}
-                                {{--<span class="la la-calendar-o"></span>--}}
-                            {{--</span>--}}
-                            {{--</div>--}}
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
 
-                            {{--<input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">--}}
-                        {{--</div>--}}
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-4 ">
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
 
-                    {{--</div>--}}
-                    {{--<div class="col-2">--}}
-                        {{--<button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>--}}
-                    {{--</div>--}}
-                {{--</div>--}}
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                        </div>
+
+                    </div>
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -96,26 +105,26 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
-                        {{--<th class="border-primary border-darken-1">Status</th>--}}
-                        {{--<th class="border-primary border-darken-1">Payment Status</th>--}}
-                        {{--<th class="border-primary border-darken-1">Service Type</th>--}}
-                        {{--<th class="border-primary border-darken-1">Arrival Date</th>--}}
-                        {{--<th class="border-primary border-darken-1">Origin</th>--}}
-                        {{--<th class="border-primary border-darken-1">Destination</th>--}}
-                        {{--<th class="border-primary border-darken-1">Hub</th>--}}
-                        {{--<th class="border-primary border-darken-1">Collection Amount</th>--}}
-                        {{--<th class="border-primary border-darken-1">Actual Weight</th>--}}
-                        {{--<th class="border-primary border-darken-1">Weight Charges</th>--}}
-                        {{--<th class="border-primary border-darken-1">Cash Handling Charges</th>--}}
-                        {{--<th class="border-primary border-darken-1">Insurance Charges</th>--}}
-                        {{--<th class="border-primary border-darken-1">Packaging Charges</th>--}}
-                        {{--<th class="border-primary border-darken-1">Return Charges</th>--}}
-                        {{--<th class="border-primary border-darken-1">Replacement Charges</th>--}}
-                        {{--<th class="border-primary border-darken-1">Try & Buy Charges</th>--}}
-                        {{--<th class="border-primary border-darken-1">Fuel Surcharge</th>--}}
-                        {{--<th class="border-primary border-darken-1">GST</th>--}}
-                        {{--<th class="border-primary border-darken-1">Total Charges</th>--}}
-                        {{--<th class="border-primary border-darken-1">Net Payable</th>--}}
+                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Payment Status</th>
+                        <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Origin</th>
+                        <th class="border-primary border-darken-1">Destination</th>
+                        <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Collection Amount</th>
+                        <th class="border-primary border-darken-1">Actual Weight</th>
+                        <th class="border-primary border-darken-1">Weight Charges</th>
+                        <th class="border-primary border-darken-1">Cash Handling Charges</th>
+                        <th class="border-primary border-darken-1">Insurance Charges</th>
+                        <th class="border-primary border-darken-1">Packaging Charges</th>
+                        <th class="border-primary border-darken-1">Return Charges</th>
+                        <th class="border-primary border-darken-1">Replacement Charges</th>
+                        <th class="border-primary border-darken-1">Try & Buy Charges</th>
+                        <th class="border-primary border-darken-1">Fuel Surcharge</th>
+                        <th class="border-primary border-darken-1">GST</th>
+                        <th class="border-primary border-darken-1">Total Charges</th>
+                        <th class="border-primary border-darken-1">Net Payable</th>
                     </tr>
                     </thead>
                 </table>
@@ -197,23 +206,33 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('#search_dn_no,#search_tracking_no').inputmask({
+            $('#search_tracking_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
             });
-            $('#search_updated_by').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Assigned By',
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Shipper',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_assigned_by').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Created By',
+            $('#search_origin').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Origin City',
                 width:'100%',
                 allowClear:true
             });
-            $('#search_rider').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Rider',
+            $('#search_destination').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Destination City',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Hub',
+                width:'100%',
+                allowClear:true
+            });
+            $('#search_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Status',
                 width:'100%',
                 allowClear:true
             });
@@ -233,7 +252,7 @@
                 onSet: function(context) {
                 }
             });
-            $('#search_form #search_date_from').pickadate({
+            $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -242,11 +261,11 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                        $('#search_date_to').pickadate('picker').set('min', $('#search_date_from').pickadate('picker').get('select'));
                     }
                 }
             });
-            $('#search_form #search_date_to').pickadate({
+            $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -255,69 +274,92 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                        $('#search_date_from').pickadate('picker').set('max', $('#search_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
 
-            {{--jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {--}}
-                {{--if ( this.context.length ) {--}}
-                    {{--body = [];--}}
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
-                    {{--var jsonResult = $.ajax({--}}
-                        {{--url: '{{ route('admin.reports.completed_delivery_notes.list') }}',--}}
-                        {{--data: {--}}
-                            {{--'page': 'all',--}}
-                            {{--'search_dn_no': $('#search_dn_no').val(),--}}
-                            {{--'search_tracking': $('#search_tracking_no').val(),--}}
-                            {{--'search_rider': $('#search_rider').val(),--}}
-                            {{--'search_assigned_by': $('#search_assigned_by').val(),--}}
-                            {{--'search_updated_by': $('#search_updated_by').val(),--}}
-                            {{--'search_hub': $('#search_hub').val(),--}}
-                            {{--'search_submission': $('input[name="submission_date_formatted"]').val(),--}}
-                            {{--'search_date_from': $('input[name="search_date_from_formatted"]').val(),--}}
-                            {{--'search_date_to': $('input[name="search_date_to_formatted"]').val()--}}
-                        {{--},--}}
-                        {{--success: function (result) {--}}
-                            {{--head = [];--}}
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.overall_sales.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_tracking': $('#search_tracking_no').val(),
+                            'search_shipper': $('#search_shipper').val(),
+                            'search_origin': $('#search_origin').val(),
+                            'search_destination': $('#search_destination').val(),
+                            'search_hub': $('#search_hub').val(),
+                            'search_status': $('#search_status').val(),
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val()
+                        },
+                        success: function (result) {
+                            head = [];
 
-                            {{--head.push('S. No.');--}}
-                            {{--head.push('Delivery Note No.');--}}
-                            {{--head.push('Hub');--}}
-                            {{--head.push('Rider');--}}
-                            {{--head.push('Route');--}}
-                            {{--head.push('No Of Shipment(s)');--}}
-                            {{--head.push('No Of Shipment(s) Delivered');--}}
-                            {{--head.push('Assigned By');--}}
-                            {{--head.push('Assigned Date');--}}
-                            {{--head.push('Updated By');--}}
-                            {{--head.push('Updated Date');--}}
-                            {{--head.push('DNCC Amount');--}}
-                            {{--$.each(result.data, function(index, values) {--}}
-                                {{--row = [];--}}
+                            head.push('S. No.');
+                            head.push('Tracking No.');
+                            head.push('Account No.');
+                            head.push('Shipper');
+                            head.push('Status');
+                            head.push('Payment Status');
+                            head.push('Service Type');
+                            head.push('Arrival Date');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Collection Amount');
+                            head.push('Actual Weight');
+                            head.push('Weight Charges');
+                            head.push('Cash Handling Charges');
+                            head.push('Insurance Charges');
+                            head.push('Packaging Charges');
+                            head.push('Return Charges');
+                            head.push('Replacement Charges');
+                            head.push('Try & Buy Charges');
+                            head.push('Fuel Surcharge');
+                            head.push('GST');
+                            head.push('Total Charges');
+                            head.push('Net Payable');
+                            $.each(result.data, function(index, values) {
+                                row = [];
 
-                                {{--row.push(index + 1);--}}
-                                {{--row.push(values.delivery_note);--}}
-                                {{--row.push(values.hub);--}}
-                                {{--row.push(values.rider);--}}
-                                {{--row.push(values.route);--}}
-                                {{--row.push(values.shipments_count);--}}
-                                {{--row.push(values.delivered_shipments);--}}
-                                {{--row.push(values.assignee);--}}
-                                {{--row.push(values.created_at);--}}
-                                {{--row.push(values.updated_by);--}}
-                                {{--row.push(values.updated_at);--}}
-                                {{--row.push(values.amount);--}}
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.account_no);
+                                row.push(values.shipper);
+                                row.push(values.current_status);
+                                row.push(values.payment_status);
+                                row.push(values.service_type);
+                                row.push(values.arrival_date);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.collection_amount);
+                                row.push(values.actual_weight);
+                                row.push(values.weight_charges);
+                                row.push(values.cash_handling_charges);
+                                row.push(values.insurance_charges);
+                                row.push(values.packaging_material_charges);
+                                row.push(values.return_charges);
+                                row.push(values.replacement_charges);
+                                row.push(values.try_and_buy_charges);
+                                row.push(values.fuel_surcharge);
+                                row.push(values.gst);
+                                row.push(values.total_charges);
+                                row.push(values.net_payable);
 
-                                {{--body.push(row);--}}
-                            {{--});--}}
-                        {{--},--}}
-                        {{--async: false--}}
-                    {{--});--}}
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
 
-                    {{--return {body: body, header:head};--}}
-                {{--}--}}
-            {{--} );--}}
+                    return {body: body, header:head};
+                }
+            } );
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '300px',
@@ -336,31 +378,42 @@
                 ajax:{
                     url: '{{ route('admin.reports.overall_sales.list') }}',
                     data: function (d) {
-                        // d.search_dn_no = $('#search_dn_no').val();
-                        // d.search_tracking = $('#search_tracking_no').val();
-                        // d.search_rider = $('#search_rider').val();
-                        // d.search_assigned_by = $('#search_assigned_by').val();
-                        // d.search_updated_by = $('#search_updated_by').val();
-                        // d.search_hub = $('#search_hub').val();
-                        // d.search_submission = $('input[name="submission_date_formatted"]').val();
-                        // d.search_date_from = $('input[name="search_date_from_formatted"]').val();
-                        // d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.search_tracking = $('#search_tracking_no').val();
+                        d.search_shipper = $('#search_shipper').val();
+                        d.search_origin = $('#search_origin').val();
+                        d.search_destination = $('#search_destination').val();
+                        d.search_hub = $('#search_hub').val();
+                        d.search_status = $('#search_status').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 order: [[2, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
-                    // { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
-                    // { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    // { data:'route' ,name: 'route', class: 'align-middle route'},
-                    // { data:'shipments_count' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count'},
-                    // { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
-                    // { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
-                    // { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
-                    // { data:'updated_by' ,name: 'ub.name.updated_by', class: 'align-middle updated_by'},
-                    // { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
-                    // { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
+                    { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
+                    { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
+                    { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
+                    { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
+                    { data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},
+                    { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
+                    { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
+                    { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
+                    { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
+                    { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
+                    { data:'collection_amount' ,name: 'shipments.amount', class: 'align-middle collection_amount'},
+                    { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
+                    { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
+                    { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
+                    { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
+                    { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
+                    { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
+                    { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},
+                    { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
+                    { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
+                    { data:'gst' ,name: 'pps.gst', class: 'align-middle gst'},
+                    { data:'total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
+                    { data:'net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

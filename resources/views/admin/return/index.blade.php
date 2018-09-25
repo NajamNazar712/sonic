@@ -19,11 +19,11 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Shipper Name / Phone</th>
+                        <th class="border-primary border-darken-1">Shipper Name & Phone</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Consignee Name / Phone</th>
+                        <th class="border-primary border-darken-1">Consignee Name & Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>

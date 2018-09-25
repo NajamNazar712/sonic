@@ -299,6 +299,7 @@
                                 row.push(values.reference_number);
                                 row.push(values.entry_type);
                                 row.push(values.created_at);
+                                row.push(values.admin);
                                 row.push(values.small_flyers);
                                 row.push(values.medium_flyers);
                                 row.push(values.large_flyers);

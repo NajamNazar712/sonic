@@ -112,7 +112,7 @@
                 @if (session('role_id') == 1 || in_array(97, session('permissions')))
 
                     buttons: [{
-                        text: 'Add Rider',
+                        text: '<i class="la la-motorcycle"></i> Add Rider',
                         className: 'btn btn-primary',
                         enabled: true,
                         action: function (e, dt, node, config) {
@@ -123,14 +123,14 @@
                     },
                     {
                         extend: 'excel',
-                        title: 'Route Management',
+                        title: 'Rider Management',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 @else
                 buttons: [{
                     extend: 'excel',
-                    title: 'Route Management',
+                    title: 'Rider Management',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 }],
