@@ -153,9 +153,15 @@ class ShipperSubstituteAccountManagementController extends Controller
     public function update_index($id) {
       $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
       $substitute_user = SubstituteUser::find($id);
-      $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
 
-      return view('client.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions]);
+      if ($substitute_user->user_id == session('user_id')) {
+        $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
+
+        return view('client.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions]);
+      }
+      else {
+            return redirect()->route('cod.access_denied');
+        }
     }
 
     public function update_store(Request $request, $id) {

@@ -96,7 +96,10 @@ class AdminReportsController extends Controller
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
             ->select(['return_notes.id as return_note_id','up.name as updated_by','return_notes.shipments_count as count','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at']);
-        $return = Datatables::of($return_note);
+        $return = Datatables::of($return_note)
+        ->editColumn('return_note_id', function ($return_note) {
+            return str_pad($return_note->return_note_id, 6, '0', STR_PAD_LEFT);
+        });
 
             if($rn_no = $request->get('search_rn_no')){
                 $return->where('return_notes.id','=',$rn_no);
@@ -138,7 +141,10 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as up','up.id','=','pickup_notes.updated_by')
             ->select(['pickup_notes.id as pn_id','cities.name as city','pickup_notes.pickups','pickup_notes.bookings as count','riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
             ->where('pickup_notes.status_id',4);
-        $return = Datatables::of($pickup_note);
+        $return = Datatables::of($pickup_note)
+        ->editColumn('pn_id', function ($pickup_note) {
+            return str_pad($pickup_note->pn_id, 6, '0', STR_PAD_LEFT);
+        });
 
             if($pn_no = $request->get('search_pn_no')){
                 $return->where('pickup_notes.id','=',$pn_no);
@@ -178,7 +184,10 @@ class AdminReportsController extends Controller
             ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
             ->select(['cargo_consignments.id as cargo_id','oc.name as origin','h.name as destination','cargo_consignments.shipments','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments'])
             ->where('cargo_consignments.status_id',3);
-        $cargo = Datatables::of($cargo_received);
+        $cargo = Datatables::of($cargo_received)
+        ->editColumn('cargo_id', function ($cargo_received) {
+            return str_pad($cargo_received->cargo_id, 6, '0', STR_PAD_LEFT);
+        });
 
             if($cargo_no = $request->get('search_cargo_no')){
                 $cargo->where('cargo_consignments.id','=',$cargo_no);
@@ -276,6 +285,9 @@ class AdminReportsController extends Controller
             ->select('shipments.id as Shipment_id','shipments.tracking_number','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status')
             ->groupBy('shipments.id');
         $lead_time = Datatables::of($shipments)
+            ->editColumn('account_no', function ($shipments) {
+                return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
+            })
             ->addColumn('transit_tat',function ($shipments){
                 return ($shipments->arrival_date && $shipments->reached_at_destination)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->reached_at_destination) :'-';
             })
@@ -469,6 +481,22 @@ class AdminReportsController extends Controller
              ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status')
              ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,9]);
          $datatables = Datatables::of($shipments)
+            ->editColumn('dncc', function ($shipments) {
+                if ($shipments->dncc) {
+                    return str_pad($shipments->dncc, 6, '0', STR_PAD_LEFT);
+                }
+                else {
+                    return '';
+                }
+            })
+            ->editColumn('sdn', function ($shipments) {
+                if ($shipments->sdn) {
+                    return str_pad($shipments->sdn, 6, '0', STR_PAD_LEFT);
+                }
+                else {
+                    return '';
+                }
+            })
              ->editColumn('status_updated_at', function($shipment) {
                  return $shipment->status_updated_at;
              })
@@ -553,7 +581,7 @@ class AdminReportsController extends Controller
          $details = array();
          $details_shipper = array();
 
-         $details[] = ['S. No.','Origin '.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','COD Collection','Avg/Parcel Revenue','Avg. Cash Collection','% Rev. on Cash Collection'];
+         $details[] = ['S. No.','Origin '.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Avg/Parcel Revenue','Avg. Cash Collection','% Rev. on Cash Collection'];
 
          $serial_number_hubs = 1;
          $booked = 0; $received = 0; $revenue_wo_gst = 0; $cod_collection = 0;
@@ -921,6 +949,9 @@ class AdminReportsController extends Controller
         }
 
         $datatable = Datatables::of($deliveries)
+            ->editColumn('delivery_note', function ($deliveries) {
+                return str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT);
+            })
             ->setRowAttr([
                 'data-hub' => function($deliveries) {
                     return $deliveries->hub_id;

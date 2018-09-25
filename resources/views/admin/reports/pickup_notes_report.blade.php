@@ -304,7 +304,7 @@
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '300px',
+                scrollX: true, scrollY: '350px',
                 buttons: [
                     {
                     extend: 'excelHtml5',
@@ -312,8 +312,8 @@
                     text: '<i class="la la-file-excel-o"></i> Excel'
                     },
                 ],
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,

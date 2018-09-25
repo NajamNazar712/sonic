@@ -41,7 +41,7 @@ class ShipperReceivingSheetHistoryController extends Controller
       return Datatables::of($receiving_sheet_received)
       ->editColumn('receiving_sheet', function($receiving_sheet_received) {
         if ($receiving_sheet_received->receiving_sheet) {
-          return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($receiving_sheet_received->receiving_sheet, 12, "0", STR_PAD_LEFT) . '</span></button>';
+          return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($receiving_sheet_received->receiving_sheet, 6, '0', STR_PAD_LEFT) . '</span></button>';
         }
         else {
           return '';

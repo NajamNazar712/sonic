@@ -362,15 +362,15 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
 				@endif
-				scrollX: true, scrollY: '300px',
+				scrollX: true, scrollY: '350px',
 				select: {
 					info: false,
 					style: 'multi',
 					selector: 'td.select-checkbox',
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
-				lengthMenu: [[25, 50, 100], [25, 50, 100]],
-				pageLength: 25,
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
@@ -440,7 +440,7 @@
 
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
 				dom: 'tr',
-				scrollX: true, scrollY: '300px',
+				scrollX: true, scrollY: '350px',
 				paging: false,
 				select: {
 					info: false,

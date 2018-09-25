@@ -40,6 +40,12 @@ class ShipperFinanceController extends Controller
         ->groupBy('done_payments.id');
 
         $datatables = Datatables::of($done_payments)
+        ->editColumn('id', function ($done_payment) {
+            return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
+        })
+        ->filterColumn('done_payments.id', function ($query, $keyword) {
+            return $query->where('done_payments.id', '=', $keyword);
+        })
         ->editColumn('delivered_shipments', function($done_payment) {
             if ($done_payment->delivered_shipments != 0) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $done_payment->delivered_shipments . '</button>';
@@ -211,15 +217,15 @@ class ShipperFinanceController extends Controller
     }
 
     public function payments_details_print(Request $request) {
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+      $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
-        $done_payment = DonePayment::find($request->id);
+      $done_payment = DonePayment::find($request->id);
 
-        $shipper = $done_payment->shipper;
+      $shipper = $done_payment->shipper;
 
-        $shipper_bank = $shipper->bank;
+      $shipper_bank = $shipper->bank;
 
-        $html = '
+      $html = '
                 <!doctype html>
                 <html lang="en">
                   <head>
@@ -287,10 +293,10 @@ class ShipperFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Payment ID</strong></td>
-                              <td>' . $done_payment->id . '</td>
-                              <td rowspan="7" class="text-center align-middle">
+                              <td>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT). '</td>
+                              <td rowspan="11" class="text-center align-middle">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($done_payment->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                                <span><strong>' . $done_payment->id . '</strong></span>
+                                <span><strong>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                               </td>
                             </tr>
                             <tr>
@@ -299,7 +305,7 @@ class ShipperFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Client Bank</strong></td>
-                              <td>' . $shipper_bank->bank_name . '</td>
+                              <td>' . $shipper_bank->bank->name . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Account Title</strong></td>
@@ -317,6 +323,60 @@ class ShipperFinanceController extends Controller
                               <td class="color secondary"><strong>Reference Number</strong></td>
                               <td>' . $done_payment->reference_number . '</td>
                             </tr>
+      ';
+
+      $shipment_details = '';
+
+      $serial_number = 1;
+
+      $total_amount = 0;
+      $total_charges = 0;
+      $total_gst = 0;
+      $total_payable = 0;
+
+      foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+            $shipment = $done_payment_shipment->shipment;
+
+            $shipment_details .= '
+                            <tr>
+                              <td>' . $serial_number . '</td>
+                              <td>' . $shipment->tracking_number . '</td>
+                              <td>' . $shipment->order_id . '</td>
+                              <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
+                              <td>' . $shipment->consignee_city->name . '</td>
+                              <td>' . $shipment->booking_type->booking_type . '</td>
+                              <td>' . $shipment->actual_weight . '</td>
+                              <td>' . number_format($done_payment_shipment->amount) . '</td>
+                              <td>' . number_format($done_payment_shipment->charges) . '</td>
+                              <td>' . number_format($done_payment_shipment->payable) . '</td>
+                            </tr>
+            ';
+
+            $serial_number++;
+
+            $total_amount += $done_payment_shipment->amount;
+            $total_charges += $done_payment_shipment->charges;
+            $total_gst += $done_payment_shipment->gst;
+            $total_payable += $done_payment_shipment->payable;
+      }
+
+      $html .= '
+                            <tr>
+                              <td class="color secondary"><strong>Total Amount</strong></td>
+                              <td>' . number_format($total_amount) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total Charges</strong></td>
+                              <td>' . number_format($total_charges) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total GST</strong></td>
+                              <td>' . number_format($total_gst) . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Total Payable</strong></td>
+                              <td>' . number_format($total_payable) . '</td>
+                            </tr>
                           </tbody>
                         </table>
 
@@ -333,62 +393,14 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Amount</strong></td>
                               <td class="color primary"><strong>Charges</strong></td>
                               <td class="color primary"><strong>Payable</strong></td>
+                            </tr>
       ';
 
-      $serial_number = 1;
-
-      $total_amount = 0;
-      $total_charges = 0;
-      $total_gst = 0;
-      $total_payable = 0;
-
-      foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
-            $shipment = $done_payment_shipment->shipment;
-
-            $html .= '
-                            <tr>
-                              <td>' . $serial_number . '</td>
-                              <td>' . $shipment->tracking_number . '</td>
-                              <td>' . $shipment->order_id . '</td>
-                              <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
-                              <td>' . $shipment->consignee_city->name . '</td>
-                              <td>' . $shipment->booking_type->booking_type . '</td>
-                              <td>' . $shipment->actual_weight . '</td>
-                              <td>' . $done_payment_shipment->amount . '</td>
-                              <td>' . $done_payment_shipment->charges . '</td>
-                              <td>' . $done_payment_shipment->payable . '</td>
-                            </tr>
-            ';
-
-            $serial_number++;
-
-            $total_amount += $done_payment_shipment->amount;
-            $total_charges += $done_payment_shipment->charges;
-            $total_gst += $done_payment_shipment->gst;
-            $total_payable += $done_payment_shipment->payable;
-      }
+      $html .= $shipment_details;
 
       $html .= '
                           </tbody>
                         </table>
-
-                        <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                              <td class="color primary"><strong>Total Amount</strong></td>
-                              <td class="color primary"><strong>Total Charges</strong></td>
-                              <td class="color primary"><strong>Total GST</strong></td>
-                              <td class="color primary"><strong>Total Payable</strong></td>
-                            </tr>
-                            <tr>
-                              <td>' . $total_amount . '</td>
-                              <td>' . $total_charges . '</td>
-                              <td>' . $total_gst . '</td>
-                              <td>' . $total_payable . '</td>
-                            </tr>
-                          </tbody>
-                        </table>
-
                       </div>
                     </div>
 
@@ -426,9 +438,9 @@ class ShipperFinanceController extends Controller
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
-            $row[] = $done_payment_shipment->amount;
-            $row[] = $done_payment_shipment->charges;
-            $row[] = $done_payment_shipment->payable;
+            $row[] = number_format($done_payment_shipment->amount);
+            $row[] = number_format($done_payment_shipment->charges);
+            $row[] = number_format($done_payment_shipment->payable);
 
             $details[] = $row;
 

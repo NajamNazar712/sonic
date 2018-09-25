@@ -20,7 +20,7 @@
                         <th class="border-primary border-darken-1">Dispute No.</th>
                         <th class="border-primary border-darken-1">Dispute Date/Time</th>
                         <th class="border-primary border-darken-1">Description</th>
-                        <th class="border-primary border-darken-1">Originated Datetime</th>
+                        <th class="border-primary border-darken-1">Originated At</th>
                         <th class="border-primary border-darken-1">Dispute Type</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Launched By</th>
@@ -335,7 +335,7 @@
                             head = [];
 
                             head.push('S.No');
-                            head.push('Dispute .No');
+                            head.push('Dispute No.');
                             head.push('Dispute Date');
                             head.push('Description');
                             head.push('Originated At');
@@ -396,9 +396,9 @@
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 }],
             @endif
-            scrollX: true, scrollY: '300px',
-            lengthMenu: [[25, 50, 100], [25, 50, 100]],
-            pageLength: 25,
+            scrollX: true, scrollY: '350px',
+            lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+            pageLength: 50,
             stateSave: true,
             pagingType: 'full_numbers',
             processing: true,

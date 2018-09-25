@@ -104,9 +104,9 @@
 
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
-				scrollX: true, scrollY: '300px',
-				lengthMenu: [[25, 50, 100], [25, 50, 100]],
-				pageLength: 25,
+				scrollX: true, scrollY: '350px',
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				columns: [
 					{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

@@ -177,7 +177,7 @@
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(41, session('permissions')))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '300px',
+                scrollX: true, scrollY: '350px',
                 buttons: [
                     {
                     text: '<i class="la la-creative-commons"></i> Cash Collect',
@@ -274,8 +274,8 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
