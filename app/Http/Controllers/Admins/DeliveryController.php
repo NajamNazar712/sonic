@@ -271,6 +271,9 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
             })
+            ->editColumn('delivery_note_id', function ($deliveries) {
+                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
+            })
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
                 return $query->where('delivery_notes.id', '=', $keyword);
             })
@@ -1876,7 +1879,7 @@ class DeliveryController extends Controller
 
         return Datatables::of($deliveries)
             ->editColumn('delivery_note_id', function ($deliveries) {
-                return str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT);
+                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
                 return $query->where('delivery_notes.id', '=', $keyword);

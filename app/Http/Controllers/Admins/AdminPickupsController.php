@@ -794,6 +794,9 @@ class AdminPickupsController extends Controller
       ->editColumn('pickup_note_no', function($pickup_note) {
         return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
       })
+      ->editColumn('pickup_note_id', function($pickup_note) {
+        return str_pad($pickup_note->pickup_note_id, 6, '0', STR_PAD_LEFT);
+      })
       ->filterColumn('pickup_notes.id', function ($query, $keyword) {
           return $query->where('pickup_notes.id', '=', $keyword);
       })
