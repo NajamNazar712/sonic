@@ -154,6 +154,30 @@ class DisputeController extends Controller
        }
 
     }
+    static public function add_over_received_shipments($receiving,$shipments){
+        $admin = Auth::id();
+        $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
+        $count = count($shipments);
+       $dispute = Dispute::create([
+            'description'=>'Shipment over received',
+            'raised_by'=>$admin,
+            'raised_by_status'=>0,
+            'city_id'=>$city_id,
+            'dispute_type_id'=>2,
+            'shipments_count'=>$count
+        ]);
+       if($dispute){
+           foreach ($shipments as $shipment){
+               DisputeShipment::create([
+                   'dispute_id'=>$dispute->id,
+                   'shipment_id'=>$shipment
+               ]);
+           }
+
+           NotificationsController::send(19, $dispute->id);
+       }
+
+    }
     public function dispute_create(Request $request){
 //        return $request;
         $tracking_numbers = explode(',',$request->tracking_number);

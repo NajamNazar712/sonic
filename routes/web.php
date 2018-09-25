@@ -573,6 +573,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('export_to_excel', 'Admins\AdminReportsController@customer_retention_export_to_excel')->name('export_to_excel');
             Route::get('download', 'Admins\AdminReportsController@customer_retention_download')->name('download');
         });
+        Route::prefix('overll_sales')->name('overll_sales.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@overall_sales_index')->name('index');
+            Route::post('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
+
+        });
 
     });
 

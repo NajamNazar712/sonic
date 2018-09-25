@@ -1115,4 +1115,10 @@ class AdminReportsController extends Controller
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
         return Response::download($file, 'customer_retention_report.xlsx',$headers);
     }
+    public function overall_sales_index(){
+        return view('admin.reports.overall_sales');
+    }
+    public function overall_sales_list(Request $request){
+
+    }
 }

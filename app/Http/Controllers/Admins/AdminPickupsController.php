@@ -1475,6 +1475,7 @@ class AdminPickupsController extends Controller
             DisputeController::add_short_received_shipments($receiving_sheet_id, $short_shipment_ids);
           }
         }
+
         //dispute end
 
         foreach ($pickup_request->pickup_request_assigned_shipments as $pickup_request_assigned_shipment) {
