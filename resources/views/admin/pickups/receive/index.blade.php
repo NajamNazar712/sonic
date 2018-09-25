@@ -31,6 +31,12 @@
 								</form>
 							@endif
 
+							<form id="tracking_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+								<div class="form-group">
+									<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+								</div>
+							</form>
+
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
@@ -183,7 +189,12 @@
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
-				ajax: '{{ route('admin.pickups.receive.list') }}',
+				ajax: {
+					url: '{{ route('admin.pickups.receive.list') }}',
+					data: function (d) {
+						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
+					}
+				},
 				rowId: 'id',
 				order: [[4, 'asc']],
 				columns: [
@@ -271,6 +282,26 @@
 					}
 				});
 			@endif
+
+			$('#tracking_number_search_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				length = $('#tracking_number_search_form #tracking_number').val().length;
+
+				if (length == 0 || length >= 12) {
+					table.draw();
+				}
+			});
+
+			$('#tracking_number_search_form #tracking_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			}).bind('input', function() {
+				if (this.value.length == 0 || this.value.length >= 12) {
+					table.draw();
+				}
+			});
 		});
 	</script>
 @endsection

@@ -681,6 +681,10 @@ class AdminPickupsController extends Controller
                             <td> ' . $route->code . ' (' . $route->start . ' to ' . $route->end . ')</td>
                           </tr>
                           <tr>
+                            <td class="color secondary"><strong>City</strong></td>
+                            <td> ' . $pickup_note->city->name . '</td>
+                          </tr>
+                          <tr>
                             <td class="color secondary"><strong>Total Pickups</strong></td>
                             <td>' . $pickup_note->pickups . '</td>
                           </tr>
@@ -852,6 +856,13 @@ class AdminPickupsController extends Controller
       })
       ->orderColumn('rider', 'r.name $1, r.phone $1')
       ->orderColumn('route', 'ro.code $1, ro.start $1, ro.end $1');
+
+      if ($tracking_number = $request->get('tracking_number')) {
+        $datatables->join('pickup_note_requests as pnr', 'pickup_notes.id', '=', 'pnr.pickup_note_id')
+        ->join('pickup_requests as pr', 'pnr.pickup_request_id', '=', 'pr.id')
+        ->join('shipments as s', 'pr.pickup_address_id', '=', 's.pickup_address_id')
+        ->where('s.tracking_number', '=', $tracking_number);
+      }
 
       return $datatables->make(true);
     }
