@@ -218,7 +218,7 @@
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 }],
 	            @endif
-	            scrollX: true, scrollY: '300px',
+	            scrollX: true, scrollY: '350px',
 				select: {
 					info: false,
 					style: 'multi',

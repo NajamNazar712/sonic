@@ -362,7 +362,7 @@
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
 				@endif
-				scrollX: true, scrollY: '300px',
+				scrollX: true, scrollY: '350px',
 				select: {
 					info: false,
 					style: 'multi',
@@ -440,7 +440,7 @@
 
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
 				dom: 'tr',
-				scrollX: true, scrollY: '300px',
+				scrollX: true, scrollY: '350px',
 				paging: false,
 				select: {
 					info: false,

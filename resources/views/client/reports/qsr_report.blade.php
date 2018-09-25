@@ -168,7 +168,7 @@
             var flag = false;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '300px',
+                scrollX: true, scrollY: '350px',
                 buttons: [
 
                     {

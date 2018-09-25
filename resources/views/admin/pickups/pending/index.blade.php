@@ -237,7 +237,7 @@
                     }
                     ],
 				@endif
-				scrollX: true, scrollY: '300px',
+				scrollX: true, scrollY: '350px',
 				select: {
 					info: false,
 					style: 'multi',

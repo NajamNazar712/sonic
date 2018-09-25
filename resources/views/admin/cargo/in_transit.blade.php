@@ -462,7 +462,7 @@
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 	}],
 				@endif
-				scrollX: true, scrollY: '300px',
+				scrollX: true, scrollY: '350px',
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',
@@ -534,7 +534,7 @@
 			@if (session('role_id') == 1 || in_array(30, session('permissions')))
 				var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
 					dom: 'tr',
-					scrollX: true, scrollY: '300px',
+					scrollX: true, scrollY: '350px',
 					paging: false,
 					columns: [
 						{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},

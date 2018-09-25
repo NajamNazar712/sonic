@@ -180,7 +180,7 @@
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
-				scrollX: true, scrollY: '300px',
+				scrollX: true, scrollY: '350px',
 				lengthMenu: [[25, 50, 100], [25, 50, 100]],
 				pageLength: 25,
 				pagingType: 'full_numbers',
@@ -242,7 +242,7 @@
 
 			var reconcile_delivery_notes_table = $('#reconcile_delivery_notes #reconcile_delivery_notes_datatable').DataTable({
 				dom: 'tr',
-				scrollX: true, scrollY: '300px',
+				scrollX: true, scrollY: '350px',
 				paging: false,
 				select: {
 					info: false,
