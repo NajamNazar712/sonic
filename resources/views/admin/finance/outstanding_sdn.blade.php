@@ -39,7 +39,7 @@
 								<div class="modal-dialog modal-lg modal-full-length" role="document">
 									<div class="modal-content">
 										<div class="modal-header">
-											<h4 class="modal-title" id="reconcile_delivery_notes_title">Reconcile Delivery Notes of SDN No. <span></span></h4>
+											<h4 class="modal-title" id="reconcile_delivery_notes_title">Reconcile Delivery Notes of SDN</h4>
 
 											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 												<span aria-hidden="true">×</span>
@@ -273,8 +273,6 @@
 					selected_rows = [];
 
 					reconcile_delivery_notes_table.clear().draw();
-
-					$('#reconcile_delivery_notes #reconcile_delivery_notes_title span').html(id);
 
 					$('#reconcile_delivery_notes').modal('show');
 				}

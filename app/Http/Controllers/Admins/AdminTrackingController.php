@@ -45,7 +45,7 @@ class AdminTrackingController extends Controller
     			$shipper = $shipment->user;
 
     			$details['shipper']['name'] = $shipper->name;
-    			$details['shipper']['account_number'] = $shipper->id;
+    			$details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
     			$details['shipper']['phone_number_1'] = $shipper->phone;
     			$details['shipper']['phone_number_2'] = $shipper->phone2;
     			$details['shipper']['origin'] = $shipper->city->name;
@@ -77,7 +77,7 @@ class AdminTrackingController extends Controller
     				$journey_details['status'] = $journey->shipment_status_shipper->name;
 
     				if ($journey->reference_1_id) {
-    					$journey_details['status'] .= ' (' . $journey->reference_1_id;
+    					$journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
 
     					if ($journey->reference_2_id) {
                             if (in_array($journey->shipper_status_id, [5, 23])) {
@@ -86,7 +86,7 @@ class AdminTrackingController extends Controller
                                 $journey_details['status'] .= ' | ' . $rider->name;
                             }
                             else {
-                                $journey_details['status'] .= ' | ' . $journey->reference_2_id;
+                                $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
                             }
     					}
                         else if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {

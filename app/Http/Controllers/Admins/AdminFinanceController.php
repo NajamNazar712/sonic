@@ -69,7 +69,10 @@ class AdminFinanceController extends Controller
 
         $datatables = Datatables::of($station_deposit_notes)
         ->editColumn('sdn_number', function($station_deposit_note) {
-            return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $station_deposit_note->sdn_number . '</span></button>';
+            return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($station_deposit_note->sdn_number, 6, '0', STR_PAD_LEFT) . '</span></button>';
+        })
+        ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
+            return $query->where('station_deposit_notes.id', '=', $keyword);
         })
         ->editColumn('deposit_slip', function($station_deposit_note) {
             if ($station_deposit_note->deposit_slip) {
@@ -123,7 +126,13 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($delivery_notes)
-        ->addColumn('action', function($station_deposit_note) {
+        ->editColumn('delivery_note_number', function ($delivery_notes) {
+            return str_pad($delivery_notes->delivery_note_number, 6, '0', STR_PAD_LEFT);
+        })
+        ->filterColumn('dn.id', function ($query, $keyword) {
+            return $query->where('dn.id', '=', $keyword);
+        })
+        ->addColumn('action', function($delivery_notes) {
             return '<div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                   <div class="dropdown-menu dropdown-menu-sm">
@@ -198,7 +207,7 @@ class AdminFinanceController extends Controller
                 $row = array();
 
                 $row[] = $serial_number;
-                $row[] = $delivery_note->id;
+                $row[] = str_pad($delivery_note->id, 6, '0', STR_PAD_LEFT);
                 $row[] = $delivery_note->hub->name;
                 $row[] = $delivery_note->rider->name;
                 $row[] = $delivery_note->route->code . ' (' . $delivery_note->route->start . ' to ' . $delivery_note->route->end . ')';
@@ -260,6 +269,28 @@ class AdminFinanceController extends Controller
         ->editColumn('tracking_number',function ($shipments){
             $route = route('admin.tracking.index');
             return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+        })
+        ->editColumn('dncc', function ($shipment) {
+            if ($shipment->dncc) {
+                return str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT);
+            }
+            else {
+                return '';
+            }
+        })
+        ->filterColumn('delivery_note_shipments.delivery_note_id', function ($query, $keyword) {
+            return $query->where('delivery_note_shipments.delivery_note_id', '=', $keyword);
+        })
+        ->editColumn('sdn', function ($shipment) {
+            if ($shipment->sdn) {
+                return str_pad($shipment->sdn, 6, '0', STR_PAD_LEFT);
+            }
+            else {
+                return '';
+            }
+        })
+        ->filterColumn('dnsdn.station_deposit_note_id', function ($query, $keyword) {
+            return $query->where('dnsdn.station_deposit_note_id', '=', $keyword);
         })
         ->addColumn('aging', function($shipment) {
             $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
@@ -412,7 +443,7 @@ class AdminFinanceController extends Controller
                 $details['amount'] = $shipment->amount;
 
                 $details['shipper']['name'] = $shipper->name;
-                $details['shipper']['account_number'] = $shipper->id;
+                $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
                 $details['shipper']['phone_number_1'] = $shipper->phone;
                 $details['shipper']['phone_number_2'] = $shipper->phone2;
                 $details['shipper']['origin'] = $shipper->city->name;
@@ -933,7 +964,7 @@ class AdminFinanceController extends Controller
 
             $row = array();
 
-            $row[] = $done_payment->id;
+            $row[] = str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
             $row[] = $shipper->name;
             $row[] = $shipper->bank->account_title;
             $row[] = $shipper->bank->iban;
@@ -1136,12 +1167,18 @@ class AdminFinanceController extends Controller
         ->groupBy('done_payments.id');
 
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('c.hub_id', session('hubs'));
+            $done_payments = $done_payments->whereIn('c.hub_id', session('hubs'));
         }
 
         $datatables = Datatables::of($done_payments)
-        ->addColumn('total_deductable', function($done_payments) {
-            return number_format($done_payments->total_charges + $done_payments->total_gst);
+        ->editColumn('id', function ($done_payment) {
+            return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
+        })
+        ->filterColumn('done_payments.id', function ($query, $keyword) {
+            return $query->where('done_payments.id', '=', $keyword);
+        })
+        ->addColumn('total_deductable', function($done_payment) {
+            return number_format($done_payment->total_charges + $done_payment->total_gst);
         })
         ->editColumn('delivered_shipments', function($done_payment) {
             if ($done_payment->delivered_shipments != 0) {
@@ -1453,10 +1490,10 @@ class AdminFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Payment ID</strong></td>
-                              <td>' . $done_payment->id . '</td>
+                              <td>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT). '</td>
                               <td rowspan="11" class="text-center align-middle">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($done_payment->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                                <span><strong>' . $done_payment->id . '</strong></span>
+                                <span><strong>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                               </td>
                             </tr>
                             <tr>
@@ -1465,7 +1502,7 @@ class AdminFinanceController extends Controller
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Client Bank</strong></td>
-                              <td>' . $shipper_bank->bank_name . '</td>
+                              <td>' . $shipper_bank->bank->name . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Account Title</strong></td>
@@ -1634,8 +1671,6 @@ class AdminFinanceController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
 
         $spreadsheet->getActiveSheet()->fromArray($details);
-
-        // var_dump($spreadsheet->getActiveSheet()->getStyle('B:B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT));
 
         $writer = new Xlsx($spreadsheet);
 

@@ -466,6 +466,12 @@ class AdminDashboardController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('account_no', function ($shipment) {
+                return str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('u.id', function ($query, $keyword) {
+                return $query->where('u.id', '=', $keyword);
+            })
             ->editColumn('phone1',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
             })
@@ -3178,6 +3184,12 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)
+            ->editColumn('id', function ($user) {
+                return str_pad($user->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('users.id', function ($query, $keyword) {
+                return $query->where('users.id', '=', $keyword);
+            })
             ->editColumn('status',function ($users){
                 if($users->status == 3){
                     return "Enable";
@@ -3250,6 +3262,12 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)
+            ->editColumn('id', function ($user) {
+                return str_pad($user->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('users.id', function ($query, $keyword) {
+                return $query->where('users.id', '=', $keyword);
+            })
             ->editColumn('status', function ($users) {
                 return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
             })
@@ -3316,7 +3334,14 @@ class AdminDashboardController extends Controller
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
 
-        return Datatables::of($users)->addColumn("action", function ($result) {
+        return Datatables::of($users)
+            ->editColumn('id', function ($user) {
+                return str_pad($user->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('users.id', function ($query, $keyword) {
+                return $query->where('users.id', '=', $keyword);
+            })
+            ->addColumn("action", function ($result) {
             $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -3357,6 +3382,18 @@ class AdminDashboardController extends Controller
         ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','cities.hub as isHub','cities.status as status']);
 
         return Datatables::of($cities)
+        ->editColumn('city_id', function ($city) {
+            return str_pad($city->city_id, 6, '0', STR_PAD_LEFT);
+        })
+        ->filterColumn('cities.id', function ($query, $keyword) {
+            return $query->where('cities.id', '=', $keyword);
+        })
+        ->editColumn('hub_id', function ($city) {
+            return str_pad($city->hub_id, 6, '0', STR_PAD_LEFT);
+        })
+        ->filterColumn('cities.hub_id', function ($query, $keyword) {
+            return $query->where('cities.hub_id', '=', $keyword);
+        })
         ->editColumn('status', function ($cities) {
             return ($cities->status == 1)? 'Active': 'Inactive';
         })

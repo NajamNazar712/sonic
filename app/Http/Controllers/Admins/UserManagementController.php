@@ -184,47 +184,57 @@ class UserManagementController extends Controller
         $user = Admin::find($id);
         $user_hubs = $user->hubs->pluck('hub_id')->toArray();
 
-        return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
+        if ($user->role_id != 1) {
+            return view('admin.user_management.user.update.index')->with(['roles' => $roles, 'hubs' => $hubs, 'user' => $user, 'user_hubs' => $user_hubs]);
+        }
+        else {
+            return redirect()->route('admin.access_denied');
+        }
     }
 
     public function user_update_store(Request $request, $id) {
-        $admin = Admin::find($id);
+        if ($request->input('role_id') != 1) {
+            $admin = Admin::find($id);
 
-        $admin->name = $request->input('name');
-        $admin->email = $request->input('email');
-        $admin->phone_number = $request->input('phone_number');
-        $admin->cnic = $request->input('cnic');
-        $admin->role_id = $request->input('role_id');
-        $admin->updated_by = Auth::id();
+            $admin->name = $request->input('name');
+            $admin->email = $request->input('email');
+            $admin->phone_number = $request->input('phone_number');
+            $admin->cnic = $request->input('cnic');
+            $admin->role_id = $request->input('role_id');
+            $admin->updated_by = Auth::id();
 
-        if ($request->filled('password')) {
-            $admin->password = bcrypt($request->input('password'));
-        }
-
-        $admin->save();
-
-        if ($request->has('hub_ids')) {
-            $current_hub_ids = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
-
-            $delete_hub_ids = array_diff($current_hub_ids, $request->input('hub_ids'));
-            $new_hub_ids = array_diff($request->input('hub_ids'), $current_hub_ids);
-
-            AdminHub::where('admin_id', $id)->whereIn('hub_id', $delete_hub_ids)->delete();
-
-            foreach($new_hub_ids as $hub_id) {
-                $admin_hub = new AdminHub();
-
-                $admin_hub->admin_id = $id;
-                $admin_hub->hub_id = $hub_id;
-
-                $admin_hub->save();
+            if ($request->filled('password')) {
+                $admin->password = bcrypt($request->input('password'));
             }
+
+            $admin->save();
+
+            if ($request->has('hub_ids')) {
+                $current_hub_ids = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
+
+                $delete_hub_ids = array_diff($current_hub_ids, $request->input('hub_ids'));
+                $new_hub_ids = array_diff($request->input('hub_ids'), $current_hub_ids);
+
+                AdminHub::where('admin_id', $id)->whereIn('hub_id', $delete_hub_ids)->delete();
+
+                foreach($new_hub_ids as $hub_id) {
+                    $admin_hub = new AdminHub();
+
+                    $admin_hub->admin_id = $id;
+                    $admin_hub->hub_id = $hub_id;
+
+                    $admin_hub->save();
+                }
+            }
+            else {
+                AdminHub::where('admin_id', $id)->delete();
+            }
+
+            return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been updated!']);
         }
         else {
-            AdminHub::where('admin_id', $id)->delete();
+            return redirect()->route('admin.access_denied');
         }
-
-        return redirect()->route('admin.user_management.users.index')->with(['success' => 'User: ' . $request->input('name') . ' has been updated!']);
     }
 
     public function role_index() {
@@ -264,26 +274,31 @@ class UserManagementController extends Controller
     }
 
     public function role_add_store(Request $request) {
-        $admin_role = new AdminRole();
+        if ($request->input('department_id') != 1) {
+            $admin_role = new AdminRole();
 
-        $admin_role->name = $request->input('name');
-        $admin_role->department_id = $request->input('department_id');
-        $admin_role->updated_by = Auth::id();
+            $admin_role->name = $request->input('name');
+            $admin_role->department_id = $request->input('department_id');
+            $admin_role->updated_by = Auth::id();
 
-        $admin_role->save();
+            $admin_role->save();
 
-        if ($request->has('permission_ids')) {
-            foreach($request->input('permission_ids') as $permission_id) {
-                $admin_role_module_permission = new AdminRoleModulePermission();
+            if ($request->has('permission_ids')) {
+                foreach($request->input('permission_ids') as $permission_id) {
+                    $admin_role_module_permission = new AdminRoleModulePermission();
 
-                $admin_role_module_permission->role_id = $admin_role->id;
-                $admin_role_module_permission->permission_id = $permission_id;
+                    $admin_role_module_permission->role_id = $admin_role->id;
+                    $admin_role_module_permission->permission_id = $permission_id;
 
-                $admin_role_module_permission->save();
+                    $admin_role_module_permission->save();
+                }
             }
-        }
 
-        return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been added!']);
+            return redirect()->route('admin.user_management.roles.index')->with(['success' => 'Role: ' . $request->input('name') . ' has been added!']);
+        }
+        else {
+            return redirect()->route('admin.access_denied');
+        }
     }
 
     public function role_update_index($id) {
@@ -292,7 +307,12 @@ class UserManagementController extends Controller
         $role = AdminRole::find($id);
         $permissions = $role->module_permissions->pluck('permission_id')->toArray();
 
-        return view('admin.user_management.role.update.index')->with(['departments' => $departments, 'modules' => $modules, 'role' => $role, 'permissions' => $permissions]);
+        if ($role->id != 1) {
+            return view('admin.user_management.role.update.index')->with(['departments' => $departments, 'modules' => $modules, 'role' => $role, 'permissions' => $permissions]);
+        }
+        else {
+            return redirect()->route('admin.access_denied');
+        }
     }
 
     public function role_update_store(Request $request, $id) {

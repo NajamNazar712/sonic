@@ -50,7 +50,7 @@
                 <div class="comment-row border">
                     <p class="comment">{{ucfirst($comment->comment)}}</p>
 
-                    <span class="">by <b>{{ucfirst($comment->admin->name)}}</b> at {{\Carbon\Carbon::parse($comment->created_at)->format('d/m/Y h:i:s A')}}</span>
+                    <span class="">by <b>{{ucfirst($comment->admin->name)}}</b> at {{ $comment->created_at }}</span>
                 </div>
 
             @endforeach

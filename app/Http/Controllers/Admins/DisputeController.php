@@ -56,6 +56,12 @@ class DisputeController extends Controller
         }
 
         return Datatables::of($dispute)
+            ->editColumn('dispute_id', function($dispute) {
+                return str_pad($dispute->dispute_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('disputes.id', function ($query, $keyword) {
+                return $query->where('disputes.id', '=', $keyword);
+            })
             ->editColumn('status',function($dispute){
                 return $dispute->status == 0? 'Dispute Launched': ($dispute->status == 1? 'Dispute Updated' : ($dispute->status == 2? 'Dispute Resolved':''));
 
@@ -392,7 +398,7 @@ class DisputeController extends Controller
     }
     public static function add_junction_dispute($cargo_id,$junction_id){
             $junction = City::find($junction_id);
-            $description = "This Cargo # $cargo_id is not updated at $junction->name";
+            $description = "This Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT) . " is not updated at $junction->name";
             $admin = Auth::id();
             $city_id = $junction_id;
 
@@ -408,7 +414,7 @@ class DisputeController extends Controller
             NotificationsController::send(19, $dispute->id);
     }
     public static function add_cargo_short_received($cargo_id,$shipments){
-        $description = "Short received shipments dispute for Cargo # $cargo_id";
+        $description = "Short received shipments dispute for Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
         $admin = Auth::id();
         $city_id = Shipment::find($shipments[0]->shipment_id)->pickup_address->city->hub_id;
         $count = count($shipments);
@@ -435,7 +441,7 @@ class DisputeController extends Controller
 //        return $shipments;
         $admin = Auth::id();
         $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
-        $description = "Delivery Note # $delivery_note Dispute for different status";
+        $description = "Delivery Note # " . str_pad($delivery_note, 6, '0', STR_PAD_LEFT) . " Dispute for different status";
         $count = count($shipments);
         $dispute = Dispute::create([
             'description'=>$description,
