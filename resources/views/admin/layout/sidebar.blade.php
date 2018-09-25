@@ -202,7 +202,7 @@
                         @endif
 
                         @if (session('role_id') == 1 || in_array(75, session('permissions')))
-                            {{--<li><a class="menu-item" href="#">Overall Sales</a></li>--}}
+                            <li><a class="menu-item" href="">Overall Sales</a></li>
                         @endif
                     </ul>
                 </li>

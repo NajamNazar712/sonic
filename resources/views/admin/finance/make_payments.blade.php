@@ -240,11 +240,86 @@
 			var selected_rows_shipments = [];
 
 			var initial_total_hold = 0;
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.finance.make_payments.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Shipper');
+                            head.push('City');
+                            head.push('Phone No(s).');
+                            head.push('Address');
+                            head.push('Total Shipments');
+                            head.push('Delivered Shipments');
+                            head.push('Returned Shipments');
+                            head.push('Adjusted Shipments');
+                            head.push('Total Amount');
+                            head.push('Total Charges');
+                            head.push('Total GST');
+                            head.push('Total Deductable');
+                            head.push('Total Payable');
+                            head.push('Bank');
+                            head.push('Bank Branch');
+                            head.push('Account No.');
+                            head.push('Account Title');
+                            head.push('IBAN');
+                            head.push('Account City');
+                            head.push('Payment Mode');
+                            head.push('Payment Cycle');
+                            head.push('Return Shipments Avg. Aging');
+
+
+
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.shipper);
+                                row.push(values.city);
+                                row.push(values.phone_numbers);
+                                row.push(values.address);
+                                row.push(values.total_shipments);
+                                row.push(values.delivered_shipments_count);
+                                row.push(values.returned_shipments_count);
+                                row.push(values.adjusted_shipments_count);
+                                row.push(values.total_amount);
+                                row.push(values.total_charges);
+                                row.push(values.total_gst);
+                                row.push(values.total_deductable);
+                                row.push(values.total_payable);
+                                row.push(values.bank);
+                                row.push(values.bank_branch);
+                                row.push(values.account_no);
+                                row.push(values.account_title);
+                                row.push(values.iban);
+                                row.push(values.account_city);
+                                row.push(values.payment_mode);
+                                row.push(values.payment_cycle);
+                                row.push(values.return_shipments_average_aging);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
-				scrollX: true, scrollY: '300px',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || in_array(60, session('permissions')))
-					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
 					buttons: [{
 						text: 'Make Payment(s)',
 						className: 'btn btn-primary make_payment',
@@ -271,9 +346,21 @@
 
 							$('#make_payments').modal('show');
 						}
-					}],
+					},
+                    {
+                        extend: 'excel',
+                        title: 'Make Payments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
 				@else
-					dom: 'ltipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Make Payments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
 				@endif
 				scrollX: true, scrollY: '300px',
 				select: {
