@@ -70,7 +70,7 @@ class AdminNotificationsController extends Controller
 
             return $dropdown;
         })
-        ->filterColumn('status', function($query, $keyword) {
+        ->filterColumn('notifications.status', function($query, $keyword) {
             $keyword = strtolower($keyword);
 
             if (strpos('enabled', $keyword) !== FALSE) {
@@ -82,7 +82,7 @@ class AdminNotificationsController extends Controller
             else {
                 $query->whereRaw('false');
             }
-        });
+        })
 
         return $datatables->make(true);
     }

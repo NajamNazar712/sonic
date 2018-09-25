@@ -35,7 +35,7 @@
         </tr>
     </thead>
     <tbody>
-        @if (($shipment->weight_charges == null) && ($shipment->cash_handling_charges == null) && ($shipment->insurance_charges == null) && ($shipment->return_charges == null) && ($shipment->fuel_surcharge == null) && ($shipment->replacement_charges == null) && ($shipment->try_and_buy_charges == null && ($shipment->packaging_material_charges == null))
+        @if (($shipment->weight_charges == null) && ($shipment->cash_handling_charges == null) && ($shipment->insurance_charges == null) && ($shipment->return_charges == null) && ($shipment->fuel_surcharge == null) && ($shipment->replacement_charges == null) && ($shipment->try_and_buy_charges == null) && ($shipment->packaging_material_charges == null))
             <tr>
                 <td>No Charges!</td>
             </tr>

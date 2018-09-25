@@ -535,7 +535,13 @@ class ReturnController extends Controller
 
         $datatables = Datatables::of($deliveries)
         ->editColumn('return_note', function ($deliveries) {
-            return "<a href='javascript:void(0);' class='printreturnnote'><u>$deliveries->return_note_id</u></a>";
+            return "<a href='javascript:void(0);' class='printreturnnote'><u>" . str_pad($deliveries->return_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+        })
+        ->editColumn('return_note_id', function ($deliveries) {
+            return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
+        })
+        ->filterColumn('return_notes.id', function ($query, $keyword) {
+            return $query->where('return_notes.id', '=', $keyword);
         })
         ->addColumn("action", function ($result) {
             $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
@@ -649,7 +655,7 @@ class ReturnController extends Controller
     public function return_receive_status(Request $request,$id){
         $return = ReturnNote::where('id',$id)->select('shipments_count')->first();
         $shipment = Shipment::where('id',30)->first();
-        return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count]);
+        return view('admin.return.receive_status')->with(['return_note_id'=>str_pad($id, 6, '0', STR_PAD_LEFT),'shipments_count'=>$return->shipments_count]);
     }
     public function return_receive_status_list(Request $request){
         $deliveries = ReturnNote::join('return_note_shipments as dns','dns.return_note_id','=','return_notes.id')
@@ -887,7 +893,7 @@ class ReturnController extends Controller
                             <td class="color primary"><strong>Contact Person</strong></td>
                             <td class="color primary"><strong>Contact Person Phone</strong></td>
                             <td class="color primary"><strong>Client Address</strong></td>
-                            <td class="color primary"><strong>No. of items</strong></td>
+                            <td class="color primary"><strong>No. of Items</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
                           </tr>
         ';
@@ -926,7 +932,7 @@ class ReturnController extends Controller
                         <tbody>
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
-                            <td class="text-center align-middle color primary"><strong>Return Note ['.$return_note_details->id.']</strong></td>
+                            <td class="text-center align-middle color primary"><strong>Return Note</strong></td>
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                          
@@ -935,7 +941,7 @@ class ReturnController extends Controller
                             <td>' . $rider_name . '</td>
                             <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
                           <tr>
