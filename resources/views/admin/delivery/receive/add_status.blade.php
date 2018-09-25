@@ -47,13 +47,17 @@
                             <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
                         </div>
                         @else
+                        @if($undelivered_printed == 1)
                         <div class="mr-1">
                             <button id="printTempDNCC" type="button" class="btn btn-warning btn-block">Print Temporary DNCC</button>
                         </div>
+                            @endif
                     @endif
+                        @if($shipment_update == 1)
                     <div class="mr-1 ml-1">
                         <button id="printUndeliveredDNCC" type="button" class="btn btn-warning btn-block">Print Undelivered Performa</button>
                     </div>
+                        @endif
                 </div>
                 </form>
             </div>
@@ -62,15 +66,15 @@
 
 
     <!--Replacement Modal -->
-    <div class="modal fade text-left" id="ReplacementModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ReplacementModal"
+    <div class="modal fade text-left" id="ReplacementModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ReplacementModal"
          aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Update Replacement Shipment Weight</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                        {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--</button>--}}
                 </div>
                 <div class="modal-body  text-center">
                     <form id="replacement_form" action="{{route('admin.delivery.receive.replacements.submit')}}" method="post">
@@ -102,15 +106,15 @@
     </div>
     <!--Replacement Modal -->
     <!--Try&Buy Modal -->
-    <div class="modal fade text-left" id="TryBuyModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TryBuyModal"
+    <div class="modal fade text-left" id="TryBuyModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TryBuyModal"
          aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Update Try &amp; Buy Delivery</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                        {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--</button>--}}
                 </div>
                 <div class="modal-body  text-center">
                     <form id="trybuy_form" action="{{route('admin.delivery.receive.trybuys.submit')}}" method="post">
@@ -764,6 +768,7 @@
             $('#printUndeliveredDNCC').on('click',function () {
                 var note_id = $('#delivery_note').val();
                 printUndelivered(note_id);
+                location.reload();
             });
 
 

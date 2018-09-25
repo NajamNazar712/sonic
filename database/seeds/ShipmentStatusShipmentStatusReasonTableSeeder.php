@@ -16,6 +16,7 @@ class ShipmentStatusShipmentStatusReasonTableSeeder extends Seeder
         DB::table('shipment_status_shipment_status_reason')->insert(array(
         	array('shipment_status_id' => 7, 'shipment_status_reason_id' => 14),
 			array('shipment_status_id' => 7, 'shipment_status_reason_id' => 23),
+			array('shipment_status_id' => 7, 'shipment_status_reason_id' => 29),
 			array('shipment_status_id' => 7, 'shipment_status_reason_id' => 24),
 			array('shipment_status_id' => 7, 'shipment_status_reason_id' => 25),
 			array('shipment_status_id' => 8, 'shipment_status_reason_id' => 1),

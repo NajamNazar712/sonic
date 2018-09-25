@@ -21,7 +21,7 @@
                                   </div>
                                   <div class="media-body text-right">
                                       <h3 class="">{{$stats['total']}}</h3>
-                                      <span>Total Orders</span>
+                                      <span>Total Booked Shipments</span>
                                   </div>
                               </div>
                           </div>
@@ -38,7 +38,7 @@
                                   </div>
                                   <div class="media-body text-right">
                                       <h3 class="">{{$stats['booked']}}</h3>
-                                      <span>PND Bookings</span>
+                                      <span>Pending Shipments</span>
                                   </div>
                               </div>
                           </div>
@@ -55,7 +55,7 @@
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['received']}}</h3>
-                                      <span>Received</span>
+                                      <span>Received Shipments</span>
                                   </div>
                               </div>
                           </div>
@@ -71,7 +71,7 @@
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['delivered']}}</h3>
-                                      <span>Delivered</span>
+                                      <span>Delivered Shipments</span>
                                   </div>
                               </div>
                           </div>
@@ -87,7 +87,7 @@
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['return']}}</h3>
-                                      <span>Returns</span>
+                                      <span>Return <br> Shipments</span>
                                   </div>
                               </div>
                           </div>
@@ -95,7 +95,7 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-danger pull-up">
+                  <div class="card bg-gradient-directional-inprocess pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -104,7 +104,7 @@
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['pending']}}</h3>
-                                      <span>In Process</span>
+                                      <span>In Process Shipments</span>
                                   </div>
                               </div>
                           </div>
@@ -203,7 +203,8 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
         .card.booking-css{
-            background-color:#CECECE;
+            background-image: linear-gradient(45deg, #2ba4e0, #aea8ff);
+            background-repeat: repeat-x;
             color:#000000;
         }
 
@@ -507,11 +508,11 @@
 
                 // Add legend
                 legend: {
-                    data: ['PND Bookings', 'Received', 'Delivered', 'Return', 'In Progress']
+                    data: ['Pending Shipments', 'Received', 'Delivered', 'Return', 'In Progress']
                 },
 
                 // Add custom colors
-                color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                color: ['#2ba4e0', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
                 // Hirozontal axis
                 xAxis: [{
@@ -531,7 +532,7 @@
                 // Add series
                 series: [
                     {
-                        name: 'PND Bookings',
+                        name: 'Pending Shipments',
                         type: 'line',
                         data: @json($graph['booked'])
                     },
@@ -597,9 +598,9 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['PND Bookings', 'Received', 'Delivered', 'Return', 'In Progress']
+                                data: ['Pending Shipments', 'Received', 'Delivered', 'Return', 'In Progress']
                             },
-                            color: ['#CECECE', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                            color: ['#2ba4e0', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
                             xAxis: [{
                                 type: 'category',
@@ -615,7 +616,7 @@
                             }],
                             series: [
                                 {
-                                    name: 'PND Bookings',
+                                    name: 'Pending Shipments',
                                     type: 'line',
                                     data: data.graph['booked']
                                 },

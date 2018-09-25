@@ -188,6 +188,10 @@ table.dataTable tbody tr.selected td.select-checkbox:after {
 	padding: 10px;
 }
 
+.bg-gradient-directional-inprocess {
+	background-image: linear-gradient(45deg, #183c4e, #c7b3b5);
+	background-repeat: repeat-x;
+}
 p.comment {
 	text-align: left;
 	-ms-word-wrap: break-word;

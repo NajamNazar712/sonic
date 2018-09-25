@@ -36,12 +36,13 @@ class ShipmentStatusReasonTableSeeder extends Seeder
 			array('id' => 20, 'name' => 'No such order from consignee'),
 			array('id' => 21, 'name' => 'Consignee is not co-operating'),
 			array('id' => 22, 'name' => 'Consignee is not interested'),
-			array('id' => 23, 'name' => 'Due to accident/snatching'),
+			array('id' => 23, 'name' => 'Due to accident'),
 			array('id' => 24, 'name' => 'Due to Shortage of Time'),
-			array('id' => 25, 'name' => 'Due to Uncertain Weather'),
-			array('id' => 26, 'name' => 'Due to Incorrect Destination'),
-			array('id' => 27, 'name' => 'Shipment Damaged'),
-			array('id' => 28, 'name' => 'Replacement not handed over')
+            array('id' => 25, 'name' => 'Due to Uncertain Weather'),
+            array('id' => 26, 'name' => 'Due to Incorrect Destination'),
+            array('id' => 27, 'name' => 'Shipment Damaged'),
+            array('id' => 28, 'name' => 'Replacement not handed over'),
+            array('id' => 29, 'name' => 'Due to snatching')
         ));
     }
 }
