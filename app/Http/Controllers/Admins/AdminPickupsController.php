@@ -437,6 +437,12 @@ class AdminPickupsController extends Controller
       }
 
       $datatables = Datatables::of($pickup_notes)
+      ->editColumn('pickup_note_no', function ($pickup_note) {
+            return str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT);
+        })
+        ->filterColumn('pickup_notes.id', function ($query, $keyword) {
+            return $query->where('pickup_notes.id', '=', $keyword);
+        })
       ->addColumn('rider', function($pickup_note) {
         return $pickup_note->rider_name . '<br/>' . $pickup_note->rider_phone;
       })
@@ -661,7 +667,7 @@ class AdminPickupsController extends Controller
                             <td>' . $rider->name . '</td>
                             <td rowspan="7" class="text-center align-middle pl-1 pr-1">
                               <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($id, 12, '0', STR_PAD_LEFT) . '</strong></span>
+                              <span><strong>' . str_pad($id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
                           <tr>
@@ -784,7 +790,10 @@ class AdminPickupsController extends Controller
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
       })
       ->editColumn('pickup_note_no', function($pickup_note) {
-        return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $pickup_note->pickup_note_no . '</span></button>';
+        return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
+      })
+      ->filterColumn('pickup_notes.id', function ($query, $keyword) {
+          return $query->where('pickup_notes.id', '=', $keyword);
       })
       ->addColumn('action', function($pickup_note) {
         $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
@@ -913,7 +922,7 @@ class AdminPickupsController extends Controller
 
             $details['id'] = $shipment->id;
             $details['tracking_number'] = $shipment->tracking_number;
-            $details['receiving_sheet_no'] = ($shipment->receiving_sheet_shipment) ? str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 12, "0", STR_PAD_LEFT) : '';
+            $details['receiving_sheet_no'] = ($shipment->receiving_sheet_shipment) ? str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT) : '';
             $details['order_id'] = $shipment->order_id;
             $details['destination'] = $shipment->consignee_city->name;
             $details['cod_amount'] = $shipment->amount;
@@ -1312,6 +1321,12 @@ class AdminPickupsController extends Controller
       ->where('pn.id', $request->pickup_receive_pickup_note_id);
 
       $datatables = Datatables::of($pickup_requests)
+      ->editColumn('pickup_note_no', function ($pickup_request) {
+          return str_pad($pickup_request->pickup_note_no, 6, '0', STR_PAD_LEFT);
+      })
+      ->filterColumn('pn.id', function ($query, $keyword) {
+          return $query->where('pn.id', '=', $keyword);
+      })
       ->editColumn('short_received', function($pickup_request) {
           if ($pickup_request->short_received != 0) {
               return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->short_received . '</button>';
@@ -1408,7 +1423,7 @@ class AdminPickupsController extends Controller
         foreach ($pickup_request_short_received_shipments as $pickup_request_short_received_shipment) {
           $shipment = $pickup_request_short_received_shipment->shipment;
 
-          $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 12, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
+          $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
         }
 
         return ['status' => 0, 'success' => 'Shipments found Short Received', 'short_received' => $short_shipments];
@@ -1453,7 +1468,7 @@ class AdminPickupsController extends Controller
           foreach ($pickup_request->pickup_request_short_received_shipments as $pickup_request_short_received_shipment) {
             $shipment = $pickup_request_short_received_shipment->shipment;
 
-           $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 12, '0', STR_PAD_LEFT)][] = $shipment->id;
+           $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT)][] = $shipment->id;
           }
 
           foreach ($short_shipments as $receiving_sheet_id => $short_shipment_ids) {

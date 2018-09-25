@@ -70,11 +70,21 @@ class NotificationsController extends Controller
 
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $shipper[$field], $subject);
+                if ($key == 'account_id') {
+                  $subject = str_replace('[' . $key . ']', str_pad($shipper[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $shipper[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $shipper[$field], $body);
+                if ($key == 'account_id') {
+                  $body = str_replace('[' . $key . ']', str_pad($shipper[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $shipper[$field], $body);
+                }
               }
             }
 
@@ -104,7 +114,7 @@ class NotificationsController extends Controller
             }
 
             if (strpos($body, '[account_id]') !== FALSE) {
-              $body = str_replace('[account_id]', $shipper->id, $body);
+              $body = str_replace('[account_id]', str_pad($shipper->id, 6, '0', STR_PAD_LEFT), $body);
             }
 
             if (strpos($body, '[company_name]') !== FALSE) {
@@ -311,11 +321,21 @@ class NotificationsController extends Controller
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                if ($key == 'cargo_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                if ($key == 'cargo_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                }
               }
             }
 
@@ -349,7 +369,10 @@ class NotificationsController extends Controller
             $to = $shipper->phone;
 
             foreach ($cargo_fields as $key => $field) {
-              if (strpos($body, '[' . $key . ']') !== FALSE) {
+              if ($key == 'cargo_number') {
+                $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+              }
+              else {
                 $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
               }
             }
@@ -381,11 +404,21 @@ class NotificationsController extends Controller
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                if ($key == 'cargo_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                if ($key == 'cargo_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                }
               }
             }
 
@@ -424,7 +457,12 @@ class NotificationsController extends Controller
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                if ($key == 'cargo_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                }
               }
             }
 

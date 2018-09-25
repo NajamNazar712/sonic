@@ -466,6 +466,12 @@ class AdminDashboardController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+			->editColumn('account_no', function ($shipment) {
+                return str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('u.id', function ($query, $keyword) {
+                return $query->where('u.id', '=', $keyword);
+            })
             ->editColumn('phone',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
             })
