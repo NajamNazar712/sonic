@@ -34,7 +34,7 @@ class UserManagementController extends Controller
         $users = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')
         ->join('admin_departments as ad', 'ar.department_id', '=', 'ad.id')
         ->leftjoin('admins as a', 'admins.updated_by', '=', 'a.id')
-        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.updated_at', 'a.name as updated_by', 'admins.status')
+        ->select('admins.id', 'admins.name', 'admins.phone_number', 'admins.email', 'admins.cnic', 'ar.name as role', 'ad.name as department', 'admins.created_at', 'admins.updated_at', 'a.name as updated_by', 'admins.status')
         ->where('ar.id', '!=', 1);
 
         $datatables = Datatables::of($users)
@@ -244,7 +244,7 @@ class UserManagementController extends Controller
     public function role_list(Request $request) {
         $roles = AdminRole::join('admin_departments as ad', 'admin_roles.department_id', '=', 'ad.id')
         ->join('admins as a', 'admin_roles.updated_by', '=', 'a.id')
-        ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.updated_at', 'a.name as updated_by')
+        ->select('admin_roles.id', 'admin_roles.name', 'ad.name as department', 'admin_roles.created_at', 'admin_roles.updated_at', 'a.name as updated_by')
         ->where('admin_roles.id', '!=', 1);
 
         $datatables = Datatables::of($roles)

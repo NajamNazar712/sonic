@@ -175,7 +175,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.notifications.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[3, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'notifications.name', class: 'align-middle name'},

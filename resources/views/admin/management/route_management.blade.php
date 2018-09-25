@@ -137,8 +137,8 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                order: [[6, 'desc']],
                 ajax: '{{ route('admin.management.route.ajax') }}',
+                order: [[6, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'align-middle serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},

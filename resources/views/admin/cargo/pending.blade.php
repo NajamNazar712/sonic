@@ -140,7 +140,7 @@
 					}
 				},
 				rowId: 'id',
-				order: [[10, 'asc']],
+				order: [[10, 'asc'], [11, 'asc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},

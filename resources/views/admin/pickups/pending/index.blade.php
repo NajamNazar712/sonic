@@ -22,6 +22,7 @@
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
+										<th class="border-primary border-darken-1">Pickup Date</th>
 										<th class="border-primary border-darken-1">Requested Datetime</th>
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Contact Person</th>
@@ -32,7 +33,6 @@
 										<th class="border-primary border-darken-1">Pending Booking(s)</th>
 										<th class="border-primary border-darken-1">Total Estimated Weight (kg)</th>
 										<th class="border-primary border-darken-1">Pickup Type</th>
-										<th class="border-primary border-darken-1">Pickup Date</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -251,10 +251,11 @@
 				serverSide: true,
 				ajax: '{{ route('admin.pickups.pending.list') }}',
 				rowId: 'id',
-				order: [[2, 'asc']],
+				order: [[2, 'asc'], [3, 'asc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'pickup_date', name: 'pickup_requests.pickup_date', class: 'align-middle pickup_date'},
 					{data: 'requested_at', name: 'pickup_requests.created_at', class: 'align-middle requested_at'},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
@@ -265,7 +266,6 @@
 					{data: 'pending_bookings', name: 'pickup_requests.pending_bookings', class: 'align-middle pending_bookings'},
 					{data: 'total_estimated_weight', name: 'pickup_requests.total_estimated_weight', class: 'align-middle total_estimated_weight'},
 					{data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},
-					{data: 'pickup_date', name: 'pickup_requests.pickup_date', class: 'align-middle pickup_date'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {

@@ -18,7 +18,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Dispute No.</th>
-                        <th class="border-primary border-darken-1">Dispute Date/Time</th>
+                        <th class="border-primary border-darken-1">Dispute Datetime</th>
                         <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Originated At</th>
                         <th class="border-primary border-darken-1">Dispute Type</th>
@@ -399,13 +399,12 @@
             scrollX: true, scrollY: '350px',
             lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
             pageLength: 50,
-            stateSave: true,
             pagingType: 'full_numbers',
             processing: true,
             serverSide: true,
             ajax: '{{ route('admin.dispute.list') }}',
             rowId: 'dispute_id',
-            order: [[1, 'asc']],
+            order: [[2, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                 {data: 'dispute_id', name: 'disputes.id', class: 'align-middle dispute_id'},

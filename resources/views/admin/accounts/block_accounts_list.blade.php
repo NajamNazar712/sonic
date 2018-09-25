@@ -154,11 +154,11 @@
             ],
             lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
             pageLength: 50,
-            stateSave: true,
             pagingType: 'full_numbers',
             processing: true,
             serverSide: true,
             rowId:'id',
+            order: [[1, 'desc']],
             ajax: '{{ route('admin.accounts.block.ajax') }}',
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

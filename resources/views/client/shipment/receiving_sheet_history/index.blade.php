@@ -131,7 +131,7 @@
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet_history.list') }}',
 				rowId: 'id',
-				order: [[5, 'asc']],
+				order: [[5, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'receiving_sheet', name: 'receiving_sheet', class: 'text-center align-middle receiving_sheet p-1'},

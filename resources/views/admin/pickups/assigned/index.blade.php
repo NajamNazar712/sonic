@@ -232,7 +232,7 @@
 				serverSide: true,
 				ajax: '{{ route('admin.pickups.assigned.list') }}',
 				rowId: 'id',
-				order: [[6, 'asc']],
+				order: [[10, 'desc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
