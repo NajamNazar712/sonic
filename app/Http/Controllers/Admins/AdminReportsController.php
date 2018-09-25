@@ -282,7 +282,7 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipment_status as fs','fs.id','=','fstatus.shipper_status_id')
             ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
-            ->select('shipments.id as Shipment_id','shipments.tracking_number','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date')
+            ->select('shipments.id as Shipment_id','shipments.tracking_number','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status')
             ->groupBy('shipments.id');
         $lead_time = Datatables::of($shipments)
             ->editColumn('account_no', function ($shipments) {
@@ -467,6 +467,7 @@ class AdminReportsController extends Controller
              ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
              ->join('users as u', 's.user_id', '=', 'u.id')
              ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+             ->leftjoin('shipment_payment_status as sps', 's.payment_status_id', '=' , 'sps.id')
              ->leftjoin('shipments_journey as sj', function($join) {
                  $join->on('sj.shipment_id', '=', 's.id')
                      ->where('sj.created_at', '=', DB::raw('(SELECT MAX(created_at) FROM shipments_journey WHERE shipment_id = s.id)'));
@@ -477,7 +478,7 @@ class AdminReportsController extends Controller
              })
              ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
              ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-             ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status')
+             ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status')
              ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,9]);
          $datatables = Datatables::of($shipments)
             ->editColumn('dncc', function ($shipments) {
@@ -1148,9 +1149,53 @@ class AdminReportsController extends Controller
         return Response::download($file, 'customer_retention_report.xlsx',$headers);
     }
     public function overall_sales_index(){
-        return view('admin.reports.overall_sales');
+        $shippers = User::whereIn('status',[3,4])->select('id','name')->get();
+        $cities = City::all('id','name');
+        $hubs = City::where('hub',1)->select('id','name')->get();
+        $statuses = ShipmentStatus::whereNotIn('id',[1,17])->get();
+        return view('admin.reports.overall_sales')->with(['shippers'=>$shippers,'cities'=>$cities,'hubs'=>$hubs,'statuses'=>$statuses]);
     }
     public function overall_sales_list(Request $request){
-
+        $sales = Shipment::join('users as u','u.id','=','shipments.user_id')
+            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->leftJoin('shipments_journey as sj', function ($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+            })
+            ->leftjoin('pending_payment_shipments as pps', 'shipments.id', '=', 'pps.shipment_id')
+            ->select('shipments.tracking_number','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','sps.name as payment_status','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst','pps.charges as total_charges','pps.payable as net_payable')
+        ->whereNotIn('shipments.shipper_status_id',[1,17]);
+        $datatable = Datatables::of($sales);
+        if($tracking = $request->get('search_tracking')){
+                $datatable->where('shipments.tracking_number', '=', $tracking);
+        }
+        if($shipper = $request->get('search_shipper')){
+                $datatable->where('u.id', '=', $shipper);
+        }
+        if($origin = $request->get('search_origin')){
+                $datatable->where('oc.id', '=', $origin);
+        }
+        if($destination = $request->get('search_destination')){
+                $datatable->where('dc.id', '=', $destination);
+        }
+        if($hub = $request->get('search_hub')){
+                $datatable->where('h.id', '=', $hub);
+        }
+        if($status = $request->get('search_status')){
+                $datatable->where('ss.id', '=', $status);
+        }
+        if ($request->get('search_date_from') && $request->get('search_date_to')) {
+            $from = $request->get('search_date_from');
+            $to = $request->get('search_date_to');
+            $datatable->whereBetween('shipments.created_at', [$from,$to]);
+        }
+        return $datatable->make(true);
     }
 }
