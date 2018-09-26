@@ -224,7 +224,7 @@
 
 														<div class="col">
 															<div class="form-group">
-																<input type="text" name="weight_charges_per_kg" class="form-control rounded-right weight_charges_per_kg" placeholder="Weight Charges / kg*" data-rule-required="true" data-msg-required="Builty Number is required">
+																<input type="text" name="weight_charges_per_kg" class="form-control rounded-right weight_charges_per_kg" placeholder="Weight Charges / kg*" data-rule-required="true" data-msg-required="Weight Charges / kg is required">
 															</div>
 														</div>
 
