@@ -17,11 +17,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-book-open font-large-2 float-left"></i>
+                                      <i class="icon-grid font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-right">
                                       <h3 class="">{{$stats['total']}}</h3>
-                                      <span>Total Orders</span>
+                                      <span>Total Booked Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -29,16 +29,16 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card booking-css pull-up">
+                  <div class="card bg-gradient-directional-primary pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-book-open font-large-2 float-left"></i>
+                                      <i class="icon-hourglass text-white font-large-2 float-left"></i>
                                   </div>
-                                  <div class="media-body text-right">
-                                      <h3 class="">{{$stats['booked']}}</h3>
-                                      <span>Pending</span>
+                                  <div class="media-body text-white text-right">
+                                      <h3 class= "text-white">{{$stats['booked']}}</h3>
+                                      <span>Pending Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -51,11 +51,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-basket-loaded text-white font-large-2 float-left"></i>
+                                      <i class="icon-layers text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['received']}}</h3>
-                                      <span>Received</span>
+                                      <span>Received Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -67,11 +67,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-emoticon-smile text-white font-large-2 float-left"></i>
+                                      <i class="icon-check text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['delivered']}}</h3>
-                                      <span>Delivered</span>
+                                      <span>Delivered Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -83,11 +83,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-refresh text-white font-large-2 float-left"></i>
+                                      <i class="icon-loop text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['return']}}</h3>
-                                      <span>Returns</span>
+                                      <span>Returned Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -95,16 +95,16 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-danger pull-up">
+                  <div class="card bg-gradient-directional-inprocess pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-shield text-white font-large-2 float-left"></i>
+                                      <i class="icon-shuffle text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['pending']}}</h3>
-                                      <span>In Process</span>
+                                      <span>In Process Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -262,10 +262,12 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
-        .card.booking-css{
-            background-color:#CECECE;
-            color:#000000;
+
+        .bg-gradient-directional-inprocess {
+            background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
+            background-repeat: repeat-x;
         }
+
     </style>
 @endsection
 
@@ -365,7 +367,7 @@
                 scrollX: true, scrollY: '350px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
-                    text: 'Print',
+                    text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
                     enabled: false,
                     action: function (e, dt, node, config) {

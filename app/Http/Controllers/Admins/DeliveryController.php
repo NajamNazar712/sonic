@@ -332,8 +332,11 @@ class DeliveryController extends Controller
                       $dropdown .= $receive_button;
                     }
 
-                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) || (!$updatedstatusCheck) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
-                      $dropdown .= $shift_shipment_button;
+                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(38, session('permissions')))) {
+                        if(!$updatedstatusCheck){
+
+                            $dropdown .= $shift_shipment_button;
+                        }
                     }
 
 

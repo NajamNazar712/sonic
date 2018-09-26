@@ -87,7 +87,7 @@
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['return']}}</h3>
-                                      <span>Returned <br> Shipment(s)</span>
+                                      <span>Returned Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -202,13 +202,9 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <style type="text/css">
-        .card.booking-css{
-            background-image: linear-gradient(45deg, #2ba4e0, #aea8ff);
-            background-repeat: repeat-x;
-            color:#000000;
-        }
+
         .bg-gradient-directional-inprocess {
-            background-image: linear-gradient(45deg, #799490, #1cd8ec);
+            background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
             background-repeat: repeat-x;
         }
 
@@ -379,7 +375,7 @@
                 scrollX: true, scrollY: '350px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
-                    text: 'Print',
+                    text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
                     enabled: false,
                     action: function (e, dt, node, config) {
@@ -512,11 +508,11 @@
 
                 // Add legend
                 legend: {
-                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Progress Shipment(s)']
+                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)']
                 },
 
                 // Add custom colors
-                color: ['#2ba4e0', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a'],
 
                 // Hirozontal axis
                 xAxis: [{
@@ -536,7 +532,7 @@
                 // Add series
                 series: [
                     {
-                        name: 'Pending Shipments',
+                        name: 'Pending Shipment(s)',
                         type: 'line',
                         data: @json($graph['booked'])
                     },
@@ -556,7 +552,7 @@
                         data: @json($graph['return'])
                     },
                     {
-                        name: 'In Progress Shipment(s)',
+                        name: 'In Process Shipment(s)',
                         type: 'line',
                         data: @json($graph['pending'])
                     }
@@ -602,9 +598,9 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pending Shipments', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Progress Shipment(s)']
+                                data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)']
                             },
-                            color: ['#2ba4e0', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                            color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a'],
 
                             xAxis: [{
                                 type: 'category',
@@ -620,7 +616,7 @@
                             }],
                             series: [
                                 {
-                                    name: 'Pending Shipments',
+                                    name: 'Pending Shipment(s)',
                                     type: 'line',
                                     data: data.graph['booked']
                                 },
@@ -640,7 +636,7 @@
                                     data: data.graph['return']
                                 },
                                 {
-                                    name: 'In Progress Shipment(s)',
+                                    name: 'In Process Shipment(s)',
                                     type: 'line',
                                     data: data.graph['pending']
                                 }
