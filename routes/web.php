@@ -18,8 +18,10 @@ Route::get('/', function () {
 
 Auth::routes();
 
-Route::get('/home', 'HomeController@index')->name('home');
-Route::get('/ecommerce', 'Shippers\ShipperDashboardController@ecommerce');
+Route::prefix('tracking')->name('tracking.')->group(function () {
+    Route::get('{tracking_number?}', 'TrackingController@index')->name('index');
+    Route::post('track', 'TrackingController@track')->name('track');
+});
 
 Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/', function () {

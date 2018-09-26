@@ -267,7 +267,7 @@
 					{data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
 					{data:'dncc', name: 'delivery_note_shipments.delivery_note_id', class: 'align-middle text-center dncc'},
 					{data:'sdn', name: 'dnsdn.station_deposit_note_id', class: 'align-middle text-center sdn'},
-					{data:'aging', name: 'aging', class: 'align-middle text-center aging'},
+					{data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -286,7 +286,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else {

@@ -306,20 +306,6 @@ class AdminFinanceController extends Controller
             else {
                 return '';
             }
-        })
-        ->filterColumn('aging', function($query, $keyword) {
-            $search = str_replace('d', '', str_replace(' ', '', $keyword));
-
-            if (filter_var($search, FILTER_VALIDATE_INT)) {
-                $date = Carbon::now();
-
-                $date = $date->subDays($search);
-
-                $query->whereDate('sj.updated_at', '>=', $date->toDateString());
-            }
-            else {
-                $query->whereRaw($search);
-            }
         });
 
         if ($hub = $request->get('hub')) {
