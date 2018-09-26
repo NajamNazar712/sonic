@@ -69,13 +69,13 @@ class DisputeController extends Controller
             ->filterColumn('status',function ($query,$keyword){
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
-                    if (strpos('launched', $keyword) !== FALSE) {
+                    if ($keyword == 0) {
                         $query->where('disputes.status', '=', 0);
                     }
-                    else if (strpos('updated', $keyword) !== FALSE) {
+                    else if ($keyword == 1) {
                         $query->where('disputes.status', '=', 1);
                     }
-                    else if (strpos('resolved', $keyword) !== FALSE) {
+                    else if ($keyword == 2) {
                         $query->where('disputes.status', '=', 2);
                     }
                     else {
@@ -95,6 +95,21 @@ class DisputeController extends Controller
                     return $dispute->shipper;
                 }
             })
+//            ->filterColumn('launched_by',function ($query,$keyword,$dispute){
+//                $keyword = strtolower($keyword);
+//                if ($keyword != '') {
+//                    if($dispute->rbstatus == 0){
+//                        $query->where('au.name', 'like', '%'.$keyword.'%');
+//                    }
+//                    else if($dispute->rbstatus == 1){
+//                        $query->where('us.name', 'like', '%'.$keyword.'%');
+//                    }else{
+//                        $query->whereRaw('false');
+//                    }
+//
+//
+//                }
+//            })
             ->addColumn("action", function ($dispute) {
                 if (($dispute->status == 0 || $dispute->status == 1) && (session('role_id') == 1 || count(array_intersect([3, 4], session('permissions'))) !== 0)) {
                     $dropdown = "

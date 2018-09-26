@@ -415,7 +415,7 @@
                 {data: 'no_of_shipments', name: 'disputes.shipments_count', class: 'align-middle mode'},
                 {data: 'launched_by', name: 'launched_by', class: 'align-middle launched_by',orderable: false, searchable: false},
                 {data: 'updated_by', name: 'au.name', class: 'align-middle updated_by'},
-                {data: 'status', name: 'status', class: 'align-middle status'},
+                {data: 'status', name: 'status', class: 'align-middle status dropdown_search'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
             ],
@@ -423,20 +423,37 @@
                 var info = table.page.info();
                 $('td:eq(0)', row).html(index + 1 + info.page * info.length);
             },
+            drawCallback: function (settings) {
+
+            },
             initComplete: function() {
                 var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                var drop_select = '<td style="padding:5px;" class="border-primary border-lighten-2"><select name="dispute_status_select" id="dispute_status_select" class="select2 form-control">' +
+                    '<option value="0">Launched</option>' +
+                    '<option value="1">Updated</option>' +
+                    '<option value="2">Resolved</option>' +
+                    '</select></td>';
 
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
-
-                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.launched_by')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.launched_by') ) {
                         $(td).appendTo($(search));
+                    }else if($(header).is('.status')){
+                        $(drop_select).appendTo($(search))
+                        // var current_search = $(drop_select).appendTo($(search).on(''))
+                    .on( 'change', function () {
+                            var val = $.fn.dataTable.util.escapeRegex(
+                                $(this).val()
+                            );
+
+                        column.search($(this).val(), false, false, true).draw();
+                        } );
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -448,7 +465,10 @@
                         }
                     }
                 });
-
+                $("#dispute_status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%'
+                });
                 this.api().table().columns.adjust();
             }
         });

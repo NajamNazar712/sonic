@@ -479,7 +479,7 @@ class AdminReportsController extends Controller
              ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
              ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
              ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status')
-             ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,9]);
+             ->whereIn('delivery_note_shipments.status', [4,5,6,7,8]);
          $datatables = Datatables::of($shipments)
             ->editColumn('dncc', function ($shipments) {
                 if ($shipments->dncc) {
@@ -522,11 +522,11 @@ class AdminReportsController extends Controller
                  }
              })
             ->editColumn('recovery_status',function ($shipment){
-                if($shipment->recovery_status == 7){
+                if(in_array($shipment->recovery_status, [4,5,6])){
                     return "Outstanding";
-                }else if($shipment->recovery_status == 8){
+                }else if($shipment->recovery_status == 7){
                     return "Resolved";
-                }else if($shipment->recovery_status == 9){
+                }else if($shipment->recovery_status == 8){
                     return "Payment Adjusted";
                 }
             });
@@ -536,12 +536,12 @@ class AdminReportsController extends Controller
          }
          if($status = $request->get('shipment_status')){
              if($status == 1){
-                 $datatables->where('delivery_note_shipments.status','=',7);
+                 $datatables->whereIn('delivery_note_shipments.status',[4,5,6]);
              }else if($status == 2){
-                 $datatables->where('delivery_note_shipments.status','=',8);
+                 $datatables->where('delivery_note_shipments.status','=',7);
 
              }else {
-                 $datatables->where('delivery_note_shipments.status','=',9);
+                 $datatables->where('delivery_note_shipments.status','=',8);
 
              }
          }
