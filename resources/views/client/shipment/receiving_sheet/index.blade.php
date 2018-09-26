@@ -148,9 +148,7 @@
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
 
-							$.each(selected_rows, function(index, selected_row) {
-								table.row($('.datatable tbody tr#' + selected_row)).deselect();
-							});
+							table.rows().deselect();
 
 							selected_rows = [];
 
