@@ -56,8 +56,8 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS', 'sonic@trax.pk'),
-        'name' => env('MAIL_FROM_NAME', 'Sonic - Trax Logistics'),
+        'address' => env('MAIL_FROM_ADDRESS', 'info@trax.pk'),
+        'name' => env('MAIL_FROM_NAME', 'Trax Logistics'),
     ],
 
     /*

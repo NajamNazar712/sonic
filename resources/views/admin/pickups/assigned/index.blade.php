@@ -24,8 +24,8 @@
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Rider</th>
 										<th class="border-primary border-darken-1">Rider Type</th>
-										<th class="border-primary border-darken-1">Route</th>
-										<th class="border-primary border-darken-1">City</th>
+										<th class="border-primary border-darken-1">Rider Route</th>
+										<th class="border-primary border-darken-1">Rider City</th>
 										<th class="border-primary border-darken-1">Pickup(s)</th>
 										<th class="border-primary border-darken-1">Booking(s)</th>
 										<th class="border-primary border-darken-1">Total Estimated Weight (kg)</th>
@@ -191,9 +191,7 @@
 								if (confirm) {
 									print(selected_rows);
 
-									$.each(selected_rows, function(index, id) {
-										table.row($('#datatable tbody tr#' + id)).deselect();
-									});
+									table.rows().deselect();
 
 									selected_rows = [];
 

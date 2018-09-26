@@ -213,9 +213,7 @@
                                                     'action': 'confirm'
                                                 }
                                             }).done(function (data) {
-                                                $.each(selected_rows, function(index, id) {
-                                                    table.row($('#datatable tbody tr#' + id)).deselect();
-                                                });
+                                                table.rows().deselect();
                                                 selected_rows = [];
                                                 table.button('.confirm').disable();
                                                 table.button('.re-attempt').disable();
@@ -278,9 +276,7 @@
                                                 table.button('.confirm').disable();
                                                 table.button('.re-attempt').disable();
                                                 table.draw('false');
-                                                $.each(selected_rows, function(index, id) {
-                                                    table.row($('#datatable tbody tr#' + id)).deselect();
-                                                });
+                                                table.rows().deselect();
                                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                             });

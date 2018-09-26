@@ -381,9 +381,7 @@
                     action: function (e, dt, node, config) {
                         table.button('.print').disable();
                         print(selected_rows);
-                        $.each(selected_rows, function(index, id) {
-                            table.row($('tbody tr#' + id)).deselect();
-                        });
+                        table.rows().deselect();
                         selected_rows = [];
 
                     }

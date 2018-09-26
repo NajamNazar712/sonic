@@ -265,9 +265,7 @@
 										toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 									}
 
-									$.each(selected_rows, function(index, id) {
-										table.row($('#datatable tbody tr#' + id)).deselect();
-									});
+									table.rows().deselect();
 
 									selected_rows = [];
 
@@ -302,9 +300,7 @@
 										toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 									}
 
-									$.each(selected_rows, function(index, id) {
-										table.row($('#datatable tbody tr#' + id)).deselect();
-									});
+									table.rows().deselect();
 
 									selected_rows = [];
 
