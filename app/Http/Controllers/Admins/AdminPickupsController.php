@@ -361,7 +361,7 @@ class AdminPickupsController extends Controller
         $pickup_note->assigned_by_user_id = Auth::id();
         $pickup_note->status_id = 1;
 
-        $pickup_note->city_id = Rider($rider_id)->city_id;
+        $pickup_note->city_id = Rider::find($rider_id)->city_id;
 
         $pickup_note->save();
 
