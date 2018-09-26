@@ -1402,6 +1402,56 @@ class AdminPickupsController extends Controller
       return $datatables->make(true);
     }
 
+    public function receive_summary_request_over_short_received(Request $request){
+        $pickup_request_id = $request->input('pickup_request_id');
+
+        $pickup_request = PickupRequest::find($pickup_request_id);
+
+        $pickup_request_short_received_shipments = $pickup_request->pickup_request_short_received_shipments;
+
+        $short_shipments = array();
+        if ($pickup_request_short_received_shipments->count() != 0) {
+
+            foreach ($pickup_request_short_received_shipments as $pickup_request_short_received_shipment) {
+                $shipment = $pickup_request_short_received_shipment->shipment;
+
+                $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
+            }
+
+//            return ['status' => 0, 'success' => 'Shipments found Short Received', 'short_received' => $short_shipments];
+        }
+        $pickup_request_over_received_shipments = PickupRequestReceivedShipment::where('pickup_request_id', $pickup_request_id)->where('over_received', 1);
+
+        $over_received_shipments = array();
+        if ($pickup_request_over_received_shipments->exists()) {
+            $pickup_request_over_received_shipments = $pickup_request_over_received_shipments->get();
+
+
+            foreach ($pickup_request_over_received_shipments as $pickup_request_over_received_shipment) {
+                $shipment = $pickup_request_over_received_shipment->shipment;
+
+                $over_received_shipments[] = $shipment->tracking_number;
+            }
+
+        }
+
+        if (empty($short_shipments)) {
+            $short_shipments = FALSE;
+        }
+
+        if (empty($over_received_shipments)) {
+            $over_received_shipments = FALSE;
+        }
+
+
+        if ($short_shipments || $over_received_shipments) {
+            return ['status' => 0, 'success' => 'Shipments found Over Received', 'over_received' => $over_received_shipments,'short_received' => $short_shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Short Received Shipments', 'short_received' => FALSE, 'over_received' => FALSE];
+
+        }
+
+    }
     public function receive_summary_request_over_received(Request $request) {
       $pickup_request_id = $request->input('pickup_request_id');
 
@@ -1490,6 +1540,21 @@ class AdminPickupsController extends Controller
             DisputeController::add_short_received_shipments($receiving_sheet_id, $short_shipment_ids);
           }
         }
+          $pickup_request_over_received_shipments = PickupRequestReceivedShipment::where('pickup_request_id', $pickup_request_id)->where('over_received', 1);
+
+          if ($pickup_request_over_received_shipments->exists()) {
+              $pickup_request_over_received_shipments = $pickup_request_over_received_shipments->get();
+
+              $over_received_shipments = array();
+
+              foreach ($pickup_request_over_received_shipments as $pickup_request_over_received_shipment) {
+                  $shipment = $pickup_request_over_received_shipment->shipment;
+
+                  $over_received_shipments[] = $shipment->id;
+              }
+              DisputeController::add_over_received_shipments($over_received_shipments);
+
+          }
 
         //dispute end
 

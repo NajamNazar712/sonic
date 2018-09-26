@@ -2026,7 +2026,7 @@ class DeliveryController extends Controller
                 return $dropdown;
             })
             ->editColumn('status', function ($sdn) {
-                return ($sdn->status == 1)? 'Deposited': 'Created';
+                return ($sdn->status == 0)? 'Created': 'Deposited';
             })
             ->filterColumn('status', function($query, $keyword) {
                 $keyword = strtolower($keyword);

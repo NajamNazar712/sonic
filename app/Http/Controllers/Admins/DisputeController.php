@@ -169,7 +169,7 @@ class DisputeController extends Controller
        }
 
     }
-    static public function add_over_received_shipments($receiving,$shipments){
+    static public function add_over_received_shipments($shipments){
         $admin = Auth::id();
         $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
         $count = count($shipments);

@@ -432,7 +432,7 @@
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                var drop_select = '<td style="padding:5px;" class="border-primary border-lighten-2"><select name="dispute_status_select" id="dispute_status_select" class="select2 form-control">' +
+                var drop_select = '<select name="dispute_status_select" id="dispute_status_select" class="select2 form-control">' +
                     '<option value="0">Launched</option>' +
                     '<option value="1">Updated</option>' +
                     '<option value="2">Resolved</option>' +
@@ -446,14 +446,9 @@
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
-                        // var current_search = $(drop_select).appendTo($(search).on(''))
                     .on( 'change', function () {
-                            var val = $.fn.dataTable.util.escapeRegex(
-                                $(this).val()
-                            );
-
                         column.search($(this).val(), false, false, true).draw();
-                        } );
+                        } ).wrap(td);
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -467,7 +462,9 @@
                 });
                 $("#dispute_status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
-                    width:'100%'
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 this.api().table().columns.adjust();
             }
