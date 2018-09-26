@@ -432,11 +432,11 @@
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                var drop_select = '<select name="dispute_status_select" id="dispute_status_select" class="select2 form-control">' +
+                var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                     '<option value="0">Launched</option>' +
                     '<option value="1">Updated</option>' +
                     '<option value="2">Resolved</option>' +
-                    '</select></td>';
+                    '</select>';
 
                 this.api().columns().every(function(column_id) {
                     var column = this;
@@ -460,7 +460,7 @@
                         }
                     }
                 });
-                $("#dispute_status_select").prepend('<option value="" selected></option>').select2({
+                $("#status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
                     width:'100%',
                     containerCssClass: 'select-xs',

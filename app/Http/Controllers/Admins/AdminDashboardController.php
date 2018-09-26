@@ -23,6 +23,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
@@ -181,8 +182,9 @@ class AdminDashboardController extends Controller
         }
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
+        $shipment_status = ShipmentStatus::select('id','name')->get();
         // return $cities;
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'shipment_status'=>$shipment_status]);
     }
     public function statistics_search(Request $request){
 //        return $request;
@@ -443,7 +445,6 @@ class AdminDashboardController extends Controller
     public function orders_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-//            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
@@ -454,7 +455,6 @@ class AdminDashboardController extends Controller
             ->leftjoin('products as p','p.id','=','si.product_type_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status'])
-            //->where('shipments.user_id',Auth::id())
             ->groupBy('shipments.id');
 
         if (session('role_id') != 1) {
@@ -481,6 +481,15 @@ class AdminDashboardController extends Controller
                     $query->where('shipments.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('shipments.consignee_phone_number_2', 'like', '%'.$keyword.'%');
                 }
 
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
                 else {
                     $query->whereRaw('false');
                 }
@@ -3207,13 +3216,9 @@ class AdminDashboardController extends Controller
                     return "Disable";
                 }
             })
-            ->filterColumn('status',function ($query,$keyword){
-                $keyword = strtolower($keyword);
-                if (strpos('enable', $keyword) !== FALSE) {
-                    $query->where('users.status', '=', 3);
-                }
-                else if (strpos('disable', $keyword) !== FALSE) {
-                    $query->where('users.status', '=', 4);
+            ->filterColumn('status', function($query, $keyword) {
+                if ($keyword == 3 || $keyword == 4) {
+                    $query->where('users.status', '=', $keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -3284,14 +3289,8 @@ class AdminDashboardController extends Controller
             ->filterColumn('status', function($query, $keyword) {
                 $keyword = strtolower($keyword);
 
-                if (strpos('request received', $keyword) !== FALSE) {
-                    $query->where('users.status', '=', 0);
-                }
-                else if (strpos('rates added', $keyword) !== FALSE) {
-                    $query->where('users.status', '=', 1);
-                }
-                else if (strpos('pending for activation', $keyword) !== FALSE) {
-                    $query->where('users.status', '=', 2);
+                if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
+                    $query->where('users.status', '=', $keyword);
                 }
                 else {
                     $query->whereRaw('false');

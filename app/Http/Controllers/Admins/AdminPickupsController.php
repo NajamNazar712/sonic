@@ -245,6 +245,13 @@ class AdminPickupsController extends Controller
       ->editColumn('pickup_type', function($pickup_request) {
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
       })
+      ->filterColumn('pickup_type', function($query, $keyword) {
+          if($keyword == 0 || $keyword == 1){
+              $query->where('pickup_requests.pickup_type','=',$keyword);
+          }else{
+              $query->whereRaw('false');
+          }
+      })
       ->editColumn('pickup_date', function($pickup_request) {
         return Carbon::parse($pickup_request->pickup_date)->format('d/m/Y');
       })
@@ -261,20 +268,20 @@ class AdminPickupsController extends Controller
         else {
           return '';
         }
-      })
-      ->filterColumn('pickup_type', function($query, $keyword) {
-        $keyword = strtolower($keyword);
-
-        if (strpos('light', $keyword) !== FALSE) {
-          $query->where('pickup_requests.pickup_type', '=', 0);
-        }
-        else if (strpos('heavy', $keyword) !== FALSE) {
-          $query->where('pickup_requests.pickup_type', '=', 1);
-        }
-        else {
-          $query->whereRaw('false');
-        }
       });
+//      ->filterColumn('pickup_type', function($query, $keyword) {
+//        $keyword = strtolower($keyword);
+//
+//        if (strpos('light', $keyword) !== FALSE) {
+//          $query->where('pickup_requests.pickup_type', '=', 0);
+//        }
+//        else if (strpos('heavy', $keyword) !== FALSE) {
+//          $query->where('pickup_requests.pickup_type', '=', 1);
+//        }
+//        else {
+//          $query->whereRaw('false');
+//        }
+//      });
 
       return $datatables->make(true);
     }
@@ -454,6 +461,13 @@ class AdminPickupsController extends Controller
       ->editColumn('pickup_type', function($pickup_note) {
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
       })
+      ->filterColumn('pickup_type', function($query, $keyword) {
+          if($keyword == 0 || $keyword == 1){
+              $query->where('pickup_requests.pickup_type','=',$keyword);
+          }else{
+              $query->whereRaw('false');
+          }
+      })
       ->addColumn('action', function($pickup_note) {
         $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
         $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
@@ -493,19 +507,20 @@ class AdminPickupsController extends Controller
       ->filterColumn('route', function($query, $keyword) {
         $query->where('ro.code', 'like', '%' . $keyword . '%')->orWhere('ro.start', 'like', '%' . $keyword . '%')->orWhere('ro.end', 'like', '%' . $keyword . '%');
       })
-      ->filterColumn('pickup_type', function($query, $keyword) {
-        $keyword = strtolower($keyword);
 
-        if (strpos('light', $keyword) !== FALSE) {
-          $query->where('pickup_notes.pickup_type', '=', 0);
-        }
-        else if (strpos('heavy', $keyword) !== FALSE) {
-          $query->where('pickup_notes.pickup_type', '=', 1);
-        }
-        else {
-          $query->whereRaw('false');
-        }
-      })
+//      ->filterColumn('pickup_type', function($query, $keyword) {
+//        $keyword = strtolower($keyword);
+//
+//        if (strpos('light', $keyword) !== FALSE) {
+//          $query->where('pickup_notes.pickup_type', '=', 0);
+//        }
+//        else if (strpos('heavy', $keyword) !== FALSE) {
+//          $query->where('pickup_notes.pickup_type', '=', 1);
+//        }
+//        else {
+//          $query->whereRaw('false');
+//        }
+//      })
       ->filterColumn('pickup_note_no', function($query, $keyword) {
         $query->where('pickup_notes.id', '=', $keyword);
       })
@@ -793,6 +808,13 @@ class AdminPickupsController extends Controller
       })
       ->editColumn('pickup_type', function($pickup_note) {
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
+      })
+      ->filterColumn('pickup_type', function($query, $keyword) {
+          if($keyword == 0 || $keyword == 1){
+              $query->where('pickup_requests.pickup_type','=',$keyword);
+          }else{
+              $query->whereRaw('false');
+          }
       })
       ->editColumn('pickup_note_no', function($pickup_note) {
         return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';

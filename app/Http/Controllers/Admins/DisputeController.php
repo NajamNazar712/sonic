@@ -69,14 +69,8 @@ class DisputeController extends Controller
             ->filterColumn('status',function ($query,$keyword){
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
-                    if ($keyword == 0) {
-                        $query->where('disputes.status', '=', 0);
-                    }
-                    else if ($keyword == 1) {
-                        $query->where('disputes.status', '=', 1);
-                    }
-                    else if ($keyword == 2) {
-                        $query->where('disputes.status', '=', 2);
+                    if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
+                        $query->where('disputes.status', '=', $keyword);
                     }
                     else {
                         $query->whereRaw('false');

@@ -39,7 +39,8 @@ class DeliveryController extends Controller
         $this->middleware('Permission');
     }
     public function pending_delivery_index(Request $request){
-        return view('admin.delivery.pending.index');
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        return view('admin.delivery.pending.index')->with(['shipment_status'=>$shipment_status]);
     }
     public function pending_list(Request $request)
     {
@@ -94,6 +95,15 @@ class DeliveryController extends Controller
                     return $shipments->arrival;
                 }else{
                     return " - ";
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn("action", function ($result) {
@@ -299,11 +309,8 @@ class DeliveryController extends Controller
             })
             ->filterColumn('pending_status',function ($query,$keyword){
                 $keyword = strtolower($keyword);
-                if (strpos('pending for update', $keyword) !== FALSE) {
-                    $query->where('delivery_notes.pending_status', '=', 0);
-                }
-                else if (strpos('pending for verification', $keyword) !== FALSE) {
-                    $query->where('delivery_notes.pending_status', '=', 1);
+                if ($keyword == 0 || $keyword == 1) {
+                    $query->where('delivery_notes.pending_status', '=', $keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -2029,13 +2036,9 @@ class DeliveryController extends Controller
                 return ($sdn->status == 0)? 'Created': 'Deposited';
             })
             ->filterColumn('status', function($query, $keyword) {
-                $keyword = strtolower($keyword);
 
-                if (strpos('deposited', $keyword) !== FALSE) {
-                    $query->where('station_deposit_notes.status', '=', 1);
-                }
-                else if (strpos('created', $keyword) !== FALSE) {
-                    $query->where('station_deposit_notes.status', '=', 0);
+                if ($keyword == 0 || $keyword == 1) {
+                    $query->where('station_deposit_notes.status', '=', $keyword);
                 }
                 else {
                     $query->whereRaw('false');
