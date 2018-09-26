@@ -2,6 +2,8 @@
 
 use Illuminate\Database\Seeder;
 
+use Carbon\Carbon;
+
 class AdminRoleTableSeeder extends Seeder
 {
     /**
