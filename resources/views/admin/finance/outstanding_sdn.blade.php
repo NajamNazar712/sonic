@@ -199,7 +199,7 @@
 					{data:'deposited_by', name: 'a.name', class: 'align-middle deposited_by'},
 					{data:'bank', name: 'b.name', class: 'align-middle bank'},
 					{data:'deposited_at', name: 'station_deposit_notes.created_at', class: 'align-middle deposited_at'},
-					{data:'deposit_slip', name: 'deposit_slip', class: 'align-middle deposit_slip'},
+					{data:'deposit_slip', name: 'deposit_slip', class: 'align-middle deposit_slip', orderable: false, searchable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
