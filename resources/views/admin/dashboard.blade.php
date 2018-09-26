@@ -17,11 +17,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-book-open font-large-2 float-left"></i>
+                                      <i class="icon-grid font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-right">
                                       <h3 class="">{{$stats['total']}}</h3>
-                                      <span>Total Booked Shipments</span>
+                                      <span>Total Booked Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -29,16 +29,16 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card booking-css pull-up">
+                  <div class="card bg-gradient-directional-primary pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-notebook font-large-2 float-left"></i>
+                                      <i class="icon-hourglass text-white font-large-2 float-left"></i>
                                   </div>
-                                  <div class="media-body text-right">
-                                      <h3 class="">{{$stats['booked']}}</h3>
-                                      <span>Pending Shipments</span>
+                                  <div class="media-body text-white text-right">
+                                      <h3 class="text-white">{{$stats['booked']}}</h3>
+                                      <span>Pending Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -51,11 +51,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-basket-loaded text-white font-large-2 float-left"></i>
+                                      <i class="icon-layers text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['received']}}</h3>
-                                      <span>Received Shipments</span>
+                                      <span>Received Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -67,11 +67,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-emoticon-smile text-white font-large-2 float-left"></i>
+                                      <i class="icon-check text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['delivered']}}</h3>
-                                      <span>Delivered Shipments</span>
+                                      <span>Delivered Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -83,11 +83,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-refresh text-white font-large-2 float-left"></i>
+                                      <i class="icon-loop text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['return']}}</h3>
-                                      <span>Return <br> Shipments</span>
+                                      <span>Returned <br> Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -100,11 +100,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-shield text-white font-large-2 float-left"></i>
+                                      <i class="icon-shuffle text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['pending']}}</h3>
-                                      <span>In Process Shipments</span>
+                                      <span>In Process Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -206,6 +206,10 @@
             background-image: linear-gradient(45deg, #2ba4e0, #aea8ff);
             background-repeat: repeat-x;
             color:#000000;
+        }
+        .bg-gradient-directional-inprocess {
+            background-image: linear-gradient(45deg, #799490, #1cd8ec);
+            background-repeat: repeat-x;
         }
 
     </style>
@@ -508,7 +512,7 @@
 
                 // Add legend
                 legend: {
-                    data: ['Pending Shipments', 'Received', 'Delivered', 'Return', 'In Progress']
+                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Progress Shipment(s)']
                 },
 
                 // Add custom colors
@@ -537,22 +541,22 @@
                         data: @json($graph['booked'])
                     },
                     {
-                        name: 'Received',
+                        name: 'Received Shipment(s)',
                         type: 'line',
                         data: @json($graph['received'])
                     },
                     {
-                        name: 'Delivered',
+                        name: 'Delivered Shipment(s)',
                         type: 'line',
                         data: @json($graph['delivered'])
                     },
                     {
-                        name: 'Return',
+                        name: 'Returned Shipment(s)',
                         type: 'line',
                         data: @json($graph['return'])
                     },
                     {
-                        name: 'In Progress',
+                        name: 'In Progress Shipment(s)',
                         type: 'line',
                         data: @json($graph['pending'])
                     }
@@ -598,7 +602,7 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pending Shipments', 'Received', 'Delivered', 'Return', 'In Progress']
+                                data: ['Pending Shipments', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Progress Shipment(s)']
                             },
                             color: ['#2ba4e0', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
 
@@ -621,22 +625,22 @@
                                     data: data.graph['booked']
                                 },
                                 {
-                                    name: 'Received',
+                                    name: 'Received Shipment(s)',
                                     type: 'line',
                                     data: data.graph['received']
                                 },
                                 {
-                                    name: 'Delivered',
+                                    name: 'Delivered Shipment(s)',
                                     type: 'line',
                                     data: data.graph['delivered']
                                 },
                                 {
-                                    name: 'Return',
+                                    name: 'Returned Shipment(s)',
                                     type: 'line',
                                     data: data.graph['return']
                                 },
                                 {
-                                    name: 'In Progress',
+                                    name: 'In Progress Shipment(s)',
                                     type: 'line',
                                     data: data.graph['pending']
                                 }
