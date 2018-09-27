@@ -29,7 +29,6 @@ class DatabaseSeeder extends Seeder
         $this->call(PackagingPaymentModesTableSeeder::class);
         $this->call(PaymentModeTableSeeder::class);
         $this->call(PickupNoteStatusTableSeeder::class);
-        $this->call(PickupTypeTableSeeder::class);
         $this->call(ProductsTableSeeder::class);
         $this->call(RiderCategoryTableSeeder::class);
         $this->call(RidersTableSeeder::class);
