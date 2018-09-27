@@ -255,7 +255,7 @@ class AdminPickupsController extends Controller
       ->editColumn('pickup_date', function($pickup_request) {
         return Carbon::parse($pickup_request->pickup_date)->format('d/m/Y');
       })
-      ->addColumn('action', function($receiving_sheet) {
+      ->addColumn('action', function($pickup_request) {
         if (session('role_id') == 1 || in_array(18, session('permissions'))) {
           return '<div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -1037,15 +1037,17 @@ class AdminPickupsController extends Controller
 
           $receiving_sheet_id = $receiving_sheet_shipment->receiving_sheet_id;
 
+          $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
+
+          $receiving_sheet->received = $receiving_sheet->received + 1;
+
           if (!in_array($receiving_sheet_id, $receiving_sheet_ids)) {
-            $receiving_sheet = $receiving_sheet_shipment->receiving_sheet;
-
             $receiving_sheet->status = 1;
-
-            $receiving_sheet->save();
 
             $receiving_sheet_ids[] = $receiving_sheet_id;
           }
+
+          $receiving_sheet->save();
 
           $receiving_sheet_received = new ReceivingSheetReceived();
 
