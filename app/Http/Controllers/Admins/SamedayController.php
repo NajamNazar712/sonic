@@ -129,6 +129,15 @@ class SamedayController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('product',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('p.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('tat',function ($shipments){
 //                Carbon::createFromFormat('Y-m-d H:i:s', $shipments->booked_date)->format('h:m:s A');
                 $now = Carbon::now();
