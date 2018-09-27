@@ -1107,7 +1107,10 @@ class DeliveryController extends Controller
                                     $parcel = Shipment::find($shipment);
 
                                     if (!$parcel->packaging_material_request) {
-                                        ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
+                                        if ($parcel->shipper_status_id != 12) {
+                                            ShipmentsJourneyController::add($shipment, 12, 12, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
+                                        }
+
                                         ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id);
                                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
                                         NotificationsController::send(15, 0, $shipment);
