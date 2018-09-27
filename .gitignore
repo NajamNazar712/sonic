@@ -1,6 +1,5 @@
 /node_modules
 /public/hot
-/public/reports
 /public/storage
 /storage/*.key
 /vendor
@@ -8,7 +7,6 @@
 /.vscode
 /.vagrant
 /public/uploads/*
-/public/reports/*
 Homestead.json
 Homestead.yaml
 npm-debug.log
