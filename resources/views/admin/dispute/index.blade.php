@@ -411,7 +411,7 @@
                 {data: 'created_at', name: 'disputes.created_at', class: 'align-middle created_at'},
                 {data: 'description', name: 'disputes.description', class: 'align-middle description'},
                 {data: 'originated_at', name: 'cities.name', class: 'align-middle originated_at'},
-                {data: 'dispute_type', name: 'dt.type', class: 'align-middle dispute_type'},
+                {data: 'dispute_type', name: 'dispute_type', class: 'align-middle dispute_type'},
                 {data: 'no_of_shipments', name: 'disputes.shipments_count', class: 'align-middle mode'},
                 {data: 'launched_by', name: 'launched_by', class: 'align-middle launched_by',orderable: false, searchable: false},
                 {data: 'updated_by', name: 'au.name', class: 'align-middle updated_by'},
@@ -437,6 +437,7 @@
                     '<option value="1">Updated</option>' +
                     '<option value="2">Resolved</option>' +
                     '</select>';
+                var dispute_select = '<select name="dispute_select" id="dispute_select" class="select2 form-control"></select>';
 
                 this.api().columns().every(function(column_id) {
                     var column = this;
@@ -446,6 +447,11 @@
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
+                    .on( 'change', function () {
+                        column.search($(this).val(), false, false, true).draw();
+                        } ).wrap(td);
+                    }else if($(header).is('.dispute_type')){
+                        $(dispute_select).appendTo($(search))
                     .on( 'change', function () {
                         column.search($(this).val(), false, false, true).draw();
                         } ).wrap(td);
@@ -462,6 +468,24 @@
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                var data = $.map({!! $dispute_types !!}, function (obj) {
+                    obj.id = obj.id // replace pk with your identifier
+
+                    return obj;
+                });
+                var data = $.map({!! $dispute_types !!}, function (obj) {
+                    obj.text = obj.type; // replace name with the property used for the text
+
+                    return obj;
+                });
+
+                $("#dispute_select").prepend('<option value="" selected></option>').select2({
+                    data:data,
+                    placeholder: "Select Type",
                     width:'100%',
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'

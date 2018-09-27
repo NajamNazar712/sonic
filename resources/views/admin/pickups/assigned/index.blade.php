@@ -238,7 +238,7 @@
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'rider', name: 'rider', class: 'align-middle rider'},
-					{data: 'rider_type', name: 'rc.name', class: 'align-middle rider_type'},
+					{data: 'rider_type', name: 'rider_type', class: 'align-middle rider_type'},
 					{data: 'route', name: 'route', class: 'align-middle route'},
 					{data: 'city', name: 'c.name', class: 'align-middle city'},
 					{data: 'pickups', name: 'pickup_notes.pickups', class: 'align-middle pickups'},
@@ -271,7 +271,9 @@
                         '<option value="0">Light</option>' +
                         '<option value="1">Heavy</option>' +
                         '</select>';
-					this.api().columns().every(function(column_id) {
+                    var rider_select = '<select name="rider_select" id="rider_select" class="select2 form-control"></select>';
+
+                    this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
@@ -279,6 +281,11 @@
 							$(td).appendTo($(search));
 						}else if($(header).is('.pickup_type')){
                             $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.rider_type')){
+                            $(rider_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -295,6 +302,24 @@
 					});
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Pickup Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data1 = $.map({!! $rider_category !!}, function (obj) {
+                        obj.id = obj.id
+
+                        return obj;
+                    });
+                    var data1 = $.map({!! $rider_category !!}, function (obj) {
+                        obj.text = obj.name
+
+                        return obj;
+                    });
+
+                    $("#rider_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Rider",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

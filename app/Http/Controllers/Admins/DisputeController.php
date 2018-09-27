@@ -89,6 +89,15 @@ class DisputeController extends Controller
                     return $dispute->shipper;
                 }
             })
+            ->filterColumn('dispute_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('dt.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
 //            ->filterColumn('launched_by',function ($query,$keyword,$dispute){
 //                $keyword = strtolower($keyword);
 //                if ($keyword != '') {

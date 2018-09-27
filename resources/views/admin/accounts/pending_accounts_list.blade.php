@@ -199,7 +199,7 @@
                 {data: 'phone', name: 'phone', class: 'align-middle phone'},
                 {data: 'address', name: 'address', class: 'align-middle address'},
                 {data: 'email', name: 'email', class: 'align-middle email'},
-                {data: 'product_name', name: 'products.product_name', class: 'align-middle product_name'},
+                {data: 'product_name', name: 'products', class: 'align-middle product_name'},
                 {data: 'created_at', name: 'created_at', class: 'align-middle created'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
@@ -221,6 +221,8 @@
                     '<option value="1">Rates Added</option>' +
                     '<option value="2">Pending For Activation</option>' +
                     '</select>';
+                var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
@@ -229,6 +231,11 @@
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }else if($(header).is('.product_name')){
+                        $(product_select).appendTo($(search))
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
@@ -245,6 +252,24 @@
                 });
                 $("#status_select").prepend('<option value="" selected></option>').select2({
                     placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                var data1 = $.map({!! $products !!}, function (obj) {
+                    obj.id = obj.id // replace pk with your identifier
+
+                    return obj;
+                });
+                var data1 = $.map({!! $products !!}, function (obj) {
+                    obj.text = obj.product_name; // replace name with the property used for the text
+
+                    return obj;
+                });
+
+                $("#product_select").prepend('<option value="" selected></option>').select2({
+                    data:data1,
+                    placeholder: "Select Product",
                     width:'100%',
                     containerCssClass: 'select-xs',
                     dropdownCssClass: 'form-control-sm p-0'

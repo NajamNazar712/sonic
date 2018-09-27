@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\RiderCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -427,7 +428,8 @@ class AdminPickupsController extends Controller
     }
 
     public function assigned_index() {
-      return view('admin.pickups.assigned.index');
+        $rider_category = RiderCategory::all();
+      return view('admin.pickups.assigned.index')->with(['rider_category'=>$rider_category]);
     }
 
     public function assigned_list(Request $request) {
@@ -468,6 +470,15 @@ class AdminPickupsController extends Controller
               $query->whereRaw('false');
           }
       })
+          ->filterColumn('rider_type',function ($query,$keyword){
+
+              if ($keyword != '') {
+                  $query->where('rc.id',$keyword);
+              }
+              else {
+                  $query->whereRaw('false');
+              }
+          })
       ->addColumn('action', function($pickup_note) {
         $cancel_button = '<button type="button" class="dropdown-item cancel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Cancel</div></button>';
         $view_details_button = '<button type="button" class="dropdown-item view_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Details</div></button>';
@@ -782,7 +793,8 @@ class AdminPickupsController extends Controller
     }
 
     public function receive_index() {
-      return view('admin.pickups.receive.index');
+        $rider_category = RiderCategory::all();
+      return view('admin.pickups.receive.index')->with(['rider_category'=>$rider_category]);
     }
 
     public function receive_list(Request $request) {
@@ -816,6 +828,15 @@ class AdminPickupsController extends Controller
               $query->whereRaw('false');
           }
       })
+          ->filterColumn('rider_type',function ($query,$keyword){
+
+              if ($keyword != '') {
+                  $query->where('rc.id',$keyword);
+              }
+              else {
+                  $query->whereRaw('false');
+              }
+          })
       ->editColumn('pickup_note_no', function($pickup_note) {
         return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
       })
