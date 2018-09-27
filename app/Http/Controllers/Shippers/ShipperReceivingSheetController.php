@@ -330,7 +330,7 @@ class ShipperReceivingSheetController extends Controller
 
             $shipment_details_row_end = '
                             <td>' . $shipment->consignee_city->name . '</td>
-                            <td>' . number_format($shipment->estimated_weight) . '</td>
+                            <td>' . $shipment->estimated_weight . '</td>
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                           </tr>
           ';

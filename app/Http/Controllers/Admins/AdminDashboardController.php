@@ -458,7 +458,9 @@ class AdminDashboardController extends Controller
             ->groupBy('shipments.id');
 
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+            $shipments = $shipments->where(function ($query) {
+              $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+            });
         }
 
         return Datatables::of($shipments)

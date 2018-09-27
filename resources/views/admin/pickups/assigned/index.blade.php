@@ -399,13 +399,13 @@
 							var pickup_requests = '';
 
 							$.each(data, function(index, details) {
-								var shipper = '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Shipper</strong></td><td>' + details.shipper + '</td></tr>';
-								var contact_person = '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Contact Person</strong></td><td>' + details.contact_person + '</td></tr>';
-								var contact_number = '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Contact Number</strong></td><td>' + details.contact_number + '</td></tr>';
-								var address = '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Address</strong></td><td>' + details.address + '</td></tr>';
-								var bookings = '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Bookings</strong></td><td>' + details.bookings + '</td></tr>';
-								var total_estimated_weight = '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Total Estimated Weight</strong></td><td>' + details.total_estimated_weight + 'kg</td></tr>';
-								var pickup_type = '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Pickup Type</strong></td><td>' + details.pickup_type + '</td></tr>';
+								var shipper = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipper</strong></td><td class="align-middle text-center">' + details.shipper + '</td></tr>';
+								var contact_person = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Contact Person</strong></td><td class="align-middle text-center">' + details.contact_person + '</td></tr>';
+								var contact_number = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Contact Number</strong></td><td class="align-middle text-center">' + details.contact_number + '</td></tr>';
+								var address = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Address</strong></td><td class="align-middle text-center">' + details.address + '</td></tr>';
+								var bookings = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Bookings</strong></td><td class="align-middle text-center">' + details.bookings + '</td></tr>';
+								var total_estimated_weight = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Estimated Weight</strong></td><td class="align-middle text-center">' + details.total_estimated_weight + 'kg</td></tr>';
+								var pickup_type = '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Pickup Type</strong></td><td class="align-middle text-center">' + details.pickup_type + '</td></tr>';
 
 								pickup_requests += '<table class="table table-sm table-bordered mb-1"><tbody>' + shipper + contact_person + contact_number + address + bookings + total_estimated_weight + pickup_type + '</tbody></table>';
 							});
