@@ -353,7 +353,7 @@ class DeliveryController extends Controller
                         <div class="dropdown-menu dropdown-menu-sm">
                     ';
                     $statusCheck = DeliveryNoteShipment::where(['delivery_note_id'=>$result->delivery_note,'status'=>0])->get();
-                    $updatedstatusCheck = DeliveryNoteShipment::where(['delivery_note_id'=>$result->delivery_note,'status'=>1])->exists();
+                    $updatedstatusCheck = DeliveryNoteShipment::where('delivery_note_id',$result->delivery_note)->where('status','>',0)->exists();
 
 
                     if ((!$statusCheck->isEmpty()) && (session('role_id') == 1 || in_array(37, session('permissions')))) {

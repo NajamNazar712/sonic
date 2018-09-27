@@ -401,7 +401,6 @@
                                                     <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local != '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
-
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
@@ -2922,6 +2921,14 @@
             'digits': 2,
             'min': 0.00,
             'max': 1000000.00
+        });
+        $('.return-amount').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 0,
+            'max': 1000000
         });
 
         $('.percent').inputmask({

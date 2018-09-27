@@ -149,7 +149,7 @@
                 allowClear:true
             }).bind('change', function() {
                 if(shipper_select.val() != ''){
-                    shipper_select.val(null).trigger('change');
+                    shipper_select.val(null).trigger('change.select2');
                 }
             });
             var shipper_select = $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
@@ -158,7 +158,7 @@
                 allowClear:true
             }).bind('change', function() {
                 if(city_select.val() != ''){
-                    city_select.val(null).trigger('change');
+                    city_select.val(null).trigger('change.select2');
                 }
             });
 
