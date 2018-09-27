@@ -161,7 +161,7 @@
 
 			var short_received_table = $('#short_received_datatable').DataTable({
 				dom: 'ltipr',
-				scrollX: true,
+				scrollX: true, scrollY: '200px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,
 				pagingType: 'full_numbers',
