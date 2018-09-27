@@ -415,7 +415,7 @@
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'payment_status', name: 'sps.name', class: 'align-middle payment_status'},
+                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
@@ -451,6 +451,7 @@
                     var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
                         '</select>';
                     var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+                    var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -471,6 +472,11 @@
                                 } ).wrap(td);
                         }else if($(header).is('.product_type')){
                             $(product_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.payment_status')){
+                            $(payment_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -535,6 +541,24 @@
                     $("#product_select").prepend('<option value="" selected></option>').select2({
                         data:data3,
                         placeholder: "Select Product",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data4 = $.map({!! $payment_status !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data4 = $.map({!! $payment_status !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#payment_select").prepend('<option value="" selected></option>').select2({
+                        data:data4,
+                        placeholder: "Select Payment",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

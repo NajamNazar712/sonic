@@ -24,6 +24,7 @@ use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentPaymentStatus;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -186,9 +187,9 @@ class AdminDashboardController extends Controller
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();
-
+        $payment_status = ShipmentPaymentStatus::all();
         // return $cities;
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status]);
     }
     public function statistics_search(Request $request){
 //        return $request;
@@ -509,6 +510,15 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('payment_status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sps.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->filterColumn('product',function ($query,$keyword){
 
                 if ($keyword != '') {
@@ -547,10 +557,12 @@ class AdminDashboardController extends Controller
         return view('admin.pending_booked_orders');
     }
     public function pendingAccountsList(){
-        return view('admin.accounts.pending_accounts_list');
+        $products = Product::select('id','product_name')->get();
+        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products]);
     }
     public function activeAccountsList(){
-        return view('admin.accounts.active_accounts_list');
+        $products = Product::select('id','product_name')->get();
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products]);
 
     }
     public function blockAccountsList(){
@@ -3248,6 +3260,15 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('products',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('p.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn("action", function ($result) {
                 $dropdown = '
                   <div class="btn-group">
@@ -3315,6 +3336,15 @@ class AdminDashboardController extends Controller
 
                 if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
                     $query->where('users.status', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('products',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('products.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
