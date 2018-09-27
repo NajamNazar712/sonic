@@ -3,6 +3,8 @@
 use Illuminate\Database\Seeder;
 use App\Http\Models\Admin\Admin;
 
+use Carbon\Carbon;
+
 class AdminsTableSeeder extends Seeder
 {
     /**
