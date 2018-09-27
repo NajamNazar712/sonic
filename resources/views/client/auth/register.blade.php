@@ -385,8 +385,8 @@
                                                         </label>
                                                         <div>
                                                         <select name="mode_of_payment" id="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="ibft" {{ old('mode_of_payment') == 'ibft' ? 'selected' : '' }}>IBFT Reimbursements</option>
-                                                            <option value="invoices" {{ old('mode_of_payment') == 'invoices' ? 'selected' : '' }}>Invoices</option>
+                                                            <option value="IBFT" {{ old('mode_of_payment') == 'IBFT' ? 'selected' : '' }}>IBFT Reimbursements</option>
+                                                            <option value="Invoices" {{ old('mode_of_payment') == 'Invoices' ? 'selected' : '' }}>Invoices</option>
                                                         </select>
                                                         </div>
                                                     </div>
@@ -429,10 +429,10 @@
                                                             </label>
                                                         <div>
                                                         <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="daily" {{ old('cycle_of_payment') == 'daily' ? 'selected' : '' }}>Daily</option>
-                                                            <option value="weekly" {{ old('cycle_of_payment') == 'weekly' ? 'selected' : '' }}>Weekly</option>
-                                                            <option value="fortnight" {{ old('cycle_of_payment') == 'fortnight' ? 'selected' : '' }}>Fortnight</option>
-                                                            <option value="monthly" {{ old('cycle_of_payment') == 'monthly' ? 'selected' : '' }}>Monthly</option>
+                                                            <option value="Daily" {{ old('cycle_of_payment') == 'Daily' ? 'selected' : '' }}>Daily</option>
+                                                            <option value="Weekly" {{ old('cycle_of_payment') == 'Weekly' ? 'selected' : '' }}>Weekly</option>
+                                                            <option value="Fortnight" {{ old('cycle_of_payment') == 'Fortnight' ? 'selected' : '' }}>Fortnight</option>
+                                                            <option value="Monthly" {{ old('cycle_of_payment') == 'Monthly' ? 'selected' : '' }}>Monthly</option>
                                                         </select>
                                                         </div>
                                                     </div>
