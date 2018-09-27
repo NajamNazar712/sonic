@@ -126,7 +126,10 @@ class AdminCargoController extends Controller
             $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
             ->where('dc.name', 'like', '%' . $keyword . '%');
           })
-          ->orWhere('oc.name', 'like', '%' . $keyword . '%');
+          ->orWhere(function ($sub_query) use ($keyword) {
+            $sub_query->where('shipments.shipper_status_id', 2)
+            ->where('oc.name', 'like', '%' . $keyword . '%');
+          });
       })
       ->filterColumn('dc.name', function ($query, $keyword) {
           $keyword = strtolower($keyword);
@@ -135,7 +138,10 @@ class AdminCargoController extends Controller
             $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
             ->where('oc.name', 'like', '%' . $keyword . '%');
           })
-          ->orWhere('dc.name', 'like', '%' . $keyword . '%');
+          ->orWhere(function ($sub_query) use ($keyword) {
+            $sub_query->where('shipments.shipper_status_id', 2)
+            ->where('dc.name', 'like', '%' . $keyword . '%');
+          });
       })
       ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), dc.name, oc.name)') . ' $1')
       ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), oc.name, dc.name)') . ' $1');

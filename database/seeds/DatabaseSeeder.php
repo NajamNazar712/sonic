@@ -13,6 +13,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         $this->call(AdminDepartmentTableSeeder::class);
+        $this->call(AdminRoleModulePermissionsTableSeeder::class);
         $this->call(AdminRoleTableSeeder::class);
         $this->call(AdminsTableSeeder::class);
         $this->call(BanksListTableSeeder::class);
@@ -32,10 +33,10 @@ class DatabaseSeeder extends Seeder
         $this->call(ProductsTableSeeder::class);
         $this->call(RiderCategoryTableSeeder::class);
         $this->call(RidersTableSeeder::class);
+        $this->call(ShipmentPaymentStatusTableSeeder::class);
         $this->call(ShipmentStatusReasonTableSeeder::class);
         $this->call(ShipmentStatusShipmentStatusReasonTableSeeder::class);
         $this->call(ShipmentStatusTableSeeder::class);
-        $this->call(ShipmentPaymentStatusTableSeeder::class);
         $this->call(ShippingModeSameDayTimingTableSeeder::class);
         $this->call(ShippingModeTableSeeder::class);
         $this->call(StandardBookingTypeChargesTableSeeder::class);
@@ -48,5 +49,6 @@ class DatabaseSeeder extends Seeder
         $this->call(SubstituteUserModulePermissionSeeder::class);
         $this->call(TransportModeTableSeeder::class);
         $this->call(TransportModeVendorTableSeeder::class);
+        $this->call(UsersTableSeeder::class);
     }
 }
