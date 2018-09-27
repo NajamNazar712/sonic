@@ -138,7 +138,7 @@
 			@if (session('role_id') == 1 || in_array(103, session('permissions')))
 				$('#send_custom_email .receiver').select2({
 					width: '100%',
-					placeholder: 'Receiver'
+					placeholder: 'Receiver*'
 				}).bind('change', function() {
 					if ($(this).hasClass('danger')) {
 						$(this).valid();
