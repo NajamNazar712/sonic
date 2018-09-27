@@ -31,7 +31,9 @@ class AdminRoleTableSeeder extends Seeder
             array('id' => 11, 'created_at' => $timestamp, 'name' => 'Officer', 'department_id' => 6, 'updated_by' => 3),
             array('id' => 12, 'created_at' => $timestamp, 'name' => 'Business Development Manager', 'department_id' => 7, 'updated_by' => 3),
             array('id' => 13, 'created_at' => $timestamp, 'name' => 'Officer', 'department_id' => 3, 'updated_by' => 3),
-            array('id' => 14, 'created_at' => $timestamp, 'name' => 'Officer', 'department_id' => 4, 'updated_by' => 3)
+            array('id' => 14, 'created_at' => $timestamp, 'name' => 'Officer', 'department_id' => 4, 'updated_by' => 3),
+            array('id' => 15, 'created_at' => $timestamp, 'name' => 'Team Leader', 'department_id' => 3, 'updated_by' => 3),
+            array('id' => 16, 'created_at' => $timestamp, 'name' => 'Business Development Officer', 'department_id' => 7, 'updated_by' => 3)
         ));
     }
 }
