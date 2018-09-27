@@ -484,7 +484,7 @@
 					{data: 'origin', name: 'oh.name', class: 'align-middle origin'},
 					{data: 'destination', name: 'dh.name', class: 'align-middle destination'},
 					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle shipments'},
-					{data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
+					{data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
 					{data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},
 					{data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
 					{data: 'transport_mode', name: 'tm.name', class: 'align-middle transport_mode'},
@@ -506,14 +506,20 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
+                        '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
 						if ($(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.shipping_mode')){
+                            $(mode_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -524,7 +530,24 @@
 							}
 						}
 					});
+                    var data2 = $.map({!! $shipping_mode !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
 
+                        return obj;
+                    });
+                    var data2 = $.map({!! $shipping_mode !!}, function (obj) {
+                        obj.text = obj.mode; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#mode_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Mode",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 					this.api().table().columns.adjust();
 				}
 			});

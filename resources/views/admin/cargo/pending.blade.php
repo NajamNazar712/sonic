@@ -145,13 +145,13 @@
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
 					{data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-					{data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-					{data: 'status', name: 'ss.name', class: 'align-middle status'},
+					{data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
+					{data: 'status', name: 'status', class: 'align-middle status'},
 					{data: 'origin', name: 'oc.name', class: 'align-middle origin'},
 					{data: 'destination', name: 'dc.name', class: 'align-middle destination'},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-					{data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
+					{data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
 					{data: 'booked_at', name: 'shipments.created_at', class: 'align-middle booked_at'},
 					{data: 'arrival_at', name: 'shipments_journey.created_at', class: 'align-middle arrival_at'}
 				],
@@ -166,14 +166,34 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '</select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
+                        '</select>';
+                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
+                        '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
 						if ($(header).is('.serial_number')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.status')){
+                            $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.service_type')){
+                        $(service_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    	}else if($(header).is('.shipping_mode')){
+                            $(mode_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -184,7 +204,60 @@
 							}
 						}
 					});
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
 
+                        return obj;
+                    });
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.text = obj.text || obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data1 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data1 = $.map({!! $service_type !!}, function (obj) {
+                        obj.text = obj.booking_type; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#service_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data2 = $.map({!! $shipping_mode !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $shipping_mode !!}, function (obj) {
+                        obj.text = obj.mode; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#mode_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Mode",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 					this.api().table().columns.adjust();
 				}
 			});

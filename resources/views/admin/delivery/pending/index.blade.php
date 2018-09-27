@@ -260,7 +260,7 @@
                     }
                 });
                 var data = $.map({!! $shipment_status !!}, function (obj) {
-                    obj.id = obj.id // replace pk with your identifier
+                    obj.id = obj.id; // replace pk with your identifier
 
                     return obj;
                 });

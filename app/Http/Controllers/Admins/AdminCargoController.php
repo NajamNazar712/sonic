@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\BookingType;
+use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -32,7 +34,10 @@ class AdminCargoController extends Controller
     }
 
     public function pending_index() {
-      return view('admin.cargo.pending');
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $service_type = BookingType::all();
+        $shipping_mode = ShippingMode::all();
+      return view('admin.cargo.pending')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'shipping_mode'=>$shipping_mode]);
     }
 
     public function pending_list(Request $request) {
@@ -85,6 +90,33 @@ class AdminCargoController extends Controller
         else {
           return $shipments->destination;
         }
+      })
+      ->filterColumn('status',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('ss.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
+      })
+      ->filterColumn('service_type',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('bt.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
+      })
+      ->filterColumn('shipping_mode',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('sm.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
       })
       ->filterColumn('oc.name', function ($query, $keyword) {
           $keyword = strtolower($keyword);
@@ -448,7 +480,9 @@ class AdminCargoController extends Controller
     }
 
     public function in_transit_index() {
-      return view('admin.cargo.in_transit');
+        $shipping_mode = ShippingMode::all();
+        $shipping_mode = ::all();
+      return view('admin.cargo.in_transit')->with(['shipping_mode'=>$shipping_mode]);
     }
 
     public function in_transit_list(Request $request) {
@@ -476,6 +510,24 @@ class AdminCargoController extends Controller
       })
       ->filterColumn('cargo_consignments.id', function ($query, $keyword) {
           return $query->where('cargo_consignments.id', '=', $keyword);
+      })
+      ->filterColumn('shipping_mode',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('sm.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
+      })
+      ->filterColumn('status',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('ccs.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
       })
       ->addColumn('action', function($cargo_consignment) {
         $print_button = '<button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>';
