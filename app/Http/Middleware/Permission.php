@@ -44,6 +44,8 @@ class Permission
             'pickups.receive.summary.index' => 24,
             'pickups.receive.summary.list' => 24,
             'pickups.receive.summary.request.short_received' => 24,
+            'pickups.receive.summary.request.over_received' => 24,
+            'pickups.receive.summary.request.over_short_received' => 24,
             'pickups.receive.summary.request.done' => 24,
             'pickups.receive.summary.request.not_done' => 24,
 
@@ -155,6 +157,7 @@ class Permission
             'finance.make_payments.adjusted_shipments' => 59,
             'finance.make_payments.shipment_details' => 59,
             'finance.make_payments.shipment_list' => 60,
+            'finance.make_payments.verify' => 60,
             'finance.make_payments.export_bank_order' => 60,
             'finance.make_payments.store' => 60,
             'finance.done_payments.index' => 61,
@@ -189,6 +192,8 @@ class Permission
             'reports.customer_sales.index' => 74,
             'reports.customer_sales.export_to_excel' => 74,
             'reports.customer_sales.download' => 74,
+            'reports.overall_sales.index' => 75,
+            'reports.overall_sales.list' => 75,
 
 
             'packaging.index' => 76,
