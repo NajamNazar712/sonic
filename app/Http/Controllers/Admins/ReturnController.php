@@ -91,7 +91,15 @@ class ReturnController extends Controller
                     return " - ";
                 }
             })
-            ->addColumn("action", function ($result) {
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })            ->addColumn("action", function ($result) {
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
                 $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';
 
@@ -273,7 +281,15 @@ class ReturnController extends Controller
                     return " - ";
                 }
             })
-            ->filterColumn('return_pending_for', function ($query, $keyword) {
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })            ->filterColumn('return_pending_for', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
                 if (strpos('shipper', $keyword) !== FALSE) {
