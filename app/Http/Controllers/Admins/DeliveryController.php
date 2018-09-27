@@ -21,6 +21,7 @@ use App\Http\Models\ShipmentItem;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShipmentStatusReason;
+use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -40,7 +41,9 @@ class DeliveryController extends Controller
     }
     public function pending_delivery_index(Request $request){
         $shipment_status = ShipmentStatus::select('id','name')->get();
-        return view('admin.delivery.pending.index')->with(['shipment_status'=>$shipment_status]);
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+        return view('admin.delivery.pending.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
     }
     public function pending_list(Request $request)
     {
@@ -101,6 +104,24 @@ class DeliveryController extends Controller
 
                 if ($keyword != '') {
                     $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('shipping_mode',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sm.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('service_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('bt.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
@@ -2303,7 +2324,10 @@ class DeliveryController extends Controller
         return $html;
     }
     public function misroute_index(){
-        return view('admin.delivery.misroute.index');
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+        return view('admin.delivery.misroute.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
     }
     public function misroute_list(Request $request){
 
@@ -2363,6 +2387,24 @@ class DeliveryController extends Controller
                     return $shipments->arrival;
                 }else{
                     return " - ";
+                }
+            })
+            ->filterColumn('shipping_mode',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sm.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('service_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('bt.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn("action", function ($result) {
