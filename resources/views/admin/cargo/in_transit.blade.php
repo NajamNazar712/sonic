@@ -181,13 +181,6 @@
 
 														<div class="col">
 															<div class="form-group">
-																<select name="shipping_mode" class="select2 shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
-																</select>
-															</div>
-														</div>
-
-														<div class="col">
-															<div class="form-group">
 																<select name="transport_mode" class="select2 transport_mode" data-rule-required="true" data-msg-required="Transport Mode is required">
 																</select>
 															</div>
