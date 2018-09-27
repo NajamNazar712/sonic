@@ -115,6 +115,7 @@ class AdminNotificationsController extends Controller
 
         if ($notification) {
             $notification->status = $request->status;
+            $notification->updated_by = Auth::id();
 
             $notification->save();
 
@@ -222,6 +223,7 @@ class AdminNotificationsController extends Controller
             }
 
             $notification->body = $request->get('body');
+            $notification->updated_by = Auth::id();
 
             $notification->save();
 
