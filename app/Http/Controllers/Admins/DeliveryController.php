@@ -1467,6 +1467,14 @@ class DeliveryController extends Controller
     }
 
     public function dncc_undelivered_print(Request $request){
+        $delivery_note = DeliveryNote::where('id',$request->id);
+        if($delivery_note->exists()){
+            $delivery_note_print = $delivery_note->first();
+            if($delivery_note_print->undelivered_print == 0){
+                $delivery_note_print->undelivered_print = 1;
+                $delivery_note_print->save();
+            }
+        }
 
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
@@ -1539,13 +1547,9 @@ class DeliveryController extends Controller
                   <body>
                     <div>
       ';
-        $delivery_note = DeliveryNote::where('id',$request->id);
+
         if($delivery_note->exists()) {
-            $delivery_note_print = $delivery_note->first();
-            if($delivery_note_print->undelivered_print == 0){
-                $delivery_note_print->undelivered_print = 1;
-                $delivery_note_print->save();
-            }
+
             $total_shipments = 0;
             $total_cod_amount = 0;
             $dncc_status = array(5,14,16,30,36,37);

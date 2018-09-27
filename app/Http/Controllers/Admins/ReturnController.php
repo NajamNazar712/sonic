@@ -31,8 +31,8 @@ class ReturnController extends Controller
         $this->middleware('Permission');
     }
     public function return_view(){
-        $shipment_status = ShipmentStatus::select('id','name')->get();
-        return view('admin.return.index')->with(['shipment_status'=>$shipment_status]);
+
+        return view('admin.return.index');
     }
     public function return_marked_list(Request $request){ //status 12 shipments
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -89,15 +89,6 @@ class ReturnController extends Controller
                     return $shipments->arrival;
                 }else{
                     return " - ";
-                }
-            })
-            ->filterColumn('status',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('ss.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
                 }
             })
             ->addColumn("action", function ($result) {
@@ -215,8 +206,8 @@ class ReturnController extends Controller
 
     }
     public function return_confirmed_view(){
-        $shipment_status = ShipmentStatus::select('id','name')->get();
-        return view('admin.return.confirmed')->with(['shipment_status'=>$shipment_status]);
+
+        return view('admin.return.confirmed');
     }
     public function return_confirmed_list(Request $request){
         $status_return = array(20,22,24,27,29,30,33,35,37,44,45,46);
@@ -280,15 +271,6 @@ class ReturnController extends Controller
                     return $shipments->arrival;
                 }else{
                     return " - ";
-                }
-            })
-            ->filterColumn('status',function ($query,$keyword){
-
-                if ($keyword != '') {
-                    $query->where('ss.id',$keyword);
-                }
-                else {
-                    $query->whereRaw('false');
                 }
             })
             ->filterColumn('return_pending_for', function ($query, $keyword) {
@@ -579,7 +561,7 @@ class ReturnController extends Controller
                   $dropdown .= $receive_button;
                 }
 
-                if (session('role_id') == 1 || in_array(51, session('permissions'))) {
+                if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(51, session('permissions')))) {
                   $dropdown .= $shift_shipment_button;
                 }
 

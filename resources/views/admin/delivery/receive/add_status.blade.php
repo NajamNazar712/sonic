@@ -548,9 +548,9 @@
                                 pagingType: 'full_numbers',
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                                    {name: 'tracking_number', class: 'align-middle tracking_number'},
-                                    {name: 'service_type', class: 'align-middle service_type'},
-                                    {name: 'weight', class: 'align-middle weight'},
+                                    {name: 'tracking_number', class: 'align-middle tracking_number',orderable: false, searchable: false},
+                                    {name: 'service_type', class: 'align-middle service_type',orderable: false, searchable: false},
+                                    {name: 'weight', class: 'align-middle weight',orderable: false, searchable: false},
 
                                 ],
                                 rowCallback: function(row, data, index) {
@@ -563,29 +563,6 @@
                                 },
                                 initComplete: function() {
 
-                                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                                    this.api().columns().every(function(column_id) {
-                                        var column = this;
-                                        var header = column.header();
-
-                                        if ($(header).is('.serial_number') || $(header).is('.weight')) {
-                                            $(td).appendTo($(search));
-                                        }
-                                        else {
-                                            var current = $(input).appendTo($(search)).on('change', function() {
-                                                column.search($(this).val(), false, false, true).draw();
-                                            }).wrap(td).after(icon);
-
-                                            if (column.search()) {
-                                                current.val(column.search());
-                                            }
-                                        }
-                                    });
                                 }
                             });
 
@@ -753,6 +730,8 @@
                             tab.document.close();
                             tab.focus();
                         }
+                        location.reload();
+
                     });
             }
 
@@ -768,7 +747,6 @@
             $('#printUndeliveredDNCC').on('click',function () {
                 var note_id = $('#delivery_note').val();
                 printUndelivered(note_id);
-                location.reload();
             });
 
 

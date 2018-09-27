@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Models\Product;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -19,8 +21,9 @@ class SamedayController extends Controller
         $this->middleware('Permission');
     }
     public function sameday_index(){
-
-        return view('admin.sameday.index');
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $products = Product::select('id','product_name')->get();
+        return view('admin.sameday.index')->with(['shipment_status'=>$shipment_status,'products'=>$products]);
     }
     public function sameday_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -115,6 +118,15 @@ class SamedayController extends Controller
                 }
                 else{
                     return " - ";
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sst.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->addColumn('tat',function ($shipments){

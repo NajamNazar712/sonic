@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\BookingType;
+use App\Http\Models\CargoConsignmentStatus;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -481,8 +482,8 @@ class AdminCargoController extends Controller
 
     public function in_transit_index() {
         $shipping_mode = ShippingMode::all();
-        $shipping_mode = ::all();
-      return view('admin.cargo.in_transit')->with(['shipping_mode'=>$shipping_mode]);
+        $cargo_status = CargoConsignmentStatus::all();
+      return view('admin.cargo.in_transit')->with(['shipping_mode'=>$shipping_mode,'cargo_status'=>$cargo_status]);
     }
 
     public function in_transit_list(Request $request) {
