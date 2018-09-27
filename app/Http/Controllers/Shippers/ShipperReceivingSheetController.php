@@ -51,6 +51,8 @@ class ShipperReceivingSheetController extends Controller
       $receiving_sheet = new ReceivingSheet();
 
       $receiving_sheet->user_id = session('user_id');
+      $receiving_sheet->pickup_address_id = $pickup_address_id;
+      $receiving_sheet->booked = count($shipment_ids);
       $receiving_sheet->status = 0;
 
       $receiving_sheet->save();
@@ -151,6 +153,10 @@ class ShipperReceivingSheetController extends Controller
 
                 $receiving_sheet_shipment->save();
 
+                $receiving_sheet->booked = $receiving_sheet->booked + 1;
+
+                $receiving_sheet->save();
+
                 return ['status' => 0, 'success' => 'Shipment has been Added to the Receiving Sheet'];
               }
               else {
@@ -164,6 +170,10 @@ class ShipperReceivingSheetController extends Controller
               $receiving_sheet_shipment->receiving_sheet_id = $request->input('receiving_sheet_id');
 
               $receiving_sheet_shipment->save();
+
+              $receiving_sheet->booked = $receiving_sheet->booked + 1;
+
+              $receiving_sheet->save();
 
               return ['status' => 0, 'success' => 'Shipment has been Added to the Receiving Sheet'];
             }
@@ -194,6 +204,7 @@ class ShipperReceivingSheetController extends Controller
             $receiving_sheet_shipment->delete();
 
             if (!ReceivingSheetShipment::where('receiving_sheet_id', $request->input('receiving_sheet_id'))->exists()) {
+              $receiving_sheet->booked = $receiving_sheet->booked - 1;
               $receiving_sheet->status = 2;
 
               $receiving_sheet->save();

@@ -62,6 +62,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
 
         Route::prefix('receiving_sheet')->name('receiving_sheet.')->group(function () {
             Route::get('list', 'Shippers\ShipperReceivingSheetController@list')->name('list');
+            Route::get('receiving_sheet_list', 'Shippers\ShipperReceivingSheetController@receiving_sheet_list')->name('receiving_sheet_list');
             Route::get('all', 'Shippers\ShipperReceivingSheetController@all')->name('all');
             Route::put('add', 'Shippers\ShipperReceivingSheetController@add')->name('add');
             Route::put('void', 'Shippers\ShipperReceivingSheetController@void')->name('void');
@@ -71,7 +72,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
 
         Route::prefix('receiving_sheet_history')->name('receiving_sheet_history.')->group(function () {
-            Route::get('list', 'Shippers\ShipperReceivingSheetHistoryController@list')->name('list');
+            Route::get('short_received_list', 'Shippers\ShipperReceivingSheetHistoryController@short_received_list')->name('short_received_list');
+            Route::get('receiving_sheet_list', 'Shippers\ShipperReceivingSheetHistoryController@receiving_sheet_list')->name('receiving_sheet_list');
             Route::post('booked_shipments', 'Shippers\ShipperReceivingSheetHistoryController@booked_shipments')->name('booked_shipments');
             Route::post('received_shipments', 'Shippers\ShipperReceivingSheetHistoryController@received_shipments')->name('received_shipments');
             Route::post('short_received_shipments', 'Shippers\ShipperReceivingSheetHistoryController@short_received_shipments')->name('short_received_shipments');

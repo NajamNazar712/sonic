@@ -28,90 +28,75 @@ class ShipperReceivingSheetHistoryController extends Controller
       return view('client.shipment.receiving_sheet_history.index');
     }
 
-    public function list() {
-      $receiving_sheet_received = ReceivingSheetReceived::leftjoin('receiving_sheet_shipments as rss', 'receiving_sheet_received.receiving_sheet_id', '=', 'rss.receiving_sheet_id')
-      ->leftjoin('receiving_sheets as rs', 'receiving_sheet_received.receiving_sheet_id', '=', 'rs.id')
-      ->join('user_shipping_infos as usi', 'receiving_sheet_received.pickup_address_id', '=', 'usi.id')
+    public function short_received_list() {
+      $receiving_sheet_received = ReceivingSheetReceived::join('user_shipping_infos as usi', 'receiving_sheet_received.pickup_address_id', '=', 'usi.id')
       ->join('cities as c', 'usi.city_id', '=', 'c.id')
-      ->select('receiving_sheet_received.receiving_sheet_id as id', 'receiving_sheet_received.receiving_sheet_id as receiving_sheet', DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'c.name as origin', 'rs.created_at AS booking_date', 'receiving_sheet_received.pickup_address_id')
-      ->where('receiving_sheet_received.user_id', session('user_id'))
-      ->groupBy('receiving_sheet_received.receiving_sheet_id')
+      ->select('receiving_sheet_received.pickup_address_id', DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'usi.pickup_address', 'c.name as origin')
+      ->whereNull('receiving_sheet_id')
       ->groupBy('receiving_sheet_received.pickup_address_id');
 
       return Datatables::of($receiving_sheet_received)
-      ->editColumn('receiving_sheet', function($receiving_sheet_received) {
-        if ($receiving_sheet_received->receiving_sheet) {
-          return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($receiving_sheet_received->receiving_sheet, 6, '0', STR_PAD_LEFT) . '</span></button>';
+      ->editColumn('received', function($receiving_sheet_received) {
+        return '<button class="btn btn-sm btn-outline-info align-middle">' . $receiving_sheet_received->received . '</button>';
+      })
+      ->addColumn('action', function($receiving_sheet_received) {
+        return '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+                  <button type="button" class="dropdown-item create_receiving_sheet"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Create Receiving Sheet</div></button>
+                </div>
+              </div>
+        ';
+      })
+      ->make(true);
+    }
+
+    public function receiving_sheet_list() {
+      $receiving_sheet = ReceivingSheet::join('user_shipping_infos as usi', 'receiving_sheets.pickup_address_id', '=', 'usi.id')
+      ->join('cities as c', 'usi.city_id', '=', 'c.id')
+      ->select('receiving_sheets.id', 'receiving_sheets.id as receiving_sheet_id', 'receiving_sheets.pickup_address_id', 'receiving_sheets.booked', 'receiving_sheets.received', 'c.name as origin', 'receiving_sheets.created_at as booking_date')
+      ->where('receiving_sheets.received', '!=', 0);
+
+      return Datatables::of($receiving_sheet)
+      ->editColumn('receiving_sheet_id', function($receiving_sheet) {
+        return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($receiving_sheet->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
+      })
+      ->addColumn('booked', function($receiving_sheet) {
+        return '<button class="btn btn-sm btn-outline-info align-middle">' . $receiving_sheet->booked . '</button>';
+      })
+      ->editColumn('received', function($receiving_sheet) {
+        if ($receiving_sheet->received != 0) {
+          return '<button class="btn btn-sm btn-outline-info align-middle">' . $receiving_sheet->received . '</button>';
         }
         else {
           return '';
         }
       })
-      ->addColumn('booked', function($receiving_sheet_received) {
-       if ($receiving_sheet_received->receiving_sheet) {
-         $booked = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
-
-         return '<button class="btn btn-sm btn-outline-info align-middle">' . $booked . '</button>';
-       }
-       else {
-         return '';
-       }
-      })
-      ->editColumn('received', function($receiving_sheet_received) {
-        if ($receiving_sheet_received->receiving_sheet) {
-          $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', session('user_id'))->count();
-
-          return '<button class="btn btn-sm btn-outline-info align-middle" data-id="' . $receiving_sheet_received->pickup_address_id . '">' . $received . '</button>';
+      ->addColumn('short_received', function($receiving_sheet) {
+        if ($receiving_sheet->booked != $receiving_sheet->received) {
+          return '<button class="btn btn-sm btn-outline-info align-middle">' . ($receiving_sheet->booked - $receiving_sheet->received) . '</button>';
         }
         else {
-          return '<button class="btn btn-sm btn-outline-info align-middle" data-id="' . $receiving_sheet_received->pickup_address_id . '">' . $receiving_sheet_received->received . '</button>';
+          return '';
         }
       })
-      ->editColumn('booking_date', function($receiving_sheet_received) {
-        return $receiving_sheet_received->booking_date;
-      })
-      ->addColumn('action', function($receiving_sheet_received) {
-        if ($receiving_sheet_received->receiving_sheet) {
-          $booked = ReceivingSheetShipment::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->count();
-
-          $received = ReceivingSheetReceived::where('receiving_sheet_id', $receiving_sheet_received->receiving_sheet)->where('user_id', session('user_id'))->count();
-
-         if ($booked != $received) {
-            return '
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      <button type="button" class="dropdown-item view_short_received"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">View Short Received</div></button>
-                    </div>
-                  </div>
-            ';
-          }
-          else {
-            return '';
-          }
-        }
-        else {
+      ->addColumn('action', function($receiving_sheet) {
+        if ($receiving_sheet->booked != $receiving_sheet->received) {
           return '
-                  <div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      <button type="button" class="dropdown-item create_receiving_sheet" data-id="' . $receiving_sheet_received->pickup_address_id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Create Receiving Sheet</div></button>
-                    </div>
+                <div class="btn-group">
+                  <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                  <div class="dropdown-menu dropdown-menu-sm">
+                    <button type="button" class="dropdown-item view_short_received"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">View Short Received</div></button>
                   </div>
+                </div>
           ';
         }
-      })
-      ->filterColumn('receiving_sheet', function($query, $keyword) {
-        $keyword = intval($keyword);
-
-        if ($keyword != 0) {
-          $query->where('receiving_sheet_received.receiving_sheet_id', '=', $keyword);
-        }
         else {
-          $query->whereNotNull('receiving_sheet_received.receiving_sheet_id');
+          return '';
         }
       })
-      ->filterColumn('booked', function($query, $keyword) {
+      ->filterColumn('receiving_sheets.id', function($query, $keyword) {
         $keyword = intval($keyword);
 
         if ($keyword != 0) {
@@ -139,11 +124,11 @@ class ShipperReceivingSheetHistoryController extends Controller
     }
 
     public function received_shipments(Request $request) {
-      if ($request->receiving_sheet_id != 'NaN') {
+      if ($request->type == 1) {
         $receiving_sheet_received = ReceivingSheetReceived::where('receiving_sheet_id', $request->receiving_sheet_id)->where('user_id', session('user_id'))->get();
       }
       else {
-        $receiving_sheet_received = ReceivingSheetReceived::whereNull('receiving_sheet_id')->where('user_id', session('user_id'))->where('pickup_address_id', $request->pickup_address_id)->get();
+        $receiving_sheet_received = ReceivingSheetReceived::whereNull('receiving_sheet_id')->where('pickup_address_id', $request->pickup_address_id)->get();
       }
 
       $tracking_numbers = array();
