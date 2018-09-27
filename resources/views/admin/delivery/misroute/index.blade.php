@@ -270,9 +270,9 @@
                 {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                 {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                {data: 'mode', name: 'sm.mode', class: 'align-middle mode'},
-                {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-                {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                {data: 'mode', name: 'shipping_mode', class: 'align-middle mode'},
+                {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
+                {data: 'status', name: 'ss.name', class: 'align-middle status', orderable: false, searchable: false},
                 {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'arrival', class: 'align-middle arrival'},
@@ -290,14 +290,27 @@
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
+                    '</select>';
+                var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
+                    '</select>';
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
 
-                    if ($(header).is('.action') || $(header).is('.serial_number')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.status')) {
                         $(td).appendTo($(search));
+                    }else if($(header).is('.mode')){
+                        $(mode_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    }else if($(header).is('.service_type')){
+                        $(service_drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -308,6 +321,43 @@
                             current.val(column.search());
                         }
                     }
+                });
+
+                var data1 = $.map({!! $shipping_mode !!}, function (obj) {
+                    obj.id = obj.id
+
+                    return obj;
+                });
+                var data1 = $.map({!! $shipping_mode !!}, function (obj) {
+                    obj.text = obj.mode;
+
+                    return obj;
+                });
+
+                $("#mode_select").prepend('<option value="" selected></option>').select2({
+                    data:data1,
+                    placeholder: "Select Mode",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                var data2 = $.map({!! $service_type !!}, function (obj) {
+                    obj.id = obj.id
+
+                    return obj;
+                });
+                var data2 = $.map({!! $service_type !!}, function (obj) {
+                    obj.text = obj.booking_type;
+
+                    return obj;
+                });
+
+                $("#service_select").prepend('<option value="" selected></option>').select2({
+                    data:data2,
+                    placeholder: "Select Service",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
                 });
                 this.api().table().columns.adjust();
             }
