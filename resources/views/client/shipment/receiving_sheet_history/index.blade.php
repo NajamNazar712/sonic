@@ -193,7 +193,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.short_received') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.received') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}
 						else {
