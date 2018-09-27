@@ -242,7 +242,6 @@ class IndexColumns extends Migration
             $table->index('created_at');
             $table->index('updated_at');
             $table->index('user_id');
-            $table->index('status');
         });
 
         Schema::table('pending_payment_shipments', function (Blueprint $table) {
