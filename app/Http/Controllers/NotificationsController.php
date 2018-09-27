@@ -19,6 +19,8 @@ use App\Http\Models\DonePayment;
 
 use GuzzleHttp\Client;
 
+use App\Mail\Notifications;
+
 class NotificationsController extends Controller
 {
     static private function sms($body, $to) {
@@ -35,19 +37,17 @@ class NotificationsController extends Controller
     }
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL) {
-      Mail::send('notifications.email', ['body' => nl2br($body)], function ($message) use ($subject, $to, $cc, $bcc) {
-          $message->subject($subject);
+      $mail = Mail::to($to);
 
-          $message->to($to);
+      if ($cc) {
+        $mail->cc($cc);
+      }
 
-          if ($cc) {
-            $message->cc($cc);
-          }
+      if ($bcc) {
+        $mail->bcc($bcc);
+      }
 
-          if ($bcc) {
-            $message->bcc($bcc);
-          }
-      });
+      $mail->send(new Notifications($subject, $body));
     }
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL) {
