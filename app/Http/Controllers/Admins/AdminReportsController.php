@@ -194,7 +194,9 @@ class AdminReportsController extends Controller
             ->select(['cargo_consignments.id as cargo_id','oc.name as origin','h.name as destination','cargo_consignments.shipments','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments'])
             ->where('cargo_consignments.status_id',3);
         if (session('role_id') != 1) {
-            $cargo_received = $cargo_received->whereIn('oc.hub_id', session('hubs'))->orwhereIn('h.hub_id', session('hubs'));
+            $cargo_received = $cargo_received->where(function ($query) {
+                $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('h.hub_id', session('hubs'));
+            });
         }
         $cargo = Datatables::of($cargo_received)
         ->editColumn('cargo_id', function ($cargo_received) {

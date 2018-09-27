@@ -265,7 +265,7 @@
                     return obj;
                 });
                 var data = $.map({!! $shipment_status !!}, function (obj) {
-                    obj.text = obj.text || obj.name; // replace name with the property used for the text
+                    obj.text = obj.name; // replace name with the property used for the text
 
                     return obj;
                 });
