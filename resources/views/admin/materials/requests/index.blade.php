@@ -34,6 +34,7 @@
                         <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Payment Mode</th>
+                        <th class="border-primary border-darken-1">Tracking Number</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -131,6 +132,7 @@
                             head.push('Amount');
                             head.push('Address');
                             head.push('Payment Mode');
+                            head.push('Tracking Number');
                             head.push('Status');
 
                             $.each(result.data, function(index, values) {
@@ -148,6 +150,7 @@
                                 row.push(values.amount);
                                 row.push(values.address);
                                 row.push(values.mode);
+                                row.push(values.tracking_number);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -189,6 +192,7 @@
                     {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.mode', class: 'align-middle mode'},
+                    {data: 'tracking_number', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 

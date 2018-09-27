@@ -1189,12 +1189,12 @@ class AdminReportsController extends Controller
         $sheet->getDefaultColumnDimension()->setWidth(20);
         $sheet->getStyle('A2:Z2')->applyFromArray($style);
         $sheet->getStyle('A4')->applyFromArray($style);
-        $sheet->getStyle('A5:D5')->applyFromArray($style);
-        $sheet->getStyle('A6:D9')->applyFromArray($style);
+//        $sheet->getStyle('A5:D5')->applyFromArray($style);
+//        $sheet->getStyle('A6:D9')->applyFromArray($style);
         $sheet->mergeCells('A2:Z2');
-        $sheet->getStyle('A10:D10')->applyFromArray($style);
+//        $sheet->getStyle('A10:D10')->applyFromArray($style);
         $sheet->getStyle('A12:A12')->applyFromArray($style);
-        $sheet->setCellValue('A2', 'Business Retention Report');
+        $sheet->setCellValue('A2', 'Customer Retention Report');
         $sheet->setCellValue('A4', 'Summary');
         $sheet->setCellValue('A5','Months');
         $sheet->setCellValue('A7','S');

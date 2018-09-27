@@ -19,6 +19,7 @@ use App\Http\Models\City;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
+use App\Http\Models\Product;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
@@ -183,8 +184,11 @@ class AdminDashboardController extends Controller
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
         $shipment_status = ShipmentStatus::select('id','name')->get();
+        $service_type = BookingType::all();
+        $products = Product::select('id','product_name')->get();
+
         // return $cities;
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'shipment_status'=>$shipment_status]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products]);
     }
     public function statistics_search(Request $request){
 //        return $request;
@@ -491,6 +495,24 @@ class AdminDashboardController extends Controller
 
                 if ($keyword != '') {
                     $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('service_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('bt.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('product',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('p.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');

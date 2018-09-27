@@ -413,7 +413,7 @@
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
+                    {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'payment_status', name: 'sps.name', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
@@ -422,7 +422,7 @@
                     {data: 'phone', name: 'phone', class: 'align-middle phone',orderable:false,searchable:false},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
+                    {data: 'product_type', name: 'product', class: 'align-middle product_type'},
                     {data: 'booking_date', name: 'booking_date', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -448,6 +448,10 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '</select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
+                        '</select>';
+                    var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -457,6 +461,16 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.service_type')){
+                            $(service_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.product_type')){
+                            $(product_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -477,7 +491,7 @@
                         return obj;
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.text = obj.text || obj.name; // replace name with the property used for the text
+                        obj.text = obj.name; // replace name with the property used for the text
 
                         return obj;
                     });
@@ -489,7 +503,42 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id
 
+                        return obj;
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.text = obj.booking_type;
+
+                        return obj;
+                    });
+
+                    $("#service_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data3 = $.map({!! $products !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data3 = $.map({!! $products !!}, function (obj) {
+                        obj.text = obj.product_name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#product_select").prepend('<option value="" selected></option>').select2({
+                        data:data3,
+                        placeholder: "Select Product",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });

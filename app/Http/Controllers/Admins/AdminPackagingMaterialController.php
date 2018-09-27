@@ -226,7 +226,7 @@ class AdminPackagingMaterialController extends Controller
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
             ->join('users as u','u.id','=','packaging_material_requests.user_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.small_flyers','packaging_material_requests.medium_flyers','packaging_material_requests.large_flyers','packaging_material_requests.boxes','packaging_material_requests.address','ppm.mode','packaging_material_requests.status','packaging_material_requests.amount']);
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.small_flyers','packaging_material_requests.medium_flyers','packaging_material_requests.large_flyers','packaging_material_requests.boxes','packaging_material_requests.address','ppm.mode','packaging_material_requests.status','packaging_material_requests.amount','packaging_material_requests.tracking_number']);
         return Datatables::of($requests)
             ->editColumn('status',function($packaging){
                 if($packaging->status == 0){
