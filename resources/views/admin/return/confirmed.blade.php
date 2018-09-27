@@ -209,7 +209,7 @@
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.mode', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'return_pending_for', name: 'return_pending_for', class: 'align-middle return_pending_for', orderable: false},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
@@ -227,13 +227,19 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.status')){
+                            $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -244,6 +250,25 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.text = obj.text || obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }

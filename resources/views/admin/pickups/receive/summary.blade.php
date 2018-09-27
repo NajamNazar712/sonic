@@ -240,7 +240,7 @@
 				}
 				else if ($(this).hasClass('done')) {
 					$.ajax({
-						url: '{!! route('admin.pickups.receive.summary.request.short_received') !!}',
+						url: '{!! route('admin.pickups.receive.summary.request.over_short_received') !!}',
 						method: 'POST',
 						data: {
 							'pickup_request_id': pickup_request_id,
@@ -249,24 +249,37 @@
 					})
 					.done(function(data) {
 						if (data.status == 0) {
-							if (data.short_received) {
-								var html = 'There are shipments that are short received from:<br/>';
+                            var html = '';
 
-								$.each(data.short_received, function(receiving_sheet_id, shipments) {
-									var receiving_sheet_number = receiving_sheet_id.toString();
+							if (data.short_received || data.over_received) {
+								if (data.short_received) {
+                                    html += 'There are shipments that are short received from:<br/>';
 
-									while (receiving_sheet_number.length < 12) {
-										receiving_sheet_number = '0' + receiving_sheet_number;
-									}
+                                    $.each(data.short_received, function (receiving_sheet_id, shipments) {
+                                        var receiving_sheet_number = receiving_sheet_id.toString();
 
-									html += receiving_sheet_number + ': ' + shipments.join(' - ') + '<br/>';
-								});
+                                        while (receiving_sheet_number.length < 12) {
+                                            receiving_sheet_number = '0' + receiving_sheet_number;
+                                        }
 
-								html += 'Are you sure, you want to mark this Pickup Done?';
+                                        html += receiving_sheet_number + ': ' + shipments.join(' - ') + '<br/>';
+                                    });
+
+                                    html += '<br/>';
+                                }
+
+								if (data.over_received) {
+									html += 'There are shipments that are over received:<br/>';
+
+									$.each(data.over_received, function (index, shipment) {
+										html += shipment + '<br/>';
+									});
+
+                                    html += '<br/>';
+								}
 							}
-							else {
-								var html = 'Are you sure, you want to mark this Pickup Done?';
-							}
+
+                        	html += 'Are you sure, you want to mark this Pickup Done?';
 
 							content = document.createElement('div');
 							content.innerHTML = html;

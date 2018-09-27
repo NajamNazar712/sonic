@@ -55,6 +55,9 @@ class AdminReportsController extends Controller
             })
             ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount'])
         ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,36,39,40,41,43,47]);
+            if (session('role_id') != 1) {
+                $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+            }
 //            ->orderBy('shipments.id');
         $datatable = Datatables::of($shipments)
             ->addColumn('aging',function ($shipments){
@@ -96,6 +99,9 @@ class AdminReportsController extends Controller
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
             ->select(['return_notes.id as return_note_id','up.name as updated_by','return_notes.shipments_count as count','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at']);
+            if (session('role_id') != 1) {
+                $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
+            }
         $return = Datatables::of($return_note)
         ->editColumn('return_note_id', function ($return_note) {
             return str_pad($return_note->return_note_id, 6, '0', STR_PAD_LEFT);
@@ -141,35 +147,38 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as up','up.id','=','pickup_notes.updated_by')
             ->select(['pickup_notes.id as pn_id','cities.name as city','pickup_notes.pickups','pickup_notes.bookings as count','riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
             ->where('pickup_notes.status_id',4);
-        $return = Datatables::of($pickup_note)
+            if (session('role_id') != 1) {
+                $pickup_note = $pickup_note->whereIn('cities.hub_id', session('hubs'));
+            }
+        $pickup_note = Datatables::of($pickup_note)
         ->editColumn('pn_id', function ($pickup_note) {
             return str_pad($pickup_note->pn_id, 6, '0', STR_PAD_LEFT);
         });
 
             if($pn_no = $request->get('search_pn_no')){
-                $return->where('pickup_notes.id','=',$pn_no);
+                $pickup_note->where('pickup_notes.id','=',$pn_no);
             }
             if($assigned_by = $request->get('search_assigned_by')){
-                $return->where('ab.id','=',$assigned_by);
+                $pickup_note->where('ab.id','=',$assigned_by);
             }
             if($rider = $request->get('search_rider')){
-                $return->where('riders.id','=',$rider);
+                $pickup_note->where('riders.id','=',$rider);
             }
             if($city = $request->get('search_city')){
-                $return->where('cities.id','=',$city);
+                $pickup_note->where('cities.id','=',$city);
             }
             if($submitted_by = $request->get('search_completed_by')){
-                $return->where('up.id','=',$submitted_by);
+                $pickup_note->where('up.id','=',$submitted_by);
             }
             if($submission_date = $request->get('search_completed_date')){
-                $return->whereDate('pickup_notes.updated_at',$submission_date);
+                $pickup_note->whereDate('pickup_notes.updated_at',$submission_date);
             }
             if ($request->get('search_date_from') && $request->get('search_date_to')) {
                 $from = $request->get('search_date_from');
                 $to = $request->get('search_date_to');
-                $return->whereBetween('pickup_notes.created_at', [$from,$to]);
+                $pickup_note->whereBetween('pickup_notes.created_at', [$from,$to]);
             }
-        return $return->make(true);
+        return $pickup_note->make(true);
     }
     public function cargo_received_index(Request $request){
         $shippimg_modes = ShippingMode::all();
@@ -184,6 +193,11 @@ class AdminReportsController extends Controller
             ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
             ->select(['cargo_consignments.id as cargo_id','oc.name as origin','h.name as destination','cargo_consignments.shipments','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments'])
             ->where('cargo_consignments.status_id',3);
+        if (session('role_id') != 1) {
+            $cargo_received = $cargo_received->where(function ($query) {
+                $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('h.hub_id', session('hubs'));
+            });
+        }
         $cargo = Datatables::of($cargo_received)
         ->editColumn('cargo_id', function ($cargo_received) {
             return str_pad($cargo_received->cargo_id, 6, '0', STR_PAD_LEFT);
@@ -284,6 +298,9 @@ class AdminReportsController extends Controller
             ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
             ->select('shipments.id as Shipment_id','shipments.tracking_number','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status')
             ->groupBy('shipments.id');
+            if (session('role_id') != 1) {
+                $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+            }
         $lead_time = Datatables::of($shipments)
             ->editColumn('account_no', function ($shipments) {
                 return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
@@ -479,7 +496,10 @@ class AdminReportsController extends Controller
              ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
              ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
              ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as current_status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'dnsdn.station_deposit_note_id as sdn', 'sjd.created_at as delivered_at','delivery_note_shipments.status as recovery_status','sps.name as payment_status')
-             ->whereIn('delivery_note_shipments.status', [4,5,6,7,8,9]);
+             ->whereIn('delivery_note_shipments.status', [4,5,6,7,8]);
+         if (session('role_id') != 1) {
+             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
+         }
          $datatables = Datatables::of($shipments)
             ->editColumn('dncc', function ($shipments) {
                 if ($shipments->dncc) {
@@ -522,11 +542,11 @@ class AdminReportsController extends Controller
                  }
              })
             ->editColumn('recovery_status',function ($shipment){
-                if($shipment->recovery_status == 7){
+                if(in_array($shipment->recovery_status, [4,5,6])){
                     return "Outstanding";
-                }else if($shipment->recovery_status == 8){
+                }else if($shipment->recovery_status == 7){
                     return "Resolved";
-                }else if($shipment->recovery_status == 9){
+                }else if($shipment->recovery_status == 8){
                     return "Payment Adjusted";
                 }
             });
@@ -536,12 +556,12 @@ class AdminReportsController extends Controller
          }
          if($status = $request->get('shipment_status')){
              if($status == 1){
-                 $datatables->where('delivery_note_shipments.status','=',7);
+                 $datatables->whereIn('delivery_note_shipments.status',[4,5,6]);
              }else if($status == 2){
-                 $datatables->where('delivery_note_shipments.status','=',8);
+                 $datatables->where('delivery_note_shipments.status','=',7);
 
              }else {
-                 $datatables->where('delivery_note_shipments.status','=',9);
+                 $datatables->where('delivery_note_shipments.status','=',8);
 
              }
          }
@@ -944,6 +964,9 @@ class AdminReportsController extends Controller
             ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
             ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
             ->where('delivery_notes.status',1);
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
+        }
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }

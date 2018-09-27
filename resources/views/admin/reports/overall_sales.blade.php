@@ -366,7 +366,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Completed Delivery Notes Report',
+                        title: 'Overall Sales Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
