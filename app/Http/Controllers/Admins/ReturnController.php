@@ -31,8 +31,8 @@ class ReturnController extends Controller
         $this->middleware('Permission');
     }
     public function return_view(){
-
-        return view('admin.return.index');
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        return view('admin.return.index')->with(['shipment_status'=>$shipment_status]);
     }
     public function return_marked_list(Request $request){ //status 12 shipments
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -91,7 +91,15 @@ class ReturnController extends Controller
                     return " - ";
                 }
             })
-            ->addColumn("action", function ($result) {
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })            ->addColumn("action", function ($result) {
                 $confirm_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="confirm"><i class="ft-plus-circle primary"></i> Confirm</a>';
                 $re_attempt_button = '<a href="javascript:void(0);" class="dropdown-item returnMarkStatus" data-action="reattempt"><i class="ft-plus-circle primary"></i> Re-Attempt</a>';
 
@@ -206,8 +214,8 @@ class ReturnController extends Controller
 
     }
     public function return_confirmed_view(){
-
-        return view('admin.return.confirmed');
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        return view('admin.return.confirmed')->with(['shipment_status'=>$shipment_status]);
     }
     public function return_confirmed_list(Request $request){
         $status_return = array(20,22,24,27,29,30,33,35,37,44,45,46);
@@ -273,7 +281,15 @@ class ReturnController extends Controller
                     return " - ";
                 }
             })
-            ->filterColumn('return_pending_for', function ($query, $keyword) {
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })            ->filterColumn('return_pending_for', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
 
                 if (strpos('shipper', $keyword) !== FALSE) {
