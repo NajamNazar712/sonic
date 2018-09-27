@@ -948,7 +948,6 @@ class AdminCargoController extends Controller
       }
 
       $cargo_consignment->seal_number = $request->input('seal_number');
-      $cargo_consignment->shipping_mode_id = $request->input('shipping_mode');
       $cargo_consignment->transport_mode_id = $request->input('transport_mode');
 
       if ($request->input('transport_mode_vendor') == 0) {
