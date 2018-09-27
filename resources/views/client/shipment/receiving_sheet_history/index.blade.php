@@ -260,6 +260,8 @@
 					}
 
 					short_received_table.draw('false');
+
+					receiving_sheet_table.draw('false');
 				});
 			});
 
