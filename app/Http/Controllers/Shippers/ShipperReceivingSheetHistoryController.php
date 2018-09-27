@@ -158,10 +158,16 @@ class ShipperReceivingSheetHistoryController extends Controller
     }
 
     public function void(Request $request) {
+      $receiving_sheet = ReceivingSheet::find($request->receiving_sheet_id);
+
       $receiving_sheet_shipments = ReceivingSheetShipment::where('receiving_sheet_id', $request->receiving_sheet_id)->pluck('shipment_id')->toArray();
       $receiving_sheet_received = ReceivingSheetReceived::where('receiving_sheet_id', $request->receiving_sheet_id)->pluck('shipment_id')->toArray();
 
       $shipment_ids = array_diff($receiving_sheet_shipments, $receiving_sheet_received);
+
+      $receiving_sheet->booked = $receiving_sheet->booked - count($shipment_ids);
+
+      $receiving_sheet->save();
 
       foreach ($shipment_ids as $shipment_id) {
         $receiving_sheet_shipment = ReceivingSheetShipment::find($shipment_id);
@@ -178,6 +184,7 @@ class ShipperReceivingSheetHistoryController extends Controller
       $receiving_sheet = new ReceivingSheet();
 
       $receiving_sheet->user_id = session('user_id');
+      $receiving_sheet->pickup_address_id = $request->pickup_address_id;
       $receiving_sheet->status = 1;
 
       $receiving_sheet->save();
@@ -191,6 +198,11 @@ class ShipperReceivingSheetHistoryController extends Controller
 
         $receiving_sheet_received->save();
       }
+
+      $receiving_sheet->booked = count($shipment_ids);
+      $receiving_sheet->received = count($shipment_ids);
+
+      $receiving_sheet->save();
 
       foreach ($shipment_ids as $shipment_id) {
         $receiving_sheet_shipment = new ReceivingSheetShipment();
