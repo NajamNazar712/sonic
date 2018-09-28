@@ -12,6 +12,7 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingPaymentMode;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
@@ -219,8 +220,9 @@ class AdminPackagingMaterialController extends Controller
         }
     }
     public function request_index(Request $request){
+        $payment_mode = PackagingPaymentMode::all();
         $packaging = PackagingMaterialStockHead::latest()->first();
-        return view('admin.materials.requests.index')->with('packaging',$packaging);
+        return view('admin.materials.requests.index')->with(['packaging'=>$packaging,'payment_mode'=>$payment_mode]);
     }
     public function request_list(Request $request){
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')

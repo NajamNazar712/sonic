@@ -2003,7 +2003,8 @@ class DeliveryController extends Controller
             }
     }
     public function sdn_view(Request $request){
-        return view('admin.delivery.sdn.index');
+        $banks = BanksList::all();
+        return view('admin.delivery.sdn.index')->with(['banks'=>$banks]);
     }
     public function sdn_list(Request $request){
         $sdn = StationDepositNote::
@@ -2065,8 +2066,10 @@ class DeliveryController extends Controller
             })
             ->filterColumn('status', function($query, $keyword) {
 
-                if ($keyword == 0 || $keyword == 1) {
+                if ($keyword == 0) {
                     $query->where('station_deposit_notes.status', '=', $keyword);
+                }else if ($keyword == 1){
+                    $query->where('station_deposit_notes.status', '>=', $keyword);
                 }
                 else {
                     $query->whereRaw('false');

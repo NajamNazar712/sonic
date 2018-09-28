@@ -9,12 +9,14 @@ use App\Http\Controllers\NotificationsController;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
+use App\Http\Models\BookingType;
 use App\Http\Models\City;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShippingMode;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -32,7 +34,9 @@ class ReturnController extends Controller
     }
     public function return_view(){
         $shipment_status = ShipmentStatus::select('id','name')->get();
-        return view('admin.return.index')->with(['shipment_status'=>$shipment_status]);
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+        return view('admin.return.index')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
     }
     public function return_marked_list(Request $request){ //status 12 shipments
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -215,7 +219,9 @@ class ReturnController extends Controller
     }
     public function return_confirmed_view(){
         $shipment_status = ShipmentStatus::select('id','name')->get();
-        return view('admin.return.confirmed')->with(['shipment_status'=>$shipment_status]);
+        $shipping_mode = ShippingMode::all();
+        $service_type = BookingType::all();
+        return view('admin.return.confirmed')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
     }
     public function return_confirmed_list(Request $request){
         $status_return = array(20,22,24,27,29,30,33,35,37,44,45,46);
