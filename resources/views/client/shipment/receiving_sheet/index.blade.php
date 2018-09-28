@@ -199,7 +199,7 @@
 
 							selected_rows = [];
 
-							table.button(0).disable();
+							table.button('.create').disable();
 
 							table.draw('false');
 						});
@@ -210,6 +210,48 @@
 					title: 'Receiving Sheet',
 					className: 'btn btn-primary',
 					text: '<i class="la la-file-excel-o"></i> Excel',
+				}, {
+					extend: 'selectAll',
+					text: 'Select All',
+					className: 'select_all',
+					action : function(e) {
+						e.preventDefault();
+
+						table.rows().nodes().each(function(index) {
+							var row = table.row(index);
+
+							if ($(row.node().firstChild).hasClass('select-checkbox')) {
+								row.select();
+
+								id = parseInt(row.id());
+
+								console.log(row.id());
+
+								console.log(selected_rows);
+
+								var index = $.inArray(id, selected_rows);
+
+								if (index === -1) {
+									selected_rows.push(id);
+								}
+
+								table.button('.create').enable();
+							}
+						});
+					}
+				}, {
+					extend: 'selectNone',
+					text: 'Select None',
+					className: 'select_none',
+					action : function(e) {
+						e.preventDefault();
+
+						table.rows().deselect();
+
+						selected_rows = [];
+
+						table.button('.create').disable();
+					}
 				}],
 				select: {
 					info: false,
@@ -217,8 +259,8 @@
 					selector: 'td.select-checkbox',
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
-				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-				pageLength: 50,
+				lengthMenu: [[5, 50, 100, 500, 1000, -1], [5, 50, 100, 500, 1000, 'All']],
+				pageLength: 5,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
@@ -293,10 +335,10 @@
 				}
 
 				if (selected_rows.length > 0) {
-					table.button(0).enable();
+					table.button('.create').enable();
 				}
 				else {
-					table.button(0).disable();
+					table.button('.create').disable();
 				}
 			});
 
@@ -334,10 +376,10 @@
 						}
 
 						if (selected_rows.length > 0) {
-							table.button(0).enable();
+							table.button('.create').enable();
 						}
 						else {
-							table.button(0).disable();
+							table.button('.create').disable();
 						}
 
 						table.row($('.datatable tbody tr#' + shipment_id)).deselect();
