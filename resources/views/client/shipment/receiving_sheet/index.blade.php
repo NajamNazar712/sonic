@@ -225,10 +225,6 @@
 
 								id = parseInt(row.id());
 
-								console.log(row.id());
-
-								console.log(selected_rows);
-
 								var index = $.inArray(id, selected_rows);
 
 								if (index === -1) {
