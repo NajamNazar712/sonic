@@ -1078,7 +1078,7 @@ class AdminReportsController extends Controller
         $to_date = $request->to_date;
         $months_array = array();
         $months_array = $this->get_months($from_date,$to_date);
-        unset($months_array[0]);
+//        unset($months_array[0]);
 
 
         $details = array();
