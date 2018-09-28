@@ -156,7 +156,7 @@ class Permission
             'finance.make_payments.returned_shipments' => 59,
             'finance.make_payments.adjusted_shipments' => 59,
             'finance.make_payments.shipment_details' => 59,
-            'finance.make_payments.shipment_list' => 60,
+            'finance.make_payments.shipment_list' => 59,
             'finance.make_payments.verify' => 60,
             'finance.make_payments.export_bank_order' => 60,
             'finance.make_payments.store' => 60,
@@ -194,7 +194,6 @@ class Permission
             'reports.customer_sales.download' => 74,
             'reports.overall_sales.index' => 75,
             'reports.overall_sales.list' => 75,
-
 
             'packaging.index' => 76,
             'packaging.list' => 76,

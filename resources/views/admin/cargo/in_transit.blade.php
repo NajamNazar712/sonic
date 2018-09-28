@@ -203,7 +203,7 @@
 
 														<div class="col">
 															<div class="form-group">
-																<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
+																<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-minlength="6" data-msg-minlength="Seal Number needs to be at-least 6 numbers" data-rule-remote="{{ route('admin.cargo.create.seal_number', ['id' => 0]) }}" data-msg-remote="Seal Number must be unique">
 															</div>
 														</div>
 
@@ -988,6 +988,12 @@
 				}
 				@if (session('role_id') == 1 || in_array(28, session('permissions')))
 					else if ($(this).hasClass('add_forwarding_details')) {
+						var link = $('#add_forwarding_details form .seal_number').attr('data-rule-remote');
+
+						link = link.substring(0, link.indexOf('=')) + '=' + cargo_consignment_id;
+
+						$('#add_forwarding_details form .seal_number').attr('data-rule-remote', link);
+
 						$.ajax({
 							url: '{!! route('admin.cargo.in_transit.forwarding_details') !!}',
 							method: 'POST',

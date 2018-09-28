@@ -869,6 +869,9 @@ class AdminReportsController extends Controller
                 if($shippers->exists()){
                     $shippers = $shippers->get();
                 }
+                else {
+                    $shippers = array();
+                }
             }
 
             if (count($shippers) > 0) {
