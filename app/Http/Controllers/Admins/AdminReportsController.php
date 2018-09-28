@@ -829,13 +829,13 @@ class AdminReportsController extends Controller
             if($hub != null){
                 $city = City::where('id',$hub)->select('id','name')->get();
             }else{
-                $city = City::where('hub',1)->get();
+                $city = City::where('hub',1)->select('id','name')->get();
             }
         }else{
             if($hub != null){
                 $city = City::where('id',$hub)->select('id','name')->get();
             }else{
-                $city = City::whereIn('id',session('hubs'))->get();
+                $city = City::whereIn('id',session('hubs'))->select('id','name')->get();
             }
         }
 
@@ -850,11 +850,12 @@ class AdminReportsController extends Controller
         foreach ($months_array as $month){
             $details['months'][] = $month;
         }
+        $hubs = array();
+        $users = array();
         foreach ($city as $c) {
-            $hubs = array();
-            $users = array();
+//            $hubid = $c->id;
             $details['hubs'][$c->id] = $c->name;
-            if ($shipper_filter != null) {
+            if ($shipper_filter != '') {
                 $shippers = User::where('id', $shipper_filter)->whereHas('city', function ($query) use ($c) {
                     $query->where('hub_id', '=', $c->id);
                 });
@@ -867,11 +868,9 @@ class AdminReportsController extends Controller
                 });
                 if($shippers->exists()){
                     $shippers = $shippers->get();
-                }else{
-                    $shippers = array();
                 }
             }
-//            var_dump($shippers);exit();
+            
             if (count($shippers) > 0) {
                 foreach ($shippers as $key => $s) {
                     $details['shipper'][$c->id][$s->id] = $s->name;
@@ -903,7 +902,9 @@ class AdminReportsController extends Controller
                     }
                 }
             }
+
         }
+
 
         //echo "<pre>";print_r($details);echo "</pre>";die();
         $spreadsheet = new Spreadsheet();
