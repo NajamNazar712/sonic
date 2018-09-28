@@ -83,8 +83,6 @@
     </div>
 
 
-    </div>
-
 @endsection
 
 @section('css')
@@ -346,7 +344,7 @@
                     }
                     if(count > 0) {
                         if (errors == 0) {
-                            $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+
                             swal({
                                 title: 'Are You Sure?',
                                 text: 'Select Yes to create the Delivery Note!',
@@ -370,6 +368,7 @@
                                 dangerMode: true
                             }).then(function (confirm) {
                                 if(confirm){
+                                    $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
                                     $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
                                     $('#create_delivery_note_form input#selected_rider_id').val(rider);
                                     $('#create_delivery_note_form input#selected_route_id').val(route);
