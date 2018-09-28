@@ -13,6 +13,8 @@ use App\Http\Models\Notification;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
+use Auth;
+
 class AdminNotificationsController extends Controller
 {
     public function __construct() {
