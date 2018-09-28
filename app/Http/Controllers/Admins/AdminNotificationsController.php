@@ -13,6 +13,8 @@ use App\Http\Models\Notification;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
 
+use Auth;
+
 class AdminNotificationsController extends Controller
 {
     public function __construct() {
@@ -36,9 +38,6 @@ class AdminNotificationsController extends Controller
                 return $notification->type_id;
             },
         ])
-        ->editColumn('updated_at', function($notifications) {
-            return Carbon::parse($notifications->updated_at)->format('d/m/Y H:i A');
-        })
         ->editColumn('status', function ($notification) {
             return (($notification->status) ? 'Enabled' : 'Disabled');
         })
@@ -53,11 +52,11 @@ class AdminNotificationsController extends Controller
                   <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            if (session('role_id') == 1 || in_array(102, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(101, session('permissions'))) {
                 $dropdown .= $edit_button;
             }
 
-            if (session('role_id') == 1 || in_array(103, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(102, session('permissions'))) {
                 if ($notification->status) {
                     $dropdown .= $disable_button;
                 }
@@ -73,7 +72,7 @@ class AdminNotificationsController extends Controller
 
             return $dropdown;
         })
-        ->filterColumn('status', function($query, $keyword) {
+        ->filterColumn('notifications.status', function($query, $keyword) {
             $keyword = strtolower($keyword);
 
             if (strpos('enabled', $keyword) !== FALSE) {
@@ -118,6 +117,7 @@ class AdminNotificationsController extends Controller
 
         if ($notification) {
             $notification->status = $request->status;
+            $notification->updated_by = Auth::id();
 
             $notification->save();
 
@@ -209,6 +209,9 @@ class AdminNotificationsController extends Controller
         else if ($id == 21) {
              $details['fields'] = ['company_name', 'service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_address', 'consignee_city', 'order_id', 'amount', 'payment_mode', 'tracking_number'];
         }
+        else if ($id == 22) {
+             $details['fields'] = ['company_name', 'person_of_contact', 'phone_number', 'address', 'city'];
+        }
 
         return $details;
     }
@@ -222,6 +225,7 @@ class AdminNotificationsController extends Controller
             }
 
             $notification->body = $request->get('body');
+            $notification->updated_by = Auth::id();
 
             $notification->save();
 

@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Book a Shipment')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -9,7 +11,7 @@
 				<h1 class="mb-1">
 					Book a Shipment
 					<span id="selected_service_type_name">{{ (Session::has('service_type_name')) ? ('(' . Session::get('service_type_name') . ')') : '' }}</span>
-					<button type="button" class="btn btn-primary float-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
+					<button type="button" class="btn btn-primary d-block mt-1 ml-auto d-sm-block mt-sm-1 ml-sm-auto mt-md-0 float-md-right float-lg-right" data-toggle="modal" data-target="#select_service_type">Change Service Type</button>
 				</h1>
 
 				<div class="card">
@@ -23,7 +25,7 @@
 								<input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ Session::get('service_type_id') }}">
 
 								<div class="row">
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Shipper Information</h4>
 
 										<div class="form-group">
@@ -46,11 +48,11 @@
 
 										<div id="new_pickup_address" class="d-none">
 											<div class="form-group">
-												<textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required"></textarea>
+												<textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
 											</div>
 
 											<div class="form-group">
-												<input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required">
+												<input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters">
 											</div>
 
 											<div class="form-group">
@@ -76,7 +78,7 @@
 										</div>
 									</div>
 
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Consignee Information</h4>
 
 										<div class="form-group">
@@ -88,11 +90,11 @@
 										</div>
 
 										<div class="form-group">
-											<input type="text" name="consignee_name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required">
+											<input type="text" name="consignee_name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" data-rule-maxlength="100" data-msg-maxlength="Name can be maximum 100 characters">
 										</div>
 
 										<div class="form-group">
-											<textarea name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="250" data-msg-maxlength="Address can not be maximum 250 characters"></textarea>
+											<textarea name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
 										</div>
 
 										<div class="form-group">
@@ -104,15 +106,15 @@
 										</div>
 
 										<div class="form-group">
-											<input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address">
+											<input type="email" name="consignee_email_address" class="form-control" placeholder="Email Address" data-rule-maxlength="100" data-msg-maxlength="Email Address can be maximum 100 characters">
 										</div>
 									</div>
 
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom_middle">
 										<h4 class="form-section mb-2 text-center">Order Information</h4>
 
 										<div class="form-group">
-											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique">
+											<input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
 										</div>
 
 										<div id="regular">
@@ -125,11 +127,16 @@
 											</div>
 
 											<div class="form-group">
-												<textarea name="item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="250" data-msg-maxlength="Item Description can not be maximum 250 characters"></textarea>
+												<textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
 											</div>
 
 											<div class="form-group input-group">
 												<input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
+											</div>
+
+											<div class="form-group text-center p-1 border border-light rounded">
+												<label class="d-block">Insurance</label>
+												<input type="checkbox" name="insurance" class="switch hidden insurance">
 											</div>
 
 											<div class="form-group input-group d-none">
@@ -137,12 +144,7 @@
 													<span class="input-group-text">Rs</span>
 												</div>
 
-												<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Price*" data-rule-required="true" data-msg-required="Price is required">
-											</div>
-
-											<div class="form-group text-center p-1 border border-light rounded">
-												<label class="d-block">Insurance</label>
-												<input type="checkbox" name="insurance" class="switch hidden insurance">
+												<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Product Value*" data-rule-required="true" data-msg-required="Product Value is required">
 											</div>
 										</div>
 
@@ -159,7 +161,7 @@
 												</div>
 
 												<div class="form-group">
-													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="250" data-msg-maxlength="Item Description can not be maximum 250 characters"></textarea>
+													<textarea name="replacement_item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
 												</div>
 
 												<div class="form-group input-group">
@@ -187,7 +189,7 @@
 															</div>
 
 															<div class="form-group">
-																<textarea name="item_description" class="form-control" placeholder="Item Description" data-rule-maxlength="250" data-msg-maxlength="Item Description can not be maximum 250 characters"></textarea>
+																<textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="190" data-msg-maxlength="Item Description can be maximum 190 characters"></textarea>
 															</div>
 
 															<div class="form-group input-group">
@@ -199,7 +201,7 @@
 																	<span class="input-group-text">Rs</span>
 																</div>
 
-																<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Price*" data-rule-required="true" data-msg-required="Price is required">
+																<input type="text" name="item_price" class="form-control rounded-right price" placeholder="Product Value*" data-rule-required="true" data-msg-required="Product Value is required">
 															</div>
 
 															<div class="form-group text-center p-1 border border-light rounded">
@@ -220,7 +222,7 @@
 											</div>
 
 											<div class="form-group">
-												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Price: Rs <span>0</span></p>
+												<p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
 											</div>
 
 											<div class="form-group">
@@ -242,14 +244,14 @@
 										</div>
 
 										<div class="form-group">
-											<textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="250" data-msg-maxlength="Special Instructions can not be maximum 250 characters"></textarea>
+											<textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters"></textarea>
 										</div>
 									</div>
 
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Shipping Information</h4>
 
-										<div class="form-group input-group">
+										<div class="form-group input-group mb-0">
 											<input type="text" name="estimated_weight" class="form-control weight" placeholder="Estimated Weight*" data-rule-required="true" data-msg-required="Estimated Weight is required">
 
 											<div class="input-group-append">
@@ -257,11 +259,10 @@
 											</div>
 										</div>
 
+										<h6 class="form-text mb-1 text-justify text-muted text-italic">*Charges will be subjected to the Final Weight measured at the time of Shipment Arrival.</h6>
+
 										<div class="form-group">
 											<select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Mode of Shipping is required">
-												@foreach($shipping_modes as $shipping_mode)
-													<option value="{{ $shipping_mode->id }}">{{ $shipping_mode->mode }}</option>
-												@endforeach
 											</select>
 										</div>
 
@@ -276,7 +277,7 @@
 										</div>
 									</div>
 
-									<div class="col" style="max-width: 20%;">
+									<div class="col col_custom">
 										<h4 class="form-section mb-2 text-center">Payment Information</h4>
 
 										<div class="form-group input-group">
@@ -284,7 +285,7 @@
 												<span class="input-group-text">Rs</span>
 											</div>
 
-											<input type="text" name="amount" class="form-control rounded-right amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">
+											<input type="text" name="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
 										</div>
 
 										<div class="form-group">
@@ -351,6 +352,7 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
 @endsection
 
@@ -365,6 +367,7 @@
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -373,8 +376,9 @@
 					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
 					method: 'POST',
 					data: {
+						'_token': '{{ csrf_token() }}',
 						'ids[]': '{{ session('print') }}',
-						'_token': '{{ csrf_token() }}'
+						'twice': true
 					}
 				})
 				.done(function(data) {
@@ -460,6 +464,69 @@
 				});
 			}
 
+			function shipping_modes() {
+				if ($('#pickup_address').val() == 0) {
+					var pickup_city_id = $('#new_pickup_city').val();
+				}
+				else {
+					var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+				}
+
+				consignee_city_id = $('#consignee_city').val();
+
+				if (consignee_city_id) {
+					$.ajax({
+						url: '{!! route('cod.shipment.book.shipping_modes') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'service_type_id': service_type,
+							'pickup_city_id': pickup_city_id,
+							'consignee_city_id': consignee_city_id
+						}
+					})
+					.done(function(data) {
+						$('#shipping_mode').html('').select2('destroy');
+
+						if (data.status == 0) {
+							$.each(data.shipping_modes, function (index, shipping_mode) {
+								$('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
+							});
+
+							present = true;
+						}
+						else {
+							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+							present = false;
+						}
+
+						$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
+							width: '100%',
+							placeholder: 'Mode of Shipping*'
+						}).bind('change', function() {
+							if ($(this).hasClass('danger')) {
+								$(this).valid();
+							}
+
+							if (this.value == 4) {
+								$('#shipping_same-day').removeClass('d-none');
+							}
+							else {
+								$('#shipping_same-day').addClass('d-none');
+							}
+						});
+
+						if (present) {
+							$('#shipping_mode').prop('disabled', false);
+						}
+						else {
+							$('#shipping_mode').prop('disabled', true);
+						}
+					});
+				}
+			}
+
 			$('#select_service_type').modal({
 				backdrop: 'static',
 				keyboard: false,
@@ -520,6 +587,8 @@
 					$('#selected_service_type_name').html('(' + selected.html() + ')');
 
 					$('#select_service_type').modal('hide');
+
+					shipping_modes();
 				}
 				else {
 					$('#select_service_type form #service_type-error').removeClass('d-none');
@@ -531,6 +600,8 @@
 				placeholder: 'Pickup Address*'
 			}).bind('change', function() {
 				$(this).valid();
+
+				shipping_modes();
 
 				if (this.value == 0) {
 					$('#new_pickup_address').removeClass('d-none');
@@ -551,6 +622,8 @@
 			}).bind('change', function() {
 				$(this).valid();
 
+				shipping_modes();
+
 				var pickup_city = $(this).val();
 				var consignee_city = $('#consignee_city').val();
 
@@ -564,6 +637,8 @@
 				placeholder: 'City*'
 			}).bind('change', function() {
 				$(this).valid();
+
+				shipping_modes();
 
 				if ($('#pickup_address').val() == 0) {
 					var pickup_city = $('#new_pickup_city').val();
@@ -585,7 +660,7 @@
 			});
 
 			$('#regular .insurance').checkboxpicker().bind('change', function() {
-				var parent = $(this).parent('.form-group').prev('.form-group');
+				var parent = $(this).parent('.form-group').next('.form-group');
 
 				if (this.checked) {
 					parent.removeClass('d-none');
@@ -666,6 +741,8 @@
 						}
 					});
 
+					$('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
+
 					$(this).find('.price').inputmask({
 						'alias': 'integer',
 						'allowMinus': false,
@@ -724,7 +801,8 @@
 
 			$('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
 				width: '100%',
-				placeholder: 'Mode of Shipping*'
+				placeholder: 'Mode of Shipping*',
+				disabled: true,
 			}).bind('change', function() {
 				if ($(this).hasClass('danger')) {
 					$(this).valid();
@@ -798,6 +876,8 @@
 					try_and_buy_total_quantity();
 				}
 			});
+
+			$('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
 
 			$('.price').inputmask({
 				'alias': 'integer',

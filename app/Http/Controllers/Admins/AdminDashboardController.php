@@ -19,10 +19,13 @@ use App\Http\Models\City;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
+use App\Http\Models\Product;
 use App\Http\Models\Rider;
 use App\Http\Models\RiderCategory;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentPaymentStatus;
+use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\Shipper\User;
@@ -53,15 +56,24 @@ class AdminDashboardController extends Controller
         $stats = array();
         $graph = array();
         $graph_dates = array();
-
-        $stats['booked'] = Shipment::all();
-        $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4]);
-        $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
-        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46]);
-        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19]);
+        $today = Carbon::now()->endOfDay();
+        $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
+        $stats['total'] = Shipment::whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['booked'] = Shipment::where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->whereBetween('created_at',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
-            $stats['booked'] = Shipment::where(function($query) {
+            $stats['total'] = Shipment::where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });
+            $stats['booked'] = $stats['booked']->where(function($query) {
                 $query->whereHas('pickup_address.city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 })->orWhereHas('consignee_city', function ($sub_query) {
@@ -102,6 +114,7 @@ class AdminDashboardController extends Controller
             });
         }
 
+        $stats['total'] = $stats['total']->count();
         $stats['booked'] = $stats['booked']->count();
         $stats['received'] = $stats['received']->count();
         $stats['delivered'] = $stats['delivered']->count();
@@ -115,7 +128,7 @@ class AdminDashboardController extends Controller
             $comparison_date = $date->toDateString();
             $graph['dates'][] = $date->format('d M');
 
-            $booked = Shipment::whereDate('created_at', $comparison_date);
+            $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
             $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[2,3,4]);
             $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
             $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19]);
@@ -171,8 +184,12 @@ class AdminDashboardController extends Controller
         }
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $service_type = BookingType::all();
+        $products = Product::select('id','product_name')->get();
+        $payment_status = ShipmentPaymentStatus::all();
         // return $cities;
-        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers]);
+        return view('admin.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'shippers'=>$shippers,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status]);
     }
     public function statistics_search(Request $request){
 //        return $request;
@@ -194,7 +211,7 @@ class AdminDashboardController extends Controller
                     $comparison_date = $this_date;
                     $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                    $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination]);
+                    $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination, 'shipper_status_id' => 1]);
                     $received = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
                     $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
                     $pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
@@ -253,7 +270,7 @@ class AdminDashboardController extends Controller
                     $comparison_date = $this_date;
                     $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                    $booked = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper);
+                    $booked = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id',1);
                     $received = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [2, 3, 4]);
                     $delivered = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
                     $pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
@@ -312,7 +329,7 @@ class AdminDashboardController extends Controller
                     $comparison_date = $this_date;
                     $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                    $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination]);
+                    $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id',1);
                     $received = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
                     $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
                     $pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
@@ -371,7 +388,7 @@ class AdminDashboardController extends Controller
                     $comparison_date = $this_date;
                     $graph['dates'][] = Carbon::parse($this_date)->format('d M');
 
-                    $booked = Shipment::whereDate('created_at', $comparison_date);
+                    $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
                     $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [2, 3, 4]);
                     $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
                     $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
@@ -433,7 +450,6 @@ class AdminDashboardController extends Controller
     public function orders_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('user_bank_infos as ubi','ubi.user_id','=','u.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
@@ -442,13 +458,14 @@ class AdminDashboardController extends Controller
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftjoin('shipment_items as si','si.shipment_id','=','shipments.id')
             ->leftjoin('products as p','p.id','=','si.product_type_id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.order_id','ubi.account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id'])
-            //->where('shipments.user_id',Auth::id())
-            ->orderBy('shipments.id','desc')
+            ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status'])
             ->groupBy('shipments.id');
 
         if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+            $shipments = $shipments->where(function ($query) {
+              $query->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+            });
         }
 
         return Datatables::of($shipments)
@@ -456,28 +473,76 @@ class AdminDashboardController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->editColumn('phone1',function ($shipments){
+			->editColumn('account_no', function ($shipment) {
+                return str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('u.id', function ($query, $keyword) {
+                return $query->where('u.id', '=', $keyword);
+            })
+            ->editColumn('phone',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
             })
-            ->editColumn('booking_date', function ($shipments) {
-                return $shipments->booking_date ? with(new Carbon($shipments->booking_date))->format('d/m/Y h:i:s A') : '';
-
-            })
-            ->addColumn('action',function ($shipments){
-                $drop = " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>";
-                if($shipments->shipper_status_id > 1) {
-                    $drop .= "<a href='javascript:void(0);' class='dropdown-item view_charges'><i class='ft-eye primary'></i> View Charges</a>";
-                }else{
-                    $drop .= "<a href='javascript:void(0);' class='dropdown-item '><i class='ft-plus-circle primary'></i> No Action</a>";
+            ->filterColumn('phone',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('shipments.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('shipments.consignee_phone_number_2', 'like', '%'.$keyword.'%');
                 }
-               
-                $drop .= "</div></span>";
-                if($shipments->shipper_status_id != 17){
 
-                    return $drop;
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('service_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('bt.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('payment_status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sps.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('product',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('p.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn('action',function ($shipments) {
+                if ($shipments->shipper_status_id != 17 && $shipments->shipper_status_id > 1) {
+                    $dropdown = '
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                            <div class="dropdown-menu dropdown-menu-sm">
+                                <button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div></button>
+                            </div>
+                        </div>
+                    ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
                 }
             })
             ->make(true);
@@ -492,22 +557,27 @@ class AdminDashboardController extends Controller
         return view('admin.pending_booked_orders');
     }
     public function pendingAccountsList(){
-        return view('admin.accounts.pending_accounts_list');
+        $products = Product::select('id','product_name')->get();
+        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products]);
     }
     public function activeAccountsList(){
-        return view('admin.accounts.active_accounts_list');
+        $products = Product::select('id','product_name')->get();
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products]);
 
     }
     public function blockAccountsList(){
         return view('admin.accounts.block_accounts_list');
     }
     public function UserStatus(Request $request){
+//        return $request;
         $id = $request->shid; //shipper id
         $status = $request->status;
-        if($status == 'active'){
+//        return $request;
+        if($status == 'activate'){
             $user = User::find($id);
             if($user->status == 2){
-               $action = User::where('id',$id)->update(['status'=>3]);
+                $now = Carbon::now();
+               $action = User::where('id',$id)->update(['status'=>3,'account_activated_by'=>Auth::id(),'activated_at'=>$now]);
                if($action == 1){
                     NotificationsController::send(1, $id);
 
@@ -520,20 +590,10 @@ class AdminDashboardController extends Controller
             }
         }
 
-//        if($status == 'unblock'){
-//            $user = User::where('id',$id)->where('blacklist',1)->update(['blacklist'=>0]);
-//            $active = User::find($id)->first()->active;
-//            if($user == 1){
-//                if($active == 1){
-//                    return redirect()->route('admin.accounts.active');
-//                }elseif($active == 0){
-//                    return redirect()->route('admin.accounts.pending');
-//                }
-//            }
-//        }
     }
     public function UserStatusBlock(Request $request){
         $user_id = $request->id;
+        $reason = $request->reason;
         $status = $request->status;
         $user = User::where('id',$user_id);
         if($user->exists()){
@@ -541,6 +601,7 @@ class AdminDashboardController extends Controller
             if($status == 'block'){
                 if($user->blacklist == 0){
                     $user->blacklist = 1;
+                    $user->blacklist_reason = $reason;
                     $user->save();
                     return response()->json(['status'=>1,'success'=>"User added to the blacklist!"]);
                 }else{
@@ -663,7 +724,7 @@ class AdminDashboardController extends Controller
 
     }
     public function editRates(Request $request, $id){
-//        return $request;
+
 
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
@@ -2143,7 +2204,7 @@ class AdminDashboardController extends Controller
             //dd($weightAlready);
         }
         if($request->authorize == 1){
-            User::where('id',$id)->update(['status'=>2]);
+            User::where('id',$id)->update(['status'=>2,'rates_authorized_by'=>Auth::id()]);
             return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
         }
 
@@ -3161,19 +3222,29 @@ class AdminDashboardController extends Controller
 
             }
             }
-            User::where('id',$id)->update(['status'=>1]);
+            User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
 
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
     public function activeAccountListAjax(){
        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->leftjoin('products as p','p.id','=','users.product_id')
+           ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
+           ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
+           ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name','rab.name as added_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
 
         return Datatables::of($users)
+            ->editColumn('id', function ($user) {
+                return str_pad($user->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('users.id', function ($query, $keyword) {
+                return $query->where('users.id', '=', $keyword);
+            })
             ->editColumn('status',function ($users){
                 if($users->status == 3){
                     return "Enable";
@@ -3181,47 +3252,56 @@ class AdminDashboardController extends Controller
                     return "Disable";
                 }
             })
-            ->addColumn("action", function ($result) {
-                $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                        aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+            ->filterColumn('status', function($query, $keyword) {
+                if ($keyword == 3 || $keyword == 4) {
+                    $query->where('users.status', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('products',function ($query,$keyword){
 
-                        <div class='dropdown-menu open-left arrow'>
-                            <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                            <a href='javascript:void(0);' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
-                ";
+                if ($keyword != '') {
+                    $query->where('p.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn("action", function ($result) {
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
+
+                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
 
                 if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
-                    $dropdown .= "
-                            <a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>
-                    ";
+                    $dropdown .= '<button onclick="location.href=\'' . route('admin.edit.rates', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                 }
                 if ($result->blacklist == 0 && (session('role_id') == 1 || in_array(14, session('permissions')))) {
-                    $dropdown .= "
-                            <a href='javascript:void(0);' class='dropdown-item blacklist' rel='block'><i class='ft-user-x primary'></i> Block</a>
-                    ";
+                    $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
                 }
 
                 if (session('role_id') == 1 || in_array(13, session('permissions'))) {
                     if ($result->status == 3) {
-                        $dropdown .="
-                                <a href='javascript:void(0);' class='dropdown-item userdisable'><i class='ft-user-minus primary'></i> Disable</a>
-                        ";
+                        $dropdown .= '<button type="button" class="dropdown-item userdisable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-minus"></i></div><div class="col-9 offset-1">Disable</div></button>';
 
                     }
                     else {
-                        $dropdown .="
-                                <a href='javascript:void(0);' class='dropdown-item userenable'><i class='ft-user-plus primary'></i> Enable</a>
-                        ";
+                        $dropdown .= '<button type="button" class="dropdown-item userenable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus"></i></div><div class="col-9 offset-1">Enable</div></button>';
 
                     }
                 }
 
-                $dropdown .="
-                        </div>
-                    </span>
-                ";
+                $dropdown .= '
+                    </div>
+                  </div>
+                ';
 
                 return $dropdown;
             })
@@ -3232,15 +3312,21 @@ class AdminDashboardController extends Controller
 
     public function pendingAccountListAjax(){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','users.blacklist'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->leftjoin('products','products.id','=','users.product_id')
+            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
+            ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
 
         return Datatables::of($users)
-            ->editColumn('created_at', function ($users) {
-                return $users->created_at ? with(new Carbon($users->created_at))->format('d/m/Y H:i:s A') : '';
+            ->editColumn('id', function ($user) {
+                return str_pad($user->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('users.id', function ($query, $keyword) {
+                return $query->where('users.id', '=', $keyword);
             })
             ->editColumn('status', function ($users) {
                 return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
@@ -3248,59 +3334,55 @@ class AdminDashboardController extends Controller
             ->filterColumn('status', function($query, $keyword) {
                 $keyword = strtolower($keyword);
 
-                if (strpos('request received', $keyword) !== FALSE) {
-                    $query->where('users.status', '=', 0);
+                if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
+                    $query->where('users.status', '=', $keyword);
                 }
-                else if (strpos('rates added', $keyword) !== FALSE) {
-                    $query->where('users.status', '=', 1);
+                else {
+                    $query->whereRaw('false');
                 }
-                else if (strpos('pending for activation', $keyword) !== FALSE) {
-                    $query->where('users.status', '=', 2);
+            })
+            ->filterColumn('products',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('products.id',$keyword);
                 }
                 else {
                     $query->whereRaw('false');
                 }
             })
             ->addColumn("action", function ($result) {
-                $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                        <div class='dropdown-menu open-left arrow'>
-                          <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                          <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
-                ";
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
+
+                $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
 
                 if($result->status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
-                    $dropdown .= "
-                            <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='active' data-toggle='modal' data-target='#ConfirmModal'><i class='ft-plus-circle primary'></i> Activate Account</a>
-                    ";
+                    $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
                 }
 
                 if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                    $dropdown .= "
-                            <a href='".route('admin.edit.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Edit Rates</a>
-                    ";
+                    $dropdown .= '<button onclick="location.href=\'' . route('admin.edit.rates', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                 }
                 else {
                     if (session('role_id') == 1 || in_array(6, session('permissions'))) {
-                        $dropdown .= "
-                            <a href='".route('admin.add.rates',['id'=> $result->id])."' class='dropdown-item'><i class='ft-plus-circle primary'></i> Add Rates</a>
-                        ";
+                        $dropdown .= '<button onclick="location.href=\'' . route('admin.add.rates', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
                     }
                 }
 
                 if($result->blacklist == 0 && (session('role_id') == 1 || in_array(10, session('permissions')))) {
-                    $dropdown .= "
-                            <a href='javascript:void(0);' class='dropdown-item blacklist' rel='block'><i class='ft-user-x primary'></i> Block</a>
-                    ";
+                    $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
                 }
 
-                $dropdown .= "
-                        </div>
-                    </span>
-                ";
+                $dropdown .= '
+                    </div>
+                  </div>
+                ';
 
                 return $dropdown;
             })
@@ -3309,33 +3391,38 @@ class AdminDashboardController extends Controller
     }
     public function blockAccountListAjax(){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email'])->where('blacklist',1);
+            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
 
-        return Datatables::of($users)->addColumn("action", function ($result) {
-            $dropdown = "
-                <span class='dropdown'>
-                    <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                            aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
+        return Datatables::of($users)
+            ->editColumn('id', function ($user) {
+                return str_pad($user->id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('users.id', function ($query, $keyword) {
+                return $query->where('users.id', '=', $keyword);
+            })
+            ->addColumn("action", function ($result) {
+            $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
 
-                    <div class='dropdown-menu open-left arrow'>
-                      <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#BankInfoModal'><i class='ft-plus-circle primary'></i> View Bank Info</a>
-                      <a href='#' class='dropdown-item' data-target-id='{$result->id}' data-toggle='modal' data-target='#ShippingInfoModal'><i class='ft-plus-circle primary'></i> View Shipping Info</a>
-            ";
+            $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
+
+            $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
 
             if (session('role_id') == 1 || in_array(16, session('permissions'))) {
-                $dropdown .= "
-                        <a href='javascript:void(0);' class='dropdown-item blacklist' rel='unblock'><i class='ft-user-plus primary'></i> Unblock</a>
-                ";
+                $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="unblock"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus "></i></div><div class="col-9 offset-1">Unblock</div></button>';
             }
 
-            $dropdown .= "
-                    </div>
-                </span>
-            ";
+            $dropdown .= '
+                </div>
+              </div>
+            ';
 
             return $dropdown;
         })
@@ -3376,36 +3463,29 @@ class AdminDashboardController extends Controller
         })
         ->addColumn("action", function ($result) {
             if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
-                $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                        <div class='dropdown-menu open-left arrow'>
-                ";
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
 
                 if (session('role_id') == 1 || in_array(90, session('permissions'))) {
-                    $dropdown .= "
-                            <a href='#' class='dropdown-item' data-target-id='{$result->city_id}' rel='editcity' data-toggle='modal' data-target='#editCity'><i class='ft-plus-circle primary'></i> Update City Status</a>
-                    ";
+                    $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->city_id . ' rel="editcity" data-toggle="modal" data-target="#editCity"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update City Status</div></button>';
                 }
 
                 if (session('role_id') == 1 || in_array(91, session('permissions'))) {
                     if ($result->status == 1) {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityInactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Deactivate City</a>
-                        ";
+                        $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityInactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate City</div></button>';
                     }
                     else {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$result->city_id}' rel='cityactive' hub='{$result->isHub}' ><i class='ft-plus-circle primary'></i> Activate City</a>
-                        ";
+                        $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->city_id . ' rel="cityactive" hub=' . $result->isHub . '><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate City</div></button>';
                     }
                 }
 
-                $dropdown .= "
-                        </div>
-                    </span>
-                ";
+                $dropdown .= '
+                    </div>
+                  </div>
+                ';
 
                 return $dropdown;
             }
@@ -3616,43 +3696,33 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('created_at', function ($routes) {
-                return $routes->created_at ? with(new Carbon($routes->created_at))->format('d/m/Y H:i:s A') : '';
-            })
             ->addColumn("action", function ($result) {
                 if (session('role_id') == 1 || count(array_intersect([94, 95], session('permissions'))) !== 0) {
-                $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                        <div class='dropdown-menu open-left arrow'>
-                ";
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
 
-                if (session('role_id') == 1 || in_array(94, session('permissions'))) {
-                    $dropdown .= "
-                            <a href='#' class='dropdown-item' data-target-id='{$result->id}' rel='editroute' data-toggle='modal' data-target='#editRoute'><i class='ft-plus-circle primary'></i> Update Route</a>
-                    ";
-                }
-
-                if (session('role_id') == 1 || in_array(95, session('permissions'))) {
-                    if ($result->status == 1) {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeInactive'  data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Deactivate Route</a>
-                        ";
+                    if (session('role_id') == 1 || in_array(94, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $result->id . ' rel="editroute" data-toggle="modal" data-target="#editRoute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Route</div></button>';
                     }
-                    else {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$result->id}' rel='routeActive' data-toggle='modal' data-target='#ConfirmModalRoute'><i class='ft-plus-circle primary'></i> Activate Route</a>
-                        ";
-                    }
-                }
 
-                $dropdown .= "
+                    if (session('role_id') == 1 || in_array(95, session('permissions'))) {
+                        if ($result->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Route</div></button>';
+                        }
+                        else {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $result->id . ' rel="routeActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Route</div></button>';
+                        }
+                    }
+
+                    $dropdown .= '
                         </div>
-                    </span>
-                ";
+                      </div>
+                    ';
 
-                return $dropdown;
+                    return $dropdown;
             }
             else {
                 return '';
@@ -3778,49 +3848,39 @@ class AdminDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->editColumn('created_at', function ($rider) {
-                return $rider->created_at ? with(new Carbon($rider->created_at))->format('d/m/Y H:i:s A') : '';
-            })
             ->addColumn("action", function ($rider) {
                 if (session('role_id') == 1 || count(array_intersect([98, 99], session('permissions'))) !== 0) {
-                $dropdown = "
-                    <span class='dropdown'>
-                        <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                        <div class='dropdown-menu open-left arrow'>
-                ";
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
 
-                if (session('role_id') == 1 || in_array(98, session('permissions'))) {
-                    $dropdown .= "
-                            <a href='#' class='dropdown-item' data-target-id='{$rider->id}' rel='editRider' data-toggle='modal' data-target='#editRider'><i class='ft-plus-circle primary'></i> Update Rider</a>
-                    ";
-                }
-
-                if (session('role_id') == 1 || in_array(99, session('permissions'))) {
-                    if ($rider->status == 1) {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderInactive'  data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Deactivate Rider</a>
-                        ";
+                    if (session('role_id') == 1 || in_array(98, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item" data-target-id=' . $rider->id . ' rel="editRider" data-toggle="modal" data-target="#editRider"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Rider</div></button>';
                     }
-                    else {
-                        $dropdown .= "
-                            <a class='dropdown-item deactivate' data-target-id='{$rider->id}' rel='riderActive' data-toggle='modal' data-target='#ConfirmModalRider'><i class='ft-plus-circle primary'></i> Activate Rider</a>
-                        ";
-                    }
-                }
 
-                $dropdown .= "
+                    if (session('role_id') == 1 || in_array(99, session('permissions'))) {
+                        if ($rider->status == 1) {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderInactive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Deactivate Rider</div></button>';
+                        }
+                        else {
+                            $dropdown .= '<button type="button" class="dropdown-item deactivate" data-target-id=' . $rider->id . '  rel="riderActive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Rider</div></button>';
+                        }
+                    }
+
+                    $dropdown .= '
                         </div>
-                    </span>
-                ";
+                      </div>
+                    ';
 
-                return $dropdown;
-            }
-            else {
-                return '';
-            }
-        })
-        ->make(true);
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            })
+            ->make(true);
     }
     public function addRiderView(){
         $city = City::select(['id','name'])->where('status',1)->get();

@@ -6,11 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta name="description" content="Trax Logistics, Sonic Project">
     <meta name="keywords" content="Trax Logistics">
-    <meta name="author" content="Waqas">
+    <meta name="author" content="Trax IT">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Sonic Login</title>
-    <link rel="apple-touch-icon" href="{{asset('app-assets/images/ico/apple-icon-120.png')}}">
-    <link rel="shortcut icon" type="image/x-icon" href="{{asset('app-assets/images/ico/favicon.ico')}}">
+    <title>Login - Sonic | Trax</title>
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ asset('img/apple-touch-icon.png') }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ asset('img/favicon-32x32.png') }} ">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ asset('img/favicon-16x16.png') }}">
+    <link rel="shortcut icon" type="image/x-icon" href="{{  asset('img/favicon.ico') }}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans:300,300i,400,400i,600,600i,700,700i|Quicksand:300,400,500,700"
           rel="stylesheet">
     <link href="https://maxcdn.icons8.com/fonts/line-awesome/1.1/css/line-awesome.min.css"
@@ -31,6 +33,8 @@
     <!-- BEGIN Custom CSS-->
     <link rel="stylesheet" type="text/css" href="{{asset('assets/css/style.css')}}">
     <!-- END Custom CSS-->
+
+    <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}">
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded blank-page blank-page"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
@@ -40,33 +44,24 @@
         <div class="content-header row">
         </div>
         <div class="content-body">
-            <section class="flexbox-container">
+            <section class="flexbox-container" style="overflow: auto;">
                 <div class="col-12 d-flex align-items-center justify-content-center">
                     <div class="col-md-4 col-10 box-shadow-2 p-0">
                         <div class="card border-grey border-lighten-3 px-1 py-1 m-0">
                             <div class="card-header border-0">
                                 <div class="card-title text-center">
-                                    <img src="{{asset('app-assets/images/logo/logo-dark.png')}}" alt="branding logo">
+                                    <div class="row align-items-center">
+                                        <div class="col sonic_logo align-middle text-left">
+                                            <img src="{{asset('img/sonic_logo.png')}}" alt="Sonic" class="d-inline-block mx-auto w-75">
+                                        </div>
+
+                                        <div class="col trax_logo align-middle text-right">
+                                            <img src="{{asset('img/trax_logo.png')}}" alt="Trax" class="d-inline-block mx-auto w-75">
+                                        </div>
+                                    </div>
                                 </div>
-                                <!-- <h6 class="card-subtitle line-on-side text-muted text-center font-small-3 pt-2">
-                                  <span>Easily Using</span>
-                                </h6> -->
                             </div>
                             <div class="card-content">
-                                <!-- <div class="text-center">
-                                  <a href="#" class="btn btn-social-icon mr-1 mb-1 btn-outline-facebook">
-                                    <span class="la la-facebook"></span>
-                                  </a>
-                                  <a href="#" class="btn btn-social-icon mr-1 mb-1 btn-outline-twitter">
-                                    <span class="la la-twitter"></span>
-                                  </a>
-                                  <a href="#" class="btn btn-social-icon mr-1 mb-1 btn-outline-linkedin">
-                                    <span class="la la-linkedin font-medium-4"></span>
-                                  </a>
-                                  <a href="#" class="btn btn-social-icon mr-1 mb-1 btn-outline-github">
-                                    <span class="la la-github font-medium-4"></span>
-                                  </a>
-                                </div> -->
                                 <p class="card-subtitle line-on-side text-muted text-center font-small-3 mx-2 my-1">
                                     <span>Login Details</span>
                                 </p>
@@ -80,11 +75,6 @@
                                             <div class="form-control-position">
                                                 <i class="ft-user"></i>
                                             </div>
-                                            @if ($errors->has('email'))
-                                                <span class="invalid-feedback">
-                                            <strong>{{ $errors->first('email') }}</strong>
-                                            </span>
-                                            @endif
                                         </fieldset>
                                         <fieldset class="form-group position-relative has-icon-left">
                                             <input type="password" name="password" class="form-control {{ $errors->has('password') ? ' is-invalid' : '' }}" id="password" placeholder="Enter Password"

@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Add Rates')
+
 @section('content')
     <h1>Add Rates</h1>
 
@@ -23,7 +25,7 @@
                                         <h3 class="card-title lead success">Overnight</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a href="#" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" /></a>
+                                        <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox"  class="switchery on-main-switch" data-size="sm" /></a>
                                     </div>
                                 </div>
                             </div>
@@ -82,7 +84,7 @@
 
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm form-group">
-                                                            <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
+                                                            <input type="text" class="touchspin-color input-sm spkg" value="1" disabled data-bts-button-down-class="btn btn-success"
                                                                    data-bts-button-up-class="btn btn-success" name="on_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
                                                         </div>
                                                     </fieldset>
@@ -453,7 +455,7 @@
                                         <h3 class="card-title lead success">Overland</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="ol_main_switch" href="#" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm"/></a>
+                                        <a id="ol_main_switch" href="javascript:void(0);" class="pull-right"><input name="ol_main_switch" type="checkbox" id="" class="switchery ol-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
@@ -513,7 +515,7 @@
 
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm form-group">
-                                                            <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
+                                                            <input type="text" class="touchspin-color input-sm spkg" value="1" disabled data-bts-button-down-class="btn btn-success"
                                                                    data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[{{$index}}]" data-rule-required="true" data-msg-required="This field is required">
                                                         </div>
                                                     </fieldset>
@@ -881,7 +883,7 @@
                                         <h3 class="card-title lead success">Detain</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="detain_main_switch" href="#" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm"/></a>
+                                        <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
@@ -941,7 +943,7 @@
 
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm form-group">
-                                                            <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
+                                                            <input type="text" class="touchspin-color input-sm spkg" value="1" disabled data-bts-button-down-class="btn btn-success"
                                                                    data-bts-button-up-class="btn btn-success" name="detain_wa_spkg[{{$index}}]">
                                                         </div>
                                                     </fieldset>
@@ -1312,7 +1314,7 @@
                                         <h3 class="card-title lead success">Sameday</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="sameday_main_switch" href="#" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm"/></a>
+                                        <a id="sameday_main_switch" href="javascript:void(0);" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm"/></a>
                                     </div>
                                 </div>
 
@@ -1372,7 +1374,7 @@
 
                                                     <fieldset style="padding-top: 5px;">
                                                         <div class="input-group input-group-sm form-group">
-                                                            <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0" disabled data-bts-button-down-class="btn btn-success"
+                                                            <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="1" disabled data-bts-button-down-class="btn btn-success"
                                                                    data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg[{{$index}}]">
                                                         </div>
                                                     </fieldset>
@@ -1771,6 +1773,8 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $(".touchspin-color").trigger("touchspin.updatesettings", {min: 1});
+
             // var on_main_switch = document.querySelector('#on_main_switch');
             $('#on_main_switch').on('change',function(){
 
@@ -1819,6 +1823,7 @@
                 }
             });
         });
+
         $('.decimal').inputmask({
             'alias': 'decimal',
             'allowMinus': false,
@@ -1891,6 +1896,7 @@
 
 
         function masks() {
+
             $('.decimal').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -1931,17 +1937,20 @@
         var count = 3;
         $('body').on('click','#waddition_btn',function () {
 
-            let htmdiv = '<div class="row" id="on_weight_row'+count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_up['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_down['+count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa_switch['+count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa_spkg['+count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="on_wa_national_charges['+count+']"></fieldset></div><div class="col">\n' +
+            let htmdiv = '<div class="row" id="on_weight_row'+count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_up['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_down['+count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa_switch['+count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="1" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa_spkg['+count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="on_wa_national_charges['+count+']"></fieldset></div><div class="col">\n' +
                 '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-overnight').append(htmdiv);
             var switches = document.querySelector('.switchery.weightAdditionOvernight'+count);
             var switchery = new Switchery(switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 1,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
                 buttonup_txt: '<i class="ft-plus"></i>'
             });
+
             masks();
 
             switches.onchange = function () {
@@ -2117,6 +2126,8 @@
             var ol_weight_switches = document.querySelector('.switchery.weightAdditionOverland'+overland_count);
             var switchery = new Switchery(ol_weight_switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 0,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -2295,6 +2306,8 @@
             var detain_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+detain_count);
             var switchery = new Switchery(detain_weight_switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 0,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -2480,11 +2493,13 @@
         $('body').on('click','#sameday_weightadd',function () {
 
             let htmdiv1 = '<div class="row" id="sameday_weight_row'+sameday_count+'"><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_down['+sameday_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch['+sameday_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_wa_national_charges['+sameday_count+']"></fieldset></div><div class="col">\n' +
-                '<span id="sameday_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
+                '<span id="sameday_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 sameday_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-sameday').append(htmdiv1);
             var sameday_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+sameday_count);
             var switchery = new Switchery(sameday_weight_switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 0,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -2514,7 +2529,7 @@
         });
 
         //addMoreSlabs
-        $('body').on('click','#sameday_weight_close',function () {
+        $('body').on('click','.sameday_weight_close',function () {
             $(this).parent().parent().remove();
         });
         $('body').on('click','.sameday_row_delete',function () {

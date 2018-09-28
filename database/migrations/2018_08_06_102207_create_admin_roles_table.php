@@ -13,6 +13,8 @@ class CreateAdminRolesTable extends Migration
      */
     public function up()
     {
+        Schema::dropIfExists('admin_roles');
+
         Schema::create('admin_roles', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamps();

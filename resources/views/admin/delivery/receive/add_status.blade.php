@@ -1,5 +1,6 @@
 
 @extends('admin.layout.master')
+@section('title','Receive Deliveries')
 
 @section('content')
     <h1 class="mb-1">
@@ -22,7 +23,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Consignee</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
+                        <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Remarks</th>
@@ -36,14 +37,27 @@
                     </thead>
                 </table>
                 <div class="row justify-content-center">
-                    <div class="col-2">
+                    @if(!$delivery_note_status == 1)
+                    <div class="mr-1">
                         <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
                     </div>
+                    @endif
                     @if($delivery_note_status == 1)
-                        <div class="col-2">
+                        <div class="mr-1">
                             <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
                         </div>
+                        @else
+                        @if($undelivered_printed == 1)
+                        <div class="mr-1">
+                            <button id="printTempDNCC" type="button" class="btn btn-warning btn-block">Print Temporary DNCC</button>
+                        </div>
+                            @endif
                     @endif
+                        @if($shipment_update == 1)
+                    <div class="mr-1 ml-1">
+                        <button id="printUndeliveredDNCC" type="button" class="btn btn-warning btn-block">Print Undelivered Performa</button>
+                    </div>
+                        @endif
                 </div>
                 </form>
             </div>
@@ -52,15 +66,15 @@
 
 
     <!--Replacement Modal -->
-    <div class="modal fade text-left" id="ReplacementModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ReplacementModal"
+    <div class="modal fade text-left" id="ReplacementModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ReplacementModal"
          aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Update Replacement Shipment Weight</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                        {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--</button>--}}
                 </div>
                 <div class="modal-body  text-center">
                     <form id="replacement_form" action="{{route('admin.delivery.receive.replacements.submit')}}" method="post">
@@ -92,15 +106,15 @@
     </div>
     <!--Replacement Modal -->
     <!--Try&Buy Modal -->
-    <div class="modal fade text-left" id="TryBuyModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TryBuyModal"
+    <div class="modal fade text-left" id="TryBuyModal" data-keyboard="false" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="TryBuyModal"
          aria-hidden="true">
         <div class="modal-dialog modal-xl" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Update Try &amp; Buy Delivery</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                        {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--</button>--}}
                 </div>
                 <div class="modal-body  text-center">
                     <form id="trybuy_form" action="{{route('admin.delivery.receive.trybuys.submit')}}" method="post">
@@ -121,7 +135,7 @@
                         </table>
                         <div class="row justify-content-center mb-2">
                             <div class="col">
-                                <h4><U>Total Cod Amount:</U> Rs: <span id="cod"></span></h4>
+                                <h4><U>Total Collection Amount:</U> Rs: <span id="cod"></span></h4>
                             </div>
                         </div>
                         <input type="hidden" name="trybuy_id_list" id="trybuy_id_list">
@@ -166,7 +180,12 @@
             margin-bottom: -10px;
             bottom: 50% !important;
         }
-
+        table.dataTable tbody tr.statusUpdated {
+            background-color:yellow;
+        }
+        table.dataTable tbody tr.statusDelivered {
+            background-color:springgreen;
+        }
         table.dataTable tbody tr td {
             padding-left: 0.5em;
             padding-right: 0.5em;
@@ -174,7 +193,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -222,55 +241,67 @@
                 'min': 0.00,
                 'max': 1000
             });
-
+            var shipment_status = [];
+            var shipment_reason = [];
             var selected_rows = [];
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+                scrollX: true, scrollY: '350px',
+                buttons: [
+                        @if(!$delivery_note_status == 1) {
                     text: 'Delivered',
                     className: 'btn btn-primary delivered',
                     enabled: false,
                     action: function (e, dt, node, config) {
-                        if(selected_rows != ''){
-                            $.ajax({
-                                url: '{!! route('admin.delivery.receive.delivered') !!}',
-                                method: 'POST',
-                                data: {
-                                    'shipment_ids': selected_rows,
-                                    'delivery_note_id': note_id,
-                                    '_token': '{{ csrf_token() }}'
+                        if(selected_rows !== ''){
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to mark shipments as Delivered!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
                                 }
-                            }).done(function (data) {
-                                if(data.status == 0){
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                $.ajax({
+                                    url: '{!! route('admin.delivery.receive.delivered') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        'shipment_ids': selected_rows,
+                                        'delivery_note_id': note_id,
+                                        '_token': '{{ csrf_token() }}'
+                                    }
+                                }).done(function (data) {
+                                    if(data.status === 0){
 
-                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                                }else{
-                                    toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }else{
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                                }
-                                location.reload();
-                                // $.each(selected_rows, function(index, id) {
-                                //     table.row($('#datatable tbody tr#' + id)).deselect();
-                                // });
-                                // checkShipmentStatuses();
-                                // selected_rows = [];
-                                // table.button('.delivered').disable();
-                                // table.ajax.reload();
-                                // $('.reasonDrop','.statusDrop').select2('destroy');
-                                // setTimeout(function () {
-                                //     $(".reasonDrop").select2({
-                                //         placeholder: "Select a Reason",
-                                //         width:'100%'
-                                //     });
-                                //     $(".statusDrop").select2({
-                                //         placeholder: "Select a Status",
-                                //         width:'100%'
-                                //     });
-                                // },2000);
+                                    }
+                                    location.reload();
 
-                            });
+                                });
+                            }
+                        });
+
+
                         }else{
                             var error = "Something went wrong please refresh page and try again!";
                             toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
@@ -278,59 +309,68 @@
                         }
                     }
 
-                }],
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
+                }@endif
+                ],
                 select: {
                     info: false,
                     style: 'multi',
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
-                serverSide: true,
+                serverSide: false,
                 ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
-                order: [[2, 'asc']],
+                order: [[10, 'asc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
+                    {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
                     {data:'amount',name: 'amount', class: 'align-middle amount'},
-                    {data:'status',name: 'status', class: 'align-middle status statusOnChange'},
-                    {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect'},
-                    {data:'remarks',name: 'remarks', class: 'align-middle remarks'},
+                    {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
+                    {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
+                    {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                     {data:'address',name: 'address', class: 'align-middle address'},
                     {data:'destination',name: 'destination', class: 'align-middle destination'},
                     {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
                     {data:'current_status',name: 'current_status', class: 'align-middle current_status'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
-                    {data:'action',name: 'action', class: 'align-middle action'},
+                    {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
                     if ($.inArray(data.id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
                 },
-                initComplete: function() {
-                    $(".reasonDrop").select2({
+                drawCallback: function (settings) {
+
+                    $(".reasonDrop").prepend('<option value="" selected="selected"></option>').select2({
                         placeholder: "Select a Reason",
                         width:'100%'
                     });
-                    $(".statusDrop").select2({
+                    $(".statusDrop").prepend('<option value="" selected="selected"></option>').select2({
                         placeholder: "Select a Status",
                         width:'100%'
                     });
+                    var api = new $.fn.dataTable.Api( settings );
+                    var data = api.rows( {page:'current'} ).data();
+                    $.each(data,function (key,value) {
+                        if(shipment_status.length !== 0){
+                            $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
+                        }
+                        if(shipment_reason.length !== 0){
+                            $('select[name="reason_drop['+value.shId+']"]').val(shipment_reason[value.shId]).trigger('change');
+                        }
+                    });
+                },
+                initComplete: function() {
+
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
@@ -345,7 +385,7 @@
                             $(td).appendTo($(search));
                         }
                         else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
+                            var current = $(input).appendTo($(search)).on('change keypress', function() {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td).after(icon);
 
@@ -354,6 +394,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
 
@@ -379,10 +420,15 @@
                 }
             });
 
+
+
             $('body').on('select2:select','.statusOnChange .statusDrop',function (e) {
+                var rowid = parseInt($(this).parents('tr').attr('id'));
+
                 $('#statusSubmit').removeAttr('disabled');
                 var statusSelection = $(this).find(':selected');
                 var status = statusSelection.val();
+                shipment_status[rowid] = status;
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
 
                 $.ajax({
@@ -402,10 +448,16 @@
                         });
                         reason.val('').trigger('change');
                     }else{
-                        $('.reasonDrop').empty();
+                        reason.empty().trigger('change');
                         toastr.success(data.error, 'Notice!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                     }
                 });
+            });
+            $('body').on('select2:select','.reasonSelect .reasonDrop',function (e) {
+                var rowid = parseInt($(this).parents('tr').attr('id'));
+                var reasonSelection = $(this).find(':selected');
+                var reason_status = reasonSelection.val();
+                shipment_reason[rowid] = reason_status;
             });
             $('body').on('click','.clear',function () {
                 // console.log();
@@ -416,18 +468,51 @@
                $('.remarks input').val('');
                 // $('.reasonDrop').val('').trigger("change");
             });
+            $('#status_update_form').on('keypress',function (e) {
+                if(e.which == 13) {
+                    e.preventDefault();
+                }
+            });
             var shipments = [];
             $('#status_update_form').bind('submit', function(event) {
-                var shipment = $('#shipment_ids');
                 event.preventDefault();
-                var id = '';
-                var count = table.data().count();
-                for(var i = 0;i<count;i++){
-                    id = table.row( i ).id();
-                    shipments.push(id);
-                }
-                shipment.val(shipments);
-                this.submit();
+                var this_form = this;
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to change the status of shipments!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        var shipment = $('#shipment_ids');
+                        event.preventDefault();
+                        var id = '';
+                        var count = table.data().count();
+                        for(var i = 0;i<count;i++){
+                            id = table.row( i ).id();
+                            shipments.push(id);
+                        }
+                        shipment.val(shipments);
+                        this_form.submit();
+                    }
+                });
+
             });
             //on page load ajax
             var trybuy_ids = [];
@@ -458,19 +543,14 @@
 
                             var repl = $('#replacementtable').DataTable({
                                 dom: 'ltipr',
-                                fixedHeader: {
-                                    header: true,
-                                    headerOffset: $('.header-navbar').height()
-                                },
-                                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                                pageLength: 25,
-                                stateSave: true,
+                                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                                pageLength: 50,
                                 pagingType: 'full_numbers',
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                                    {name: 'tracking_number', class: 'align-middle tracking_number'},
-                                    {name: 'service_type', class: 'align-middle service_type'},
-                                    {name: 'weight', class: 'align-middle weight'},
+                                    {name: 'tracking_number', class: 'align-middle tracking_number',orderable: false, searchable: false},
+                                    {name: 'service_type', class: 'align-middle service_type',orderable: false, searchable: false},
+                                    {name: 'weight', class: 'align-middle weight',orderable: false, searchable: false},
 
                                 ],
                                 rowCallback: function(row, data, index) {
@@ -483,29 +563,6 @@
                                 },
                                 initComplete: function() {
 
-                                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                                    this.api().columns().every(function(column_id) {
-                                        var column = this;
-                                        var header = column.header();
-
-                                        if ($(header).is('.serial_number') || $(header).is('.weight')) {
-                                            $(td).appendTo($(search));
-                                        }
-                                        else {
-                                            var current = $(input).appendTo($(search)).on('change', function() {
-                                                column.search($(this).val(), false, false, true).draw();
-                                            }).wrap(td).after(icon);
-
-                                            if (column.search()) {
-                                                current.val(column.search());
-                                            }
-                                        }
-                                    });
                                 }
                             });
 
@@ -554,13 +611,8 @@
 
                             trybuy = $('#trybuytable').DataTable({
                                 dom: 'ltipr',
-                                fixedHeader: {
-                                    header: true,
-                                    headerOffset: $('.header-navbar').height()
-                                },
-                                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                                pageLength: 25,
-                                stateSave: true,
+                                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                                pageLength: 50,
                                 pagingType: 'full_numbers',
 
                                 columns: [
@@ -623,9 +675,38 @@
             }
             checkShipmentStatuses();
 
-            function print(id) {
+            function print(id,temp = null) {
                 $.ajax({
                     url: '{!! route('admin.delivery.receive.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        'temporary':temp,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            function printUndelivered(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.undelivered.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -649,12 +730,23 @@
                             tab.document.close();
                             tab.focus();
                         }
+                        location.reload();
+
                     });
             }
 
             $('#printDNCC').on('click',function () {
                 var note_id = $('#delivery_note').val();
                 print(note_id);
+            });
+            $('#printTempDNCC').on('click',function () {
+                var note_id = $('#delivery_note').val();
+                var temporary = 'temporary';
+                print(note_id,temporary);
+            });
+            $('#printUndeliveredDNCC').on('click',function () {
+                var note_id = $('#delivery_note').val();
+                printUndelivered(note_id);
             });
 
 

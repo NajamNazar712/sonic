@@ -11,12 +11,15 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
 use App\Http\Models\PickupNote;
 use App\Http\Models\CargoConsignment;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Dispute;
 use App\Http\Models\DonePayment;
 
 use GuzzleHttp\Client;
+
+use App\Mail\Notifications;
 
 class NotificationsController extends Controller
 {
@@ -33,12 +36,18 @@ class NotificationsController extends Controller
       ]);
     }
 
-    static private function email($subject, $body, $to) {
-      Mail::send('notifications.email', ['body' => nl2br($body)], function ($message) use ($subject, $to) {
-          $message->subject($subject);
+    static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL) {
+      $mail = Mail::to($to);
 
-          $message->to($to);
-      });
+      if ($cc) {
+        $mail->cc($cc);
+      }
+
+      if ($bcc) {
+        $mail->bcc($bcc);
+      }
+
+      $mail->send(new Notifications($subject, $body));
     }
 
     static public function send($id, $reference_1_id, $reference_2_id = NULL) {
@@ -61,11 +70,21 @@ class NotificationsController extends Controller
 
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $shipper[$field], $subject);
+                if ($key == 'account_id') {
+                  $subject = str_replace('[' . $key . ']', str_pad($shipper[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $shipper[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $shipper[$field], $body);
+                if ($key == 'account_id') {
+                  $body = str_replace('[' . $key . ']', str_pad($shipper[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $shipper[$field], $body);
+                }
               }
             }
 
@@ -95,7 +114,7 @@ class NotificationsController extends Controller
             }
 
             if (strpos($body, '[account_id]') !== FALSE) {
-              $body = str_replace('[account_id]', $shipper->id, $body);
+              $body = str_replace('[account_id]', str_pad($shipper->id, 6, '0', STR_PAD_LEFT), $body);
             }
 
             if (strpos($body, '[company_name]') !== FALSE) {
@@ -262,7 +281,29 @@ class NotificationsController extends Controller
 
               $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
 
-              self::email($subject, $body, $to);
+              $bcc = array();
+
+              $general_admins = Admin::whereIn('role_id', [4, 3, 6])->where('status', 1);
+
+              if ($general_admins->exists()) {
+                $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
+              }
+
+              $origin_hub_id = $pickup_note->city->hub_id;
+
+              $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_id) {
+                $query->where('hub_id', $origin_hub_id);
+              });
+
+              if ($related_admins->exists()) {
+                $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
+              }
+
+              if (empty($bcc)) {
+                $bcc = NULL;
+              }
+
+              self::email($subject, $body, $to, NULL, $bcc);
             }
           }
           else if ($id == 5) {
@@ -280,11 +321,21 @@ class NotificationsController extends Controller
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                if ($key == 'cargo_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                if ($key == 'cargo_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                }
               }
             }
 
@@ -318,7 +369,10 @@ class NotificationsController extends Controller
             $to = $shipper->phone;
 
             foreach ($cargo_fields as $key => $field) {
-              if (strpos($body, '[' . $key . ']') !== FALSE) {
+              if ($key == 'cargo_number') {
+                $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+              }
+              else {
                 $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
               }
             }
@@ -350,11 +404,21 @@ class NotificationsController extends Controller
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                if ($key == 'cargo_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                if ($key == 'cargo_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                }
               }
             }
 
@@ -393,7 +457,12 @@ class NotificationsController extends Controller
 
             foreach ($cargo_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                if ($key == 'cargo_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                }
               }
             }
 
@@ -410,70 +479,97 @@ class NotificationsController extends Controller
             self::sms($body, $to);
           }
           else if ($id == 9) {
-            // $fields = ['cargo_number' => 'id', 'departure_at' => 'created_at', 'seal_number' => 'seal_number', 'builty_number' => 'builty_number', 'expected_arrival_date', 'expected_arrival_date'];
+            $fields = ['cargo_number' => 'id', 'departure_at' => 'created_at', 'seal_number' => 'seal_number', 'builty_number' => 'builty_number', 'expected_arrival_date', 'expected_arrival_date'];
 
-            // 'shipping_mode', 'transport_mode', 'vendor', 'sender', 'tracking_number'
+            $cargo_consignment = CargoConsignment::find($reference_1_id);
 
-            // $cargo_consignment = CargoConsignment::find($reference_1_id);
+            foreach ($fields as $key => $field) {
+              if (strpos($subject, '[' . $key . ']') !== FALSE) {
+                if ($key == 'cargo_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
+                }
+              }
 
-            // //ROLES TO BE ADDED
-            // $to = Admin::whereIn('role', [])->get()->pluck('email');
+              if (strpos($body, '[' . $key . ']') !== FALSE) {
+                if ($key == 'cargo_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($cargo_consignment[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
+                }
+              }
+            }
 
-            // foreach ($fields as $key => $field) {
-            //   if (strpos($subject, '[' . $key . ']') !== FALSE) {
-            //     $subject = str_replace('[' . $key . ']', $cargo_consignment[$field], $subject);
-            //   }
+            if (strpos($subject, '[shipping_mode]') !== FALSE) {
+              $subject = str_replace('[shipping_mode]', $cargo_consignment->shipping_mode->mode, $subject);
+            }
 
-            //   if (strpos($body, '[' . $key . ']') !== FALSE) {
-            //     $body = str_replace('[' . $key . ']', $cargo_consignment[$field], $body);
-            //   }
-            // }
+            if (strpos($body, '[shipping_mode]') !== FALSE) {
+              $body = str_replace('[shipping_mode]', $cargo_consignment->shipping_mode->mode, $body);
+            }
 
-            // if (strpos($subject, '[shipping_mode]') !== FALSE) {
-            //   $subject = str_replace('[shipping_mode]', $cargo_consignment->shipping_mode->mode, $subject);
-            // }
+            if (strpos($subject, '[transport_mode]') !== FALSE) {
+              $subject = str_replace('[transport_mode]', $cargo_consignment->transport_mode->name, $subject);
+            }
 
-            // if (strpos($body, '[shipping_mode]') !== FALSE) {
-            //   $body = str_replace('[shipping_mode]', $cargo_consignment->shipping_mode->mode, $body);
-            // }
+            if (strpos($body, '[transport_mode]') !== FALSE) {
+              $body = str_replace('[transport_mode]', $cargo_consignment->transport_mode->name, $body);
+            }
 
-            // if (strpos($subject, '[transport_mode]') !== FALSE) {
-            //   $subject = str_replace('[transport_mode]', $cargo_consignment->transport_mode->name, $subject);
-            // }
+            if (strpos($subject, '[vendor]') !== FALSE) {
+              $subject = str_replace('[vendor]', $cargo_consignment->transport_mode_vendor->name, $subject);
+            }
 
-            // if (strpos($body, '[transport_mode]') !== FALSE) {
-            //   $body = str_replace('[transport_mode]', $cargo_consignment->transport_mode->name, $body);
-            // }
+            if (strpos($body, '[vendor]') !== FALSE) {
+              $body = str_replace('[vendor]', $cargo_consignment->transport_mode_vendor->name, $body);
+            }
 
-            // if (strpos($subject, '[vendor]') !== FALSE) {
-            //   $subject = str_replace('[vendor]', $cargo_consignment->transport_mode_vendor->name, $subject);
-            // }
+            if (strpos($subject, '[sender]') !== FALSE) {
+              $subject = str_replace('[sender]', $cargo_consignment->sender->name, $subject);
+            }
 
-            // if (strpos($body, '[vendor]') !== FALSE) {
-            //   $body = str_replace('[vendor]', $cargo_consignment->transport_mode_vendor->name, $body);
-            // }
+            if (strpos($body, '[sender]') !== FALSE) {
+              $body = str_replace('[sender]', $cargo_consignment->sender->name, $body);
+            }
 
-            // if (strpos($subject, '[sender]') !== FALSE) {
-            //   $subject = str_replace('[sender]', $cargo_consignment->sender->name, $subject);
-            // }
+            if (strpos($body, '[tracking_number]') !== FALSE) {
+              $tracking_numbers = '';
 
-            // if (strpos($body, '[sender]') !== FALSE) {
-            //   $body = str_replace('[sender]', $cargo_consignment->sender->name, $body);
-            // }
+              foreach ($cargo_consignment->cargo_consignment_shipments as $cargo_consignment_shipment) {
+                $shipment = $cargo_consignment_shipment->shipment;
 
-            // if (strpos($body, '[tracking_number]') !== FALSE) {
-            //   $tracking_numbers = '';
+                $tracking_numbers .= $shipment->tracking_number . PHP_EOL;
+              }
 
-            //   foreach ($cargo_consignment->cargo_consignment_shipments => $cargo_consignment_shipment) {
-            //     $shipment = $cargo_consignment_shipment->shipment;
+              $body = str_replace('[tracking_number]', $tracking_numbers, $body);
+            }
 
-            //     $tracking_numbers .= $shipment->tracking_number . PHP_EOL;
-            //   }
+            $to = array();
 
-            //   $body = str_replace('[tracking_number]', $tracking_numbers, $body);
-            // }
+            $general_admins = Admin::whereIn('role_id', [3, 4, 6])->where('status', 1);
 
-            // self::email($subject, $body, $to);
+            if ($general_admins->exists()) {
+              $to = array_merge($to, $general_admins->pluck('email')->toArray());
+            }
+
+            $origin_hub_id = $cargo_consignment->origin_hub_id;
+            $destination_hub_id = $cargo_consignment->destination_hub_id;
+
+            $related_admins = Admin::whereIn('role_id', [8, 9, 10])->where('status', 1)->whereHas('hubs', function ($query) use ($origin_hub_id, $destination_hub_id) {
+              $query->where('hub_id', $origin_hub_id)
+              ->orWhere('hub_id', $destination_hub_id);
+            });
+
+            if ($related_admins->exists()) {
+              $to = array_merge($to, $related_admins->pluck('email')->toArray());
+            }
+
+            if (!empty($to)) {
+              self::email($subject, $body, $to);
+            }
           }
           else if ($id == 10) {
             $delivery_note_fields = ['delivery_note_number' => 'id', 'departure_at' => 'created_at'];
@@ -490,11 +586,21 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $delivery_note[$field], $subject);
+                if ($key == 'delivery_note_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $delivery_note[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -541,7 +647,12 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -576,7 +687,12 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -609,11 +725,21 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $delivery_note[$field], $subject);
+                if ($key == 'delivery_note_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $delivery_note[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -680,7 +806,12 @@ class NotificationsController extends Controller
 
             foreach ($delivery_note_fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                if ($key == 'delivery_note_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($delivery_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $delivery_note[$field], $body);
+                }
               }
             }
 
@@ -728,11 +859,21 @@ class NotificationsController extends Controller
 
               foreach ($return_note_fields as $key => $field) {
                 if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                  $subject = str_replace('[' . $key . ']', $return_note[$field], $subject);
+                  if ($key == 'return_note_number') {
+                    $subject = str_replace('[' . $key . ']', str_pad($return_note[$field], 6, '0', STR_PAD_LEFT), $subject);
+                  }
+                  else {
+                    $subject = str_replace('[' . $key . ']', $return_note[$field], $subject);
+                  }
                 }
 
                 if (strpos($body, '[' . $key . ']') !== FALSE) {
-                  $body = str_replace('[' . $key . ']', $return_note[$field], $body);
+                  if ($key == 'return_note_number') {
+                    $body = str_replace('[' . $key . ']', str_pad($return_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                  }
+                  else {
+                    $body = str_replace('[' . $key . ']', $return_note[$field], $body);
+                  }
                 }
               }
 
@@ -854,7 +995,12 @@ class NotificationsController extends Controller
 
               foreach ($return_note_fields as $key => $field) {
                 if (strpos($body, '[' . $key . ']') !== FALSE) {
-                  $body = str_replace('[' . $key . ']', $return_note[$field], $body);
+                  if ($key == 'return_note_number') {
+                    $body = str_replace('[' . $key . ']', str_pad($return_note[$field], 6, '0', STR_PAD_LEFT), $body);
+                  }
+                  else {
+                    $body = str_replace('[' . $key . ']', $return_note[$field], $body);
+                  }
                 }
               }
 
@@ -950,11 +1096,11 @@ class NotificationsController extends Controller
             }
 
             if (strpos($subject, '[account_id]') !== FALSE) {
-              $subject = str_replace('[account_id]', $shipper->id, $subject);
+              $subject = str_replace('[account_id]', str_pad($shipper->id, 6, '0', STR_PAD_LEFT), $subject);
             }
 
             if (strpos($body, '[account_id]') !== FALSE) {
-              $body = str_replace('[account_id]', $shipper->id, $body);
+              $body = str_replace('[account_id]', str_pad($shipper->id, 6, '0', STR_PAD_LEFT), $body);
             }
 
             if (strpos($subject, '[company_name]') !== FALSE) {
@@ -1027,18 +1173,26 @@ class NotificationsController extends Controller
               $launched_by = $dispute->admins;
             }
             else {
-              $launched_by = $dispute->user;
+              $launched_by = $dispute->shipper;
             }
-
-            $to = $launched_by->email;
 
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                $subject = str_replace('[' . $key . ']', $dispute[$field], $subject);
+                if ($key == 'dispute_number') {
+                  $subject = str_replace('[' . $key . ']', str_pad($dispute[$field], 6, '0', STR_PAD_LEFT), $subject);
+                }
+                else {
+                  $subject = str_replace('[' . $key . ']', $dispute[$field], $subject);
+                }
               }
 
               if (strpos($body, '[' . $key . ']') !== FALSE) {
-                $body = str_replace('[' . $key . ']', $dispute[$field], $body);
+                if ($key == 'dispute_number') {
+                  $body = str_replace('[' . $key . ']', str_pad($dispute[$field], 6, '0', STR_PAD_LEFT), $body);
+                }
+                else {
+                  $body = str_replace('[' . $key . ']', $dispute[$field], $body);
+                }
               }
             }
 
@@ -1092,6 +1246,24 @@ class NotificationsController extends Controller
               $tracking_numbers .= substr($tracking_numbers, 0, -2) . PHP_EOL;
 
               $body = str_replace('[tracking_number]', $tracking_numbers, $body);
+            }
+
+            $to = [$launched_by->email];
+
+            $general_admins = Admin::whereIn('role_id', [4, 3, 2, 5, 6])->where('status', 1);
+
+            if ($general_admins->exists()) {
+              $to = array_merge($to, $general_admins->pluck('email')->toArray());
+            }
+
+            $hub_id = $dispute->city->hub_id;
+
+            $related_admins = Admin::whereIn('role_id', [8, 11])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+              $query->where('hub_id', $hub_id);
+            });
+
+            if ($related_admins->exists()) {
+              $to = array_merge($to, $related_admins->pluck('email')->toArray());
             }
 
             self::email($subject, $body, $to);
@@ -1210,11 +1382,11 @@ class NotificationsController extends Controller
             }
 
             if (strpos($subject, '[payment_done_id]') !== FALSE) {
-              $subject = str_replace('[payment_done_id]', $done_payment->id, $subject);
+              $subject = str_replace('[payment_done_id]', str_pad($done_payment->id, 6, '0', STR_PAD_LEFT), $subject);
             }
 
             if (strpos($body, '[payment_done_id]') !== FALSE) {
-              $body = str_replace('[payment_done_id]', $done_payment->id, $body);
+              $body = str_replace('[payment_done_id]', str_pad($done_payment->id, 6, '0', STR_PAD_LEFT), $body);
             }
 
             if (strpos($subject, '[payment_done_at]') !== FALSE) {
@@ -1329,7 +1501,29 @@ class NotificationsController extends Controller
               $body = str_replace('[total_payable]', $total_payable, $body);
             }
 
-            self::email($subject, $body, $to);
+            $bcc = array();
+
+            $general_admins = Admin::whereIn('role_id', [4, 3, 6])->where('status', 1);
+
+            if ($general_admins->exists()) {
+              $bcc = array_merge($bcc, $general_admins->pluck('email')->toArray());
+            }
+
+            $hub_id = $shipper->city->hub_id;
+
+            $related_admins = Admin::whereIn('role_id', [10])->where('status', 1)->whereHas('hubs', function ($query) use ($hub_id) {
+              $query->where('hub_id', $hub_id);
+            });
+
+            if ($related_admins->exists()) {
+              $bcc = array_merge($bcc, $related_admins->pluck('email')->toArray());
+            }
+
+            if (empty($bcc)) {
+              $bcc = NULL;
+            }
+
+            self::email($subject, $body, $to, NULL, $bcc);
           }
           else if ($id == 21) {
             $fields = ['consignee_name' => 'consignee_name', 'consignee_address' => 'consignee_address', 'order_id' => 'order_id', 'amount' => 'amount', 'tracking_number' => 'tracking_number'];
@@ -1337,8 +1531,6 @@ class NotificationsController extends Controller
             $shipment = Shipment::find($reference_1_id);
 
             $shipper = $shipment->user;
-
-            $to = $shipper->email;
 
             foreach ($fields as $key => $field) {
               if (strpos($subject, '[' . $key . ']') !== FALSE) {
@@ -1398,7 +1590,87 @@ class NotificationsController extends Controller
               $body = str_replace('[payment_mode]', $shipment->payment_mode->mode, $body);
             }
 
+            $to = [$shipper->email];
+
+            $general_admins = Admin::whereIn('role_id', [2, 4])->where('status', 1);
+
+            if ($general_admins->exists()) {
+              $to = array_merge($to, $general_admins->pluck('email')->toArray());
+            }
+
+            $to[] = Admin::find($reference_2_id)->email;
+
             self::email($subject, $body, $to);
+          }
+          else if ($id == 22) {
+            $possible_fields = ['company_name', 'person_of_contact', 'phone_number', 'address', 'city'];
+
+            $present_fields = array();
+
+            $first_field = NULL;
+
+            $position = NULL;
+
+            foreach ($possible_fields as $field) {
+              $new_position = strpos($body, '[' . $field . ']');
+
+              if ($new_position !== FALSE) {
+                if ($position == NULL) {
+                  $present_fields[] = $field;
+
+                  $first_field = $field;
+                }
+                else if ($new_position > $position) {
+                  $present_fields[] = $field;
+                }
+                else {
+                  array_unshift($present_fields, $field);
+                }
+
+                $position = $new_position;
+              }
+            }
+
+            $pickup_note = PickupNote::find($reference_1_id);
+
+            $to = $pickup_note->rider->phone;
+
+            $pickup_details = '';
+
+            foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
+              $pickup_request = $pickup_note_request->pickup_request;
+              $pickup_address = $pickup_request->pickup_address;
+
+              foreach ($present_fields as $field) {
+                if ($field == 'company_name') {
+                  $pickup_details .= $pickup_request->shipper->name . ', ';
+                }
+                else if ($field == 'person_of_contact') {
+                  $pickup_details .= $pickup_address->poc . ', ';
+                }
+                else if ($field == 'phone_number') {
+                  $pickup_details .= $pickup_address->phone . ', ';
+                }
+                else if ($field == 'address') {
+                  $pickup_details .= $pickup_address->pickup_address . ', ';
+                }
+                else if ($field == 'city') {
+                  $pickup_details .= $pickup_address->city->name . ', ';
+                }
+              }
+
+              $pickup_details = substr($pickup_details, 0, -2) . PHP_EOL;
+            }
+
+            foreach ($present_fields as $field) {
+              if ($field != $first_field) {
+                $body = str_replace('[' . $field . ']', '', $body);
+              }
+            }
+
+            $body = str_replace('[' . $first_field . ']', $pickup_details, $body);
+
+            self::sms($body, $to);
           }
         }
       }

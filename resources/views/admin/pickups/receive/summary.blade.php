@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Received Pickup Summary')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -27,6 +29,7 @@
 										<th class="border-primary border-darken-1">Bookings</th>
 										<th class="border-primary border-darken-1">Received</th>
 										<th class="border-primary border-darken-1">Short Received</th>
+										<th class="border-primary border-darken-1">Over Received</th>
 										<th class="border-primary border-darken-1">Pickup Type</th>
 										<th class="border-primary border-darken-1">Booking Date</th>
 										<th class="border-primary border-darken-1">Assigned Date</th>
@@ -40,8 +43,48 @@
 					</div>
 				</div>
 
+				<div class="modal fade" id="short_received_shipments" role="dialog" aria-labelledby="delivered_shipments_title" aria-hidden="true">
+					<div class="modal-dialog modal-sm" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title" id="short_received_title">Short Received Shipment(s)</h4>
+
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">×</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="modal fade" id="over_received_shipments" role="dialog" aria-labelledby="delivered_shipments_title" aria-hidden="true">
+					<div class="modal-dialog modal-sm" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title" id="over_received_title">Over Received Shipment(s)</h4>
+
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">×</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
 				<form id="receive_pickup_note_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.pickups.receive.pickup_note') }}">
 					{{ csrf_field() }}
+
+					<input type="hidden" name="summary" value="1">
 
 					<input type="hidden" name="pickup_note_no" class="pickup_note_no" value="{{ session('pickup_receive_pickup_note_id') }}">
 				</form>
@@ -52,69 +95,21 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-				pageLength: 25,
+				scrollX: true, scrollY: '350px',
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
@@ -125,7 +120,7 @@
 					}
 				},
 				rowId: 'id',
-				order: [[9, 'asc']],
+				order: [[12, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
@@ -136,6 +131,7 @@
 					{data: 'bookings', name: 'pickup_requests.bookings', class: 'align-middle bookings'},
 					{data: 'received', name: 'pickup_requests.received', class: 'align-middle received'},
 					{data: 'short_received', name: 'pickup_requests.short_received', class: 'align-middle short_received'},
+					{data: 'over_received', name: 'pickup_requests.over_received', class: 'align-middle over_received'},
 					{data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},
 					{data: 'booking_date', name: 'pickup_requests.created_at', class: 'align-middle booking_date'},
 					{data: 'assigned_date', name: 'pn.created_at', class: 'align-middle assigned_date'},
@@ -154,14 +150,22 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Light</option>' +
+                        '<option value="1">Heavy</option>' +
+                        '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
 						if ($(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.pickup_type')){
+                        $(drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    	}
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -172,7 +176,76 @@
 							}
 						}
 					});
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Pickup Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+					this.api().table().columns.adjust();
 				}
+			});
+
+			$('#datatable tbody').on('click', 'tr td.short_received button', function() {
+				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#short_received_shipments .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.pickups.receive.summary.request.short_received') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'pickup_request_id': pickup_request_id
+					}
+				})
+				.done(function(data) {
+					if (data) {
+						var shipments = '';
+
+						$.each(data.short_received, function(receiving_sheet_id, tracking_numbers) {
+							var receiving_sheet_number = receiving_sheet_id.toString();
+
+							while (receiving_sheet_number.length < 12) {
+								receiving_sheet_number = '0' + receiving_sheet_number;
+							}
+
+							shipments += receiving_sheet_number + ': ' + tracking_numbers.join(' - ') + '<br/>';
+						});
+
+						$('#short_received_shipments .modal-body').html(shipments);
+
+						$('#short_received_shipments').modal('show');
+					}
+				});
+			});
+
+			$('#datatable tbody').on('click', 'tr td.over_received button', function() {
+				var pickup_request_id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#over_received_shipments .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.pickups.receive.summary.request.over_received') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'pickup_request_id': pickup_request_id
+					}
+				})
+				.done(function(data) {
+					if (data) {
+						var shipments = '';
+
+						$.each(data.over_received, function(index, tracking_number) {
+							shipments += tracking_number + '<br/>';
+						});
+
+						$('#over_received_shipments .modal-body').html(shipments);
+
+						$('#over_received_shipments').modal('show');
+					}
+				});
 			});
 
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
@@ -183,7 +256,7 @@
 				}
 				else if ($(this).hasClass('done')) {
 					$.ajax({
-						url: '{!! route('admin.pickups.receive.summary.request.short_received') !!}',
+						url: '{!! route('admin.pickups.receive.summary.request.over_short_received') !!}',
 						method: 'POST',
 						data: {
 							'pickup_request_id': pickup_request_id,
@@ -192,24 +265,37 @@
 					})
 					.done(function(data) {
 						if (data.status == 0) {
-							if (data.short_received) {
-								var html = 'There are shipments that are short received from:<br/>';
+                            var html = '';
 
-								$.each(data.short_received, function(receiving_sheet_id, shipments) {
-									var receiving_sheet_number = receiving_sheet_id.toString();
+							if (data.short_received || data.over_received) {
+								if (data.short_received) {
+                                    html += 'There are shipments that are short received from:<br/>';
 
-									while (receiving_sheet_number.length < 12) {
-										receiving_sheet_number = '0' + receiving_sheet_number;
-									}
+                                    $.each(data.short_received, function (receiving_sheet_id, shipments) {
+                                        var receiving_sheet_number = receiving_sheet_id.toString();
 
-									html += receiving_sheet_number + ': ' + shipments.join(' - ') + '<br/>';
-								});
+                                        while (receiving_sheet_number.length < 12) {
+                                            receiving_sheet_number = '0' + receiving_sheet_number;
+                                        }
 
-								html += 'Are you sure, you want to mark this Pickup Done?';
+                                        html += receiving_sheet_number + ': ' + shipments.join(' - ') + '<br/>';
+                                    });
+
+                                    html += '<br/>';
+                                }
+
+								if (data.over_received) {
+									html += 'There are shipments that are over received:<br/>';
+
+									$.each(data.over_received, function (index, shipment) {
+										html += shipment + '<br/>';
+									});
+
+                                    html += '<br/>';
+								}
 							}
-							else {
-								var html = 'Are you sure, you want to mark this Pickup Done?';
-							}
+
+                        	html += 'Are you sure, you want to mark this Pickup Done?';
 
 							content = document.createElement('div');
 							content.innerHTML = html;
@@ -219,13 +305,13 @@
 								icon: 'warning',
 								buttons: {
 									cancel: {
-										text: 'Close',
+										text: 'No',
 										value: null,
 										visible: true,
 										closeModal: true,
 									},
 									confirm: {
-										text: 'Done',
+										text: 'Yes',
 										value: true,
 										visible: true,
 										closeModal: true
@@ -248,18 +334,18 @@
 										if (data.status == 0) {
 											toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-											table.ajax.reload();
+											table.draw('false');
 
 											if (data.complete) {
 												setTimeout(function() {
 													window.location.href = '{{ route('admin.pickups.receive.index') }}';
-												}, 5000);
+												}, 2500);
 											}
 										}
 										else {
 											toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-											table.ajax.reload();
+											table.draw('false');
 										}
 									});
 								}
@@ -276,13 +362,13 @@
 						icon: 'warning',
 						buttons: {
 							cancel: {
-								text: 'Close',
+								text: 'No',
 								value: null,
 								visible: true,
 								closeModal: true,
 							},
 							confirm: {
-								text: 'Not Done',
+								text: 'Yes',
 								value: true,
 								visible: true,
 								closeModal: true
@@ -308,14 +394,14 @@
 									if (data.complete) {
 										setTimeout(function() {
 											window.location.href = '{{ route('admin.pickups.receive.index') }}';
-										}, 5000);
+										}, 2500);
 									}
 								}
 								else {
 									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 
-								table.ajax.reload();
+								table.draw('false');
 							});
 						}
 					});

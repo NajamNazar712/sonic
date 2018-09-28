@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Models\BanksList;
 use App\Http\Models\City;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
@@ -49,12 +50,13 @@ class RegisterController extends Controller
     public function showRegistrationForm()
     {
         $products = Product::all();
+        $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
 
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list]);
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -77,14 +79,15 @@ class RegisterController extends Controller
 //            'ntn_no'=>'string|max:255',
 //            'url'=>'string|max:255',
             'shipper_city'=>'required|string|max:255',
+            'shipper_product_type'=>'required|string|max:255',
             'shipping_city.*'=>'required|string|max:255',
             'pickup_address.*'=>'required|string|max:255',
             'shipping_poc.*'=>'required|string|max:255',
             'shipping_phone.*'=>'required|string|max:255',
             'shipping_email.*'=>'required|string|max:255',
-            'product_type.*'=>'required|string|max:255',
+            'product_type.*'=>'required|max:255',
             'bank_city'=>'required|string|max:255',
-            'bank_name'=>'required|string|max:255',
+            'bank_name'=>'required|max:255',
             'bank_branch'=>'required|string|max:255',
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
@@ -133,10 +136,11 @@ class RegisterController extends Controller
             'ntn_no' => $data['ntn_no'],
             'url' => $data['url'],
             'city_id'=>$data['shipper_city'],
+            'product_id'=>$data['shipper_product_type'],
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
-        $shipper->products()->attach($data['product_type']);
+//        $shipper->products()->attach($data['product_type']);
 
         foreach ($data['pickup_address'] as $index => $pickup_address) {
             UserShippingInfo::create([

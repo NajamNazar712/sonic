@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Receiving Sheet')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -23,11 +25,12 @@
 										<th class="border-primary border-darken-1">Tracking Number</th>
 										<th class="border-primary border-darken-1">Order ID</th>
 										<th class="border-primary border-darken-1">Service Type</th>
+										<th class="border-primary border-darken-1">Pickup Address</th>
 										<th class="border-primary border-darken-1">Origin</th>
 										<th class="border-primary border-darken-1">Destination</th>
 										<th class="border-primary border-darken-1">Booking Date</th>
 										<th class="border-primary border-darken-1">Receiving Sheet</th>
-										<th class="border-primary border-darken-1">Action</th>
+										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
 							</table>
@@ -66,60 +69,14 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
@@ -163,10 +120,58 @@
 				show: false
 			});
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.shipment.receiving_sheet.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Tracking Number');
+                            head.push('Order ID');
+                            head.push('Service Type');
+                            head.push('Pickup Address');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Booking Date');
+                            head.push('Receiving Sheet');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.order_id);
+                                row.push(values.service_type);
+                                row.push(values.pickup_address);
+                                row.push(values.origin_city);
+                                row.push(values.destination_city);
+                                row.push(values.booking_date);
+                                row.push(values.receiving_sheet_no);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
 			var selected_rows = [];
 
 			var table = $('.datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				scrollX: true, scrollY: '350px',
 				buttons: [{
 					text: 'Create',
 					className: 'btn btn-primary create',
@@ -190,43 +195,81 @@
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
 
-							$.each(selected_rows, function(index, selected_row) {
-								table.row($('.datatable tbody tr#' + selected_row)).deselect();
-							});
+							table.rows().deselect();
 
 							selected_rows = [];
 
-							table.button(0).disable();
+							table.button('.create').disable();
 
-							table.ajax.reload();
+							table.draw('false');
 						});
 					}
-				}],
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
 				},
+				{
+					extend: 'excel',
+					title: 'Receiving Sheet',
+					className: 'btn btn-primary',
+					text: '<i class="la la-file-excel-o"></i> Excel',
+				}, {
+					extend: 'selectAll',
+					text: 'Select All',
+					className: 'select_all',
+					action : function(e) {
+						e.preventDefault();
+
+						table.rows().nodes().each(function(index) {
+							var row = table.row(index);
+
+							if ($(row.node().firstChild).hasClass('select-checkbox')) {
+								row.select();
+
+								id = parseInt(row.id());
+
+								var index = $.inArray(id, selected_rows);
+
+								if (index === -1) {
+									selected_rows.push(id);
+								}
+
+								table.button('.create').enable();
+							}
+						});
+					}
+				}, {
+					extend: 'selectNone',
+					text: 'Select None',
+					className: 'select_none',
+					action : function(e) {
+						e.preventDefault();
+
+						table.rows().deselect();
+
+						selected_rows = [];
+
+						table.button('.create').disable();
+					}
+				}],
 				select: {
 					info: false,
 					style: 'multi',
 					selector: 'td.select-checkbox',
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
-				lengthMenu: [[25, 50, 100], [25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+				lengthMenu: [[5, 50, 100, 500, 1000, -1], [5, 50, 100, 500, 1000, 'All']],
+				pageLength: 5,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet.list') }}',
 				rowId: 'id',
-				order: [[7, 'asc']],
+				order: [[8, 'desc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
 					{data: 'order_id', name: 'order_id', class: 'align-middle order_id'},
 					{data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
+					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 					{data: 'origin_city', name: 'oc.name', class: 'align-middle origin_city'},
 					{data: 'destination_city', name: 'dc.name', class: 'align-middle destination_city'},
 					{data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
@@ -270,6 +313,8 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				}
 			});
 
@@ -286,10 +331,10 @@
 				}
 
 				if (selected_rows.length > 0) {
-					table.button(0).enable();
+					table.button('.create').enable();
 				}
 				else {
-					table.button(0).disable();
+					table.button('.create').disable();
 				}
 			});
 
@@ -327,15 +372,15 @@
 						}
 
 						if (selected_rows.length > 0) {
-							table.button(0).enable();
+							table.button('.create').enable();
 						}
 						else {
-							table.button(0).disable();
+							table.button('.create').disable();
 						}
 
 						table.row($('.datatable tbody tr#' + shipment_id)).deselect();
 
-						table.ajax.reload();
+						table.draw('false');
 
 						$('#add_in_receiving_sheet').modal('hide');
 					});
@@ -346,7 +391,7 @@
 				print(parseInt($(this).children('.id').html()));
 			});
 
-			$('.datatable tbody').on('click', 'tr td.action button', function() {
+			$('.datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				if ($(this).hasClass('add')) {
 					var shipment_id = $(this).parents('tr').attr('id');
 
@@ -364,7 +409,7 @@
 								var id = receiving_sheet['id'];
 								var text = receiving_sheet['id'].toString();
 
-								while (text.length < 12) {
+								while (text.length < 6) {
 									text = '0' + text;
 								}
 
@@ -435,7 +480,7 @@
 									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 
-								table.ajax.reload();
+								table.draw('false');
 							});
 						}
 					});

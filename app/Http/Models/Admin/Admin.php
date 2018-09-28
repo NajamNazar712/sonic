@@ -16,7 +16,7 @@ class Admin extends Authenticatable
      * @var array
      */
     protected $fillable = [
-        'name','username', 'email', 'phone_number', 'cnic', 'role_id', 'password', 'updated_by'
+        'name', 'email', 'phone_number', 'cnic', 'role_id', 'password', 'updated_by', 'status'
     ];
 
     /**
@@ -41,7 +41,7 @@ class Admin extends Authenticatable
      */
 
     public function role() {
-        return $this->belongsTo('App\Http\Models\Admin\Role', 'role_id', 'id');
+        return $this->belongsTo('App\Http\Models\Admin\AdminRole', 'role_id', 'id');
     }
 
     public function hubs() {

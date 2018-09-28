@@ -1,5 +1,6 @@
 
 @extends('admin.layout.master')
+@section('title','Receive Deliveries')
 
 @section('content')
     <h1 class="mb-1">
@@ -48,7 +49,8 @@
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
-                        <th class="border-primary border-darken-1">Total COD</th>
+                        <th class="border-primary border-darken-1">Total Collection</th>
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -58,8 +60,6 @@
         </div>
     </div>
 
-
-    </div>
 
 @endsection
 
@@ -92,7 +92,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -103,7 +103,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -125,15 +128,66 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                            url: '{{ route('admin.delivery.receive.list') }}',
+                            data: {
+                                'page': 'all',
+                                'delivery_note_number' : $('#scan_delivery_note').val(),
+                                'search_tracking' : $('#search_tracking').val(),
+                            },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Delivery Note No.');
+                            head.push('Hub');
+                            head.push('Rider');
+                            head.push('Route');
+                            head.push('No. Of Shipments');
+                            head.push('Assigned By');
+                            head.push('Assigned Date');
+                            head.push('Total COD');
+                            head.push('Status');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.delivery_note_id);
+                                row.push(values.hub);
+                                row.push(values.rider);
+                                row.push(values.route);
+                                row.push(values.shipments_count);
+                                row.push(values.assignee);
+                                row.push(values.created_at);
+                                row.push(values.amount);
+                                row.push(values.pending_status);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '350px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Receive Deliveries',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    },
+                ],
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
@@ -145,22 +199,22 @@
                     }
                 },
                 rowId: 'delivery_note_id',
-                order: [[2, 'asc']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_note_id', class: 'align-middle delivery_note'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'rider', class: 'align-middle rider'},
+                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle delivery_note'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
-                    { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
-                    { data:'amount' ,name: 'amount', class: 'align-middle amount'},
+                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
+                    { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
+                    { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
+                    { data:'pending_status' ,name: 'pending_status', class: 'align-middle pending_status'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
-
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
@@ -169,15 +223,21 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Pending for Update</option>' +
+                        '<option value="1">Pending for Verification</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.action')){
-                            $(td).appendTo($(search));
+                        }else if($(header).is('.pending_status')){
+                            $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -189,6 +249,13 @@
                             }
                         }
                     });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    this.api().table().columns.adjust();
                 }
             });
 
@@ -197,7 +264,7 @@
                 'allowMinus': false,
                 'allowPlus': false
             }).bind('input', function() {
-                if (this.value.length == 0 || this.value.length >= 10) {
+                if (this.value.length == 0 || this.value.length >= 12) {
                     table.draw();
                 }
             });

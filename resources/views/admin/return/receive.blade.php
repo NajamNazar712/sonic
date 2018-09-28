@@ -1,5 +1,6 @@
 
 @extends('admin.layout.master')
+@section('title','Receive Return Deliveries')
 
 @section('content')
     <h1 class="mb-1">
@@ -62,7 +63,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-    <style>
+    <style type="text/css">
         table.dataTable {
             font-size: 12px;
         }
@@ -87,7 +88,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -98,7 +99,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -120,15 +124,60 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.return.receive.list') }}',
+                        data: {
+                            'page': 'all',
+                            'return_note_number': $('#scan_return_note').val(),
+                            'search_tracking': $('#search_tracking').val(),
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Return Note No.');
+                            head.push('Hub');
+                            head.push('Rider');
+                            head.push('No. Of Shipments');
+                            head.push('Assigned By');
+                            head.push('Assigned Date');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.return_note_id);
+                                row.push(values.hub);
+                                row.push(values.rider);
+                                row.push(values.shipments_count);
+                                row.push(values.assignee);
+                                row.push(values.created_at);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '350px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Receive Return Deliveries',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }
+                ],
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
@@ -140,15 +189,15 @@
                     }
                 },
                 rowId: 'return_note_id',
-                order: [[2, 'asc']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'return_note' ,name: 'return_note_id', class: 'align-middle return_note'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'rider', class: 'align-middle rider'},
-                    { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
-                    { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
+                    { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
+                    { data:'shipments_count' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count'},
+                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
+                    { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -182,6 +231,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
 

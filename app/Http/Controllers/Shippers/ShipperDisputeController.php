@@ -30,6 +30,8 @@ class ShipperDisputeController extends Controller
         $this->middleware('Permission');
     }
     public function dispute_index(){
+        return redirect()->route('cod.access_denied');
+
         $cities = City::all();
         $dispute_types = DisputeType::whereIn('id',[5,9])->get();
         return view('client.dispute.index')->with(['cities'=>$cities,'dispute_types'=>$dispute_types]);
@@ -41,24 +43,42 @@ class ShipperDisputeController extends Controller
             ->where('disputes.raised_by',session('user_id'))
             ->where('disputes.raised_by_status',1);
         return Datatables::of($dispute)
-
-            ->editColumn('created_at', function ($dispute) {
-                return $dispute->created_at ? with(new Carbon($dispute->created_at))->format('d/m/Y H:i:s A') : '';
-            })
             ->editColumn('status',function($dispute){
                 return $dispute->status == 0? 'Dispute Launched': ($dispute->status == 1? 'Dispute Updated' : ($dispute->status == 2? 'Dispute Resolved':''));
 
             })
+            ->filterColumn('status',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    if (strpos('launched', $keyword) !== FALSE) {
+                        $query->where('disputes.status', '=', 0);
+                    }
+                    else if (strpos('updated', $keyword) !== FALSE) {
+                        $query->where('disputes.status', '=', 1);
+                    }
+                    else if (strpos('resolved', $keyword) !== FALSE) {
+                        $query->where('disputes.status', '=', 2);
+                    }
+                    else {
+                        $query->whereRaw('false');
+                    }
+
+                }
+            })
             ->editColumn('no_of_shipments',function($dispute){
-                return "<a class='font-weight-bold shipment_count' href='#'>{$dispute->no_of_shipments}</a>";
+                return "<a class='font-weight-bold shipment_count' href='javascript:void(0);'>{$dispute->no_of_shipments}</a>";
             })
             ->addColumn("action", function ($dispute) {
-                return " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                            <a href='#' class='dropdown-item view-comments'><i class='ft-plus-circle primary'></i> View Comments</a>                                   
-                                            </div></span>";
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                        <button type="button" class="dropdown-item view-comments"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Comments</div></button>
+                    </div>
+                  </div>
+                ';
+
+                return $dropdown;
             })
 
             ->make(true);
@@ -155,6 +175,8 @@ class ShipperDisputeController extends Controller
 
     //Rebook Starts
     public function rebook_index(Request $request){
+        return redirect()->route('cod.access_denied');
+
         return view('client.dispute.rebook.index');
     }
     public function rebook_list(Request $request){
@@ -174,17 +196,18 @@ class ShipperDisputeController extends Controller
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->editColumn('created_at', function ($shipments) {
-                return $shipments->created_at ? with(new Carbon($shipments->created_at))->format('d/m/Y H:i:s A') : '';
-            })
             ->addColumn("action", function ($result) {
-                return " <span class='dropdown'>
-                                            <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
-                                                    aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
-                                            <div class='dropdown-menu open-left arrow'>
-                                              <a href='#' class='dropdown-item details print_airway'><i class='ft-plus-circle primary'></i> View Details</a>                                         
-                                              <a href='#' class='dropdown-item rebook'><i class='ft-plus-circle primary'></i> Re-book</a>                                         
-                                            </div></span>";
+                $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                        <button type="button" class="dropdown-item print_airway"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Details</div></button>
+                        <button type="button" class="dropdown-item rebook"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Re-book</div></button>
+                    </div>
+                  </div>
+                ';
+
+                return $dropdown;
             })
             ->make(true);
     }

@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Roles')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -19,9 +21,10 @@
 								<thead>
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1">S. No.</th>
-										<th class="border-primary border-darken-1">Name</th>
+										<th class="border-primary border-darken-1">Designation</th>
 										<th class="border-primary border-darken-1">Department</th>
-										<th class="border-primary border-darken-1">Updated at</th>
+										<th class="border-primary border-darken-1">Created Datetime</th>
+										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -36,53 +39,6 @@
 @endsection
 
 @section('css')
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -101,23 +57,20 @@
 				@else
 	                dom: 'ltipr',
 	            @endif
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+	            scrollX: true, scrollY: '350px',
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
 				ajax: '{{ route('admin.user_management.roles.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[3, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'admin_roles.name', class: 'align-middle name'},
 					{data: 'department', name: 'ad.name', class: 'align-middle department'},
+					{data: 'created_at', name: 'admin_roles.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'admin_roles.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -151,6 +104,8 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				}
 			});
 

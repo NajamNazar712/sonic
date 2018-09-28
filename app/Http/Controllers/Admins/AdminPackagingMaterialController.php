@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+
 use App\Http\Models\Admin\PackagingMaterialStockHead;
 use App\Http\Models\Admin\PackagingMaterialStockHub;
 use App\Http\Models\Admin\PackagingStockHistory;
@@ -10,6 +12,7 @@ use App\Http\Models\CargoConsignment;
 use App\Http\Models\City;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\PackagingMaterialRequest;
+use App\Http\Models\PackagingPaymentMode;
 use App\Http\Models\PendingPayment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentItem;
@@ -39,10 +42,6 @@ class AdminPackagingMaterialController extends Controller
             ->join('admins as ad','ad.id','=','packaging_stock_histories.admin_id')
             ->select(['packaging_stock_histories.id as psh_id','packaging_stock_histories.reference_number','packaging_stock_histories.entry_type','packaging_stock_histories.created_at','packaging_stock_histories.small_flyers','packaging_stock_histories.medium_flyers','packaging_stock_histories.large_flyers','packaging_stock_histories.boxes','ad.name as admin','cities.name as hub']);
         return Datatables::of($packaging)
-
-            ->editColumn('created_at', function ($packaging) {
-                return $packaging->created_at ? with(new Carbon($packaging->created_at))->format('d/m/Y h:i:s A') : '';
-            })
             ->editColumn('entry_type',function($packaging){
                 if($packaging->entry_type == 0){
                     return "Inbound";
@@ -221,18 +220,19 @@ class AdminPackagingMaterialController extends Controller
         }
     }
     public function request_index(Request $request){
+        $payment_mode = PackagingPaymentMode::all();
         $packaging = PackagingMaterialStockHead::latest()->first();
-        return view('admin.materials.requests.index')->with('packaging',$packaging);
+        return view('admin.materials.requests.index')->with(['packaging'=>$packaging,'payment_mode'=>$payment_mode]);
     }
     public function request_list(Request $request){
         $requests = PackagingMaterialRequest::join('cities as ct','ct.id','=','packaging_material_requests.city_id')
             ->join('users as u','u.id','=','packaging_material_requests.user_id')
             ->join('packaging_payment_modes as ppm','ppm.id','=','packaging_material_requests.packaging_payment_mode_id')
-            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.small_flyers','packaging_material_requests.medium_flyers','packaging_material_requests.large_flyers','packaging_material_requests.boxes','packaging_material_requests.address','ppm.mode','packaging_material_requests.status']);
+            ->select(['packaging_material_requests.id as request_id','u.name as shipper','packaging_material_requests.created_at','ct.name as city','packaging_material_requests.small_flyers','packaging_material_requests.medium_flyers','packaging_material_requests.large_flyers','packaging_material_requests.boxes','packaging_material_requests.address','ppm.mode','packaging_material_requests.status','packaging_material_requests.amount','packaging_material_requests.tracking_number','packaging_material_requests.tracking_number as tracking_number_link']);
         return Datatables::of($requests)
-
-            ->editColumn('created_at', function ($packaging) {
-                return $packaging->created_at ? with(new Carbon($packaging->created_at))->format('d/m/Y h:i:s A') : '';
+            ->editColumn('tracking_number_link',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('status',function($packaging){
                 if($packaging->status == 0){
@@ -242,16 +242,16 @@ class AdminPackagingMaterialController extends Controller
                     return "Dispatched";
                 }
             })
-            ->addColumn('action',function ($packaging){
-
-                if ((packaging->status == 0) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
+            ->addColumn('action',function ($packaging) {
+                if (($packaging->status == 0) && (session('role_id') == 1 || in_array(80, session('permissions')))) {
                     $dropdown = '
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                            <div class="dropdown-menu open-left arrow"><a class="dropdown-item dispatch"><i class="ft-fast-forward primary"> Dispatch</a>
+                      <span class="dropdown">
+                        <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false"><i class="ft-settings"></i></button>
+                        <div class="dropdown-menu open-left arrow">
+                            <a class="dropdown-item dispatch"><i class="ft-fast-forward primary"></i> Dispatch</a>
                         </div>
-                      </div>
+                      </span>
                     ';
 
                     return $dropdown;
@@ -302,9 +302,15 @@ class AdminPackagingMaterialController extends Controller
                }else{
                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
                }
-               $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
+               $new_tracking_number = $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
                 $this->add_item($shipment->id,24,null,1,null,0,0);
+                PackagingMaterialRequest::where('id',$request_id)->update([
+                   'tracking_number'=>$new_tracking_number
+                ]);
                ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, $request_details->user_id, NULL);
+
+               ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $request_details->amount);
+
                 $this->sub_head_stock($request_details->small_flyers,$request_details->medium_flyers,$request_details->large_flyers,$request_details->boxes);
                 $request_details->status = 1;
                 $request_details->save();
@@ -348,7 +354,10 @@ class AdminPackagingMaterialController extends Controller
         $shipment->shipper_status_id = $shipper_status_id;
         $shipment->consignee_status_id = $consignee_status_id;
 
+        $shipment->packaging_material_request = 1;
+
         $shipment->save();
+
         return $shipment;
     }
     private function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {

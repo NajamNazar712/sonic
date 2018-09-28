@@ -1,5 +1,6 @@
 @extends('admin.layout.master')
 
+@section('title', 'City Management')
 
 @section('content')
     <h1>City Management</h1>
@@ -9,32 +10,39 @@
             <div class="col-12">
                 <div class="card">
 
-                    <div class="card-header">
-                        <span class="font-large-1 card-title">Cities List</span>
-                        {{--<button type="button" rel="addcity" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addCity" data-toggle="modal">Add City</button>--}}
-
-                        <div class="mt-1">
-                            @include('admin.inc.messages')
-                        </div>
-                    </div>
-
-
                     <div class="card-content">
                         <div class="card-body card-dashboard">
-                            <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
+                            @include('admin.inc.messages')
+
+
+
+                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th>S No.</th>
-                                    <th>City Name</th>
-                                    <th>City Code</th>
-                                    <th>Hub Name</th>
-                                    <th>Hub Code</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th class="border-primary border-darken-1">S No.</th>
+                                    <th class="border-primary border-darken-1">City Name</th>
+                                    <th class="border-primary border-darken-1">City Code</th>
+                                    <th class="border-primary border-darken-1">Hub Name</th>
+                                    <th class="border-primary border-darken-1">Hub Code</th>
+                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
                         </div>
+                    </div>
+
+                    <div style="display: none;">
+                        <form id="city_active_form" action="{{route('admin.management.city.status')}}" method="post" class="mt-2">
+                            {{csrf_field()}}
+                            <input type="hidden" name="_method" value="PUT">
+                            <input type="hidden" name="cid" id="cid">
+                            <input type="hidden" name="status" id="cstatus">
+                            <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
+                            <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+
+
+                        </form>
                     </div>
 
                 </div>
@@ -47,51 +55,6 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-
-
-    <style type="text/css">
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #666EE8;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-    </style>
 @endsection
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>
@@ -103,9 +66,48 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.management.city.ajax') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('City Name');
+                            head.push('City Code');
+                            head.push('Hub Name');
+                            head.push('Hub Code');
+                            head.push('Status');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.name);
+                                row.push(values.city_id);
+                                row.push(values.hub);
+                                row.push(values.hub_id);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
            var table =  $('.datatable').DataTable({
+               dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(89, session('permissions')))
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
                     buttons: [{
                        text: 'Add City',
                        className: 'btn btn-primary',
@@ -122,21 +124,28 @@
                            }
                        }
 
+                    },{
+                    extend: 'excel',
+                    title: 'City Management',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 @else
-                    dom: 'ltipr',
+                buttons: [{
+                    extend: 'excel',
+                    title: 'City Management',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
                 @endif
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                scrollX: true, scrollY: '350px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.management.city.ajax') }}',
+                order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'cities.name', class: 'align-middle city'},
@@ -175,6 +184,8 @@
                            }
                        }
                    });
+
+                   this.api().table().columns.adjust();
                }
             });
 
@@ -199,7 +210,7 @@
             var $invoker = $(e.relatedTarget);
             var action = $invoker.attr('rel');
             var id = $(e.relatedTarget).data('target-id');
-            console.log(id)
+            
 
             if(action == 'editcity'){
                 $.get( "/admin/management/city/"+id+"/edit/form", function( data ) {
@@ -213,9 +224,40 @@
             var rel = $(this).attr('rel');
             var isHub = $(this).attr('hub');
             if(isHub == 0){
-                $('.modal-body #cid').val(id);
-                $('.modal-body #cstatus').val(rel);
-                $('#ConfirmModalCity').modal('show');
+                $('#city_active_form #cid').val(id);
+                $('#city_active_form #cstatus').val(rel);
+                if(rel == 'cityInactive'){
+                    var atext = "Select Yes to Deactive this city!";
+                }else{
+                    var atext = "Select Yes to active this city!";
+                }
+                swal({
+                    title: 'Are You Sure?',
+                    text: atext,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $('#city_active_form').submit();
+                    }
+                });
+                // $('#ConfirmModalCity').modal('show');
             }else if(isHub == 1){
                 $.ajax({
                     url:'/admin/management/city/'+id+'/status/ajax',
@@ -249,9 +291,39 @@
                             });
 
                         }else{
-                            $('.modal-body #cid').val(id);
-                            $('.modal-body #cstatus').val(rel);
-                            $('#ConfirmModalCity').modal('show');
+                            $('#city_active_form #cid').val(id);
+                            $('#city_active_form #cstatus').val(rel);
+                            if(rel == 'cityInactive'){
+                                var atext = "Select Yes to Deactive this Hub!";
+                            }else{
+                                var atext = "Select Yes to active this Hub!";
+                            }
+                            swal({
+                                title: 'Are You Sure?',
+                                text: atext,
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function (confirm) {
+                                if (confirm) {
+                                    $('#city_active_form').submit();
+                                }
+                            });
                         }
                         
                     }

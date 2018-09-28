@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Add Subsitute Account')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -19,31 +21,31 @@
 								{{ csrf_field() }}
 
 								<div class="row">
-									<div class="col-4">
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
 											<input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required">
 										</div>
 									</div>
 
-									<div class="col-4">
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
 											<input type="text" name="phone_number" id="phone_number" class="form-control" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
 										</div>
 									</div>
 
-									<div class="col-4">
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
 											<input type="text" name="cnic" id="cnic" class="form-control" placeholder="CNIC*" data-rule-required="true" data-msg-required="CNIC is required">
 										</div>
 									</div>
 
-									<div class="col-4">
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
 											<input type="email" name="email" class="form-control" placeholder="Email*" data-rule-required="true" data-msg-required="Email is required" data-rule-remote="{{ route('cod.substitute_account_management.email') }}" data-msg-remote="Email must be unique">
 										</div>
 									</div>
 
-									<div class="col-4">
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-4">
 										<div class="form-group">
 											<input type="password" name="password" class="form-control" placeholder="Password*" data-rule-required="true" data-msg-required="Password is required" data-rule-minlength="6" data-msg-minlength="Password needs to be at-least 6 characters">
 										</div>
@@ -79,54 +81,6 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')

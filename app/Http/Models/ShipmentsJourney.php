@@ -30,4 +30,8 @@ class ShipmentsJourney extends Model
     public function user() {
     	return $this->belongsTo('App\Http\Models\Shipper\User', 'user_id', 'id');
     }
+
+    public function city() {
+        return $this->belongsTo('App\Http\Models\City');
+    }
 }

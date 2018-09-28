@@ -27,13 +27,10 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function list() {
-      $substitute_users = SubstituteUser::select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.updated_at', 'substitute_users.status')
+      $substitute_users = SubstituteUser::select('substitute_users.id', 'substitute_users.name', 'substitute_users.phone_number', 'substitute_users.email', 'substitute_users.cnic', 'substitute_users.created_at', 'substitute_users.updated_at', 'substitute_users.status')
       ->where('substitute_users.user_id', session('user_id'));
 
       $datatables = Datatables::of($substitute_users)
-      ->editColumn('updated_at', function($substitute_user) {
-        return Carbon::parse($substitute_user->updated_at)->format('d/m/Y H:i A');
-      })
       ->editColumn('status', function ($substitute_user) {
         return (($substitute_user->status) ? 'Enabled' : 'Disabled');
       })
@@ -64,7 +61,7 @@ class ShipperSubstituteAccountManagementController extends Controller
 
         return $dropdown;
       })
-      ->filterColumn('status', function($query, $keyword) {
+      ->filterColumn('substitute_users.status', function($query, $keyword) {
         $keyword = strtolower($keyword);
 
         if (strpos('enabled', $keyword) !== FALSE) {
@@ -122,7 +119,7 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function add_index() {
-      $permissions = SubstituteUserModulePermission::all();
+      $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
 
       return view('client.substitute_account_management.add.index')->with(['permissions' => $permissions]);
     }
@@ -154,11 +151,17 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function update_index($id) {
-      $permissions = SubstituteUserModulePermission::all();
+      $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
       $substitute_user = SubstituteUser::find($id);
-      $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
 
-      return view('client.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions]);
+      if ($substitute_user->user_id == session('user_id')) {
+        $substitute_user_permissions = $substitute_user->permissions->pluck('permission_id')->toArray();
+
+        return view('client.substitute_account_management.update.index')->with(['permissions' => $permissions, 'substitute_user' => $substitute_user, 'substitute_user_permissions' => $substitute_user_permissions]);
+      }
+      else {
+            return redirect()->route('cod.access_denied');
+        }
     }
 
     public function update_store(Request $request, $id) {

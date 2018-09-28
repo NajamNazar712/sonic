@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Done Payments')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -20,6 +22,7 @@
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
+										<th class="border-primary border-darken-1">Payment ID</th>
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
@@ -31,11 +34,12 @@
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
+										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
 										<th class="border-primary border-darken-1">Reference No.</th>
-										<th class="border-primary border-darken-1">Done at</th>
+										<th class="border-primary border-darken-1">Done Datetime</th>
 										<th class="border-primary border-darken-1">Company Bank</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
@@ -145,61 +149,6 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		.modal .modal-dialog.modal-lg.modal-full-length {
-			max-width: 95%;
-		}
-
-		table,
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table thead tr th,
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table tbody tr td,
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -219,16 +168,85 @@
 			});
 
 			var selected_rows = [];
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.finance.done_payments.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Payment ID');
+                            head.push('Shipper');
+                            head.push('City');
+                            head.push('Phone No(s).');
+                            head.push('Address');
+                            head.push('Total Shipments');
+                            head.push('Delivered Shipments');
+                            head.push('Returned Shipments');
+                            head.push('Adjusted Shipments');
+                            head.push('Total Amount');
+                            head.push('Total Charges');
+                            head.push('Total GST');
+                            head.push('Total Deductable');
+                            head.push('Total Payable');
+                            head.push('Bank');
+                            head.push('Return Shipments Avg. Aging');
+                            head.push('Reference No.');
+                            head.push('Done Datetime');
+                            head.push('Company Bank');
+                            head.push('Status');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.id);
+                                row.push(values.shipper);
+                                row.push(values.city);
+                                row.push(values.phone_numbers);
+                                row.push(values.address);
+                                row.push(values.total_shipments);
+                                row.push(values.delivered_shipments_count);
+                                row.push(values.returned_shipments_count);
+                                row.push(values.adjusted_shipments_count);
+                                row.push(values.total_amount);
+                                row.push(values.total_charges);
+                                row.push(values.total_gst);
+                                row.push(values.total_deductable);
+                                row.push(values.total_payable);
+                                row.push(values.bank);
+                                row.push(values.return_shipments_average_aging);
+                                row.push(values.reference_number);
+                                row.push(values.done_at);
+                                row.push(values.company_bank);
+                                row.push(values.status);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
-				scrollX: true,
+				scrollX: true, scrollY: '350px',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || count(array_intersect([62, 63], session('permissions'))) !== 0)
-					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
 					buttons: [
 						@if (session('role_id') == 1 || in_array(62, session('permissions')))
 							{
 							text: 'Paid',
-							className: 'mr-1 btn btn-primary paid',
+							className: 'btn btn-primary paid',
 							enabled: false,
 							action: function (e, dt, node, config) {
 								$.ajax({
@@ -247,16 +265,14 @@
 										toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 									}
 
-									$.each(selected_rows, function(index, id) {
-										table.row($('#datatable tbody tr#' + id)).deselect();
-									});
+									table.rows().deselect();
 
 									selected_rows = [];
 
 									table.button('.paid').disable();
 									table.button('.reverted').disable();
 
-									table.ajax.reload();
+									table.draw('false');
 								});
 							}
 						},
@@ -284,46 +300,52 @@
 										toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 									}
 
-									$.each(selected_rows, function(index, id) {
-										table.row($('#datatable tbody tr#' + id)).deselect();
-									});
+									table.rows().deselect();
 
 									selected_rows = [];
 
 									table.button('.paid').disable();
 									table.button('.reverted').disable();
 
-									table.ajax.reload();
+									table.draw('false');
 								});
 							}
-						}
+						},
 					@endif
-					],
+                    {
+                        extend: 'excel',
+                        title: 'Done Payments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
 				@else
-					dom: 'ltipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Done Payments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
 				@endif
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
+				scrollX: true, scrollY: '350px',
 				select: {
 					info: false,
 					style: 'multi',
 					selector: 'td.select-checkbox',
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
 				ajax: '{{ route('admin.finance.done_payments.list') }}',
 				rowId: 'id',
-				order: [[2, 'asc']],
+				order: [[2, 'desc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data:'id', name: 'done_payments.id', class: 'align-middle text-center id'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
@@ -332,15 +354,16 @@
 					{data:'delivered_shipments', name: 'done_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'done_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'done_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
-					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount'},
-					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
-					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
-					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable'},
-					{data:'bank', name: 'ubi.bank_name', class: 'align-middle text-center bank'},
-					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging'},
+					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', orderable: false},
+					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', orderable: false},
+					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
+					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
+					{data:'bank', name: 'ub.name', class: 'align-middle text-center bank'},
+					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
-					{data:'company_bank', name: 'b.name', class: 'align-middle text-center company_bank'},
+					{data:'company_bank', name: 'b.id', class: 'align-middle text-center company_bank'},
 					{data:'status', name: 'status', class: 'align-middle text-center status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
@@ -359,14 +382,35 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
+                    var company_bank_select = '<select name="company_bank_select" id="company_bank_select" class="select2 form-control"></select>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Processed</option>' +
+                        '<option value="1">Paid</option>' +
+                        '<option value="2">Reverted</option>' +
+                        '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.bank')){
+                            $(bank_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.company_bank')){
+                            $(company_bank_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -377,6 +421,49 @@
 							}
 						}
 					});
+                    var data = $.map({!! $banks !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data = $.map({!! $banks !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#bank_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Bank",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data1 = $.map({!! $company_banks !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data1 = $.map({!! $company_banks !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#company_bank_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Bank",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+					this.api().table().columns.adjust();
 				}
 			});
 
@@ -580,7 +667,7 @@
 							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 						}
 
-						table.ajax.reload();
+						table.draw('false');
 
 						$('#update_details').modal('hide');
 					});

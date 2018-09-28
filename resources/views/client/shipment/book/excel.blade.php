@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Book Excel Shipment(s)')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -7,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Book a Shipment
+					Book Excel Shipment(s)
 				</h1>
 
 				<div class="card">
@@ -15,7 +17,7 @@
 						<div class="card-body">
 							@include('client.inc.messages')
 
-							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.excel_store') }}" novalidate="novalidate">
+							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.excel_store') }}" novalidate="novalidate" enctype="multipart/form-data">
 								{{ csrf_field() }}
 
 								<div class="row align-items-center justify-content-center">
@@ -64,13 +66,13 @@
 									<table class="table table-bordered">
 										<thead>
 											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Show Informaiton on Air Waybill</th>
+												<th colspan="2" class="border-primary border-darken-1">Show Information on Air Waybill</th>
 											</tr>
 										</thead>
 										<tbody>
 											<tr role="row">
-												<td class="text-center">Hide</td>
-												<td class="text-center">Show</td>
+												<td class="text-center">No</td>
+												<td class="text-center">Yes</td>
 											</tr>
 										</tbody>
 									</table>
@@ -78,7 +80,7 @@
 									<table class="table table-bordered">
 										<thead>
 											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Insurance</th>
+												<th colspan="2" class="border-primary border-darken-1">Item Insurance</th>
 											</tr>
 										</thead>
 										<tbody>
@@ -109,25 +111,27 @@
 										</tbody>
 									</table>
 
-									<table class="table table-bordered">
-										<thead>
-											<tr role="row" class="bg-primary white text-center">
-												<th colspan="2" class="border-primary border-darken-1">Same Day Timings</th>
-											</tr>
-											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="text-center border-primary border-lighten-2">ID</th>
-												<th class="border-primary border-lighten-2">Name</th>
-											</tr>
-										</thead>
-										<tbody>
-											@foreach ($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
-												<tr role="row">
-													<td class="text-center">{{ $shipping_mode_same_day_timing->id }}</td>
-													<td>{{ $shipping_mode_same_day_timing->timing }}</td>
+									@if ($shipping_mode_same_day_timings)
+										<table class="table table-bordered">
+											<thead>
+												<tr role="row" class="bg-primary white text-center">
+													<th colspan="2" class="border-primary border-darken-1">Same Day Timings</th>
 												</tr>
-											@endforeach
-										</tbody>
-									</table>
+												<tr role="row" class="bg-primary bg-lighten-1 white">
+													<th class="text-center border-primary border-lighten-2">ID</th>
+													<th class="border-primary border-lighten-2">Name</th>
+												</tr>
+											</thead>
+											<tbody>
+												@foreach ($shipping_mode_same_day_timings as $shipping_mode_same_day_timing)
+													<tr role="row">
+														<td class="text-center">{{ $shipping_mode_same_day_timing->id }}</td>
+														<td>{{ $shipping_mode_same_day_timing->timing }}</td>
+													</tr>
+												@endforeach
+											</tbody>
+										</table>
+									@endif
 
 									<table class="table table-bordered">
 										<thead>
@@ -170,6 +174,72 @@
 											@endforeach
 										</tbody>
 									</table>
+
+									<table class="table table-bordered">
+										<thead>
+											<tr role="row" class="bg-primary white text-center">
+												<th colspan="2" class="border-primary border-darken-1">Character Limits</th>
+											</tr>
+											<tr role="row" class="bg-primary bg-lighten-1 white">
+												<th class="border-primary border-lighten-2">Field</th>
+												<th class="text-center border-primary border-lighten-2">Limit</th>
+											</tr>
+										</thead>
+										<tbody>
+											<tr role="row">
+												<td>Consignee City Name</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Consignee Name</td>
+												<td class="text-center">100</td>
+											</tr>
+											<tr role="row">
+												<td>Consignee Address</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Consignee Email Address</td>
+												<td class="text-center">100</td>
+											</tr>
+											<tr role="row">
+												<td>Order ID</td>
+												<td class="text-center">100</td>
+											</tr>
+											<tr role="row">
+												<td>Item Description</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Item Quantity</td>
+												<td class="text-center">1000</td>
+											</tr>
+											<tr role="row">
+												<td>Product Value</td>
+												<td class="text-center">100000</td>
+											</tr>
+											<tr role="row">
+												<td>Replacement Item Description</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Replacement Item Quantity</td>
+												<td class="text-center">1000</td>
+											</tr>
+											<tr role="row">
+												<td>Special Instructions</td>
+												<td class="text-center">190</td>
+											</tr>
+											<tr role="row">
+												<td>Estimated Weight (kg)</td>
+												<td class="text-center">1000</td>
+											</tr>
+											<tr role="row">
+												<td>Collection Amount</td>
+												<td class="text-center">1000000</td>
+											</tr>
+										</tbody>
+									</table>
 								</div>
 
 								<div class="col">
@@ -201,15 +271,13 @@
 												<th colspan="2" class="border-primary border-darken-1">Cities</th>
 											</tr>
 											<tr role="row" class="bg-primary bg-lighten-1 white">
-												<th class="text-center border-primary border-lighten-2">ID</th>
 												<th class="border-primary border-lighten-2">Name</th>
 											</tr>
 										</thead>
 										<tbody>
 											@foreach ($cities as $city)
 												<tr role="row">
-													<td class="text-center">{{ $city->id }}</td>
-													<td>{{ $city->name }}</td>
+													<td>{{ $city }}</td>
 												</tr>
 											@endforeach
 										</tbody>
@@ -256,7 +324,7 @@
 						closeOnEsc: false
 					});
 
-					// form.submit();
+					form.submit();
 				}
 			});
 		});

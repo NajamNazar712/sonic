@@ -1,5 +1,6 @@
-
 @extends('admin.layout.master')
+
+@section('title', 'Packaging Material Stock')
 
 @section('content')
     <h1 class="mb-1">
@@ -147,11 +148,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-
-
-
-    <style>
+    <style type="text/css">
         table.dataTable {
             font-size: 12px;
         }
@@ -176,7 +173,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -187,7 +184,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -202,15 +202,10 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--<script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>--}}
-    {{--<script src="{{asset('app-assets/vendors/js/forms/tags/tagging.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    {{--<script src="{{asset('app-assets/vendors/js/ui/perfect-scrollbar.jquery.min.js')}}" type="text/javascript"></script>--}}
-
-
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -274,11 +269,56 @@
                 'min': 0,
                 'max': 10000
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.packaging.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Invoice No./Cargo ID');
+                            head.push('Entry Type');
+                            head.push('Entered Date/Time');
+                            head.push('Entered By');
+                            head.push('Small Flyers');
+                            head.push('Medium Flyers');
+                            head.push('Large Flyers');
+                            head.push('Boxes');
+                            head.push('Hub');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.reference_number);
+                                row.push(values.entry_type);
+                                row.push(values.created_at);
+                                row.push(values.admin);
+                                row.push(values.small_flyers);
+                                row.push(values.medium_flyers);
+                                row.push(values.large_flyers);
+                                row.push(values.boxes);
+                                row.push(values.hub);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var table = $('#datatable').DataTable({
-                // "scrollX": true,
-                @if (session('role_id') == 1 || count(array_intersect([77, 78], session('permissions'))) !== 0)
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                @if (session('role_id') == 1 || count(array_intersect([77, 78], session('permissions'))) !== 0)
+
                     buttons: [
                     @if (session('role_id') == 1 || in_array(77, session('permissions')))
                         {
@@ -301,25 +341,32 @@
                                 $('#SendStockModal').modal('show');
 
                             }
-                        }
+                        },
                     @endif
-                    ],
+                        {
+                            extend: 'excel',
+                            title: 'Packaging Material Stock',
+                            className:'btn btn-primary',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
+                        }],
+
                 @else
-                    dom: 'ltipr',
+                    buttons:[{
+                    extend: 'excel',
+                    title: 'Packaging Material Stock',
+                    className:'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
                 @endif
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                scrollX: true, scrollY: '350px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.packaging.list') }}',
                 rowId: 'psh_id',
-                order: [[3, 'asc']],
+                order: [[3, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'reference_number', name: 'packaging_stock_histories.reference_number', class: 'align-middle reference_number'},
@@ -343,7 +390,10 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var entry_select = '<select name="entry_select" id="entry_select" class="select2 form-control">' +
+                        '<option value="0">Inbound</option>' +
+                        '<option value="1">Outbound</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -351,6 +401,11 @@
 
                         if ($(header).is('.serial_number')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.entry_type')){
+                            $(entry_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -362,6 +417,13 @@
                             }
                         }
                     });
+                    $("#entry_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    this.api().table().columns.adjust();
                 }
             });
 

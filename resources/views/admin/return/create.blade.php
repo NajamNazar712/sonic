@@ -1,5 +1,6 @@
 
 @extends('admin.layout.master')
+@section('title','Create Return Note')
 
 @section('content')
     <h1 class="mb-1">
@@ -22,7 +23,6 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="rider_name" id="rider_name" class="form-control select2" required >
-                                <option value="">Select a rider</option>
                                 @foreach($riders as $rider)
                                     <option value="{{$rider->id}}" data-id="{{$rider->route_id}}">{{$rider->name}}</option>
                                 @endforeach
@@ -33,7 +33,6 @@
                     <div class="col-3">
                         <fieldset class="form-group">
                             <select name="route" id="route" class="form-control select2" required>
-                                <option value="">Select a route</option>
                                 @foreach($routes as $route)
                                     <option value="{{$route->id}}">{{$route->code}} ({{$route->start}} to {{$route->end}})</option>
                                 @endforeach
@@ -55,7 +54,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
+                        <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Action</th>
@@ -81,7 +80,6 @@
     </div>
 
 
-    </div>
 
 @endsection
 
@@ -114,7 +112,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -180,14 +178,10 @@
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
+                scrollX: true, scrollY: '350px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
-                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {name: 'tracking_number', class: 'align-middle tracking_number'},
@@ -212,12 +206,17 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
 
-
+                    this.api().table().columns.adjust();
                 }
             });
 
 
-            $('.select2').select2();
+            $('#rider_name').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Rider*',
+            });
+            $('#route').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Select Route*',
+            });
             $('#rider_name').on('change',function () {
                 var route = $(this).find(":selected").data("id");
                 $('#route').val(route).trigger('change');
@@ -248,7 +247,7 @@
                             $('input#scan_tracking').focus();
                         } else {
                             var rowNo = table.rows().count();
-                            var remove = '<a href="#" class="deliverynoterow">Delete</a>';
+                            var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
                             table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
                             table.draw(false);
                             shipment_ids.push(data.shId);
@@ -309,6 +308,7 @@
 
 
             $('#create_return_note_form').bind('submit', function(event) {
+                var this_form = this;
                 event.preventDefault();
                 var count = table.rows().count();
                 var errors = 0;
@@ -338,18 +338,36 @@
                     if (errors == 0) {
                         $('#create_return_note_form button[type="submit"]').attr('disabled', 'disabled');
                         swal({
-                            title: 'Please Wait!',
-                            text: 'Return Shipments are being submited!',
-                            icon: 'info',
-                            buttons: false,
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to create the Return Note!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
                             closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-                        $('#create_return_note_form input#shipment_ids').val(shipment_ids);
-                        $('#create_return_note_form input#selected_rider_id').val(rider);
-                        $('#create_return_note_form input#selected_route_id').val(route);
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if (confirm) {
+                                $('#create_return_note_form input#shipment_ids').val(shipment_ids);
+                                $('#create_return_note_form input#selected_rider_id').val(rider);
+                                $('#create_return_note_form input#selected_route_id').val(route);
 
-                        this.submit();
+                                this_form.submit();
+
+                            }
+                        });
 
                     }
                 }else{

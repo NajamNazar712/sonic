@@ -1,5 +1,6 @@
-
 @extends('admin.layout.master')
+
+@section('title', 'Disputes')
 
 @section('content')
     <h1 class="mb-1">
@@ -17,7 +18,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Dispute No.</th>
-                        <th class="border-primary border-darken-1">Dispute Date/Time</th>
+                        <th class="border-primary border-darken-1">Dispute Datetime</th>
                         <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Originated At</th>
                         <th class="border-primary border-darken-1">Dispute Type</th>
@@ -142,17 +143,18 @@
                 <div class="modal-body text-center">
                         <h2>Are You Sure?</h2>
                 </div>
+                <div class="modal-footer text-center">
                 <input type="hidden" id="disputeId">
-                    <div class="row justify-content-center no-gutters">
-                        <div class="col">
-                            <button type="button" class="btn btn-outline-danger block padding-right-0 dispute-resolve">Yes</button>
-                        </div>
-                        <div class="col">
-                            <button type="button" class="btn btn-outline-primary block padding-left-0" data-dismiss="modal">No</button>
-                        </div>
+                    <div class="row">
+
+                            <button type="button" class="btn btn-danger btn-min-width mr-1 mb-1 dispute-resolve">Yes</button>
+
+
+                            <button type="button" class="btn btn-primary btn-min-width mr-1 mb-1" data-dismiss="modal">No</button>
+
                     </div>
 
-
+                </div>
 
             </div>
         </div>
@@ -166,7 +168,6 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-{{--    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/ui/perfect-scrollbar.min.css')}}">--}}
 
 
 
@@ -195,7 +196,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -265,7 +266,7 @@
             padding: 10px;
             border: 1px #cccccc;
             border-radius:4px;
-            background: #666ee80d;
+            background: #64a0d20d;
             margin-bottom: 5px;
         }
         td.align-middle.description {
@@ -281,7 +282,6 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-    {{--<script src="{{asset('app-assets/vendors/js/ui/perfect-scrollbar.jquery.min.js')}}" type="text/javascript"></script>--}}
 
 
     <script type="text/javascript">
@@ -322,45 +322,100 @@
                     }
                 }
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.dispute.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Dispute No.');
+                            head.push('Dispute Date');
+                            head.push('Description');
+                            head.push('Originated At');
+                            head.push('Dispute Type');
+                            head.push('No. Of Shipments');
+                            head.push('Launched By');
+                            head.push('Updated By');
+                            head.push('Status');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.dispute_id);
+                                row.push(values.created_at);
+                                row.push(values.description);
+                                row.push(values.originated_at);
+                                row.push(values.dispute_type);
+                                row.push(values.shipments_count);
+                                row.push(values.launched_by);
+                                row.push(values.updated_by);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 
         var table = $('#datatable').DataTable({
+            dom: '<"d-inline-block"l><"pull-right"B>tipr',
             @if (session('role_id') == 1 || in_array(2, session('permissions')))
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
                 buttons: [{
-                    text: 'Launch Dispute',
+                    text: '<i class="la la-calendar-times-o"></i> Launch',
                     className: 'btn btn-primary dispute_modal',
                     enabled: true,
                     action: function (e, dt, node, config) {
                         $('#DisputeModal').modal('show');
                     }
-                }],
+                },
+                    {
+                        extend: 'excel',
+                        className: 'btn btn-primary',
+                        title: 'Disputes',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
             @else
-                dom: 'ltipr',
+            buttons: [
+                {
+                    extend: 'excel',
+                    className: 'btn btn-primary',
+                    title: 'Disputes',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
             @endif
-            fixedHeader: {
-                header: true,
-                headerOffset: $('.header-navbar').height()
-            },
-            lengthMenu: [[25, 50, 100], [25, 50, 100]],
-            pageLength: 25,
-            stateSave: true,
+            scrollX: true, scrollY: '350px',
+            lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+            pageLength: 50,
             pagingType: 'full_numbers',
             processing: true,
             serverSide: true,
             ajax: '{{ route('admin.dispute.list') }}',
             rowId: 'dispute_id',
-            order: [[1, 'asc']],
+            order: [[2, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'dispute_id', name: 'dispute_id', class: 'align-middle dispute_id'},
-                {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
-                {data: 'description', name: 'description', class: 'align-middle description'},
-                {data: 'originated_at', name: 'originated_at', class: 'align-middle originated_at'},
+                {data: 'dispute_id', name: 'disputes.id', class: 'align-middle dispute_id'},
+                {data: 'created_at', name: 'disputes.created_at', class: 'align-middle created_at'},
+                {data: 'description', name: 'disputes.description', class: 'align-middle description'},
+                {data: 'originated_at', name: 'cities.name', class: 'align-middle originated_at'},
                 {data: 'dispute_type', name: 'dispute_type', class: 'align-middle dispute_type'},
-                {data: 'no_of_shipments', name: 'sm.mode', class: 'align-middle mode'},
-                {data: 'launched_by', name: 'launched_by', class: 'align-middle launched_by'},
-                {data: 'updated_by', name: 'updated_by', class: 'align-middle updated_by'},
-                {data: 'status', name: 'status', class: 'align-middle status'},
+                {data: 'no_of_shipments', name: 'disputes.shipments_count', class: 'align-middle mode'},
+                {data: 'launched_by', name: 'launched_by', class: 'align-middle launched_by',orderable: false, searchable: false},
+                {data: 'updated_by', name: 'au.name', class: 'align-middle updated_by'},
+                {data: 'status', name: 'status', class: 'align-middle status dropdown_search'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
             ],
@@ -368,20 +423,38 @@
                 var info = table.page.info();
                 $('td:eq(0)', row).html(index + 1 + info.page * info.length);
             },
+            drawCallback: function (settings) {
+
+            },
             initComplete: function() {
                 var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
                 var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                 var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                 var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    '<option value="0">Launched</option>' +
+                    '<option value="1">Updated</option>' +
+                    '<option value="2">Resolved</option>' +
+                    '</select>';
+                var dispute_select = '<select name="dispute_select" id="dispute_select" class="select2 form-control"></select>';
 
                 this.api().columns().every(function(column_id) {
                     var column = this;
                     var header = column.header();
 
-
-                    if ($(header).is('.action') || $(header).is('.serial_number')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.launched_by') ) {
                         $(td).appendTo($(search));
+                    }else if($(header).is('.status')){
+                        $(drop_select).appendTo($(search))
+                    .on( 'change', function () {
+                        column.search($(this).val(), false, false, true).draw();
+                        } ).wrap(td);
+                    }else if($(header).is('.dispute_type')){
+                        $(dispute_select).appendTo($(search))
+                    .on( 'change', function () {
+                        column.search($(this).val(), false, false, true).draw();
+                        } ).wrap(td);
                     }
                     else {
                         var current = $(input).appendTo($(search)).on('change', function() {
@@ -393,13 +466,38 @@
                         }
                     }
                 });
+                $("#status_select").prepend('<option value="" selected></option>').select2({
+                    placeholder: "Select a Status",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                var data = $.map({!! $dispute_types !!}, function (obj) {
+                    obj.id = obj.id // replace pk with your identifier
+
+                    return obj;
+                });
+                var data = $.map({!! $dispute_types !!}, function (obj) {
+                    obj.text = obj.type; // replace name with the property used for the text
+
+                    return obj;
+                });
+
+                $("#dispute_select").prepend('<option value="" selected></option>').select2({
+                    data:data,
+                    placeholder: "Select Type",
+                    width:'100%',
+                    containerCssClass: 'select-xs',
+                    dropdownCssClass: 'form-control-sm p-0'
+                });
+                this.api().table().columns.adjust();
             }
         });
         // $('.dispute_modal').on('click',function () {
         //
         // });
 
-        var max_char = 250;
+        var max_char = 190;
         $('#description').on('keypress copy paste',function (e) {
             // var comment = $(this).val();
             // console.log(comment)
@@ -424,7 +522,7 @@
             $('#dispute_type_select').val('').trigger('change');
         });
         $('#DisputeUpdateModal').on('hidden.bs.modal',function (e) {
-            table.ajax.reload();
+            table.draw('false');
         });
         $('#dispute_form').on('submit',function (e) {
             e.preventDefault();
@@ -463,7 +561,7 @@
                     }
 
                     if(data.success != undefined){
-                        table.ajax.reload();
+                        table.draw('false');
                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                     }
@@ -505,32 +603,60 @@
         });
         $('body').on('click','.resolve',function () {
             var disputeId = parseInt($(this).parents('tr').attr('id'));
-           $('#ResolveModal').modal('show');
-           $('#disputeId').val(disputeId);
-        });
-        $('body').on('click','.dispute-resolve',function () {
-            var resolve_id = $('#disputeId').val();
-            // console.log(resolve_id);
-            if(resolve_id !== '') {
-                $.ajax({
-                    url: '{!! route('admin.dispute.resolve') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': resolve_id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    $('#ResolveModal').modal('hide');
-                    if(data.status === 1){
-                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        table.ajax.reload();
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+            if(disputeId){
+                swal({
+                    title: 'Are You Sure?',
+                    text: 'Select Yes to resolve this dispute!',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.dispute.resolve') !!}',
+                            method: 'POST',
+                            data: {
+                                'id': disputeId,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            // $('#ResolveModal').modal('hide');
+                            if(data.status === 1){
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                table.draw('false');
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
+                            }
+                        });
                     }
                 });
             }
+           // $('#ResolveModal').modal('show');
+           // $('#disputeId').val(disputeId);
         });
+        // $('body').on('click','.dispute-resolve',function () {
+        //     var resolve_id = $('#disputeId').val();
+        //     // console.log(resolve_id);
+        //     if(resolve_id !== '') {
+        //
+        //     }
+        // });
         $('body').on('click','.update',function(){
             var disputeId = parseInt($(this).parents('tr').attr('id'));
             // console.log(disputeId)

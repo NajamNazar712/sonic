@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Receive Cargo')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -69,54 +71,6 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -127,18 +81,15 @@
 
 	<script>
 		$(document).ready(function() {
-			var cargo_consignment_id = {{ session('cargo_consignment_id') }};
+			var cargo_consignment_id = {{ ltrim(session('cargo_consignment_id'), '0') }};
 
 			var shipment_ids = [];
 
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-				pageLength: 25,
+				scrollX: true, scrollY: '350px',
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				columns: [
 					{name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -155,6 +106,9 @@
 					var info = table.page.info();
 
 					$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+				},
+				initComplete: function() {
+					this.api().table().columns.adjust();
 				}
 			});
 
@@ -171,6 +125,8 @@
 					error.addClass('w-100').appendTo(element.parents('form'));
 				},
 				submitHandler: function(form) {
+					$('#add_shipment_form button.add').prop('disabled', true);
+
 					var tracking_number = $(form).find('input.tracking_number').val();
 
 					form.reset();
@@ -186,6 +142,8 @@
 							}
 						})
 						.done(function(data) {
+							$('#add_shipment_form button.add').prop('disabled', false);
+
 							if (data.status == 0) {
 								table.row.add([0, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]);
 								table.draw(false);
@@ -204,8 +162,12 @@
 						});
 					}
 					else {
+						$('#add_shipment_form button.add').prop('disabled', false);
+
 						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 					}
+
+					$('#add_shipment_form button.add').prop('disabled', false);
 
 					return false;
 				}
@@ -254,13 +216,13 @@
 							icon: 'warning',
 							buttons: {
 								cancel: {
-									text: 'Close',
+									text: 'No',
 									value: null,
 									visible: true,
 									closeModal: true,
 								},
 								confirm: {
-									text: 'Done',
+									text: 'Yes',
 									value: true,
 									visible: true,
 									closeModal: true

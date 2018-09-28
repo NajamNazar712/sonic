@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\BookingType;
+use App\Http\Models\CargoConsignmentStatus;
+use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -32,7 +35,10 @@ class AdminCargoController extends Controller
     }
 
     public function pending_index() {
-      return view('admin.cargo.pending');
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $service_type = BookingType::all();
+        $shipping_mode = ShippingMode::all();
+      return view('admin.cargo.pending')->with(['shipment_status'=>$shipment_status,'service_type'=>$service_type,'shipping_mode'=>$shipping_mode]);
     }
 
     public function pending_list(Request $request) {
@@ -50,17 +56,95 @@ class AdminCargoController extends Controller
         $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
         ->on('shipments_journey.shipper_status_id', '=', DB::raw(2));
       })
-      ->select('shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at');
+      ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at');
 
       if (session('role_id') != 1) {
-        $shipments = $shipments->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+        $shipments = $shipments->where(function ($query) {
+          $query->where(function ($sub_query) {
+            $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+            ->whereIn('dc.hub_id', session('hubs'));
+          })
+          ->orWhere(function ($sub_query) {
+            $sub_query->where('shipments.shipper_status_id', 2)
+            ->whereIn('oc.hub_id', session('hubs'));
+          });
+        });
       }
 
       $datatables = Datatables::of($shipments)
       ->editColumn('tracking_number', function ($shipments) {
           $route = route('admin.tracking.index');
           return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
-      });
+      })
+      ->editColumn('origin', function ($shipments) {
+        if (in_array($shipments->shipper_status_id, [20, 30, 36, 37])) {
+          return $shipments->destination;
+        }
+        else {
+          return $shipments->origin;
+        }
+      })
+      ->editColumn('destination', function ($shipments) {
+        if (in_array($shipments->shipper_status_id, [20, 30, 36, 37])) {
+          return $shipments->origin;
+        }
+        else {
+          return $shipments->destination;
+        }
+      })
+      ->filterColumn('status',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('ss.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
+      })
+      ->filterColumn('service_type',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('bt.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
+      })
+      ->filterColumn('shipping_mode',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('sm.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
+      })
+      ->filterColumn('oc.name', function ($query, $keyword) {
+          $keyword = strtolower($keyword);
+
+          $query->where(function ($sub_query) use ($keyword) {
+            $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+            ->where('dc.name', 'like', '%' . $keyword . '%');
+          })
+          ->orWhere(function ($sub_query) use ($keyword) {
+            $sub_query->where('shipments.shipper_status_id', 2)
+            ->where('oc.name', 'like', '%' . $keyword . '%');
+          });
+      })
+      ->filterColumn('dc.name', function ($query, $keyword) {
+          $keyword = strtolower($keyword);
+
+          $query->where(function ($sub_query) use ($keyword) {
+            $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+            ->where('oc.name', 'like', '%' . $keyword . '%');
+          })
+          ->orWhere(function ($sub_query) use ($keyword) {
+            $sub_query->where('shipments.shipper_status_id', 2)
+            ->where('dc.name', 'like', '%' . $keyword . '%');
+          });
+      })
+      ->orderColumn('oc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), dc.name, oc.name)') . ' $1')
+      ->orderColumn('dc.name', DB::raw('IF (shipments.shipper_status_id IN (20, 30, 36, 37), oc.name, dc.name)') . ' $1');
 
       if ($shipment_type = $request->get('shipment_type')) {
         if ($shipment_type == 0) {
@@ -90,79 +174,144 @@ class AdminCargoController extends Controller
       if ($shipment->exists()) {
         $shipment = $shipment->first();
 
-        if (session('role_id') == 1 || (in_array($shipment->pickup_address->city->hub_id, session('hubs')) || in_array($shipment->destination_city->hub_id, session('hubs')))) {
-          if ($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) {
-            $hub = City::find($shipment->consignee_city->hub_id);
+        if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37])) {
+          if ($shipment->shipper_status_id != 2) {
+            $hub_id = $shipment->consignee_city->hub_id;
+          }
+          else {
+            $hub_id = $shipment->pickup_address->city->hub_id;
+          }
 
-            if ($request->hub_id == 0 || $request->hub_id == $shipment->consignee_city->hub_id) {
-              if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37])) {
-                $details = array();
-
-                if ($request->cargo_type != 0) {
-                  if ($request->cargo_type == 1) {
-                    if ($shipment->shipper_status_id != 2) {
-                      return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
-                    }
-                  }
-                  else {
-                    if (!in_array($shipment->shipper_status_id, [20, 30, 36, 37])) {
-                      return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
-                    }
-                  }
+          if (session('role_id') == 1 || (in_array($hub_id, session('hubs')))) {
+            if ($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) {
+              if ($request->cargo_type != 0) {
+                if ($shipment->shipper_status_id == 2) {
+                  $hub_id = $shipment->consignee_city->hub_id;
                 }
                 else {
-                  if ($shipment->shipper_status_id == 2) {
-                    $details['cargo_type'] = 1;
-                  }
-                  else {
-                    $details['cargo_type'] = 2;
-                  }
+                  $hub_id = $shipment->pickup_address->city->hub_id;
                 }
-
-                $details['id'] = $shipment->id;
-                $details['tracking_number'] = $shipment->tracking_number;
-                $details['order_id'] = $shipment->order_id;
-                $details['service_type'] = $shipment->booking_type->booking_type;
-                $details['destination'] = $shipment->consignee_city->name;
-                $details['amount'] = $shipment->amount;
-                $details['shipping_mode'] = $shipment->shipping_mode->mode;
-
-                $hub = City::find($shipment->consignee_city->hub_id);
-
-                $details['hub']['id'] = $hub->id;
-                $details['hub']['name'] = $hub->name;
-
-                if ($request->hub_id == 0) {
-                  $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
-                  ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-                  ->join('cities as dc', function($join) {
-                    $join->on('shipments.consignee_city_id', '=', 'dc.id')
-                    ->on('oc.hub_id', '!=', 'dc.hub_id');
-                  })
-                  ->select(DB::raw('count(shipments.id) as count'))
-                  ->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37])
-                  ->where('dc.hub_id', $hub->id)
-                  ->first();
-
-                  $details['total'] = $shipments->count;
-                }
-
-                return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
               }
               else {
-                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                $hub_id = 0;
+              }
+
+              if ($request->hub_id == 0 || $request->hub_id == $hub_id) {
+                if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {
+                  $details = array();
+
+                  if ($request->cargo_type != 0) {
+                    if ($request->cargo_type == 1) {
+                      if ($shipment->shipper_status_id != 2) {
+                        return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
+                      }
+
+                      $cargo_type = 1;
+                    }
+                    else {
+                      if (!in_array($shipment->shipper_status_id, [20, 30, 36, 37])) {
+                        return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Normal Type while the Cargo is Return Type'];
+                      }
+
+                      $cargo_type = 2;
+                    }
+                  }
+                  else {
+                    if ($shipment->shipper_status_id == 2) {
+                      $details['cargo_type'] = 1;
+
+                      $cargo_type = 1;
+                    }
+                    else {
+                      $details['cargo_type'] = 2;
+
+                      $cargo_type = 2;
+                    }
+                  }
+
+                  if ($cargo_type == 1) {
+                    $destination = $shipment->consignee_city;
+                  }
+                  else {
+                    $destination = $shipment->pickup_address->city;
+                  }
+
+                  $details['id'] = $shipment->id;
+                  $details['tracking_number'] = $shipment->tracking_number;
+                  $details['order_id'] = $shipment->order_id;
+                  $details['service_type'] = $shipment->booking_type->booking_type;
+                  $details['destination'] = $destination->name;
+                  $details['amount'] = $shipment->amount;
+
+                  $hub = $destination->hub_city;
+
+                  $details['hub']['id'] = $hub->id;
+                  $details['hub']['name'] = $hub->name;
+
+                  $shipping_mode_id = $request->shipping_mode_id;
+
+                  if ($shipping_mode_id == 0) {
+                    $shipping_mode_id = $shipment->shipping_mode->id;
+
+                    $details['shipping_mode']['id'] = $shipment->shipping_mode->id;
+                    $details['shipping_mode']['name'] = $shipment->shipping_mode->mode;
+                  }
+
+                  if ($request->hub_id == 0) {
+                    if ($cargo_type == 1) {
+                      $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                      ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+                      ->join('cities as dc', function($join) {
+                        $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                        ->on('oc.hub_id', '!=', 'dc.hub_id');
+                      })
+                      ->select(DB::raw('count(shipments.id) as count'))
+                      ->where('dc.hub_id', $hub->id)
+                      ->where('shipments.shipper_status_id', 2)
+                      ->where('shipments.shipping_mode_id', $shipping_mode_id);
+                    }
+                    else {
+                      $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                      ->join('cities as dc', 'usi.city_id', '=', 'dc.id')
+                      ->join('cities as oc', function($join) {
+                        $join->on('shipments.consignee_city_id', '=', 'oc.id')
+                        ->on('dc.hub_id', '!=', 'oc.hub_id');
+                      })
+                      ->select(DB::raw('count(shipments.id) as count'))
+                      ->where('dc.hub_id', $hub->id)
+                      ->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+                      ->where('shipments.shipping_mode_id', $shipping_mode_id);
+                    }
+
+                    if (session('role_id') != 1) {
+                      $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
+                    }
+
+                    $shipments = $shipments->first();
+
+                    $details['total'] = $shipments->count;
+                  }
+
+                  return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
+                }
+                else {
+                  return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
+                }
+              }
+              else {
+                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
               }
             }
             else {
-              return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
+              return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
             }
           }
           else {
-            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to any of your assigned Hub\'s Cities'];
           }
         }
         else {
-          return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to any of your assigned Hub\'s Cities'];
+          return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
         }
       }
       else {
@@ -173,14 +322,14 @@ class AdminCargoController extends Controller
     public function create_consignment_details(Request $request) {
       $shipment = Shipment::find(current($request->shipment_ids));
 
-      $origin = $shipment->pickup_address->city;
+      $origin = $shipment->pickup_address->city->hub_city;
 
       $origin_details = array();
 
       $origin_details['id'] = $origin->id;
       $origin_details['name'] = $origin->name;
 
-      $destination = $shipment->consignee_city;
+      $destination = $shipment->consignee_city->hub_city;
 
       $destination_details = array();
 
@@ -191,13 +340,6 @@ class AdminCargoController extends Controller
 
       $details['junctions'] = City::select(['id', 'name'])->where('hub', 1)->where('status', 1)->get();
 
-      $hub = City::find($destination->hub_id);
-
-      $details['hub']['id'] = $hub->id;
-      $details['hub']['name'] = $hub->name;
-
-      $details['shipping_modes'] = ShippingMode::where('id', '!=', 4)->get();
-
       $details['transport_modes'] = TransportMode::all();
 
       $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
@@ -207,21 +349,9 @@ class AdminCargoController extends Controller
       $details['sender']['id'] = $sender->id;
       $details['sender']['name'] = $sender->name;
 
-      $details['receivers'] = Admin::all(['id', 'name']);
-
-      foreach ($request->shipment_ids as $shipment_id) {
-        $shipment = Shipment::find($shipment_id);
-
-        if ($shipment->pickup_address->city->id != $origin_details['id']) {
-          $origin_details['id'] = 1;
-          $origin_details['name'] = 'Multiple';
-        }
-
-        if ($shipment->consignee_city->id != $destination_details['id']) {
-          $destination_details['id'] = 1;
-          $destination_details['name'] = 'Multiple';
-        }
-      }
+      $details['receivers'] = Admin::where('status', 1)->whereHas('hubs', function ($query) use($destination_details) {
+        $query->where('hub_id',  $destination_details['id']);
+      })->select(['id', 'name'])->get();
 
       if ($request->cargo_type == 1) {
         $details['origin'] = $origin_details;
@@ -235,16 +365,35 @@ class AdminCargoController extends Controller
       return $details;
     }
 
+    public function create_consignment_seal_number(Request $request) {
+      if ($request->filled('seal_number')) {
+        $seal_number = CargoConsignment::where('seal_number', $request->input('seal_number'));
+
+        if ($request->has('id')) {
+            $seal_number = $seal_number->where('id', '!=', $request->input('id'));
+        }
+
+        if (!$seal_number->exists()) {
+          return 'true';
+        }
+        else {
+          return 'false';
+        }
+      }
+      else {
+        return 'false';
+      }
+    }
+
     public function create_store(Request $request) {
       $cargo_consignment = new CargoConsignment();
 
-      $cargo_consignment->origin_city_id = $request->input('origin_city_id');
-      $cargo_consignment->destination_city_id = $request->input('destination_city_id');
-      $cargo_consignment->junction_city_1_id = $request->input('junction_1');
-      $cargo_consignment->junction_city_2_id = $request->input('junction_2');
-      $cargo_consignment->hub_id = $request->input('hub_id');
+      $cargo_consignment->origin_hub_id = $request->input('origin_hub_id');
+      $cargo_consignment->destination_hub_id = $request->input('destination_hub_id');
+      $cargo_consignment->junction_hub_1_id = $request->input('junction_1');
+      $cargo_consignment->junction_hub_2_id = $request->input('junction_2');
       $cargo_consignment->seal_number = $request->input('seal_number');
-      $cargo_consignment->shipping_mode_id = $request->input('shipping_mode');
+      $cargo_consignment->shipping_mode_id = $request->input('shipping_mode_id');
       $cargo_consignment->transport_mode_id = $request->input('transport_mode');
 
       if ($request->input('transport_mode_vendor') == 0) {
@@ -348,30 +497,61 @@ class AdminCargoController extends Controller
     }
 
     public function in_transit_index() {
-      return view('admin.cargo.in_transit');
+        $shipping_mode = ShippingMode::all();
+        $cargo_status = CargoConsignmentStatus::all();
+        $transport_vendor = TransportModeVendor::all();
+        $transport_mode = TransportMode::all();
+      return view('admin.cargo.in_transit')->with(['shipping_mode'=>$shipping_mode,'cargo_status'=>$cargo_status,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor]);
     }
 
     public function in_transit_list(Request $request) {
-      $cargo_consignments = CargoConsignment::join('cities as oc', 'cargo_consignments.origin_city_id', '=', 'oc.id')
-      ->join('cities as dc', 'cargo_consignments.destination_city_id', '=', 'dc.id')
-      ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
+      $cargo_consignments = CargoConsignment::join('cities as oh', 'cargo_consignments.origin_hub_id', '=', 'oh.id')
+      ->join('cities as dh', 'cargo_consignments.destination_hub_id', '=', 'dh.id')
       ->join('shipping_modes as sm', 'cargo_consignments.shipping_mode_id', '=', 'sm.id')
       ->join('admins as a', 'cargo_consignments.sender_id', '=', 'a.id')
       ->join('cargo_consignment_status as ccs', 'cargo_consignments.status_id', '=', 'ccs.id')
-      ->select('cargo_consignments.id' , 'oc.id as origin_id', 'oc.name as origin', 'dc.id as destination_id', 'dc.name as destination', 'hc.name as hub', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status')
+      ->join('cities as jh1', 'cargo_consignments.junction_hub_1_id', '=', 'jh1.id')
+      ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
+      ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
+      ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
+      ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status')
       ->whereIn('cargo_consignments.status_id', [1, 2, 4]);
 
       if (session('role_id') != 1) {
-        $cargo_consignments = $cargo_consignments->whereIn('oc.hub_id', session('hubs'))->orWhereIn('dc.hub_id', session('hubs'));
+        $cargo_consignments = $cargo_consignments->where(function ($query) {
+          $query->whereIn('oh.hub_id', session('hubs'))->orWhereIn('dh.hub_id', session('hubs'))->orWhereIn('cargo_consignments.junction_hub_1_id', session('hubs'))->orWhereIn('cargo_consignments.junction_hub_1_id', session('hubs'));
+        });
       }
 
       $datatables = Datatables::of($cargo_consignments)
-      ->editColumn('transit_at', function($cargo_consignment) {
-        return Carbon::parse($cargo_consignment->transit_at)->format('d/m/Y H:i A');
+      ->editColumn('id', function ($cargo_consignment) {
+          return str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
       })
+      ->filterColumn('cargo_consignments.id', function ($query, $keyword) {
+          return $query->where('cargo_consignments.id', '=', $keyword);
+      })
+      ->filterColumn('shipping_mode',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('sm.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
+      })
+      ->filterColumn('status',function ($query,$keyword){
+
+          if ($keyword != '') {
+              $query->where('ccs.id',$keyword);
+          }
+          else {
+              $query->whereRaw('false');
+          }
+      })
+
       ->addColumn('action', function($cargo_consignment) {
         $print_button = '<button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>';
-        $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Forwarding Details</div></button>';
+        $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Forwarding Details</div></button>';
         $view_forwarding_details_button = '<button type="button" class="dropdown-item view_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Forwarding Details</div></button>';
         $launch_dispute_button = '<button type="button" class="dropdown-item launch_dispute"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Launch Dispute</div></button>';
         $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
@@ -384,7 +564,7 @@ class AdminCargoController extends Controller
 
         $dropdown .= $print_button;
 
-        if (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($cargo_consignment->origin_id, session('hubs')))) {
+        if (($cargo_consignment->status_id == 1) && (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($cargo_consignment->origin_id, session('hubs'))))) {
           $dropdown .= $add_forwarding_details_button;
         }
 
@@ -447,7 +627,6 @@ class AdminCargoController extends Controller
                     <style>
                       @page {
                         size: A4 portrait;
-                        margin: 0mm;
                       }
 
                       * {
@@ -495,25 +674,25 @@ class AdminCargoController extends Controller
                   </head>
                   <body>
                     <div>
-                      <div class="p-1 cargo_slip">
+                      <div class="cargo_slip">
                         <table class="table table-sm table-bordered border">
                           <tbody>
                             <tr>
                               <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Slip</strong></td>
-                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
-                            </tr>
+                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                              </tr>
                             <tr>
-                              <td class="color secondary"><strong>Destination City</strong></td>
-                              <td>' . $cargo_consignment->destination_city->name . '</td>
+                              <td class="color secondary"><strong>Destination Hub</strong></td>
+                              <td>' . $cargo_consignment->destination_hub->name . '</td>
                               <td rowspan="8" class="text-center align-middle">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($cargo_consignment->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                                <span><strong>' . $cargo_consignment->id . '</strong></span>
+                                <span><strong>' . str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                               </td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Transit Date</strong></td>
-                              <td>' . Carbon::parse($cargo_consignment->created_at)->format('d/m/Y H:i A') . '</td>
+                              <td>' . $cargo_consignment->created_at . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Shipping Mode</strong></td>
@@ -555,22 +734,16 @@ class AdminCargoController extends Controller
                               <td>' . (($receiver) ? $receiver['name'] : '') . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Department</strong></td>
-                              <td>' . $sender['department'] . '</td>
-                              <td class="color secondary"><strong>Department</strong></td>
-                              <td>' . (($receiver) ? $receiver['department'] : '') . '</td>
+                              <td class="color secondary"><strong>Role</strong></td>
+                              <td>' . $sender->role->name  . ' - ' . $sender->role->department->name . '</td>
+                              <td class="color secondary"><strong>Role</strong></td>
+                              <td>' . (($receiver) ? $receiver->role->department->name : '') . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Phone No.</strong></td>
-                              <td>-</td>
+                              <td>' . $sender['phone_number'] . '</td>
                               <td class="color secondary"><strong>Phone No.</strong></td>
-                              <td>-</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>City</strong></td>
-                              <td>-</td>
-                              <td class="color secondary"><strong>City</strong></td>
-                              <td>-</td>
+                              <td>' . (($receiver) ? $receiver['phone_number'] : '') . '</td>
                             </tr>
                           </tbody>
                         </table>
@@ -581,35 +754,35 @@ class AdminCargoController extends Controller
                               <td class="color primary"><strong>Route Information</strong></td>
                             </tr>
                             <tr>
-                              <td>' . $cargo_consignment->origin_city->name . ' - ' . $cargo_consignment->junction_city_1->name . ' - ' . $cargo_consignment->junction_city_2->name . ' - ' . $cargo_consignment->destination_city->name . '</td>
+                              <td>' . $cargo_consignment->origin_hub->name . ' - ' . $cargo_consignment->junction_hub_1->name . ' - ' . (($cargo_consignment->junction_hub_2_id) ? ($cargo_consignment->junction_hub_2->name . ' - ') : '') . $cargo_consignment->destination_hub->name . '</td>
                             </tr>
                           </tbody>
                         </table>
                       </div>
 
-                      <div class="p-1 cargo_checklist">
+                      <div class="cargo_checklist">
                         <table class="table table-sm table-bordered border">
                           <tbody>
                             <tr>
                               <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
                               <td class="text-center align-middle color primary"><strong>Cargo Checklist</strong></td>
-                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now()->format('d/m/Y H:i A') . '</td>
+                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Origin City</strong></td>
-                              <td>' . $cargo_consignment->origin_city->name . '</td>
+                              <td class="color secondary"><strong>Origin Hub</strong></td>
+                              <td>' . $cargo_consignment->origin_hub->name . '</td>
                               <td rowspan="5" class="text-center align-middle">
                                 <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($cargo_consignment->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                                <span><strong>' . $cargo_consignment->id . '</strong></span>
+                                <span><strong>' . str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                               </td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Destination City</strong></td>
-                              <td>' . $cargo_consignment->destination_city->name . '</td>
+                              <td class="color secondary"><strong>Destination Hub</strong></td>
+                              <td>' . $cargo_consignment->destination_hub->name . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Transit Date</strong></td>
-                              <td>' . Carbon::parse($cargo_consignment->created_at)->format('d/m/Y H:i A') . '</td>
+                              <td>' . $cargo_consignment->created_at . '</td>
                             </tr>
                             <tr>
                               <td class="color secondary"><strong>Expected Arrival Date</strong></td>
@@ -672,7 +845,13 @@ class AdminCargoController extends Controller
     }
 
     public function in_transit_junctions(Request $request) {
-      return City::select(['id', 'name'])->where('hub', 1)->where('status', 1)->get();
+      $cities = City::select(['id', 'name'])->where('hub', 1)->where('status', 1);
+
+      if (session('role_id') != 1) {
+        $cities = $cities->whereIn('id', session('hubs'));
+      }
+
+      return $cities->get();
     }
 
     public function in_transit_details(Request $request) {
@@ -681,14 +860,13 @@ class AdminCargoController extends Controller
       if ($cargo_consignment->exists()) {
         $cargo_consignment = $cargo_consignment->first();
 
-        if (session('role_id') == 1 || (in_array($cargo_consignment->junction_city_1_id, session('hubs')) || $cargo_consignment->junction_city_2_id, session('hubs')))) {
+        if (session('role_id') == 1 || (in_array($cargo_consignment->junction_hub_1_id, session('hubs')) || in_array($cargo_consignment->junction_hub_2_id, session('hubs')))) {
           if (in_array($cargo_consignment->status_id, [1, 2])) {
             $details = array();
 
-            $details['cargo_number'] = $cargo_consignment->id;
-            $details['origin'] = $cargo_consignment->origin_city->name;
-            $details['destination'] = $cargo_consignment->destination_city->name;
-            $details['hub'] = $cargo_consignment->hub->name;
+            $details['cargo_number'] = str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
+            $details['origin'] = $cargo_consignment->origin_hub->name;
+            $details['destination'] = $cargo_consignment->destination_hub->name;
             $details['seal_number'] = $cargo_consignment->seal_number;
 
             return ['status' => 0, 'success' => 'Cargo has been scanned', 'details' => $details];
@@ -739,8 +917,8 @@ class AdminCargoController extends Controller
       $details['cargo_consignment']['sender_name'] = Admin::find($cargo_consignment->sender_id)->name;
 
       if ($request->add) {
-        $details['cargo_consignment']['junction_city_1_id'] = $cargo_consignment->junction_city_1_id;
-        $details['cargo_consignment']['junction_city_2_id'] = $cargo_consignment->junction_city_2_id;
+        $details['cargo_consignment']['junction_hub_1_id'] = $cargo_consignment->junction_hub_1_id;
+        $details['cargo_consignment']['junction_hub_2_id'] = $cargo_consignment->junction_hub_2_id;
         $details['cargo_consignment']['expected_arrival_date'] = $cargo_consignment->expected_arrival_date;
         $details['cargo_consignment']['shipping_mode_id'] = $cargo_consignment->shipping_mode_id;
         $details['cargo_consignment']['transport_mode_id'] = $cargo_consignment->transport_mode_id;
@@ -755,11 +933,15 @@ class AdminCargoController extends Controller
 
         $details['transport_mode_vendors'] = TransportModeVendor::get()->groupBy('transport_mode_id');
 
-        $details['receivers'] = Admin::all(['id', 'name']);
+        $destination_hub_id = $cargo_consignment->destination_hub_id;
+
+        $details['receivers'] = Admin::where('status', 1)->whereHas('hubs', function ($query) use($destination_hub_id) {
+          $query->where('hub_id',  $destination_hub_id);
+        })->select(['id', 'name'])->get();
       }
       else {
-        $details['cargo_consignment']['junction_city_1'] = $cargo_consignment->junction_city_1->name;
-        $details['cargo_consignment']['junction_city_2'] = $cargo_consignment->junction_city_2->name;
+        $details['cargo_consignment']['junction_hub_1'] = $cargo_consignment->junction_hub_1->name;
+        $details['cargo_consignment']['junction_hub_2'] = ($cargo_consignment->junction_hub_2_id) ? $cargo_consignment->junction_hub_2->name : '';
         $details['cargo_consignment']['expected_arrival_date'] = Carbon::parse($cargo_consignment->expected_arrival_date)->format('d/m/Y');
         $details['cargo_consignment']['shipping_mode'] = $cargo_consignment->shipping_mode->mode;
         $details['cargo_consignment']['transport_mode'] = $cargo_consignment->transport_mode->name;
@@ -775,10 +957,16 @@ class AdminCargoController extends Controller
     public function in_transit_update(Request $request) {
       $cargo_consignment = CargoConsignment::find($request->input('cargo_consignment_id'));
 
-      $cargo_consignment->junction_city_1_id = $request->input('junction_1');
-      $cargo_consignment->junction_city_2_id = $request->input('junction_2');
+      $cargo_consignment->junction_hub_1_id = $request->input('junction_1');
+
+      if ($request->filled('junction_2')) {
+        $cargo_consignment->junction_hub_2_id = $request->input('junction_2');
+      }
+      else {
+        $cargo_consignment->junction_hub_2_id = NULL;
+      }
+
       $cargo_consignment->seal_number = $request->input('seal_number');
-      $cargo_consignment->shipping_mode_id = $request->input('shipping_mode');
       $cargo_consignment->transport_mode_id = $request->input('transport_mode');
 
       if ($request->input('transport_mode_vendor') == 0) {
@@ -819,7 +1007,7 @@ class AdminCargoController extends Controller
 
         if ($cargo_consignment) {
           if (in_array($cargo_consignment->status_id, [1, 2, 4])) {
-            return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
+            return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT));
           }
           else {
             return back()->withErrors('Given Cargo Number has already been modified!');
@@ -862,13 +1050,15 @@ class AdminCargoController extends Controller
             if ($cargo_consignment_shipment->exists()) {
               $cargo_consignment_shipment = $cargo_consignment_shipment->first();
 
+              $consignee_city = $shipment->consignee_city;
+
               $details = array();
 
               $details['id'] = $shipment->id;
               $details['tracking_number'] = $shipment->tracking_number;
               $details['origin'] = $shipment->pickup_address->city->name;
-              $details['destination'] = $shipment->consignee_city->name;
-              $details['hub'] = City::find($shipment->consignee_city->hub_id)->name;
+              $details['destination'] = $consignee_city->name;
+              $details['hub'] = $consignee_city->hub_city->name;
               $details['consignee'] = $shipment->consignee_name;
               $details['amount'] = $shipment->amount;
               $details['shipping_mode'] = $shipment->shipping_mode->mode;
@@ -986,19 +1176,19 @@ class AdminCargoController extends Controller
 
 //        end dispute short received
 //        dispute start for junction
-        $junction_city_1_id = $cargo_consignment->junction_city_1_id;
-        $junction_city_2_id = $cargo_consignment->junction_city_2_id;
-        $cargo_hub = $cargo_consignment->hub_id;
-        if($cargo_hub != $junction_city_1_id){
-            $junction1 = CargoConsignmentJunctionReceival::where(['cargo_consignment_id'=>$cargo_consignment_id,'junction_id'=>$junction_city_1_id])->exists();
+        $junction_hub_1_id = $cargo_consignment->junction_hub_1_id;
+        $junction_hub_2_id = $cargo_consignment->junction_hub_2_id;
+
+        if($cargo_consignment->origin_hub_id != $junction_hub_1_id) {
+            $junction1 = CargoConsignmentJunctionReceival::where(['cargo_consignment_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_1_id])->exists();
             if(!$junction1){
-                DisputeController::add_junction_dispute($cargo_consignment_id,$junction_city_1_id);
+                DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_1_id);
             }
         }
-        if($cargo_hub != $junction_city_2_id){
-            $junction2 = CargoConsignmentJunctionReceival::where(['cargo_consignment_id'=>$cargo_consignment_id,'junction_id'=>$junction_city_2_id])->exists();
+        if($junction_hub_2_id && $cargo_consignment->destination_hub_id != $junction_hub_2_id) {
+            $junction2 = CargoConsignmentJunctionReceival::where(['cargo_consignment_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_2_id])->exists();
             if(!$junction2){
-                DisputeController::add_junction_dispute($cargo_consignment_id,$junction_city_2_id);
+                DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_2_id);
             }
         }
 

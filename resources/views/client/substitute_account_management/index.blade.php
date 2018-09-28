@@ -1,5 +1,7 @@
 @extends('client.layout.master')
 
+@section('title', 'Subsitute Accounts')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -23,7 +25,8 @@
 										<th class="border-primary border-darken-1">Phone Number</th>
 										<th class="border-primary border-darken-1">Email</th>
 										<th class="border-primary border-darken-1">CNIC</th>
-										<th class="border-primary border-darken-1">Updated at</th>
+										<th class="border-primary border-darken-1">Created Datetime</th>
+										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -39,95 +42,89 @@
 
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.substitute_account_management.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Name');
+                            head.push('Phone Number');
+                            head.push('Email');
+                            head.push('CNIC');
+                            head.push('Created Datetime');
+                            head.push('Updated Datetime');
+                            head.push('Status');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.name);
+                                row.push(values.phone_number);
+                                row.push(values.email);
+                                row.push(values.cnic);
+                                row.push(values.created_at);
+                                row.push(values.updated_at);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				scrollX: true, scrollY: '350px',
 				buttons: [{
-					text: 'Add',
+					text: '<i class="la la-user-plus"></i> Add',
 					className: 'btn btn-primary add',
 					action: function (e, dt, node, config) {
 						window.location = '{{ route('cod.substitute_account_management.add.index') }}';
 					}
-				}],
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+				},{
+                    extend: 'excel',
+                    title: 'Substitute Accounts',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
 				ajax: '{{ route('cod.substitute_account_management.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[5, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'substitute_users.name', class: 'align-middle name'},
 					{data: 'phone_number', name: 'substitute_users.phone_number', class: 'align-middle phone_number'},
 					{data: 'email', name: 'substitute_users.email', class: 'align-middle email'},
 					{data: 'cnic', name: 'substitute_users.cnic', class: 'align-middle cnic'},
+					{data: 'created_at', name: 'substitute_users.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'substitute_users.updated_at', class: 'align-middle updated_at'},
 					{data: 'status', name: 'substitute_users.status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -161,6 +158,8 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				}
 			});
 

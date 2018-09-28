@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Rider Management')
+
 @section('content')
     <h1>Rider Management</h1>
 
@@ -8,38 +10,41 @@
             <div class="col-12">
                 <div class="card">
 
-                    <div class="card-header">
-                        <span class="font-large-1 card-title">Riders List</span>
-                        {{--<button type="button" rel="addroute" class="btn btn-primary btn-min-width mr-1 mb-1 pull-right" data-target="#addRider" data-toggle="modal">Add Rider</button>--}}
-
-                        <div class="mt-1">
-                            @include('admin.inc.messages')
-                        </div>
-                    </div>
-
-
                     <div class="card-content">
                         <div class="card-body card-dashboard">
-                            <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
+                            @include('admin.inc.messages')
+
+                            <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr class="bg-primary white">
-                                    <th>S No.</th>
-                                    <th>City</th>
-                                    <th>Name</th>
-                                    <th>Phone No</th>
-                                    <th>CNIC</th>
-                                    <th>Address</th>
-                                    <th>Route</th>
-                                    <th>Category</th>
-                                    <th>Added On</th>
-                                    <th>Status</th>
-                                    <th>Action</th>
+                                    <th class="border-primary border-darken-1">S No.</th>
+                                    <th class="border-primary border-darken-1">City</th>
+                                    <th class="border-primary border-darken-1">Name</th>
+                                    <th class="border-primary border-darken-1">Phone No</th>
+                                    <th class="border-primary border-darken-1">CNIC</th>
+                                    <th class="border-primary border-darken-1">Address</th>
+                                    <th class="border-primary border-darken-1">Route</th>
+                                    <th class="border-primary border-darken-1">Category</th>
+                                    <th class="border-primary border-darken-1">Added On</th>
+                                    <th class="border-primary border-darken-1">Status</th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
                         </div>
                     </div>
+                <div style="display: none;">
+                    <form id="rider_active_form" action="{{route('admin.management.rider.status')}}" method="post" class="mt-2">
+                        @csrf
+                        @method('PUT')
+                        <input type="hidden" name="cid" id="cid">
+                        <input type="hidden" name="status" id="cstatus">
+                        <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
+                        <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
 
+
+                    </form>
+                </div>
                 </div>
             </div>
         </div>
@@ -48,54 +53,6 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-    <style>
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-
-        }
-        /*table.dataTable tbody tr td.junction{*/
-            /*word-wrap: break-word;*/
-            /*background: #606060;*/
-        /*}*/
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #666EE8;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-    </style>
 @endsection
 
 @section('js')
@@ -104,11 +61,58 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.management.rider.ajax') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('City Name');
+                            head.push('Rider Name');
+                            head.push('Phone No.');
+                            head.push('CNIC');
+                            head.push('Address');
+                            head.push('Route');
+                            head.push('Category');
+                            head.push('Added On');
+                            head.push('Status');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.city);
+                                row.push(values.rider);
+                                row.push(values.phone);
+                                row.push(values.cnic);
+                                row.push(values.address);
+                                row.push(values.route);
+                                row.push(values.category);
+                                row.push(values.created_at);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var table =  $('.datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(97, session('permissions')))
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
                     buttons: [{
-                        text: 'Add Rider',
+                        text: '<i class="la la-motorcycle"></i> Add Rider',
                         className: 'btn btn-primary',
                         enabled: true,
                         action: function (e, dt, node, config) {
@@ -116,34 +120,41 @@
 
                         }
 
+                    },
+                    {
+                        extend: 'excel',
+                        title: 'Rider Management',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 @else
-                    dom: 'ltipr',
+                buttons: [{
+                    extend: 'excel',
+                    title: 'Rider Management',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
                 @endif
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                scrollX: true, scrollY: '350px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-
                 ajax: '{{ route('admin.management.rider.ajax') }}',
+                order: [[8, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'city', name: 'cities.name', class: 'city'},
-                    {data: 'rider', name: 'riders.name', class: 'name'},
-                    {data: 'phone', name: 'riders.phone', class: 'phone'},
-                    {data: 'cnic', name: 'riders.cnic', class: 'cnic'},
-                    {data: 'address', name: 'riders.address', class: 'address'},
-                    {data: 'route', name: 'route', class: 'route'},
-                    {data: 'category', name: 'rider_categories.name', class: 'category'},
-                    {data: 'created_at', name: 'created_at', class: 'created_at'},
-                    {data: 'status', name: 'status', class: 'status'},
-                    {data: 'action', name: 'action', class: 'text-center action', orderable: false, searchable: false}
+                    {data: 'city', name: 'cities.name', class: 'align-middle city'},
+                    {data: 'rider', name: 'riders.name', class: 'align-middle name'},
+                    {data: 'phone', name: 'riders.phone', class: 'align-middle phone'},
+                    {data: 'cnic', name: 'riders.cnic', class: 'align-middle cnic'},
+                    {data: 'address', name: 'riders.address', class: 'align-middle address'},
+                    {data: 'route', name: 'route', class: 'align-middle route'},
+                    {data: 'category', name: 'rider_categories.name', class: 'align-middle category'},
+                    {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -174,6 +185,8 @@
                             }
                         }
                     });
+
+                    this.api().table().columns.adjust();
                 }
             });
 
@@ -197,8 +210,39 @@
                 var id = $(this).data('target-id');
                 var rel = $(this).attr('rel');
 
-                $('.riderConfirmation #cid').val(id);
-                $('.riderConfirmation #cstatus').val(rel);
+                $('#rider_active_form #cid').val(id);
+                $('#rider_active_form #cstatus').val(rel);
+                if(rel == 'riderInactive'){
+                    var atext = "Select Yes to Deactive this Rider!";
+                }else{
+                    var atext = "Select Yes to active this Rider!";
+                }
+                swal({
+                    title: 'Are You Sure?',
+                    text: atext,
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function (confirm) {
+                    if (confirm) {
+                        $('#rider_active_form').submit();
+                    }
+                });
 
             });
         });

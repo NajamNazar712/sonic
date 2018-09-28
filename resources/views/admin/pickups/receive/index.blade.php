@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Receive Pickups')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -29,14 +31,20 @@
 								</form>
 							@endif
 
+							<form id="tracking_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+								<div class="form-group">
+									<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+								</div>
+							</form>
+
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Rider</th>
 										<th class="border-primary border-darken-1">Rider Type</th>
-										<th class="border-primary border-darken-1">Route</th>
-										<th class="border-primary border-darken-1">City</th>
+										<th class="border-primary border-darken-1">Rider Route</th>
+										<th class="border-primary border-darken-1">Rider City</th>
 										<th class="border-primary border-darken-1">Pickup(s)</th>
 										<th class="border-primary border-darken-1">Booking(s)</th>
 										<th class="border-primary border-darken-1">Pickup Type</th>
@@ -76,59 +84,13 @@
 @endsection
 
 @section('css')
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
@@ -162,34 +124,93 @@
 					}
 				});
 			}
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.pickups.receive.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Rider');
+                            head.push('Rider Type');
+                            head.push('Route');
+                            head.push('City');
+                            head.push('Pickup(s)');
+                            head.push('Booking(s)');
+                            head.push('Pickup Type');
+                            head.push('Assigned Date');
+                            head.push('Assigned By');
+                            head.push('Pickup Note No.');
+                            head.push('Status');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.rider_name+" | "+values.rider_phone);
+                                row.push(values.rider_type);
+                                row.push(values.route);
+                                row.push(values.city);
+                                row.push(values.pickups);
+                                row.push(values.bookings);
+                                row.push(values.pickup_type);
+                                row.push(values.assigned_date);
+                                row.push(values.assigned_by);
+                                row.push(values.pickup_note_id);
+                                row.push(values.status);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
-				dom: 'ltipr',
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
-				lengthMenu: [[25, 50, 100], [25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '350px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Receive Pickups',
+						className:'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }
+                ],
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
-				ajax: '{{ route('admin.pickups.receive.list') }}',
+				ajax: {
+					url: '{{ route('admin.pickups.receive.list') }}',
+					data: function (d) {
+						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
+					}
+				},
 				rowId: 'id',
-				order: [[4, 'asc']],
+				order: [[10, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_notes.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'rider', name: 'rider', class: 'align-middle rider'},
-					{data: 'rider_type', name: 'rc.name', class: 'align-middle rider_type'},
+					{data: 'rider_type', name: 'rider_type', class: 'align-middle rider_type'},
 					{data: 'route', name: 'route', class: 'align-middle route'},
 					{data: 'city', name: 'c.name', class: 'align-middle city'},
 					{data: 'pickups', name: 'pickup_notes.pickups', class: 'align-middle pickups'},
 					{data: 'bookings', name: 'pickup_notes.bookings', class: 'align-middle bookings'},
-					{data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},
+					{data: 'pickup_type', name: 'pickup_notes.pickup_type', class: 'align-middle pickup_type'},
 					{data: 'assigned_date', name: 'pickup_notes.created_at', class: 'align-middle assigned_date'},
 					{data: 'assigned_by', name: 'a.name', class: 'align-middle assigned_by'},
-					{data: 'pickup_note_no', name: 'pickup_note_no', class: 'align-middle pickup_note_no'},
+					{data: 'pickup_note_no', name: 'pickup_notes.id', class: 'align-middle pickup_note_no'},
 					{data: 'status', name: 'status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
@@ -204,14 +225,29 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Light</option>' +
+                        '<option value="1">Heavy</option>' +
+                        '</select>';
+                    var rider_select = '<select name="rider_select" id="rider_select" class="select2 form-control"></select>';
 
-					this.api().columns().every(function(column_id) {
+                    this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
 						if ($(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.pickup_type')){
+                            $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.rider_type')){
+                            $(rider_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -222,6 +258,31 @@
 							}
 						}
 					});
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Pickup Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data1 = $.map({!! $rider_category !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data1 = $.map({!! $rider_category !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#rider_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Rider",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+					this.api().table().columns.adjust();
 				}
 			});
 
@@ -261,6 +322,26 @@
 					}
 				});
 			@endif
+
+			$('#tracking_number_search_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				length = $('#tracking_number_search_form #tracking_number').val().length;
+
+				if (length == 0 || length >= 12) {
+					table.draw();
+				}
+			});
+
+			$('#tracking_number_search_form #tracking_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			}).bind('input', function() {
+				if (this.value.length == 0 || this.value.length >= 12) {
+					table.draw();
+				}
+			});
 		});
 	</script>
 @endsection

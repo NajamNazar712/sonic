@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Outstanding Shipments')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -74,7 +76,7 @@
 										<th class="border-primary border-darken-1">Service Type</th>
 										<th class="border-primary border-darken-1">Amount</th>
 										<th class="border-primary border-darken-1">Status</th>
-										<th class="border-primary border-darken-1">Status Updated at</th>
+										<th class="border-primary border-darken-1">Status Updated Datetime</th>
 										<th class="border-primary border-darken-1">Remarks</th>
 										<th class="border-primary border-darken-1">DNCC</th>
 										<th class="border-primary border-darken-1">SDN</th>
@@ -96,54 +98,6 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -209,15 +163,81 @@
 				}
 			});
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.finance.outstanding_shipments.list') }}',
+                        data: {
+                            'page': 'all',
+                            'hub': $('#search_form #hub').val(),
+                    		'service': $('#search_form #service').val(),
+                    		'delivery_date_from': $('#search_form input[name="delivery_date_from_formatted"]').val(),
+                    		'delivery_date_to': $('#search_form input[name="delivery_date_to_formatted"]').val(),
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Tracking Number');
+                            head.push('Consignee');
+                            head.push('Address');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Shipper');
+                            head.push('Service Type');
+                            head.push('Amount');
+                            head.push('Status');
+                            head.push('Status Updated Datetime');
+                            head.push('Remarks');
+                            head.push('DNCC');
+                            head.push('SDN');
+                            head.push('Aging');
+
+
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.consignee);
+                                row.push(values.address);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.shipper);
+                                row.push(values.service_type);
+                                row.push(values.amount);
+                                row.push(values.status);
+                                row.push(values.status_updated_at);
+                                row.push(values.remarks);
+                                row.push(values.dncc);
+                                row.push(values.sdn);
+                                row.push(values.aging);
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
 			var table = $('#datatable').DataTable({
-				dom: 'ltipr',
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Outstanding Shipments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
+				scrollX: true, scrollY: '350px',
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
@@ -231,7 +251,7 @@
 					}
 				},
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[10, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'tracking_number', name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -240,14 +260,14 @@
 					{data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
 					{data:'hub', name: 'hc.name', class: 'align-middle text-center hub'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
-					{data:'service_type', name: 'bt.booking_type', class: 'align-middle text-center service_type'},
+					{data:'service_type', name: 'bt.id', class: 'align-middle text-center service_type'},
 					{data:'amount', name: 's.amount', class: 'align-middle text-center amount'},
-					{data:'status', name: 'ss.name as status', class: 'align-middle text-center status'},
+					{data:'status', name: 'ss.id', class: 'align-middle text-center status'},
 					{data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
 					{data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
 					{data:'dncc', name: 'delivery_note_shipments.delivery_note_id', class: 'align-middle text-center dncc'},
 					{data:'sdn', name: 'dnsdn.station_deposit_note_id', class: 'align-middle text-center sdn'},
-					{data:'aging', name: 'aging', class: 'align-middle text-center aging'},
+					{data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -261,14 +281,26 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.service_type')){
+                            $(service_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -279,12 +311,49 @@
 							}
 						}
 					});
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.text = obj.booking_type;
+
+                        return obj;
+                    });
+
+                    $("#service_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+					this.api().table().columns.adjust();
 				}
 			});
 
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
-				var tracking_number = $(this).parents('tr').children('td.tracking_number').html();
+				var tracking_number = $(this).parents('tr').children('td.tracking_number').text();
 
 				if ($(this).hasClass('resolve')) {
 					swal({
@@ -293,13 +362,13 @@
 						icon: 'success',
 						buttons: {
 							cancel: {
-								text: 'Close',
+								text: 'No',
 								value: null,
 								visible: true,
 								closeModal: true,
 							},
 							confirm: {
-								text: 'Resolved',
+								text: 'Yes',
 								value: true,
 								visible: true,
 								closeModal: true
@@ -338,13 +407,13 @@
 						icon: 'warning',
 						buttons: {
 							cancel: {
-								text: 'Close',
+								text: 'No',
 								value: null,
 								visible: true,
 								closeModal: true,
 							},
 							confirm: {
-								text: 'Adjust in Payment',
+								text: 'Yes',
 								value: true,
 								visible: true,
 								closeModal: true

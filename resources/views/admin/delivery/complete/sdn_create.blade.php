@@ -1,4 +1,5 @@
 @extends('admin.layout.master')
+@section('title','Completed Deliveries')
 
 @section('content')
     <h1 class="mb-1">
@@ -28,8 +29,8 @@
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
                         <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
-                        <th class="border-primary border-darken-1">Emergency Amount</th>
-                        <th class="border-primary border-darken-1">Net Amount</th>
+                        {{--<th class="border-primary border-darken-1">Emergency Amount</th>--}}
+                        {{--<th class="border-primary border-darken-1">Total Amount</th>--}}
                         <th class="border-primary border-darken-1">Remarks</th>
                     </tr>
                     </thead>
@@ -66,26 +67,26 @@
                         </fieldset>
                     </div>
 
-                    <div class="col-3">
-                        <fieldset>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">Total Emergency Amount</span>
-                                </div>
-                                <input type="text" class="form-control" name="total_expenses" value="0" id="total_expense" readonly placeholder="Total Emergency Amount">
-                            </div>
-                        </fieldset>
-                    </div>
-                    <div class="col-3">
-                        <fieldset>
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-                                    <span class="input-group-text">Total Net Amount</span>
-                                </div>
-                                <input type="text" class="form-control" name="total_amount" value="0" id="total_amount" readonly placeholder="Total Net Amount">
-                            </div>
-                        </fieldset>
-                    </div>
+                    {{--<div class="col-3">--}}
+                        {{--<fieldset>--}}
+                            {{--<div class="input-group">--}}
+                                {{--<div class="input-group-prepend">--}}
+                                    {{--<span class="input-group-text">Total Emergency Amount</span>--}}
+                                {{--</div>--}}
+                                {{--<input type="text" class="form-control" name="total_expenses" value="0" id="total_expense" readonly placeholder="Total Emergency Amount">--}}
+                            {{--</div>--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
+                    {{--<div class="col-3">--}}
+                        {{--<fieldset>--}}
+                            {{--<div class="input-group">--}}
+                                {{--<div class="input-group-prepend">--}}
+                                    {{--<span class="input-group-text">Total Net Amount</span>--}}
+                                {{--</div>--}}
+                                {{--<input type="text" class="form-control" name="total_amount" value="0" id="total_amount" readonly placeholder="Total Net Amount">--}}
+                            {{--</div>--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
                     <div class="col-3">
                         <select name="bank_select" class="form-control select2" id="banks_list">
                             @foreach($banks_list as $banks)
@@ -96,7 +97,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="col-2">
-                        <button id="sdnSubmit" type="submit" class="btn btn-primary btn-block">Confirm</button>
+                        <button id="sdnSubmit" type="submit"  class="btn btn-primary btn-block">Confirm</button>
 
                     </div>
                 </div>
@@ -138,7 +139,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -177,31 +178,27 @@
             var dncc_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                scrollX: true, scrollY: '350px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.completed.dncc.list') }}',
                 rowId: 'delivery_note_id',
-                order: [[2, 'asc']],
+                order: [[1, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note_id' ,name: 'delivery_note_id', class: 'align-middle text-center delivery_note'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'rider', class: 'align-middle rider'},
+                    { data:'delivery_note_id' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
-                    { data:'delivered_shipments' ,name: 'delivered_shipments', class: 'align-middle delivered_shipments'},
-                    { data:'received_cod_amount' ,name: 'received_cod_amount', class: 'align-middle received_cod_amount'},
-                    { data:'expense' ,name: 'expense', class: 'align-middle expense'},
-                    { data:'net_amount' ,name: 'net_amount', class: 'align-middle net_amount'},
-                    { data:'remarks' ,name: 'remarks', class: 'align-middle remarks'},
+                    { data:'shipments_count' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count'},
+                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
+                    { data:'received_cod_amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle received_cod_amount'},
+                    // { data:'expense' ,name: 'expense', class: 'align-middle expense'},
+                    // { data:'net_amount' ,name: 'net_amount', class: 'align-middle net_amount'},
+                    { data:'remarks' ,name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -271,7 +268,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.expense') || $(header).is('.serial_number') || $(header).is('.net_amount')) {
+                        if ($(header).is('.expense') || $(header).is('.serial_number') || $(header).is('.remarks')) {
                             $(td).appendTo($(search));
                         }
                         else {
@@ -284,6 +281,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
 
@@ -336,6 +334,7 @@
                 // this.submit();
             $('body').on('change','td.remarks input',function() {
                 $(this).val($(this).val().trim());
+
             });
             $( "#sdn_form" ).validate({
                 errorClass:"danger",
@@ -343,19 +342,34 @@
                     error.addClass('w-100').appendTo(element.parent('.remarks'));
                 },
                 submitHandler: function(form) {
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
 
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Station deposit note is being created!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
-
-                       form.submit();
-
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to create Station Deposit Note!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                            form.submit();
+                        }
+                    });
 
                 }
             });

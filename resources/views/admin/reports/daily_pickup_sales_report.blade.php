@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Daily Pickup & Sales Report')
+
 @section('content')
     <h1 class="mb-1">
         Daily Pickup & Sales Report
@@ -71,7 +73,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -80,7 +82,7 @@
         }
         a.btn.btn-secondary {
             border-radius: 20px;
-            background: #666ee8;
+            background: #64a0d2;
         }
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
@@ -129,7 +131,7 @@
                     $('#search_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-                    // console.log($())
+
                 }
             });
             $('#search_form').on('submit',function (e) {

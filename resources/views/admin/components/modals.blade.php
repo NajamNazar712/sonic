@@ -3,8 +3,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Bank Information</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Bank Information</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -23,8 +23,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Shipping Information</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Shipping Information</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -44,8 +44,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Shipper Rates</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Shipper Rates</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -66,8 +66,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Please Confirm</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Please Confirm</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -93,8 +93,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Add City</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Add City</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -111,8 +111,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Edit City</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Edit City</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -125,40 +125,40 @@
 </div>
 
 <!--Confirm Modal City-->
-<div class="modal fade text-left" id="ConfirmModalCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalCity"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Please Confirm</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body confirmation text-center">
-                <h3>Are you sure you want to perform this action?</h3>
-                <form action="{{route('admin.management.city.status')}}" method="post" class="mt-2">
-                    {{csrf_field()}}
-                    <input type="hidden" name="_method" value="PUT">
-                    <input type="hidden" name="cid" id="cid">
-                    <input type="hidden" name="status" id="cstatus">
-                    <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
-                    <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+{{--<div class="modal fade text-left" id="ConfirmModalCity" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalCity"--}}
+     {{--aria-hidden="true">--}}
+    {{--<div class="modal-dialog modal-lg" role="document">--}}
+        {{--<div class="modal-content">--}}
+            {{--<div class="modal-header">--}}
+                {{--<h4 class="modal-title" id="myModalLabel8">Please Confirm</h4>--}}
+                {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                    {{--<span aria-hidden="true">&times;</span>--}}
+                {{--</button>--}}
+            {{--</div>--}}
+            {{--<div class="modal-body confirmation text-center">--}}
+                {{--<h3>Are you sure you want to perform this action?</h3>--}}
+                {{--<form action="{{route('admin.management.city.status')}}" method="post" class="mt-2">--}}
+                    {{--{{csrf_field()}}--}}
+                    {{--<input type="hidden" name="_method" value="PUT">--}}
+                    {{--<input type="hidden" name="cid" id="cid">--}}
+                    {{--<input type="hidden" name="status" id="cstatus">--}}
+                    {{--<button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>--}}
+                    {{--<button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>--}}
 
 
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                {{--</form>--}}
+            {{--</div>--}}
+        {{--</div>--}}
+    {{--</div>--}}
+{{--</div>--}}
 <!--Confirm Modal City-->
 <!--Route Add Model -->
 <div class="modal fade text-left" id="addRoute" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="addRoute"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Add Route</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Add Route</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -175,8 +175,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Edit Route</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Edit Route</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -189,40 +189,40 @@
 </div>
 <!--Route edit Model end-->
 <!--Confirm Modal City-->
-<div class="modal fade text-left" id="ConfirmModalRoute" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRoute"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Please Confirm</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body routeConfirmation text-center">
-                <h3>Are you sure you want to perform this action?</h3>
-                <form action="{{route('admin.management.route.status')}}" method="post" class="mt-2">
-                    {{csrf_field()}}
-                    <input type="hidden" name="_method" value="PUT">
-                    <input type="hidden" name="cid" id="cid">
-                    <input type="hidden" name="status" id="cstatus">
-                    <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
-                    <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+{{--<div class="modal fade text-left" id="ConfirmModalRoute" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRoute"--}}
+     {{--aria-hidden="true">--}}
+    {{--<div class="modal-dialog modal-lg" role="document">--}}
+        {{--<div class="modal-content">--}}
+            {{--<div class="modal-header">--}}
+                {{--<h4 class="modal-title" id="myModalLabel8">Please Confirm</h4>--}}
+                {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                    {{--<span aria-hidden="true">&times;</span>--}}
+                {{--</button>--}}
+            {{--</div>--}}
+            {{--<div class="modal-body routeConfirmation text-center">--}}
+                {{--<h3>Are you sure you want to perform this action?</h3>--}}
+                {{--<form action="{{route('admin.management.route.status')}}" method="post" class="mt-2">--}}
+                    {{--{{csrf_field()}}--}}
+                    {{--<input type="hidden" name="_method" value="PUT">--}}
+                    {{--<input type="hidden" name="cid" id="cid">--}}
+                    {{--<input type="hidden" name="status" id="cstatus">--}}
+                    {{--<button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>--}}
+                    {{--<button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>--}}
 
 
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                {{--</form>--}}
+            {{--</div>--}}
+        {{--</div>--}}
+    {{--</div>--}}
+{{--</div>--}}
 <!--Confirm Modal City-->
 <!--Route Add Model -->
 <div class="modal fade text-left" id="addRider" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="addRider"
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Add Rider</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Add Rider</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -239,8 +239,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Edit Rider</h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="myModalLabel8">Edit Rider</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -253,40 +253,40 @@
 </div>
 <!--Route Edit Model end-->
 <!--Confirm Modal City-->
-<div class="modal fade text-left" id="ConfirmModalRider" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRider"
-     aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="myModalLabel8">Please Confirm</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body riderConfirmation text-center">
-                <h3>Are you sure you want to perform this action?</h3>
-                <form action="{{route('admin.management.rider.status')}}" method="post" class="mt-2">
-                    @csrf
-                    @method('PUT')
-                    <input type="hidden" name="cid" id="cid">
-                    <input type="hidden" name="status" id="cstatus">
-                    <button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>
-                    <button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>
+{{--<div class="modal fade text-left" id="ConfirmModalRider" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="ConfirmModalRider"--}}
+     {{--aria-hidden="true">--}}
+    {{--<div class="modal-dialog modal-lg" role="document">--}}
+        {{--<div class="modal-content">--}}
+            {{--<div class="modal-header">--}}
+                {{--<h4 class="modal-title" id="myModalLabel8">Please Confirm</h4>--}}
+                {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                    {{--<span aria-hidden="true">&times;</span>--}}
+                {{--</button>--}}
+            {{--</div>--}}
+            {{--<div class="modal-body riderConfirmation text-center">--}}
+                {{--<h3>Are you sure you want to perform this action?</h3>--}}
+                {{--<form action="{{route('admin.management.rider.status')}}" method="post" class="mt-2">--}}
+                    {{--@csrf--}}
+                    {{--@method('PUT')--}}
+                    {{--<input type="hidden" name="cid" id="cid">--}}
+                    {{--<input type="hidden" name="status" id="cstatus">--}}
+                    {{--<button type="submit" class="btn btn-warning btn-min-width btn-glow mr-1 mb-1" id="confirmAction">Yes</button>--}}
+                    {{--<button type="button" class="btn btn-primary btn-min-width btn-glow mr-1 mb-1" data-dismiss="modal">Cancel</button>--}}
 
 
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
+                {{--</form>--}}
+            {{--</div>--}}
+        {{--</div>--}}
+    {{--</div>--}}
+{{--</div>--}}
 <!--Confirm Modal City-->
 <!--Dispute Modal -->
 <div class="modal fade text-left" id="UniversalDisputeModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="UniversalDisputeModal"
      aria-hidden="true">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white">Launch Dispute</h4>
+            <div class="modal-header">
+                <h4 class="modal-title">Launch Dispute</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -332,8 +332,8 @@
      aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
-            <div class="modal-header bg-primary white">
-                <h4 class="modal-title white" id="shipment_charges_modal_heading">Shipment Charges of # <span></span></h4>
+            <div class="modal-header">
+                <h4 class="modal-title" id="shipment_charges_modal_heading">Shipment Charges of #<span></span></h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>

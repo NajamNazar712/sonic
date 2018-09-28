@@ -1,5 +1,5 @@
 @extends('admin.layout.master')
-
+@section('title','Completed Deliveries')
 @section('content')
     <h1 class="mb-1">
         Completed Deliveries
@@ -17,6 +17,14 @@
                     <div class="col-3">
                         <fieldset class="position-relative has-icon-left">
                             <input type="text" class="form-control" placeholder="Search By Tracking Number" id="search_tracking">
+                            <div class="form-control-position">
+                                <i class="ft-search"></i>
+                            </div>
+                        </fieldset>
+                    </div>
+                    <div class="col-3">
+                        <fieldset class="position-relative has-icon-left">
+                            <input type="text" class="form-control" placeholder="Scan To Select" id="select_dn">
                             <div class="form-control-position">
                                 <i class="ft-search"></i>
                             </div>
@@ -87,7 +95,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -98,7 +106,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -118,22 +129,100 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.delivery.completed.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_tracking': $('#search_tracking').val()
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Delivery Note No.');
+                            head.push('Hub');
+                            head.push('Rider');
+                            head.push('Route');
+                            head.push('No. Of Shipments');
+                            head.push('No. Of Shipments Delivered');
+                            head.push('Assigned By');
+                            head.push('Assigned Date');
+                            head.push('Updated By');
+                            head.push('Updated Date');
+                            head.push('DNCC Amount');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+
+                                row.push(index + 1);
+                                row.push(values.delivery_note_id);
+                                row.push(values.hub);
+                                row.push(values.rider);
+                                row.push(values.route);
+                                row.push(values.shipments_count);
+                                row.push(values.delivered_shipments);
+                                row.push(values.assignee);
+                                row.push(values.created_at);
+                                row.push(values.updated_by);
+                                row.push(values.updated_at);
+                                row.push(values.amount);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || in_array(41, session('permissions')))
-                    dom: '<"d-inline-block"l><"pull-right"B>tipr',
                     buttons: [{
                         text: 'Deposit DNCC',
                         className: 'btn btn-primary delivered',
                         enabled: false,
                         action: function (e, dt, node, config) {
                             if(selected_rows != ''){
-                                $('#delivery_note_ids').val(selected_rows);
-                                var delivery_note_ids = $('#delivery_note_ids').val();
-                                // console.log(delivery_note_ids)
-                                if(delivery_note_ids != ''){
-                                    $('#post_delivery_note_ids_form').submit();
-                                }
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: 'Select Yes to Deposit DNCC!',
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $('#delivery_note_ids').val(selected_rows);
+                                        var delivery_note_ids = $('#delivery_note_ids').val();
+                                        // console.log(delivery_note_ids)
+                                        if(delivery_note_ids != ''){
+                                            $('#post_delivery_note_ids_form').submit();
+                                        }
+                                    }
+                                });
+
 
                             }else{
                                 var error = "Something went wrong please refresh page and try again!";
@@ -141,43 +230,54 @@
 
                             }
                         }
+                    },{
+                        extend: 'excel',
+                        title: 'Completed Deliveries',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 @else
-                    dom: 'ltipr',
+                    buttons:[{
+                    extend: 'excel',
+                    title: 'Completed Deliveries',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
                 @endif
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
                 select: {
                     info: false,
                     style: 'multi',
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                scrollX: true, scrollY: '350px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.delivery.completed.list') }}',
+                ajax: {
+                    url:'{{ route('admin.delivery.completed.list') }}',
+                    data:function (d) {
+                        d.search_tracking = $('#search_tracking').val();
+                    }
+                },
                 rowId: 'delivery_note_id',
-                order: [[2, 'asc']],
+                order: [[11, 'desc']],
                 columns: [
                     {data: 'delivery_note_id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_note_id', class: 'align-middle text-center delivery_note'},
-                    { data:'hub' ,name: 'hub', class: 'align-middle hub'},
-                    { data:'rider' ,name: 'rider', class: 'align-middle rider'},
+                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
+                    { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
+                    { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
                     { data:'shipments_count' ,name: 'shipments_count', class: 'align-middle shipments_count'},
                     { data:'delivered_shipments' ,name: 'delivered_shipments', class: 'align-middle delivered_shipments'},
-                    { data:'assignee' ,name: 'assignee', class: 'align-middle assignee'},
+                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
-                    { data:'updated_by' ,name: 'updated_by', class: 'align-middle updated_by'},
-                    { data:'updated_at' ,name: 'updated_at', class: 'align-middle updated_at'},
-                    { data:'amount' ,name: 'amount', class: 'align-middle amount'},
+                    { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
+                    { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
+                    { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -211,6 +311,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
             var hub_ids = [];
@@ -264,45 +365,45 @@
 
             });
 
-            $('#search_tracking').on('change',function () {
-                var input = $(this);
-                var tracking = $(this).val();
-                var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
+            {{--$('#search_tracking').on('change',function () {--}}
+                {{--var input = $(this);--}}
+                {{--var tracking = $(this).val();--}}
+                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
 
-                if(numberRegex.test(tracking)) {
-                    $.ajax({
-                        url:'{{route('admin.delivery.receive.tracking.search')}}',
-                        type:'GET',
-                        dataType:'JSON',
-                        data: {
-                            'tracking':tracking
-                        }
-                    }).done(function(data){
-                        if(data.status == 0){
+                {{--if(numberRegex.test(tracking)) {--}}
+                    {{--$.ajax({--}}
+                        {{--url:'{{route('admin.delivery.receive.tracking.search')}}',--}}
+                        {{--type:'GET',--}}
+                        {{--dataType:'JSON',--}}
+                        {{--data: {--}}
+                            {{--'tracking':tracking--}}
+                        {{--}--}}
+                    {{--}).done(function(data){--}}
+                        {{--if(data.status == 0){--}}
 
-                            table
-                                .columns( 1 )
-                                .search( data.delivery_note )
-                                .draw();
-                            // input.val('');
-                        }else{
-                            table
-                                .columns( 1 )
-                                .search( 0 )
-                                .draw();
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            {{--table--}}
+                                {{--.columns( 1 )--}}
+                                {{--.search( data.delivery_note )--}}
+                                {{--.draw();--}}
+                            {{--// input.val('');--}}
+                        {{--}else{--}}
+                            {{--table--}}
+                                {{--.columns( 1 )--}}
+                                {{--.search( 0 )--}}
+                                {{--.draw();--}}
+                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
 
-                        }
+                        {{--}--}}
 
-                    });
-                }else{
-                    table
-                        .columns( 1 )
-                        .search( 0 )
-                        .draw();
-                    input.val('');
-                }
-            });
+                    {{--});--}}
+                {{--}else{--}}
+                    {{--table--}}
+                        {{--.columns( 1 )--}}
+                        {{--.search( 0 )--}}
+                        {{--.draw();--}}
+                    {{--input.val('');--}}
+                {{--}--}}
+            {{--});--}}
 
             function print(id) {
                 $.ajax({
@@ -371,18 +472,54 @@
                 printDNCC(note_id);
             });
 
-            $('#scan_tracking').on('change',function () {
-                var scan = $(this);
-                var tracking = $(this).val();
-                var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;
-                if(numberRegex.test(tracking)) {
-                    var url = "{{route("admin.delivery.receive.status","id")}}";
-                    url = url.replace('id',tracking);
-                    // console.log(url);
-                    window.location.href = url;
+            {{--$('#scan_tracking').on('change',function () {--}}
+                {{--var scan = $(this);--}}
+                {{--var tracking = $(this).val();--}}
+                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
+                {{--if(numberRegex.test(tracking)) {--}}
+                    {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
+                    {{--url = url.replace('id',tracking);--}}
+                    {{--// console.log(url);--}}
+                    {{--window.location.href = url;--}}
+                {{--}else{--}}
+                    {{--scan.val('');--}}
+                {{--}--}}
+            {{--});--}}
+            $('#search_tracking').on('change',function () {
+                table.draw();
+            });
+            $('#select_dn').on('change',function () {
+                var id = $(this).val();
+                row = table.row('#' + id);
+                if(row.length >0) {
+                    row.select();
+
+                    if (hub_ids.length == 0) {
+                        hub_ids.push(row.data().hub_id);
+                    }
+                    var index = $.inArray(id, selected_rows);
+
+                    if (index === -1) {
+                        selected_rows.push(id);
+                    }
+                else {
+                        row.deselect();
+                        selected_rows.splice(index, 1);
+                    }
+
+                    if (selected_rows.length > 0) {
+                        table.button('.delivered').enable();
+                    }
+                    else {
+                        table.button('.delivered').disable();
+                        hub_ids.splice(index, 1);
+                    }
                 }else{
-                    scan.val('');
+                    var error = "Delivery Note not found!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                 }
+                $(this).val('');
+
             });
 
         });

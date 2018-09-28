@@ -49,20 +49,34 @@ class DisputeController extends Controller
                     DB::raw('(select max(created_at) from dispute_comments where dispute_comments.dispute_id = disputes.id)'));
                 })
             ->leftJoin('admins as au', 'dc.admin_id', '=', 'au.id')
-            ->select(['disputes.id as dispute_id','disputes.created_at as created_at','disputes.description','cities.name as originated_at','dt.type as dispute_type','disputes.shipments_count as no_of_shipments','ad.name as admin','us.name as shipper','disputes.raised_by_status as rbstatus','au.name as updated_by','disputes.status as status']);
+            ->select(['disputes.id as dispute_id','disputes.created_at as created_at','disputes.description','cities.name as originated_at','dt.type as dispute_type','disputes.shipments_count as no_of_shipments','disputes.shipments_count as shipments_count','ad.name as admin','us.name as shipper','disputes.raised_by_status as rbstatus','au.name as updated_by','disputes.status as status']);
 
         if (session('role_id') != 1) {
             $dispute = $dispute->whereIn('cities.hub_id', session('hubs'));
         }
 
         return Datatables::of($dispute)
-
-            ->editColumn('created_at', function ($dispute) {
-                return $dispute->created_at ? with(new Carbon($dispute->created_at))->format('d/m/Y h:i:s A') : '';
+            ->editColumn('dispute_id', function($dispute) {
+                return str_pad($dispute->dispute_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->filterColumn('disputes.id', function ($query, $keyword) {
+                return $query->where('disputes.id', '=', $keyword);
             })
             ->editColumn('status',function($dispute){
                 return $dispute->status == 0? 'Dispute Launched': ($dispute->status == 1? 'Dispute Updated' : ($dispute->status == 2? 'Dispute Resolved':''));
 
+            })
+            ->filterColumn('status',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
+                        $query->where('disputes.status', '=', $keyword);
+                    }
+                    else {
+                        $query->whereRaw('false');
+                    }
+
+                }
             })
             ->editColumn('no_of_shipments',function($dispute){
                 return "<a class='font-weight-bold shipment_count' href='javascript:void(0);'>{$dispute->no_of_shipments}</a>";
@@ -75,6 +89,30 @@ class DisputeController extends Controller
                     return $dispute->shipper;
                 }
             })
+            ->filterColumn('dispute_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('dt.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+//            ->filterColumn('launched_by',function ($query,$keyword,$dispute){
+//                $keyword = strtolower($keyword);
+//                if ($keyword != '') {
+//                    if($dispute->rbstatus == 0){
+//                        $query->where('au.name', 'like', '%'.$keyword.'%');
+//                    }
+//                    else if($dispute->rbstatus == 1){
+//                        $query->where('us.name', 'like', '%'.$keyword.'%');
+//                    }else{
+//                        $query->whereRaw('false');
+//                    }
+//
+//
+//                }
+//            })
             ->addColumn("action", function ($dispute) {
                 if (($dispute->status == 0 || $dispute->status == 1) && (session('role_id') == 1 || count(array_intersect([3, 4], session('permissions'))) !== 0)) {
                     $dropdown = "
@@ -120,6 +158,30 @@ class DisputeController extends Controller
             'raised_by_status'=>0,
             'city_id'=>$city_id,
             'dispute_type_id'=>2,
+            'shipments_count'=>$count
+        ]);
+       if($dispute){
+           foreach ($shipments as $shipment){
+               DisputeShipment::create([
+                   'dispute_id'=>$dispute->id,
+                   'shipment_id'=>$shipment
+               ]);
+           }
+
+           NotificationsController::send(19, $dispute->id);
+       }
+
+    }
+    static public function add_over_received_shipments($shipments){
+        $admin = Auth::id();
+        $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
+        $count = count($shipments);
+       $dispute = Dispute::create([
+            'description'=>'Shipment over received',
+            'raised_by'=>$admin,
+            'raised_by_status'=>0,
+            'city_id'=>$city_id,
+            'dispute_type_id'=>11,
             'shipments_count'=>$count
         ]);
        if($dispute){
@@ -378,7 +440,7 @@ class DisputeController extends Controller
     }
     public static function add_junction_dispute($cargo_id,$junction_id){
             $junction = City::find($junction_id);
-            $description = "This Cargo # $cargo_id is not updated at $junction->name";
+            $description = "This Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT) . " is not updated at $junction->name";
             $admin = Auth::id();
             $city_id = $junction_id;
 
@@ -394,9 +456,9 @@ class DisputeController extends Controller
             NotificationsController::send(19, $dispute->id);
     }
     public static function add_cargo_short_received($cargo_id,$shipments){
-        $description = "Short received shipments dispute for Cargo # $cargo_id";
+        $description = "Short received shipments dispute for Cargo # " . str_pad($cargo_id, 6, '0', STR_PAD_LEFT);
         $admin = Auth::id();
-        $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
+        $city_id = Shipment::find($shipments[0]->shipment_id)->pickup_address->city->hub_id;
         $count = count($shipments);
         $dispute = Dispute::create([
             'description'=>$description,
@@ -421,7 +483,7 @@ class DisputeController extends Controller
 //        return $shipments;
         $admin = Auth::id();
         $city_id = Shipment::find($shipments[0])->pickup_address->city->hub_id;
-        $description = "Delivery Note # $delivery_note Dispute for different status";
+        $description = "Delivery Note # " . str_pad($delivery_note, 6, '0', STR_PAD_LEFT) . " Dispute for different status";
         $count = count($shipments);
         $dispute = Dispute::create([
             'description'=>$description,

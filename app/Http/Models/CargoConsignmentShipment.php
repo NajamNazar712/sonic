@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class CargoConsignmentShipment extends Model
 {
-	protected $primaryKey = 'shipment_id';
 	public $timestamps = FALSE;
 
 	public function shipment() {

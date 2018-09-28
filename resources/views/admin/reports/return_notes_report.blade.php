@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Return Notes Report')
+
 @section('content')
     <h1 class="mb-1">
         Return Notes Report
@@ -9,19 +11,19 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="row mb-2 justify-content-center">
+                <div id="search_form" class="row mb-2 justify-content-center">
 
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_rn_no" id="search_rn_no" placeholder="Search Return Note Number">
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_rider" id="search_rider" class="form-control select2">
                                 @foreach($riders as $rider)
@@ -30,7 +32,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_created_by" id="search_created_by" class="form-control select2">
                                 @foreach($admins as $admin)
@@ -39,7 +41,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_submitted_by" id="search_submitted_by" class="form-control select2">
                                 @foreach($admins as $admin)
@@ -48,10 +50,40 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
-                        <fieldset class="form-group">
+                    <div class="col-4">
+                        <div class="form-group input-group ">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
                             <input type="text" name="submission_date" class="form-control bg-primary border-primary white rounded-right" id="submission_date" placeholder="Submission Date" data-value="">
-                        </fieldset>
+                        </div>
+                    </div>
+                    <div class="col-4">
+
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                        </div>
+                    </div>
+                    <div class="col-4 ">
+                        <div class="form-group input-group ml-1">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                        </div>
+
                     </div>
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -65,7 +97,7 @@
                         <th class="border-primary border-darken-1">Return Note No.</th>
                         <th class="border-primary border-darken-1">Submitted By</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
-                        <th class="border-primary border-darken-1">Submition Date</th>
+                        <th class="border-primary border-darken-1">Submission Date</th>
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Creation Date</th>
@@ -107,7 +139,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -116,7 +148,7 @@
         }
         a.btn.btn-secondary{
             border-radius: 20px;
-            background: #666ee8;
+            background: #64a0d2;
         }
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
@@ -178,45 +210,94 @@
                 onSet: function(context) {
                 }
             });
+            $('#search_form #search_date_from').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            $('#search_form #search_date_to').pickadate({
+                firstDay: 1,
+                clear: '',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 23:59:59',
+                hiddenSuffix: '_formatted',
+                onSet: function(context) {
+                    if (context.select) {
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
+                    }
+                }
+            });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.return_note.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_rn_no': $('#search_rn_no').val(),
+                            'search_tracking': $('#search_tracking_no').val(),
+                            'search_rider': $('#search_rider').val(),
+                            'search_created_by': $('#search_created_by').val(),
+                            'search_submitted_by': $('#search_submitted_by').val(),
+                            'search_hub': $('#search_hub').val(),
+                            'search_submission': $('input[name="submission_date_formatted"]').val(),
+                            'search_date_from': $('input[name="search_date_from_formatted"]').val(),
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val()
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S. No');
+                            head.push('Return Note No.');
+                            head.push('Submitted By');
+                            head.push('No Of Shipment(s)');
+                            head.push('Submission Date');
+                            head.push('Rider Name');
+                            head.push('Created By');
+                            head.push('Creation Date');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.return_note_id);
+                                row.push(values.updated_by);
+                                row.push(values.count);
+                                row.push(values.submission_date);
+                                row.push(values.rider);
+                                row.push(values.created_by);
+                                row.push(values.created_at);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
             var index_column = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                scrollX: true, scrollY: '350px',
                 buttons: [
                     {
                     extend: 'excelHtml5',
                     title: 'Completed Return Notes Report',
-                    exportOptions: {
-                        columns: ':visible',
-                        format: {
-                            body: function ( data, row, column, node ) {
-                                return (column == 0)? index_column+=1:data;
-
-
-                            }
-                        },
-                    }
+                    text:'<i class="la la-file-excel-o"></i> Excel',
                     },
-                    // {
-                    //     extend: 'pdfHtml5',
-                    //     title: 'Received Cargo Report',
-                    //     exportOptions: {
-                    //         columns: ':visible',
-                    //         format: {
-                    //             body: function ( data, row, column, node ) {
-                    //                 return (column == 0)? index_column+=1:data;
-                    //             }
-                    //         }
-                    //     }
-                    // },
                 ],
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
@@ -230,10 +311,12 @@
                         d.search_submitted_by = $('#search_submitted_by').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_submission = $('input[name="submission_date_formatted"]').val();
+                        d.search_date_from = $('input[name="search_date_from_formatted"]').val();
+                        d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
                 rowId: 'return_note_id',
-                order: [[1, 'asc']],
+                order: [[4, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'return_note_id', name: 'return_notes.id', class: 'align-middle return_note_id'},
@@ -249,30 +332,7 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-
-                        if ($(header).is('.serial_number')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
+                    this.api().table().columns.adjust();
                 }
             });
 

@@ -7,6 +7,8 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentJourney;
+use App\Http\Models\ShipmentPaymentJourney;
+use App\Http\Models\Rider;
 use App\Http\Models\CargoConsignment;
 
 use Auth;
@@ -43,7 +45,7 @@ class AdminTrackingController extends Controller
     			$shipper = $shipment->user;
 
     			$details['shipper']['name'] = $shipper->name;
-    			$details['shipper']['account_number'] = $shipper->id;
+    			$details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
     			$details['shipper']['phone_number_1'] = $shipper->phone;
     			$details['shipper']['phone_number_2'] = $shipper->phone2;
     			$details['shipper']['origin'] = $shipper->city->name;
@@ -71,14 +73,21 @@ class AdminTrackingController extends Controller
     			foreach ($shipment->shipment_journey as $journey) {
     				$journey_details = array();
 
-    				$journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y H:i A');
+    				$journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
     				$journey_details['status'] = $journey->shipment_status_shipper->name;
 
     				if ($journey->reference_1_id) {
-    					$journey_details['status'] .= ' (' . $journey->reference_1_id;
+    					$journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
 
     					if ($journey->reference_2_id) {
-    						$journey_details['status'] .= ' | ' . $journey->reference_2_id;
+                            if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
+                                $rider = Rider::find($journey->reference_2_id);
+
+                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                            }
+                            else {
+                                $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                            }
     					}
                         else if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
                             $cargo_consignment = CargoConsignment::find($journey->reference_1_id);
@@ -94,9 +103,24 @@ class AdminTrackingController extends Controller
     				$journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
     				$journey_details['remarks'] = ($journey->remarks) ? $journey->remarks : '';
     				$journey_details['user'] = ($journey->admin_id) ? $journey->admin->name : $journey->user->name;
+                    $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
 
     				$details['tracking_history'][] = $journey_details;
     			}
+
+                $shipment_payment_journey = $shipment->shipment_payment_journey;
+
+                if ($shipment_payment_journey) {
+                    foreach ($shipment_payment_journey as $journey) {
+                        $journey_details = array();
+
+                        $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                        $journey_details['status'] = $journey->status->name;
+                        $journey_details['user'] = $journey->admin->name;
+
+                        $details['payment_history'][] = $journey_details;
+                    }
+                }
 
     			$tracking['shipments'][$shipment->id] = $details;
     		}
@@ -106,6 +130,20 @@ class AdminTrackingController extends Controller
     	}
 
     	return $tracking;
+    }
+
+    public function rider_information(Request $request) {
+        $rider = Rider::find($request->id);
+
+        $information = array();
+
+        $information['name'] = $rider->name;
+        $information['phone_number'] = $rider->phone;
+        $information['city'] = $rider->city->name;
+        $information['category'] = $rider->rider_category->name;
+        $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
+
+        return $information;
     }
 
 }

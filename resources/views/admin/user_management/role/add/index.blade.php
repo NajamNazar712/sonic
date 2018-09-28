@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Add Role')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -19,25 +21,27 @@
 								{{ csrf_field() }}
 
 								<div class="row">
-									<div class="col-6">
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
 										<div class="form-group">
-											<input type="text" name="name" class="form-control" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required">
+											<input type="text" name="name" class="form-control" placeholder="Designation*" data-rule-required="true" data-msg-required="Designation is required">
 										</div>
 									</div>
 
-									<div class="col-6">
-										<select name="department_id" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
-											@foreach($departments as $department)
-												<option value="{{ $department->id }}">{{ $department->name }}</option>
-											@endforeach
-										</select>
+									<div class="col-xs-12 col-sm-12 col-md-6 col-lg-6">
+										<div class="form-group">
+											<select name="department_id" class="select2" id="department" data-rule-required="true" data-msg-required="Department is required">
+												@foreach($departments as $department)
+													<option value="{{ $department->id }}">{{ $department->name }}</option>
+												@endforeach
+											</select>
+										</div>
 									</div>
 
 									<div class="col-12">
 										<h4 class="form-section mb-2">Permissions</h4>
 									</div>
 
-									<div class="col-2">
+									<div class="col-6 col-xs-6 col-sm-6 col-md-4 col-lg-3">
 										<div class="nav flex-column nav-pills border-info rounded-0" role="tablist" aria-orientation="vertical">
 											@foreach($modules as $module)
 												@if ($loop->first)
@@ -48,7 +52,7 @@
 											@endforeach
 										</div>
 									</div>
-									<div class="col-10">
+									<div class="col-6 col-xs-6 col-sm-6 col-md-8 col-lg-9">
 										<div class="tab-content">
 											@foreach($modules as $module)
 												@if ($loop->first)
@@ -92,54 +96,6 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')

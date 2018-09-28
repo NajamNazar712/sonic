@@ -1,5 +1,5 @@
 @extends('admin.layout.master')
-
+@section('title','Blocked Accounts List')
 @section('content')
     <h1>Blocked Accounts List</h1>
 
@@ -16,6 +16,7 @@
                             <table class="table table-stripped table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                     <tr class="bg-primary white">
+                                        <th class="border-primary border-darken-1">S. No</th>
                                         <th class="border-primary border-darken-1">Account ID</th>
                                         <th class="border-primary border-darken-1">Company Name</th>
                                         <th class="border-primary border-darken-1">City Name</th>
@@ -23,6 +24,7 @@
                                         <th class="border-primary border-darken-1">Phone Number</th>
                                         <th class="border-primary border-darken-1">Address</th>
                                         <th class="border-primary border-darken-1">Email Address</th>
+                                        <th class="border-primary border-darken-1">Reason</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -62,7 +64,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -73,7 +75,10 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-
+        a.btn.btn-secondary{
+            border-radius: 20px;
+            background: #64a0d2;
+        }
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -93,30 +98,84 @@
 
 <script>
     $(document).ready(function() {
+        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            if ( this.context.length ) {
+                body = [];
+
+                var jsonResult = $.ajax({
+                    url: '{{ route('admin.accounts.block.ajax') }}',
+                    data: {
+                        'page': 'all',
+                    },
+                    success: function (result) {
+                        head = [];
+
+                        head.push('S.No');
+                        head.push('Account ID');
+                        head.push('Company Name');
+                        head.push('City Name');
+                        head.push('Contact Person');
+                        head.push('Phone No.');
+                        head.push('Company Address');
+                        head.push('Email Address');
+                        head.push('Reason');
+                        $.each(result.data, function(index, values) {
+                            row = [];
+
+
+                            row.push(index + 1);
+                            row.push(values.id);
+                            row.push(values.name);
+                            row.push(values.city);
+                            row.push(values.poc);
+                            row.push(values.phone);
+                            row.push(values.address);
+                            row.push(values.email);
+                            row.push(values.reason);
+
+                            body.push(row);
+                        });
+                    },
+                    async: false
+                });
+
+                return {body: body, header: head};
+            }
+        } );
         var table = $('.datatable').DataTable({
-            dom: 'ltipr',
-            fixedHeader: {
-                header: true,
-                headerOffset: $('.header-navbar').height()
-            },
-            lengthMenu: [[25, 50, 100], [25, 50, 100]],
-            pageLength: 25,
-            stateSave: true,
+            dom: '<"d-inline-block"l><"pull-right"B>tipr',
+            scrollX: true, scrollY: '350px',
+            buttons: [
+                {
+                    extend: 'excel',
+                    title: 'Blocked Accounts',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                },
+            ],
+            lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+            pageLength: 50,
             pagingType: 'full_numbers',
             processing: true,
             serverSide: true,
             rowId:'id',
+            order: [[1, 'desc']],
             ajax: '{{ route('admin.accounts.block.ajax') }}',
             columns: [
-                {data: 'id', name: 'id', class: 'account_id'},
-                {data: 'name', name: 'name', class: 'company_name'},
+                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                {data: 'id', name: 'users.id', class: 'account_id'},
+                {data: 'name', name: 'users.name', class: 'company_name'},
                 {data: 'city', name: 'cities.name', class: 'city'},
-                {data: 'poc', name: 'poc', class: 'contact_person'},
-                {data: 'phone', name: 'phone', class: 'phone'},
-                {data: 'address', name: 'address', class: 'address'},
-                {data: 'email', name: 'email', class: 'email'},
+                {data: 'poc', name: 'users.poc', class: 'contact_person'},
+                {data: 'phone', name: 'users.phone', class: 'phone'},
+                {data: 'address', name: 'users.address', class: 'address'},
+                {data: 'email', name: 'users.email', class: 'email'},
+                {data: 'reason', name: 'users.blacklist_reason', class: 'reason'},
                 {data: 'action', name: 'action', class: 'action', orderable: false, searchable: false}
             ],
+            rowCallback: function(row, data, index) {
+                var info = table.page.info();
+                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+            },
             initComplete: function() {
                 var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
@@ -127,7 +186,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action')) {
+                    if ($(header).is('.action') || $(header).is('.serial_number')) {
                         $(td).appendTo($(search));
                     }
                     else {
@@ -142,28 +201,55 @@
                 });
             }
         });
-        $('body').on('click','a.blacklist',function () {
+        $('body').on('click','button.blacklist',function () {
             var id = $(this).parents('tr').attr('id');
             var status = $(this).attr('rel');
-            if(id){
-                $.ajax({
-                    url: '{!! route('admin.accounts.status.block') !!}',
-                    method: 'POST',
-                    data: {
-                        'id':id,
-                        'status':status,
-                        '_token': '{{ csrf_token() }}'
+            console.log(status);
+            swal({
+                title: 'Are You Sure?',
+                text: 'Select Yes to Unblock this account!',
+                icon: 'warning',
+                buttons: {
+                    cancel: {
+                        text: 'No',
+                        value: null,
+                        visible: true,
+                        closeModal: true,
+                    },
+                    confirm: {
+                        text: 'Yes',
+                        value: true,
+                        visible: true,
+                        closeModal: true
                     }
-                }).done(function (data) {
-                    if(data.status == 1){
-                        table.ajax.reload();
-                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                    }
+                },
+                closeOnClickOutside: false,
+                closeOnEsc: false,
+                dangerMode: true
+            }).then(function (confirm) {
+                if(confirm){
+                    if(id){
+                        $.ajax({
+                            url: '{!! route('admin.accounts.status.block') !!}',
+                            method: 'POST',
+                            data: {
+                                'id':id,
+                                'status':status,
+                                '_token': '{{ csrf_token() }}'
+                            }
+                        }).done(function (data) {
+                            if(data.status == 1){
+                                table.draw('false');
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
 
-                });
-            }
+                        });
+                    }
+                }
+            });
+
         });
     });
 </script>

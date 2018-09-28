@@ -1,18 +1,14 @@
 @extends('admin.layout.master')
 
+@section('title', 'Dashboard')
+
 @section('content')
 <div class="app-content content">
     <div class="content-wrapper">
       <div class="content-header row">
       </div>
       <div class="content-body">
-        
-        
-       
-        <!-- Active Orders -->
-       <h1>Welcome To Trax Logistics,
-       <span class="user-name text-bold-700 ">{{Auth::user()->name}}</span>
-     </h1>
+
         <!-- Active Orders -->
           <div class="row">
               <div class="col">
@@ -21,11 +17,28 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-book-open font-large-2 float-left"></i>
+                                      <i class="icon-grid font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-right">
-                                      <h3 class="">{{$stats['booked']}}</h3>
-                                      <span>Booked</span>
+                                      <h3 class="">{{$stats['total']}}</h3>
+                                      <span>Total Booked Shipment(s)</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="col">
+                  <div class="card bg-gradient-directional-primary pull-up">
+                      <div class="card-content">
+                          <div class="card-body">
+                              <div class="media d-flex">
+                                  <div class="align-self-center">
+                                      <i class="icon-hourglass text-white font-large-2 float-left"></i>
+                                  </div>
+                                  <div class="media-body text-white text-right">
+                                      <h3 class="text-white">{{$stats['booked']}}</h3>
+                                      <span>Pending Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -38,11 +51,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-basket-loaded text-white font-large-2 float-left"></i>
+                                      <i class="icon-layers text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['received']}}</h3>
-                                      <span>Received</span>
+                                      <span>Received Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -54,11 +67,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-emoticon-smile text-white font-large-2 float-left"></i>
+                                      <i class="icon-check text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['delivered']}}</h3>
-                                      <span>Delivered</span>
+                                      <span>Delivered Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -70,11 +83,11 @@
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-refresh text-white font-large-2 float-left"></i>
+                                      <i class="icon-loop text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['return']}}</h3>
-                                      <span>Returns</span>
+                                      <span>Returned Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -82,16 +95,16 @@
                   </div>
               </div>
               <div class="col">
-                  <div class="card bg-gradient-directional-danger pull-up">
+                  <div class="card bg-gradient-directional-inprocess pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
                                   <div class="align-self-center">
-                                      <i class="icon-shield text-white font-large-2 float-left"></i>
+                                      <i class="icon-shuffle text-white font-large-2 float-left"></i>
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['pending']}}</h3>
-                                      <span>Pendings</span>
+                                      <span>In Process Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -103,15 +116,15 @@
               <div class="card col-12">
                   <div class="card-content collapse show">
                       <div class="card-body">
-                          <div id="shipment_statistics_chart" class="height-400 echart-container"></div>
+                          <div id="shipment_statistics_chart" class="height-300 echart-container"></div>
                           <div class="row">
-                              <div class="col-3">
+                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
                                   <input type="text" name="from_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{$dates['old_date']}}">
                               </div>
-                              <div class="col-3">
+                              <div class="col-lg-3 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-0 mt-sm-1 mt-xs-1">
                                   <input type="text" name="to_date" class="form-control graph_date bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{$dates['current']}}">
                               </div>
-                              <div class="col-2">
+                              <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
                                   <select name="graph_destination" id="graph_destination" class="select2 form-control">
                                       {{--<option value="">All</option>--}}
                                       @foreach($cities as $city)
@@ -119,15 +132,14 @@
                                       @endforeach
                                   </select>
                               </div>
-                              <div class="col-2">
+                              <div class="col-lg-2 col-md-6 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1">
                                   <select name="graph_shipper" id="graph_shipper" class="select2 form-control">
-                                      {{--<option value="">All</option>--}}
                                       @foreach($shippers as $shipper)
                                           <option value="{{$shipper->id}}">{{$shipper->name}}</option>
                                       @endforeach
                                   </select>
                               </div>
-                              <div class="col-2">
+                              <div class="col-lg-2 col-md-12 col-sm-12 col-xs-12 mt-lg-0 mt-md-1 mt-sm-1 mt-xs-1 text-right">
                                   <button type="button" class="btn round btn-primary mr-1 btn-glow statistics_search">Search <i class="ft-bar-chart"></i></button>
                               </div>
                           </div>
@@ -136,7 +148,6 @@
                   </div>
               </div>
           </div>
-          <hr>
 
           <div class="row">
               <div class="card">
@@ -147,25 +158,25 @@
               <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                   <thead>
                   <tr role="row" class="bg-primary white">
-
                       <th class="border-primary border-darken-1"></th>
-                      <th class="border-primary border-darken-1">SN No.</th>
+                      <th class="border-primary border-darken-1">S No.</th>
                       <th class="border-primary border-darken-1">Tracking No.</th>
                       <th class="border-primary border-darken-1">Order ID</th>
                       <th class="border-primary border-darken-1">Account No.</th>
                       <th class="border-primary border-darken-1">Shipper</th>
                       <th class="border-primary border-darken-1">Service Type</th>
                       <th class="border-primary border-darken-1">Status</th>
+                      <th class="border-primary border-darken-1">Payment Status</th>
                       <th class="border-primary border-darken-1">Origin</th>
                       <th class="border-primary border-darken-1">Destination</th>
                       <th class="border-primary border-darken-1">Consignee Name</th>
                       <th class="border-primary border-darken-1">Consignee Contact</th>
                       <th class="border-primary border-darken-1">Consignee Address</th>
-                      <th class="border-primary border-darken-1">COD Amount</th>
+                      <th class="border-primary border-darken-1">Collection Amount</th>
                       <th class="border-primary border-darken-1">Product Type</th>
                       <th class="border-primary border-darken-1">Booking Date</th>
                       <th class="border-primary border-darken-1">Instructions</th>
-                      <th class="border-primary border-darken-1">Action</th>
+                      <th class="border-primary border-darken-1"></th>
                   </tr>
                   </thead>
               </table>
@@ -188,81 +199,25 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/fonts/simple-line-icons/style.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/cryptocoins/cryptocoins.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
-    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/extensions/fixedHeader.dataTables.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <style type="text/css">
 
-
-    <style>
-        table.dataTable {
-            font-size: 12px;
+        .bg-gradient-directional-inprocess {
+            background-image: linear-gradient(45deg, #d6a42a, #ffec07fa);
+            background-repeat: repeat-x;
         }
 
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #666EE8;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-        .selectize-control {
-            width: 100%;
-        }
-
-        .selectize-control .selectize-input {
-            vertical-align: middle;
-        }
-
-        .selectize-control .selectize-input .item {
-            word-break: break-all;
-        }
     </style>
 @endsection
 
 @section('js')
-
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-{{--    <script src="{{asset('app-assets/js/scripts/forms/select/form-select2.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.fixedHeader.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/charts/echarts/echarts.common.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -352,59 +307,53 @@
                         }
                     });
             }
+
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                "scrollX": true,
+                scrollX: true, scrollY: '350px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
-                    text: 'Print',
+                    text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
                     enabled: false,
                     action: function (e, dt, node, config) {
                         table.button('.print').disable();
                         print(selected_rows);
-                        $.each(selected_rows, function(index, id) {
-                            table.row($('#datatable tbody tr#' + id)).deselect();
-                        });
+                        table.rows().deselect();
                         selected_rows = [];
-
                     }
                 }],
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
                 select: {
                     info: false,
                     style: 'multi',
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.orders.list') }}',
                 rowId: 'shipment_id',
-                order: [[1, 'asc']],
+                order: [[16, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'account_no', name: 'ubi.account_no', class: 'align-middle account_no'},
+                    {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
+                    {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone1', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone1'},
+                    {data: 'phone', name: 'phone', class: 'align-middle phone',orderable:false,searchable:false},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
+                    {data: 'product_type', name: 'product', class: 'align-middle product_type'},
                     {data: 'booking_date', name: 'booking_date', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -414,10 +363,10 @@
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-                    if (data.shipper_status_id == 1) {
+                    if (data.shipper_status_id === 1) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
-                        if ($.inArray(data.id, selected_rows) !== -1) {
+                        if ($.inArray(data.shipment_id, selected_rows) !== -1) {
                             table.row(row).select();
                         }
                     }
@@ -428,6 +377,12 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '</select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
+                        '</select>';
+                    var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+                    var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -436,6 +391,26 @@
 
                         if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.status')){
+                            $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.service_type')){
+                            $(service_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.product_type')){
+                            $(product_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.payment_status')){
+                            $(payment_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -447,6 +422,79 @@
                             }
                         }
                     });
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.text = obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.text = obj.booking_type;
+
+                        return obj;
+                    });
+
+                    $("#service_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data3 = $.map({!! $products !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data3 = $.map({!! $products !!}, function (obj) {
+                        obj.text = obj.product_name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#product_select").prepend('<option value="" selected></option>').select2({
+                        data:data3,
+                        placeholder: "Select Product",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data4 = $.map({!! $payment_status !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data4 = $.map({!! $payment_status !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#payment_select").prepend('<option value="" selected></option>').select2({
+                        data:data4,
+                        placeholder: "Select Payment",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    this.api().table().columns.adjust();
                 }
             });
             $('.datatable tbody').on('click', 'tr td.select-checkbox', function() {
@@ -475,8 +523,8 @@
 
                 // Setup grid
                 grid: {
-                    x: 40,
-                    x2: 20
+                    x: 60,
+                    x2: 40
                 },
 
                 // Add tooltip
@@ -486,11 +534,11 @@
 
                 // Add legend
                 legend: {
-                    data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
+                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)']
                 },
 
                 // Add custom colors
-                color: ['#cecece', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a'],
 
                 // Hirozontal axis
                 xAxis: [{
@@ -510,27 +558,27 @@
                 // Add series
                 series: [
                     {
-                        name: 'Booked',
+                        name: 'Pending Shipment(s)',
                         type: 'line',
                         data: @json($graph['booked'])
                     },
                     {
-                        name: 'Received',
+                        name: 'Received Shipment(s)',
                         type: 'line',
                         data: @json($graph['received'])
                     },
                     {
-                        name: 'Delivered',
+                        name: 'Delivered Shipment(s)',
                         type: 'line',
                         data: @json($graph['delivered'])
                     },
                     {
-                        name: 'Return',
+                        name: 'Returned Shipment(s)',
                         type: 'line',
                         data: @json($graph['return'])
                     },
                     {
-                        name: 'Pending',
+                        name: 'In Process Shipment(s)',
                         type: 'line',
                         data: @json($graph['pending'])
                     }
@@ -576,9 +624,9 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Booked', 'Received', 'Delivered', 'Return', 'Pending']
+                                data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)']
                             },
-                            color: ['#CECECE', '#62BCF6', '#69DEB4', '#FFB280', '#FF8090'],
+                            color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a'],
 
                             xAxis: [{
                                 type: 'category',
@@ -594,27 +642,27 @@
                             }],
                             series: [
                                 {
-                                    name: 'Booked',
+                                    name: 'Pending Shipment(s)',
                                     type: 'line',
                                     data: data.graph['booked']
                                 },
                                 {
-                                    name: 'Received',
+                                    name: 'Received Shipment(s)',
                                     type: 'line',
                                     data: data.graph['received']
                                 },
                                 {
-                                    name: 'Delivered',
+                                    name: 'Delivered Shipment(s)',
                                     type: 'line',
                                     data: data.graph['delivered']
                                 },
                                 {
-                                    name: 'Return',
+                                    name: 'Returned Shipment(s)',
                                     type: 'line',
                                     data: data.graph['return']
                                 },
                                 {
-                                    name: 'Pending',
+                                    name: 'In Process Shipment(s)',
                                     type: 'line',
                                     data: data.graph['pending']
                                 }
@@ -646,8 +694,12 @@
                 })
             });
 
-
-
+            window.onresize = function() {
+                $(".echart-container").each(function(){
+                    var id = $(this).attr('_echarts_instance_');
+                    window.echarts.getInstanceById(id).resize();
+                });
+            };
         });
     </script>
 @endsection

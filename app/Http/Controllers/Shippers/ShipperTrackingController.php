@@ -45,7 +45,7 @@ class ShipperTrackingController extends Controller
         			$shipper = $shipment->user;
 
         			$details['shipper']['name'] = $shipper->name;
-        			$details['shipper']['account_number'] = $shipper->id;
+        			$details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
         			$details['shipper']['phone_number_1'] = $shipper->phone;
         			$details['shipper']['phone_number_2'] = $shipper->phone2;
         			$details['shipper']['origin'] = $shipper->city->name;
@@ -73,13 +73,27 @@ class ShipperTrackingController extends Controller
         			foreach ($shipment->shipment_journey as $journey) {
         				$journey_details = array();
 
-        				$journey_details['date_time'] = Carbon::parse($journey->created_at)->format('d/m/Y H:i A');
+        				$journey_details['date_time'] = $journey->created_at->toDateTimeString();
         				$journey_details['status'] = $journey->shipment_status_shipper->name;
-
         				$journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                        $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
 
         				$details['tracking_history'][] = $journey_details;
         			}
+
+                    $shipment_payment_journey = $shipment->shipment_payment_journey;
+
+                    if ($shipment_payment_journey) {
+                        foreach ($shipment_payment_journey as $journey) {
+                            $journey_details = array();
+
+                            $journey_details['date_time'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                            $journey_details['status'] = $journey->status->name;
+                            $journey_details['user'] = $journey->admin->name;
+
+                            $details['payment_history'][] = $journey_details;
+                        }
+                    }
 
         			$tracking['shipments'][$shipment->id] = $details;
                 }

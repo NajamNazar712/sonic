@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Lead Time Report')
+
 @section('content')
     <h1 class="mb-1">
        Lead Time Report
@@ -11,21 +13,13 @@
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
 
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <input type="text" class="form-control" name="search_tracking_no" id="search_tracking_no" placeholder="Search Tracking Number">
                         </fieldset>
                     </div>
-                    {{--<div class="col-3">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_shipper" id="search_shipper" class="form-control select2">--}}
-                                {{--@foreach($shippers as $shipper)--}}
-                                    {{--<option value="{{$shipper->id}}">{{$shipper->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                    <div class="col-3">
+
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_origin" id="search_origin" class="form-control select2">
                                 @foreach($cities as $city)
@@ -34,7 +28,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_destination" id="search_destination" class="form-control select2">
                                 @foreach($cities as $city)
@@ -43,7 +37,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $hub)
@@ -52,7 +46,7 @@
                             </select>
                         </fieldset>
                     </div>
-                    <div class="col-3">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_status" id="search_status" class="form-control select2">
                                 @foreach($statuses as $status)
@@ -62,15 +56,25 @@
                         </fieldset>
                     </div>
 
-                    <div class="col-3">
-                        <fieldset class="form-group">
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
                             <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
-                        </fieldset>
+                        </div>
                     </div>
-                    <div class="col-3">
-                        <fieldset class="form-group">
+                    <div class="col-4">
+                        <div class="form-group input-group">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
                             <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
-                        </fieldset>
+                        </div>
                     </div>
 
                     <div class="col-2">
@@ -89,6 +93,7 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Current Status</th>
+                        <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Arrival Date(A)</th>
                         <th class="border-primary border-darken-1">Reached At Destination Date(B)</th>
                         <th class="border-primary border-darken-1">Transit TAT(A-B)</th>
@@ -97,6 +102,7 @@
                         <th class="border-primary border-darken-1">Attempt TAT(A-C)</th>
                         <th class="border-primary border-darken-1">Dispatch TAT(B-C)</th>
                         <th class="border-primary border-darken-1">Delivered Date(D)</th>
+                        <th class="border-primary border-darken-1">Delivered TAT(A-D)</th>
                         <th class="border-primary border-darken-1">Return Confirm(E)</th>
                         <th class="border-primary border-darken-1">Reached At Origin(F)</th>
                         <th class="border-primary border-darken-1">Return Transit TAT(E-F)</th>
@@ -106,7 +112,7 @@
                         <th class="border-primary border-darken-1">Return TAT(E-G)</th>
                         <th class="border-primary border-darken-1">Payment Done Date(H)</th>
                         <th class="border-primary border-darken-1">Payment TAT(D-H,G-H)</th>
-                        <th class="border-primary border-darken-1">Total TAT</th>
+                        <th class="border-primary border-darken-1">Shipment TAT</th>
                     </tr>
                     </thead>
                 </table>
@@ -145,7 +151,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -154,7 +160,7 @@
         }
         a.btn.btn-secondary {
             border-radius: 20px;
-            background: #666ee8;
+            background: #64a0d2;
         }
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
@@ -246,43 +252,106 @@
                     from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
                 }
             });
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.reports.lead_time.list') }}',
+                        data: {
+                            'page': 'all',
+                            'search_tracking_no': $('#search_tracking_no').val(),
+                            'search_origin': $('#search_origin').val(),
+                            'search_destination': $('#search_destination').val(),
+                            'search_hub': $('#search_hub').val(),
+                            'search_status': $('#search_status').val(),
+                            'search_from': $('input[name="from_date_formatted"]').val(),
+                            'search_to': $('input[name="to_date_formatted"]').val()
+                        },
+                        success: function (result) {
+                            head = [];
 
-            var index_column = 0;
+                            head.push('S.No');
+                            head.push('Tracking .No');
+                            head.push('Account No.');
+                            head.push('Shipper');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Hub');
+                            head.push('Current Status');
+                            head.push('Payment Status');
+                            head.push('Arrival Date(A)');
+                            head.push('Reached At Destination Date(B)');
+                            head.push('Transit TAT(A-B)');
+                            head.push('First Status');
+                            head.push('First Status Date(C)');
+                            head.push('Attempt TAT(A-C)');
+                            head.push('Dispatch TAT(B-C)');
+                            head.push('Delivered Date(D)');
+                            head.push('Delivered TAT(A-D)');
+                            head.push('Return Confirm(E)');
+                            head.push('Reached At Origin(F)');
+                            head.push('Return Transit TAT(E-F)');
+                            head.push('Return Status');
+                            head.push('Return Status Date(G)');
+                            head.push('Return Dispatch TAT(F-G)');
+                            head.push('Return TAT(E-G)');
+                            head.push('Payment Done Date(H)');
+                            head.push('Payment TAT(D-H,G-H)');
+                            head.push('Shipment TAT');
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.account_no);
+                                row.push(values.shipper);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.hub);
+                                row.push(values.current_status);
+                                row.push(values.payment_status);
+                                row.push(values.arrival_date);
+                                row.push(values.reached_at_destination);
+                                row.push(values.transit_tat);
+                                row.push(values.first_status);
+                                row.push(values.first_status_date);
+                                row.push(values.attempt_tat);
+                                row.push(values.dispatch_tat);
+                                row.push(values.delivered_date);
+                                row.push(values.delivered_tat);
+                                row.push(values.return_confirm);
+                                row.push(values.return_reached_at_destination);
+                                row.push(values.return_transit_tat);
+                                row.push(values.return_delivered_status);
+                                row.push(values.return_delivered_date);
+                                row.push(values.return_dispatch_tat);
+                                row.push(values.return_tat);
+                                row.push(values.payment_done_date);
+                                row.push(values.payment_tat);
+                                row.push(values.total_tat);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );            var index_column = 0;
             var table = $('#datatable').DataTable({
-                "scrollX": true,
+                scrollX: true, scrollY: '350px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
                     {
                         extend: 'excelHtml5',
                         title: 'Lead Time Report',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( data, row, column, node ) {
-                                    return (column == 0)? row+1:data;
-                                }
-                            }
-                        }
-                    },
-                    {
-                        extend: 'print',
-                        exportOptions: {
-                            columns: ':visible',
-                            format: {
-                                body: function ( e, dt, column, node ) {
-                                    return (column == 0)? dt+1:e;
-                                }
-                            }
-                        }
+                        text: '<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
-                stateSave: true,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
@@ -299,34 +368,36 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[1, 'desc']],
+                order: [[9, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
-                    {data: 'account_no', name: 'ubi.account_no', class: 'align-middle account_no'},
+                    {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'current_status', name: 'ss.name', class: 'align-middle current_status'},
+                    {data: 'payment_status', name: 'sps.name', class: 'align-middle payment_status'},
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date'},
                     {data: 'reached_at_destination', name: 'reached_at_destination', class: 'align-middle reached_at_destination'},
-                    {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat'},
+                    {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat', orderable: false, searchable: false},
                     {data: 'first_status', name: 'fs.name', class: 'align-middle first_status'},////
                     {data: 'first_status_date', name: 'first_status_date', class: 'align-middle first_status_date'},////
-                    {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat'},////
-                    {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat'},
+                    {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat', orderable: false, searchable: false},////
+                    {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat', orderable: false, searchable: false},
                     {data: 'delivered_date', name: 'delivered_date', class: 'align-middle delivered_date'},
+                    {data: 'delivered_tat', name: 'delivered_tat', class: 'align-middle delivered_tat', orderable: false, searchable: false},
                     {data: 'return_confirm', name: 'return_confirm', class: 'align-middle return_confirm'},
                     {data: 'return_reached_at_destination', name: 'return_reached_at_destination', class: 'align-middle return_reached_at_destination'},
-                    {data: 'return_transit_tat', name: 'return_transit_tat', class: 'align-middle return_transit_tat'},
+                    {data: 'return_transit_tat', name: 'return_transit_tat', class: 'align-middle return_transit_tat', orderable: false, searchable: false},
                     {data: 'return_delivered_status', name: 'return_delivered_status', class: 'align-middle return_delivered_status'},
                     {data: 'return_delivered_date', name: 'return_delivered_date', class: 'align-middle return_delivered_date'},
-                    {data: 'return_dispatch_tat', name: 'return_dispatch_tat', class: 'align-middle return_dispatch_tat'},
-                    {data: 'return_tat', name: 'return_tat', class: 'align-middle return_tat'},
+                    {data: 'return_dispatch_tat', name: 'return_dispatch_tat', class: 'align-middle return_dispatch_tat', orderable: false, searchable: false},
+                    {data: 'return_tat', name: 'return_tat', class: 'align-middle return_tat', orderable: false, searchable: false},
                     {data: 'payment_done_date', name: 'payment_done_date', class: 'align-middle payment_done_date'},
-                    {data: 'payment_tat', name: 'payment_tat', class: 'align-middle payment_tat'},
-                    {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat'}
+                    {data: 'payment_tat', name: 'payment_tat', class: 'align-middle payment_tat', orderable: false, searchable: false},
+                    {data: 'total_tat', name: 'total_tat', class: 'align-middle total_tat', orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {
@@ -334,30 +405,7 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-
-                        if ($(header).is('.serial_number') || $(header).is('.transit_tat') || $(header).is('.attempt_tat')  || $(header).is('.return_transit_tat') || $(header).is('.dispatch_tat') || $(header).is('.payment_tat') || $(header).is('.return_dispatch_tat') || $(header).is('.return_tat') || $(header).is('.total_tat')) {
-                            $(td).appendTo($(search));
-                        }
-                        else {
-                            var current = $(input).appendTo($(search)).on('change', function() {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td).after(icon);
-
-                            if (column.search()) {
-                                current.val(column.search());
-                            }
-                        }
-                    });
+                    this.api().table().columns.adjust();
                 }
             });
 

@@ -1,10 +1,6 @@
-{{--/**--}}
- {{--* Created by PhpStorm.--}}
- {{--* User: WaqasTrax--}}
- {{--* Date: 6/2/2018--}}
- {{--* Time: 3:32 PM--}}
- {{--*/--}}
 @extends('admin.layout.master')
+
+@section('title', 'Pickup Weight Threshold')
 
 @section('css')
     {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">--}}
@@ -15,7 +11,7 @@
 
 @endsection
 @section('content')
-    <h1>Pickup Settings</h1>
+    <h1>Pickup Weight Threshold</h1>
 
     <section>
         <div class="row">
@@ -36,18 +32,14 @@
 
                                     <div class="card-content">
                                     <div class="row">
-                                        <div class="com-md-4">
-                                            <h3>Pickup Weight Threshold</h3>
-                                        </div>
                                         @php
                                         $pickup_weight = '';
-                                        if($settings->isEmpty() == false){
-                                            if(isset($settings[0]->setting_value)){
-                                                $pickup_weight = $settings[0]->setting_value;
+                                        if(!empty($settings)){
+                                                $pickup_weight = $settings->setting_value;
                                             }else{
                                                 $pickup_weight = '';
                                             }
-                                        }
+
 
                                         @endphp
                                         <div class="col-md-4">
@@ -63,7 +55,7 @@
                                                         <span class="input-group-text">KG</span>
                                                     </div>
                                                     <div class="input-group-append">
-                                                        <button class="btn btn-primary" type="submit">Add Weight</button>
+                                                        <button class="btn btn-primary" type="submit">Add Threshold</button>
                                                     </div>
                                                 </div>
                                             </fieldset>
@@ -85,11 +77,7 @@
 @endsection
 
 @section('js')
-    {{--<script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" type="text/javascript"></script>--}}
-    {{--<script src="{{asset('app-assets/js/scripts/forms/checkbox-radio.js')}}" type="text/javascript"></script>--}}
-    {{--<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-    {{--<script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>--}}
 
     <script type="text/javascript">
         $(document).ready(function () {

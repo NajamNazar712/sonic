@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Pending Pickups')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -20,7 +22,8 @@
 									<tr role="row" class="bg-primary white">
 										<th class="border-primary border-darken-1"></th>
 										<th class="border-primary border-darken-1">S. No.</th>
-										<th class="border-primary border-darken-1">Requested at</th>
+										<th class="border-primary border-darken-1">Pickup Date</th>
+										<th class="border-primary border-darken-1">Requested Datetime</th>
 										<th class="border-primary border-darken-1">Shipper</th>
 										<th class="border-primary border-darken-1">Contact Person</th>
 										<th class="border-primary border-darken-1">Contact No(s).</th>
@@ -30,7 +33,6 @@
 										<th class="border-primary border-darken-1">Pending Booking(s)</th>
 										<th class="border-primary border-darken-1">Total Estimated Weight (kg)</th>
 										<th class="border-primary border-darken-1">Pickup Type</th>
-										<th class="border-primary border-darken-1">Pickup Date</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
@@ -74,53 +76,6 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -135,12 +90,63 @@
 				keyboard: false,
 				show: false
 			});
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.pickups.pending.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Requested Datetime');
+                            head.push('Shipper');
+                            head.push('Contact Person');
+                            head.push('Contact No(s).');
+                            head.push('Address');
+                            head.push('City');
+                            head.push('Booking(s)');
+                            head.push('Pending Booking(s)');
+                            head.push('Total Estimated Weight (kg)');
+                            head.push('Pickup Type');
+                            head.push('Pickup Date');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.requested_at);
+                                row.push(values.shipper);
+                                row.push(values.contact_person);
+                                row.push(values.contact_number);
+                                row.push(values.address);
+                                row.push(values.city);
+                                row.push(values.bookings);
+                                row.push(values.pending_bookings);
+                                row.push(values.total_estimated_weight);
+                                row.push(values.pickup_type);
+                                row.push(values.pickup_date);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var selected_rows = [];
 
 			var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || count(array_intersect([18, 19], session('permissions'))) !== 0)
-					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
 					buttons: [
 					@if (session('role_id') == 1 || in_array(19, session('permissions')))
 						{
@@ -158,7 +164,7 @@
 					@if (session('role_id') == 1 || in_array(18, session('permissions')))
 						{
 							text: 'Cancel',
-							className: 'btn btn-danger ml-1 cancel',
+							className: 'btn btn-danger  cancel',
 							enabled: false,
 							action: function (e, dt, node, config) {
 								swal({
@@ -166,13 +172,13 @@
 									icon: 'warning',
 									buttons: {
 										cancel: {
-											text: 'Close',
+											text: 'No',
 											value: null,
 											visible: true,
 											closeModal: true,
 										},
 										confirm: {
-											text: 'Cancel',
+											text: 'Yes',
 											value: true,
 											visible: true,
 											closeModal: true
@@ -199,48 +205,55 @@
 												toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 											}
 
-											$.each(selected_rows, function(index, id) {
-												table.row($('#datatable tbody tr#' + id)).deselect();
-											});
+											table.rows().deselect();
 
 											selected_rows = [];
 
 											table.button('.assign').disable();
 											table.button('.cancel').disable();
 
-											table.ajax.reload();
+											table.draw('false');
 										});
 									}
 								});
 							}
-						}
+						},
 					@endif
-					],
+                        {
+                            extend: 'excel',
+                            title: 'Pending Pickups',
+                        	className: 'btn btn-primary',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
+                        }],
 				@else
-					dom: 'ltipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Pending Pickups',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }
+                    ],
 				@endif
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
+				scrollX: true, scrollY: '350px',
 				select: {
 					info: false,
 					style: 'multi',
 					selector: 'td.select-checkbox',
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
-				lengthMenu: [[25, 50, 100], [25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
 				ajax: '{{ route('admin.pickups.pending.list') }}',
 				rowId: 'id',
-				order: [[2, 'asc']],
+				order: [[2, 'asc'], [3, 'asc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'pickup_requests.id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'pickup_date', name: 'pickup_requests.pickup_date', class: 'align-middle pickup_date'},
 					{data: 'requested_at', name: 'pickup_requests.created_at', class: 'align-middle requested_at'},
 					{data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data: 'contact_person', name: 'usi.poc', class: 'align-middle contact_person'},
@@ -251,7 +264,6 @@
 					{data: 'pending_bookings', name: 'pickup_requests.pending_bookings', class: 'align-middle pending_bookings'},
 					{data: 'total_estimated_weight', name: 'pickup_requests.total_estimated_weight', class: 'align-middle total_estimated_weight'},
 					{data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},
-					{data: 'pickup_date', name: 'pickup_requests.pickup_date', class: 'align-middle pickup_date'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -269,14 +281,22 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Light</option>' +
+                        '<option value="1">Heavy</option>' +
+                        '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
 						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.pickup_type')){
+                            $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -287,6 +307,13 @@
 							}
 						}
 					});
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Pickup Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+					this.api().table().columns.adjust();
 				}
 			});
 
@@ -347,16 +374,14 @@
 							toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 						}
 
-						$.each(selected_rows, function(index, id) {
-							table.row($('#datatable tbody tr#' + id)).deselect();
-						});
+						table.rows().deselect();
 
 						selected_rows = [];
 
 						table.button('.assign').disable();
 						table.button('.cancel').disable();
 
-						table.ajax.reload();
+						table.draw('false');
 
 						$('#assign_to_rider').modal('hide');
 					});
@@ -371,13 +396,13 @@
 					icon: 'warning',
 					buttons: {
 						cancel: {
-							text: 'Close',
+							text: 'No',
 							value: null,
 							visible: true,
 							closeModal: true,
 						},
 						confirm: {
-							text: 'Cancel',
+							text: 'Yes',
 							value: true,
 							visible: true,
 							closeModal: true
@@ -419,7 +444,7 @@
 								table.button('.cancel').disable();
 							}
 
-							table.ajax.reload();
+							table.draw('false');
 						});
 					}
 				});

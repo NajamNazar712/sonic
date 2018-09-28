@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Notifications')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -21,7 +23,7 @@
 										<th class="border-primary border-darken-1">S. No.</th>
 										<th class="border-primary border-darken-1">Name</th>
 										<th class="border-primary border-darken-1">Type</th>
-										<th class="border-primary border-darken-1">Updated at</th>
+										<th class="border-primary border-darken-1">Updated Datetime</th>
 										<th class="border-primary border-darken-1">Updated by</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
@@ -29,7 +31,7 @@
 								</thead>
 							</table>
 
-							@if (session('role_id') == 1 || in_array(104, session('permissions')))
+							@if (session('role_id') == 1 || in_array(103, session('permissions')))
 								<div class="modal fade" id="send_custom_email" role="dialog" aria-labelledby="send_custom_email_title" aria-hidden="true">
 									<div class="modal-dialog modal-lg" role="document">
 										<div class="modal-content">
@@ -72,7 +74,7 @@
 								</div>
 							@endif
 
-							@if (session('role_id') == 1 || in_array(102, session('permissions')))
+							@if (session('role_id') == 1 || in_array(101, session('permissions')))
 								<div class="modal fade" id="edit" role="dialog" aria-labelledby="edit_title" aria-hidden="true">
 									<div class="modal-dialog modal-lg" role="document">
 										<div class="modal-content">
@@ -123,54 +125,6 @@
 @section('css')
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -181,10 +135,10 @@
 
 	<script>
 		$(document).ready(function() {
-			@if (session('role_id') == 1 || in_array(104, session('permissions')))
+			@if (session('role_id') == 1 || in_array(103, session('permissions')))
 				$('#send_custom_email .receiver').select2({
 					width: '100%',
-					placeholder: 'Receiver'
+					placeholder: 'Receiver*'
 				}).bind('change', function() {
 					if ($(this).hasClass('danger')) {
 						$(this).valid();
@@ -194,14 +148,14 @@
 				autosize($('#send_custom_email .body')[0]);
 			@endif
 
-			@if (session('role_id') == 1 || in_array(102, session('permissions')))
+			@if (session('role_id') == 1 || in_array(101, session('permissions')))
 				autosize($('#edit .body')[0]);
 			@endif
 
 			var valid_fields = [];
 
 			var table = $('#datatable').DataTable({
-				@if (session('role_id') == 1 || in_array(104, session('permissions')))
+				@if (session('role_id') == 1 || in_array(103, session('permissions')))
 					dom: '<"d-inline-block"l><"pull-right"B>tipr',
 					buttons: [{
 						text: 'Send Custom Email',
@@ -213,19 +167,15 @@
 				@else
                 	dom: 'ltipr',
 				@endif
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+				scrollX: true, scrollY: '350px',
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
 				ajax: '{{ route('admin.notifications.list') }}',
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[3, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'notifications.name', class: 'align-middle name'},
@@ -264,10 +214,12 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				}
 			});
 
-			@if (session('role_id') == 1 || in_array(104, session('permissions')))
+			@if (session('role_id') == 1 || in_array(103, session('permissions')))
 				$('#send_custom_email form').validate({
 					errorClass: 'danger',
 					successClass: 'success',
@@ -284,7 +236,7 @@
 				var notification_id = parseInt($(this).parents('tr').attr('id'));
 				var notification_type = parseInt($(this).parents('tr').attr('data-type'));
 
-				@if (session('role_id') == 1 || in_array(102, session('permissions')))
+				@if (session('role_id') == 1 || in_array(101, session('permissions')))
 					if ($(this).hasClass('edit')) {
 						$.ajax({
 							url: '{!! route('admin.notifications.details') !!}',
@@ -325,7 +277,7 @@
 					}
 				@endif
 
-				@if (session('role_id') == 1 || in_array(103, session('permissions')))
+				@if (session('role_id') == 1 || in_array(102, session('permissions')))
 					if ($(this).hasClass('enable')) {
 						$.ajax({
 							url: '{!! route('admin.notifications.status') !!}',
@@ -371,7 +323,7 @@
 				@endif
 			});
 
-			@if (session('role_id') == 1 || in_array(102, session('permissions')))
+			@if (session('role_id') == 1 || in_array(101, session('permissions')))
 				$('#edit').on('shown.bs.modal', function (e) {
 					autosize.update($('#edit .body')[0]);
 				})

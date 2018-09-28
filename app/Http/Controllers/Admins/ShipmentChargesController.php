@@ -70,10 +70,10 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $shipment->weight_charges = $charges;
+                        $shipment->weight_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->weight_charges = $charges - $discount;
+                        $shipment->weight_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -130,10 +130,10 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $shipment->weight_charges = $charges;
+                        $shipment->weight_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->weight_charges = $charges - $discount;
+                        $shipment->weight_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -186,15 +186,20 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $shipment->cash_handling_charges = $charges;
+                        $shipment->cash_handling_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->cash_handling_charges = $charges - $discount;
+                        $shipment->cash_handling_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
                 }
             }
+        }
+        else {
+            $shipment->cash_handling_charges = 0;
+
+            $shipment->save();
         }
     }
 
@@ -250,10 +255,10 @@ class ShipmentChargesController extends Controller
                     }
 
                     if ($charges < $discount) {
-                        $shipment->insurance_charges = $charges;
+                        $shipment->insurance_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->insurance_charges = $charges - $discount;
+                        $shipment->insurance_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -301,10 +306,10 @@ class ShipmentChargesController extends Controller
                 }
 
                 if ($charges < $discount) {
-                    $shipment->return_charges = $charges;
+                    $shipment->return_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                 }
                 else {
-                    $shipment->return_charges = $charges - $discount;
+                    $shipment->return_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                 }
 
                 $shipment->save();
@@ -323,7 +328,7 @@ class ShipmentChargesController extends Controller
             if ($fuel_charge->exists()) {
                 $fuel_charge = $fuel_charge->first();
 
-                $shipment->fuel_surcharge = ($fuel_charge->fuel_surcharge / 100) * $shipment->weight_charges;
+                $shipment->fuel_surcharge = ROUND((($fuel_charge->fuel_surcharge / 100) * $shipment->weight_charges), 0, PHP_ROUND_HALF_DOWN);
 
                 $shipment->save();
             }
@@ -385,11 +390,13 @@ class ShipmentChargesController extends Controller
                         $charges = $weight_charge->national_or_sameday;
                     }
 
+                    $charges = ($charges * $replacement_multiplier);
+
                     if ($charges < $discount) {
-                        $shipment->replacement_charges = ($charges * $replacement_multiplier);
+                        $shipment->replacement_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->replacement_charges = ($charges * $replacement_multiplier) - $discount;
+                        $shipment->replacement_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -445,11 +452,13 @@ class ShipmentChargesController extends Controller
                         $discount = floatval($discount);
                     }
 
+                    $charges = ($charges * $replacement_multiplier);
+
                     if ($charges < $discount) {
-                        $shipment->replacement_charges = ($charges * $replacement_multiplier);
+                        $shipment->replacement_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
                     }
                     else {
-                        $shipment->replacement_charges = ($charges * $replacement_multiplier) - $discount;
+                        $shipment->replacement_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
                     $shipment->save();
@@ -491,13 +500,52 @@ class ShipmentChargesController extends Controller
             }
 
             if ($charges < $discount) {
-                $shipment->try_and_buy_charges = $charges;
+                $shipment->try_and_buy_charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
             }
             else {
-                $shipment->try_and_buy_charges = $charges - $discount;
+                $shipment->try_and_buy_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
             }
 
             $shipment->save();
         }
+    }
+
+    static public function packaging_material($id, $type, $charges) {
+        $shipment = Shipment::find($id);
+
+        $today = Carbon::today();
+
+        $discount_charge = DiscountCharge::where('user_id', $shipment->user_id)->whereDate('to', '<=', $today)->whereDate('from', '>=', $today);
+
+        if ($discount_charge->exists()) {
+            $discount_charge = $discount_charge->first();
+
+            $discount = $discount_charge->packaging;
+
+            if (strpos($discount, '%') !== FALSE) {
+                $discount = (floatval(str_replace('%', '', $discount)) / 100) * $charges;
+            }
+            else {
+                $discount = floatval($discount);
+            }
+        }
+        else {
+            $discount = 0;
+        }
+
+        if ($charges < $discount) {
+            $charges = ROUND($charges, 0, PHP_ROUND_HALF_DOWN);
+        }
+        else {
+            $charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
+        }
+
+        if ($type == 1) {
+            $shipment->amount = $charges;
+        }
+
+        $shipment->packaging_material_charges = $charges;
+
+        $shipment->save();
     }
 }

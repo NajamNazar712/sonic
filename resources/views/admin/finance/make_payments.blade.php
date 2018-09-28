@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Make Payments')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -24,6 +26,7 @@
 										<th class="border-primary border-darken-1">City</th>
 										<th class="border-primary border-darken-1">Phone No(s).</th>
 										<th class="border-primary border-darken-1">Address</th>
+										<th class="border-primary border-darken-1">Created Datetime</th>
 										<th class="border-primary border-darken-1">Total Shipments</th>
 										<th class="border-primary border-darken-1">Delivered Shipments</th>
 										<th class="border-primary border-darken-1">Returned Shipments</th>
@@ -31,6 +34,7 @@
 										<th class="border-primary border-darken-1">Total Amount</th>
 										<th class="border-primary border-darken-1">Total Charges</th>
 										<th class="border-primary border-darken-1">Total GST</th>
+										<th class="border-primary border-darken-1">Total Deductable</th>
 										<th class="border-primary border-darken-1">Total Payable</th>
 										<th class="border-primary border-darken-1">Bank</th>
 										<th class="border-primary border-darken-1">Bank Branch</th>
@@ -141,9 +145,13 @@
 														<th class="border-primary border-darken-1">Shipper</th>
 														<th class="border-primary border-darken-1">Shipment</th>
 														<th class="border-primary border-darken-1">Type</th>
+														<th class="border-primary border-darken-1">Status</th>
+														<th class="border-primary border-darken-1">Delivery / Return Datetime</th>
+														<th class="border-primary border-darken-1">Aging</th>
 														<th class="border-primary border-darken-1">Amount</th>
 														<th class="border-primary border-darken-1">Charges</th>
 														<th class="border-primary border-darken-1">GST</th>
+														<th class="border-primary border-darken-1">Deductable</th>
 														<th class="border-primary border-darken-1">Payable</th>
 													</tr>
 												</thead>
@@ -180,6 +188,13 @@
 
 												<div class="col-2">
 													<div class="form-group">
+														<label class="mx-auto">Total Deductable</label>
+														<input type="text" name="total_deductable" class="form-control text-center total_deductable" placeholder="Total Deductable" readonly="readonly">
+													</div>
+												</div>
+
+												<div class="col-2">
+													<div class="form-group">
 														<label class="mx-auto">Total Payable</label>
 														<input type="text" name="total_payable" class="form-control text-center total_payable" placeholder="Total Payable" readonly="readonly">
 													</div>
@@ -195,8 +210,7 @@
 												<div class="w-100"></div>
 
 												<button type="button" class="mr-auto btn btn-secondary" data-dismiss="modal">Close</button>
-												<button type="submit" name="make" class="mr-1 btn btn-primary make">Make</button>
-												<button type="button" name="export_bank_order" class="btn btn-info export_bank_order">Export Bank Order</button>
+												<button type="submit" name="make" class="mr-1 btn btn-primary make">Make & Export Bank Order</button>
 											</form>
 										</div>
 									</div>
@@ -211,65 +225,18 @@
 @endsection
 
 @section('css')
-	<style>
-		.modal .modal-dialog.modal-lg.modal-full-length {
-			max-width: 95%;
-		}
-
-		table,
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table thead tr th,
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table tbody tr td,
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-	</style>
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 @endsection
 
 @section('js')
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+
 	<script>
 		$(document).ready(function() {
+			@if (session('print'))
+				window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?done_payment_ids=' + '{{ implode(',', session('print')) }}', '_blank');
+			@endif
+
 			var selected_rows = [];
 
 			var selected_pending_payment_ids = [];
@@ -277,11 +244,86 @@
 			var selected_rows_shipments = [];
 
 			var initial_total_hold = 0;
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.finance.make_payments.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Shipper');
+                            head.push('City');
+                            head.push('Phone No(s).');
+                            head.push('Address');
+                            head.push('Total Shipments');
+                            head.push('Delivered Shipments');
+                            head.push('Returned Shipments');
+                            head.push('Adjusted Shipments');
+                            head.push('Total Amount');
+                            head.push('Total Charges');
+                            head.push('Total GST');
+                            head.push('Total Deductable');
+                            head.push('Total Payable');
+                            head.push('Bank');
+                            head.push('Bank Branch');
+                            head.push('Account No.');
+                            head.push('Account Title');
+                            head.push('IBAN');
+                            head.push('Account City');
+                            head.push('Payment Mode');
+                            head.push('Payment Cycle');
+                            head.push('Return Shipments Avg. Aging');
+
+
+
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.shipper);
+                                row.push(values.city);
+                                row.push(values.phone_numbers);
+                                row.push(values.address);
+                                row.push(values.total_shipments);
+                                row.push(values.delivered_shipments_count);
+                                row.push(values.returned_shipments_count);
+                                row.push(values.adjusted_shipments_count);
+                                row.push(values.total_amount);
+                                row.push(values.total_charges);
+                                row.push(values.total_gst);
+                                row.push(values.total_deductable);
+                                row.push(values.total_payable);
+                                row.push(values.bank);
+                                row.push(values.bank_branch);
+                                row.push(values.account_no);
+                                row.push(values.account_title);
+                                row.push(values.iban);
+                                row.push(values.account_city);
+                                row.push(values.payment_mode);
+                                row.push(values.payment_cycle);
+                                row.push(values.return_shipments_average_aging);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
-				scrollX: true,
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || in_array(60, session('permissions')))
-					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
 					buttons: [{
 						text: 'Make Payment(s)',
 						className: 'btn btn-primary make_payment',
@@ -290,6 +332,7 @@
 							$('#make_payments #make_payments_form .total_amount').val(0);
 							$('#make_payments #make_payments_form .total_charges').val(0);
 							$('#make_payments #make_payments_form .total_gst').val(0);
+							$('#make_payments #make_payments_form .total_deductable').val(0);
 							$('#make_payments #make_payments_form .total_payable').val(0);
 							$('#make_payments #make_payments_form .total_hold').val(0);
 
@@ -307,29 +350,37 @@
 
 							$('#make_payments').modal('show');
 						}
-					}],
+					},
+                    {
+                        extend: 'excel',
+                        title: 'Make Payments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
 				@else
-					dom: 'ltipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Make Payments',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }],
 				@endif
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
+				scrollX: true, scrollY: '350px',
 				select: {
 					info: false,
 					style: 'multi',
 					selector: 'td.select-checkbox',
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
 				ajax: '{{ route('admin.finance.make_payments.list') }}',
 				rowId: 'id',
-				order: [[2, 'asc']],
+				order: [[6, 'asc']],
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -337,23 +388,25 @@
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
 					{data:'address', name: 'u.address', class: 'align-middle text-center address'},
+					{data:'created_at', name: 'pending_payments.created_at', class: 'align-middle text-center created_at'},
 					{data:'total_shipments', name: 'pending_payments.total_shipments', class: 'align-middle text-center total_shipments'},
 					{data:'delivered_shipments', name: 'pending_payments.delivered_shipments', class: 'align-middle text-center delivered_shipments'},
 					{data:'returned_shipments', name: 'pending_payments.returned_shipments', class: 'align-middle text-center returned_shipments'},
 					{data:'adjusted_shipments', name: 'pending_payments.adjusted_shipments', class: 'align-middle text-center adjusted_shipments'},
-					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount'},
-					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges'},
-					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst'},
-					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable'},
-					{data:'bank', name: 'ubi.bank_name', class: 'align-middle text-center bank'},
+					{data:'total_amount', name: 'total_amount', class: 'align-middle text-center total_amount', orderable: false},
+					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', orderable: false},
+					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
+					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
+					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
+					{data:'bank', name: 'ub.id', class: 'align-middle text-center bank'},
 					{data:'bank_branch', name: 'ubi.bank_branch', class: 'align-middle text-center bank_branch'},
 					{data:'account_no', name: 'ubi.account_no', class: 'align-middle text-center account_no'},
-					{data:'account_title', name: 'ub.account_title', class: 'align-middle text-center account_title'},
+					{data:'account_title', name: 'ubi.account_title', class: 'align-middle text-center account_title'},
 					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
 					{data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
 					{data:'payment_mode', name: 'ubi.payment_mode', class: 'align-middle text-center payment_mode'},
 					{data:'payment_cycle', name: 'ubi.payment_cycle', class: 'align-middle text-center payment_cycle'},
-					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging'},
+					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -367,14 +420,39 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
+                    var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control">' +
+                        '<option value="ibft">IBFT</option>' +
+                        '<option value="invoices">Invoices</option>' +
+                        '</select>';
+                    var payment_cycle_select = '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
+                        '<option value="daily">Daily</option>' +
+                        '<option value="weekly">Weekly</option>' +
+                        '<option value="fortnight">Fortnight</option>' +
+                        '<option value="monthly">Monthly</option>' +
+                        '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.total_amount') || $(header).is('.total_charges') || $(header).is('.total_gst') || $(header).is('.total_deductable') || $(header).is('.total_payable') || $(header).is('.return_shipments_average_aging') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.bank')){
+                            $(bank_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.payment_mode')){
+                            $(payment_mode_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.payment_cycle')){
+                            $(payment_cycle_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -385,11 +463,43 @@
 							}
 						}
 					});
+                    var data = $.map({!! $banks !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data = $.map({!! $banks !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#bank_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Bank",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#payment_mode_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Mode",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    $("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Cycle",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+					this.api().table().columns.adjust();
 				}
 			});
 
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
 				dom: 'tr',
+				scrollX: true, scrollY: '350px',
 				paging: false,
 				select: {
 					info: false,
@@ -413,13 +523,23 @@
 					{data:'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data:'shipment', name: 's.tracking_number', class: 'align-middle shipment'},
 					{data:'type', name: 'pending_payment_shipments.type', class: 'align-middle type'},
+					{data:'status', name: 'ss.name', class: 'align-middle status'},
+					{data:'created_at', name: 'pending_payment_shipments.created_at', class: 'align-middle created_at'},
+					{data:'aging', name: 'aging', class: 'align-middle aging', orderable: false},
 					{data:'amount', name: 'pending_payment_shipments.amount', class: 'align-middle amount'},
 					{data:'charges', name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
 					{data:'gst', name: 'pending_payment_shipments.gst', class: 'align-middle gst'},
+					{data:'deductable', name: 'deductable', class: 'align-middle deductable'},
 					{data:'payable', name: 'pending_payment_shipments.payable', class: 'align-middle payable'}
 				],
 				rowCallback: function(row, data, index) {
 					$('td:eq(1)', row).html(index + 1);
+
+					if (selected_rows_shipments.length != 0) {
+						if ($.inArray(data.id, selected_rows_shipments) !== -1) {
+							make_payments_table.row(row).select();
+						}
+					}
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -432,7 +552,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.select') || $(header).is('.serial_number')) {
+						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging')) {
 							$(td).appendTo($(search));
 						}
 						else {
@@ -445,13 +565,17 @@
 							}
 						}
 					});
+
+					this.api().table().columns.adjust();
 				},
 				drawCallback: function() {
-					initial_total_hold = this.api().column('.payable').data().reduce(function (a, b) {
-						return parseFloat(a) + parseFloat(b);
-					}, 0);
+					if (selected_rows_shipments.length == 0) {
+						initial_total_hold = this.api().column('.payable').data().reduce(function (a, b) {
+							return parseInt(a.toString().replace(/,/g, '')) + parseInt(b.toString().replace(/,/g, ''));
+						}, 0);
 
-					$('#make_payments #make_payments_form .total_hold').val(parseFloat(initial_total_hold.toFixed(2)));
+						$('#make_payments #make_payments_form .total_hold').val(parseInt(initial_total_hold));
+					}
 				}
 			});
 
@@ -574,7 +698,7 @@
 						}
 					})
 					.done(function(data) {
-						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
+						var details = '<table class="table table-sm table-bordered"><thead><tr role="row" class="bg-primary white"><th class="border-primary border-darken-1 align-middle text-center">Shipment</th><th class="border-primary border-darken-1 align-middle text-center">Type</th><th class="border-primary border-darken-1 align-middle text-center">Amount</th><th class="border-primary border-darken-1 align-middle text-center">Charges</th><th class="border-primary border-darken-1 align-middle text-center">GST</th><th class="border-primary border-darken-1 align-middle text-center">Deductable</th><th class="border-primary border-darken-1 align-middle text-center">Payable</th></tr></thead><tbody>';
 
 						$.each(data, function(index, detail) {
 							details += '<tr>';
@@ -583,6 +707,7 @@
 							details += '<td class="align-middle text-center">' + detail.amount + '</td>';
 							details += '<td class="align-middle text-center">' + detail.charges + '</td>';
 							details += '<td class="align-middle text-center">' + detail.gst + '</td>';
+							details += '<td class="align-middle text-center">' + detail.deductable + '</td>';
 							details += '<td class="align-middle text-center">' + detail.payable + '</td>';
 							details += '</tr>';
 						});
@@ -598,6 +723,7 @@
 					$('#make_payments #make_payments_form .total_amount').val(0);
 					$('#make_payments #make_payments_form .total_charges').val(0);
 					$('#make_payments #make_payments_form .total_gst').val(0);
+					$('#make_payments #make_payments_form .total_deductable').val(0);
 					$('#make_payments #make_payments_form .total_payable').val(0);
 					$('#make_payments #make_payments_form .total_hold').val(0);
 
@@ -630,34 +756,38 @@
 				var total_amount_selector = $('#make_payments #make_payments_form .total_amount');
 				var total_charges_selector = $('#make_payments #make_payments_form .total_charges');
 				var total_gst_selector = $('#make_payments #make_payments_form .total_gst');
+				var total_deductable_selector = $('#make_payments #make_payments_form .total_deductable');
 				var total_payable_selector = $('#make_payments #make_payments_form .total_payable');
 				var total_hold_selector = $('#make_payments #make_payments_form .total_hold');
 
 				if (index === -1) {
 					selected_rows_shipments.push(id);
 
-					var total_amount = ((total_amount_selector.val() != '') ? parseFloat(total_amount_selector.val()) : 0) + ((parent.children('td.amount').html() != '') ? parseFloat(parent.children('td.amount').html()) : 0);
-					var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseFloat(parent.children('td.charges').html()) : 0);
-					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) + ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html()) : 0);
-					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html()) : 0);
-					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html()) : 0);
+					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) + ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html().replace(/,/g, '')) : 0);
+					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) + ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html().replace(/,/g, '')) : 0);
+					var total_gst = ((total_gst_selector.val() != '') ? parseInt(total_gst_selector.val()) : 0) + ((parent.children('td.gst').html() != '') ? parseInt(parent.children('td.gst').html().replace(/,/g, '')) : 0);
+					var total_deductable = ((total_deductable_selector.val() != '') ? parseInt(total_deductable_selector.val()) : 0) + ((parent.children('td.deductable').html() != '') ? parseInt(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
+					var total_payable = ((total_payable_selector.val() != '') ? parseInt(total_payable_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html().replace(/,/g, '')) : 0);
+					var total_hold = ((total_hold_selector.val() != '') ? parseInt(total_hold_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html().replace(/,/g, '')) : 0);
 				}
 				else {
 					selected_rows_shipments.splice(index, 1);
 
-					var total_amount = ((total_amount_selector.val() != '') ? parseFloat(total_amount_selector.val()) : 0) - ((parent.children('td.amount').html() != '') ? parseFloat(parent.children('td.amount').html()) : 0);
-					var total_charges = ((total_charges_selector.val() != '') ? parseFloat(total_charges_selector.val()) : 0) - ((parent.children('td.charges').html() != '') ? parseFloat(parent.children('td.charges').html()) : 0);
-					var total_gst = ((total_gst_selector.val() != '') ? parseFloat(total_gst_selector.val()) : 0) - ((parent.children('td.gst').html() != '') ? parseFloat(parent.children('td.gst').html()) : 0);
-					var total_payable = ((total_payable_selector.val() != '') ? parseFloat(total_payable_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html()) : 0);
-					var total_hold = ((total_hold_selector.val() != '') ? parseFloat(total_hold_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseFloat(parent.children('td.payable').html()) : 0);
+					var total_amount = ((total_amount_selector.val() != '') ? parseInt(total_amount_selector.val()) : 0) - ((parent.children('td.amount').html() != '') ? parseInt(parent.children('td.amount').html().replace(/,/g, '')) : 0);
+					var total_charges = ((total_charges_selector.val() != '') ? parseInt(total_charges_selector.val()) : 0) - ((parent.children('td.charges').html() != '') ? parseInt(parent.children('td.charges').html().replace(/,/g, '')) : 0);
+					var total_gst = ((total_gst_selector.val() != '') ? parseInt(total_gst_selector.val()) : 0) - ((parent.children('td.gst').html() != '') ? parseInt(parent.children('td.gst').html().replace(/,/g, '')) : 0);
+					var total_deductable = ((total_deductable_selector.val() != '') ? parseInt(total_deductable_selector.val()) : 0) - ((parent.children('td.deductable').html() != '') ? parseInt(parent.children('td.deductable').html().replace(/,/g, '')) : 0);
+					var total_payable = ((total_payable_selector.val() != '') ? parseInt(total_payable_selector.val()) : 0) - ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html().replace(/,/g, '')) : 0);
+					var total_hold = ((total_hold_selector.val() != '') ? parseInt(total_hold_selector.val()) : 0) + ((parent.children('td.payable').html() != '') ? parseInt(parent.children('td.payable').html().replace(/,/g, '')) : 0);
 				}
 
 				if (selected_rows_shipments.length > 0) {
-					total_amount_selector.val(parseFloat(total_amount.toFixed(2)));
-					total_charges_selector.val(parseFloat(total_charges.toFixed(2)));
-					total_gst_selector.val(parseFloat(total_gst.toFixed(2)));
-					total_payable_selector.val(parseFloat(total_payable.toFixed(2)));
-					total_hold_selector.val(parseFloat(total_hold.toFixed(2)));
+					total_amount_selector.val(parseInt(total_amount));
+					total_charges_selector.val(parseInt(total_charges));
+					total_gst_selector.val(parseInt(total_gst));
+					total_deductable_selector.val(parseInt(total_deductable));
+					total_payable_selector.val(parseInt(total_payable));
+					total_hold_selector.val(parseInt(total_hold));
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', false);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', false);
@@ -666,8 +796,9 @@
 					total_amount_selector.val(0);
 					total_charges_selector.val(0);
 					total_gst_selector.val(0);
+					total_deductable_selector.val(0);
 					total_payable_selector.val(0);
-					total_hold_selector.val(parseFloat(initial_total_hold.toFixed(2)));
+					total_hold_selector.val(parseInt(initial_total_hold));
 
 					$('#make_payments #make_payments_form button.make').prop('disabled', true);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
@@ -677,10 +808,51 @@
 				$('#make_payments #make_payments_form .shipment_ids').val(selected_rows_shipments);
 			});
 
-			$('#make_payments #make_payments_form .export_bank_order').bind('click', function(e) {
+			$('#make_payments #make_payments_form').bind('submit', function(e) {
 				e.preventDefault();
 
-				window.open('{!! route('admin.finance.make_payments.export_bank_order') !!}?pending_payment_ids=' + selected_pending_payment_ids + '&shipment_ids=' + selected_rows_shipments, '_blank');
+				var form = this;
+
+				$.ajax({
+					url: '{!! route('admin.finance.make_payments.verify') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'pending_payment_ids': $('#make_payments #make_payments_form .pending_payment_ids').val(),
+						'shipment_ids': $('#make_payments #make_payments_form .shipment_ids').val()
+					}
+				})
+				.done(function(data) {
+					if (data.status == 0) {
+						form.submit();
+					}
+					else {
+						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
+
+						$.each(data.negative_payments, function(index, shipper) {
+							html += shipper + '<br/>';
+						});
+
+						content = document.createElement('div');
+						content.innerHTML = html;
+
+						swal({
+							content: content,
+							icon: 'warning',
+							buttons: {
+								cancel: {
+									text: 'Close',
+									value: null,
+									visible: true,
+									closeModal: true,
+								}
+							},
+							closeOnClickOutside: false,
+							closeOnEsc: false,
+							dangerMode: true
+						});
+					}
+				});
 			});
 		});
 	</script>

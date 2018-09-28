@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Cargo in Transit')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -61,10 +63,14 @@
 										<th class="border-primary border-darken-1">Cargo No.</th>
 										<th class="border-primary border-darken-1">Origin</th>
 										<th class="border-primary border-darken-1">Destination</th>
-										<th class="border-primary border-darken-1">Hub</th>
 										<th class="border-primary border-darken-1">Shipment(s)</th>
 										<th class="border-primary border-darken-1">Shipping Mode</th>
-										<th class="border-primary border-darken-1">Transit At</th>
+										<th class="border-primary border-darken-1">Junction 1</th>
+										<th class="border-primary border-darken-1">Junction 2</th>
+										<th class="border-primary border-darken-1">Transport Mode</th>
+										<th class="border-primary border-darken-1">Vendor</th>
+										<th class="border-primary border-darken-1">Builty No.</th>
+										<th class="border-primary border-darken-1">Transit Datetime</th>
 										<th class="border-primary border-darken-1">Transitted By</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
@@ -101,7 +107,6 @@
 															<th class="border-primary border-darken-1">Cargo No.</th>
 															<th class="border-primary border-darken-1">Origin</th>
 															<th class="border-primary border-darken-1">Destination</th>
-															<th class="border-primary border-darken-1">Hub</th>
 															<th class="border-primary border-darken-1">Seal No.</th>
 														</tr>
 													</thead>
@@ -155,7 +160,7 @@
 
 														<div class="col">
 															<div class="form-group">
-																<select name="junction_2" class="select2 junction_2" data-rule-required="true" data-msg-required="Junction 2 is required">
+																<select name="junction_2" class="select2 junction_2">
 																</select>
 															</div>
 														</div>
@@ -173,13 +178,6 @@
 														</div>
 
 														<div class="w-100"></div>
-
-														<div class="col">
-															<div class="form-group">
-																<select name="shipping_mode" class="select2 shipping_mode" data-rule-required="true" data-msg-required="Shipping Mode is required">
-																</select>
-															</div>
-														</div>
 
 														<div class="col">
 															<div class="form-group">
@@ -205,7 +203,7 @@
 
 														<div class="col">
 															<div class="form-group">
-																<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required">
+																<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-minlength="6" data-msg-minlength="Seal Number needs to be at-least 6 numbers" data-rule-remote="{{ route('admin.cargo.create.seal_number', ['id' => 0]) }}" data-msg-remote="Seal Number must be unique">
 															</div>
 														</div>
 
@@ -219,7 +217,7 @@
 
 														<div class="col">
 															<div class="form-group">
-																<input type="text" name="weight_charges_per_kg" class="form-control rounded-right weight_charges_per_kg" placeholder="Weight Charges / kg*" data-rule-required="true" data-msg-required="Builty Number is required">
+																<input type="text" name="weight_charges_per_kg" class="form-control rounded-right weight_charges_per_kg" placeholder="Weight Charges / kg*" data-rule-required="true" data-msg-required="Weight Charges / kg is required">
 															</div>
 														</div>
 
@@ -247,20 +245,8 @@
 
 														<div class="col">
 															<div class="form-group">
-																<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 sender_hub">Hub</p>
-															</div>
-														</div>
-
-														<div class="col">
-															<div class="form-group">
 																<select name="receiver_id" class="select2 receiver_id">
 																</select>
-															</div>
-														</div>
-
-														<div class="col">
-															<div class="form-group">
-																<p class="mt-1 border-bottom border-light text-center font-medium-1 text-bold-600 receiver_hub">Hub</p>
 															</div>
 														</div>
 													</div>
@@ -308,65 +294,6 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
 
-
-	<style>
-		table.dataTable {
-			font-size: 12px;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.5em;
-			white-space: normal;
-			word-wrap: break-word;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			bottom: 50% !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.5em;
-			padding-right: 0.5em;
-		}
-
-		table.dataTable tbody tr td.select-checkbox:before {
-			top: 50%;
-			border-color: #666EE8;
-		}
-
-		table.dataTable tbody tr.selected td.select-checkbox:after {
-			top: 50%;
-			text-shadow: none;
-		}
-
-		.btn-group .dropdown-menu .dropdown-item {
-			white-space: normal;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-		.selectize-control {
-			width: 100%;
-		}
-
-		.selectize-control .selectize-input {
-			vertical-align: middle;
-		}
-
-		.selectize-control .selectize-input .item {
-			word-break: break-all;
-		}
-	</style>
 @endsection
 
 @section('js')
@@ -414,10 +341,67 @@
 			@if (session('print'))
 				print('{{ session('print') }}');
 			@endif
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.cargo.in_transit.list') }}',
+                        data: {
+                            'page': 'all',
+                            'cargo_type': $('#cargo_type_search_form #cargo_type').val(),
+                    		'tracking_number': $('#tracking_number_search_form #tracking_number').val(),
+                    		'seal_number': $('#seal_number_search_form #seal_number').val(),
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Cargo No.');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Shipment(s)');
+                            head.push('Shipping Mode');
+                            head.push('Junction 1');
+                            head.push('Junction 2');
+                            head.push('Transport Mode');
+                            head.push('Vendor');
+                            head.push('Builty No.');
+                            head.push('Transit Datetime');
+                            head.push('Transitted By');
+                            head.push('Status');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.id);
+                                row.push(values.origin);
+                                row.push(values.destination);
+                                row.push(values.shipments);
+                                row.push(values.shipping_mode);
+                                row.push(values.junction_1);
+                                row.push(values.junction_2);
+                                row.push(values.transport_mode);
+                                row.push(values.vendor);
+                                row.push(values.builty_number);
+                                row.push(values.transit_at);
+                                row.push(values.transitted_by);
+                                row.push(values.status);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				@if (session('role_id') == 1 || in_array(30, session('permissions')))
-					dom: '<"d-inline-block"l><"pull-right"B>tipr',
+
 					buttons: [{
 						text: 'Update at Link',
 						className: 'btn btn-primary receive_at_link',
@@ -456,17 +440,24 @@
 
 							$('#receive_at_link').modal('show');
 						}
-					}],
+					},
+                        {
+                            extend: 'excel',
+                            title: 'Cargo In-transit',
+                            className: 'btn btn-primary',
+                            text: '<i class="la la-file-excel-o"></i> Excel',
+                        }],
 				@else
-                	dom: 'ltipr',
+                	buttons:[{
+                    extend: 'excel',
+                    title: 'Cargo In-transit',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                	}],
 				@endif
-				fixedHeader: {
-					header: true,
-					headerOffset: $('.header-navbar').height()
-				},
-				lengthMenu: [[1, 25, 50, 100], [1, 25, 50, 100]],
-				pageLength: 25,
-				stateSave: true,
+				scrollX: true, scrollY: '350px',
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
@@ -479,18 +470,22 @@
 					}
 				},
 				rowId: 'id',
-				order: [[1, 'asc']],
+				order: [[11, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'id', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
-					{data: 'origin', name: 'oc.name', class: 'align-middle origin'},
-					{data: 'destination', name: 'dc.name', class: 'align-middle destination'},
-					{data: 'hub', name: 'hc.name', class: 'align-middle hub'},
+					{data: 'origin', name: 'oh.name', class: 'align-middle origin'},
+					{data: 'destination', name: 'dh.name', class: 'align-middle destination'},
 					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle shipments'},
-					{data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
+					{data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
+					{data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},
+					{data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
+					{data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
+					{data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
+					{data: 'builty_number', name: 'cargo_consignments.builty_number', class: 'align-middle builty_number'},
 					{data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
 					{data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
-					{data: 'status', name: 'ccs.name', class: 'align-middle status'},
+					{data: 'status', name: 'status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
@@ -504,6 +499,10 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
+                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
+                    var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
+                    var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -511,7 +510,27 @@
 
 						if ($(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.shipping_mode')){
+                            $(mode_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.transport_mode')){
+                            $(transport_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.vendor')){
+                            $(vendor_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -522,6 +541,79 @@
 							}
 						}
 					});
+                    var data1 = $.map({!! $shipping_mode !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data1 = $.map({!! $shipping_mode !!}, function (obj) {
+                        obj.text = obj.mode; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#mode_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Mode",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data2 = $.map({!! $cargo_status !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $cargo_status !!}, function (obj) {
+                        obj.text = obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data3 = $.map({!! $transport_mode !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data3 = $.map({!! $transport_mode !!}, function (obj) {
+                        obj.text = obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#transport_select").prepend('<option value="" selected></option>').select2({
+                        data:data3,
+                        placeholder: "Select Transport",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data4 = $.map({!! $transport_vendor !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data4 = $.map({!! $transport_vendor !!}, function (obj) {
+                        obj.text = obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#vendor_select").prepend('<option value="" selected></option>').select2({
+                        data:data4,
+                        placeholder: "Select Transport",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+					this.api().table().columns.adjust();
 				}
 			});
 
@@ -530,19 +622,22 @@
 			@if (session('role_id') == 1 || in_array(30, session('permissions')))
 				var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
 					dom: 'tr',
+					scrollX: true, scrollY: '350px',
 					paging: false,
 					columns: [
 						{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 						{name: 'cargo_number', class: 'align-middle cargo_number'},
 						{name: 'origin', class: 'align-middle origin'},
 						{name: 'destination', class: 'align-middle destination'},
-						{name: 'hub', class: 'align-middle hub'},
 						{name: 'seal_number', class: 'align-middle seal_number'}
 					],
 					rowCallback: function(row, data, index) {
 						var info = receive_at_link_table.page.info();
 
 						$('td:eq(0)', row).html(index + 1 + info.page * info.length);
+					},
+					initComplete: function() {
+						this.api().table().columns.adjust();
 					}
 				});
 			@endif
@@ -570,6 +665,16 @@
 				table.draw();
 			});
 
+			$('#tracking_number_search_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				length = $('#tracking_number_search_form #tracking_number').val().length;
+
+				if (length == 0 || length >= 12) {
+					table.draw();
+				}
+			});
+
 			$('#tracking_number_search_form #tracking_number').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
@@ -578,6 +683,12 @@
 				if (this.value.length == 0 || this.value.length >= 12) {
 					table.draw();
 				}
+			});
+
+			$('#seal_number_search_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				table.draw();
 			});
 
 			$('#seal_number_search_form #seal_number').inputmask({
@@ -654,7 +765,7 @@
 								$('#receive_at_link #scan_seal_number_form .seal_number').val('');
 
 								if (data.status == 0) {
-									receive_at_link_table.row.add([0, data.details.cargo_number, data.details.origin, data.details.destination, data.details.hub, data.details.seal_number]).node().id = data.details.cargo_number;
+									receive_at_link_table.row.add([0, data.details.cargo_number, data.details.origin, data.details.destination, data.details.seal_number]).node().id = data.details.cargo_number;
 									receive_at_link_table.draw(false);
 
 									cargo_consignment_ids.push(data.details.cargo_number);
@@ -666,8 +777,6 @@
 								else {
 									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
-
-								table.draw();
 							});
 						}
 						else {
@@ -705,6 +814,8 @@
 							else {
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
+
+							table.draw();
 						});
 
 						return false;
@@ -733,8 +844,8 @@
 	                            'cargo_id':id
 	                        }
 	                    }).done(function (data) {
-	                        if(data.success == 1){
-	                            $('#universal_city_select').select2({
+	                        if(data.success === 1){
+	                            $('#universal_city_select').prepend('<option value="" selected="selected"></option>').select2({
 	                                placeholder:'Select a city',
 	                                dropdownParent:$('#universal_dispute_form')
 	                            });
@@ -742,7 +853,7 @@
 	                                var newOption = new Option(value.name, value.id, false, false);
 	                                $('#universal_city_select').append(newOption).trigger('select');
 	                            });
-	                            $('#universal_dispute_type_select').select2({
+	                            $('#universal_dispute_type_select').prepend('<option value="" selected="selected"></option>').select2({
 	                                placeholder:'Select a Dispute type',
 	                                dropdownParent:$('#universal_dispute_form')
 	                            });
@@ -786,7 +897,7 @@
 	                }
 	            });
 
-				var max_char = 250;
+				var max_char = 190;
 				$('#universal_description').on('keypress copy paste',function (e) {
 	                // var comment = $(this).val();
 	                // console.log(comment)
@@ -877,6 +988,12 @@
 				}
 				@if (session('role_id') == 1 || in_array(28, session('permissions')))
 					else if ($(this).hasClass('add_forwarding_details')) {
+						var link = $('#add_forwarding_details form .seal_number').attr('data-rule-remote');
+
+						link = link.substring(0, link.indexOf('=')) + '=' + cargo_consignment_id;
+
+						$('#add_forwarding_details form .seal_number').attr('data-rule-remote', link);
+
 						$.ajax({
 							url: '{!! route('admin.cargo.in_transit.forwarding_details') !!}',
 							method: 'POST',
@@ -908,9 +1025,8 @@
 
 							$('#add_forwarding_details form .junction_2').prepend('<option value="" selected="selected"></option>').select2({
 								width: '100%',
-								placeholder: 'Junction 2*'
-							}).bind('change', function() {
-								$(this).valid();
+								placeholder: 'Junction 2',
+								allowClear: true
 							});
 
 							if (picker) {
@@ -1010,8 +1126,8 @@
 								$(this).valid();
 							});
 
-							$('#add_forwarding_details form .junction_1').val(data.cargo_consignment.junction_city_1_id).trigger('change');
-							$('#add_forwarding_details form .junction_2').val(data.cargo_consignment.junction_city_2_id).trigger('change');
+							$('#add_forwarding_details form .junction_1').val(data.cargo_consignment.junction_hub_1_id).trigger('change');
+							$('#add_forwarding_details form .junction_2').val(data.cargo_consignment.junction_hub_2_id).trigger('change');
 							picker.pickadate('picker').set('select', data.cargo_consignment.expected_arrival_date);
 							$('#add_forwarding_details form .shipping_mode').val(data.cargo_consignment.shipping_mode_id).trigger('change');
 							$('#add_forwarding_details form .transport_mode').val(data.cargo_consignment.transport_mode_id).trigger('change');
@@ -1045,21 +1161,21 @@
 
 						var details = '<table class="table table-sm table-bordered"><tbody>';
 
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Junction 1</strong></td><td>' + cargo_consignment.junction_city_1 + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Junction 2</strong></td><td>' + cargo_consignment.junction_city_2 + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Expected Arrival Date</strong></td><td>' + cargo_consignment.expected_arrival_date + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Shipping Mode</strong></td><td>' + cargo_consignment.shipping_mode + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Transport Mode</strong></td><td>' + cargo_consignment.transport_mode + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Transport Mode Vendor</strong></td><td>' + cargo_consignment.transport_mode_vendor + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Seal Number</strong></td><td>' + cargo_consignment.seal_number + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Builty Number</strong></td><td>' + cargo_consignment.builty_number + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Weight Charges / kg</strong></td><td>' + cargo_consignment.weight_charges_per_kg + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Shipments Weight</strong></td><td>' + cargo_consignment.shipments_weight + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Actual Weight</strong></td><td>' + cargo_consignment.actual_weight + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Extra Charges</strong></td><td>' + cargo_consignment.extra_charges + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Total Weight Charges</strong></td><td>' + cargo_consignment.total_weight_charges + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Sender Name</strong></td><td>' + cargo_consignment.sender_name + '</td></tr>';
-						details += '<tr><td class="bg-primary white border-primary border-darken-1"><strong>Receiver Name</strong></td><td>' + cargo_consignment.receiver_name + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 1</strong></td><td class="align-middle text-center">' + cargo_consignment.junction_hub_1 + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + ((cargo_consignment.junction_hub_2) ? cargo_consignment.junction_hub_2 : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Expected Arrival Date</strong></td><td class="align-middle text-center">' + cargo_consignment.expected_arrival_date + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipping Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.shipping_mode + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode_vendor + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + cargo_consignment.seal_number + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((cargo_consignment.builty_number) ? cargo_consignment.builty_number : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((cargo_consignment.weight_charges_per_kg) ? cargo_consignment.weight_charges_per_kg : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.shipments_weight + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.actual_weight + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Extra Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.extra_charges) ? cargo_consignment.extra_charges : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Weight Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.total_weight_charges) ? cargo_consignment.total_weight_charges : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Sender Name</strong></td><td class="align-middle text-center">' + cargo_consignment.sender_name + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Receiver Name</strong></td><td class="align-middle text-center">' + cargo_consignment.receiver_name + '</td></tr>';
 
 						details += '</tbody></table>';
 

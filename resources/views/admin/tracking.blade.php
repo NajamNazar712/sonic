@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Tracking')
+
 @section('content')
 	<div class="app-content content">
 		<div class="content-wrapper">
@@ -27,6 +29,25 @@
 
 							<div class="tracking" id="tracking">
 							</div>
+
+							<div class="modal fade" id="rider_information" role="dialog" aria-labelledby="rider_information_title" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="rider_information_title">Rider Information</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -40,62 +61,8 @@
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
 	<style>
-		table.table.table-sm td {
-			padding: .3rem;
-		}
-
-		table.dataTable {
-			margin: 0 !important;
-		}
-
-		table.dataTable thead tr th {
-			padding-left: 0.3em !important;
-			white-space: normal;
-			word-wrap: break-word;
-			border: 0 !important;
-		}
-
-		table.dataTable thead tr th:before,
-		table.dataTable thead tr th:after {
-			height: 20px;
-			margin-bottom: -10px;
-			top: auto !important;
-			bottom: 50% !important;
-		}
-
-		table.dataTable thead tr th:before {
-			right: 0.65em !important;
-		}
-
-		table.dataTable thead tr th:after {
-			right: 0.3em !important;
-		}
-
-		table.dataTable tbody tr td {
-			padding-left: 0.3em;
-			padding-right: 0.3em;
-		}
-
-		#toast-bottom-center.toast-container {
-			text-align: center;
-		}
-
-		#toast-bottom-center.toast-container .toast {
-			display: table;
-			width: auto !important;
-			text-align: left;
-		}
-
 		.selectize-control {
-			width: 300px;
-		}
-
-		.selectize-control .selectize-input {
-			vertical-align: middle;
-		}
-
-		.selectize-control .selectize-input .item {
-			word-break: break-all;
+			width: 300px !important;
 		}
 	</style>
 @endsection
@@ -172,7 +139,7 @@
 							shipment += '<div class="p-1">';
 							shipment += '<div class="row justify-content-between">';
 
-							shipment += '<div class="col-5 mt-1">';
+							shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5">';
 							shipment += '<h4><u>Shipper Information</u></h4>';
 							shipment += '<div class="border">';
 							shipment += '<table class="table table-sm table-borderless mb-0">';
@@ -205,7 +172,7 @@
 							shipment += '</div>';
 							shipment += '</div>';
 
-							shipment += '<div class="col-5 mt-1">';
+							shipment += '<div class="col-xs-12 col-sm-12 col-md-12 col-lg-5 mt-xs-2 mt-sm-2 mt-md-2 mt-lg-0">';
 							shipment += '<h4><u>Consignee Information</u></h4>';
 							shipment += '<div class="border">';
 							shipment += '<table class="table table-sm table-borderless mb-0">';
@@ -270,7 +237,7 @@
 							shipment += '<h4><u>Tracking History</u></h4>';
 							shipment += '<div class="border">';
 
-							shipment += '<table class="table table-sm table-borderless datatable">';
+							shipment += '<table class="table table-sm table-borderless datatable tracking_history">';
 							shipment += '<thead>';
 							shipment += '<tr role="row">';
 							shipment += '<th><strong>Date / Time</strong></th>';
@@ -278,6 +245,7 @@
 							shipment += '<th><strong>Reason</strong></th>';
 							shipment += '<th><strong>Remarks</strong></th>';
 							shipment += '<th><strong>User</strong></th>';
+							shipment += '<th><strong>City</strong></th>';
 							shipment += '</tr>';
 							shipment += '</thead>';
 							shipment += '<tbody>';
@@ -289,15 +257,45 @@
 								shipment += '<td>' + ((history.status_reason) ? history.status_reason : '') + '</td>';
 								shipment += '<td>' + history.remarks + '</td>';
 								shipment += '<td>' + history.user + '</td>';
+								shipment += '<td>' + history.city + '</td>';
 								shipment += '</tr>';
 							});
 
 							shipment += '</tbody>';
-							shipment += '</thead>';
 							shipment += '</table>';
 
 							shipment += '</div>';
 							shipment += '</div>';
+
+							if ('payment_history' in details) {
+								shipment += '<div class="col-12 mt-2">';
+								shipment += '<h4><u>Payment History</u></h4>';
+								shipment += '<div class="border">';
+
+								shipment += '<table class="table table-sm table-borderless datatable payment_history">';
+								shipment += '<thead>';
+								shipment += '<tr role="row">';
+								shipment += '<th><strong>Date / Time</strong></th>';
+								shipment += '<th><strong>Status</strong></th>';
+								shipment += '<th><strong>User</strong></th>';
+								shipment += '</tr>';
+								shipment += '</thead>';
+								shipment += '<tbody>';
+
+								$.each(details.payment_history, function(index, history) {
+									shipment += '<tr>';
+									shipment += '<td>' + history.date_time + '</td>';
+									shipment += '<td>' + history.status + '</td>';
+									shipment += '<td>' + history.user + '</td>';
+									shipment += '</tr>';
+								});
+
+								shipment += '</tbody>';
+								shipment += '</table>';
+
+								shipment += '</div>';
+								shipment += '</div>';
+							}
 
 							shipment += '</div>';
 							shipment += '</div>';
@@ -308,14 +306,27 @@
 							$('#tracking').append(shipment);
 						});
 
-						$('#tracking table.datatable').DataTable({
+						$('#tracking table.datatable.tracking_history').DataTable({
 							dom: 't',
+							paging: false,
 							order: [[0, 'desc']],
 							columns: [
 								{name: 'date_time', class: 'align-middle date_time'},
 								{name: 'status', class: 'align-middle status'},
 								{name: 'reason', class: 'align-middle reason'},
 								{name: 'remarks', class: 'align-middle remarks'},
+								{name: 'user', class: 'align-middle user'},
+								{name: 'city', class: 'align-middle city'}
+							]
+						});
+
+						$('#tracking table.datatable.payment_history').DataTable({
+							dom: 't',
+							paging: false,
+							order: [[0, 'desc']],
+							columns: [
+								{name: 'date_time', class: 'align-middle date_time'},
+								{name: 'status', class: 'align-middle status'},
 								{name: 'user', class: 'align-middle user'}
 							]
 						});
@@ -374,6 +385,34 @@
 				id = $(this).attr('id');
 
 				print(id);
+			});
+
+			$('#tracking').on('click', '.rider_information', function() {
+				id = $(this).attr('data-id');
+
+				$.ajax({
+				url: '{!! route('admin.tracking.rider_information') !!}',
+				method: 'POST',
+				data: {
+					'_token': '{{ csrf_token() }}',
+					'id': id
+				}
+			})
+			.done(function(data) {
+				var details = '<table class="table table-sm table-bordered"><tbody>';
+
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' + data.name + '</td></tr>';
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' + data.phone_number + '</td></tr>';
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' + data.city + '</td></tr>';
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' + data.category + '</td></tr>';
+				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' + data.route + '</td></tr>';
+
+				details += '</tbody></table>';
+
+				$('#rider_information .modal-body').html(details);
+
+				$('#rider_information').modal('show');
+			});
 			});
 		});
 	</script>

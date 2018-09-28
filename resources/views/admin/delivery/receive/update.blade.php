@@ -1,5 +1,6 @@
 
 @extends('admin.layout.master')
+@section('title','Update Receive Deliveries')
 
 @section('content')
     <h1 class="mb-1">
@@ -23,7 +24,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">COD Amount</th>
+                        <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
@@ -35,7 +36,7 @@
     </div>
 
 
-    </div>
+
 
 @endsection
 
@@ -68,7 +69,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -103,17 +104,15 @@
             // var delivery_note = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
+                scrollX: true, scrollY: '350px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.delivery.receive.update.list',['note'=>$delivery_note_id]) }}',
                 rowId: 'shId',
+                order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
@@ -157,18 +156,20 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
 
             $('body').on('click','a.deliverynoterow',function () {
                 var shipment_id = $(this).parents('tr').attr('id');
-
+                var delivery_note = $('#delivery_note').val();
                 $.ajax({
                     url:'{{route('admin.delivery.receive.update.remove')}}',
-                    type:'GET',
-                    dataType:'JSON',
+                    type:'POST',
                     data: {
-                        'shipment_id':shipment_id
+                        'shipment_id':shipment_id,
+                        'delivery_note_id':delivery_note,
+                        '_token': '{{ csrf_token() }}'
                     }
                 }).done(function (data) {
                     if(data.status == 0){

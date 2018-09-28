@@ -1,5 +1,7 @@
 @extends('admin.layout.master')
 
+@section('title', 'Edit Rates')
+
 @section('content')
     @if(!empty($shipper))
 
@@ -28,7 +30,7 @@
                                         <h3 class="card-title lead success">Overnight</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a href="#" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox" id="" class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a href="javascript:void(0);" class="pull-right" id="on_main_switch"><input name="on_main_switch" type="checkbox" id="" class="switchery on-main-switch" data-size="sm" {{ ((isset($switches[1][0]) && $switches[1][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
                             </div>
@@ -396,14 +398,13 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local != '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local !== '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
-
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_national_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national != '')? $returnCharges[1][0]->national : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_national_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national !== '')? $returnCharges[1][0]->national : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -721,7 +722,7 @@
                                         <h3 class="card-title lead success">Overland</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a href="#" class="pull-right" id="ol_main_switch"><input name="ol_main_switch" type="checkbox" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a href="javascript:void(0);" class="pull-right" id="ol_main_switch"><input name="ol_main_switch" type="checkbox" class="switchery ol-main-switch" data-size="sm" {{ ((isset($switches[2][0]) && $switches[2][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
 
@@ -1082,12 +1083,12 @@
                                         </div>
 
                                         <div class="row return-charges-div-overland">
-                                            <input type="hidden" name="on_return_record" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->id != '')? $returnCharges[2][0]->id : ''}}">
+                                            <input type="hidden" name="ol_return_record" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->id != '')? $returnCharges[2][0]->id : ''}}">
                                             
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local != '')? $returnCharges[2][0]->local : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" class="form-control amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local !== '')? $returnCharges[2][0]->local : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
 
@@ -1122,7 +1123,7 @@
                                         </div>
 
                                         <div class="row fuel-surcharge-div-overland">
-                                            <input type="hidden" name="on_fuel_record" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->id != '')? $fuelCharges[2][0]->id : ''}}">
+                                            <input type="hidden" name="ol_fuel_record" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->id != '')? $fuelCharges[2][0]->id : ''}}">
                                             
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Charges</label>
@@ -1412,7 +1413,7 @@
                                         <h3 class="card-title lead success">Detain</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="detain_main_switch" href="#" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a id="detain_main_switch" href="javascript:void(0);" class="pull-right"><input name="detain_main_switch" type="checkbox" id="" class="switchery detain-main-switch" data-size="sm" {{ ((isset($switches[3][0]) && $switches[3][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
 
@@ -1782,7 +1783,7 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local != '')? $returnCharges[3][0]->local : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" class="form-control amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local !== '')? $returnCharges[3][0]->local : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
 
@@ -2110,7 +2111,7 @@
                                         <h3 class="card-title lead success">Sameday</h3>
                                     </div>
                                     <div class="col-md-6">
-                                        <a id="sameday_main_switch" href="#" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'checked' : '') }}/></a>
+                                        <a id="sameday_main_switch" href="javascript:void(0);" class="pull-right"><input name="sameday_main_switch" type="checkbox" id="" class="switchery sameday-main-switch" data-size="sm" {{ ((isset($switches[4][0]) && $switches[4][0]->status == 1) ? 'checked' : '') }}/></a>
                                     </div>
                                 </div>
 
@@ -2483,7 +2484,7 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text"  class="form-control amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local != '')? $returnCharges[4][0]->local : ''}}" {{$same_return_sw}}>
+                                                    <input type="text"  class="form-control amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local !== '')? $returnCharges[4][0]->local : ''}}" {{$same_return_sw}}>
                                                 </fieldset>
                                             </div>
 
@@ -2849,6 +2850,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $(".touchspin-color").trigger("touchspin.updatesettings", {min: 1});
             // var on_main_switch = document.querySelector('#on_main_switch');
             $('#on_main_switch').on('change',function(){
 
@@ -2919,6 +2921,14 @@
             'digits': 2,
             'min': 0.00,
             'max': 1000000.00
+        });
+        $('.return-amount').inputmask({
+            'alias': 'integer',
+            'allowMinus': false,
+            'allowPlus': false,
+            'rightAlign': false,
+            'min': 0,
+            'max': 1000000
         });
 
         $('.percent').inputmask({
@@ -3018,6 +3028,8 @@
             var switches = document.querySelector('.switchery.weightAdditionOvernight'+count);
             var switchery = new Switchery(switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 1,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -3208,6 +3220,8 @@
             var ol_weight_switches = document.querySelector('.switchery.weightAdditionOverland'+overland_count);
             var switchery = new Switchery(ol_weight_switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 1,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -3397,6 +3411,8 @@
             var detain_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+detain_count);
             var switchery = new Switchery(detain_weight_switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 1,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -3586,6 +3602,8 @@
             var sameday_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+sameday_count);
             var switchery = new Switchery(sameday_weight_switches, { disabled: false,color: '#37BC9B',size:'small' });
             $(".touchspin-color").TouchSpin({
+                min: 1,
+                max: 100,
                 buttondown_class: "btn btn-success",
                 buttonup_class: "btn btn-success",
                 buttondown_txt: '<i class="ft-minus"></i>',
@@ -3893,55 +3911,7 @@
 
             }
         }
-        //Main switches
-        // overnightSwitch.onchange = function() {
-        //     if(overnightSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(overnightSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // overlandSwitch.onchange = function() {
-        //     if(overlandSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(overlandSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // detainSwitch.onchange = function() {
-        //     if(detainSwitch.checked === true){
-        //         errors = 0;
-        //     }else if(detainSwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        // samedayDiscountSwitch.onchange = function() {
-        //     if(samedaySwitch.checked === true){
-        //         errors = 0;
-        //     }else if(samedaySwitch.checked === false){
-        //         errors = 1;
-        //     }
-        // };
-        //
 
-
-        // var overnight_switch = new Switchery('#overnight_switch');
-
-        // $('#overnight_switch').bind('change', function() {
-        //     // var switchery = new Switchery(overnightSwitch);
-        //     // overnight_switch.disable();
-        //     // setTimeout(function(){ overnightSwitch.disable(); }, 1000);
-        //     if(this.checked == true){
-        //         $('#overnight').collapse('show');
-        //     }else{
-        //         $('#overnight').collapse('hide');
-        //     }
-        // });
-        // $("#overnight_switch").dblclick(function (event)
-        // {
-        //     console.log('double');
-        //     event.preventDefault();
-        // });
 
 
         var overnightSwitch = document.querySelector('.switchery.on-main-switch');
@@ -3958,10 +3928,17 @@
             submitHandler: function(form) {
                 if (overnightSwitch.checked == true || overlandSwitch.checked == true || detainSwitch.checked == true || samedaySwitch.checked == true) {
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    var msg = "";
+                    if($('#authorize').val() == 1){
+                        msg = "Rates are being authorized!"
+                    }else{
+                        msg = 'Rates are being added!';
+                    }
+
 
                     swal({
                         title: 'Please Wait!',
-                        text: 'Your rates are being added!',
+                        text: msg,
                         icon: 'info',
                         buttons: false,
                         closeOnClickOutside: false,

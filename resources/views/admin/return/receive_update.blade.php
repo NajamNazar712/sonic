@@ -1,9 +1,10 @@
 
 @extends('admin.layout.master')
+@section('title','Update Receive Return Deliveries')
 
 @section('content')
     <h1 class="mb-1">
-        Update Receive Return Deliveries
+        Update Return Receive Deliveries
     </h1>
 
     <div class="card">
@@ -34,7 +35,6 @@
     </div>
 
 
-    </div>
 
 @endsection
 
@@ -67,7 +67,7 @@
 
         table.dataTable tbody tr td.select-checkbox:before {
             top: 50%;
-            border-color: #666EE8;
+            border-color: #64a0d2;
         }
 
         table.dataTable tbody tr.selected td.select-checkbox:after {
@@ -102,25 +102,23 @@
             // var delivery_note = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
-                lengthMenu: [[25, 50, 100], [25, 50, 100]],
-                pageLength: 25,
+                scrollX: true, scrollY: '350px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.return.receive.update.list',['id'=>$return_note_id]) }}',
                 rowId: 'shId',
+                order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {data:'destination',name: 'destination', class: 'align-middle destination'},
-                    {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
-                    {data:'phone',name: 'phone', class: 'align-middle phone'},
-                    {data:'address',name: 'address', class: 'align-middle address'},
-                    {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
+                    {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data:'destination',name: 'oc.name', class: 'align-middle destination'},
+                    {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data:'phone',name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
+                    {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
+                    {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data:'action',name: 'action', class: 'align-middle action'}
                 ],
                 rowCallback: function(row, data, index) {
@@ -155,6 +153,7 @@
                             }
                         }
                     });
+                    this.api().table().columns.adjust();
                 }
             });
 

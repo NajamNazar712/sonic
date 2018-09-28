@@ -3,7 +3,10 @@
 namespace App\Http\Controllers\Admins;
 
 
+use App\Http\Models\Product;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShippingModeSameDayTiming;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -19,8 +22,10 @@ class SamedayController extends Controller
         $this->middleware('Permission');
     }
     public function sameday_index(){
-
-        return view('admin.sameday.index');
+        $timings = ShippingModeSameDayTiming::all();
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $products = Product::select('id','product_name')->get();
+        return view('admin.sameday.index')->with(['shipment_status'=>$shipment_status,'products'=>$products,'timings'=>$timings]);
     }
     public function sameday_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -66,7 +71,7 @@ class SamedayController extends Controller
             })
             ->leftjoin('shipment_status as sst','sst.id','=','last_update.shipper_status_id')
             ->leftjoin('admins as updater','updater.id','=','last_update.admin_id')
-            ->select('shipments.id as shId','shipments.booking_type_id','shipments.tracking_number','u.name as shipper','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address','p.product_name','sms.id as timing_id','sms.timing','sj.created_at as arrival','shipments.created_at as booked_date','shipments.pickup_date','dispatched.created_at as dispatched_time','regular_delivery.created_at as delivered_time','trybuy_delivery.created_at as trybuy_delivered','replacement_delivery.created_at as replacement_delivered','updater.name as updated_by','sst.name as current_status','shipments.shipper_status_id', 'shipments.special_instructions as instructions')
+            ->select('shipments.id as shId','shipments.booking_type_id','shipments.tracking_number','shipments.tracking_number as tracking_no','u.name as shipper','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address','p.product_name','sms.id as timing_id','sms.timing','sj.created_at as arrival','shipments.created_at as booked_date','shipments.pickup_date','dispatched.created_at as dispatched_time','regular_delivery.created_at as delivered_time','trybuy_delivery.created_at as trybuy_delivered','replacement_delivery.created_at as replacement_delivered','updater.name as updated_by','sst.name as current_status','shipments.shipper_status_id', 'shipments.special_instructions as instructions')
 
             ->where('shipments.shipping_mode_id',4)
             ->whereNotIn('shipments.shipper_status_id',[39,40,41,42,43,47])
@@ -83,8 +88,7 @@ class SamedayController extends Controller
             })
             ->editColumn('dispatched_time',function ($shipments){
                 if($shipments->dispatched_time) {
-
-                        return Carbon::parse($shipments->dispatched_time)->format('d/m/Y h:i A');
+                    return $shipments->dispatched_time;
 
                 }else{
                     return " - ";
@@ -92,14 +96,14 @@ class SamedayController extends Controller
             })
             ->editColumn('booked_date',function($shipments){
                 if($shipments->booked_date){
-                    return Carbon::parse($shipments->booked_date)->format('d/m/Y h:i A');
+                    return $shipments->booked_date;
                 }else{
                     return " - ";
                 }
             })
             ->editColumn('arrival',function($shipments){
                 if($shipments->arrival){
-                    return Carbon::parse($shipments->arrival)->format('d/m/Y h:i A');
+                    return $shipments->arrival;
                 }else{
                     return " - ";
                 }
@@ -107,22 +111,40 @@ class SamedayController extends Controller
             ->addColumn('delivered_status',function ($shipments){
                 if($shipments->delivered_time != '' || $shipments->replacement_delivered != '' || $shipments->trybuy_delivered != ''){
                     if($shipments->booking_type_id == 1){
-                        return Carbon::parse($shipments->delivered_time)->format('d/m/Y h:i A');
+                        return $shipments->delivered_time;
                     }else if($shipments->booking_type_id == 2){
-                        return Carbon::parse($shipments->replacement_delivered)->format('d/m/Y h:i A');
+                        return $shipments->replacement_delivered;
                     }else if($shipments->booking_type_id == 3){
-                        return Carbon::parse($shipments->trybuy_delivered)->format('d/m/Y h:i A');
+                        return $shipments->trybuy_delivered;
                     }
                 }
                 else{
                     return " - ";
                 }
             })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sst.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('product',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('p.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn('tat',function ($shipments){
 //                Carbon::createFromFormat('Y-m-d H:i:s', $shipments->booked_date)->format('h:m:s A');
                 $now = Carbon::now();
                return Carbon::parse($now)->diffForHumans($shipments->booked_date,true);
-//                return Carbon::parse($shipments->booked_date)->format('d/m/Y h:i A');
+
             })
             ->addColumn('remaining_time',function ($shipments){
                 $now = Carbon::now();
@@ -157,7 +179,7 @@ class SamedayController extends Controller
                 }
             })
             ->addColumn("action", function ($shipments) {
-                if (session('role_id') == 1 || count(array_intersect([3, 4], session('permissions'))) !== 0) {
+                if (session('role_id') == 1 || count(array_intersect([17, 35, 36], session('permissions'))) !== 0) {
                     $delivery_statuses = array(2, 4, 6, 7, 8, 9, 13, 15);
 
                     $dropdown = "
