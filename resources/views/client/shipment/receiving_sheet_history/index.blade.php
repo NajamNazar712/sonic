@@ -265,8 +265,59 @@
 				});
 			});
 
-			var receiving_sheet_table = $('#receiving_sheet_datatable').DataTable({
-				dom: 'ltipr',
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.shipment.receiving_sheet_history.receiving_sheet_list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+                            head.push('S.No');
+                            head.push('Receiving Sheet');
+                            head.push('Booked');
+                            head.push('Received');
+                            head.push('Short Received');
+                            head.push('Origin');
+                            head.push('Booking Date');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.id);
+                                row.push(values.bookings);
+                                row.push(values.receiving);
+                                row.push(values.bookings - values.receiving);
+                                row.push(values.origin);
+                                row.push(values.booking_date);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
+
+            var receiving_sheet_table = $('#receiving_sheet_datatable').DataTable({
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Receiving Sheet History',
+                        className: 'btn btn-primary',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }
+                ],
 				scrollX: true, scrollY: '350px',
 				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
 				pageLength: 50,

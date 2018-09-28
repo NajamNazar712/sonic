@@ -199,7 +199,7 @@
                     {data: 'consignee_phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'product_name', name: 'product', class: 'align-middle product_name'},
-                    {data: 'timing', name: 'sms.timing', class: 'align-middle timing'},
+                    {data: 'timing', name: 'sms.id', class: 'align-middle timing'},
                     {data: 'current_status', name: 'status', class: 'align-middle current_status'},
                     {data: 'booked_date', name: 'shipments.created_at', class: 'align-middle booked_date'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
@@ -224,6 +224,7 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
                     var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
+                    var timing_select = '<select name="timing_select" id="timing_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -242,6 +243,11 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
+                        }else if($(header).is('.timing')){
+                            $(timing_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -254,12 +260,12 @@
                         }
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
+                        obj.id = obj.id;
 
                         return obj;
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.text = obj.name; // replace name with the property used for the text
+                        obj.text = obj.name;
 
                         return obj;
                     });
@@ -272,12 +278,12 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data1 = $.map({!! $products !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
+                        obj.id = obj.id;
 
                         return obj;
                     });
                     var data1 = $.map({!! $products !!}, function (obj) {
-                        obj.text = obj.product_name; // replace name with the property used for the text
+                        obj.text = obj.product_name;
 
                         return obj;
                     });
@@ -285,6 +291,24 @@
                     $("#product_select").prepend('<option value="" selected></option>').select2({
                         data:data1,
                         placeholder: "Select Product",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data2 = $.map({!! $timings !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $timings !!}, function (obj) {
+                        obj.text = obj.timing; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#timing_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Timing",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

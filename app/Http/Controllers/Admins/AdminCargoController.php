@@ -489,7 +489,9 @@ class AdminCargoController extends Controller
     public function in_transit_index() {
         $shipping_mode = ShippingMode::all();
         $cargo_status = CargoConsignmentStatus::all();
-      return view('admin.cargo.in_transit')->with(['shipping_mode'=>$shipping_mode,'cargo_status'=>$cargo_status]);
+        $transport_vendor = TransportModeVendor::all();
+        $transport_mode = TransportMode::all();
+      return view('admin.cargo.in_transit')->with(['shipping_mode'=>$shipping_mode,'cargo_status'=>$cargo_status,'transport_mode'=>$transport_mode,'transport_vendor'=>$transport_vendor]);
     }
 
     public function in_transit_list(Request $request) {
@@ -536,6 +538,7 @@ class AdminCargoController extends Controller
               $query->whereRaw('false');
           }
       })
+
       ->addColumn('action', function($cargo_consignment) {
         $print_button = '<button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>';
         $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Forwarding Details</div></button>';
