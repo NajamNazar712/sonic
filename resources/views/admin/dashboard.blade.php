@@ -307,69 +307,7 @@
                         }
                     });
             }
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
 
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.orders.list') }}',
-                        data: {
-                            'page': 'all',
-                        },
-                        success: function (result) {
-                            head = [];
-
-                            head.push('S.No');
-                            head.push('Tracking No.');
-                            head.push('Order ID');
-                            head.push('Account No.');
-                            head.push('Shipper');
-                            head.push('Service Type');
-                            head.push('Status');
-                            head.push('Payment Status');
-                            head.push('Origin');
-                            head.push('Destination');
-                            head.push('Consignee Name');
-                            head.push('Consignee Contact');
-                            head.push('Consignee Address');
-                            head.push('Collection Amount');
-                            head.push('Product Type');
-                            head.push('Booking Date');
-                            head.push('Instructions');
-
-
-
-                            $.each(result.data, function(index, values) {
-                                row = [];
-
-                                row.push(index + 1);
-                                row.push(values.tracking);
-                                row.push(values.order_id);
-                                row.push(values.account_no);
-                                row.push(values.shipper);
-                                row.push(values.service_type);
-                                row.push(values.status);
-                                row.push(values.payment_status);
-                                row.push(values.origin);
-                                row.push(values.destination);
-                                row.push(values.consignee_name);
-                                row.push(values.phone1 + " | " + values.phone2);
-                                row.push(values.consignee_address);
-                                row.push(values.amount);
-                                row.push(values.product_type);
-                                row.push(values.booking_date);
-                                row.push(values.instructions);
-
-
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-
-                    return {body: body, header: head};
-                }
-            } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '350px',
@@ -383,15 +321,8 @@
                         print(selected_rows);
                         table.rows().deselect();
                         selected_rows = [];
-
                     }
-                },
-                    {
-                        extend: 'excel',
-                        title: 'Order Details',
-                        className: 'btn btn-primary',
-                        text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
+                }],
                 select: {
                     info: false,
                     style: 'multi',
@@ -435,7 +366,7 @@
                     if (data.shipper_status_id === 1) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
-                        if ($.inArray(data.id, selected_rows) !== -1) {
+                        if ($.inArray(data.shipment_id, selected_rows) !== -1) {
                             table.row(row).select();
                         }
                     }
