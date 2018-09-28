@@ -243,7 +243,7 @@
                     // { data:'sdn_expense' ,name: 'sdn_expense', class: 'align-middle sdn_expense'},
                     // { data:'sdn_net_amount' ,name: 'station_deposit_notes.sdn_net_amount', class: 'align-middle sdn_net_amount'},
                     { data:'deposited_by' ,name: 'admins.name', class: 'align-middle deposited_by'},
-                    { data:'bank' ,name: 'banks_lists.name', class: 'align-middle bank'},
+                    { data:'bank' ,name: 'banks_lists.id', class: 'align-middle bank'},
                     { data:'created_at' ,name: 'station_deposit_notes.created_at', class: 'align-middle created_at'},
                     { data:'status' ,name: 'status', class: 'align-middle status'},
                     { data:'deposit_slip' ,name: 'deposit_slip', class: 'align-middle deposit_slip',orderable: false, searchable: false},
@@ -265,6 +265,7 @@
                         '<option value="0">Created</option>' +
                         '<option value="1">Deposited</option>' +
                         '</select>';
+                    var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -273,6 +274,11 @@
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.bank')){
+                            $(bank_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -289,6 +295,24 @@
                     });
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select a Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data = $.map({!! $banks !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data = $.map({!! $banks !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#bank_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Bank",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

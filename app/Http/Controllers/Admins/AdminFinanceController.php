@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\ShipmentsJourneyController;
@@ -53,7 +54,8 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_sdn_index() {
-      return view('admin.finance.outstanding_sdn');
+        $banks = BanksList::all();
+      return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks]);
     }
 
     public function outstanding_sdn_list(Request $request) {
@@ -214,8 +216,9 @@ class AdminFinanceController extends Controller
     public function outstanding_shipments_index() {
         $hubs = City::orderBy('name')->get();
         $booking_types = BookingType::all();
-
-        return view('admin.finance.outstanding_shipments')->with(['hubs' => $hubs, 'booking_types' => $booking_types]);
+        $service_type = BookingType::all();
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        return view('admin.finance.outstanding_shipments')->with(['hubs' => $hubs, 'booking_types' => $booking_types,'service_type'=>$service_type,'shipment_status'=>$shipment_status]);
     }
 
     public function outstanding_shipments_list(Request $request) {
@@ -616,7 +619,8 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_index() {
-      return view('admin.finance.make_payments');
+        $banks = BanksList::all();
+      return view('admin.finance.make_payments')->with(['banks'=>$banks]);
     }
 
     public function make_payments_list(Request $request) {
@@ -1115,9 +1119,10 @@ class AdminFinanceController extends Controller
     }
 
     public function done_payments_index() {
-        $banks = BanksList::where('affiliate', 1)->get();
+        $banks = BanksList::all();
+        $company_banks = BanksList::where('affiliate', 1)->get();
 
-        return view('admin.finance.done_payments')->with('banks', $banks);
+        return view('admin.finance.done_payments')->with(['banks'=>$banks,'company_banks'=>$company_banks]);
     }
 
     public function done_payments_list(Request $request) {
@@ -1255,13 +1260,13 @@ class AdminFinanceController extends Controller
         ->filterColumn('status', function($query, $keyword) {
             $keyword = strtolower($keyword);
 
-            if (strpos('processed', $keyword) !== FALSE) {
+            if ($keyword == 0) {
                 $query->where('done_payments.status', '=', 0);
             }
-            else if (strpos('paid', $keyword) !== FALSE) {
+            else if ($keyword == 1) {
                 $query->where('done_payments.status', '=', 1);
             }
-            else if (strpos('reverted', $keyword) !== FALSE) {
+            else if ($keyword == 2) {
                 $query->where('done_payments.status', '=', 2);
             }
             else {

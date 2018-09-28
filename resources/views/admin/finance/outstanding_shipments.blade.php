@@ -260,9 +260,9 @@
 					{data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
 					{data:'hub', name: 'hc.name', class: 'align-middle text-center hub'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
-					{data:'service_type', name: 'bt.booking_type', class: 'align-middle text-center service_type'},
+					{data:'service_type', name: 'bt.id', class: 'align-middle text-center service_type'},
 					{data:'amount', name: 's.amount', class: 'align-middle text-center amount'},
-					{data:'status', name: 'ss.name as status', class: 'align-middle text-center status'},
+					{data:'status', name: 'ss.id', class: 'align-middle text-center status'},
 					{data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
 					{data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
 					{data:'dncc', name: 'delivery_note_shipments.delivery_note_id', class: 'align-middle text-center dncc'},
@@ -281,6 +281,8 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -288,7 +290,17 @@
 
 						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.service_type')){
+                            $(service_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -299,7 +311,42 @@
 							}
 						}
 					});
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.id = obj.id;
 
+                        return obj;
+                    });
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.text = obj.booking_type;
+
+                        return obj;
+                    });
+
+                    $("#service_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 					this.api().table().columns.adjust();
 				}
 			});
