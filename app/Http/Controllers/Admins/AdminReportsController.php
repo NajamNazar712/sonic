@@ -859,19 +859,21 @@ class AdminReportsController extends Controller
                 $shippers = User::where('id', $shipper_filter)->whereHas('city', function ($query) use ($c) {
                     $query->where('hub_id', '=', $c->id);
                 });
-//                if($shippers->exists()){
-                    $shippers = $shippers->get();
-//                }
+////                if($shippers->exists()){
+//                    $shippers = $shippers->get();
+////                }
             } else {
                 $shippers = User::whereHas('city', function ($query) use ($c) {
                     $query->where('hub_id', '=', $c->id);
                 });
-                if($shippers->exists()){
-                    $shippers = $shippers->get();
-                }
+//                if($shippers->exists()){
+//                    $shippers = $shippers->get();
+//                }
             }
 
-            if (count($shippers) > 0) {
+            if ($shippers->exists()) {
+                $shippers = $shippers->get();
+
                 foreach ($shippers as $key => $s) {
                     $details['shipper'][$c->id][$s->id] = $s->name;
                     foreach ($months_array as $month) {
