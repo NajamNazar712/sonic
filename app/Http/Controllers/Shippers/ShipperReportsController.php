@@ -13,7 +13,9 @@ use Yajra\Datatables\Datatables;
 class ShipperReportsController extends Controller
 {
     public function __construct() {
-        $this->middleware('auth');
+        $this->middleware('auth:web,substitute_users');
+
+      $this->middleware('Permission');
     }
     public function qsr_index(){
         return view('client.reports.qsr_report');

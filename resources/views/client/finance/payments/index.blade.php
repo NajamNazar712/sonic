@@ -219,7 +219,7 @@
 					{data:'total_charges', name: 'total_charges', class: 'align-middle text-center total_charges', sortable: false},
 					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', sortable: false},
 					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', sortable: false},
-					{data:'bank', name: 'ubi.bank_name', class: 'align-middle text-center bank'},
+					{data:'bank', name: 'ub.name', class: 'align-middle text-center bank'},
 					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', sortable: false},
 					{data:'reference_number', name: 'done_payments.reference_number', class: 'align-middle text-center reference_number'},
 					{data:'done_at', name: 'done_payments.created_at', class: 'align-middle text-center done_at'},
