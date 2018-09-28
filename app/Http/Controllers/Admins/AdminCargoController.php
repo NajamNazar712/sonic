@@ -369,6 +369,10 @@ class AdminCargoController extends Controller
       if ($request->filled('seal_number')) {
         $seal_number = CargoConsignment::where('seal_number', $request->input('seal_number'));
 
+        if ($request->has('id')) {
+            $seal_number = $seal_number->where('id', '!=', $request->input('id'));
+        }
+
         if (!$seal_number->exists()) {
           return 'true';
         }

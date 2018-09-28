@@ -175,7 +175,7 @@
             } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                @if (session('role_id') == 1 || in_array(41, session('permissions')))
+                @if (session('role_id') == 1 || in_array(106, session('permissions')))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '350px',
                 buttons: [
