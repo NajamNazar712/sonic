@@ -801,7 +801,7 @@ class AdminReportsController extends Controller
         $time2  = strtotime($date2);
         $my     = date('mY', $time2);
 
-        $months = array(date('F', $time1));
+//        $months = array(date('F', $time1));
         $f      = '';
 
         while($time1 < $time2) {
@@ -842,7 +842,7 @@ class AdminReportsController extends Controller
 
         $details = array();
         $shippers = array();
-        unset($months_array[0]);
+//        unset($months_array[0]);
 
         $details['header'] = ['Origin', 'Client Name' ];
         $details['subheader'] = ['Parcels', 'Weight','Collection Amount','Revenue' ];
@@ -870,7 +870,7 @@ class AdminReportsController extends Controller
                     $shippers = $shippers->get();
                 }
             }
-            
+
             if (count($shippers) > 0) {
                 foreach ($shippers as $key => $s) {
                     $details['shipper'][$c->id][$s->id] = $s->name;
