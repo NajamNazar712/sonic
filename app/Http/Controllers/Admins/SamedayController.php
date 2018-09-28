@@ -6,6 +6,7 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Models\Product;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentStatus;
+use App\Http\Models\ShippingModeSameDayTiming;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -21,9 +22,10 @@ class SamedayController extends Controller
         $this->middleware('Permission');
     }
     public function sameday_index(){
+        $timings = ShippingModeSameDayTiming::all();
         $shipment_status = ShipmentStatus::select('id','name')->get();
         $products = Product::select('id','product_name')->get();
-        return view('admin.sameday.index')->with(['shipment_status'=>$shipment_status,'products'=>$products]);
+        return view('admin.sameday.index')->with(['shipment_status'=>$shipment_status,'products'=>$products,'timings'=>$timings]);
     }
     public function sameday_list(Request $request){
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')

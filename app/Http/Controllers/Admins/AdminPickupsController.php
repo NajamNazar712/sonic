@@ -1430,18 +1430,13 @@ class AdminPickupsController extends Controller
           ';
         }
       })
-      ->filterColumn('pickup_type', function($query, $keyword) {
-        $keyword = strtolower($keyword);
-
-        if (strpos('light', $keyword) !== FALSE) {
-          $query->where('pickup_requests.pickup_type', '=', 0);
-        }
-        else if (strpos('heavy', $keyword) !== FALSE) {
-          $query->where('pickup_requests.pickup_type', '=', 1);
-        }
-        else {
-          $query->whereRaw('false');
-        }
+      ->filterColumn('pickup_type',function ($query,$keyword){
+              if ($keyword != '') {
+                  $query->where('pickup_requests.pickup_type',$keyword);
+              }
+              else {
+                  $query->whereRaw('false');
+              }
       });
 
       return $datatables->make(true);

@@ -398,13 +398,13 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local != '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_local_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->local !== '')? $returnCharges[1][0]->local : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">National Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_national_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national != '')? $returnCharges[1][0]->national : ''}}" {{$on_return_sw}}>
+                                                    <input type="text" data-rule-required="true" data-msg-required="This field is required" class="form-control amount" name="on_return_national_charges"  value="{{ (isset($returnCharges[1][0]) && $returnCharges[1][0]->national !== '')? $returnCharges[1][0]->national : ''}}" {{$on_return_sw}}>
                                                 </fieldset>
                                             </div>
                                         </div>
@@ -1088,7 +1088,7 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local != '')? $returnCharges[2][0]->local : ''}}" {{$ol_return_sw}}>
+                                                    <input type="text" class="form-control amount" name="ol_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->local !== '')? $returnCharges[2][0]->local : ''}}" {{$ol_return_sw}}>
                                                 </fieldset>
                                             </div>
 
@@ -1783,7 +1783,7 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text" class="form-control amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local != '')? $returnCharges[3][0]->local : ''}}" {{$det_return_sw}}>
+                                                    <input type="text" class="form-control amount" name="detain_return_local_charges" data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[3][0]) && $returnCharges[3][0]->local !== '')? $returnCharges[3][0]->local : ''}}" {{$det_return_sw}}>
                                                 </fieldset>
                                             </div>
 
@@ -2484,7 +2484,7 @@
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
-                                                    <input type="text"  class="form-control amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local != '')? $returnCharges[4][0]->local : ''}}" {{$same_return_sw}}>
+                                                    <input type="text"  class="form-control amount" name="sameday_return_local_charges"  data-rule-required="true" data-msg-required="This field is required" value="{{ (isset($returnCharges[4][0]) && $returnCharges[4][0]->local !== '')? $returnCharges[4][0]->local : ''}}" {{$same_return_sw}}>
                                                 </fieldset>
                                             </div>
 

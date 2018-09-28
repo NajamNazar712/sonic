@@ -120,6 +120,53 @@
 				show: false
 			});
 
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('cod.shipment.receiving_sheet.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Tracking Number');
+                            head.push('Order ID');
+                            head.push('Service Type');
+                            head.push('Pickup Address');
+                            head.push('Origin');
+                            head.push('Destination');
+                            head.push('Booking Date');
+                            head.push('Receiving Sheet');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.tracking_number);
+                                row.push(values.order_id);
+                                row.push(values.service_type);
+                                row.push(values.pickup_address);
+                                row.push(values.origin_city);
+                                row.push(values.destination_city);
+                                row.push(values.booking_date);
+                                row.push(values.receiving_sheet_no);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
+
 			var selected_rows = [];
 
 			var table = $('.datatable').DataTable({
@@ -157,6 +204,12 @@
 							table.draw('false');
 						});
 					}
+				},
+				{
+					extend: 'excel',
+					title: 'Receiving Sheet',
+					className: 'btn btn-primary',
+					text: '<i class="la la-file-excel-o"></i> Excel',
 				}],
 				select: {
 					info: false,

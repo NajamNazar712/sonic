@@ -480,8 +480,8 @@
 					{data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
 					{data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},
 					{data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
-					{data: 'transport_mode', name: 'tm.name', class: 'align-middle transport_mode'},
-					{data: 'vendor', name: 'tmv.name', class: 'align-middle vendor'},
+					{data: 'transport_mode', name: 'tm.id', class: 'align-middle transport_mode'},
+					{data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
 					{data: 'builty_number', name: 'cargo_consignments.builty_number', class: 'align-middle builty_number'},
 					{data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
 					{data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
@@ -500,8 +500,10 @@
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
-                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control">' +
-                        '</select>';
+                    var mode_drop_select = '<select name="mode_select" id="mode_select" class="select2 form-control"></select>';
+                    var transport_select = '<select name="transport_select" id="transport_select" class="select2 form-control"></select>';
+                    var vendor_select = '<select name="vendor_select" id="vendor_select" class="select2 form-control"></select>';
+
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
@@ -515,6 +517,16 @@
                                 } ).wrap(td);
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.transport_mode')){
+                            $(transport_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.vendor')){
+                            $(vendor_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -561,6 +573,42 @@
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         data:data2,
                         placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data3 = $.map({!! $transport_mode !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data3 = $.map({!! $transport_mode !!}, function (obj) {
+                        obj.text = obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#transport_select").prepend('<option value="" selected></option>').select2({
+                        data:data3,
+                        placeholder: "Select Transport",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data4 = $.map({!! $transport_vendor !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
+
+                        return obj;
+                    });
+                    var data4 = $.map({!! $transport_vendor !!}, function (obj) {
+                        obj.text = obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#vendor_select").prepend('<option value="" selected></option>').select2({
+                        data:data4,
+                        placeholder: "Select Transport",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
