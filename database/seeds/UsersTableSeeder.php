@@ -192,6 +192,61 @@ class UsersTableSeeder extends Seeder
             ));
         }
 
+
+        //new accounts
+
+        $ids = array(448,936,970,996,1006,1012,1015,1016,1018,1020,1021,1023,1025,1026,1027,1028,1037,1040,1043,1044,1045,1048);
+        $names = array('Ayesha Fashion','DCS COURIER','AU Online Store','Shafay Online World','Mob City','button corner','Mughal-e-azam','Beauty Inside Out','jszas marketing',' BEAUTY DOT COM','e.buy','SA TRADER','APNA STORE','Newborns to kneehighs','Balibaba It (Pvt) Ltd','Os Organic Honey','The Right Stop','Flutter Creations','Skineva Natural Skincare','Mehreen Sheikh','Meemz Nail Art Studio','hallroad.org');
+        $addresses = array('A 305 Rabia Garden block 17 gulistan-e-jauhar karachi ','dcscourier','f-24 central mall near gulplaza karachi','A-448 First Floor Block-1 Gulshan-e-Iqbal Near Continental Bakery Behind Aisha Clinic','F60 1st floor amma tower M,A Jinha road sadar karachi','Button Corner 5 B 2 Ghalib Market Gulberg 3 Lahore','F-167 1st Floor  Al-Najeebi Electronic Bazaar Near Star City Mall Saddar Karachi.','30/1/1, 4th Commerical Lane, Phase 4, DHA','house no 51, street no 6, gulistan colony harbanspura lahore','house # R996 sector 15A-4 bufferzone karachi','TS-105 Amma Tower MA Jinnah Road Karachi','House #1, Halli Street#2, Main G.T Road Banghanpura','AL TAWAKAL BOOK STORE MENGAL BAZAR SIDDIQUE GOTH SURJANI SECTORE 2 KARACHI','Ashiana appartments , A block , flat 718, 7th floor clifton block 9 karachi',' 24th Commercial St, Phase 2 Commercial Area Defence Housing Authority, Karachi, Karachi City, Sindh 75500','House 226h Street 5 H Block Phase 6 Dha','Sharfabad,aisha arcade flat no 202','97/2 Babar Block New Garden Town, Lahore','Skineva Natural Skincare','76, lane 4, chaklala scheme 1, rawalpindi.','76, lane 4, chaklala scheme 1, rawalpindi.','Digilog Electronics shop ug21 1st floor qazi center , opposit state bank Pakistan');
+        $ntn = array('','1539935-4','0000000-0','','0000000-0','1367328-9','0000000-0','0000000-0','0000000-0','0000000-0','0000000-0','0000000-0','','0000000-0','0000000-0','4277845-0','7170083-8','0000000-0','','','','7217873-8');
+        $poc = array('Nawaid Irfan Hussain','Syed Sajid Hussain','Uzair Ahmed','M Jahnagir Assadi','Zahid','Bilal','Daniyal Junejo','Saboohi','Umar Sheikh','Shazeem','Kashif','Ali Mushtaq','GHULAM MUJTABA','Javeria Arfat','Sahil Pahuja ','Omar Farooq','Hamza','Kazim Haider','Sikandar Khan','Mehreen','Mehreen','Irfan Ahmad');
+        $phone1 = array('3332197232','3009232567','3468918987','3009222266','3113297888','3407864631','3350129278','3333280984','3317848884','3330262438','3162731639','3069409740','3131277277','3232856503','3322998875','3008420482','3312364114','3218867099','3004383839','3455420081','3455420081','3124002221');
+        $phone2 = array('','2135630004','3468918987','','3002511007','3407864631','3212773782','923333280984','','3162258539','','','','','3443613134','3008420482','3312364114','3008463584','3004383839','3455420081','3455420081','3124002221');
+        $cnic = array('42201-0402156-7','42201-3095239-9','42301-6980505-1','42301-0236054-1','42201-6971514-3','35202-8006332-5','42000-8376311-7','42201-8945859-0','33100-0765052-5','42101-7747250-5','42501-3707303-3','35202-5407044-7','42101-8861276-9','42301-1978059-8','54101-0157281-5','42301-3091382-7','42000-9854057-3','35202-4340857-1','35202-9272101-9','37405-2519915-6','37405-2519915-6','35201-1682045-5');
+        $emails = array('cool_family5@hotmail.com','dcssajid@yahoo.com','uzair420ahmed@gmail.com','mjassadi1@gmail.com','sohailboghani0@gmail.com','online@button-corner.com','daniyaljunejo6@gmail.com','mariamfaridd@gmail.com','jsmarketinglhr@gmail.com','shazeem.bera@gmail.com','forpages05@gmail.com','sanakhalid422@gmail.com','mujtaba.soomro2@gmail.com','javeriaarfat@gmail.com','noureen.rajpari@balibaba.co','omartajammal@gmail.com','hamza_mohammadali@hotmail.co.uk','creationsflutter@gmail.com','skinevanatural@gmail.com','mehreenafzal1@gmail.com','mehreenafzal2@gmail.com','digilogpk@gmail.com');
+        $urls = array('','www.dcscourier.com','facebook.com','www.Shopnwalk.com','Mob city','button-corner.com','mughaleazampk.com','','','www.Beauty.Com','fb.me/e.buy01','','www.apnastore.pk','','balibaba.pk ','www.osorganics.com','','','','','www.meemznailart.com','www.hallroad.org');
+        $city_ids = array(202,202,202,202,202,223,202,202,223,202,202,223,202,202,202,223,202,223,223,288,288,223);
+        $product_id = array(24,8,24,1,4,22,3,8,8,8,6,8,6,1,24,15,8,24,8,1,24,22);
+        $password = array('7fdsuJUc','hVHewmDv','cvGdp5Tl','MoVRyXvc','YQhrxES4','nIBrXR8S','I2XRKcm3','5wXpMkJs','PX73y5aD','dhwLkTYi','9xneAxB4','c6cD8T3n','9gMVtjQi','MVBgg1HX','aHPYo0sG','qcTAlDJe','IXYj3B63','e4oPCj42','f9lV6ySB','et6TgBik','NxToLnNK','HkrmsSer');
+        $statuses = array(4,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3);
+
+        for($i=0;$i<count($ids);$i++)
+        {
+//            if($names[$i]=="hijabeaze (Over Night) ")
+//            {
+//                continue;
+//            }
+//            if($names[$i]=='Pansari.pk')
+//            {
+//                $api_token = 'NEh4SFR2emFqZHB4SFR6RWh1MDZLVVBoZzF1dTZUWUEzOVNiR1luYkxoYkhTTXlxUkpXY0p2aHJMTWFs5b76e7eb74ede';
+//            }
+//            else
+//            {
+                $api_token = uniqid(base64_encode(str_random(60)));
+            //}
+            DB::table('users')->insert(array(
+                array('id' => $ids[$i], 'name' => $names[$i], 'address' => $addresses[$i], 'ntn_no' => $ntn[$i], 'poc' => $poc[$i], 'status' => $statuses[$i], 'phone' => $phone1[$i], 'phone2' => $phone2[$i], 'cnic' => $cnic[$i], 'email' => $emails[$i], 'url' => $urls[$i], 'city_id' => $city_ids[$i], 'email' => $emails[$i],'rates_added_by'=>$rates_activated,'rates_authorized_by'=>$rates_activated,'account_activated_by'=>$rates_activated,'activated_at'=>$timestamp,'product_id'=>$product_id[$i],'password'=>bcrypt($password[$i]),'api_token'=>$api_token,'created_at'=>$timestamp,'updated_at'=>$timestamp),
+            ));
+
+        }
+
+
+        $bank_code = array('HBL','BAHL','MEZN','SCB','FAYS','MEZN','HMB','MEZN','ABL','MEZN','FAYS','SCB','HBL','HBL','HMB','SCB','MEZN','AKBL','HBL','MEZN','SCB','MEZN');
+        $bank_branch = array('Gulistan e Jauhar','Gulshan e Iqbal','Gulberg Branch','Shahrah e Faisal Islamic Branch','Abdullah haroon rood sadar','Ghalib Market, Lahore','M.A Jinnah Branch (25)','Block F North Nazimabad','satiana road branch code : 0245','SITE BRANCH KARACHI','PK62FAYS0236007000001378','Baghbanpura','SINDHI HOTEL NEW KARACHI','Zamzama boulevard branch ','Main Khayaban-e-Ittehad, Phase II, Extension DHA, Karachi.','Z-Block Branch','Sharfabad','Gulberg, Main Boulevard','Fortress Stadium','Raja market, Garden Town, Lahore','G-9 Islamabad','0230 Hall Road');
+        $account_title = array('Nawaid Irfan Hussain','DCS COURIER','Muhammad Uzair Kalota','Muhammad Jahangir Assadi','Haji Zahid Razzak','Button Corner','Daniyal','Muhammad Nabeel Naseem','jawad qasim','SHAZEEM','KASHIF REHMAN KHAN','Ali Mushtaq','GHULAM MUJTABA SOOMRO','Javeria arfat','Balibaba IT (Pvt) Ltd','Omar Tajammal Farooq','Hamza','Muhammad Kazim Haider','Sikandar Khan','Mehreen Afzal Sheikh','Mehreen Afzal Sheikh','Irfan Ahmad');
+        $account_no = array('40193588203','10570981012714000','1880103090556','1172487601','330000123942004','2450102693969','06-01-20-20357-714-188121','1310100508853','100019622700018','0107 0102743095','PK62FAYS0236007000001378','1142828602','11167900338503','127900874103','130027140211063','1143472701','1970102997604','0021-0320218740','10257900386901','2890102744514','1642911401','2300102159664');
+        $iban = array('PK57 HABB 0000040193588203','PK52BAHL1057098101271402','PK92MEZN0001880103090556','PK35SCBL0000001172487601','PK49FAYS0330000123942004','PK69MEZN0002450102693969','PK18MPBL0120567140188121','PK72MEZN0001310100508853','PK17ABPA0010001962700018','PK03 MEZN 0001 0801 0274 3095','PK62FAYS0236007000001378','PK02SCBL0000001142828602','PK26HABB0011167900338503','PK 37 HABB 0000 1279 0087 4103','PK59MPBL0130027140211063','PK71SCBL0000001143472701','PK42MEZN0001970102997604','PK80ASCM0000210320218740','PK80HABB0010257900386901','PK93MEZN0002890102744514','PK65SCBL0000001642911401','pk36mezn0002300102159664');
+
+        for($i=0;$i<count($ids);$i++) {
+
+            DB::table('user_bank_infos')->insert(array(
+                array('user_id' => $ids[$i], 'bank_name' => $bank_code[$i], 'bank_branch' => $bank_branch[$i], 'account_no' => $account_no[$i], 'account_title' => $account_title[$i], 'iban' => $iban[$i], 'city_id' => $city_ids[$i], 'payment_mode' => $payment_mode, 'payment_cycle' => $payment_cycle),
+            ));
+        }
+
+
+
+
         DB::table('user_shipping_infos')->truncate();
 
         $pickup_id = array(110,112,113,114,116,117,118,119,121,123,124,128,129,130,131,133,134,135,136,137,138,140,144,145,146,148,151,152,153,154,155,156,158,159,160,161,162,164,166,167,168,171,172,174,179,180,181,183,184,185,186,187,188,189,190,191,192,193,194,195,197,198,199,200,201,203,204,205,206,208,209,211,212,213,214,215,216,217,218,219,220,221,223,224,225,226,227,229,230,231,232,233,234,236,237,238,240,241,242,243,244,245,246,247,248,249,254,255,257,258,260,261,262,263,264,265,268,269,270,271,272,273,275,276,277,278,279,280,282,283,284,285,286,287,288,289,290,291,292,293,294,295,296,297,299,300,303,304,305,306,307,308,309,310,311,312,313,314,315,316,317,318,319,320,321,323,324,325,326,327,328,329,333,334,335,336,337,338,339,340,341,342,343,344,345,346,349,350,351,352,353,354,355,356,357,358,359,360,362,363,364,367,368,369,370,371,372,373,375,376,379,381,382,384,385,386,387,388,389,391,392,393,394,395,396,397,399,400,401,402,403,404,405,406,407,408,409,411,412,413,414,415,416,418,419,420,421,422,423,425,429,430,431,432,434,435,436,437,438,439,440,441,442,471,472,473,474,475,478,480,482,483,484,485,486,487,488,489,490,491,492,493,494,495,496,498,499,500,532,533,534,535,569,570,579,580,581,582,584,587,589,590,591,593,594,596,598,599,601,603,604,605,606,607,608,609,610,612,614,615,621,622,624,626,628,629,631,632,633,635,636,637,638,639,640,641,642,643,644,645,646,647,648,650,660,667,669,670,671,672,676,677,678,679,680,681,682,683,684,685,686,687,688,689,692,693,694,695,696,697,700,701,703,705,712,713,715,716,718,719,722,723,724,726,727,728,729,730,731,732,734,735,736,737,739,740,741,742,743,744,745,747,749,750,751,752,757,759,760,761,762,763,765,766,768,769,771,773,774,776,778,779,780,781,782,783,784,785,786,787,788,789,790,791,792,793,794,796,797,798,799,800,801,802,803,805,807,810,811,812,813,814,815,817,818,819,820,827,828,829,830,831,832,833,834,835,837,838,839,840,841,842,843,844,846,847,848,850,853,856,857,858,860,861,862,863,864,869,872,873,874,875,877,878,880,881,882,883,884,885,887,893,895,896,897,898,899,901,902,905,906,907,909,913,914,940,942,943,945,946,947,948,949,950,953,954,955,956,957,958,959,960,962,963,964,965,966,967,968,969,970,971,972,973,974,975,976,977,978,979,980,981,982,983,984,985,986,987,988,989,990,991,992,993,995,996,997,998,999,1000,1001,1002,1003,1006,1007,1008,1009,1010,1011,1012,1013,1014,1015,1016,1017,1018,1019,1020,1021,1022,1023,1024,1025,1026,1027,1028,1029,1030,1031,1032,1033,1034,1035,1037,1038,1039,1040,1041,1042,1043,1046,1047,1050,1051,1053,1054,1055,1057,1061,1062,1063,1065,1067,1068,1069,1070,1072,1073,1074,1076,1077,1078,1080,1082,1083,1084,1085,1086,1088,1090,1099,1101,1102,1103,1104,1105,1107,1108,1109,1110,1111,1112,1115,1117,1118,1120,1122,1123,1124,1125,1127,1128,1129,1130,1131,1132,1133,1134,1135,1136,1141,1145,1149,1150,1157,1160,1161,1163,1164,1165,1166,1168,1169,1170,1171,1172,1173,1174,1175,1176,1177,1178,1179,1180,1181,1183,1186,1187,1188,1189,1190,1191,1193,1196,1198,1200,1201,1202,1203,1204,1205,1206,1207,1208,1209,1210,1211,1212,1213,1214,1215,1216,1217,1219,1220,1221,1222,1224,1228,1229,1230,1231,1232,1233,1234,1235,1236,1238,1239,1240,1241,1242,1243,1244,1245,1246,1247,1252,1256,1257,1258,1259,1260,1261,1262,1263,1264,1265,1266,1267,1268,1269,1271,1272,1273,1274,1275,1276,1277,1278,1279,1280,1281,1282,1284,1285,1287,1288,1289,1290,1291,1294,1296,1297,1298,1303,1304,1305,1306,1307,1308,1309,1310,1311,1312,1315,1316,1317,1318,1319,1320,1323,1324,1326,1328,1333,1334,1335,1337,1338,1341,1343,1344,1345,1346,1348,1349,1350,1352,1354,1357,1358,1359,1360,1361,1362,1364,1365,1366,1367,1369,1370,1371,1372,1373,1375,1376,1377,1379,1381,1383,1384,1387,1388,1389,1391,1392,1393,1394,1395,1398,1399,1400,1401,1403,1406,1407,1408,1409,1410,1412,1413,1421,1422,1423,1425,1427,1428,1429);
@@ -212,6 +267,30 @@ class UsersTableSeeder extends Seeder
                 array('id' => $pickup_id[$i], 'user_id' => $user_id[$i], 'pickup_address' => $pickup_address[$i], 'poc' => $poc[$i], 'phone' => $phone[$i],'city_id'=>$city[$i]),
             ));
         }
+
+
+        //new accounts
+
+
+        $pickup_id = array(585,1313,1485,1374,1456,1415,1450,1432,1439,1441,1442,1444,1448,1449,1452,1455,1457,1458,1459,1461,1468,1472,1473,1474,1483);
+        $user_id = array(448,936,936,970,996,996,1006,1006,1012,1015,1016,1018,1020,1021,1023,1025,1026,1027,1028,1037,1040,1043,1044,1045,1048);
+        $pickup_address = array('A 305 Rabia Garden block 17 gulistan-e-jauhar karachi ','Al Sehat Centre M-3 back of Regant Plaza Hotel Karachi','36 mezzanine floor Shadman market','f-24 central mall near gulplaza karachi','A-76 Block-2 Behind Continental Bakery Gulshan e Iqbal Karachi','A-448 First Floor Block-1 Gulshan-e-Iqbal Near Continental Bakery Behind Aisha Clinic','Amma Tower Karachi','Amma Tower Karachi','Button Corner 5 B 2 Ghalib Market Gulberg 3 Lahore','F-167 1st Floor  Al-Najeebi Electronic Bazaar Near Star City Mall Saddar Karachi.','30/1/1, 4th Commerical Lane, Phase 4, DHA','house no 51, street no 6, gulistan colony harbanspura lahore','house # R996 sector 15A-4 bufferzone karachi','TS-105 Amma Tower MA Jinnah Road Karachi','House #1, Halli Street#2, Main G.T Road Banghanpura','AL TAWAKAL BOOK STORE MENGAL BAZAR SIDDIQUE GOTH SURJANI SECTORE 2 KARACHI','Ashiana appartments , A block , flat 718, 7th floor clifton block 9 karachi',' 24th Commercial St, Phase 2 Commercial Area Defence Housing Authority, Karachi, Karachi City, Sindh 75500','House 226h Street 5 H Block Phase 6 Dha','Sharfabad,aisha arcade flat no 202','97/2 Babar Block New Garden Town, Lahore','82, Abu Bakar Block, New garden town, Lahore','Meemz Nail Art','76, lane 4, chaklala scheme 1, rawalpindi.','Digilog Electronics shop ug21 1st floor qazi center , opposit state bank Pakistan');
+        $poc = array('Nawaid Irfan Hussain','Syed Hasan Ali','Shafeeq','Uzair Ahmed','M JAhangir','Sikander Khan','Zahid','Zahid','Miss Neeha','Naseem','saboohi','umar babar','MUHAMMAD USMAN','ALI','Sana Ali','GHULAM MUJTABA','Javeria Arfat','Sahil Pahuja ','Omar Farooq','Hamza','Kazim/Tania','Sikandar ','Mehreen','Mehreen','Naeem Ahmad');
+        $phone = array('3332197232','3461034193','3049156362','3468918987','3009222266','3002419034','3113297888','3113297888','3407864631','3323124828','3333280984','3317848884','3162258539','3162731639','3069409740','3456152361','3232856503','3322998875','3008420482','3312364114','3008463584','3214356506','3455420081','3455420081','3228017104');
+        $emails = array();
+        $city = array(202,202,223,202,202,202,202,202,223,202,202,223,202,202,223,202,202,202,223,202,223,223,288,288,223);
+
+        for($i=0;$i<count($pickup_id);$i++)
+        {
+            if(($pickup_id[$i]==""||$pickup_id[$i]==null) || ($user_id[$i]==""||$user_id[$i]==null) || ($pickup_address[$i]==""||$pickup_address[$i]==null)|| ($poc[$i]==""||$poc[$i]==null)|| ($phone[$i]==""||$phone[$i]==null)|| ($city[$i]==""||$city[$i]==null||$city[$i]==0))
+            {
+                continue;
+            }
+            DB::table('user_shipping_infos')->insert(array(
+                array('id' => $pickup_id[$i], 'user_id' => $user_id[$i], 'pickup_address' => $pickup_address[$i], 'poc' => $poc[$i], 'phone' => $phone[$i],'city_id'=>$city[$i]),
+            ));
+        }
+
 
         DB::table('weight_charges')->truncate();
         DB::table('rate_statuses')->truncate();
@@ -630,6 +709,137 @@ class UsersTableSeeder extends Seeder
         }
 
 
+        //new accounts
+
+        $user_ids = array(448,448,448,936,936,936,970,970,970,996,996,996,996,1006,1006,1006,1012,1012,1012,1015,1015,1015,1016,1016,1016,1018,1018,1018,1020,1020,1020,1021,1021,1021,1023,1023,1023,1025,1025,1025,1026,1026,1026,1027,1027,1027,1028,1028,1028,1037,1037,1037,1040,1040,1040,1043,1043,1043,1044,1044,1044,1045,1045,1045,1048,1048,1048);
+        $range_down = array(0.5,1.2,-1,0.5,1.2,-1,0.5,1,-1,0.5,1,1.5,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1,0.5,1.2,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1,0.5,1.1,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1,0.5,1,-1);
+        $range_up = array(0.1,0.51,-1,0.01,0.51,-1,0.1,0.51,-1,0.1,0.51,1.1,-1,0.01,0.51,-1,0.1,0.51,-1,0.1,0.51,-1,0.1,0.51,-1,0.1,0.51,-1,0.01,0.51,-1,0.1,0.51,-1,0.1,0.51,-1,0.01,0.51,-1,0.01,0.51,-1,0.01,0.51,-1,0.1,0.51,-1,0.01,0.51,-1,0.1,0.51,-1,0.1,0.51,-1,0.1,0.51,-1,0.1,0.51,-1,0.1,0.51,-1);
+        $national_amount = array(180,220,130,150,160,100,165,180,100,135,150,200,80,165,180,100,165,180,100,170,210,100,160,180,100,125,142,100,170,200,110,170,210,100,150,170,100,150,165,100,170,200,120,145,155,100,165,180,100,165,180,100,165,180,100,165,180,100,165,180,100,165,180,100,165,180,100);
+        $local_amount = array(120,150,70,120,150,60,135,150,100,100,100,100,50,100,150,100,120,165,100,150,170,100,150,170,100,100,125,100,120,150,60,130,170,100,110,165,100,165,180,100,120,150,70,100,120,100,120,165,100,135,150,100,150,165,100,120,165,100,120,165,100,120,165,100,135,165,100);
+
+        for($i=0;$i<count($user_ids);$i++) {
+
+            $weight_addition = 0;
+            $spkg = null;
+            if($range_up[$i]<0)
+            {
+                $range_up[$i]=$range_down[$i-1]+0.01;
+                $range_down[$i]=1000;
+
+                if($range_down[$i]-$range_up[$i]>=1)
+                {
+                    $weight_addition = 1;
+                    $spkg = 1;
+                }
+                else
+                {
+                    $weight_addition = 0;
+                    $spkg = null;
+                }
+            }
+
+
+
+            DB::table('weight_charges')->insert(array(
+                array('user_id' => $user_ids[$i], 'shipping_mode_id' => $shipping_mode, 'range_up' => $range_up[$i], 'range_down' => $range_down[$i], 'weight_addition' => $weight_addition, 'spkg' => $spkg, 'local_or_6hr' => $local_amount[$i], 'national_or_sameday' => $national_amount[$i]),
+            ));
+
+            $exists = DB::table('rate_statuses')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$shipping_mode]])->first();
+
+            if($exists==null)
+            {
+                DB::table('rate_statuses')->insert(array(
+                    array('user_id' => $user_ids[$i], 'shipping_mode_id' => $shipping_mode, 'status' => $status,'packaging_charges'=>$packaging_charges),
+                ));
+            }
+            else
+            {
+                DB::table('rate_statuses')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$shipping_mode]])->update(
+                    ['packaging_charges'=>$packaging_charges]
+                );
+            }
+
+            $packaging =  DB::table('packaging_charges')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$shipping_mode]])->first();
+
+            if($packaging==null)
+            {
+                DB::table('packaging_charges')->insert(array(
+                    array('user_id' => $user_ids[$i], 'shipping_mode_id' => $shipping_mode, 'sm_flyer' => 10,'md_flyer'=>15,'lg_flyer'=>20,'box_flyer'=>20),
+                ));
+            }
+
+            $type_charges =  DB::table('booking_type_charges')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$shipping_mode]])->first();
+
+            if($type_charges==null)
+            {
+                DB::table('booking_type_charges')->insert(array(
+                    array('user_id' => $user_ids[$i], 'shipping_mode_id' => $shipping_mode, 'replacement_charges' => $replacement_charges_on,'try_and_buy_charges'=>$try_and_buy_charges_on),
+                ));
+            }
+        }
+
+
+        //new accounts overland
+
+        $user_ids = array(446,446,446);
+        $range_down = array(5,10,-1);
+        $range_up = array(0.01,5.01,-1);
+        $national_amount = array(250,500,50);
+        $local_amount = array(150,300,30);
+        $overland = 2;
+
+        for($i=0;$i<count($user_ids);$i++) {
+
+            $weight_addition = 0;
+            $spkg = null;
+            if($range_up[$i]<0)
+            {
+                $range_up[$i]=$range_down[$i-1]+0.01;
+                $range_down[$i]=1000;
+
+                if($range_down[$i]-$range_up[$i]>=1)
+                {
+                    $weight_addition = 1;
+                    $spkg = 1;
+                }
+                else
+                {
+                    $weight_addition = 0;
+                    $spkg = null;
+                }
+            }
+
+
+            DB::table('weight_charges')->insert(array(
+                array('user_id' => $user_ids[$i], 'shipping_mode_id' => $overland, 'range_up' => $range_up[$i], 'range_down' => $range_down[$i], 'weight_addition' => $weight_addition, 'spkg' => $spkg, 'local_or_6hr' => $local_amount[$i], 'national_or_sameday' => $national_amount[$i]),
+            ));
+
+            $exists = DB::table('rate_statuses')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$overland]])->first();
+
+            if($exists==null)
+            {
+                DB::table('rate_statuses')->insert(array(
+                    array('user_id' => $user_ids[$i], 'shipping_mode_id' => $overland, 'status' => $status),
+                ));
+            }
+//            else
+//            {
+//                DB::table('rate_statuses')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$overland]])->update(
+//                    ['packaging_charges'=>$packaging_charges]
+//                );
+//            }
+
+            $type_charges =  DB::table('booking_type_charges')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$overland]])->first();
+
+            if($type_charges==null)
+            {
+                DB::table('booking_type_charges')->insert(array(
+                    array('user_id' => $user_ids[$i], 'shipping_mode_id' => $overland, 'replacement_charges' => $replacement_charges_on,'try_and_buy_charges'=>$try_and_buy_charges_on),
+                ));
+            }
+
+        }
+
 
 
         DB::table('cash_handling_charges')->truncate();
@@ -739,6 +949,43 @@ class UsersTableSeeder extends Seeder
         }
 
 
+        //new accounts
+
+        $user_ids = array(448,448,448,448,448,936,936,936,936,970,970,970,996,996,996,1006,1006,1006,1006,1006,1012,1012,1012,1012,1015,1015,1015,1015,1016,1016,1016,1018,1018,1018,1018,1020,1020,1020,1020,1021,1021,1021,1021,1023,1023,1023,1023,1025,1025,1025,1025,1025,1026,1026,1026,1026,1027,1027,1027,1027,1027,1028,1028,1028,1028,1037,1037,1037,1037,1037,1040,1040,1040,1040,1043,1043,1043,1043,1044,1044,1044,1044,1045,1045,1045,1045,1048,1048,1048,1048);
+        $range_down = array(3000,5000,10000,25000,1000000,5000,10000,30000,150000,5000,10000,30000,5000,10000,30000,3000,5000,10000,25000,1000000,5000,10000,30000,100000,3000,5000,10000,25000,5000,10000,30000,3000,5000,20000,100000,5000,10000,30000,150000,3000,5000,10000,25000,3000,5000,10000,25000,3000,5000,10000,25000,1000000,5000,10000,30000,150000,3000,5000,10000,25000,1000000,3000,5000,10000,30000,3000,5000,10000,25000,1000000,3000,5000,10000,30000,3000,5000,10000,30000,3000,5000,10000,30000,3000,5000,10000,30000,3000,5000,10000,30000);
+        $range_up = array(0,3001,5001,10001,25000,0,5001,10001,30001,1,5001,10001,1,5001,10001,0,3001,5001,10001,25000,1,5001,10001,30001,1,3001,5001,10001,1,5001,10001,1,3001,5001,20001,0,5001,10001,30001,1,3001,5001,10001,1,3001,5001,10001,0,3001,5001,10001,25000,0,5001,10001,30001,0,3001,5001,10001,25000,1,3001,5001,10001,0,3001,5001,10001,25000,1,3001,5001,10001,1,3001,5001,10001,1,3001,5001,10001,1,3001,5001,10001,1,3001,5001,10001);
+        $charges = array('0','100','150','200','1%','0','0','100','1%','0','50','100','0','0','100','0','0','0','100','1%','0','0','0','200','0','50','100','200','0','0','100','0','0','0','1%','0','0','150','1%','0','0','100','200','0','0','100','200','0','100','150','200','1%','0','100','150','1%','0','100','150','200','1%','0','0','0','0','0','100','150','200','1%','0','0','100','200','0','0','100','200','0','0','100','200','0','0','100','200','0','0','100','200');
+
+        for($i=0;$i<count($user_ids);$i++)
+        {
+            DB::table('cash_handling_charges')->insert(array(
+                array('user_id' => $user_ids[$i], 'shipping_mode_id' => $shipping_mode, 'range_up' => $range_up[$i], 'range_down' => $range_down[$i], 'charges' => $charges[$i]),
+            ));
+
+            DB::table('rate_statuses')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$shipping_mode]])->update(
+                ['cash_handling_charges'=>1]
+            );
+        }
+
+
+        //new accounts overland
+
+        $user_ids = array(446,446,446,446);
+        $range_down = array(5000,10000,30000,150000);
+        $range_up = array(0,5001,10001,30001);
+        $charges = array('0','50','150','1%');
+
+        for($i=0;$i<count($user_ids);$i++)
+        {
+            DB::table('cash_handling_charges')->insert(array(
+                array('user_id' => $user_ids[$i], 'shipping_mode_id' => $overland, 'range_up' => $range_up[$i], 'range_down' => $range_down[$i], 'charges' => $charges[$i]),
+            ));
+            DB::table('rate_statuses')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$overland]])->update(
+                ['cash_handling_charges'=>1]
+            );
+        }
+
+
         DB::table('fuel_surcharges')->truncate();
         $user_ids = array(111,114,117,118,118,119,120,121,123,126,127,128,130,136,136,137,137,138,138,142,142,144,144,145,145,146,146,147,147,148,148,149,149,150,150,151,151,152,152,154,154,157,157,158,158,159,159,161,161,162,162,163,163,164,164,165,165,167,167,169,169,170,170,171,171,172,172,174,174,175,175,179,179,180,180,181,181,183,183,184,184,185,185,187,187,187,187,187,187,188,188,188,188,188,188,188,188,188,188,190,190,194,194,197,197,198,198,199,199,200,200,201,201,203,203,204,204,205,205,207,207,209,209,213,213,214,214,215,215,216,216,217,217,218,218,219,219,220,220,221,221,224,224,226,226,230,230,231,231,232,232,233,233,234,234,237,237,239,239,240,240,242,242,243,243,244,244,245,245,248,248,251,251,252,252,253,253,254,254,255,255,256,256,257,257,260,260,262,262,263,263,266,266,267,267,268,268,269,269,270,270,271,271,273,273,274,274,275,275,276,276,277,277,278,278,279,279,280,280,281,281,286,286,287,287,288,288,291,291,292,292,295,295,296,296,297,297,298,298,299,299,300,300,301,301,304,304,306,306,307,307,308,308,309,309,310,310,314,314,315,315,316,316,318,318,319,319,320,320,321,321,322,322,323,323,324,324,326,326,327,327,328,328,331,331,332,332,333,333,334,334,335,335,336,336,342,342,343,343,344,344,345,345,346,346,348,348,349,349,350,350,352,352,353,353,357,357,358,358,359,359,360,360,362,362,363,363,364,364,365,365,366,366,368,368,371,371,371,371,371,371,372,372,372,372,374,374,375,375,377,377,378,378,380,380,381,381,382,382,382,382,385,385,386,386,387,387,388,388,389,389,391,391,392,392,395,395,396,396,398,398,399,399,400,400,406,406,407,407,408,408,409,409,410,410,411,411,412,412,413,413,415,415,419,419,423,423,424,424,425,425,426,426,427,427,428,428,429,429,430,430,431,431,432,432,433,433,434,434,437,437,439,439,440,440,441,441,442,442,443,443,446,446,449,449,451,451,452,452,454,454,456,456,457,457,459,459,460,460,461,461,465,465,466,466,468,468,469,469,470,470,471,471,473,473,474,474,475,475,481,481,482,482,484,484,485,485,486,486,487,487,488,488,490,490,494,494,496,496,497,497,498,498,499,499,501,501,502,502,504,504,505,505,506,506,509,509,510,510,512,512,513,513,514,514,515,515,516,516,520,520,522,522,524,524,526,526,527,527,530,530,532,532,535,535,536,536,541,541,542,542,543,543,546,546,547,547,548,548,549,549,551,551,552,552,553,553,554,554,556,556,557,557,558,558,560,560,561,561,564,564,567,567,568,568,569,569,570,570,572,572,574,574,575,575,576,576,578,578,581,581,584,584,586,586,587,587,591,591,593,593,595,595,596,596,597,597,600,600,601,601,602,602,603,603,606,606,608,608,609,609,612,612,613,613,614,614,616,616,618,618,619,619,620,620,768,768,769,769,770,770,773,773,774,774,775,775,777,777,778,778,779,779,780,780,781,781,782,782,783,783,785,785,786,786,787,787,788,788,789,789,791,791,792,792,794,794,795,795,796,796,799,799,800,800,802,802,803,803,804,804,805,805,806,806,807,807,808,808,809,809,810,810,811,811,812,812,813,813,814,814,817,817,819,819,823,823,824,824,826,826,828,828,829,829,830,830,832,832,834,834,837,837,840,840,841,841,843,843,844,844,845,845,846,846,847,847,848,848,849,849,850,850,851,851,852,852,853,853,858,858,860,860,861,861,863,863,864,864,865,865,866,866,868,868,870,870,873,873,874,874,875,875,884,884,888,888,891,891,893,893,894,894,896,896,900,900,902,902,903,903,904,904,908,908,909,909,913,913,914,914,916,916,917,917,921,921,922,922,923,923,925,925,926,926,927,927,928,928,930,930,932,932,934,934,935,935,938,938,939,939,941,941,944,944,945,945,949,949,952,952,953,953,955,955,957,957,959,959,960,960,962,962,965,965,967,967,968,968,969,969,972,972,975,975,977,977,978,978,979,979,981,981,984,984,985,985,987,987,990,990,991,991,992,992,993,993,994,994);
         $fuel_surcharge = array(10,2,0,0,0,5,0,5,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,0,5,0,0,5,0,0,0,0,4,0,0,0,0,0,0,0,3,0,0,0,0,0,5,0,6,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,3,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,3,0,0,0,0,0,3,0,0,0,3,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,6,0,3,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,0,0,5,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,5,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,6,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,5,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,3,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,3,0,7,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,3,0,3,0,0,0,0,0,5,0,0,0,0,0,6,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,3,0,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,3,0,3,0,0,0,0,0,0,0,0,0,3,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,10,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,3,0,0,0,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,6,0,0,0,0,0,3,0,5,0,0,0,0,0,0,0,5,0,0,0,5,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,7,0,0,0,3,0,3,0,3,0,3,0,0,0,0,0,5,0,0,0,2,0,0,0,6,0,7,0,0,0,0,0,0,0,5,0,5,0,5,0,0,0,5,0,0,0,0,0,5,0,0,0,5,0,0,0,6,0,2,0,0,0,0,0,5,0,5,0,3,0,0,0,0,0,3,0,7,0,0,0,0,0,2,0,0,0,0,0,4,0,0,0,2,0,0,0,0,0,3,0,10,0,0,0,0,0,3,0,0,0,3,0,2,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,0,0,0,0,0,3,0,3,0,5,0,10,0,3,0,3,0,3,0,5,0,3,0,5,0,3,0,0,0,0,0,5,0,3,0,3,0,5,0,5,0,5,0,10,0,3,0,5,0,3,0,2,0,3,0,3,0,0,0,3,0,3,0,5,0,3,0,2,0,3,0,3,0,3,0,3,0,2,0,3,0,0,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,3,0,2,0,3,0,3,0,3,0,3,0,0,0,10,0,10,0,3,0,3,0,5,0,3);
@@ -818,6 +1065,47 @@ class UsersTableSeeder extends Seeder
             }
         }
 
+
+        //new accounts
+
+        $user_ids = array(448,936,970,996,1006,1012,1015,1016,1018,1020,1021,1023,1025,1026,1027,1028,1037,1040,1043,1044,1045,1048);
+        $fuel_surcharge = array(0,3,3,3,0,3,3,5,3,3,3,3,0,3,10,3,0,3,3,3,3,3);
+
+        for($i=0;$i<count($user_ids);$i++)
+        {
+
+
+            if($fuel_surcharge[$i]>0)
+            {
+                DB::table('fuel_surcharges')->insert(array(
+                    array('user_id' => $user_ids[$i], 'shipping_mode_id' => $shipping_mode,'fuel_surcharge'=>$fuel_surcharge[$i]),
+                ));
+                DB::table('rate_statuses')->where([['user_id', '=', $user_ids[$i]], ['shipping_mode_id', '=', $shipping_mode]])->update(
+                    ['fuel_charges' => 1]
+                );
+            }
+        }
+
+
+        //new accounts overland
+
+        $user_ids = array(446);
+        $fuel_surcharge = array(5);
+
+        for($i=0;$i<count($user_ids);$i++)
+        {
+
+
+            if($fuel_surcharge[$i]>0)
+            {
+                DB::table('fuel_surcharges')->insert(array(
+                    array('user_id' => $user_ids[$i], 'shipping_mode_id' => $overland,'fuel_surcharge'=>$fuel_surcharge[$i]),
+                ));
+                DB::table('rate_statuses')->where([['user_id', '=', $user_ids[$i]], ['shipping_mode_id', '=', $overland]])->update(
+                    ['fuel_charges' => 1]
+                );
+            }
+        }
 
 
 
@@ -907,6 +1195,49 @@ class UsersTableSeeder extends Seeder
         $user_ids = array(325,980);
         $local = array(50,0);
         $national = array(100,0);
+
+        for($i=0;$i<count($user_ids);$i++)
+        {
+            DB::table('return_charges')->insert(array(
+                array('user_id' => $user_ids[$i], 'shipping_mode_id' => $overland,'local'=>$local[$i],'national'=>$national[$i]),
+            ));
+
+            if($local[$i]>0 || $national[$i]>0) {
+                DB::table('rate_statuses')->where([['user_id', '=', $user_ids[$i]], ['shipping_mode_id', '=', $overland]])->update(
+                    ['return_charges' => 1]
+                );
+            }
+        }
+
+
+        //new accounts
+
+
+        $user_ids = array(448,936,1020,1026);
+        $local = array(50,0,0,0);
+        $national = array(100,60,100,100);
+
+
+        for($i=0;$i<count($user_ids);$i++)
+        {
+            DB::table('return_charges')->insert(array(
+                array('user_id' => $user_ids[$i], 'shipping_mode_id' => $shipping_mode,'local'=>$local[$i],'national'=>$national[$i]),
+            ));
+
+            if($local[$i]>0 || $national[$i]>0)
+            {
+                DB::table('rate_statuses')->where([['user_id','=',$user_ids[$i]],['shipping_mode_id','=',$shipping_mode]])->update(
+                    ['return_charges'=>1]
+                );
+            }
+        }
+
+
+        //new accounts overland
+
+        $user_ids = array(446);
+        $local = array(0);
+        $national = array(200);
 
         for($i=0;$i<count($user_ids);$i++)
         {
