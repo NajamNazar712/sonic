@@ -81,7 +81,7 @@
 
 	<script>
 		$(document).ready(function() {
-			var cargo_consignment_id = {{ session('cargo_consignment_id') }};
+			var cargo_consignment_id = {{ ltrim(session('cargo_consignment_id'), '0') }};
 
 			var shipment_ids = [];
 
