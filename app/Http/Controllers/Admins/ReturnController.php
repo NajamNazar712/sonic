@@ -829,7 +829,7 @@ class ReturnController extends Controller
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$request->return_note_id,'status'=>0])->count();
             if($shipment_status == 0){
-                ReturnNote::where('id',$request->return_note_id)->update(['status'=>1]);
+                ReturnNote::where('id',$return_note_id)->update(['updated_by'=>Auth::id(),'status'=>1]);
             }
 
             NotificationsController::send(15, $request->return_note_id);
