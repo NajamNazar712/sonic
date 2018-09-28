@@ -868,7 +868,7 @@ class AdminReportsController extends Controller
                 if($shippers->exists()){
                     $shippers = $shippers->get();
                 }else{
-                    $shippers = null;
+                    $shippers = array();
                 }
             }
 //            var_dump($shippers);exit();
