@@ -23,7 +23,13 @@
                 </ul>
                 <ul class="nav navbar-nav float-right">
                     <li class="dropdown dropdown-user nav-item">
-                        <a class="dropdown-toggle nav-link dropdown-user-link" href="#" data-toggle="dropdown">
+                        <a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_manuals" target="_blank">
+                            <h2 class="m-0 white">
+                                <i class="ft-help-circle"></i>
+                            </h2>
+                        </a>
+
+                        <a class="dropdown-toggle nav-link d-inline-flex align-middle dropdown-user-link" href="#" data-toggle="dropdown">
                             <span class="d-inline-block align-middle">
                                 <div class="text-bold-700 border-bottom-white text-right">{{ucfirst(Auth::user()->name)}}</div>
                                 <div class="border-top-white text-right">{{Auth::user()->role->department->name}}</div>
