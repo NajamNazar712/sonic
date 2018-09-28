@@ -33,9 +33,10 @@ class ShipperFinanceController extends Controller
       $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
         ->join('cities as c', 'u.city_id', '=', 'c.id')
         ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
+        ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
         ->join('done_payment_shipments as pps', 'done_payments.id', '=', 'pps.done_payment_id')
         ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-        ->select('done_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ubi.bank_name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
+        ->select('done_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
         ->where('done_payments.user_id', session('user_id'))
         ->groupBy('done_payments.id');
 
@@ -71,16 +72,16 @@ class ShipperFinanceController extends Controller
             }
         })
         ->editColumn('total_amount', function($done_payment) {
-            return floatval($done_payment->total_amount);
+            return number_format($done_payment->total_amount);
         })
         ->editColumn('total_charges', function($done_payment) {
-            return floatval($done_payment->total_charges);
+            return number_format($done_payment->total_charges);
         })
         ->editColumn('total_gst', function($done_payment) {
-            return floatval($done_payment->total_gst);
+            return number_format($done_payment->total_gst);
         })
         ->editColumn('total_payable', function($done_payment) {
-            return floatval($done_payment->total_payable);
+            return number_format($done_payment->total_payable);
         })
         ->addColumn('phone_numbers', function($done_payment) {
             $phone_numbers = $done_payment->phone;
