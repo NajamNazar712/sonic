@@ -62,11 +62,11 @@ class AdminCargoController extends Controller
         $shipments = $shipments->where(function ($query) {
           $query->where(function ($sub_query) {
             $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
-            ->whereIn('oc.hub_id', session('hubs'));
+            ->whereIn('dc.hub_id', session('hubs'));
           })
           ->orWhere(function ($sub_query) {
             $sub_query->where('shipments.shipper_status_id', 2)
-            ->whereIn('dc.hub_id', session('hubs'));
+            ->whereIn('oc.hub_id', session('hubs'));
           });
         });
       }
@@ -174,23 +174,22 @@ class AdminCargoController extends Controller
       if ($shipment->exists()) {
         $shipment = $shipment->first();
 
-        if (session('role_id') == 1 || (in_array($shipment->pickup_address->city->hub_id, session('hubs')) || in_array($shipment->consignee_city->hub_id, session('hubs')))) {
-          if ($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) {
-            if ($request->cargo_type != 0) {
-              if ($request->shipper_status_id != 2) {
-                $hub_id = $shipment->consignee_city->hub_id;
-              }
-              else {
-                $hub_id = $shipment->pickup_address->city->hub_id;
-              }
-            }
-            else {
-              $hub_id = 0;
-            }
+        if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37])) {
+          if ($shipment->shipper_status_id != 2) {
+            $hub_id = $shipment->consignee_city->hub_id;
+          }
+          else {
+            $hub_id = $shipment->pickup_address->city->hub_id;
+          }
 
-            if ($request->hub_id == 0 || $request->hub_id == $hub_id) {
-              if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {
-                if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37])) {
+          if (session('role_id') == 1 || (in_array($hub_id, session('hubs')))) {
+            if ($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) {
+              if ($request->cargo_type == 0) {
+                $hub_id = 0;
+              }
+
+              if ($request->hub_id == 0 || $request->hub_id == $hub_id) {
+                if ($request->shipping_mode_id == 0 || $request->shipping_mode_id == $shipment->shipping_mode->id) {
                   $details = array();
 
                   if ($request->cargo_type != 0) {
@@ -260,7 +259,7 @@ class AdminCargoController extends Controller
                       })
                       ->select(DB::raw('count(shipments.id) as count'))
                       ->where('dc.hub_id', $hub->id)
-                      ->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+                      ->where('shipments.shipper_status_id', 2)
                       ->where('shipments.shipping_mode_id', $shipping_mode_id);
                     }
                     else {
@@ -272,8 +271,12 @@ class AdminCargoController extends Controller
                       })
                       ->select(DB::raw('count(shipments.id) as count'))
                       ->where('dc.hub_id', $hub->id)
-                      ->where('shipments.shipper_status_id', 2)
+                      ->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
                       ->where('shipments.shipping_mode_id', $shipping_mode_id);
+                    }
+
+                    if (session('role_id') != 1) {
+                      $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
                     }
 
                     $shipments = $shipments->first();
@@ -284,23 +287,23 @@ class AdminCargoController extends Controller
                   return ['status' => 0, 'success' => 'Shipment has been added', 'details' => $details];
                 }
                 else {
-                  return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+                  return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
                 }
               }
               else {
-                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment\'s Shipment Mode is different'];
+                return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
               }
             }
             else {
-              return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to another Hub'];
+              return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
             }
           }
           else {
-            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment belongs to same Origin and Destination Hub'];
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to any of your assigned Hub\'s Cities'];
           }
         }
         else {
-          return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment does not belong to any of your assigned Hub\'s Cities'];
+          return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
         }
       }
       else {
