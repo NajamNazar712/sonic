@@ -192,7 +192,7 @@
                     {data: 'amount', name: 'packaging_material_requests.amount', class: 'align-middle amount'},
                     {data: 'address', name: 'packaging_material_requests.address', class: 'align-middle address'},
                     {data: 'mode', name: 'ppm.id', class: 'align-middle mode'},
-                    {data: 'tracking_number', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'tracking_number_link', name: 'packaging_material_requests.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'status', name: 'packaging_material_requests.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 
