@@ -3448,19 +3448,19 @@ class AdminDashboardController extends Controller
         ->editColumn('status', function ($cities) {
             return ($cities->status == 1)? 'Active': 'Inactive';
         })
-        ->filterColumn('status', function($query, $keyword) {
-            $keyword = strtolower($keyword);
-
-            if (strpos('active', $keyword) !== FALSE) {
-                $query->where('cities.status', '=', 1);
-            }
-            else if (strpos('inactive', $keyword) !== FALSE) {
-                $query->where('cities.status', '=', 0);
-            }
-            else {
-                $query->whereRaw('false');
-            }
-        })
+//        ->filterColumn('status', function($query, $keyword) {
+//            $keyword = strtolower($keyword);
+//
+//            if (strpos('active', $keyword) !== FALSE) {
+//                $query->where('cities.status', '=', 1);
+//            }
+//            else if (strpos('inactive', $keyword) !== FALSE) {
+//                $query->where('cities.status', '=', 0);
+//            }
+//            else {
+//                $query->whereRaw('false');
+//            }
+//        })
         ->addColumn("action", function ($result) {
             if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
                 $dropdown = '

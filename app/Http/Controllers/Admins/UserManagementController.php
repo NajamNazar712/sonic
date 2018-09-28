@@ -238,7 +238,8 @@ class UserManagementController extends Controller
     }
 
     public function role_index() {
-      return view('admin.user_management.role.index');
+        $departments = AdminDepartment::all();
+        return view('admin.user_management.role.index')->with(['departments'=>$departments]);
     }
 
     public function role_list(Request $request) {
