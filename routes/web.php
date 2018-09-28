@@ -596,7 +596,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     //Reset Password
     Route::post('password/email','Auth\AdminForgotPasswordController@sendResetLinkEmail')->name('password.email');
     Route::get('password/reset','Auth\AdminForgotPasswordController@showLinkRequestForm')->name('password.request');
-    Route::post('password/reset','Auth\AdminResetPasswordController@reset');
+    Route::post('password/reset','Auth\AdminResetPasswordController@reset')->name('password.reset');
     Route::get('password/reset/{token}','Auth\AdminResetPasswordController@showResetForm')->name('password.reset');
 
     Route::prefix('settings')->name('settings.')->group(function () {
