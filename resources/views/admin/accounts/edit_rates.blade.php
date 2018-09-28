@@ -1083,7 +1083,7 @@
                                         </div>
 
                                         <div class="row return-charges-div-overland">
-                                            <input type="hidden" name="on_return_record" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->id != '')? $returnCharges[2][0]->id : ''}}">
+                                            <input type="hidden" name="ol_return_record" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->id != '')? $returnCharges[2][0]->id : ''}}">
                                             
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
@@ -1123,7 +1123,7 @@
                                         </div>
 
                                         <div class="row fuel-surcharge-div-overland">
-                                            <input type="hidden" name="on_fuel_record" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->id != '')? $fuelCharges[2][0]->id : ''}}">
+                                            <input type="hidden" name="ol_fuel_record" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->id != '')? $fuelCharges[2][0]->id : ''}}">
                                             
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Charges</label>
