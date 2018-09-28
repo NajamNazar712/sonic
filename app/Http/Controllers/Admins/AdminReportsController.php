@@ -859,22 +859,14 @@ class AdminReportsController extends Controller
                 $shippers = User::where('id', $shipper_filter)->whereHas('city', function ($query) use ($c) {
                     $query->where('hub_id', '=', $c->id);
                 });
-////                if($shippers->exists()){
-//                    $shippers = $shippers->get();
-////                }
             } else {
                 $shippers = User::whereHas('city', function ($query) use ($c) {
                     $query->where('hub_id', '=', $c->id);
                 });
-//                if($shippers->exists()){
-//                    $shippers = $shippers->get();
-//                }
             }
 
             if ($shippers->exists()) {
-                $shippers = $shippers->get();
-
-                foreach ($shippers as $key => $s) {
+                foreach ($shippers->get() as $key => $s) {
                     $details['shipper'][$c->id][$s->id] = $s->name;
                     foreach ($months_array as $month) {
                         $thisMonth = Carbon::parse($month)->month;
@@ -946,8 +938,7 @@ class AdminReportsController extends Controller
             $sheet->setCellValue('A'.$col,$h);
             $sheet->getStyle('A'.$col)->applyFromArray($cell_st);
 
-            if(count($shippers) > 0){
-
+            if (isset($details['shipper']) && !empty($details['shipper'])) {
                 foreach ($details['shipper'] as $hkey => $client){
                     foreach ($client as $ship_key => $cli){
                         if($hkey == $key){
