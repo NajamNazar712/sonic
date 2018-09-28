@@ -185,7 +185,7 @@ class AdminCargoController extends Controller
           if (session('role_id') == 1 || (in_array($hub_id, session('hubs')))) {
             if ($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) {
               if ($request->cargo_type != 0) {
-                if ($shipment->shipper_status_id != 2) {
+                if ($shipment->shipper_status_id == 2) {
                   $hub_id = $shipment->consignee_city->hub_id;
                 }
                 else {
