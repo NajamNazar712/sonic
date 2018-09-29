@@ -255,7 +255,7 @@
                                         @if (old('pickup_address'))
                                             @php ($i = 1)
                                         @else
-                                            @php ($i = 1)
+                                            @php ($i = 0)
                                         @endif
                                         @while (old('pickup_address.'.$i) != null)
 
@@ -369,7 +369,7 @@
                                                     </div>
                                                     <div class="form-group">
                                                         <label for="bank_branch">
-                                                            Bank Branch:
+                                                            Branch Name:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <input type="text" class="form-control required" value="{{ old('bank_branch') }}" name="bank_branch" placeholder="Branch Name*">
@@ -527,11 +527,11 @@
 
 
        $('#shipper_city').prepend('<option value="" selected="selected"></option>').select2({
-           placeholder:'Select a city',
+           placeholder:'Select City',
            dropdownParent:$('#registership')
        });
        $('#bank_name').prepend('<option value="" selected="selected"></option>').select2({
-           placeholder:'Select a bank',
+           placeholder:'Select Bank',
            dropdownParent:$('#registership')
        });
        $('#mode_of_payment').prepend('<option value="" selected="selected"></option>').select2({
@@ -539,7 +539,7 @@
            dropdownParent:$('#registership')
        });
        $('#bank_city').prepend('<option value="" selected="selected"></option>').select2({
-           placeholder:'Select bank city',
+           placeholder:'Select Bank City',
            dropdownParent:$('#registership')
        });
        $('#cycle_of_payment').prepend('<option value="" selected="selected"></option>').select2({
@@ -548,15 +548,15 @@
        });
 
        $('select[name="shipping_city[]"]').prepend('<option value="" selected="selected"></option>').select2({
-           placeholder:'Select pickup city',
+           placeholder:'Select Pickup City',
            dropdownParent:$('#registership')
        });
         $('select[name="product_type[]"]').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select product type',
+            placeholder:'Select Product Type',
             dropdownParent:$('#registership')
         });
         $('select[name="shipper_product_type"]').prepend('<option value="" selected="selected"></option>').select2({
-            placeholder:'Select product type',
+            placeholder:'Select Product Type',
             dropdownParent:$('#registership')
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});

@@ -724,7 +724,7 @@ class AdminDashboardController extends Controller
 
     }
     public function editRates(Request $request, $id){
-//        return $request;
+
 
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',

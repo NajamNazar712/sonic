@@ -205,7 +205,7 @@ class APIController extends Controller
         'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
         'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
         'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
-        'amount' => ['required', 'integer', 'digits_between:1,20', 'between:1,1000000'],
+        'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
         'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:payment_modes,id'],
 
         'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],

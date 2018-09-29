@@ -19,6 +19,7 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Response;
 use PHPExcel_Cell;
@@ -590,7 +591,6 @@ class AdminReportsController extends Controller
         return view('admin.reports.daily_pickup_sales_report')->with(['cities'=>$cities]);
     }
     public function daily_pickup_sales_export_to_excel(Request $request){
-
         $date = $request->date;
         $date = Carbon::parse($date)->toDateString();
         $search_city = $request->city;
@@ -620,8 +620,6 @@ class AdminReportsController extends Controller
             }
         }
 
-//         return $hubs;
-//         $all_details = array();
         $details = array();
         $details_shipper = array();
 
@@ -775,11 +773,13 @@ class AdminReportsController extends Controller
         header('Cache-Control: max-age=0');
 
 //         $writer->save('php://output');
-        $writer->save('reports/daily_pickup_sales_report.xlsx');
+        $file_name = "reports/daily_pickup_sales_report".Auth::id()."xlsx";
+        $writer->save("$file_name");
         return response()->json(['success'=>1,'file'=>'daily_pickup_sales_report.xlsx']);
     }
     public function daily_pickup_sales_download(Request $request){
-        $file = public_path()."/reports/daily_pickup_sales_report.xlsx";
+        $file_name = "/reports/daily_pickup_sales_report".Auth::id()."xlsx";
+        $file = public_path().$file_name;
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
         return Response::download($file, 'daily_pickup_sales_report.xlsx',$headers);
     }
@@ -801,7 +801,7 @@ class AdminReportsController extends Controller
         $time2  = strtotime($date2);
         $my     = date('mY', $time2);
 
-        $months = array(date('F', $time1));
+//        $months = array(date('F', $time1));
         $f      = '';
 
         while($time1 < $time2) {
@@ -829,20 +829,20 @@ class AdminReportsController extends Controller
             if($hub != null){
                 $city = City::where('id',$hub)->select('id','name')->get();
             }else{
-                $city = City::where('hub',1)->get();
+                $city = City::where('hub',1)->select('id','name')->get();
             }
         }else{
             if($hub != null){
                 $city = City::where('id',$hub)->select('id','name')->get();
             }else{
-                $city = City::whereIn('id',session('hubs'))->get();
+                $city = City::whereIn('id',session('hubs'))->select('id','name')->get();
             }
         }
 
 
         $details = array();
         $shippers = array();
-        unset($months_array[0]);
+//        unset($months_array[0]);
 
         $details['header'] = ['Origin', 'Client Name' ];
         $details['subheader'] = ['Parcels', 'Weight','Collection Amount','Revenue' ];
@@ -850,30 +850,23 @@ class AdminReportsController extends Controller
         foreach ($months_array as $month){
             $details['months'][] = $month;
         }
+        $hubs = array();
+        $users = array();
         foreach ($city as $c) {
-            $hubs = array();
-            $users = array();
+//            $hubid = $c->id;
             $details['hubs'][$c->id] = $c->name;
-            if ($shipper_filter != null) {
+            if ($shipper_filter != '') {
                 $shippers = User::where('id', $shipper_filter)->whereHas('city', function ($query) use ($c) {
                     $query->where('hub_id', '=', $c->id);
                 });
-                if($shippers->exists()){
-                    $shippers = $shippers->get();
-                }
             } else {
                 $shippers = User::whereHas('city', function ($query) use ($c) {
                     $query->where('hub_id', '=', $c->id);
                 });
-                if($shippers->exists()){
-                    $shippers = $shippers->get();
-                }else{
-                    $shippers = null;
-                }
             }
-//            var_dump($shippers);exit();
-            if (count($shippers) > 0) {
-                foreach ($shippers as $key => $s) {
+
+            if ($shippers->exists()) {
+                foreach ($shippers->get() as $key => $s) {
                     $details['shipper'][$c->id][$s->id] = $s->name;
                     foreach ($months_array as $month) {
                         $thisMonth = Carbon::parse($month)->month;
@@ -903,7 +896,9 @@ class AdminReportsController extends Controller
                     }
                 }
             }
+
         }
+
 
         //echo "<pre>";print_r($details);echo "</pre>";die();
         $spreadsheet = new Spreadsheet();
@@ -943,8 +938,7 @@ class AdminReportsController extends Controller
             $sheet->setCellValue('A'.$col,$h);
             $sheet->getStyle('A'.$col)->applyFromArray($cell_st);
 
-            if(count($shippers) > 0){
-
+            if (isset($details['shipper']) && !empty($details['shipper'])) {
                 foreach ($details['shipper'] as $hkey => $client){
                     foreach ($client as $ship_key => $cli){
                         if($hkey == $key){
@@ -983,12 +977,14 @@ class AdminReportsController extends Controller
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="customer_sales_report.xlsx"');
         header('Cache-Control: max-age=0');
-
-        $writer->save('reports/customer_sales_report.xlsx');
+        $file_name = "reports/customer_sales_report".Auth::id()."xlsx";
+        $writer->save("$file_name");
         return response()->json(['success'=>1,'file'=>'customer_sales_report.xlsx']);
     }
     public function customer_sales_download(Request $request){
-        $file = public_path()."/reports/customer_sales_report.xlsx";
+        $file_name = "/reports/customer_sales_report".Auth::id()."xlsx";
+
+        $file = public_path().$file_name;
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
         return Response::download($file, 'customer_sales_report.xlsx',$headers);
     }
@@ -1082,7 +1078,7 @@ class AdminReportsController extends Controller
         $to_date = $request->to_date;
         $months_array = array();
         $months_array = $this->get_months($from_date,$to_date);
-        unset($months_array[0]);
+//        unset($months_array[0]);
 
 
         $details = array();
@@ -1111,14 +1107,7 @@ class AdminReportsController extends Controller
             $shippers['header'][] = $month;
 
         }
-//        $shippers['header'][] = 'Grand Total';
-//        if (session('role_id') != 1) {
-//            $shippers['shipper'] = User::whereHas('city.hub', function($query) use ($hub) {
-//                $query->whereIn('hub_id', '=', session('hubs'));
-//            })->where('status','>=',3)->get();
-//        }else{
-//
-//        }
+
         if($hub != null){
             if (session('role_id') == 1 || in_array($hub, session('hubs'))) {
                 $shippers['shipper'] = User::whereHas('city', function($query) use ($hub) {
@@ -1237,13 +1226,14 @@ class AdminReportsController extends Controller
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="customer_retention_report.xlsx"');
         header('Cache-Control: max-age=0');
-
-        $writer->save('reports/customer_retention_report.xlsx');
+        $file_name = "reports/customer_retention_report".Auth::id()."xlsx";
+        $writer->save("$file_name");
         return response()->json(['success'=>1,'file'=>'customer_retention_report.xlsx']);
 
     }
     public function customer_retention_download(Request $request){
-        $file = public_path()."/reports/customer_retention_report.xlsx";
+        $file_name = "/reports/customer_retention_report".Auth::id()."xlsx";
+        $file = public_path().$file_name;
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
         return Response::download($file, 'customer_retention_report.xlsx',$headers);
     }
