@@ -1408,23 +1408,28 @@ class AdminPickupsController extends Controller
         $done_button = '<button type="button" class="dropdown-item done"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Done</div></button>';
         $not_done_button = '<button type="button" class="dropdown-item not_done"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Not Done</div></button>';
 
-        if ($pickup_request->received > 0) {
-          return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      ' . $cancel_button . $done_button . '
+        if ($pickup_request->status == 0) {
+          if ($pickup_request->received > 0) {
+            return '<div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                        ' . $cancel_button . $done_button . '
+                      </div>
                     </div>
-                  </div>
-          ';
+            ';
+          }
+          else {
+            return '<div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                        ' . $cancel_button . $not_done_button . '
+                      </div>
+                    </div>
+            ';
+          }
         }
         else {
-          return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      ' . $cancel_button . $not_done_button . '
-                    </div>
-                  </div>
-          ';
+          return '';
         }
       })
       ->filterColumn('pickup_type',function ($query,$keyword){
