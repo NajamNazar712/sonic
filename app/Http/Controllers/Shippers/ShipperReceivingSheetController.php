@@ -35,7 +35,11 @@ class ShipperReceivingSheetController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         if ($shipment->user_id != session('user_id')) {
-          return ['status' => 1, 'error' => 'One of the Shipment(s) doesn\'t belong to you'];
+          return ['status' => 1, 'error' => $shipment->tracking_number . ' doesn\'t belong to you'];
+        }
+
+        if (ReceivingSheetShipment::where('shipment_id', $shipment_id)->exists()) {
+          return ['status' => 1, 'error' => $shipment->tracking_number . ' is already in a Receiving Sheet'];
         }
 
         if ($pickup_address_id == 0) {
@@ -60,14 +64,12 @@ class ShipperReceivingSheetController extends Controller
       $receiving_sheet_id = $receiving_sheet->id;
 
       foreach ($shipment_ids as $shipment_id) {
-        if (!ReceivingSheetShipment::where('shipment_id', $shipment_id)->exists()) {
-          $receiving_sheet_shipment = new ReceivingSheetShipment();
+        $receiving_sheet_shipment = new ReceivingSheetShipment();
 
-          $receiving_sheet_shipment->shipment_id = $shipment_id;
-          $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
+        $receiving_sheet_shipment->shipment_id = $shipment_id;
+        $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
 
-          $receiving_sheet_shipment->save();
-        }
+        $receiving_sheet_shipment->save();
       }
 
       return ['status' => 0, 'success' => 'Receiving Sheet has been created', 'receiving_sheet_id' => $receiving_sheet_id];
