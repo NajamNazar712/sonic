@@ -60,12 +60,14 @@ class ShipperReceivingSheetController extends Controller
       $receiving_sheet_id = $receiving_sheet->id;
 
       foreach ($shipment_ids as $shipment_id) {
-        $receiving_sheet_shipment = new ReceivingSheetShipment();
+        if (!ReceivingSheetShipment::where('shipment_id', $shipment_id)->exists()) {
+          $receiving_sheet_shipment = new ReceivingSheetShipment();
 
-        $receiving_sheet_shipment->shipment_id = $shipment_id;
-        $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
+          $receiving_sheet_shipment->shipment_id = $shipment_id;
+          $receiving_sheet_shipment->receiving_sheet_id = $receiving_sheet_id;
 
-        $receiving_sheet_shipment->save();
+          $receiving_sheet_shipment->save();
+        }
       }
 
       return ['status' => 0, 'success' => 'Receiving Sheet has been created', 'receiving_sheet_id' => $receiving_sheet_id];
