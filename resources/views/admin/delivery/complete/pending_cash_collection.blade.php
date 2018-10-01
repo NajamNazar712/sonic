@@ -98,10 +98,7 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-        a.btn.btn-secondary{
-            border-radius: 20px;
-            background: #64a0d2;
-        }
+
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -116,7 +113,6 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -175,8 +171,8 @@
             } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
-                @if (session('role_id') == 1 || in_array(106, session('permissions')))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                @if (session('role_id') == 1 || in_array(106, session('permissions')))
                 scrollX: true, scrollY: '350px',
                 buttons: [
                     {
@@ -260,9 +256,66 @@
                         extend: 'excel',
                         title: 'Pending Cash Collection',
                         text: '<i class="la la-file-excel-o"></i> Excel',
+                    }, {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.cash_collect_all').enable();
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                              var row = table.row(index);
+
+                              if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.deselect();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index !== -1) {
+                                    selected_rows.splice(index, 1);
+                                }
+
+                                if (selected_rows.length == 0) {
+                                    table.button('.cash_collect_all').disable();
+                                }
+                              }
+                            });
+                        }
                     }],
                 @else
-                dom: 'ltipr',
+                    buttons:[{
+                    extend: 'excel',
+                    title: 'Completed Deliveries',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
+                }],
                 @endif
                 fixedHeader: {
                     header: true,
@@ -307,7 +360,7 @@
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
+                    if ($.inArray(data.delivery_note_id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
                 },

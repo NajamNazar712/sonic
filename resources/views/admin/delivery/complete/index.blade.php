@@ -106,10 +106,7 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-        a.btn.btn-secondary{
-            border-radius: 20px;
-            background: #64a0d2;
-        }
+
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -235,7 +232,59 @@
                         title: 'Completed Deliveries',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
+                    }, {
+                    extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'select_all',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.select();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index === -1) {
+                                    selected_rows.push(id);
+                                }
+
+                                table.button('.delivered').enable();
+                            }
+                        });
+                    }
+                }, {
+                    extend: 'selectNone',
+                    text: 'Select None',
+                    className: 'select_none',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                          var row = table.row(index);
+
+                          if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                            row.deselect();
+
+                            id = parseInt(row.id());
+
+                            var index = $.inArray(id, selected_rows);
+
+                            if (index !== -1) {
+                                selected_rows.splice(index, 1);
+                            }
+
+                            if (selected_rows.length == 0) {
+                                table.button('.delivered').disable();
+                            }
+                          }
+                        });
+                    }
+                }],
                 @else
                     buttons:[{
                     extend: 'excel',
@@ -283,7 +332,7 @@
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
+                    if ($.inArray(data.delivery_note_id, selected_rows) !== -1) {
                         table.row(row).select();
                     }
                 },
