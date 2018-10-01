@@ -1374,7 +1374,7 @@ class AdminPickupsController extends Controller
       ->join('pickup_note_requests as pnr', 'pickup_requests.id', '=', 'pnr.pickup_request_id')
       ->join('pickup_notes as pn', 'pnr.pickup_note_id', '=', 'pn.id')
       ->join('admins as a', 'pn.assigned_by_user_id', '=', 'a.id')
-      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.over_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
+      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.over_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no', 'pickup_requests.status')
       ->where('pn.id', $request->pickup_receive_pickup_note_id);
 
       $datatables = Datatables::of($pickup_requests)
@@ -1408,7 +1408,7 @@ class AdminPickupsController extends Controller
         $done_button = '<button type="button" class="dropdown-item done"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Done</div></button>';
         $not_done_button = '<button type="button" class="dropdown-item not_done"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Not Done</div></button>';
 
-        // if ($pickup_request->status == 1) {
+        if ($pickup_request->status == 1) {
           if ($pickup_request->received > 0) {
             return '<div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -1427,10 +1427,10 @@ class AdminPickupsController extends Controller
                     </div>
             ';
           }
-        // }
-        // else {
-        //   return '';
-        // }
+        }
+        else {
+          return '';
+        }
       })
       ->filterColumn('pickup_type',function ($query,$keyword){
               if ($keyword != '') {
