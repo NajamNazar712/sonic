@@ -151,9 +151,22 @@ table.dataTable tbody tr.selected td.select-checkbox:after {
 .dataTables_scrollBody thead tr {
 	visibility: collapse;
 }
-.dt-buttons.btn-group > a{
+
+.dt-buttons.btn-group > a {
 	 border-radius: 20px;
- }
+}
+
+#toast-top-center.toast-container {
+	font-size: 1.5rem;
+	text-align: center;
+}
+
+#toast-top-center.toast-container .toast {
+	display: table;
+	width: auto !important;
+	opacity: 1;
+	text-align: left;
+}
 
 #toast-bottom-center.toast-container {
 	text-align: center;

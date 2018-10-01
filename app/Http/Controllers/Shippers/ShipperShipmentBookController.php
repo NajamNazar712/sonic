@@ -424,6 +424,7 @@ class ShipperShipmentBookController extends Controller
 
                       body {
                         background: none !important;
+                        color: #09262e !important;
                         font-size: 0.9rem !important;
                       }
 
@@ -438,10 +439,6 @@ class ShipperShipmentBookController extends Controller
                       table.table-bordered tbody tr td {
                         width: 12.5% !important;
                         border: 1px solid #09262e !important;
-                      }
-
-                      .color {
-                        color: #09262e !important;
                       }
 
                       .color.primary {
@@ -534,7 +531,7 @@ class ShipperShipmentBookController extends Controller
                           </tr>
                           <tr>
                             <td class="color primary border twice-left"><strong>Shipping Mode</strong></td>
-                            <td>' . $shipment->shipping_mode->mode . '</td>
+                            <td><strong>' . $shipment->shipping_mode->mode . '</strong></td>
           ';
 
           $table_start .= '
@@ -543,9 +540,9 @@ class ShipperShipmentBookController extends Controller
                           </tr>
                           <tr>
                             <td class="color primary border twice-bottom twice-left"><strong>Origin</strong></td>
-                            <td class="border twice-bottom">' . $shipment->pickup_address->city->name . '</td>
+                            <td class="border twice-bottom"><strong>' . $shipment->pickup_address->city->name . '</strong></td>
                             <td class="color primary border twice-bottom"><strong>Destination</strong></td>
-                            <td class="border twice-bottom">' . $shipment->consignee_city->name . '</td>
+                            <td class="border twice-bottom"><strong>' . $shipment->consignee_city->name . '</strong></td>
                           </tr>
                           <tr>
                             <td colspan="4" class="text-center color primary border twice-top twice-right"><strong>Shipper</strong></td>

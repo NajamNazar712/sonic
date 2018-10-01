@@ -226,7 +226,7 @@
 
                             }else{
                                 var error = "Something went wrong please refresh page and try again!";
-                                toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                             }
                         }
@@ -357,7 +357,7 @@
                         }
                     }else{
                         var error = "Selected hubs should be the same!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         return false;
                     }
 
@@ -391,7 +391,7 @@
                                 {{--.columns( 1 )--}}
                                 {{--.search( 0 )--}}
                                 {{--.draw();--}}
-                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
                         {{--}--}}
 
@@ -516,7 +516,7 @@
                     }
                 }else{
                     var error = "Delivery Note not found!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
                 $(this).val('');
 
