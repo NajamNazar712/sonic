@@ -123,7 +123,7 @@
 
 													<div class="col">
 														<div class="form-group">
-															<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-minlength="6" data-msg-minlength="Seal Number needs to be at-least 6 numbers" data-rule-remote="{{ route('admin.cargo.create.seal_number') }}" data-msg-remote="Seal Number must be unique">
+															<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-minlength="5" data-msg-minlength="Seal Number needs to be at-least 5 numbers" data-rule-remote="{{ route('admin.cargo.create.seal_number') }}" data-msg-remote="Seal Number must be unique">
 														</div>
 													</div>
 
