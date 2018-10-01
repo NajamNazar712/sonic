@@ -575,7 +575,7 @@ class ShipperShipmentBookController extends Controller
                             <td rowspan="3" colspan="2" class="color primary border twice-top twice-bottom twice-right"><strong>Special Instruction(s)</strong></td>
                             <td rowspan="3" colspan="4" class="border twice-top twice-bottom twice-right">' . $shipment->special_instructions . '</td>
                             <td class="color primary border twice-top twice-bottom twice-left"><strong>Estimated Weight</strong></td>
-                            <td class="border twice-top twice-bottom twice-left"><strong>' . number_format($shipment->estimated_weight) . ' kg</strong></td>
+                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
                           </tr>
                           <tr>
                             <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
