@@ -173,6 +173,7 @@
 														<td>{{ $pickup_address->pickup_address }}, {{ $pickup_address->city->name }}</td>
 													</tr>
 												@endforeach
+											@else
 													<tr role="row">
 														<td colspan="2" class="text-center">No Active Pickup Addresses</td>
 													</tr>
