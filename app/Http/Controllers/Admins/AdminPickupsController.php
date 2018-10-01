@@ -1404,7 +1404,7 @@ class AdminPickupsController extends Controller
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
       })
       ->addColumn('action', function($pickup_request) {
-        $cancel_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
+        $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
         $done_button = '<button type="button" class="dropdown-item done"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Done</div></button>';
         $not_done_button = '<button type="button" class="dropdown-item not_done"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Not Done</div></button>';
 
@@ -1413,7 +1413,7 @@ class AdminPickupsController extends Controller
             return '<div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">
-                        ' . $cancel_button . $done_button . '
+                        ' . $receive_button . $done_button . '
                       </div>
                     </div>
             ';
@@ -1422,7 +1422,7 @@ class AdminPickupsController extends Controller
             return '<div class="btn-group">
                       <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                       <div class="dropdown-menu dropdown-menu-sm">
-                        ' . $cancel_button . $not_done_button . '
+                        ' . $receive_button . $not_done_button . '
                       </div>
                     </div>
             ';
