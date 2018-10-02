@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\BanksList;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -26,7 +27,9 @@ class ShipperFinanceController extends Controller
     }
 
     public function payments_index() {
-      return view('client.finance.payments.index');
+        $banks = BanksList::all();
+        $company_banks = BanksList::where('affiliate', 1)->get();
+      return view('client.finance.payments.index')->with(['banks'=>$banks,'company_banks'=>$company_banks]);
     }
 
     public function payments_list() {
