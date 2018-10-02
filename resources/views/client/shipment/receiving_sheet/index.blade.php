@@ -261,11 +261,11 @@
 				processing: true,
 				serverSide: true,
 				ajax: '{{ route('cod.shipment.receiving_sheet.list') }}',
-				rowId: 'id',
+				rowId: 'receiving_sheet_no',
 				order: [[8, 'desc']],
 				columns: [
-					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
-					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+					{data: 'receiving_sheet_no', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
+					{data: 'serial_number', orderable: false, searchable: false, name: 'receiving_sheet_no', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
 					{data: 'order_id', name: 'order_id', class: 'align-middle order_id'},
 					{data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
@@ -284,7 +284,7 @@
 					if (!data.receiving_sheet) {
 						$('td:eq(0)', row).addClass('select-checkbox');
 
-						if ($.inArray(data.id, selected_rows) !== -1) {
+						if ($.inArray(data.receiving_sheet_no, selected_rows) !== -1) {
 							table.row(row).select();
 						}
 					}
