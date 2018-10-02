@@ -296,17 +296,45 @@ class AdminPackagingMaterialController extends Controller
                    $shipment_consignee_name = "Packaging Material to $shipper_details->name";
                 $pickup_address = $pickup_address->first();
                }
+
                $now = Carbon::today();
+
+               $details = '';
+
+               if ($request_details->small_flyers != 0) {
+                $details .= $request_details->small_flyers . ' Small Flyers, ';
+               }
+
+               if ($request_details->medium_flyers != 0) {
+                $details .= $request_details->medium_flyers . ' Medium Flyers, ';
+               }
+
+               if ($request_details->large_flyers != 0) {
+                $details .= $request_details->large_flyers . ' Large Flyers, ';
+               }
+
+               if ($request_details->small_flyers != 0) {
+                $details .= $request_details->small_flyers . ' Small Flyers, ';
+               }
+
+               if ($request_details->boxes != 0) {
+                $details .= $request_details->boxes . ' Boxes, ';
+               }
+
+               $details = substr($details, 0, -2);
+
                if($request_details->packaging_payment_mode_id == 1){
-                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,$request_details->amount,1,2,2);
+                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,$details,1,1,null,$request_details->amount,1,2,2);
                }else{
-                 $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
+                 $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,$details,1,1,null,0,1,2,2);
                }
                $new_tracking_number = $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
-                $this->add_item($shipment->id,24,null,1,null,0,0);
-                PackagingMaterialRequest::where('id',$request_id)->update([
-                   'tracking_number'=>$new_tracking_number
-                ]);
+
+               $this->add_item($shipment->id,24,$details,1,null,0,0);
+
+               PackagingMaterialRequest::where('id',$request_id)->update([
+                    'tracking_number'=>$new_tracking_number
+               ]);
                ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, $request_details->user_id, NULL);
 
                ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $request_details->amount);
