@@ -224,6 +224,9 @@
             $('input#scan_tracking').focus();
             $('#scan_tracking').on('change',function () {
                 var scan = $(this);
+
+                scan.attr('disabled', true);
+
                 var tracking = scan.val();
                 var hub_id = $('#hub_id').val();
 
@@ -243,8 +246,6 @@
                                 positionClass: 'toast-bottom-center',
                                 containerId: 'toast-bottom-center'
                             });
-                            scan.val('');
-                            $('input#scan_tracking').focus();
                         } else {
                             var rowNo = table.rows().count();
                             var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
@@ -252,10 +253,11 @@
                             table.draw(false);
                             shipment_ids.push(data.shId);
                             $('#hub_id').val(data.hub);
-
-                            scan.val('');
-                            $('input#scan_tracking').focus();
                         }
+
+                        scan.attr('disabled', false);
+                        scan.val('');
+                        scan.focus();
                     });
                 }else {
                     if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1) {
@@ -276,17 +278,17 @@
                                     positionClass: 'toast-bottom-center',
                                     containerId: 'toast-bottom-center'
                                 });
-                                scan.val('');
-                                $('input#scan_tracking').focus();
                             } else {
                                 var rowNo = table.rows().count();
                                 var remove = '<a href="#" class="deliverynoterow">Delete</a>';
                                 table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
-                                scan.val('');
-                                $('input#scan_tracking').focus();
                             }
+
+                            scan.attr('disabled', false);
+                            scan.val('');
+                            scan.focus();
                         });
                     } else {
                         var error = 'Tracking Number already scanned!';
@@ -294,8 +296,10 @@
                             positionClass: 'toast-bottom-center',
                             containerId: 'toast-bottom-center'
                         });
+
+                        scan.attr('disabled', false);
                         scan.val('');
-                        $('input#scan_tracking').focus();
+                        scan.focus();
                     }
                 }
             });
