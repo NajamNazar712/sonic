@@ -278,7 +278,7 @@
             });
 
 
-            function print(id) {
+            function printTemp(id) {
                 $.ajax({
                     url: '{!! route('admin.delivery.receive.print') !!}',
                     method: 'POST',
@@ -310,6 +310,78 @@
                 var deliverynote = $(this).parents('tr').attr('id');
                 print(deliverynote);
             });
+            $('body').on('click','.printTempDNCC',function () {
+                var note_id = $(this).parents('tr').attr('id');
+                var temporary = 'temporary';
+                printTemp(note_id,temporary);
+            });
+            $('body').on('click','.printUndeliveredDNCC',function () {
+                var note_id = $(this).parents('tr').attr('id');
+                printUndelivered(note_id);
+            });
+
+
+            function printTemp(id,temp = null) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        'temporary':temp,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            function printUndelivered(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.receive.undelivered.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                        location.reload();
+
+                    });
+            }
+
+
 
             {{--$('#scan_tracking').on('change',function () {--}}
                 {{--var scan = $(this);--}}

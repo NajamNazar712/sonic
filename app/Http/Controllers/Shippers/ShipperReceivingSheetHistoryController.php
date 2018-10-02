@@ -33,6 +33,7 @@ class ShipperReceivingSheetHistoryController extends Controller
       ->join('cities as c', 'usi.city_id', '=', 'c.id')
       ->select('receiving_sheet_received.pickup_address_id', DB::raw('count(receiving_sheet_received.pickup_address_id) as received'), 'usi.pickup_address', 'c.name as origin')
       ->whereNull('receiving_sheet_id')
+      ->where('usi.user_id', session('user_id'))
       ->groupBy('receiving_sheet_received.pickup_address_id');
 
       return Datatables::of($receiving_sheet_received)
@@ -56,6 +57,7 @@ class ShipperReceivingSheetHistoryController extends Controller
       $receiving_sheet = ReceivingSheet::join('user_shipping_infos as usi', 'receiving_sheets.pickup_address_id', '=', 'usi.id')
       ->join('cities as c', 'usi.city_id', '=', 'c.id')
       ->select('receiving_sheets.id', 'receiving_sheets.id as receiving_sheet_id', 'receiving_sheets.pickup_address_id', 'receiving_sheets.booked', 'receiving_sheets.booked as bookings', 'receiving_sheets.received', 'receiving_sheets.received as receiving', 'c.name as origin', 'receiving_sheets.created_at as booking_date')
+      ->where('usi.user_id', session('user_id'))
       ->where('receiving_sheets.received', '!=', 0);
 
       return Datatables::of($receiving_sheet)

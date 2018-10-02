@@ -450,7 +450,7 @@
 					{data:'total_gst', name: 'total_gst', class: 'align-middle text-center total_gst', orderable: false},
 					{data:'total_deductable', name: 'total_deductable', class: 'align-middle text-center total_deductable', orderable: false},
 					{data:'total_payable', name: 'total_payable', class: 'align-middle text-center total_payable', orderable: false},
-					{data:'bank', name: 'ub.id', class: 'align-middle text-center bank'},
+					{data:'bank', name: 'banks', class: 'align-middle text-center bank'},
 					{data:'bank_branch', name: 'ubi.bank_branch', class: 'align-middle text-center bank_branch'},
 					{data:'account_no', name: 'ubi.account_no', class: 'align-middle text-center account_no'},
 					{data:'account_title', name: 'ubi.account_title', class: 'align-middle text-center account_title'},

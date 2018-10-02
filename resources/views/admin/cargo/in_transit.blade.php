@@ -203,7 +203,7 @@
 
 														<div class="col">
 															<div class="form-group">
-																<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-minlength="6" data-msg-minlength="Seal Number needs to be at-least 6 numbers" data-rule-remote="{{ route('admin.cargo.create.seal_number', ['id' => 0]) }}" data-msg-remote="Seal Number must be unique">
+																<input type="text" name="seal_number" class="form-control rounded-right seal_number" placeholder="Seal Number*" data-rule-required="true" data-msg-required="Seal Number is required" data-rule-minlength="5" data-msg-minlength="Seal Number needs to be at-least 5 numbers" data-rule-remote="{{ route('admin.cargo.create.seal_number', ['id' => 0]) }}" data-msg-remote="Seal Number must be unique">
 															</div>
 														</div>
 
@@ -775,12 +775,12 @@
 									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
 								else {
-									toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 								}
 							});
 						}
 						else {
-							toastr.error('Cargo has been scanned already', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+							toastr.error('Cargo has been scanned already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 						}
 
 						return false;
@@ -812,7 +812,7 @@
 								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
 							else {
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 							}
 
 							table.draw();
@@ -941,7 +941,7 @@
 
 	                            var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
 
-	                            toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+	                            toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 	                        }
 
 	                        if(data.success != undefined){

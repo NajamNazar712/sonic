@@ -176,12 +176,12 @@
 
                         var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
 
-                        toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                     if (data.duplicate !== undefined) {
                         var message = 'Following Tracking Number(s) already exists: ' + data.duplicate.join(', ');
 
-                        toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                     if(data.success !== undefined){
 
@@ -189,7 +189,7 @@
 
                     }
                     if(data.status == 0){
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     }
                 });

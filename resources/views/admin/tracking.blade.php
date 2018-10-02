@@ -122,7 +122,7 @@
 					if (data.invalid !== undefined) {
 						var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
 
-						toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
 
 

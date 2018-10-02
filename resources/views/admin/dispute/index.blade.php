@@ -557,7 +557,7 @@
 
                         var message = 'Invalid Tracking Number(s): ' + data.invalid.join(', ');
 
-                        toastr.error(message, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        toastr.error(message, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
 
                     if(data.success != undefined){
@@ -595,7 +595,7 @@
                         $('.modal-body.dispute_shipments').html(shipment);
                         // var shipment = "<p></p>";
                     }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     }
                 })
@@ -640,7 +640,7 @@
                                 toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                 table.draw('false');
                             }else{
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                             }
                         });
@@ -675,7 +675,7 @@
                         $('#DisputeUpdateModal').modal('show');
 
                     }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     }
                 });

@@ -348,7 +348,7 @@
 
                 if(!imagefile){
                     error = "Please select a deposit slip first!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }else{
                     $.ajax({
                         type:'post',
@@ -369,7 +369,7 @@
                         }else{
                             $('#deposit_slip').val('');
                             $('#uploadDepositSlip').modal('hide');
-                            toastr.error(data.error.deposit_slip[0], 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.error(data.error.deposit_slip[0], 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                         }
                     });

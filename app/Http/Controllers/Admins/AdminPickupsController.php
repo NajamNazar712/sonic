@@ -632,6 +632,7 @@ class AdminPickupsController extends Controller
 
                       body {
                         background: none !important;
+                        color: #09262e !important;
                         font-size: 0.9rem !important;
                       }
 
@@ -645,10 +646,6 @@ class AdminPickupsController extends Controller
 
                       table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
-                      }
-
-                      .color {
-                        color: #09262e !important;
                       }
 
                       .color.primary {
@@ -1070,25 +1067,29 @@ class AdminPickupsController extends Controller
 
           $receiving_sheet->save();
 
-          $receiving_sheet_received = new ReceivingSheetReceived();
+          if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+            $receiving_sheet_received = new ReceivingSheetReceived();
 
-          $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
-          $receiving_sheet_received->user_id = $shipment->user_id;
-          $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
-          $receiving_sheet_received->shipment_id = $shipment_id;
+            $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+            $receiving_sheet_received->user_id = $shipment->user_id;
+            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+            $receiving_sheet_received->shipment_id = $shipment_id;
 
-          $receiving_sheet_received->save();
+            $receiving_sheet_received->save();
+          }
 
           $reference_2_id = $receiving_sheet_id;
         }
         else {
-          $receiving_sheet_received = new ReceivingSheetReceived();
+          if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+            $receiving_sheet_received = new ReceivingSheetReceived();
 
-          $receiving_sheet_received->user_id = $shipment->user_id;
-          $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
-          $receiving_sheet_received->shipment_id = $shipment_id;
+            $receiving_sheet_received->user_id = $shipment->user_id;
+            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+            $receiving_sheet_received->shipment_id = $shipment_id;
 
-          $receiving_sheet_received->save();
+            $receiving_sheet_received->save();
+          }
 
           $reference_2_id = NULL;
         }
@@ -1377,7 +1378,7 @@ class AdminPickupsController extends Controller
       ->join('pickup_note_requests as pnr', 'pickup_requests.id', '=', 'pnr.pickup_request_id')
       ->join('pickup_notes as pn', 'pnr.pickup_note_id', '=', 'pn.id')
       ->join('admins as a', 'pn.assigned_by_user_id', '=', 'a.id')
-      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.over_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no')
+      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.over_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no', 'pickup_requests.status')
       ->where('pn.id', $request->pickup_receive_pickup_note_id);
 
       $datatables = Datatables::of($pickup_requests)
@@ -1407,27 +1408,32 @@ class AdminPickupsController extends Controller
         return ($pickup_request->pickup_type == 0) ? 'Light' : 'Heavy';
       })
       ->addColumn('action', function($pickup_request) {
-        $cancel_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
+        $receive_button = '<button type="button" class="dropdown-item receive"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Receive</div></button>';
         $done_button = '<button type="button" class="dropdown-item done"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Done</div></button>';
         $not_done_button = '<button type="button" class="dropdown-item not_done"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Not Done</div></button>';
 
-        if ($pickup_request->received > 0) {
-          return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      ' . $cancel_button . $done_button . '
+        if ($pickup_request->status == 1) {
+          if ($pickup_request->received > 0) {
+            return '<div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                        ' . $receive_button . $done_button . '
+                      </div>
                     </div>
-                  </div>
-          ';
+            ';
+          }
+          else {
+            return '<div class="btn-group">
+                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                      <div class="dropdown-menu dropdown-menu-sm">
+                        ' . $receive_button . $not_done_button . '
+                      </div>
+                    </div>
+            ';
+          }
         }
         else {
-          return '<div class="btn-group">
-                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                    <div class="dropdown-menu dropdown-menu-sm">
-                      ' . $cancel_button . $not_done_button . '
-                    </div>
-                  </div>
-          ';
+          return '';
         }
       })
       ->filterColumn('pickup_type',function ($query,$keyword){

@@ -868,6 +868,7 @@ class ReturnController extends Controller
 
                       body {
                         background: none !important;
+                        color: #09262e !important;
                         font-size: 0.9rem !important;
                       }
 
@@ -881,10 +882,6 @@ class ReturnController extends Controller
 
                       table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
-                      }
-
-                      .color {
-                        color: #09262e !important;
                       }
 
                       .color.primary {
