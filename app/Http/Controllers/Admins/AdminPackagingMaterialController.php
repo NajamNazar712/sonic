@@ -303,10 +303,36 @@ class AdminPackagingMaterialController extends Controller
                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,0,1,2,2);
                }
                $new_tracking_number = $this->generate_tracking_number($shipment->id, $pickup_address->city_id, $request_details->city_id);
-                $this->add_item($shipment->id,24,null,1,null,0,0);
-                PackagingMaterialRequest::where('id',$request_id)->update([
-                   'tracking_number'=>$new_tracking_number
-                ]);
+
+               $item_description = '';
+
+               if ($request_details->small_flyers != 0) {
+                $item_description .= $request_details->small_flyers . ' Small Flyers, ';
+               }
+
+               if ($request_details->medium_flyers != 0) {
+                $item_description .= $request_details->medium_flyers . ' Medium Flyers, ';
+               }
+
+               if ($request_details->large_flyers != 0) {
+                $item_description .= $request_details->large_flyers . ' Large Flyers, ';
+               }
+
+               if ($request_details->small_flyers != 0) {
+                $item_description .= $request_details->small_flyers . ' Small Flyers, ';
+               }
+
+               if ($request_details->boxes != 0) {
+                $item_description .= $request_details->boxes . ' Boxes, ';
+               }
+
+               $item_description = substr($item_description, 0, -2);
+
+               $this->add_item($shipment->id,24,$item_description,1,null,0,0);
+
+               PackagingMaterialRequest::where('id',$request_id)->update([
+                    'tracking_number'=>$new_tracking_number
+               ]);
                ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, $request_details->user_id, NULL);
 
                ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $request_details->amount);
