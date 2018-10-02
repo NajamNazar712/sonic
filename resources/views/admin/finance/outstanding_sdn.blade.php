@@ -156,7 +156,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.delivery_note_number);
+                                row.push(values.sdn_number_padded);
                                 row.push(values.hub);
                                 row.push(values.dncc_count);
                                 row.push(values.sdn_delivered_shipments);

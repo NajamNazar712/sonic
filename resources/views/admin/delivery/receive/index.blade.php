@@ -157,7 +157,7 @@
 
 
                                 row.push(index + 1);
-                                row.push(values.delivery_note_id);
+                                row.push(values.delivery_note_id_padded);
                                 row.push(values.hub);
                                 row.push(values.rider);
                                 row.push(values.route);

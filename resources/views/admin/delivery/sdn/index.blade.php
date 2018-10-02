@@ -191,7 +191,7 @@
 
 
                                 row.push(index + 1);
-                                row.push(values.sdn_id);
+                                row.push(values.sdn_id_padded);
                                 row.push(values.hub);
                                 row.push(values.dncc_count);
                                 row.push(values.sdn_delivered_shipments);

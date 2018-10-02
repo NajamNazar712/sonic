@@ -3239,7 +3239,7 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)
-            ->editColumn('id', function ($user) {
+            ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {
@@ -3322,7 +3322,7 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)
-            ->editColumn('id', function ($user) {
+            ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {
@@ -3398,7 +3398,7 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)
-            ->editColumn('id', function ($user) {
+            ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {

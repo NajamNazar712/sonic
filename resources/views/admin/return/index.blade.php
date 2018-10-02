@@ -302,22 +302,35 @@
                                 table.rows().nodes().each(function(index) {
                                     var row = table.row(index);
 
-                                    if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                        row.select();
-
+                                    if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                         id = parseInt(row.id());
 
-                                        var index = $.inArray(id, selected_rows);
+                                        hub_id = $(row.node()).data('hub');
 
-                                        if (index === -1) {
-                                            selected_rows.push(id);
+                                        var allow = false;
+
+                                        if(hub_ids.length == 0) {
+                                            hub_ids.push(hub_id);
+
+                                            allow = true;
+                                        }
+                                        else if(hub_ids[0] == hub_id) {
+                                            allow = true;
                                         }
 
-                                        table.button('.confirm').enable();
-                                        table.button('.re-attempt').enable();
-                                    }
+                                        if (allow) {
+                                            row.select();
 
-                                    //CALCULATION
+                                            var index = $.inArray(id, selected_rows);
+
+                                            if (index === -1) {
+                                                selected_rows.push(id);
+                                            }
+
+                                            table.button('.confirm').enable();
+                                            table.button('.re-attempt').enable();
+                                        }
+                                    }
                                 });
                             }
                         }, {
@@ -330,7 +343,7 @@
                                 table.rows().nodes().each(function(index) {
                                   var row = table.row(index);
 
-                                  if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                  if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
                                     row.deselect();
 
                                     id = parseInt(row.id());
@@ -344,9 +357,9 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.confirm').disable();
                                         table.button('.re-attempt').disable();
-                                    }
 
-                                    //CALCULATION
+                                        hub_ids.splice(index, 1);
+                                    }
                                   }
                                 });
                             }

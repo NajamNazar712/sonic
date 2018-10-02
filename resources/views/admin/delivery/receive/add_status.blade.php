@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Receive Deliveries(Delivery Note: {{$delivery_note_id}})
+        Receive Deliveries(Delivery Note: {{str_pad($delivery_note_id, 6, '0', STR_PAD_LEFT)}})
     </h1>
 
     <div class="card">

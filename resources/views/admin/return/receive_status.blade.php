@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Return Receive Deliveries(Return Note: {{$return_note_id}})
+        Return Receive Deliveries(Return Note: {{str_pad($return_note_id, 6, '0', STR_PAD_LEFT)}})
     </h1>
 
     <div class="card">
@@ -248,10 +248,6 @@
                 @else
                     dom: 'ltipr',
                 @endif
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
                 select: {
                     info: false,
                     style: 'multi',

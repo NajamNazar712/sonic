@@ -524,7 +524,7 @@ class AdminCargoController extends Controller
       }
 
       $datatables = Datatables::of($cargo_consignments)
-      ->editColumn('id', function ($cargo_consignment) {
+      ->addColumn('id_padded', function ($cargo_consignment) {
           return str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
       })
       ->filterColumn('cargo_consignments.id', function ($query, $keyword) {
@@ -1007,7 +1007,7 @@ class AdminCargoController extends Controller
 
         if ($cargo_consignment) {
           if (in_array($cargo_consignment->status_id, [1, 2, 4])) {
-            return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT));
+            return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
           }
           else {
             return back()->withErrors('Given Cargo Number has already been modified!');

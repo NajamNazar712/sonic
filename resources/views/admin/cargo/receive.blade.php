@@ -28,7 +28,7 @@
 							</form>
 
 							<div id="information" class="information text-center">
-								Cargo No #{{ session('cargo_consignment_id') }} | Scanned: <span class="scanned">0</span>/<span class="total">{{ $total }}</span>
+								Cargo No #{{ str_pad(session('cargo_consignment_id'), 6, '0', STR_PAD_LEFT) }} | Scanned: <span class="scanned">0</span>/<span class="total">{{ $total }}</span>
 							</div>
 
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -81,7 +81,7 @@
 
 	<script>
 		$(document).ready(function() {
-			var cargo_consignment_id = {{ ltrim(session('cargo_consignment_id'), '0') }};
+			var cargo_consignment_id = {{ session('cargo_consignment_id') }};
 
 			var shipment_ids = [];
 

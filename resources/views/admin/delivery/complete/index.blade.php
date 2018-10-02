@@ -157,7 +157,7 @@
 
 
                                 row.push(index + 1);
-                                row.push(values.delivery_note_id);
+                                row.push(values.delivery_note_id_padded);
                                 row.push(values.hub);
                                 row.push(values.rider);
                                 row.push(values.route);
@@ -242,18 +242,33 @@
                         table.rows().nodes().each(function(index) {
                             var row = table.row(index);
 
-                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                row.select();
-
+                            if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                 id = parseInt(row.id());
 
-                                var index = $.inArray(id, selected_rows);
+                                hub_id = $(row.node()).data('hub');
 
-                                if (index === -1) {
-                                    selected_rows.push(id);
+                                var allow = false;
+
+                                if(hub_ids.length == 0) {
+                                    hub_ids.push(hub_id);
+
+                                    allow = true;
+                                }
+                                else if(hub_ids[0] == hub_id) {
+                                    allow = true;
                                 }
 
-                                table.button('.delivered').enable();
+                                if (allow) {
+                                    row.select();
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.delivered').enable();
+                                }
                             }
                         });
                     }
@@ -267,7 +282,7 @@
                         table.rows().nodes().each(function(index) {
                           var row = table.row(index);
 
-                          if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                          if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
                             row.deselect();
 
                             id = parseInt(row.id());
@@ -280,6 +295,8 @@
 
                             if (selected_rows.length == 0) {
                                 table.button('.delivered').disable();
+
+                                hub_ids.splice(index, 1);
                             }
                           }
                         });

@@ -56,7 +56,7 @@ class DisputeController extends Controller
         }
 
         return Datatables::of($dispute)
-            ->editColumn('dispute_id', function($dispute) {
+            ->addColumn('dispute_id_padded', function($dispute) {
                 return str_pad($dispute->dispute_id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('disputes.id', function ($query, $keyword) {

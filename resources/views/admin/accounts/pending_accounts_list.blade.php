@@ -148,7 +148,7 @@
 
 
                             row.push(index + 1);
-                            row.push(values.id);
+                            row.push(values.id_padded);
                             row.push(values.name);
                             row.push(values.city);
                             row.push(values.poc);
@@ -192,7 +192,7 @@
             ajax: '{{ route('admin.accounts.pending.ajax') }}',
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'id', name: 'users.id', class: 'align-middle account_id'},
+                {data: 'id_padded', name: 'users.id', class: 'align-middle account_id'},
                 {data: 'name', name: 'name', class: 'align-middle company_name'},
                 {data: 'city', name: 'cities.name', class: 'align-middle city'},
                 {data: 'poc', name: 'poc', class: 'align-middle contact_person'},

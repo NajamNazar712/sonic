@@ -550,7 +550,7 @@
 			});
 
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
-				dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				dom: '<"pull-right"B>tr',
 				buttons: [{
 					extend: 'selectAll',
                     text: 'Select All',
@@ -561,20 +561,14 @@
                         make_payments_table.rows().nodes().each(function(index) {
                             var row = make_payments_table.row(index);
 
-                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                            if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                 row.select();
 
-                                id = parseInt(row.id());
+                                var parent = $(row.node());
 
-                                var index = $.inArray(id, selected_rows);
-
-                                if (index === -1) {
-                                    selected_rows.push(id);
-                                }
+								calculation(parent);
                             }
                         });
-
-                        //CALCULATION
                     }
                 }, {
                     extend: 'selectNone',
@@ -586,23 +580,17 @@
                         make_payments_table.rows().nodes().each(function(index) {
                           var row = make_payments_table.row(index);
 
-                          if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                          if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
                             row.deselect();
 
-                            id = parseInt(row.id());
+                            var parent = $(row.node());
 
-                            var index = $.inArray(id, selected_rows);
-
-                            if (index !== -1) {
-                                selected_rows.splice(index, 1);
-                            }
+							calculation(parent);
                           }
                         });
-
-                        //CALCULATION
                     }
                 }],
-				scrollX: true, scrollY: '350px',
+				scrollX: true,
 				paging: false,
 				select: {
 					info: false,
@@ -849,9 +837,7 @@
 				}
 			});
 
-			$('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-				var parent = $(this).parent('tr');
-
+			function calculation(parent) {
 				var id = parseInt(parent.attr('id'));
 
 				var index = $.inArray(id, selected_rows_shipments);
@@ -909,6 +895,12 @@
 
 				$('#make_payments #make_payments_form .pending_payment_ids').val(selected_pending_payment_ids);
 				$('#make_payments #make_payments_form .shipment_ids').val(selected_rows_shipments);
+			}
+
+			$('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
+				var parent = $(this).parent('tr');
+
+				calculation(parent);
 			});
 
 			$('#make_payments #make_payments_form').bind('submit', function(e) {

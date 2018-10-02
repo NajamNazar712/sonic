@@ -349,7 +349,7 @@
 
 
                                 row.push(index + 1);
-                                row.push(values.dispute_id);
+                                row.push(values.dispute_id_padded);
                                 row.push(values.created_at);
                                 row.push(values.description);
                                 row.push(values.originated_at);
@@ -407,7 +407,7 @@
             order: [[2, 'desc']],
             columns: [
                 {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {data: 'dispute_id', name: 'disputes.id', class: 'align-middle dispute_id'},
+                {data: 'dispute_id_padded', name: 'disputes.id', class: 'align-middle dispute_id'},
                 {data: 'created_at', name: 'disputes.created_at', class: 'align-middle created_at'},
                 {data: 'description', name: 'disputes.description', class: 'align-middle description'},
                 {data: 'originated_at', name: 'cities.name', class: 'align-middle originated_at'},
