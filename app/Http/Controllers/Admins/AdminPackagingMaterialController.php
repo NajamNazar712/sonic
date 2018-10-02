@@ -324,7 +324,7 @@ class AdminPackagingMaterialController extends Controller
                $details = substr($details, 0, -2);
 
                if($request_details->packaging_payment_mode_id == 1){
-                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,null,1,1,null,$request_details->amount,1,2,2);
+                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,$details,1,1,null,$request_details->amount,1,2,2);
                }else{
                  $shipment = $this->book($request_details->user_id,1,$pickup_address->id,1,$request_details->city_id,$shipment_consignee_name,$request_details->address,$request_details->phone,null,null,null,0,$now,$details,1,1,null,0,1,2,2);
                }
