@@ -266,7 +266,58 @@
 			var selected_rows = [];
 
 			var reconcile_delivery_notes_table = $('#reconcile_delivery_notes #reconcile_delivery_notes_datatable').DataTable({
-				dom: 'tr',
+				dom: '<"d-inline-block"l><"pull-right"B>tipr',
+				buttons: [{
+					extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'select_all',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        reconcile_delivery_notes_table.rows().nodes().each(function(index) {
+                            var row = reconcile_delivery_notes_table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.select();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index === -1) {
+                                    selected_rows.push(id);
+                                }
+                            }
+                        });
+
+                        $('#reconcile_delivery_notes #reconcile_delivery_notes_form .delivery_note_ids').val(selected_rows);
+                    }
+                }, {
+                    extend: 'selectNone',
+                    text: 'Select None',
+                    className: 'select_none',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        reconcile_delivery_notes_table.rows().nodes().each(function(index) {
+                          var row = reconcile_delivery_notes_table.row(index);
+
+                          if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                            row.deselect();
+
+                            id = parseInt(row.id());
+
+                            var index = $.inArray(id, selected_rows);
+
+                            if (index !== -1) {
+                                selected_rows.splice(index, 1);
+                            }
+                          }
+                        });
+
+                        $('#reconcile_delivery_notes #reconcile_delivery_notes_form .delivery_note_ids').val(selected_rows);
+                    }
+                }],
 				scrollX: true, scrollY: '350px',
 				paging: false,
 				select: {

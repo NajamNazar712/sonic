@@ -278,6 +278,8 @@
                                     }
 
                                     table.button('.cash_collect_all').enable();
+
+                                    //CALCULATION
                                 }
                             });
                         }
@@ -305,6 +307,8 @@
                                 if (selected_rows.length == 0) {
                                     table.button('.cash_collect_all').disable();
                                 }
+
+                                //CALCULATION
                               }
                             });
                         }
