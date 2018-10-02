@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Admins;
 
+
+use App\Http\Models\NotificationType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\NotificationsController;
@@ -24,7 +26,8 @@ class AdminNotificationsController extends Controller
     }
 
     public function index() {
-      return view('admin.notifications.index');
+        $notifications = NotificationType::all();
+      return view('admin.notifications.index')->with(['notifications'=>$notifications]);
     }
 
     public function list(Request $request) {
@@ -71,19 +74,6 @@ class AdminNotificationsController extends Controller
             ';
 
             return $dropdown;
-        })
-        ->filterColumn('notifications.status', function($query, $keyword) {
-            $keyword = strtolower($keyword);
-
-            if (strpos('enabled', $keyword) !== FALSE) {
-                $query->where('notifications.status', '=', 1);
-            }
-            else if (strpos('disabled', $keyword) !== FALSE) {
-                $query->where('notifications.status', '=', 0);
-            }
-            else {
-                $query->whereRaw('false');
-            }
         });
 
         return $datatables->make(true);

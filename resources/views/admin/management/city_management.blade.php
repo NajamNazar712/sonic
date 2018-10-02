@@ -109,7 +109,7 @@
                 @if (session('role_id') == 1 || in_array(89, session('permissions')))
 
                     buttons: [{
-                       text: 'Add City',
+                       text: '<i class="la la-map-marker"></i> Add City',
                        className: 'btn btn-primary',
                        enabled: true,
                        action: function (e, dt, node, config) {
@@ -237,6 +237,7 @@
             var id = $(this).data('target-id');
             var rel = $(this).attr('rel');
             var isHub = $(this).attr('hub');
+
             if(isHub == 0){
                 $('#city_active_form #cid').val(id);
                 $('#city_active_form #cstatus').val(rel);
@@ -273,75 +274,107 @@
                 });
                 // $('#ConfirmModalCity').modal('show');
             }else if(isHub == 1){
-                $.ajax({
-                    url:'/admin/management/city/'+id+'/status/ajax',
-                    type:'GET',
-                    dataType:'json',
-                    success:function (data) {
-                        var name = [];
-                        if(data.length > 0){
-                            var comma = '';
-                            $.each(data, function (index, value) {
-                                if(data.length != index+1){ comma = ", ";}else{
-                                    comma = '';
-                                }
-                                name += value.name+comma;
-
-                            });
-                            swal({
-                                title: 'Please remove following cities from hub!',
-                                text: name,
-                                icon: 'info',
-                                buttons: {
-                                    cancel: {
-                                        text: 'Close',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    }
-                                },
-                                closeOnClickOutside: true,
-                                closeOnEsc: true
-                            });
-
-                        }else{
-                            $('#city_active_form #cid').val(id);
-                            $('#city_active_form #cstatus').val(rel);
-                            if(rel == 'cityInactive'){
-                                var atext = "Select Yes to Deactive this Hub!";
-                            }else{
-                                var atext = "Select Yes to active this Hub!";
+                if(rel == 'cityactive'){
+                    $('#city_active_form #cid').val(id);
+                    $('#city_active_form #cstatus').val(rel);
+                    swal({
+                        title: 'Are You Sure?',
+                        text: atext,
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
                             }
-                            swal({
-                                title: 'Are You Sure?',
-                                text: atext,
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
-                                },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function (confirm) {
-                                if (confirm) {
-                                    $('#city_active_form').submit();
-                                }
-                            });
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if (confirm) {
+                            $('#city_active_form').submit();
                         }
-                        
-                    }
-                });
+                    });
+                }else{
+                    $.ajax({
+                        url:'/admin/management/city/'+id+'/status/ajax',
+                        type:'GET',
+                        dataType:'json',
+                        success:function (data) {
+                            var name = [];
+                            if(data.length > 0){
+                                var comma = '';
+                                $.each(data, function (index, value) {
+                                    if(data.length != index+1){ comma = ", ";}else{
+                                        comma = '';
+                                    }
+                                    name += value.name+comma;
+
+                                });
+                                swal({
+                                    title: 'Please remove following cities from hub!',
+                                    text: name,
+                                    icon: 'info',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'Close',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        }
+                                    },
+                                    closeOnClickOutside: true,
+                                    closeOnEsc: true
+                                });
+
+                            }else{
+                                $('#city_active_form #cid').val(id);
+                                $('#city_active_form #cstatus').val(rel);
+                                if(rel == 'cityInactive'){
+                                    var atext = "Select Yes to Deactive this Hub!";
+                                }else{
+                                    var atext = "Select Yes to active this Hub!";
+                                }
+                                swal({
+                                    title: 'Are You Sure?',
+                                    text: atext,
+                                    icon: 'warning',
+                                    buttons: {
+                                        cancel: {
+                                            text: 'No',
+                                            value: null,
+                                            visible: true,
+                                            closeModal: true,
+                                        },
+                                        confirm: {
+                                            text: 'Yes',
+                                            value: true,
+                                            visible: true,
+                                            closeModal: true
+                                        }
+                                    },
+                                    closeOnClickOutside: false,
+                                    closeOnEsc: false,
+                                    dangerMode: true
+                                }).then(function (confirm) {
+                                    if (confirm) {
+                                        $('#city_active_form').submit();
+                                    }
+                                });
+                            }
+
+                        }
+                    });
+                }
+
             }
 
         });

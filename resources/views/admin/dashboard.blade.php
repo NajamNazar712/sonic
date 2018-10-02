@@ -379,8 +379,7 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '</select>';
-                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
-                        '</select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
                     var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
 

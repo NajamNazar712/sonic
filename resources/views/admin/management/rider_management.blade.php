@@ -151,9 +151,9 @@
                     {data: 'cnic', name: 'riders.cnic', class: 'align-middle cnic'},
                     {data: 'address', name: 'riders.address', class: 'align-middle address'},
                     {data: 'route', name: 'route', class: 'align-middle route'},
-                    {data: 'category', name: 'rider_categories.name', class: 'align-middle category'},
+                    {data: 'category', name: 'rider_categories.id', class: 'align-middle category'},
                     {data: 'created_at', name: 'created_at', class: 'align-middle created_at'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'status', name: 'riders.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
@@ -168,12 +168,28 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Inactive</option>' +
+                        '<option value="1">Active</option>' +
+                        '</select>';
+                    var category_select = '<select name="category_select" id="category_select" class="select2 form-control"></select>';
+
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.category')){
+                            $(category_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -185,7 +201,30 @@
                             }
                         }
                     });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data = $.map({!! $categories !!}, function (obj) {
+                        obj.id = obj.id // replace pk with your identifier
 
+                        return obj;
+                    });
+                    var data = $.map({!! $categories !!}, function (obj) {
+                        obj.text = obj.name; // replace name with the property used for the text
+
+                        return obj;
+                    });
+
+                    $("#category_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Category",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });

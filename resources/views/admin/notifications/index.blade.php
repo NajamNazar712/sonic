@@ -179,7 +179,7 @@
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'notifications.name', class: 'align-middle name'},
-					{data: 'type', name: 'nt.name', class: 'align-middle type'},
+					{data: 'type', name: 'nt.id', class: 'align-middle type'},
 					{data: 'updated_at', name: 'notifications.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
 					{data: 'status', name: 'notifications.status', class: 'align-middle status'},
@@ -196,14 +196,29 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Disable</option>' +
+                        '<option value="1">Enable</option>' +
+                        '</select>';
+                    var type_select = '<select name="type_select" id="type_select" class="select2 form-control"></select>';
 
-					this.api().columns().every(function(column_id) {
+                    this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
 						if ($(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.type')){
+                            $(type_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -214,7 +229,30 @@
 							}
 						}
 					});
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data = $.map({!! $notifications !!}, function (obj) {
+                        obj.id = obj.id;
 
+                        return obj;
+                    });
+                    var data = $.map({!! $notifications !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#type_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 					this.api().table().columns.adjust();
 				}
 			});

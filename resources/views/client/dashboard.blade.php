@@ -397,16 +397,16 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data: 'status', name: 'ss.name', class: 'align-middle status'},
-                    {data: 'payment_status', name: 'sps.name', class: 'align-middle payment_status'},
+                    {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'phone1', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone1'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
+                    {data: 'product_type', name: 'product', class: 'align-middle product_type'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -416,7 +416,7 @@
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-                    if (data.shipper_status_id == 1) {
+                    if (data.shipper_status_id === 1) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.id, selected_rows) !== -1) {
@@ -430,6 +430,11 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '</select>';
+                    var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -438,6 +443,27 @@
 
                         if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.select')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.payment_status')){
+                            $(payment_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.service_type')){
+                            $(service_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    console.log($(this).val())
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.product_type')){
+                            $(product_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -449,7 +475,79 @@
                             }
                         }
                     });
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.id = obj.id;
 
+                        return obj;
+                    });
+                    var data = $.map({!! $shipment_status !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.text = obj.booking_type;
+
+                        return obj;
+                    });
+
+                    $("#service_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        allowClear:true,
+                        placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data3 = $.map({!! $products !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data3 = $.map({!! $products !!}, function (obj) {
+                        obj.text = obj.product_name;
+
+                        return obj;
+                    });
+
+                    $("#product_select").prepend('<option value="" selected></option>').select2({
+                        data:data3,
+                        placeholder: "Select Product",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data4 = $.map({!! $payment_status !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data4 = $.map({!! $payment_status !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#payment_select").prepend('<option value="" selected></option>').select2({
+                        data:data4,
+                        placeholder: "Select Payment",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });

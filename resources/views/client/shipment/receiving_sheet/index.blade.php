@@ -268,7 +268,7 @@
 					{data: 'serial_number', orderable: false, searchable: false, name: 'id', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
 					{data: 'order_id', name: 'order_id', class: 'align-middle order_id'},
-					{data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
+					{data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
 					{data: 'pickup_address', name: 'usi.pickup_address', class: 'align-middle pickup_address'},
 					{data: 'origin_city', name: 'oc.name', class: 'align-middle origin_city'},
 					{data: 'destination_city', name: 'dc.name', class: 'align-middle destination_city'},
@@ -295,6 +295,7 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -302,7 +303,12 @@
 
 						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.service_type')){
+                            $(service_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -313,7 +319,24 @@
 							}
 						}
 					});
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id
 
+                        return obj;
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.text = obj.booking_type;
+
+                        return obj;
+                    });
+
+                    $("#service_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 					this.api().table().columns.adjust();
 				}
 			});
