@@ -1067,25 +1067,29 @@ class AdminPickupsController extends Controller
 
           $receiving_sheet->save();
 
-          $receiving_sheet_received = new ReceivingSheetReceived();
+          if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+            $receiving_sheet_received = new ReceivingSheetReceived();
 
-          $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
-          $receiving_sheet_received->user_id = $shipment->user_id;
-          $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
-          $receiving_sheet_received->shipment_id = $shipment_id;
+            $receiving_sheet_received->receiving_sheet_id = $receiving_sheet_id;
+            $receiving_sheet_received->user_id = $shipment->user_id;
+            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+            $receiving_sheet_received->shipment_id = $shipment_id;
 
-          $receiving_sheet_received->save();
+            $receiving_sheet_received->save();
+          }
 
           $reference_2_id = $receiving_sheet_id;
         }
         else {
-          $receiving_sheet_received = new ReceivingSheetReceived();
+          if (!ReceivingSheetReceived::where('shipment_id', $shipment_id)->exists()) {
+            $receiving_sheet_received = new ReceivingSheetReceived();
 
-          $receiving_sheet_received->user_id = $shipment->user_id;
-          $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
-          $receiving_sheet_received->shipment_id = $shipment_id;
+            $receiving_sheet_received->user_id = $shipment->user_id;
+            $receiving_sheet_received->pickup_address_id = $shipment->pickup_address_id;
+            $receiving_sheet_received->shipment_id = $shipment_id;
 
-          $receiving_sheet_received->save();
+            $receiving_sheet_received->save();
+          }
 
           $reference_2_id = NULL;
         }
