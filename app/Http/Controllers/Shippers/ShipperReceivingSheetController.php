@@ -37,7 +37,11 @@ class ShipperReceivingSheetController extends Controller
         $shipment = Shipment::find($shipment_id);
 
         if ($shipment->user_id != session('user_id')) {
-          return ['status' => 1, 'error' => 'One of the Shipment(s) doesn\'t belong to you'];
+          return ['status' => 1, 'error' => $shipment->tracking_number . ' doesn\'t belong to you'];
+        }
+
+        if (ReceivingSheetShipment::where('shipment_id', $shipment_id)->exists()) {
+          return ['status' => 1, 'error' => $shipment->tracking_number . ' is already in a Receiving Sheet'];
         }
 
         if ($pickup_address_id == 0) {
@@ -254,6 +258,7 @@ class ShipperReceivingSheetController extends Controller
 
                       body {
                         background: none !important;
+                        color: #09262e !important;
                         font-size: 0.9rem !important;
                       }
 
@@ -267,10 +272,6 @@ class ShipperReceivingSheetController extends Controller
 
                       table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
-                      }
-
-                      .color {
-                        color: #09262e !important;
                       }
 
                       .color.primary {

@@ -23,7 +23,7 @@
           </ul>
           <ul class="nav navbar-nav float-right">
             <li class="dropdown dropdown-user nav-item">
-              <a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_video" target="_blank">
+              <a class="nav-link d-inline-flex align-middle p-0" href="http://bit.ly/sonic_video_tutorial" target="_blank">
                   <h2 class="m-0 white">
                       <i class="ft-help-circle"></i>
                   </h2>

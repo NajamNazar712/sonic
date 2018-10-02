@@ -175,7 +175,7 @@
                     if(data.status == 0){
                         table.row( $(this).parents('tr') ).remove().draw();
                     }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     }
                 });
 

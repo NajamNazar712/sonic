@@ -292,7 +292,7 @@
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                     }else{
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                                     }
                                     location.reload();
@@ -304,7 +304,7 @@
 
                         }else{
                             var error = "Something went wrong please refresh page and try again!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                         }
                     }
@@ -805,7 +805,7 @@
                     this.submit();
                 }else{
                         var error = "Select at-least one item!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
         });

@@ -84,6 +84,15 @@ class AdminFinanceController extends Controller
                 return '';
             }
         })
+        ->filterColumn('banks', function($query, $keyword) {
+
+                if ($keyword !='') {
+                    $query->where('b.id', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+        })
         ->addColumn('action', function($station_deposit_note) {
             $reconcile_delivery_notes_button = '<button type="button" class="dropdown-item reconcile_delivery_notes"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-list"></i></div><div class="col-9 offset-1">Reconcile Delivery Notes</div></button>';
             $export_to_excel_button = '<button type="button" class="dropdown-item export_to_excel"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-download"></i></div><div class="col-9 offset-1">Export to Excel</div></button>';
@@ -747,6 +756,15 @@ class AdminFinanceController extends Controller
                 $query->whereRaw('false');
             }
         })
+            ->filterColumn('banks', function($query, $keyword) {
+
+                if ($keyword !='') {
+                    $query->where('ub.id', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
         ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
         return $datatables->make(true);
@@ -1210,6 +1228,24 @@ class AdminFinanceController extends Controller
                 return 'Unknown';
             }
         })
+        ->filterColumn('banks', function($query, $keyword) {
+
+                if ($keyword !='') {
+                    $query->where('ub.id', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+        })
+            ->filterColumn('company_banks', function($query, $keyword) {
+
+                if ($keyword !='') {
+                    $query->where('b.id', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+        })
         ->addColumn('return_shipments_average_aging', function($done_payment) {
             if ($done_payment->returned_shipments != 0) {
                 $shipments = 0;
@@ -1415,6 +1451,7 @@ class AdminFinanceController extends Controller
 
                       body {
                         background: none !important;
+                        color: #09262e !important;
                         font-size: 0.9rem !important;
                       }
 
@@ -1428,10 +1465,6 @@ class AdminFinanceController extends Controller
 
                       table.table-bordered tbody tr td {
                         border: 1px solid #09262e !important;
-                      }
-
-                      .color {
-                        color: #09262e !important;
                       }
 
                       .color.primary {

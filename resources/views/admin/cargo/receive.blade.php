@@ -157,14 +157,14 @@
 								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
 							else {
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 							}
 						});
 					}
 					else {
 						$('#add_shipment_form button.add').prop('disabled', false);
 
-						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
 
 					$('#add_shipment_form button.add').prop('disabled', false);
@@ -238,7 +238,7 @@
 						});
 					}
 					else {
-						toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+						toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
 				});
 			});

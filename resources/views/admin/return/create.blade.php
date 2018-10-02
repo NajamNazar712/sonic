@@ -372,7 +372,7 @@
                     }
                 }else{
                     var error = "Select at-least one shipment!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                 }
 

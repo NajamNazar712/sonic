@@ -411,7 +411,7 @@
                             });
                             $('#payment_mode').val(data.data.payment_mode).trigger('change');
                         }else{
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                         }
 

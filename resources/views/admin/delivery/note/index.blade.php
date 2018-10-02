@@ -243,7 +243,7 @@
 
                         if(data.status == 1){
 
-                            toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             scan.val('');
                             $('input#scan_tracking').focus();
                         }else{
@@ -273,7 +273,7 @@
 
                             if(data.status == 1){
 
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 scan.val('');
                                 $('input#scan_tracking').focus();
                             }else{
@@ -288,7 +288,7 @@
                         });
                     }else{
                         var error = 'Tracking Number already scanned!';
-                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                         scan.val('');
                         $('input#scan_tracking').focus();
                     }
@@ -381,7 +381,7 @@
                         }
                     }else{
                             var error = "Select at-least one shipment!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     }
 
