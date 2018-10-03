@@ -151,6 +151,7 @@
                 buttons: [{
                     extend: 'excelHtml5',
                     title: 'Station Deposit Note',
+                    className:'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 }
                 ],
