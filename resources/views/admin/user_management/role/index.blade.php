@@ -39,9 +39,13 @@
 @endsection
 
 @section('css')
+	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+
 @endsection
 
 @section('js')
+	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+
 	<script>
 		$(document).ready(function() {
 			var table = $('#datatable').DataTable({
@@ -69,7 +73,7 @@
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'name', name: 'admin_roles.name', class: 'align-middle name'},
-					{data: 'department', name: 'ad.name', class: 'align-middle department'},
+					{data: 'department', name: 'ad.id', class: 'align-middle department'},
 					{data: 'created_at', name: 'admin_roles.created_at', class: 'align-middle created_at'},
 					{data: 'updated_at', name: 'admin_roles.updated_at', class: 'align-middle updated_at'},
 					{data: 'updated_by', name: 'a.name', class: 'align-middle updated_by'},
@@ -86,6 +90,7 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var departments_select = '<select name="departments_select" id="departments_select" class="select2 form-control"></select>';
 
 					this.api().columns().every(function(column_id) {
 						var column = this;
@@ -93,7 +98,12 @@
 
 						if ($(header).is('.serial_number') || $(header).is('.action')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.department')){
+                            $(departments_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -104,7 +114,24 @@
 							}
 						}
 					});
+                    var data1 = $.map({!! $departments !!}, function (obj) {
+                        obj.id = obj.id;
 
+                        return obj;
+                    });
+                    var data1 = $.map({!! $departments !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#departments_select").prepend('<option value="" selected></option>').select2({
+                        data:data1,
+                        placeholder: "Select Department",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 					this.api().table().columns.adjust();
 				}
 			});

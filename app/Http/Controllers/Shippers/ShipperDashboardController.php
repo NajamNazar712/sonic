@@ -2,6 +2,10 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\BookingType;
+use App\Http\Models\Product;
+use App\Http\Models\ShipmentPaymentStatus;
+use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -56,13 +60,16 @@ class ShipperDashboardController extends Controller
 //            $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
 //            $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
 //        }
-
+        $should_not_show_status = array(32,33,34,35,36,37,38,46);
         $cities = City::where('status',1)->select('id','name')->get();
         $dispute_types = DisputeType::whereIn('id',[5,9])->get();
-
+        $shipment_status = ShipmentStatus::select('id','name')->whereNotIn('id',$should_not_show_status)->get();
+        $service_type = BookingType::all();
+        $products = Product::select('id','product_name')->get();
+        $payment_status = ShipmentPaymentStatus::all();
         // return $cities;
 //      return view('client.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'dispute_types'=>$dispute_types]);
-      return view('client.dashboard')->with(['stats'=>$stats,'cities'=>$cities,'dispute_types'=>$dispute_types]);
+      return view('client.dashboard')->with(['stats'=>$stats,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status]);
     }
     public function orders_list(Request $request) {
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -136,6 +143,34 @@ class ShipperDashboardController extends Controller
                 }
                 else {
                     return '';
+                }
+            })
+            ->filterColumn('status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('ss.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+
+            ->filterColumn('payment_status',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('sps.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('product',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('p.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
                 }
             })
             ->make(true);

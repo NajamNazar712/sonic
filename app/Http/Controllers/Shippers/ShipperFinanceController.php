@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\BanksList;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -26,7 +27,9 @@ class ShipperFinanceController extends Controller
     }
 
     public function payments_index() {
-      return view('client.finance.payments.index');
+        $banks = BanksList::all();
+        $company_banks = BanksList::where('affiliate', 1)->get();
+      return view('client.finance.payments.index')->with(['banks'=>$banks,'company_banks'=>$company_banks]);
     }
 
     public function payments_list() {
@@ -155,20 +158,31 @@ class ShipperFinanceController extends Controller
             }
         })
         ->filterColumn('status', function($query, $keyword) {
-            $keyword = strtolower($keyword);
 
-            if (strpos('processed', $keyword) !== FALSE) {
-                $query->where('done_payments.status', '=', 0);
-            }
-            else if (strpos('paid', $keyword) !== FALSE) {
-                $query->where('done_payments.status', '=', 1);
-            }
-            else if (strpos('reverted', $keyword) !== FALSE) {
-                $query->where('done_payments.status', '=', 2);
+            if ($keyword != '') {
+                $query->where('done_payments.status', '=', $keyword);
             }
             else {
                 $query->whereRaw('false');
             }
+        })
+        ->filterColumn('banks', function($query, $keyword) {
+
+                if ($keyword !='') {
+                    $query->where('ub.id', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+        })
+        ->filterColumn('company_banks', function($query, $keyword) {
+
+                if ($keyword !='') {
+                    $query->where('b.id', '=', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
         })
         ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\BookingType;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -23,7 +24,8 @@ class ShipperReceivingSheetController extends Controller
     }
 
     public function index() {
-      return view('client.shipment.receiving_sheet.index');
+        $service_type = BookingType::all();
+      return view('client.shipment.receiving_sheet.index')->with('service_type',$service_type);
     }
 
     public function store(Request $request) {
