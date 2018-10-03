@@ -278,7 +278,7 @@
             });
 
 
-            function printTemp(id) {
+            function print(id) {
                 $.ajax({
                     url: '{!! route('admin.delivery.receive.print') !!}',
                     method: 'POST',
