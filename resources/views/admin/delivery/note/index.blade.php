@@ -228,9 +228,6 @@
             $('input#scan_tracking').focus();
             $('#scan_tracking').on('change',function () {
                 var scan = $(this);
-
-                scan.attr('disabled', true);
-
                 var tracking = scan.val();
                 var hub_id = $('#hub_id').val();
 
@@ -245,7 +242,10 @@
                     }).done(function (data) {
 
                         if(data.status == 1){
+
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            scan.val('');
+                            $('input#scan_tracking').focus();
                         }else{
                             var rowNo = table.rows().count();
                             var remove = '<a href="#" class="deliverynoterow">Delete</a>';
@@ -253,11 +253,9 @@
                             table.draw(false);
                             shipment_ids.push(data.shId);
                             $('#hub_id').val(data.hub);
+                            scan.val('');
+                            $('input#scan_tracking').focus();
                         }
-
-                        scan.attr('disabled', false);
-                        scan.val('');
-                        scan.focus();
                     });
                 } else {
 
@@ -276,25 +274,23 @@
                             if(data.status == 1){
 
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                scan.val('');
+                                $('input#scan_tracking').focus();
                             }else{
                                 var rowNo = table.rows().count();
                                 var remove = '<a href="#" class="deliverynoterow">Delete</a>';
                                 table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
+                                scan.val('');
+                                $('input#scan_tracking').focus();
                             }
-
-                            scan.attr('disabled', false);
-                            scan.val('');
-                            scan.focus();
                         });
                     }else{
                         var error = 'Tracking Number already scanned!';
                             toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                        scan.attr('disabled', false);
                         scan.val('');
-                        scan.focus();
+                        $('input#scan_tracking').focus();
                     }
                 }
 
