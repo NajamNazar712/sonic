@@ -44,7 +44,7 @@ class ShipperFinanceController extends Controller
         ->groupBy('done_payments.id');
 
         $datatables = Datatables::of($done_payments)
-        ->editColumn('id', function ($done_payment) {
+        ->addColumn('id_padded', function ($done_payment) {
             return str_pad($done_payment->id, 6, '0', STR_PAD_LEFT);
         })
         ->filterColumn('done_payments.id', function ($query, $keyword) {

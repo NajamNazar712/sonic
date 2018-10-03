@@ -61,6 +61,9 @@ class ShipperReceivingSheetHistoryController extends Controller
       ->where('receiving_sheets.received', '!=', 0);
 
       return Datatables::of($receiving_sheet)
+      ->addColumn('id_padded', function($receiving_sheet) {
+        return str_pad($receiving_sheet->id, 6, '0', STR_PAD_LEFT);
+      })
       ->editColumn('receiving_sheet_id', function($receiving_sheet) {
         return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle id">' . str_pad($receiving_sheet->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
       })

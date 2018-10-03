@@ -135,10 +135,7 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-        a.btn.btn-secondary{
-            border-radius: 20px;
-            background: #64a0d2;
-        }
+
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -191,7 +188,7 @@
 
 
                                 row.push(index + 1);
-                                row.push(values.sdn_id);
+                                row.push(values.sdn_id_padded);
                                 row.push(values.hub);
                                 row.push(values.dncc_count);
                                 row.push(values.sdn_delivered_shipments);

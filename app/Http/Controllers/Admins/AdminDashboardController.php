@@ -3239,7 +3239,7 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)
-            ->editColumn('id', function ($user) {
+            ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {
@@ -3322,7 +3322,7 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)
-            ->editColumn('id', function ($user) {
+            ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {
@@ -3398,7 +3398,7 @@ class AdminDashboardController extends Controller
         }
 
         return Datatables::of($users)
-            ->editColumn('id', function ($user) {
+            ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('users.id', function ($query, $keyword) {
@@ -3926,7 +3926,8 @@ class AdminDashboardController extends Controller
         $city = City::select(['id','name'])->where('status',1)->get();
         $category = RiderCategory::all();
         $rider = Rider::find($id);
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider]);
+        $route = Route::where('city_id',$rider->city_id)->get();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [

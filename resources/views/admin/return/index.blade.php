@@ -85,10 +85,7 @@
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }
-        a.btn.btn-secondary{
-            border-radius: 20px;
-            background: #64a0d2;
-        }
+
         #toast-bottom-center.toast-container {
             text-align: center;
         }
@@ -231,9 +228,9 @@
                                 }
                             }
                         },
-                        @endif
+                    @endif
 
-                        @if (session('role_id') == 1 || in_array(46, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(46, session('permissions')))
                         {
                             text: 'Re-Attempt',
                             className: 'btn btn-primary re-attempt',
@@ -285,13 +282,84 @@
 
                                 }
                             }
-                            @endif
                         },
+                    @endif
                         {
                             extend: 'excel',
                             title: 'Return Marked',
                             className: 'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
+                        }, {
+                            extend: 'selectAll',
+                            text: 'Select All',
+                            className: 'select_all',
+                            action : function(e) {
+                                e.preventDefault();
+
+                                table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+
+                                    if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                        id = parseInt(row.id());
+
+                                        hub_id = $(row.node()).data('hub');
+
+                                        var allow = false;
+
+                                        if(hub_ids.length == 0) {
+                                            hub_ids.push(hub_id);
+
+                                            allow = true;
+                                        }
+                                        else if(hub_ids[0] == hub_id) {
+                                            allow = true;
+                                        }
+
+                                        if (allow) {
+                                            row.select();
+
+                                            var index = $.inArray(id, selected_rows);
+
+                                            if (index === -1) {
+                                                selected_rows.push(id);
+                                            }
+
+                                            table.button('.confirm').enable();
+                                            table.button('.re-attempt').enable();
+                                        }
+                                    }
+                                });
+                            }
+                        }, {
+                            extend: 'selectNone',
+                            text: 'Select None',
+                            className: 'select_none',
+                            action : function(e) {
+                                e.preventDefault();
+
+                                table.rows().nodes().each(function(index) {
+                                  var row = table.row(index);
+
+                                  if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                    if (selected_rows.length == 0) {
+                                        table.button('.confirm').disable();
+                                        table.button('.re-attempt').disable();
+
+                                        hub_ids.splice(index, 1);
+                                    }
+                                  }
+                                });
+                            }
                         }
                         ],
                 @else
@@ -343,7 +411,7 @@
                     var info = table.page.info();
 
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
-                    if ($.inArray(data.id, selected_rows) !== -1) {
+                    if ($.inArray(data.shId, selected_rows) !== -1) {
                         table.row(row).select();
                     }
                 },

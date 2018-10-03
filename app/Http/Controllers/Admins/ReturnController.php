@@ -559,7 +559,7 @@ class ReturnController extends Controller
         ->editColumn('return_note', function ($deliveries) {
             return "<a href='javascript:void(0);' class='printreturnnote'><u>" . str_pad($deliveries->return_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
         })
-        ->editColumn('return_note_id', function ($deliveries) {
+        ->addColumn('return_note_id_padded', function ($deliveries) {
             return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
         })
         ->filterColumn('return_notes.id', function ($query, $keyword) {
@@ -677,7 +677,7 @@ class ReturnController extends Controller
     public function return_receive_status(Request $request,$id){
         $return = ReturnNote::where('id',$id)->select('shipments_count')->first();
         $shipment = Shipment::where('id',30)->first();
-        return view('admin.return.receive_status')->with(['return_note_id'=>str_pad($id, 6, '0', STR_PAD_LEFT),'shipments_count'=>$return->shipments_count]);
+        return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count]);
     }
     public function return_receive_status_list(Request $request){
         $deliveries = ReturnNote::join('return_note_shipments as dns','dns.return_note_id','=','return_notes.id')

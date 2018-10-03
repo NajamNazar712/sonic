@@ -375,7 +375,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.id);
+                                row.push(values.id_padded);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.shipments);
@@ -473,7 +473,7 @@
 				order: [[11, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data: 'id', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
+					{data: 'id_padded', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
 					{data: 'origin', name: 'oh.name', class: 'align-middle origin'},
 					{data: 'destination', name: 'dh.name', class: 'align-middle destination'},
 					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle shipments'},

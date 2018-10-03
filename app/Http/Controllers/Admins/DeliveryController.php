@@ -302,7 +302,7 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
             })
-            ->editColumn('delivery_note_id', function ($deliveries) {
+            ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
@@ -421,7 +421,7 @@ class DeliveryController extends Controller
             }
     }
     public function receive_delivery_update(Request $request,$id){
-        return view('admin.delivery.receive.update')->with('delivery_note_id', str_pad($id, 6, '0', STR_PAD_LEFT));
+        return view('admin.delivery.receive.update')->with('delivery_note_id', $id);
     }
     public function receive_delivery_notes_list(Request $request,$id){
         $deliveries = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
@@ -690,7 +690,7 @@ class DeliveryController extends Controller
                     $undelivered_printed = 1;
                 }
             }
-            return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>str_pad($id, 6, '0', STR_PAD_LEFT),'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed]);
+            return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed]);
         }else{
             return redirect()->back()->with('error','Delivery note not found!');
         }
@@ -973,7 +973,7 @@ class DeliveryController extends Controller
 
         $note_data = DeliveryNote::where('id',$id)->first();
 
-        return view('admin.delivery.receive.verify_status')->with(['delivery_note_id'=>str_pad($request->id, 6, '0', STR_PAD_LEFT),'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status]);
+        return view('admin.delivery.receive.verify_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status]);
     }
     public function receive_delivery_verify_status_list(Request $request,$id){
         $deliveries = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
@@ -1766,7 +1766,7 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
-            ->editColumn('delivery_note_id', function ($deliveries) {
+            ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
@@ -1872,8 +1872,8 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
-            ->editColumn('delivery_note_id', function ($deliveries) {
-                return str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT);
+            ->addColumn('delivery_note_id_padded', function ($deliveries) {
+                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
                 return $query->where('delivery_notes.id', '=', $keyword);
@@ -1934,7 +1934,7 @@ class DeliveryController extends Controller
         }
 
         return Datatables::of($deliveries)
-            ->editColumn('delivery_note_id', function ($deliveries) {
+            ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
@@ -1965,7 +1965,7 @@ class DeliveryController extends Controller
 //                return "<input class='form-control net_amount' readonly placeholder='Net Amount' name='net_amount[{$deliveries->delivery_note_id}]'>";
 //            })
             ->addColumn('remarks', function ($deliveries) {
-                $reason = '<input class="form-control" name="remarks['.str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT).']" placeholder="Enter Remarks">';
+                $reason = '<input class="form-control" name="remarks['.$deliveries->delivery_note_id.']" placeholder="Enter Remarks">';
                 return $reason;
             })
             ->make(true);
@@ -2020,7 +2020,7 @@ class DeliveryController extends Controller
             ->editColumn('sdn', function ($sdn) {
                 return "<a href='javascript:void(0);' class='printSDN'><u>" . str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
             })
-            ->editColumn('sdn_id', function ($sdn) {
+            ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('station_deposit_notes.id', function ($query, $keyword) {
@@ -2088,7 +2088,7 @@ class DeliveryController extends Controller
             return $datatable->make(true);
     }
     public function sdn_details(Request $request,$id){
-        return view('admin.delivery.sdn.details')->with('sdn_id', str_pad($id, 6, '0', STR_PAD_LEFT));
+        return view('admin.delivery.sdn.details')->with('sdn_id', $id);
     }
     public function sdn_details_ajax(Request $request,$id){
         $deliveries = StationDepositNote::

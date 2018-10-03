@@ -206,7 +206,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.id);
+                                row.push(values.id_padded);
                                 row.push(values.shipper);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
@@ -317,7 +317,61 @@
                         title: 'Done Payments',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
+                    }, {
+	                    extend: 'selectAll',
+	                    text: 'Select All',
+	                    className: 'select_all',
+	                    action : function(e) {
+	                        e.preventDefault();
+
+	                        table.rows().nodes().each(function(index) {
+	                            var row = table.row(index);
+
+	                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+	                                row.select();
+
+	                                id = parseInt(row.id());
+
+	                                var index = $.inArray(id, selected_rows);
+
+	                                if (index === -1) {
+	                                    selected_rows.push(id);
+	                                }
+
+	                                table.button('.paid').enable();
+	                                table.button('.reverted').enable();
+	                            }
+	                        });
+	                    }
+	                }, {
+	                    extend: 'selectNone',
+	                    text: 'Select None',
+	                    className: 'select_none',
+	                    action : function(e) {
+	                        e.preventDefault();
+
+	                        table.rows().nodes().each(function(index) {
+	                          var row = table.row(index);
+
+	                          if ($(row.node().firstChild).hasClass('select-checkbox')) {
+	                            row.deselect();
+
+	                            id = parseInt(row.id());
+
+	                            var index = $.inArray(id, selected_rows);
+
+	                            if (index !== -1) {
+	                                selected_rows.splice(index, 1);
+	                            }
+
+	                            if (selected_rows.length == 0) {
+	                                table.button('.paid').disable();
+	                                table.button('.reverted').disable();
+	                            }
+	                          }
+	                        });
+	                    }
+	                }],
 				@else
                 buttons: [
                     {
@@ -345,7 +399,7 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'id', name: 'done_payments.id', class: 'align-middle text-center id'},
+					{data:'id_padded', name: 'done_payments.id', class: 'align-middle text-center id'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
@@ -374,6 +428,10 @@
 
 					if (data.status != 'Paid') {
 						$('td:eq(0)', row).addClass('select-checkbox');
+
+						if ($.inArray(data.id, selected_rows) !== -1) {
+	                        table.row(row).select();
+	                    }
 					}
 				},
 				initComplete: function() {

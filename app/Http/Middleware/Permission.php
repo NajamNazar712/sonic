@@ -198,7 +198,6 @@ class Permission
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,
-            'packaging.fetch.cities' => 77,
             'packaging.send.submit' => 78,
             'packaging.requests.index' => 79,
             'packaging.requests.list' => 79,

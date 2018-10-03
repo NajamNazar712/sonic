@@ -146,10 +146,7 @@
             top: 50%;
             text-shadow: none;
         }
-        a.btn.btn-secondary{
-            border-radius: 20px;
-            background: #64a0d2;
-        }
+
         .btn-group .dropdown-menu .dropdown-item {
             white-space: normal;
         }

@@ -524,7 +524,7 @@ class AdminCargoController extends Controller
       }
 
       $datatables = Datatables::of($cargo_consignments)
-      ->editColumn('id', function ($cargo_consignment) {
+      ->addColumn('id_padded', function ($cargo_consignment) {
           return str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
       })
       ->filterColumn('cargo_consignments.id', function ($query, $keyword) {
@@ -1004,7 +1004,7 @@ class AdminCargoController extends Controller
 
         if ($cargo_consignment) {
           if (in_array($cargo_consignment->status_id, [1, 2, 4])) {
-            return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT));
+            return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
           }
           else {
             return back()->withErrors('Given Cargo Number has already been modified!');
@@ -1176,13 +1176,13 @@ class AdminCargoController extends Controller
         $junction_hub_1_id = $cargo_consignment->junction_hub_1_id;
         $junction_hub_2_id = $cargo_consignment->junction_hub_2_id;
 
-        if($cargo_consignment->origin_hub_id != $junction_hub_1_id) {
+        if($cargo_consignment->origin_hub_id != $junction_hub_1_id && $cargo_consignment->destination_hub_id != $junction_hub_1_id) {
             $junction1 = CargoConsignmentJunctionReceival::where(['cargo_consignment_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_1_id])->exists();
             if(!$junction1){
                 DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_1_id);
             }
         }
-        if($junction_hub_2_id && $cargo_consignment->destination_hub_id != $junction_hub_2_id) {
+        if($junction_hub_2_id && $cargo_consignment->origin_hub_id != $junction_hub_2_id && $cargo_consignment->destination_hub_id != $junction_hub_2_id) {
             $junction2 = CargoConsignmentJunctionReceival::where(['cargo_consignment_id'=>$cargo_consignment_id,'junction_id'=>$junction_hub_2_id])->exists();
             if(!$junction2){
                 DisputeController::add_junction_dispute($cargo_consignment_id,$junction_hub_2_id);

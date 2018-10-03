@@ -230,45 +230,14 @@
                 var tracking = scan.val();
                 var hub_id = $('#hub_id').val();
 
-                if(table.row().count() == 0) {
-                    $.ajax({
-                        url: '{{route('admin.return.create.shipment_details')}}',
-                        type: 'GET',
-                        dataType: 'JSON',
-                        data: {
-                            'tracking': tracking
-                        }
-                    }).done(function (data) {
-
-                        if (data.status == 1) {
-
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-                        } else {
-                            var rowNo = table.rows().count();
-                            var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
-                            table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
-                            table.draw(false);
-                            shipment_ids.push(data.shId);
-                            $('#hub_id').val(data.hub);
-                        }
-
-                        scan.attr('disabled', false);
-                        scan.val('');
-                        scan.focus();
-                    });
-                }else {
-                    if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1) {
-
+                if (tracking != '') {
+                    if(table.row().count() == 0) {
                         $.ajax({
                             url: '{{route('admin.return.create.shipment_details')}}',
                             type: 'GET',
                             dataType: 'JSON',
                             data: {
-                                'tracking': tracking,
-                                'hub_id':hub_id
+                                'tracking': tracking
                             }
                         }).done(function (data) {
 
@@ -280,26 +249,59 @@
                                 });
                             } else {
                                 var rowNo = table.rows().count();
-                                var remove = '<a href="#" class="deliverynoterow">Delete</a>';
+                                var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
                                 table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
+                                $('#hub_id').val(data.hub);
                             }
 
-                            scan.attr('disabled', false);
                             scan.val('');
+                            scan.attr('disabled', false);
                             scan.focus();
                         });
-                    } else {
-                        var error = 'Tracking Number already scanned!';
-                        toastr.error(error, 'Error!', {
-                            positionClass: 'toast-bottom-center',
-                            containerId: 'toast-bottom-center'
-                        });
+                    }else {
+                        if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1) {
 
-                        scan.attr('disabled', false);
-                        scan.val('');
-                        scan.focus();
+                            $.ajax({
+                                url: '{{route('admin.return.create.shipment_details')}}',
+                                type: 'GET',
+                                dataType: 'JSON',
+                                data: {
+                                    'tracking': tracking,
+                                    'hub_id':hub_id
+                                }
+                            }).done(function (data) {
+
+                                if (data.status == 1) {
+
+                                    toastr.error(data.error, 'Error!', {
+                                        positionClass: 'toast-bottom-center',
+                                        containerId: 'toast-bottom-center'
+                                    });
+                                } else {
+                                    var rowNo = table.rows().count();
+                                    var remove = '<a href="#" class="deliverynoterow">Delete</a>';
+                                    table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
+                                    table.draw(false);
+                                    shipment_ids.push(data.shId);
+                                }
+
+                                scan.val('');
+                                scan.attr('disabled', false);
+                                scan.focus();
+                            });
+                        } else {
+                            var error = 'Tracking Number already scanned!';
+                            toastr.error(error, 'Error!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+
+                            scan.val('');
+                            scan.attr('disabled', false);
+                            scan.focus();
+                        }
                     }
                 }
             });

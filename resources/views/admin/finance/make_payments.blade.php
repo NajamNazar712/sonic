@@ -356,7 +356,59 @@
                         title: 'Make Payments',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    }],
+                    }, {
+	                    extend: 'selectAll',
+	                    text: 'Select All',
+	                    className: 'select_all',
+	                    action : function(e) {
+	                        e.preventDefault();
+
+	                        table.rows().nodes().each(function(index) {
+	                            var row = table.row(index);
+
+	                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+	                                row.select();
+
+	                                id = parseInt(row.id());
+
+	                                var index = $.inArray(id, selected_rows);
+
+	                                if (index === -1) {
+	                                    selected_rows.push(id);
+	                                }
+
+	                                table.button('.make_payment').enable();
+	                            }
+	                        });
+	                    }
+	                }, {
+	                    extend: 'selectNone',
+	                    text: 'Select None',
+	                    className: 'select_none',
+	                    action : function(e) {
+	                        e.preventDefault();
+
+	                        table.rows().nodes().each(function(index) {
+	                          var row = table.row(index);
+
+	                          if ($(row.node().firstChild).hasClass('select-checkbox')) {
+	                            row.deselect();
+
+	                            id = parseInt(row.id());
+
+	                            var index = $.inArray(id, selected_rows);
+
+	                            if (index !== -1) {
+	                                selected_rows.splice(index, 1);
+	                            }
+
+	                            if (selected_rows.length == 0) {
+	                                table.button('.make_payment').disable();
+	                            }
+	                          }
+	                        });
+	                    }
+	                }],
 				@else
                 buttons: [
                     {
@@ -498,8 +550,47 @@
 			});
 
 			var make_payments_table = $('#make_payments #make_payments_datatable').DataTable({
-				dom: 'tr',
-				scrollX: true, scrollY: '350px',
+				dom: '<"pull-right"B>tr',
+				buttons: [{
+					extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'select_all',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        make_payments_table.rows().nodes().each(function(index) {
+                            var row = make_payments_table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
+                                row.select();
+
+                                var parent = $(row.node());
+
+								calculation(parent);
+                            }
+                        });
+                    }
+                }, {
+                    extend: 'selectNone',
+                    text: 'Select None',
+                    className: 'select_none',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        make_payments_table.rows().nodes().each(function(index) {
+                          var row = make_payments_table.row(index);
+
+                          if ($(row.node().firstChild).hasClass('select-checkbox') && $(row.node()).hasClass('selected')) {
+                            row.deselect();
+
+                            var parent = $(row.node());
+
+							calculation(parent);
+                          }
+                        });
+                    }
+                }],
+				scrollX: true,
 				paging: false,
 				select: {
 					info: false,
@@ -746,9 +837,7 @@
 				}
 			});
 
-			$('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
-				var parent = $(this).parent('tr');
-
+			function calculation(parent) {
 				var id = parseInt(parent.attr('id'));
 
 				var index = $.inArray(id, selected_rows_shipments);
@@ -806,6 +895,12 @@
 
 				$('#make_payments #make_payments_form .pending_payment_ids').val(selected_pending_payment_ids);
 				$('#make_payments #make_payments_form .shipment_ids').val(selected_rows_shipments);
+			}
+
+			$('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
+				var parent = $(this).parent('tr');
+
+				calculation(parent);
 			});
 
 			$('#make_payments #make_payments_form').bind('submit', function(e) {

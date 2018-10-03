@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Return Receive Deliveries(Return Note: {{$return_note_id}})
+        Return Receive Deliveries(Return Note: {{str_pad($return_note_id, 6, '0', STR_PAD_LEFT)}})
     </h1>
 
     <div class="card">
@@ -192,15 +192,62 @@
 
                             }
                         }
+                    }, {
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
 
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.returned').enable();
+                                }
+                            });
+                        }
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                              var row = table.row(index);
+
+                              if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.deselect();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index !== -1) {
+                                    selected_rows.splice(index, 1);
+                                }
+
+                                if (selected_rows.length == 0) {
+                                    table.button('.returned').disable();
+                                }
+                              }
+                            });
+                        }
                     }],
                 @else
                     dom: 'ltipr',
                 @endif
-                fixedHeader: {
-                    header: true,
-                    headerOffset: $('.header-navbar').height()
-                },
                 select: {
                     info: false,
                     style: 'multi',
@@ -237,8 +284,8 @@
 
                     if ((data.shipper_status_id != 25) && (data.shipper_status_id != 31) && (data.shipper_status_id != 38)) {
                         $('td:eq(0)', row).addClass('select-checkbox');
-                        console.log(data.shipper_status_id)
-                        if ($.inArray(data.id, selected_rows) !== -1) {
+
+                        if ($.inArray(data.shId, selected_rows) !== -1) {
                             table.row(row).select();
                         }
                     }

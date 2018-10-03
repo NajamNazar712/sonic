@@ -242,11 +242,25 @@
 					action : function(e) {
 						e.preventDefault();
 
-						table.rows().deselect();
+						table.rows().nodes().each(function(index) {
+	                      var row = table.row(index);
 
-						selected_rows = [];
+	                      if ($(row.node().firstChild).hasClass('select-checkbox')) {
+	                        row.deselect();
 
-						table.button('.create').disable();
+	                        id = parseInt(row.id());
+
+	                        var index = $.inArray(id, selected_rows);
+
+	                        if (index !== -1) {
+	                            selected_rows.splice(index, 1);
+	                        }
+
+	                        if (selected_rows.length == 0) {
+	                            table.button('.create').disable();
+	                        }
+	                      }
+	                    });
 					}
 				}],
 				select: {
@@ -255,8 +269,8 @@
 					selector: 'td.select-checkbox',
 					className: 'selected bg-primary bg-lighten-5 primary'
 				},
-				lengthMenu: [[5, 50, 100, 500, 1000, -1], [5, 50, 100, 500, 1000, 'All']],
-				pageLength: 5,
+				lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+				pageLength: 50,
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
