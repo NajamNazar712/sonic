@@ -683,7 +683,7 @@ class AdminCargoController extends Controller
                               <td class="color secondary"><strong>Destination Hub</strong></td>
                               <td>' . $cargo_consignment->destination_hub->name . '</td>
                               <td rowspan="8" class="text-center align-middle">
-                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($cargo_consignment->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                 <span><strong>' . str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                               </td>
                             </tr>
@@ -769,7 +769,7 @@ class AdminCargoController extends Controller
                               <td class="color secondary"><strong>Origin Hub</strong></td>
                               <td>' . $cargo_consignment->origin_hub->name . '</td>
                               <td rowspan="5" class="text-center align-middle">
-                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($cargo_consignment->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                 <span><strong>' . str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                               </td>
                             </tr>
