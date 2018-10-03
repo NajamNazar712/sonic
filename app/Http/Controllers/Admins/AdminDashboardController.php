@@ -3448,19 +3448,19 @@ class AdminDashboardController extends Controller
         ->editColumn('status', function ($cities) {
             return ($cities->status == 1)? 'Active': 'Inactive';
         })
-        ->filterColumn('status', function($query, $keyword) {
-            $keyword = strtolower($keyword);
-
-            if (strpos('active', $keyword) !== FALSE) {
-                $query->where('cities.status', '=', 1);
-            }
-            else if (strpos('inactive', $keyword) !== FALSE) {
-                $query->where('cities.status', '=', 0);
-            }
-            else {
-                $query->whereRaw('false');
-            }
-        })
+//        ->filterColumn('status', function($query, $keyword) {
+//            $keyword = strtolower($keyword);
+//
+//            if (strpos('active', $keyword) !== FALSE) {
+//                $query->where('cities.status', '=', 1);
+//            }
+//            else if (strpos('inactive', $keyword) !== FALSE) {
+//                $query->where('cities.status', '=', 0);
+//            }
+//            else {
+//                $query->whereRaw('false');
+//            }
+//        })
         ->addColumn("action", function ($result) {
             if (session('role_id') == 1 || count(array_intersect([90, 91], session('permissions'))) !== 0) {
                 $dropdown = '
@@ -3806,7 +3806,8 @@ class AdminDashboardController extends Controller
 
     }
     public function riderView(){
-        return view('admin.management.rider_management');
+        $category = RiderCategory::all();
+        return view('admin.management.rider_management')->with(['categories'=>$category]);
     }
     public function riderListAjax(){
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
@@ -3822,19 +3823,7 @@ class AdminDashboardController extends Controller
             ->editColumn('status', function ($rider) {
                 return ($rider->status == 0)? 'Inactive': 'Active';
             })
-            ->filterColumn('status', function($query, $keyword) {
-                $keyword = strtolower($keyword);
 
-                if (strpos('active', $keyword) !== FALSE) {
-                    $query->where('riders.status', '=', 1);
-                }
-                else if (strpos('inactive', $keyword) !== FALSE) {
-                    $query->where('riders.status', '=', 0);
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
             ->editColumn('route', function ($rider) {
                 return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
             })
@@ -3937,7 +3926,8 @@ class AdminDashboardController extends Controller
         $city = City::select(['id','name'])->where('status',1)->get();
         $category = RiderCategory::all();
         $rider = Rider::find($id);
-        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider]);
+        $route = Route::where('city_id',$rider->city_id)->get();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [

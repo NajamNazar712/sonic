@@ -19,7 +19,7 @@
         <div class="col">
             <fieldset class="form-group">
                 <select name="city_id" id="city_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                    <option value="{{$rider->city->id}}" selected>{{$rider->city->name}}</option>
+                    {{--<option value="{{$rider->city->id}}" selected>{{$rider->city->name}}</option>--}}
                     @foreach($cities as $city)
                         <option value="{{$city->id}}">{{$city->name}}</option>
                     @endforeach
@@ -58,8 +58,9 @@
             <div class="col">
                 <fieldset class="form-group">
                     <select name="route_id" id="route_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                        <option value="{{$rider->route->id}}" selected>{{$rider->route->code}} ({{$rider->route->start}} to {{$rider->route->end}})</option>
-
+                        @foreach($routes as $route)
+                            <option value="{{$route->id}}">{{$rider->route->code}} ({{$route->start}} to {{$route->end}})</option>
+                        @endforeach
                     </select>
                 </fieldset>
             </div>
@@ -92,10 +93,8 @@
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
         $("input[name='phone']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         //$('#riderInfoDiv input,#riderInfoDiv textarea,#riderInfoDiv select').attr('disabled','disabled');
-
-        $('#city_list').change(function () {
-
-        });
+        $('#city_list').val({!! $rider->city_id !!}).trigger('change');
+        $('#route_list').val({!! $rider->route_id !!}).trigger('change');
         $('#city_list').on('change',function () {
             var routelist = $('#route_list');
             var id = $('#city_list').val();
