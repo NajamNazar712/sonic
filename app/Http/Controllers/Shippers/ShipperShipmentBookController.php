@@ -138,7 +138,7 @@ class ShipperShipmentBookController extends Controller
       $consignee_cities = City::where('status', 1)->orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
-      $payment_modes = PaymentMode::all();
+      $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
 
       return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities]);
     }
@@ -730,7 +730,7 @@ class ShipperShipmentBookController extends Controller
         $shipping_mode_same_day_timings = NULL;
       }
 
-      $payment_modes = PaymentMode::all();
+      $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
 
       return view('client.shipment.book.excel')->with(['booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'cities' => $cities, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes]);
     }
@@ -825,7 +825,9 @@ class ShipperShipmentBookController extends Controller
         'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
         'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
         'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
-        'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:payment_modes,id']
+        'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+          $query->whereNotIn('id', [2, 3]);
+        })]
       ];
 
       $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'pickup_date', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id'];

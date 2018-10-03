@@ -206,7 +206,9 @@ class APIController extends Controller
         'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
         'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
         'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
-        'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:payment_modes,id'],
+        'payment_mode_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('payment_modes', 'id')->where(function($query) {
+          $query->whereNotIn('id', [2, 3]);
+        })],
 
         'item_product_type_id' => ['required_if:service_type_id,1,2', 'integer', 'digits_between:1,10', 'exists:products,id'],
         'item_description' => ['required_if:service_type_id,1,2', 'between:0,190'],

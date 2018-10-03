@@ -406,7 +406,7 @@
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'product_type', name: 'product', class: 'align-middle product_type'},
-                    {data: 'booking_date', name: 'booking_date', class: 'align-middle booking_date'},
+                    {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -431,8 +431,7 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '</select>';
-                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control">' +
-                        '</select>';
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     var product_select = '<select name="product_select" id="product_select" class="select2 form-control"></select>';
                     var payment_select = '<select name="payment_select" id="payment_select" class="select2 form-control"></select>';
 

@@ -114,7 +114,7 @@
                                 shipment += '<td>' + details.consignee.name + '</td>';
                                 shipment += '</tr>';
                                 shipment += '<tr>';
-                                shipment += '<td><strong>Origin</strong></td>';
+                                shipment += '<td><strong>Destination</strong></td>';
                                 shipment += '<td>' + details.consignee.destination + '</td>';
                                 shipment += '</tr>';
                                 shipment += '</tbody>';
