@@ -333,8 +333,8 @@
                                     });
                                 } else {
                                     toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
                                     });
                                 }
 

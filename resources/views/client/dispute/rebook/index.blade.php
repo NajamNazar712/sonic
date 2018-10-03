@@ -329,8 +329,8 @@
                                     $('#RebookModal').modal('hide');
                                     selected_rows = [];
                                     toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
                                     });
                                     if (selected_rows.length !== 0) {
                                         console.log('After error submit: ' + selected_rows);
@@ -342,8 +342,8 @@
                     }else{
                         var err = 'Select different city!';
                         toastr.error(err, 'Error!', {
-                            positionClass: 'toast-bottom-center',
-                            containerId: 'toast-bottom-center'
+                            positionClass: 'toast-top-center',
+                            containerId: 'toast-top-center'
                         });
                     }
                 }
