@@ -155,7 +155,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.id);
+                                row.push(values.id_padded);
                                 row.push(values.shipper);
                                 row.push(values.city);
                                 row.push(values.phone_numbers);
@@ -206,7 +206,7 @@
 				order: [[1, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'id', name: 'done_payments.id', class: 'align-middle text-center id'},
+					{data:'id_padded', name: 'done_payments.id', class: 'align-middle text-center id'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},

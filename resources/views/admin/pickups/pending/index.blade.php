@@ -164,7 +164,7 @@
 					@if (session('role_id') == 1 || in_array(18, session('permissions')))
 						{
 							text: 'Cancel',
-							className: 'btn btn-danger  cancel',
+							className: 'btn btn-danger cancel',
 							enabled: false,
 							action: function (e, dt, node, config) {
 								swal({
@@ -224,7 +224,62 @@
                             title: 'Pending Pickups',
                         	className: 'btn btn-primary',
                             text: '<i class="la la-file-excel-o"></i> Excel',
-                        }],
+                        }, {
+		                  extend: 'selectAll',
+		                  text: 'Select All',
+		                  className: 'select_all',
+		                  action : function(e) {
+		                    e.preventDefault();
+
+		                    table.rows().nodes().each(function(index) {
+		                      var row = table.row(index);
+
+		                      if ($(row.node().firstChild).hasClass('select-checkbox')) {
+		                        row.select();
+
+		                        id = parseInt(row.id());
+
+		                        var index = $.inArray(id, selected_rows);
+
+		                        if (index === -1) {
+		                          selected_rows.push(id);
+		                        }
+
+		                        table.button('.assign').enable();
+		                        table.button('.cancel').enable();
+		                      }
+		                    });
+		                  }
+		                }, {
+		                  extend: 'selectNone',
+		                  text: 'Select None',
+		                  className: 'select_none',
+		                  action : function(e) {
+		                    e.preventDefault();
+
+		                    table.rows().nodes().each(function(index) {
+		                      var row = table.row(index);
+
+		                      if ($(row.node().firstChild).hasClass('select-checkbox')) {
+		                        row.deselect();
+
+		                        id = parseInt(row.id());
+
+		                        var index = $.inArray(id, selected_rows);
+
+		                        if (index !== -1) {
+		                            selected_rows.splice(index, 1);
+		                        }
+
+		                        if (selected_rows.length == 0) {
+		                            table.button('.assign').disable();
+		                            table.button('.cancel').disable();
+		                        }
+		                      }
+		                    });
+		                  }
+		                }
+                        ],
 				@else
                 buttons: [
                     {

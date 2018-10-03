@@ -4,7 +4,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Receive Deliveries(Delivery Note: {{$delivery_note_id}})
+        Receive Deliveries(Delivery Note: {{str_pad($delivery_note_id, 6, '0', STR_PAD_LEFT)}})
     </h1>
 
     <div class="card">
@@ -309,7 +309,60 @@
                         }
                     }
 
-                }@endif
+                }, {
+                    extend: 'selectAll',
+                    text: 'Select All',
+                    className: 'select_all',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+
+                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                row.select();
+
+                                id = parseInt(row.id());
+
+                                var index = $.inArray(id, selected_rows);
+
+                                if (index === -1) {
+                                    selected_rows.push(id);
+                                }
+
+                                table.button('.delivered').enable();
+                            }
+                        });
+                    }
+                }, {
+                    extend: 'selectNone',
+                    text: 'Select None',
+                    className: 'select_none',
+                    action : function(e) {
+                        e.preventDefault();
+
+                        table.rows().nodes().each(function(index) {
+                          var row = table.row(index);
+
+                          if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                            row.deselect();
+
+                            id = parseInt(row.id());
+
+                            var index = $.inArray(id, selected_rows);
+
+                            if (index !== -1) {
+                                selected_rows.splice(index, 1);
+                            }
+
+                            if (selected_rows.length == 0) {
+                                table.button('.delivered').disable();
+                            }
+                          }
+                        });
+                    }
+                }
+                @endif
                 ],
                 select: {
                     info: false,

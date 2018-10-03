@@ -3,7 +3,7 @@
 
 @section('content')
     <h1 class="mb-1">
-        Station Delivery Note ({{$sdn_id}})
+        Station Delivery Note ({{str_pad($sdn_id, 6, '0', STR_PAD_LEFT)}})
     </h1>
 
     <div class="card">

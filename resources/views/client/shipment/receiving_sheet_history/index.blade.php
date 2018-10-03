@@ -289,7 +289,7 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.id);
+                                row.push(values.id_padded);
                                 row.push(values.bookings);
                                 row.push(values.receiving);
                                 row.push(values.bookings - values.receiving);
