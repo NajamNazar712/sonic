@@ -42,8 +42,6 @@
                 </div>
 
 
-            </div>
-
 @endsection
 
 @section('css')
@@ -219,7 +217,7 @@
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
-                {data: 'arrival', name: 'arrival', class: 'align-middle arrival'},
+                {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
