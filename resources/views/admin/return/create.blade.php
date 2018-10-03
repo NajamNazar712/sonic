@@ -256,8 +256,8 @@
                                 $('#hub_id').val(data.hub);
                             }
 
-                            scan.attr('disabled', false);
                             scan.val('');
+                            scan.attr('disabled', false);
                             scan.focus();
                         });
                     }else {
@@ -287,8 +287,8 @@
                                     shipment_ids.push(data.shId);
                                 }
 
-                                scan.attr('disabled', false);
                                 scan.val('');
+                                scan.attr('disabled', false);
                                 scan.focus();
                             });
                         } else {
@@ -298,8 +298,8 @@
                                 containerId: 'toast-bottom-center'
                             });
 
-                            scan.attr('disabled', false);
                             scan.val('');
+                            scan.attr('disabled', false);
                             scan.focus();
                         }
                     }
