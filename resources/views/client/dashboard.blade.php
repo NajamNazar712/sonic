@@ -483,7 +483,6 @@
 
                     $("#service_select").prepend('<option value="" selected></option>').select2({
                         data:data2,
-                        allowClear:true,
                         placeholder: "Select Service",
                         width:'100%',
                         containerCssClass: 'select-xs',
