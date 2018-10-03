@@ -214,6 +214,7 @@
                     {
                         extend: 'excel',
                         title: 'Station Deposit Notes',
+                        className:'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
