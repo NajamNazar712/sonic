@@ -322,7 +322,7 @@
                     buttons: [
                     @if (session('role_id') == 1 || in_array(77, session('permissions')))
                         {
-                            text: 'Add Stock',
+                            text: '<i class="la la-plus"></i> Add Stock',
                             className: 'btn btn-primary add_stock',
                             enabled: true,
                             action: function (e, dt, node, config) {
@@ -334,7 +334,7 @@
 
                     @if (session('role_id') == 1 || in_array(78, session('permissions')))
                         {
-                            text:'Send Stock',
+                            text: '<i class="la la-send"></i> Send Stock',
                             className: 'btn btn-primary send_stock',
                             enabled:true,
                             action: function(e, dt, node, config){
