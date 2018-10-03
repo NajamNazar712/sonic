@@ -2146,11 +2146,12 @@ class DeliveryController extends Controller
         $imageName = $image->getClientOriginalName();
 //        $image_size = $image->getClientSize();
 
-        $imageName = explode('.', $imageName);
+        //$imageName = explode('.', $imageName);
+        $extension = $image->getClientOriginalExtension();
         $random = rand(1000, 100000);
         $now = Carbon::now();
         $time = $now->year . '_' . $now->month;
-        $slip = $time . $random . Auth::id() . '.' . $imageName[1];
+        $slip = $time . $random . Auth::id() . '.' . $extension;
         $image->move(public_path('uploads/sdn'), $slip);
 
         $imageUpload = StationDepositNote::find($request->sdn_id);
