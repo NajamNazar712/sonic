@@ -158,16 +158,9 @@ class ShipperFinanceController extends Controller
             }
         })
         ->filterColumn('status', function($query, $keyword) {
-            $keyword = strtolower($keyword);
 
-            if (strpos('processed', $keyword) !== FALSE) {
-                $query->where('done_payments.status', '=', 0);
-            }
-            else if (strpos('paid', $keyword) !== FALSE) {
-                $query->where('done_payments.status', '=', 1);
-            }
-            else if (strpos('reverted', $keyword) !== FALSE) {
-                $query->where('done_payments.status', '=', 2);
+            if ($keyword != '') {
+                $query->where('done_payments.status', '=', $keyword);
             }
             else {
                 $query->whereRaw('false');

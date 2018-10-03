@@ -244,7 +244,11 @@
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
                     var company_bank_select = '<select name="company_bank_select" id="company_bank_select" class="select2 form-control"></select>';
-
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Processed</option>' +
+                        '<option value="1">Paid</option>' +
+                        '<option value="2">Reverted</option>' +
+                        '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
@@ -261,6 +265,11 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
@@ -272,6 +281,12 @@
 							}
 						}
 					});
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     var data = $.map({!! $banks !!}, function (obj) {
                         obj.id = obj.id;
 

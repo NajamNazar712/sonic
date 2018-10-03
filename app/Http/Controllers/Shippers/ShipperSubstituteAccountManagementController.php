@@ -61,14 +61,11 @@ class ShipperSubstituteAccountManagementController extends Controller
 
         return $dropdown;
       })
-      ->filterColumn('substitute_users.status', function($query, $keyword) {
+      ->filterColumn('status', function($query, $keyword) {
         $keyword = strtolower($keyword);
 
-        if (strpos('enabled', $keyword) !== FALSE) {
-            $query->where('substitute_users.status', '=', 1);
-        }
-        else if (strpos('disabled', $keyword) !== FALSE) {
-            $query->where('substitute_users.status', '=', 0);
+        if ($keyword != '') {
+            $query->where('substitute_users.status', '=', $keyword);
         }
         else {
             $query->whereRaw('FALSE');
