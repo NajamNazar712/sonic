@@ -65,18 +65,18 @@
                     </thead>
                 </table>
                 <form id="create_delivery_note_form" class="" method="post" action="{{ route('admin.delivery.note.create') }}">
-                <div class="row justify-content-center">
+                    <div class="row justify-content-center">
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
                         <input type="hidden" name="selected_rider_id" id="selected_rider_id">
                         <input type="hidden" name="selected_route_id" id="selected_route_id">
                         <div class="col-3">
-                        <button type="submit" class="btn btn-primary btn-block ">Submit &amp; Print</button>
+                            <button type="submit" class="btn btn-primary btn-block ">Submit &amp; Print</button>
+
+                        </div>
 
                     </div>
-
-                </div>
                 </form>
             </div>
         </div>
@@ -140,12 +140,12 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-{{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
-            @if(session('print'))
+                    @if(session('print'))
             var pid = '{{ session('print') }}';
             print(pid);
             function print(id) {
@@ -176,43 +176,43 @@
                         }
                     });
             }
-            @endif
+                    @endif
 
             var shipment_ids = [];
-        var table = $('#datatable').DataTable({
-            dom: 'ltipr',
-            scrollX: true, scrollY: '350px',
-            lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-            pageLength: 50,
-            pagingType: 'full_numbers',
-            columns: [
-                {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                {name: 'tracking_number', class: 'align-middle tracking_number'},
-                {name: 'destination', class: 'align-middle destination'},
-                {name: 'consignee_name', class: 'align-middle consignee_name'},
-                {name: 'phone', class: 'align-middle phone'},
-                {name: 'address', class: 'align-middle address'},
-                {name: 'amount', class: 'align-middle amount'},
-                {name: 'service_type', class: 'align-middle service_type'},
-                {name: 'status', class: 'align-middle status'},
-                {name: 'remarks', class: 'align-middle remarks'},
-                {name: 'action', class: 'align-middle action'}
-            ],
-            rowCallback: function(row, data, index) {
-                var info = table.page.info();
+            var table = $('#datatable').DataTable({
+                dom: 'ltipr',
+                scrollX: true, scrollY: '350px',
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
+                columns: [
+                    {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
+                    {name: 'tracking_number', class: 'align-middle tracking_number'},
+                    {name: 'destination', class: 'align-middle destination'},
+                    {name: 'consignee_name', class: 'align-middle consignee_name'},
+                    {name: 'phone', class: 'align-middle phone'},
+                    {name: 'address', class: 'align-middle address'},
+                    {name: 'amount', class: 'align-middle amount'},
+                    {name: 'service_type', class: 'align-middle service_type'},
+                    {name: 'status', class: 'align-middle status'},
+                    {name: 'remarks', class: 'align-middle remarks'},
+                    {name: 'action', class: 'align-middle action'}
+                ],
+                rowCallback: function(row, data, index) {
+                    var info = table.page.info();
 
-                $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-            },
-            initComplete: function() {
-                var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+                    $('td:eq(0)', row).html(index + 1 + info.page * info.length);
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
-                var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
 
-                this.api().table().columns.adjust();
-            }
-        });
+                    this.api().table().columns.adjust();
+                }
+            });
 
 
             $('#rider_name').prepend('<option value="" selected="selected"></option>').select2({
@@ -228,13 +228,12 @@
             $('input#scan_tracking').focus();
             $('#scan_tracking').on('change',function () {
                 var scan = $(this);
-
-                scan.attr('disabled', true);
-
                 var tracking = scan.val();
                 var hub_id = $('#hub_id').val();
 
                 if (tracking != '') {
+                    scan.attr('disabled', true);
+
                     if(table.row().count() == 0) {
                         $.ajax({
                             url:'{{route('admin.delivery.note.shipment.info')}}',
@@ -250,7 +249,7 @@
                             }else{
                                 var rowNo = table.rows().count();
                                 var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.status,data.remarks,remove]).node().id = data.shId;
+                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 $('#hub_id').val(data.hub);
@@ -280,7 +279,7 @@
                                 }else{
                                     var rowNo = table.rows().count();
                                     var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.status,data.remarks,remove]).node().id = data.shId;
+                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
                                 }
@@ -291,7 +290,7 @@
                             });
                         }else{
                             var error = 'Tracking Number already scanned!';
-                                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                             scan.val('');
                             scan.attr('disabled', false);
@@ -299,20 +298,9 @@
                         }
                     }
                 }
-
-                // var ack = table.fnFilter( tracking );
-                // console.log(ack);
-                // if(table.columns(2).search( tracking ) == true){
-                //     console.log('yes');
-                // }else{
-                //     console.log(table.columns(2).search( tracking ).length);
-                //
-                // }
-
-
             });
             $('body').on('click','a.deliverynoterow',function () {
-               var rid = $(this).parents('tr').attr('id');
+                var rid = $(this).parents('tr').attr('id');
 
                 table.row( $(this).parents('tr') ).remove().draw();
                 shipment_ids.splice( $.inArray(rid, shipment_ids), 1 );
@@ -326,70 +314,70 @@
                 var this_form = this;
                 count = table.rows().count();
 
-                    var errors = 0;
-                    var rider = $('#rider_name').val();
-                    var route = $('#route').val();
-                    if (rider != '') {
+                var errors = 0;
+                var rider = $('#rider_name').val();
+                var route = $('#route').val();
+                if (rider != '') {
 
-                        $('#rider_error').css('display', 'none');
-                    } else {
+                    $('#rider_error').css('display', 'none');
+                } else {
 
-                        $('#rider_error').css('display', 'block');
-                    }
-                    if (route != '') {
+                    $('#rider_error').css('display', 'block');
+                }
+                if (route != '') {
 
-                        $('#route_error').css('display', 'none');
-                    } else {
+                    $('#route_error').css('display', 'none');
+                } else {
 
-                        $('#route_error').css('display', 'block');
-                    }
-                    if (rider != '' && route != '') {
-                        errors = 0;
-                    } else {
-                        errors = 1;
-                    }
-                    if(count > 0) {
-                        if (errors == 0) {
+                    $('#route_error').css('display', 'block');
+                }
+                if (rider != '' && route != '') {
+                    errors = 0;
+                } else {
+                    errors = 1;
+                }
+                if(count > 0) {
+                    if (errors == 0) {
 
-                            swal({
-                                title: 'Are You Sure?',
-                                text: 'Select Yes to create the Delivery Note!',
-                                icon: 'warning',
-                                buttons: {
-                                    cancel: {
-                                        text: 'No',
-                                        value: null,
-                                        visible: true,
-                                        closeModal: true,
-                                    },
-                                    confirm: {
-                                        text: 'Yes',
-                                        value: true,
-                                        visible: true,
-                                        closeModal: true
-                                    }
+                        swal({
+                            title: 'Are You Sure?',
+                            text: 'Select Yes to create the Delivery Note!',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
                                 },
-                                closeOnClickOutside: false,
-                                closeOnEsc: false,
-                                dangerMode: true
-                            }).then(function (confirm) {
-                                if(confirm){
-                                    $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
-                                    $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
-                                    $('#create_delivery_note_form input#selected_rider_id').val(rider);
-                                    $('#create_delivery_note_form input#selected_route_id').val(route);
-
-                                    this_form.submit();
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
                                 }
-                            });
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function (confirm) {
+                            if(confirm){
+                                $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
+                                $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                $('#create_delivery_note_form input#selected_rider_id').val(rider);
+                                $('#create_delivery_note_form input#selected_route_id').val(route);
 
+                                this_form.submit();
+                            }
+                        });
 
-                        }
-                    }else{
-                            var error = "Select at-least one shipment!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                     }
+                }else{
+                    var error = "Select at-least one shipment!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                }
 
 
 
