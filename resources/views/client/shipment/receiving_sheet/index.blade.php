@@ -177,6 +177,17 @@
 					className: 'btn btn-primary create',
 					enabled: false,
 					action: function (e, dt, node, config) {
+						table.button('.create').disable();
+
+						swal({
+							title: 'Please Wait!',
+							text: 'Your Receiving Sheet is being created!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+
 						$.ajax({
 							url: '{!! route('cod.shipment.receiving_sheet.store') !!}',
 							method: 'POST',
@@ -199,9 +210,9 @@
 
 							selected_rows = [];
 
-							table.button('.create').disable();
-
 							table.draw('false');
+
+							swal.close();
 						});
 					}
 				},
