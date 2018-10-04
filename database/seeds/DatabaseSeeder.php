@@ -50,5 +50,6 @@ class DatabaseSeeder extends Seeder
         $this->call(TransportModeVendorTableSeeder::class);
         $this->call(UsersTableSeeder::class);
         $this->call(UpdateBankNameTableSeeder::class);
+        $this->call(UpdatePhoneNumbersTableSeeder::class);
     }
 }
