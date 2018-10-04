@@ -234,7 +234,7 @@ class DeliveryController extends Controller
                         }
                     }
 
-                    return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'status' => $status, 'remarks' => $remarks]);
+                    return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status, 'remarks' => $remarks]);
                 }
             }else{
                     return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];
