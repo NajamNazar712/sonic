@@ -11,7 +11,7 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form action="#" id="return_note_form"></form>
+                <form action="#" id="return_note_form">
                 <div class="row justify-content-center mb-2">
                     <div class="col-3">
                         <fieldset>
@@ -19,6 +19,7 @@
                         </fieldset>
                     </div>
                 </div>
+                </form>
                 <div class="row mb-2 justify-content-center">
 
                     <div class="col-3">
