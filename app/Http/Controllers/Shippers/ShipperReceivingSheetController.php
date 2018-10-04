@@ -327,7 +327,7 @@ class ShipperReceivingSheetController extends Controller
                           </tr>
         ';
 
-        foreach ($receiving_sheet_shipments->get() as $receiving_sheet_shipment) {
+        foreach ($receiving_sheet_shipments->orderBy('shipment_id')->get() as $receiving_sheet_shipment) {
           $total_shipments++;
 
           $shipment = Shipment::find($receiving_sheet_shipment->shipment_id);
