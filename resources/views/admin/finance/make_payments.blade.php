@@ -919,7 +919,31 @@
 				})
 				.done(function(data) {
 					if (data.status == 0) {
-						form.submit();
+						swal({
+							text: 'Are you sure, you want to make the Payments?',
+							icon: 'warning',
+							buttons: {
+								cancel: {
+									text: 'No',
+									value: null,
+									visible: true,
+									closeModal: true,
+								},
+								confirm: {
+									text: 'Yes',
+									value: true,
+									visible: true,
+									closeModal: true
+								}
+							},
+							closeOnClickOutside: false,
+							closeOnEsc: false,
+							dangerMode: true
+						}).then(function(confirm) {
+							if (confirm) {
+								form.submit();
+							}
+						});
 					}
 					else {
 						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
