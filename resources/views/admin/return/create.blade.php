@@ -224,13 +224,12 @@
             $('input#scan_tracking').focus();
             $('#scan_tracking').on('change',function () {
                 var scan = $(this);
-
-                scan.attr('disabled', true);
-
                 var tracking = scan.val();
                 var hub_id = $('#hub_id').val();
 
                 if (tracking != '') {
+                    scan.attr('disabled', true);
+
                     if(table.row().count() == 0) {
                         $.ajax({
                             url: '{{route('admin.return.create.shipment_details')}}',
