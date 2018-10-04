@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class CargoConsignment extends Model
 {
 	public function cargo_consignment_shipments() {
-		return $this->hasMany('App\Http\Models\CargoConsignmentShipment');
+		return $this->hasMany('App\Http\Models\CargoConsignmentShipment')->orderBy('shipment_id');
 	}
 
 	public function origin_hub() {

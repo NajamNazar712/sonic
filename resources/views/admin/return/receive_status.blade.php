@@ -20,6 +20,7 @@
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1"></th>
                             <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Shipment ID</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Shipper</th>
                             <th class="border-primary border-darken-1">Status</th>
@@ -262,10 +263,12 @@
                 serverSide: false,
                 ajax: '{{ route('admin.return.receive.status.list',['id'=>$return_note_id]) }}',
                 rowId: 'shId',
-                order: [[3, 'asc']],
+                order: [[2, 'asc']],
+                ordering: false,
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data:'shipment_id_padded',name: 'shipments.id', class: 'align-middle shipment_id'},
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'shipper',name: 'users.name', class: 'align-middle shipper'},
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},

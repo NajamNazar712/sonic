@@ -695,7 +695,9 @@ class ReturnController extends Controller
         }
 
         return Datatables::of($deliveries)
-
+            ->addColumn('shipment_id_padded', function ($deliveries) {
+                return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
+            })
             ->addColumn('status', function ($deliveries) {
                 $delivered_array = array(25,31,38);
                 if(in_array($deliveries->shipper_status_id,$delivered_array)){
@@ -904,7 +906,7 @@ class ReturnController extends Controller
         if($return_note->exists()) {
             $total_shipments = 0;
             $shipment_ids = ReturnNoteShipment::where('return_note_id',$request->id)->select('shipment_id')->get();
-            $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->get();
+            $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->get();
             $shipment_details = '
                       <table class="table table-sm table-bordered border">
                         <tbody>
