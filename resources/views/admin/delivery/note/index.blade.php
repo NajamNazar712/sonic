@@ -12,7 +12,7 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
-
+                <form action="#" id="delivery_note_form">
                 <div class="row justify-content-center mb-2">
                     <div class="col-3">
                         <fieldset>
@@ -20,6 +20,7 @@
                         </fieldset>
                     </div>
                 </div>
+                </form>
                 <div class="row mb-2 justify-content-center">
 
                     <div class="col-3">
@@ -225,9 +226,13 @@
                 var route = $(this).find(":selected").data("id");
                 $('#route').val(route).trigger('change');
             });
+            $('#scan_tracking').on('change',function() {
+                $(this).val($(this).val().trim());
+            });
             $('input#scan_tracking').focus();
-            $('#scan_tracking').on('change',function () {
-                var scan = $(this);
+            $('#delivery_note_form').on('submit',function (e) {
+                e.preventDefault();
+                var scan = $('#scan_tracking');
                 var tracking = scan.val();
                 var hub_id = $('#hub_id').val();
 
