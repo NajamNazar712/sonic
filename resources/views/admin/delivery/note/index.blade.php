@@ -250,7 +250,7 @@
                             }else{
                                 var rowNo = table.rows().count();
                                 var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.status,data.remarks,remove]).node().id = data.shId;
+                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 $('#hub_id').val(data.hub);
