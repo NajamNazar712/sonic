@@ -224,13 +224,12 @@
             $('input#scan_tracking').focus();
             $('#scan_tracking').on('change',function () {
                 var scan = $(this);
-
-                scan.attr('disabled', true);
-
                 var tracking = scan.val();
                 var hub_id = $('#hub_id').val();
 
                 if (tracking != '') {
+                    scan.attr('disabled', true);
+
                     if(table.row().count() == 0) {
                         $.ajax({
                             url: '{{route('admin.return.create.shipment_details')}}',
@@ -244,13 +243,13 @@
                             if (data.status == 1) {
 
                                 toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
+                                    positionClass: 'toast-top-center',
+                                    containerId: 'toast-top-center'
                                 });
                             } else {
                                 var rowNo = table.rows().count();
                                 var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
-                                table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
+                                table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 $('#hub_id').val(data.hub);
@@ -276,13 +275,13 @@
                                 if (data.status == 1) {
 
                                     toastr.error(data.error, 'Error!', {
-                                        positionClass: 'toast-bottom-center',
-                                        containerId: 'toast-bottom-center'
+                                        positionClass: 'toast-top-center',
+                                        containerId: 'toast-top-center'
                                     });
                                 } else {
                                     var rowNo = table.rows().count();
                                     var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                                    table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.status, remove]).node().id = data.shId;
+                                    table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
                                 }

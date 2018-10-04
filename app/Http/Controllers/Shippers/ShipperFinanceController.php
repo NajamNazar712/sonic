@@ -307,7 +307,7 @@ class ShipperFinanceController extends Controller
                               <td class="color secondary"><strong>Payment ID</strong></td>
                               <td>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT). '</td>
                               <td rowspan="11" class="text-center align-middle">
-                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($done_payment->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($done_payment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                                 <span><strong>' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                               </td>
                             </tr>

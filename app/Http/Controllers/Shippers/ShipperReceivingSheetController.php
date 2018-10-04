@@ -451,7 +451,7 @@ class ShipperReceivingSheetController extends Controller
                             <td class="color secondary"><strong>Shipper</strong></td>
                             <td>' . Auth::user()->name . '</td>
                             <td rowspan="7" class="text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode($request->id, $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
                               <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
                             </td>
                           </tr>
