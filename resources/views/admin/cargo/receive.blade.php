@@ -142,19 +142,25 @@
 							}
 						})
 						.done(function(data) {
-							$('#add_shipment_form button.add').prop('disabled', false);
-
 							if (data.status == 0) {
-								table.row.add([0, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]);
-								table.draw(false);
+								id = data.details.id;
 
-								shipment_ids.push(data.details.id);
+								var index = $.inArray(id, shipment_ids);
 
-								$('#information .scanned').html(shipment_ids.length);
+								if (index === -1) {
+									table.row.add([0, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]);
+									table.draw(false);
 
-								$('#receive_form .receive').prop('disabled', false);
+									shipment_ids.push(data.details.id);
 
-								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									$('#information .scanned').html(shipment_ids.length);
+
+									$('#add_shipment_form button.add').prop('disabled', false);
+
+									$('#receive_form .receive').prop('disabled', false);
+
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
 							}
 							else {
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -166,8 +172,6 @@
 
 						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 					}
-
-					$('#add_shipment_form button.add').prop('disabled', false);
 
 					return false;
 				}
