@@ -119,7 +119,7 @@
                     {data:'phone',name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data:'action',name: 'action', class: 'align-middle action'}
+                    {data:'action',name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

@@ -373,8 +373,6 @@
                             tab.document.close();
                             tab.focus();
                         }
-                        location.reload();
-
                     });
             }
 
