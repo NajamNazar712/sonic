@@ -122,7 +122,7 @@
                     {data:'address',name: 'address', class: 'align-middle address'},
                     {data:'amount',name: 'amount', class: 'align-middle amount'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
-                    {data:'action',name: 'action', class: 'align-middle action'}
+                    {data:'action',name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

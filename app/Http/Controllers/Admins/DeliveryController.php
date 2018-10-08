@@ -551,7 +551,7 @@ class DeliveryController extends Controller
         if($delivery_note->exists()) {
             $total_shipments = 0;
             $total_cod_amount = 0;
-            $shipments = DeliveryNoteShipment::where('delivery_note_id',$request->id)->select('shipment_id')->get();
+            $shipments = DeliveryNoteShipment::where('delivery_note_id',$request->id)->select('shipment_id')->orderBy('shipment_id')->get();
 
             $shipment_details = '
                       <table class="table table-sm table-bordered border">
@@ -724,6 +724,9 @@ class DeliveryController extends Controller
                     }
                 },
             ])
+            ->addColumn('shipment_id_padded', function ($deliveries) {
+                return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
+            })
             ->addColumn('status', function ($deliveries) {
                 $where = array(7,8,9,10,11,12,15,18);
                 $statuses = ShipmentStatus::whereIn('id',$where)->get();
@@ -986,7 +989,9 @@ class DeliveryController extends Controller
             ->where('delivery_notes.id',$id);
 
         return Datatables::of($deliveries)
-
+            ->addColumn('shipment_id_padded', function ($deliveries) {
+                return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
+            })
             ->addColumn('status', function ($deliveries) {
                 if($deliveries->booking_type_id == 1){
                     $where = array(7,8,9,10,11,12,15,18,20);
@@ -1319,7 +1324,7 @@ class DeliveryController extends Controller
                 $total_cod_amount = 0;
                 $dncc_status = array(14,16,30,36,37);
                 $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$request->id)->select('shipment_id')->get();
-                $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereIn('shipper_status_id',$dncc_status)->get();
+                $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereIn('shipper_status_id',$dncc_status)->orderBy('id')->get();
                 //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
                 $shipment_details = '
                       <table class="table table-sm table-bordered border">
@@ -1577,7 +1582,7 @@ class DeliveryController extends Controller
             $total_cod_amount = 0;
             $dncc_status = array(5,14,16,30,36,37);
             $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$request->id)->select('shipment_id')->get();
-            $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereNotIn('shipper_status_id',$dncc_status)->get();
+            $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereNotIn('shipper_status_id',$dncc_status)->orderBy('id')->get();
             //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
             $shipment_details = '
                       <table class="table table-sm table-bordered border">

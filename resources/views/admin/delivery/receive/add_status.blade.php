@@ -21,6 +21,7 @@
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1"></th>
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Shipment ID</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Consignee</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
@@ -377,10 +378,12 @@
                 serverSide: false,
                 ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
-                order: [[10, 'asc']],
+                order: [[2, 'asc']],
+                ordering: false,
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data:'shipment_id_padded',name: 'shipments.id', class: 'align-middle shipment_id'},
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
                     {data:'amount',name: 'amount', class: 'align-middle amount'},

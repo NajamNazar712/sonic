@@ -245,21 +245,29 @@
 
 							$('#add_shipment_form input.tracking_number').val('').focus();
 
-							$('#add_shipment_form button.add').prop('disabled', false);
-
 							remove_button = '<button type="button" class="btn btn-icon btn-danger"><i class="la la-close"></i></button>';
 
 							if (data.status == 0) {
-								table.row.add([0, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).node().id = data.details.id;
-								table.draw(false);
+								id = data.details.id;
 
-								shipment_ids.push(data.details.id);
+								var index = $.inArray(id, shipment_ids);
 
-								$('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+								if (index === -1) {
+									table.row.add([0, data.details.tracking_number, data.details.receiving_sheet_no, data.details.order_id, data.details.destination, data.details.cod_amount, data.details.estimated_weight, data.details.actual_weight, remove_button]).node().id = data.details.id;
+									table.draw(false);
 
-								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+									shipment_ids.push(data.details.id);
+
+									$('#add_shipment_form button.add').prop('disabled', false);
+
+									$('#arrival_of_shipments_form button.confirm').prop('disabled', false);
+
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+								}
 							}
 							else {
+								$('#add_shipment_form button.add').prop('disabled', false);
+
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 							}
 						});

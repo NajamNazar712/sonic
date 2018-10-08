@@ -244,39 +244,47 @@
 							}
 						})
 						.done(function(data) {
-							$('#add_shipment_form button.add').prop('disabled', false);
-
 							if (data.status == 0) {
-								table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount]);
-								table.draw(false);
+								id = data.details.id;
 
-								shipment_ids.push(data.details.id);
+								var index = $.inArray(id, shipment_ids);
 
-								$('#information .scanned').html(shipment_ids.length);
+								if (index === -1) {
+									table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount]);
+									table.draw(false);
 
-								if (hub_id == 0) {
-									hub_id = data.details.hub.id;
+									shipment_ids.push(data.details.id);
 
-									$('#information .hub').html(data.details.hub.name);
+									$('#information .scanned').html(shipment_ids.length);
 
-									$('#information .total').html(data.details.total);
+									if (hub_id == 0) {
+										hub_id = data.details.hub.id;
+
+										$('#information .hub').html(data.details.hub.name);
+
+										$('#information .total').html(data.details.total);
+									}
+
+									if (shipping_mode_id == 0) {
+										shipping_mode_id = data.details.shipping_mode.id;
+
+										$('#information .shipping_mode').html(data.details.shipping_mode.name);
+									}
+
+									if (cargo_type == 0) {
+										cargo_type = data.details.cargo_type;
+									}
+
+									$('#add_shipment_form button.add').prop('disabled', false);
+
+									$('#cargo_consignment_confirm').prop('disabled', false);
+
+									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
-
-								if (shipping_mode_id == 0) {
-									shipping_mode_id = data.details.shipping_mode.id;
-
-									$('#information .shipping_mode').html(data.details.shipping_mode.name);
-								}
-
-								if (cargo_type == 0) {
-									cargo_type = data.details.cargo_type;
-								}
-
-								$('#cargo_consignment_confirm').prop('disabled', false);
-
-								toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 							}
 							else {
+								$('#add_shipment_form button.add').prop('disabled', false);
+
 								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 							}
 						});
