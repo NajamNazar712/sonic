@@ -209,7 +209,7 @@
                 {data: 'phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
                 {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                 {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                {data: 'mode', name: 'shipping_mode', class: 'align-middle mode'},
+                {data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
                 {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
@@ -245,7 +245,7 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    }else if($(header).is('.mode')){
+                    }else if($(header).is('.shipping_mode')){
                         $(mode_drop_select).appendTo($(search))
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();

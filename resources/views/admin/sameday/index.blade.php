@@ -195,9 +195,9 @@
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_phone', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'product_name', name: 'product', class: 'align-middle product_name'},
+                    {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                     {data: 'timing', name: 'sms.id', class: 'align-middle timing'},
-                    {data: 'current_status', name: 'status', class: 'align-middle current_status'},
+                    {data: 'current_status', name: 'current_status', class: 'align-middle current_status'},
                     {data: 'booked_date', name: 'shipments.created_at', class: 'align-middle booked_date'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'dispatched_time', name: 'dispatched.created_at', class: 'align-middle dispatched_time'},
@@ -230,7 +230,7 @@
 
                         if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.delivered_status') || $(header).is('.tat') || $(header).is('.remaining_time')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.product_name')){
+                        }else if($(header).is('.product_type')){
                             $(product_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();

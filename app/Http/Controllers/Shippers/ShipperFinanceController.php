@@ -167,7 +167,7 @@ class ShipperFinanceController extends Controller
                 $query->whereRaw('false');
             }
         })
-        ->filterColumn('banks', function($query, $keyword) {
+        ->filterColumn('bank', function($query, $keyword) {
 
                 if ($keyword !='') {
                     $query->where('ub.id', '=', $keyword);
@@ -176,7 +176,7 @@ class ShipperFinanceController extends Controller
                     $query->whereRaw('false');
                 }
         })
-        ->filterColumn('company_banks', function($query, $keyword) {
+        ->filterColumn('company_bank', function($query, $keyword) {
 
                 if ($keyword !='') {
                     $query->where('b.id', '=', $keyword);

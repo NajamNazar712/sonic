@@ -71,7 +71,7 @@ class SamedayController extends Controller
             })
             ->leftjoin('shipment_status as sst','sst.id','=','last_update.shipper_status_id')
             ->leftjoin('admins as updater','updater.id','=','last_update.admin_id')
-            ->select('shipments.id as shId','shipments.booking_type_id','shipments.tracking_number','shipments.tracking_number as tracking_no','u.name as shipper','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address','p.product_name','sms.id as timing_id','sms.timing','sj.created_at as arrival','shipments.created_at as booked_date','shipments.pickup_date','dispatched.created_at as dispatched_time','regular_delivery.created_at as delivered_time','trybuy_delivery.created_at as trybuy_delivered','replacement_delivery.created_at as replacement_delivered','updater.name as updated_by','sst.name as current_status','shipments.shipper_status_id', 'shipments.special_instructions as instructions')
+            ->select('shipments.id as shId','shipments.booking_type_id','shipments.tracking_number','shipments.tracking_number as tracking_no','u.name as shipper','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as consignee_phone','shipments.consignee_address','p.product_name as product_type','sms.id as timing_id','sms.timing','sj.created_at as arrival','shipments.created_at as booked_date','shipments.pickup_date','dispatched.created_at as dispatched_time','regular_delivery.created_at as delivered_time','trybuy_delivery.created_at as trybuy_delivered','replacement_delivery.created_at as replacement_delivered','updater.name as updated_by','sst.name as current_status','shipments.shipper_status_id', 'shipments.special_instructions as instructions')
 
             ->where('shipments.shipping_mode_id',4)
             ->whereNotIn('shipments.shipper_status_id',[39,40,41,42,43,47])
@@ -122,7 +122,7 @@ class SamedayController extends Controller
                     return " - ";
                 }
             })
-            ->filterColumn('status',function ($query,$keyword){
+            ->filterColumn('current_status',function ($query,$keyword){
 
                 if ($keyword != '') {
                     $query->where('sst.id',$keyword);
@@ -131,7 +131,7 @@ class SamedayController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->filterColumn('product',function ($query,$keyword){
+            ->filterColumn('product_type',function ($query,$keyword){
 
                 if ($keyword != '') {
                     $query->where('p.id',$keyword);
