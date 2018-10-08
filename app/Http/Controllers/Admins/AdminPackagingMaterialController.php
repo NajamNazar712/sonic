@@ -219,6 +219,32 @@ class AdminPackagingMaterialController extends Controller
             return 0;
         }
     }
+    protected function sub_hub_stock($hub,$small,$medium,$large,$box){
+        $head_stocks = PackagingMaterialStockHub::where('hub_id',$hub)->first();
+        $small_flyers = 0; $medium_flyers = 0; $medium_flyers = 0; $large_flyers = 0;
+        $small_flyers = $head_stocks->small_flyers;
+        $medium_flyers = $head_stocks->medium_flyers;
+        $large_flyers = $head_stocks->large_flyers;
+        $boxes = $head_stocks->boxes;
+        if($small <= $small_flyers && $medium <= $medium_flyers && $large <= $large_flyers && $box <= $boxes){
+
+            $small_flyers -= $small;
+            $medium_flyers -= $medium;
+            $large_flyers -= $large;
+            $boxes -= $box;
+            $packaging_head =  PackagingMaterialStockHub::where('hub_id',$hub)->update([
+                'small_flyers'=>$small_flyers,
+                'medium_flyers'=>$medium_flyers,
+                'large_flyers'=>$large_flyers,
+                'boxes'=>$boxes
+            ]);
+            if($packaging_head){
+                return 1;
+            }
+        }else{
+            return 0;
+        }
+    }
     public function request_index(Request $request){
         $payment_mode = PackagingPaymentMode::all();
         $packaging = PackagingMaterialStockHead::latest()->first();
@@ -264,8 +290,25 @@ class AdminPackagingMaterialController extends Controller
     }
     public function request_dispatch_submit(Request $request){
         $request_id = $request->id;
-        $head_stocks = PackagingMaterialStockHead::latest()->first();
+
         $request_details = PackagingMaterialRequest::where('id',$request_id)->with('city')->first();
+
+        $hub_id = $request_details->city->hub_id;
+
+        if ($hub_id == 202) {
+            $head_stocks = PackagingMaterialStockHead::latest()->first();
+        }
+        else {
+            $head_stocks = PackagingMaterialStockHub::where('hub_id',$hub_id);
+
+            if (!$head_stocks->exists()) {
+                return response()->json(['status'=>0,'error'=>"No stock exists!"]);
+            }
+            else {
+                $head_stocks = $head_stocks->first();
+            }
+        }
+
 //        return $request_details->city->hub_id;
         if($request_details->small_flyers > $head_stocks->small_flyers || $request_details->medium_flyers > $head_stocks->medium_flyers || $request_details->large_flyers > $head_stocks->large_flyers || $request_details->boxes > $head_stocks->boxes){
             return response()->json(['status'=>0,'error'=>"Insufficient quantity!"]);
@@ -285,7 +328,6 @@ class AdminPackagingMaterialController extends Controller
 //                }
 //            }
 
-               $hub_id = $request_details->city->hub_id;
                $pickup_address = UserShippingInfo::where(['user_id'=>$request_details->user_id,'city_id'=>$hub_id,'hidden'=>1]);
                if(!$pickup_address->exists()){
                    $shipper_details = User::where('id',$request_details->user_id)->select('name','poc','phone','email')->first();
@@ -338,8 +380,13 @@ class AdminPackagingMaterialController extends Controller
                ShipmentsJourneyController::add($shipment->id, 2, 2, NULL, NULL, $request_details->user_id, NULL);
 
                ShipmentChargesController::packaging_material($shipment->id, $request_details->packaging_payment_mode_id, $request_details->amount);
+                if ($hub_id == 202) {
+                    $this->sub_head_stock($request_details->small_flyers,$request_details->medium_flyers,$request_details->large_flyers,$request_details->boxes);
+                }
+                else {
+                    $this->sub_hub_stock($hub_id,$request_details->small_flyers,$request_details->medium_flyers,$request_details->large_flyers,$request_details->boxes);
+                }
 
-                $this->sub_head_stock($request_details->small_flyers,$request_details->medium_flyers,$request_details->large_flyers,$request_details->boxes);
                 $request_details->status = 1;
                 $request_details->save();
                 return response()->json(['status'=>1,'success'=>"Packaging Material has been dispatched successfully!"]);
