@@ -105,10 +105,10 @@ class ShipperReceivingSheetHistoryController extends Controller
         $keyword = intval($keyword);
 
         if ($keyword != 0) {
-          $query->where('receiving_sheet_received.receiving_sheet_id', '=', $keyword);
+          $query->where('receiving_sheets.id', '=', $keyword);
         }
         else {
-          $query->whereNotNull('receiving_sheet_received.receiving_sheet_id');
+          $query->whereNotNull('receiving_sheets.id');
         }
       })
       ->make(true);
