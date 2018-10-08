@@ -350,6 +350,8 @@
                                 row.push(values.gst);
                                 row.push(values.total_charges);
                                 row.push(values.net_payable);
+                                row.push(values.total_estimated_charges);
+                                row.push(values.d_r_date);
 
                                 body.push(row);
                             });
@@ -413,7 +415,7 @@
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'gst' ,name: 'pps.gst', class: 'align-middle gst'},
                     { data:'total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
-                    { data:'net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
+                    { data:'net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
