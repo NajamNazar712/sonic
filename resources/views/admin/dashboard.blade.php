@@ -405,7 +405,7 @@
                     {data: 'phone', name: 'phone', class: 'align-middle phone',orderable:false,searchable:false},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'product_type', name: 'product', class: 'align-middle product_type'},
+                    {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}

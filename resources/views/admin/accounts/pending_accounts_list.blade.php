@@ -196,7 +196,7 @@
                 {data: 'phone', name: 'phone', class: 'align-middle phone'},
                 {data: 'address', name: 'address', class: 'align-middle address'},
                 {data: 'email', name: 'email', class: 'align-middle email'},
-                {data: 'product_name', name: 'products', class: 'align-middle product_name'},
+                {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'created_at', name: 'created_at', class: 'align-middle created'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
@@ -231,7 +231,7 @@
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             } ).wrap(td);
-                    }else if($(header).is('.product_name')){
+                    }else if($(header).is('.product_type')){
                         $(product_select).appendTo($(search))
                             .on( 'change', function () {
                                 column.search($(this).val(), false, false, true).draw();

@@ -164,7 +164,7 @@ class ShipperDashboardController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->filterColumn('product',function ($query,$keyword){
+            ->filterColumn('product_type',function ($query,$keyword){
 
                 if ($keyword != '') {
                     $query->where('p.id',$keyword);
