@@ -203,15 +203,21 @@
 					if (data) {
 						var shipments = '';
 
-						$.each(data.short_received, function(receiving_sheet_id, tracking_numbers) {
-							var receiving_sheet_number = receiving_sheet_id.toString();
+						if (data.short_received) {
+							$.each(data.short_received, function(receiving_sheet_id, tracking_numbers) {
+								var receiving_sheet_number = receiving_sheet_id.toString();
 
-							while (receiving_sheet_number.length < 12) {
-								receiving_sheet_number = '0' + receiving_sheet_number;
-							}
+								while (receiving_sheet_number.length < 12) {
+									receiving_sheet_number = '0' + receiving_sheet_number;
+								}
 
-							shipments += receiving_sheet_number + ': ' + tracking_numbers.join(' - ') + '<br/>';
-						});
+								shipments += receiving_sheet_number + ': ' + tracking_numbers.join(' - ') + '<br/>';
+							});
+						}
+
+						if (data.voided_short_received) {
+							shipments += 'Shipments Voided from Receiving Sheet: ' + data.voided_short_received.join(' - ') + '<br/>';
+						}
 
 						$('#short_received_shipments .modal-body').html(shipments);
 
@@ -267,7 +273,7 @@
 						if (data.status == 0) {
                             var html = '';
 
-							if (data.short_received || data.over_received) {
+							if (data.short_received || data.voided_short_received || data.over_received) {
 								if (data.short_received) {
                                     html += 'There are shipments that are short received from:<br/>';
 
@@ -283,6 +289,12 @@
 
                                     html += '<br/>';
                                 }
+
+                                if (data.voided_short_received) {
+									html += 'Shipments Voided from Receiving Sheet: ' + data.voided_short_received.join(' - ') + '<br/>';
+
+									html += '<br/>';
+								}
 
 								if (data.over_received) {
 									html += 'There are shipments that are over received:<br/>';
