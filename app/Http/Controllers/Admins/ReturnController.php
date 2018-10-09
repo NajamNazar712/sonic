@@ -613,7 +613,8 @@ class ReturnController extends Controller
     }
 
     public function return_receive_update(Request $request,$id){
-        return view('admin.return.receive_update')->with('return_note_id',$id);
+        $service_type = BookingType::all();
+        return view('admin.return.receive_update')->with(['return_note_id'=>$id,'service_type'=>$service_type]);
     }
     public function return_receive_update_list(Request $request,$id){
         $deliveries = ReturnNote::join('return_note_shipments as dns','dns.return_note_id','=','return_notes.id')
@@ -631,6 +632,15 @@ class ReturnController extends Controller
             ->addColumn("action", function ($deliveries) {
                 return "<a href='javascript:void(0);' class='returnnoterow'>Remove</a>";
 
+            })
+            ->filterColumn('service_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('bt.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->make(true);
     }
