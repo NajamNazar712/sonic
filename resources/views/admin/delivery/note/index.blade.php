@@ -197,7 +197,7 @@
                     {name: 'service_type', class: 'align-middle service_type'},
                     {name: 'status', class: 'align-middle status'},
                     {name: 'remarks', class: 'align-middle remarks'},
-                    {name: 'action', class: 'align-middle action'}
+                    {name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
