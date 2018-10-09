@@ -421,7 +421,8 @@ class DeliveryController extends Controller
             }
     }
     public function receive_delivery_update(Request $request,$id){
-        return view('admin.delivery.receive.update')->with('delivery_note_id', $id);
+        $service_type = BookingType::all();
+        return view('admin.delivery.receive.update')->with(['delivery_note_id'=>$id,'service_type'=>$service_type]);
     }
     public function receive_delivery_notes_list(Request $request,$id){
         $deliveries = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id','=','delivery_notes.id')
@@ -439,6 +440,15 @@ class DeliveryController extends Controller
             ->addColumn("action", function ($deliveries) {
                return "<a href='javascript:void(0);' class='deliverynoterow'>Remove</a>";
 
+            })
+            ->filterColumn('service_type',function ($query,$keyword){
+
+                if ($keyword != '') {
+                    $query->where('bt.id',$keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->make(true);
 

@@ -115,12 +115,12 @@
                 order: [[1, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data:'tracking_number',name: 'tracking_number', class: 'align-middle tracking_number'},
-                    {data:'destination',name: 'destination', class: 'align-middle destination'},
-                    {data:'consignee_name',name: 'consignee_name', class: 'align-middle consignee_name'},
-                    {data:'phone',name: 'phone', class: 'align-middle phone'},
-                    {data:'address',name: 'address', class: 'align-middle address'},
-                    {data:'amount',name: 'amount', class: 'align-middle amount'},
+                    {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data:'destination',name: 'oc.name', class: 'align-middle destination'},
+                    {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data:'phone',name: 'shipments.consignee_phone_number_1', class: 'align-middle phone'},
+                    {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
+                    {data:'amount',name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
                     {data:'action',name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
@@ -135,7 +135,7 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -145,6 +145,11 @@
                         }
                         else if ($(header).is('.action')) {
                             $(td).appendTo($(search));
+                        }else if($(header).is('.service_type')){
+                            $(service_drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -155,6 +160,24 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.text = obj.booking_type;
+
+                        return obj;
+                    });
+
+                    $("#service_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Select Service",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
