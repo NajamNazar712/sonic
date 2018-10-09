@@ -291,7 +291,7 @@
                                 }
 
                                 if (data.voided_short_received) {
-									shipments += 'Shipments Voided from Receiving Sheet: ' + data.voided_short_received.join(' - ') + '<br/>';
+									html += 'Shipments Voided from Receiving Sheet: ' + data.voided_short_received.join(' - ') + '<br/>';
 
 									html += '<br/>';
 								}
