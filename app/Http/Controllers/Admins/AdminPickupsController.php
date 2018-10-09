@@ -1456,12 +1456,19 @@ class AdminPickupsController extends Controller
         $pickup_request_short_received_shipments = $pickup_request->pickup_request_short_received_shipments;
 
         $short_shipments = array();
+        $voided_short_shipments = array();
+
         if ($pickup_request_short_received_shipments->count() != 0) {
 
             foreach ($pickup_request_short_received_shipments as $pickup_request_short_received_shipment) {
                 $shipment = $pickup_request_short_received_shipment->shipment;
 
-                $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
+                if ($shipment->receiving_sheet_shipment) {
+                    $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
+                }
+                else {
+                  $voided_short_shipments[] = $shipment->tracking_number;
+                }
             }
 
 //            return ['status' => 0, 'success' => 'Shipments found Short Received', 'short_received' => $short_shipments];
@@ -1485,15 +1492,19 @@ class AdminPickupsController extends Controller
             $short_shipments = FALSE;
         }
 
+        if (empty($voided_short_shipments)) {
+            $voided_short_shipments = FALSE;
+        }
+
         if (empty($over_received_shipments)) {
             $over_received_shipments = FALSE;
         }
 
 
-        if ($short_shipments || $over_received_shipments) {
-            return ['status' => 0, 'success' => 'Shipments found Over Received', 'over_received' => $over_received_shipments,'short_received' => $short_shipments];
+        if ($short_shipments || $voided_short_shipments || $over_received_shipments) {
+            return ['status' => 0, 'success' => 'Shipments found Short or Over Received', 'short_received' => $short_shipments, 'voided_short_received' => $voided_short_shipments, 'over_received' => $over_received_shipments];
         }else{
-            return ['status' => 0, 'success' => 'No Short Received Shipments', 'short_received' => FALSE, 'over_received' => FALSE];
+            return ['status' => 0, 'success' => 'No Short or Over Received Shipments', 'short_received' => FALSE, 'voided_short_received' => FALSE, 'over_received' => FALSE];
 
         }
 
@@ -1530,14 +1541,28 @@ class AdminPickupsController extends Controller
 
       if ($pickup_request_short_received_shipments->count() != 0) {
         $short_shipments = array();
+        $voided_short_shipments = array();
 
         foreach ($pickup_request_short_received_shipments as $pickup_request_short_received_shipment) {
           $shipment = $pickup_request_short_received_shipment->shipment;
 
-          $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
+          if ($shipment->receiving_sheet_shipment) {
+            $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT)][] = $shipment->tracking_number;
+          }
+          else {
+            $voided_short_shipments[] = $shipment->tracking_number;
+          }
         }
 
-        return ['status' => 0, 'success' => 'Shipments found Short Received', 'short_received' => $short_shipments];
+        if (empty($short_shipments)) {
+          $short_shipments = FALSE;
+        }
+
+        if (empty($voided_short_shipments)) {
+          $voided_short_shipments = FALSE;
+        }
+
+        return ['status' => 0, 'success' => 'Shipments found Short Received', 'short_received' => $short_shipments, 'voided_short_received' => $voided_short_shipments];
       }
       else {
         return ['status' => 0, 'success' => 'No Short Received Shipments', 'short_received' => FALSE];
@@ -1579,11 +1604,15 @@ class AdminPickupsController extends Controller
           foreach ($pickup_request->pickup_request_short_received_shipments as $pickup_request_short_received_shipment) {
             $shipment = $pickup_request_short_received_shipment->shipment;
 
-           $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT)][] = $shipment->id;
+              if ($shipment->receiving_sheet_shipment) {
+                  $short_shipments[str_pad($shipment->receiving_sheet_shipment->receiving_sheet_id, 6, '0', STR_PAD_LEFT)][] = $shipment->id;
+                }
           }
 
-          foreach ($short_shipments as $receiving_sheet_id => $short_shipment_ids) {
-            DisputeController::add_short_received_shipments($receiving_sheet_id, $short_shipment_ids);
+          if (!empty($short_shipments)) {
+            foreach ($short_shipments as $receiving_sheet_id => $short_shipment_ids) {
+              DisputeController::add_short_received_shipments($receiving_sheet_id, $short_shipment_ids);
+            }
           }
         }
           $pickup_request_over_received_shipments = PickupRequestReceivedShipment::where('pickup_request_id', $pickup_request_id)->where('over_received', 1);
