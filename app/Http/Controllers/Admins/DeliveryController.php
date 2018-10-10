@@ -248,7 +248,6 @@ class DeliveryController extends Controller
         }
     }
     public function create_delivery_note(Request $request){
-        return $request;
         $shipments = explode(',',$request->shipment_ids);
         $count = count($shipments);
         $cod = Shipment::whereIn('id',$shipments)->sum('amount');

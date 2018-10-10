@@ -301,7 +301,7 @@
 
                     $("#pickup_select").prepend('<option value="" selected></option>').select2({
                         data:data2,
-                        placeholder: "Select Rider",
+                        placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
