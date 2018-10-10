@@ -21,7 +21,7 @@ class Notifications extends Mailable implements ShouldQueue
     public function __construct($subject, $body)
     {
         $this->subject = $subject;
-        $this->body = $body;
+        $this->body = nl2br($body);
     }
 
     /**
@@ -31,6 +31,6 @@ class Notifications extends Mailable implements ShouldQueue
      */
     public function build()
     {
-        return $this->subject($this->subject)->view('notifications.email')->with(['body' => nl2br($this->body)]);
+        return $this->subject($this->subject)->view('notifications.email')->with(['body' => $this->body]);
     }
 }
