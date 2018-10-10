@@ -322,25 +322,22 @@
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
-                if (rider != '') {
+                if (rider !== '' && rider !== null) {
 
                     $('#rider_error').css('display', 'none');
                 } else {
-
+                    errors = 1;
                     $('#rider_error').css('display', 'block');
                 }
-                if (route != '') {
+                if (route !== '' && route !== null) {
 
                     $('#route_error').css('display', 'none');
                 } else {
-
+                    errors = 1;
                     $('#route_error').css('display', 'block');
                 }
-                if (rider != '' && route != '') {
-                    errors = 0;
-                } else {
-                    errors = 1;
-                }
+
+
                 if(count > 0) {
                     if (errors == 0) {
 

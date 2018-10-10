@@ -791,7 +791,8 @@ class AdminPickupsController extends Controller
 
     public function receive_index() {
         $rider_category = RiderCategory::all();
-      return view('admin.pickups.receive.index')->with(['rider_category'=>$rider_category]);
+        $pickup_status = PickupNoteStatus::all();
+      return view('admin.pickups.receive.index')->with(['rider_category'=>$rider_category,'pickup_status'=>$pickup_status]);
     }
 
     public function receive_list(Request $request) {
@@ -829,6 +830,15 @@ class AdminPickupsController extends Controller
 
               if ($keyword != '') {
                   $query->where('rc.id',$keyword);
+              }
+              else {
+                  $query->whereRaw('false');
+              }
+          })
+          ->filterColumn('status',function ($query,$keyword){
+
+              if ($keyword != '') {
+                  $query->where('pns.id',$keyword);
               }
               else {
                   $query->whereRaw('false');

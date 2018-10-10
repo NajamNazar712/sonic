@@ -230,6 +230,7 @@
                         '<option value="1">Heavy</option>' +
                         '</select>';
                     var rider_select = '<select name="rider_select" id="rider_select" class="select2 form-control"></select>';
+                    var pickup_select = '<select name="pickup_select" id="pickup_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
 						var column = this;
@@ -244,6 +245,11 @@
                                 } ).wrap(td);
                         }else if($(header).is('.rider_type')){
                             $(rider_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.status')){
+                            $(pickup_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -277,6 +283,24 @@
 
                     $("#rider_select").prepend('<option value="" selected></option>').select2({
                         data:data1,
+                        placeholder: "Select Rider",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+                    var data2 = $.map({!! $pickup_status !!}, function (obj) {
+                        obj.id = obj.id;
+
+                        return obj;
+                    });
+                    var data2 = $.map({!! $pickup_status !!}, function (obj) {
+                        obj.text = obj.name;
+
+                        return obj;
+                    });
+
+                    $("#pickup_select").prepend('<option value="" selected></option>').select2({
+                        data:data2,
                         placeholder: "Select Rider",
                         width:'100%',
                         containerCssClass: 'select-xs',
