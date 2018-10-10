@@ -311,6 +311,15 @@
 					dangerMode: true
 				}).then(function(confirm) {
 					if (confirm) {
+						swal({
+							title: 'Please Wait!',
+							text: 'Shipments are being marked arrived!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+
 						form.submit();
 					}
 				});
