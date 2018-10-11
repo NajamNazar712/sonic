@@ -1662,9 +1662,9 @@ class AdminFinanceController extends Controller
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
-            $row[] = number_format($done_payment_shipment->amount);
-            $row[] = number_format($done_payment_shipment->charges);
-            $row[] = number_format($done_payment_shipment->payable);
+            $row[] = $done_payment_shipment->amount;
+            $row[] = $done_payment_shipment->charges;
+            $row[] = $done_payment_shipment->payable;
 
             $details[] = $row;
 
@@ -1674,6 +1674,9 @@ class AdminFinanceController extends Controller
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
