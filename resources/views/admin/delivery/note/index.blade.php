@@ -326,6 +326,8 @@
 
                     $('#rider_error').css('display', 'none');
                 } else {
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     errors = 1;
                     $('#rider_error').css('display', 'block');
                 }
@@ -333,6 +335,8 @@
 
                     $('#route_error').css('display', 'none');
                 } else {
+                    var error = "Route not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                     errors = 1;
                     $('#route_error').css('display', 'block');
                 }

@@ -246,7 +246,7 @@
                     table.column('.delivered_shipments', {
                         page: 'current'
                     }).every(function() {
-                        var sum = this
+                        var delivered_count = this
                             .data()
                             .reduce(function (a, b) {
                                 var x = parseFloat(a) || 0;
@@ -254,7 +254,7 @@
                                 return x + y;
                             }, 0);
 
-                        $('#sdn_delivered_shipments').val(sum);
+                        $('#sdn_delivered_shipments').val(delivered_count);
                     });
                     //table dncc count
                     var dncc_count = table.rows().count();

@@ -207,7 +207,7 @@ class ReturnController extends Controller
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
         }elseif($request->action == 'reattempt'){
             Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-            ShipmentsJourneyController::add($request->shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+            ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
 
             NotificationsController::send(15, 0, $request->shipment_id);
             NotificationsController::send(16, 0, $request->shipment_id);
