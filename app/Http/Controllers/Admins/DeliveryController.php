@@ -2018,7 +2018,8 @@ class DeliveryController extends Controller
             }
     }
     public function sdn_view(Request $request){
-        $banks = BanksList::all();
+        $banks = BanksList::where('affiliate', 1)->get();
+
         return view('admin.delivery.sdn.index')->with(['banks'=>$banks]);
     }
     public function sdn_list(Request $request){

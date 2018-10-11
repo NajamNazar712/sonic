@@ -254,7 +254,7 @@ class AdminPickupsController extends Controller
           }
       })
       ->editColumn('pickup_date', function($pickup_request) {
-        return Carbon::parse($pickup_request->pickup_date)->format('d/m/Y');
+        return Carbon::parse($pickup_request->pickup_date)->format('Y-m-d');
       })
       ->addColumn('action', function($pickup_request) {
         if (session('role_id') == 1 || in_array(18, session('permissions'))) {
@@ -746,7 +746,7 @@ class AdminPickupsController extends Controller
                             <td>' . $pickup_address['phone'] . '</td>
                             <td>' . $pickup_address['pickup_address'] . '</td>
                             <td>' . $pickup_request['bookings'] . '</td>
-                            <td>' . Carbon::parse($pickup_request['pickup_date'])->format('d/m/Y') . '</td>
+                            <td>' . Carbon::parse($pickup_request['pickup_date'])->format('Y-m-d') . '</td>
                           </tr>
           ';
 

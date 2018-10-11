@@ -54,8 +54,9 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_sdn_index() {
-        $banks = BanksList::all();
-      return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks]);
+        $banks = BanksList::where('affiliate', 1)->get();
+
+        return view('admin.finance.outstanding_sdn')->with(['banks'=>$banks]);
     }
 
     public function outstanding_sdn_list(Request $request) {
@@ -749,10 +750,13 @@ class AdminFinanceController extends Controller
             return $dropdown;
         })
         ->filterColumn('phone_numbers', function($query, $keyword) {
-            $search = str_replace(' ', '', $keyword);
+            $search = str_replace('-', '', $keyword);
 
             if ($keyword != '') {
-                $query->where('u.phone', 'like', '%'.$search.'%')->orWhere('u.phone2', 'like', '%'.$search.'%');
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('u.phone', 'like', '%' . $keyword . '%')
+                    ->orWhere('u.phone2', 'like', '%' . $keyword . '%');
+                });
             }
 
             else {
@@ -1240,7 +1244,7 @@ class AdminFinanceController extends Controller
                     $query->whereRaw('false');
                 }
         })
-            ->filterColumn('company_bank', function($query, $keyword) {
+        ->filterColumn('company_bank', function($query, $keyword) {
 
                 if ($keyword !='') {
                     $query->where('b.id', '=', $keyword);
@@ -1286,10 +1290,13 @@ class AdminFinanceController extends Controller
             ';
         })
         ->filterColumn('phone_numbers', function($query, $keyword) {
-            $search = str_replace(' ', '', $keyword);
+            $search = str_replace('-', '', $keyword);
 
             if ($keyword != '') {
-                $query->where('u.phone', 'like', '%'.$search.'%')->orWhere('u.phone2', 'like', '%'.$search.'%');
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('u.phone', 'like', '%' . $keyword . '%')
+                    ->orWhere('u.phone2', 'like', '%' . $keyword . '%');
+                });
             }
 
             else {
