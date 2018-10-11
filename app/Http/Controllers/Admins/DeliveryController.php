@@ -47,7 +47,7 @@ class DeliveryController extends Controller
     }
     public function pending_list(Request $request)
     {
-        $status = array(2, 4, 6, 7, 8, 9, 13, 15); //for pending deliveries
+        $status = array(2, 4, 6, 7, 8, 9,10, 13, 15); //for pending deliveries
         $normal = 2;
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -172,7 +172,7 @@ class DeliveryController extends Controller
     }
 
     public function get_shipment_details(Request $request){
-        $pending_status = array(2, 4, 6, 7, 8, 9, 13, 15);
+        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15);
         if($request->tracking != ''){
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$pending_status);
             $remarks = '';$status = '';
