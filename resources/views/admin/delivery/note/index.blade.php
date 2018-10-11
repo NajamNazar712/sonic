@@ -322,15 +322,8 @@
                 var errors = 0;
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
-                if (rider !== '' && rider !== null) {
 
-                    $('#rider_error').css('display', 'none');
-                } else {
-                    var error = "Rider not selected!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                    errors = 1;
-                    $('#rider_error').css('display', 'block');
-                }
+                
                 if (route !== '' && route !== null) {
 
                     $('#route_error').css('display', 'none');

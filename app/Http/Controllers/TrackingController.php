@@ -44,12 +44,15 @@ class TrackingController extends Controller
 
     			foreach ($shipment->shipment_journey as $journey) {
                     if ($journey->consignee_status_id) {
-        				$journey_details = array();
+                        if ($journey->verification) {
+                            $journey_details = array();
 
-        				$journey_details['date_time'] = $journey->created_at->toDateTimeString();
-        				$journey_details['status'] = $journey->shipment_status_consignee->name;
+                            $journey_details['date_time'] = $journey->created_at->toDateTimeString();
+                            $journey_details['status'] = $journey->shipment_status_consignee->name;
 
-        				$details['tracking_history'][] = $journey_details;
+                            $details['tracking_history'][] = $journey_details;
+                        }
+
                     }
     			}
 
