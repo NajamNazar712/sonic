@@ -375,6 +375,8 @@ class AdminFinanceController extends Controller
             if ($done_payment_shipment->exists()) {
                 $done_payment_shipment = $done_payment_shipment->first();
 
+                $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id);
+
                 $shipment = Shipment::find($request->id);
 
                 $shipment->shipper_status_id = 20;
@@ -383,12 +385,6 @@ class AdminFinanceController extends Controller
                 $shipment->payment_status_id = 4;
 
                 $shipment->save();
-
-                ShipmentChargesController::return($shipment->id);
-
-                $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id);
-
-                $this->add_payment($shipment, 1);
 
                 ShipmentsJourneyController::add($shipment->id, 20, 20, NULL, NULL, NULL, Auth::id());
 
@@ -583,6 +579,8 @@ class AdminFinanceController extends Controller
 
     private function adjust_payment($done_payment_id, $shipment_id) {
         $done_payment_shipment = DonePaymentShipment::where('done_payment_id', $done_payment_id)->where('shipment_id', $shipment_id)->first();
+
+        ShipmentChargesController::return($shipment_id);
 
         $shipment = Shipment::find($shipment_id);
 
