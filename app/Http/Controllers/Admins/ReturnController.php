@@ -309,6 +309,29 @@ class ReturnController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
+            })
+            ->addColumn('action', function($shipment) {
+                if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
+                    $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
+
+                    $dropdown = '
+                      <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                        <div class="dropdown-menu dropdown-menu-sm">
+                    ';
+
+                    $dropdown .= $revert_button;
+
+                    $dropdown .= '
+                        </div>
+                      </div>
+                    ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
             });
 
            return $datatables->make(true);
@@ -1021,6 +1044,21 @@ class ReturnController extends Controller
         return $html;
 
 
+    }
+
+    public function return_confirmed_revert(Request $request) {
+        $shipment = Shipment::find($request->id);
+
+        $shipment->shipper_status_id = 13;
+        $shipment->consignee_status_id = 13;
+
+        $shipment->save();
+
+        ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+
+        AdminFinanceController::return_confirmed_revert($request->id);
+
+        return ['status' => 0, 'success' => 'Shipment has been marked to be Adjusted in Payment'];
     }
 
 }

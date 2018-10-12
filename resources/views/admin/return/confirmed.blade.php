@@ -33,6 +33,7 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
                 </table>
@@ -212,7 +213,7 @@
                     {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-
+                    {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -231,7 +232,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number')) {
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -317,6 +318,57 @@
                     this.api().table().columns.adjust();
                 }
             });
+
+            @if (session('role_id') == 1 || in_array(109, session('permissions')))
+                $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
+                    var id = parseInt($(this).parents('tr').attr('id'));
+
+                    if ($(this).hasClass('revert')) {
+                        swal({
+                            text: 'Are you sure, you want to revert this Shipment?',
+                            icon: 'warning',
+                            buttons: {
+                                cancel: {
+                                    text: 'No',
+                                    value: null,
+                                    visible: true,
+                                    closeModal: true,
+                                },
+                                confirm: {
+                                    text: 'Yes',
+                                    value: true,
+                                    visible: true,
+                                    closeModal: true
+                                }
+                            },
+                            closeOnClickOutside: false,
+                            closeOnEsc: false,
+                            dangerMode: true
+                        }).then(function(confirm) {
+                            if (confirm) {
+                                $.ajax({
+                                    url: '{!! route('admin.return.confirmed.revert') !!}',
+                                    method: 'POST',
+                                    data: {
+                                        '_token': '{{ csrf_token() }}',
+                                        'id': id
+                                    }
+                                })
+                                .done(function(data) {
+                                    table.draw(false);
+
+                                    if (data.status == 0) {
+                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    }
+                                    else {
+                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            @endif
         });
     </script>
 @endsection
