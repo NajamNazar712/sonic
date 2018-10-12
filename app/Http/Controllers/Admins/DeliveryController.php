@@ -1247,8 +1247,8 @@ class DeliveryController extends Controller
                         DisputeController::add_delivery_wrong_status_dispute($delivery_note_id, $dispute_shipments);
                     }
                     $dncc_status = array(14, 16, 30, 36, 37);
-                    $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->select('shipment_id')->get();
-                    $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status);
+                    $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->select('shipment_id')->get();
+                    $filtered_shipments = Shipment::whereIn('id', $shipment_ids);
                     $dncc_amount = $filtered_shipments->sum('received_amount');
                     $delivered_shipments = $filtered_shipments->count();
 
