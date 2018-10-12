@@ -379,9 +379,14 @@ class AdminFinanceController extends Controller
 
                 $shipment = Shipment::find($request->id);
 
+                $shipment->shipper_status_id = 20;
+                $shipment->consignee_status_id = 20;
+
                 $shipment->payment_status_id = 4;
 
                 $shipment->save();
+
+                ShipmentsJourneyController::add($shipment->id, 20, 20, NULL, NULL, NULL, Auth::id());
 
                 ShipmentsPaymentJourneyController::add($shipment->id, 4, Auth::id());
 
