@@ -432,6 +432,8 @@ class ShipperFinanceController extends Controller
     public function payments_export_to_excel(Request $request) {
         $done_payment = DonePayment::find($request->id);
 
+        $filename = 'sonic_payment_details_' . $request->id . '.xlsx';
+
         $details = array();
 
         $details[] = ['S. No.', 'Tracking No.', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'Payable'];
@@ -472,7 +474,7 @@ class ShipperFinanceController extends Controller
         $writer = new Xlsx($spreadsheet);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="sonic_payment_details.xlsx"');
+        header('Content-Disposition: attachment;filename="' . $filename .'"');
         header('Cache-Control: max-age=0');
 
         $writer->save('php://output');
