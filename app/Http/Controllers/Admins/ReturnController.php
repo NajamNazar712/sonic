@@ -77,6 +77,10 @@ class ReturnController extends Controller
             ->editColumn('consignee_name',function ($consignee){
                 return "$consignee->consignee_name | $consignee->phone";
             })
+            ->addColumn('shipment_remarks',function ($shipments){
+                $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
+                return $remark;
+            })
             ->editColumn('status_date',function ($shipments){
                 if($shipments->status_date) {
                     if (2 - ((new \Carbon\Carbon($shipments->status_date, 'UTC'))->diffInDays()) < 0) {
@@ -178,13 +182,14 @@ class ReturnController extends Controller
     }
     public function return_marked_single_status(Request $request){
         $admin = Auth::id();
+        $remark = $request->remark;
         if($request->action == 'confirm'){
             $parcel = Shipment::find($request->shipment_id);
 
             if (!$parcel->packaging_material_request) {
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
                 $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
-                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+                ShipmentsJourneyController::add($request->shipment_id, 20, 20, $shipment_history->status_reason_id, $remark, NULL, Auth::id());
 
 
                 NotificationsController::send(15, 0, $request->shipment_id);
@@ -197,7 +202,7 @@ class ReturnController extends Controller
             else {
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
                 $shipment_history = ShipmentsJourney::where('shipment_id',$request->shipment_id)->latest()->first();
-                ShipmentsJourneyController::add($request->shipment_id, 17, 17, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+                ShipmentsJourneyController::add($request->shipment_id, 17, 17, $shipment_history->status_reason_id, $remark, NULL, Auth::id());
 
 
                 NotificationsController::send(15, 0, $request->shipment_id);
@@ -207,7 +212,7 @@ class ReturnController extends Controller
             return ['status'=>1,'success'=>"Shipment successfully marked as Shipment - Return Confirm"];
         }elseif($request->action == 'reattempt'){
             Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-            ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, NULL, NULL, Auth::id());
+            ShipmentsJourneyController::add($request->shipment_id, 13, 13, NULL, $remark, NULL, Auth::id());
 
             NotificationsController::send(15, 0, $request->shipment_id);
             NotificationsController::send(16, 0, $request->shipment_id);
