@@ -348,6 +348,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
+
+        Route::prefix('confirmed')->name('confirmed.')->group(function (){
+            Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');
+        });
+
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
             Route::get('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');

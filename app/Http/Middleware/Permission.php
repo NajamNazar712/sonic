@@ -123,6 +123,7 @@ class Permission
             'return.list' => 44,
             'return.confirmed' => 47,
             'return.confirmed.list' => 47,
+            'return.confirmed.revert' => 109,
             'return.create.index' => 48,
             'return.create.shipment_details' => 48,
             'return.create.note.submit' => 48,
