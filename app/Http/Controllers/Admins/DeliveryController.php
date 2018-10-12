@@ -878,7 +878,12 @@ class DeliveryController extends Controller
             }
             $updates_count = DeliveryNoteShipment::where('delivery_note_id',$request->delivery_note_id)->where('status',0)->count();
             if($updates_count == 0){
-                DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>1]);
+                $delivered_status = array(14, 16, 30, 36, 37);
+                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->select('shipment_id')->get();
+                $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status)->get();
+                $dncc_amount = $filtered_shipments->sum('received_amount');
+                $count = count($filtered_shipments);
+                DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>1,'delivered_shipments'=>$count,'received_cod_amount'=>$dncc_amount]);
             }
             return ['status'=>0,'success'=>'Shipments status Delivered updated!'];
         }else{
@@ -1011,7 +1016,7 @@ class DeliveryController extends Controller
                     $where = array(7,8,9,10,11,12,15,18,20);
                 }
 //                $where = array(7,8,9,10,11,12,14,15,16,18,20,30,35,36,37);
-                $delivered_statuses = array(14,30,36,37);
+                $delivered_statuses = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38,45,46);
                 $statuses = ShipmentStatus::whereIn('id',$where)->get();
                 $drops = '';
                 $disable = '';
