@@ -38,14 +38,6 @@
           <li class=" nav-item"><a href="{{ route('cod.substitute_account_management.index') }}"><span class="menu-title" data-i18n="nav.dash.main">Substitute Accounts</span></a></li>
         @endif
 
-        @if (session('user_type') == 1 || in_array(8, session('permissions')))
-          <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Reports</span></a>
-              <ul class="menu-content">
-                  <li><a class="menu-item" href="{{ route('cod.reports.qsr.index') }}">Quality of Service</a></li>
-              </ul>
-          </li>
-        @endif
-
         <li class=" nav-item"><a href="{{ route('cod.tracking.index') }}"><span class="menu-title">Tracking</span></a></li>
       </ul>
     </div>
