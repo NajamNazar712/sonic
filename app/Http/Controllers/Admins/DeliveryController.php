@@ -1338,7 +1338,7 @@ class DeliveryController extends Controller
                 $total_shipments = 0;
                 $total_cod_amount = 0;
                 $dncc_status = array(14,16,30,36,37);
-                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$request->id)->select('shipment_id')->get();
+                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$request->id)->where('status','>',1)->select('shipment_id')->get();
                 $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereIn('shipper_status_id',$dncc_status)->orderBy('id')->get();
                 //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
                 $shipment_details = '
@@ -1596,7 +1596,7 @@ class DeliveryController extends Controller
             $total_shipments = 0;
             $total_cod_amount = 0;
             $dncc_status = array(5,14,16,30,36,37);
-            $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$request->id)->select('shipment_id')->get();
+            $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$request->id)->where('status',1)->select('shipment_id')->get();
             $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereNotIn('shipper_status_id',$dncc_status)->orderBy('id')->get();
             //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
             $shipment_details = '
