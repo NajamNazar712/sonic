@@ -700,7 +700,12 @@ class DeliveryController extends Controller
                     $undelivered_printed = 1;
                 }
             }
-            return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed]);
+            if($note_data->status == 0){
+
+                return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed]);
+            }else{
+                return redirect(route('admin.delivery.receive.index'));
+            }
         }else{
             return redirect()->back()->with('error','Delivery note not found!');
         }
@@ -1339,7 +1344,7 @@ class DeliveryController extends Controller
                 $total_cod_amount = 0;
                 $dncc_status = array(14,16,30,36,37);
                 $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$request->id)->where('status','>',1)->select('shipment_id')->get();
-                $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereIn('shipper_status_id',$dncc_status)->orderBy('id')->get();
+                $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->get();
                 //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
                 $shipment_details = '
                       <table class="table table-sm table-bordered border">
@@ -1597,7 +1602,7 @@ class DeliveryController extends Controller
             $total_cod_amount = 0;
             $dncc_status = array(5,14,16,30,36,37);
             $shipment_ids = DeliveryNoteShipment::where('delivery_note_id',$request->id)->where('status',1)->select('shipment_id')->get();
-            $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->whereNotIn('shipper_status_id',$dncc_status)->orderBy('id')->get();
+            $filtered_shipments = Shipment::whereIn('id',$shipment_ids)->orderBy('id')->get();
             //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
             $shipment_details = '
                       <table class="table table-sm table-bordered border">
