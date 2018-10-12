@@ -361,6 +361,7 @@ class ShipperFinanceController extends Controller
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . number_format($done_payment_shipment->charges) . '</td>
+                              <td>' . number_format($done_payment_shipment->gst) . '</td>
                               <td>' . number_format($done_payment_shipment->payable) . '</td>
                             </tr>
             ';
@@ -405,6 +406,7 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Actual Weight</strong></td>
                               <td class="color primary"><strong>Amount</strong></td>
                               <td class="color primary"><strong>Charges</strong></td>
+                              <td class="color primary"><strong>GST</strong></td>
                               <td class="color primary"><strong>Payable</strong></td>
                             </tr>
       ';
@@ -436,7 +438,7 @@ class ShipperFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'Payable'];
+        $details[] = ['S. No.', 'Tracking No.', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'GST', 'Payable'];
 
         $serial_number = 1;
 
@@ -455,6 +457,7 @@ class ShipperFinanceController extends Controller
             $row[] = $shipment->actual_weight;
             $row[] = $done_payment_shipment->amount;
             $row[] = $done_payment_shipment->charges;
+            $row[] = $done_payment_shipment->gst;
             $row[] = $done_payment_shipment->payable;
 
             $details[] = $row;
@@ -468,6 +471,7 @@ class ShipperFinanceController extends Controller
         $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
