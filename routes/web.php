@@ -143,6 +143,10 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('','Shippers\ShipperReportsController@qsr_index')->name('index');
             Route::get('list','Shippers\ShipperReportsController@qsr_list')->name('list');
         });
+        Route::prefix('sales')->name('sales.')->group(function (){
+            Route::get('','Shippers\ShipperReportsController@sales_index')->name('index');
+            Route::get('list','Shippers\ShipperReportsController@sales_list')->name('list');
+        });
     });
 
     Route::get('/logout','Auth\LoginController@logout')->name('logout');
