@@ -1167,20 +1167,23 @@ class DeliveryController extends Controller
 
                                         ShipmentsJourneyController::add($shipment, 20, 20, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL,$verification);
                                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
-                                        NotificationsController::send(15, 0, $shipment);
-                                        NotificationsController::send(16, 0, $shipment);
+                                        if($verification == 1){
+                                            NotificationsController::send(15, 0, $shipment);
+                                            NotificationsController::send(16, 0, $shipment);
+                                            ShipmentChargesController::return ($shipment);
 
-                                        ShipmentChargesController::return ($shipment);
+                                            AdminFinanceController::add_payment($shipment, 1);
+                                        }
 
-                                        AdminFinanceController::add_payment($shipment, 1);
                                     } else {
                                         ShipmentsJourneyController::add($shipment, 17, 17, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL,$verification);
 
                                         Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
-
-                                        NotificationsController::send(15, 0, $shipment);
-                                        NotificationsController::send(16, 0, $shipment);
-                                    }
+                                        if($verification == 1) {
+                                            NotificationsController::send(15, 0, $shipment);
+                                            NotificationsController::send(16, 0, $shipment);
+                                        }
+                                        }
                                 } else if (in_array($request->status_drop[$shipment], $delivered_status_array)) {
                                     $parcel = Shipment::where('id', $shipment)->first();
                                     if ($parcel->booking_type_id == 2) {
@@ -1205,8 +1208,8 @@ class DeliveryController extends Controller
                                         Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
                                         DeliveryNoteShipment::where(['delivery_note_id' => $delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                                     }
-
-                                    if (in_array($request->status_drop[$shipment], [14, 16, 30, 36, 37])) {
+                                    if($verification == 1){
+                                        if (in_array($request->status_drop[$shipment], [14, 16, 30, 36, 37])) {
                                         $parcel = Shipment::find($shipment);
 
                                         if ($parcel->booking_type_id == 2) {
@@ -1216,6 +1219,7 @@ class DeliveryController extends Controller
                                         }
 
                                         AdminFinanceController::add_payment($shipment, 0);
+                                        }
                                     }
                                 } else {
                                     ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id,NULL, $verification);
@@ -1242,30 +1246,33 @@ class DeliveryController extends Controller
 
 
                             } else {
-                                if (in_array($shipper_status_id->shipper_status_id, [14, 16, 30, 36, 37])) {
-                                    $parcel = Shipment::find($shipment);
+                                if($verification == 1) {
+                                    if (in_array($shipper_status_id->shipper_status_id, [14, 16, 30, 36, 37])) {
+                                        $parcel = Shipment::find($shipment);
 
-                                    if ($parcel->booking_type_id == 2) {
-                                        ShipmentChargesController::replacement($shipment);
-                                    } else if ($parcel->booking_type_id == 3) {
-                                        ShipmentChargesController::try_and_buy($shipment);
+                                        if ($parcel->booking_type_id == 2) {
+                                            ShipmentChargesController::replacement($shipment);
+                                        } else if ($parcel->booking_type_id == 3) {
+                                            ShipmentChargesController::try_and_buy($shipment);
+                                        }
+
+                                        AdminFinanceController::add_payment($shipment, 0);
                                     }
-
-                                    AdminFinanceController::add_payment($shipment, 0);
                                 }
                             }
                         }//main if condition
 
                     } else {
                         $parcel = Shipment::find($shipment);
+                        if($verification == 1) {
+                            if ($parcel->booking_type_id == 2) {
+                                ShipmentChargesController::replacement($shipment);
+                            } else if ($parcel->booking_type_id == 3) {
+                                ShipmentChargesController::try_and_buy($shipment);
+                            }
 
-                        if ($parcel->booking_type_id == 2) {
-                            ShipmentChargesController::replacement($shipment);
-                        } else if ($parcel->booking_type_id == 3) {
-                            ShipmentChargesController::try_and_buy($shipment);
+                            AdminFinanceController::add_payment($shipment, 0);
                         }
-
-                        AdminFinanceController::add_payment($shipment, 0);
                         $shipment_journey = ShipmentsJourney::where(['shipment_id' => $parcel->id, 'shipper_status_id' => $shipper_status_id->shipper_status_id, 'consignee_status_id' => $shipper_status_id->consignee_status_id])->latest()->first();
                         if($verification == 1){
                             ShipmentsJourneyController::add($shipment, $shipper_status_id->shipper_status_id, $shipper_status_id->consignee_status_id, $shipment_journey->status_reason_id, $shipment_journey->remarks, NULL, Auth::id(), $delivery_note_id, NULL, $verification);
