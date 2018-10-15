@@ -166,6 +166,7 @@
                 }
             } );
             var selected_rows = [];
+            var shipment_remarks = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0)
@@ -201,17 +202,30 @@
                                         dangerMode: true
                                     }).then(function (confirm) {
                                         if (confirm) {
+
+                                            table.rows().nodes().each(function(index) {
+                                                var row = table.row(index);
+
+                                                if ($(row.node()).hasClass('selected')) {
+                                                    id = parseInt(row.id());
+                                                    var remark = $(row.node()).find('td.shipment_remarks input').val();
+                                                    shipment_remarks[id] = remark;
+                                                }
+                                            });
+
                                             $.ajax({
                                                 url:"{{route('admin.return.marked.status')}}",
                                                 method:'POST',
                                                 data:{
                                                     'shipment_ids':selected_rows,
                                                     '_token':'{{ csrf_token() }}',
-                                                    'action': 'confirm'
+                                                    'action': 'confirm',
+                                                    'remark': shipment_remarks
                                                 }
                                             }).done(function (data) {
                                                 table.rows().deselect();
                                                 selected_rows = [];
+                                                shipment_remarks = [];
                                                 table.button('.confirm').disable();
                                                 table.button('.re-attempt').disable();
                                                 table.draw('false');
@@ -260,16 +274,28 @@
                                         dangerMode: true
                                     }).then(function (confirm) {
                                         if (confirm) {
+                                            table.rows().nodes().each(function(index) {
+                                                var row = table.row(index);
+
+                                                if ($(row.node()).hasClass('selected')) {
+                                                    id = parseInt(row.id());
+                                                    var remark = $(row.node()).find('td.shipment_remarks input').val();
+                                                    shipment_remarks[id] = remark;
+                                                }
+                                            });
+
                                             $.ajax({
                                                 url:"{{route('admin.return.marked.status')}}",
                                                 method:'POST',
                                                 data:{
                                                     'shipment_ids':selected_rows,
                                                     '_token':'{{ csrf_token() }}',
-                                                    'action': 'reattempt'
+                                                    'action': 'reattempt',
+                                                    'remark': shipment_remarks
                                                 }
                                             }).done(function (data) {
                                                 selected_rows = [];
+                                                shipment_remarks = [];
                                                 table.button('.confirm').disable();
                                                 table.button('.re-attempt').disable();
                                                 table.draw('false');
@@ -498,15 +524,13 @@
                 }
             });
             var hub_ids = [];
-            var shipment_remarks = [];
+
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
                 var id = parseInt($(this).parent('tr').attr('id'));
                 var hub_id = $(this).parents('tr').data('hub');
-                var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
                 if(hub_ids.length == 0){
                     hub_ids.push(hub_id);
-                    shipment_remarks.push(remark);
                     var index = $.inArray(id, selected_rows);
 
                     if (index === -1) {

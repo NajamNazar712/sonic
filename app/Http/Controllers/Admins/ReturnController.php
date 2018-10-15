@@ -149,7 +149,7 @@ class ReturnController extends Controller
                 if (!$parcel->packaging_material_request) {
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                    ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $request->remark[$parcel->id], NULL, Auth::id());
 
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
@@ -161,7 +161,7 @@ class ReturnController extends Controller
                 else {
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
-                    ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $shipment_history->remarks, NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $request->remark[$parcel->id], NULL, Auth::id());
 
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
