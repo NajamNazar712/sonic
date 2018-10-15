@@ -506,6 +506,7 @@
                 var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
                 if(hub_ids.length == 0){
                     hub_ids.push(hub_id);
+                    shipment_remarks.push(remark);
                     var index = $.inArray(id, selected_rows);
 
                     if (index === -1) {
