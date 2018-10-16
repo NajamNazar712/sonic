@@ -150,7 +150,7 @@ class NotificationsController extends Controller
 
             $shipper = $shipment->user;
 
-            $to = $shipper->phone;
+            $to = $shipment->consignee_phone_number_1;
 
             foreach ($fields as $key => $field) {
               if (strpos($body, '[' . $key . ']') !== FALSE) {
@@ -240,6 +240,9 @@ class NotificationsController extends Controller
               $user_wise_shipments[$shipment->user_id][] = $details;
             }
 
+            $original_subject = $subject;
+            $original_body = $body;
+
             foreach ($user_wise_shipments as $user_id => $shipments) {
               $shipper = User::find($user_id);
 
@@ -304,6 +307,9 @@ class NotificationsController extends Controller
               }
 
               self::email($subject, $body, $to, NULL, $bcc);
+
+              $subject = $original_subject;
+              $body = $original_body;
             }
           }
           else if ($id == 5) {

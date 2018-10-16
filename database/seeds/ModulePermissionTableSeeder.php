@@ -135,7 +135,9 @@ class ModulePermissionTableSeeder extends Seeder
             array('id' => 105, 'name' => 'Cash Collection - View', 'module_id' => 6),
             array('id' => 106, 'name' => 'Cash Collection - Collect Cash', 'module_id' => 6),
             array('id' => 107, 'name' => 'Misroute - View', 'module_id' => 6),
-            array('id' => 108, 'name' => 'Misroute - Update', 'module_id' => 6)
+            array('id' => 108, 'name' => 'Misroute - Update', 'module_id' => 6),
+
+            array('id' => 109, 'name' => 'Confirm - Revert', 'module_id' => 7)
         ));
     }
 }

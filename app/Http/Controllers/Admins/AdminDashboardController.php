@@ -482,16 +482,23 @@ class AdminDashboardController extends Controller
             ->editColumn('phone',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
             })
-            ->filterColumn('phone',function ($query,$keyword){
+            ->filterColumn('phone', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
+
+                $keyword = str_replace('-', '', $keyword);
+
                 if ($keyword != '') {
-                    $query->where('shipments.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('shipments.consignee_phone_number_2', 'like', '%'.$keyword.'%');
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')
+                        ->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+                    });
                 }
 
                 else {
                     $query->whereRaw('false');
                 }
             })
+            ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
             ->filterColumn('status',function ($query,$keyword){
 
                 if ($keyword != '') {

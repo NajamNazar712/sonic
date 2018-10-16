@@ -148,10 +148,13 @@ class ShipperFinanceController extends Controller
             ';
         })
         ->filterColumn('phone_numbers', function($query, $keyword) {
-            $search = str_replace(' ', '', $keyword);
+            $search = str_replace('-', '', $keyword);
 
             if ($keyword != '') {
-                $query->where('u.phone', 'like', '%'.$search.'%')->orWhere('u.phone2', 'like', '%'.$search.'%');
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('u.phone', 'like', '%' . $keyword . '%')
+                    ->orWhere('u.phone2', 'like', '%' . $keyword . '%');
+                });
             }
 
             else {

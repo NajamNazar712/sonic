@@ -8,111 +8,6 @@
       <div class="content-header row">
       </div>
       <div class="content-body">
-
-        <!-- Active Orders -->
-          <div class="row">
-              <div class="col">
-                  <div class="card pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-grid font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-right">
-                                      <h3 class="">{{$stats['total']}}</h3>
-                                      <span>Total Booked Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="col">
-                  <div class="card bg-gradient-directional-primary pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-hourglass text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class= "text-white">{{$stats['booked']}}</h3>
-                                      <span>Pending Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="col">
-                  <div class="card bg-gradient-directional-info pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-layers text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['received']}}</h3>
-                                      <span>Received Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div><div class="col">
-                  <div class="card bg-gradient-directional-success pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-check text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['delivered']}}</h3>
-                                      <span>Delivered Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div><div class="col">
-                  <div class="card bg-gradient-directional-warning pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-loop text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['return']}}</h3>
-                                      <span>Returned Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-              <div class="col">
-                  <div class="card bg-gradient-directional-inprocess pull-up">
-                      <div class="card-content">
-                          <div class="card-body">
-                              <div class="media d-flex">
-                                  <div class="align-self-center">
-                                      <i class="icon-shuffle text-white font-large-2 float-left"></i>
-                                  </div>
-                                  <div class="media-body text-white text-right">
-                                      <h3 class="text-white">{{$stats['pending']}}</h3>
-                                      <span>In Process Shipment(s)</span>
-                                  </div>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-
           <div class="row">
               <div class="card">
                   <div class="card-content">
@@ -380,7 +275,7 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'phone1', name: 'shipments.consignee_phone_number_1', class: 'align-middle phone1'},
+                    {data: 'phone', name: 'phone', class: 'align-middle phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
