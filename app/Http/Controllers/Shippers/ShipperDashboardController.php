@@ -36,30 +36,6 @@ class ShipperDashboardController extends Controller
     }
 
     public function orders_index() {
-        $stats = array();
-        $graph = array();
-        $graph_dates = array();
-
-        $stats['total'] = Shipment::where('user_id', session('user_id'))->count();
-        $stats['booked'] = Shipment::where('user_id', session('user_id'))->where('shipper_status_id',1)->count();
-        $stats['received'] = Shipment::where('user_id', session('user_id'))->whereIn('shipper_status_id',[2,3,4])->count();
-        $stats['delivered'] = Shipment::where('user_id', session('user_id'))->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
-        $stats['return'] = Shipment::where('user_id', session('user_id'))->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
-        $stats['pending'] = Shipment::where('user_id', session('user_id'))->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
-
-//        $graph_dates['current'] = Carbon::now();
-//        $graph_dates['old_date'] = Carbon::now()->subDays(29);
-//
-//        for ($counter = 29; $counter >= 0; $counter--) {
-//            $date = Carbon::now()->subDays($counter);
-//            $comparison_date = $date->toDateString();
-//            $graph['dates'][] = $date->format('d M');
-//            $graph['booked'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->where('shipper_status_id',1)->count();
-//            $graph['received'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[2,3,4])->count();
-//            $graph['delivered'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->count();
-//            $graph['pending'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->count();
-//            $graph['return'][] = Shipment::whereDate('created_at', $comparison_date)->where('user_id', session('user_id'))->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->count();
-//        }
         $should_not_show_status = array(32,33,34,35,36,37,38,46);
         $cities = City::where('status',1)->select('id','name')->get();
         $dispute_types = DisputeType::whereIn('id',[5,9])->get();
@@ -67,9 +43,8 @@ class ShipperDashboardController extends Controller
         $service_type = BookingType::all();
         $products = Product::select('id','product_name')->get();
         $payment_status = ShipmentPaymentStatus::all();
-        // return $cities;
-//      return view('client.dashboard')->with(['stats'=>$stats,'graph'=>$graph,'dates'=>$graph_dates,'cities'=>$cities,'dispute_types'=>$dispute_types]);
-      return view('client.dashboard')->with(['stats'=>$stats,'cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status]);
+
+      return view('client.dashboard')->with(['cities'=>$cities,'dispute_types'=>$dispute_types,'shipment_status'=>$shipment_status,'service_type'=>$service_type,'products'=>$products,'payment_status'=>$payment_status]);
     }
     public function orders_list(Request $request) {
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
@@ -92,9 +67,26 @@ class ShipperDashboardController extends Controller
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-            ->editColumn('phone1',function ($shipments){
+            ->editColumn('phone',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
             })
+            ->filterColumn('phone', function ($query, $keyword) {
+                $keyword = strtolower($keyword);
+
+                $keyword = str_replace('-', '', $keyword);
+
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.consignee_phone_number_1', 'like', '%' . $keyword . '%')
+                        ->orWhere('shipments.consignee_phone_number_2', 'like', '%' . $keyword . '%');
+                    });
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
             ->addColumn('action',function ($shipments) {
                 $view_charges_button = '<button type="button" class="dropdown-item view_charges"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Charges</div></button>';
                 $cancel_button = '<button type="button" class="dropdown-item cancel_order"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-crosshair"></i></div><div class="col-9 offset-1">Cancel</div></button>';
