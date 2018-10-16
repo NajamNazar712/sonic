@@ -621,11 +621,11 @@ class NotificationsController extends Controller
             }
 
             if (strpos($subject, '[rider]') !== FALSE) {
-              $subject = str_replace('[rider]', $delivery_note->rider->name, $subject);
+              $subject = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $subject);
             }
 
             if (strpos($body, '[rider]') !== FALSE) {
-              $body = str_replace('[rider]', $delivery_note->rider->name, $body);
+              $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
             }
 
             if (strpos($subject, '[company_name]') !== FALSE) {
@@ -669,7 +669,7 @@ class NotificationsController extends Controller
             }
 
             if (strpos($body, '[rider]') !== FALSE) {
-              $body = str_replace('[rider]', $delivery_note->rider->name, $body);
+              $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
             }
 
             if (strpos($body, '[company_name]') !== FALSE) {
@@ -709,7 +709,7 @@ class NotificationsController extends Controller
             }
 
             if (strpos($body, '[rider]') !== FALSE) {
-              $body = str_replace('[rider]', $delivery_note->rider->name, $body);
+              $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
             }
 
             if (strpos($body, '[company_name]') !== FALSE) {
@@ -750,11 +750,11 @@ class NotificationsController extends Controller
             }
 
             if (strpos($subject, '[rider]') !== FALSE) {
-              $subject = str_replace('[rider]', $delivery_note->rider->name, $subject);
+              $subject = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $subject);
             }
 
             if (strpos($body, '[rider]') !== FALSE) {
-              $body = str_replace('[rider]', $delivery_note->rider->name, $body);
+              $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
             }
 
             $original_subject = $subject;
@@ -822,7 +822,7 @@ class NotificationsController extends Controller
             }
 
             if (strpos($body, '[rider]') !== FALSE) {
-              $body = str_replace('[rider]', $delivery_note->rider->name, $body);
+              $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
             }
 
             $original_body = $body;
@@ -884,11 +884,11 @@ class NotificationsController extends Controller
               }
 
               if (strpos($subject, '[rider]') !== FALSE) {
-                $subject = str_replace('[rider]', $return_note->rider->name, $subject);
+                $subject = str_replace('[rider]', $return_note->rider->name . ' (' . $return_note->rider->phone . ')', $subject);
               }
 
               if (strpos($body, '[rider]') !== FALSE) {
-                $body = str_replace('[rider]', $return_note->rider->name, $body);
+                $body = str_replace('[rider]', $return_note->rider->name . ' (' . $return_note->rider->phone . ')', $body);
               }
 
               $original_subject = $subject;
@@ -1011,7 +1011,7 @@ class NotificationsController extends Controller
               }
 
               if (strpos($body, '[rider]') !== FALSE) {
-                $body = str_replace('[rider]', $return_note->rider->name, $body);
+                $body = str_replace('[rider]', $return_note->rider->name . ' (' . $return_note->rider->phone . ')', $body);
               }
 
               $original_body = $body;
