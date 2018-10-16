@@ -250,39 +250,58 @@ class DeliveryController extends Controller
         }
     }
 
-    public function create_delivery_note(Request $request)
-    {
-        $shipments = explode(',', $request->shipment_ids);
-        $count = count($shipments);
-        $cod = Shipment::whereIn('id', $shipments)->sum('amount');
+    public function create_delivery_note(Request $request){
+        $shipments = explode(',',$request->shipment_ids);
+
 
         $admin = Auth::id();
 
-        $note = DeliveryNote::create([
-            'hub_id' => $request->hub_id,
-            'rider_id' => $request->selected_rider_id,
-            'route_id' => $request->selected_route_id,
-            'shipments_count' => $count,
-            'admin_id' => $admin,
-            'total_cod_amount' => $cod
-        ]);
-//        session('delivery_note_print', $note);
-        if ($note) {
+        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15);
+
+            $valid_shipments = array();
+            $shipments_count = 0;
+            $total_cod_amount = 0;
             foreach ($shipments as $shipment) {
-                DeliveryNoteShipment::create([
-                    'delivery_note_id' => $note->id,
-                    'shipment_id' => $shipment
-                ]);
-                Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
-                ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
-
-
-                NotificationsController::send(10, $note->id, $shipment);
-                NotificationsController::send(11, $note->id, $shipment);
-                NotificationsController::send(12, $note->id, $shipment);
+                        $shipment_details = Shipment::find($shipment);
+            
+                        if (in_array($shipment_details->shipper_status_id, $pending_status)) {
+                            $valid_shipments[] = $shipment;
+                            $shipments_count++;
+                            $total_cod_amount += $shipment_details->amount;
+                        }
             }
-        }
-        return redirect()->back()->with(['success' => 'Delivery note has been created successfully', 'print' => $note->id]);
+            if ($shipments_count != 0) {
+                        $note = DeliveryNote::create([
+                            'hub_id' => $request->hub_id,
+                            'rider_id' => $request->selected_rider_id,
+                            'route_id' => $request->selected_route_id,
+                            'shipments_count' => $shipments_count,
+                            'admin_id' => $admin,
+                            'total_cod_amount' => $total_cod_amount
+                        ]);
+            
+                        if ($note) {
+                            foreach ($valid_shipments as $shipment) {
+                                DeliveryNoteShipment::create([
+                                    'delivery_note_id' => $note->id,
+                                    'shipment_id' => $shipment
+                                ]);
+                                Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
+                                ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+            
+                                NotificationsController::send(10, $note->id, $shipment);
+                                NotificationsController::send(11, $note->id, $shipment);
+                                NotificationsController::send(12, $note->id, $shipment);
+                            }
+                        }
+            
+                        return redirect()->back()->with(['success'=>'Delivery note has been created successfully','print'=>$note->id]);
+                    }
+                    else {
+                        return redirect()->back()->with(['error'=>'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
+            
+            }
+       
     }
 
     public function delivery_note_receive_index()
