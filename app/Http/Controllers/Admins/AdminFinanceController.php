@@ -1619,10 +1619,21 @@ class AdminFinanceController extends Controller
       foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
+            if ($done_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($done_payment_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
             $shipment_details .= '
                             <tr>
                               <td>' . $serial_number . '</td>
                               <td>' . $shipment->tracking_number . '</td>
+                              <td>' . $type . '</td>
                               <td>' . $shipment->order_id . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
                               <td>' . $shipment->consignee_city->name . '</td>
@@ -1668,6 +1679,7 @@ class AdminFinanceController extends Controller
                             <tr>
                               <td class="color primary"><strong>S. No.</strong></td>
                               <td class="color primary"><strong>Tracking No.</strong></td>
+                              <td class="color primary"><strong>Type</strong></td>
                               <td class="color primary"><strong>Order ID</strong></td>
                               <td class="color primary"><strong>Consignee</strong></td>
                               <td class="color primary"><strong>Destination</strong></td>
@@ -1729,17 +1741,28 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'GST', 'Payable'];
+        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'GST', 'Payable'];
 
         $serial_number = 1;
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
+            if ($done_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($done_payment_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
             $row = array();
 
             $row[] = $serial_number;
             $row[] = $shipment->tracking_number;
+            $row[] = $type;
             $row[] = $shipment->order_id;
             $row[] = $shipment->consignee_name;
             $row[] = $shipment->consignee_phone_number_1;
