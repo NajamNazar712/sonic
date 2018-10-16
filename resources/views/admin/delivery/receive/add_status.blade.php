@@ -645,7 +645,7 @@
                                             'allowPlus': false,
                                             'rightAlign': false,
                                             'digits': 3,
-                                            'min': 0.00,
+                                            'min': 0.01,
                                             'max': 1000
                                         });
                                     });

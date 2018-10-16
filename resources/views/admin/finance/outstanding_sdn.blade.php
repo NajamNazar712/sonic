@@ -239,12 +239,9 @@
 							}
 						}
 					});
+
                     var data = $.map({!! $banks !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data = $.map({!! $banks !!}, function (obj) {
                         obj.text = obj.name;
 
                         return obj;
