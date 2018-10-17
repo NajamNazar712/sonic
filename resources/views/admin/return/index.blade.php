@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title','Return Marked Shipments')
+@section('title','Return Confirmation Pending Shipments')
 
 @section('content')
     <h1 class="mb-1">
-        Return Marked Shipments
+        Return Confirmation Pending Shipments
     </h1>
 
     <div class="card">
