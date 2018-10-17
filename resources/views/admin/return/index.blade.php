@@ -19,11 +19,13 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Shipper Name & Phone</th>
+                        <th class="border-primary border-darken-1">Shipper Name</th>
+                        <th class="border-primary border-darken-1">Shipper Phone(s)</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Consignee Name & Phone</th>
+                        <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -392,10 +394,12 @@
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle shipper_phone'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'consignee_phone_number_1', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
