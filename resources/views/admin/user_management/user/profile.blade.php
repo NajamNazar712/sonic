@@ -33,6 +33,7 @@
                             {{--candy jelly cake jelly-o sugar plum marshmallow. Dessert--}}
                             {{--cotton candy macaroon chocolate sugar plum cake donut.</p>--}}
                         <div class="table-responsive">
+                            <br>
                             <table class="table" style="font-size: 14px">
                                 <thead>
                                 <tr>
@@ -88,10 +89,11 @@
                                 </tbody>
                             </table>
                         </div>
+                        <br>
                         @if (session('role_id') == 1 || in_array(110, session('permissions')))
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button id="edit-1" type="button" class="btn btn-success btn-block">Edit</button>
+                                <button id="edit-1" type="button" class="btn btn-primary btn-block">Edit</button>
                             </div>
                         </div>
                         @endif
@@ -126,6 +128,7 @@
                         {{--</div>--}}
 
                         <div class="table-responsive">
+                            <br>
                             <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                                 <thead>
                                 <tr role="row" class="bg-primary white">
@@ -136,7 +139,7 @@
                                     <th class="border-primary border-darken-1">POC</th>
                                     <th class="border-primary border-darken-1">Phone</th>
                                     <th class="border-primary border-darken-1">Email</th>
-                                    <th class="border-primary border-darken-1">Action</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -145,6 +148,7 @@
                     </div>
                     <div class="tab-pane" id="linkOpt" role="tabpanel" aria-labelledby="linkOpt-tab" aria-expanded="false">
                         <div class="table-responsive">
+                            <br>
                             <table class="table" style="font-size: 14px">
                                 <thead>
                                 <tr>
@@ -184,10 +188,11 @@
                                 </tbody>
                             </table>
                         </div>
+                        <br>
                         @if (session('role_id') == 1 || in_array(111, session('permissions')))
                         <div class="row justify-content-center">
                             <div class="col-3">
-                                <button id="edit-2" type="button" class="btn btn-success btn-block">Edit</button>
+                                <button id="edit-2" type="button" class="btn btn-primary btn-block">Edit</button>
                             </div>
                         </div>
                         @endif
@@ -495,8 +500,10 @@
                 dom: 'ltipr',
                 processing: true,
                 serverSide: true,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 ajax: '{{route('admin.accounts.get.pickups',['user_id'=>$user->id])}}',
                 rowId: 'id',
+                order : [1,'desc'],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id', name: 'id'},
@@ -504,7 +511,7 @@
                     {data: 'poc', name: 'poc'},
                     {data: 'phone', name: 'phone'},
                     {data: 'email', name: 'email'},
-                    {data: 'action', name: 'action',class:'action'}
+                    {data: 'action', name: 'action',class:'action',orderable: false,}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
