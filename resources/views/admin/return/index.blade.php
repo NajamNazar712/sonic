@@ -441,7 +441,7 @@
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts'},
+                    {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -466,7 +466,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
