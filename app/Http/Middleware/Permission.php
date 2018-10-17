@@ -24,6 +24,11 @@ class Permission
             'accounts.active.ajax' => 11,
             'accounts.block' => 15,
             'accounts.block.ajax' => 15,
+            'accounts.view.profile' =>109,
+            'accounts.get.pickups' =>109,
+            'accounts.update.profile' =>110,
+            'accounts.update.bank' =>111,
+
 
             'pickups.pending.index' => 17,
             'pickups.pending.list' => 17,

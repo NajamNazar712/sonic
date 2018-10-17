@@ -10,7 +10,9 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
-
+use App\Http\Models\BanksList;
+use App\Http\Models\Shipper\User;
+use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\DisputeType;
 use App\Http\Models\PackagingCharge;
 use App\Http\Models\Shipment;
@@ -202,6 +204,166 @@ class ShipperDashboardController extends Controller
     public function orderPending() {
       return view('client.pending_booked_orders');
     }
+
+    //User Profile
+
+    public function userProfile()
+    {
+        //return dd($id);
+        $user = User::find(Auth::id());
+        $product = Product::find($user->product_id);
+        $banks = BanksList::all();
+        $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
+        return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list]);
+    }
+
+    public function getPickups(Request $request)
+    {
+        $user_id = $request->user_id;
+        $pickups = UserShippingInfo::select(['id','pickup_address','poc','phone','email','status','default_address','user_id'])->where('user_id',$user_id);
+        return Datatables::of($pickups)
+            ->addColumn("action", function ($result) {
+                $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+                $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+                $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default</div></button>';
+
+
+                if($result->status==1 && UserShippingInfo::where('user_id',$result->user_id)->count()>1 && $result->default_address!==1)
+                {
+                    $dropdown .= $disable_button;
+                }
+                elseif($result->status==0)
+                {
+                    $dropdown .= $enable_button;
+                }
+
+                if($result->default_address!==1 && $result->status==1)
+                {
+                    $dropdown .= $default_button;
+                }
+                elseif($result->default_address==1)
+                {
+                    $dropdown = "<div style='text-align: center' '>Default</div>";
+                }
+
+
+                $dropdown .= '
+                </div>
+              </div>
+            ';
+//                if(UserShippingInfo::where('user_id',$result->user_id)->count()==1 && $result->default_address==1 )
+//                {
+//                    $dropdown = "";
+//                }
+
+                return $dropdown;
+            })
+            ->make(true);
+    }
+
+
+    public function pickupStatusChange(Request $request){
+        $pickup_id = $request->id;
+        $status = $request->status;
+        $shipping_info = UserShippingInfo::where('id',$pickup_id)->first();
+        if($shipping_info->exists()){
+            if($status == 'enable'){
+                if($shipping_info->status == 0){
+//                    $shipping_info->update(['status'=>1]);
+                    $shipping_info->status = 1;
+                    $shipping_info->save();
+                    return response()->json(['status'=>1,'success'=>"Pickup is now enabled!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"Pickup is already enabled!"]);
+                }
+            }else if($status == 'disable'){
+                if(UserShippingInfo::where('user_id',$shipping_info->user_id)->count()==1)
+                {
+                    return response()->json(['status'=>0,'error'=>"Single Pickup Address cannot be set to disabled"]);
+                }
+                if($shipping_info->status == 1){
+//                    $shipping_info->update(['status'=>0]);
+                    $shipping_info->status = 0;
+                    $shipping_info->save();
+                    return response()->json(['status'=>1,'success'=>"Pickup is now disabled!"]);
+                }else{
+                    return response()->json(['status'=>0,'error'=>"Pickup is already disabled!"]);
+
+                }
+            }
+            else if($status == 'default')
+            {
+                if($shipping_info->default_address == 0)
+                {
+                    $shipping_info->default_address = 1;
+                    $shipping_info->save();
+                    UserShippingInfo::where('user_id',$shipping_info->user_id)->where('id','<>',$pickup_id)->update(['default_address'=>0]);
+                    return response()->json(['status'=>1,'success'=>"This Pickup is now default Pickup Address"]);
+                }
+                else
+                {
+                    return response()->json(['status'=>0,'error'=>"Pickup is already default Pickup Address"]);
+                }
+
+            }
+        }else{
+            return response()->json(['status'=>0,'error'=>"Pickup doesn\'t exist!"]);
+        }
+    }
+
+
+
+
+    public function addPickup(Request $request){
+
+
+        $pickup_address = $request->pickup_address;
+        $phone = $request->phone;
+        $poc = $request->poc;
+        $email = $request->email;
+        $city_id = $request->city_id;
+        $user_id = Auth::id();
+
+        if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null)
+        {
+            UserShippingInfo::create(['user_id'=>$user_id,'pickup_address'=>$pickup_address,'poc'=>$poc,
+                'email'=>$email,'city_id'=>$city_id,'phone'=>$phone]);
+            return redirect()->back()->with('success','Pickup added successfully!');
+
+        }else{
+            return redirect()->back()->with('error','Pickup not added!');
+        }
+    }
+
+
+
+
+
+    public function updateProfile(Request $request)
+    {
+
+        //1 for Admin, 0 for User
+        $request->validate([
+            'poc'=>'required|string|max:255',
+            'phone'=>'required|string|max:255',
+            'phone2'=>'string|max:255',
+        ]);
+
+
+        User::where('id',Auth::id())->update(['poc'=>$request->poc,'phone'=>$request->phone,'phone2'=>$request->phone2,
+            'updated_by_type'=>0,'updated_by_id'=>Auth::id()]);
+
+
+        return redirect()->back()->with(['success'=>"Profile Successfully Updated"]);
+    }
+
+
 //    public function statistics_search(Request $request){
 //        $graph = array();
 //        $destination = $request->destination;

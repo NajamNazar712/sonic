@@ -194,4 +194,22 @@ class RegisterController extends Controller
                 ]);
             }
     }
+
+    public function checkCompanyEmail(Request $request){
+
+//        dd($request);
+        $email = $request->email;
+        $res = User::where('email','LIKE',$email)->get();
+        if(!$res->isEmpty()){
+            return response()->json([
+                'message' => 'email already exists',
+                'status' => 0
+            ]);
+        }else{
+            return response()->json([
+                'message' => 'email available',
+                'status' => 1
+            ]);
+        }
+    }
 }

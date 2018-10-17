@@ -5,7 +5,10 @@ namespace App\Http\Controllers\Admins;
 use App\Http\Controllers\NotificationsController;
 
 use App\Http\Models\CityDelivery;
-
+use App\Http\Models\BanksList;
+use App\Http\Models\Shipper\UserBankInfo;
+use App\Http\Models\Shipper\UserShippingInfo;
+use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\StandardCashHandlingCharge;
 use App\Http\Models\Admin\StandardInsuranceCharge;
@@ -3305,6 +3308,11 @@ class AdminDashboardController extends Controller
                     }
                 }
 
+                if(session('role_id') == 1 || in_array(109, session('permissions')))
+                {
+                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                }
+
                 $dropdown .= '
                     </div>
                   </div>
@@ -3386,6 +3394,12 @@ class AdminDashboardController extends Controller
                     $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="block"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-x "></i></div><div class="col-9 offset-1">Block</div></button>';
                 }
 
+
+                if(session('role_id') == 1 || in_array(109, session('permissions')))
+                {
+                    $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+                }
+
                 $dropdown .= '
                     </div>
                   </div>
@@ -3426,6 +3440,12 @@ class AdminDashboardController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item blacklist" rel="unblock"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-user-plus "></i></div><div class="col-9 offset-1">Unblock</div></button>';
             }
 
+
+            if(session('role_id') == 1 || in_array(109, session('permissions')))
+            {
+                $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
+            }
+
             $dropdown .= '
                 </div>
               </div>
@@ -3436,6 +3456,91 @@ class AdminDashboardController extends Controller
       ->make(true);
 
     }
+
+    //User Profile Methods
+
+    public function userProfile($id)
+    {
+        //return dd($id);
+        $user = User::find($id);
+        $product = Product::find($user->product_id);
+        $banks = BanksList::all();
+        $city_list = City::where('status',1)->get();
+        return view('admin.user_management.user.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list]);
+    }
+
+    public function updateProfile(Request $request)
+    {
+
+        $user_id = $request->user_id;
+
+        //1 for Admin, 0 for User
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|email|max:255',
+            'address'=>'required|string|max:255',
+            'poc'=>'required|string|max:255',
+            'phone'=>'required|string|max:255',
+            'phone2'=>'string|max:255',
+            'cnic'=>'required|string|max:255',
+        ]);
+
+
+        if($request->password=="" || $request->password==null || $request->password==" ")
+        {
+            User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
+                'ntn_no'=>$request->ntn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id]);
+        }
+        else
+        {
+            User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
+                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id()]);
+        }
+
+//        UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
+//            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city]);
+
+        return redirect()->back()->with(['success'=>"Profile Successfully Updated"]);
+    }
+
+    public function updateBankInfo(Request $request)
+    {
+
+        $user_id = $request->user_id;
+
+        //1 for Admin, 0 for User
+
+        $request->validate([
+            'bank_name'=>'required|max:255',
+            'bank_branch'=>'required|string|max:255',
+            'account_no'=>'required|string|max:255',
+            'account_title'=>'required|string|max:255',
+            'iban'=>'required|string|max:255',
+        ]);
+
+
+        UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
+            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city]);
+
+        return redirect()->back()->with(['success'=>"Bank Info Successfully Updated"]);
+    }
+
+
+
+    public function getPickups(Request $request)
+    {
+        $user_id = $request->user_id;
+        $pickups = UserShippingInfo::select(['id','pickup_address','poc','phone','email','status','default_address','user_id'])->where('user_id',$user_id);
+        return Datatables::of($pickups)
+            ->addColumn("action", function ($result) {
+                $status = $result->default_address==1 ? "Default Address | " : "";
+                $status .= $result->status==1 ? "Enabled" : "Disabled";
+                return $status;
+            })
+            ->make(true);
+    }
+
 
     public function cityView(Request $request){
 //        $req = $request->route();
