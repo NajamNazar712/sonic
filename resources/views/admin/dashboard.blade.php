@@ -312,17 +312,21 @@
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '350px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
-                    text: '<i class="la la-print"></i> Print',
-                    className: 'btn btn-primary print',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        table.button('.print').disable();
-                        print(selected_rows);
-                        table.rows().deselect();
-                        selected_rows = [];
-                    }
-                }, {
+                buttons: [
+                @if (session('role_id') == 1)
+                  {
+                      text: '<i class="la la-print"></i> Print',
+                      className: 'btn btn-primary print',
+                      enabled: false,
+                      action: function (e, dt, node, config) {
+                          table.button('.print').disable();
+                          print(selected_rows);
+                          table.rows().deselect();
+                          selected_rows = [];
+                      }
+                  },
+                @endif
+                {
                   extend: 'selectAll',
                   text: 'Select All',
                   className: 'select_all',
