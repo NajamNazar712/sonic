@@ -516,6 +516,7 @@ class AdminFinanceController extends Controller
                 $payable = $amount - ($charges + $gst);
             }
             else {
+                $amount = 0;
                 $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
                 $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
 
@@ -627,10 +628,10 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($shipment_id);
 
-            $amount = 0 - $payment_shipment->payable;
+            $amount = 0;
             $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
             $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
-            $payable = $amount - ($charges + $gst);
+            $payable = (0 - $payment_shipment->payable) - ($charges + $gst);
         }
         else {
             if ($payment_type == 0) {
@@ -642,10 +643,10 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($shipment_id);
 
-            $amount = 0 - $payment_shipment->payable;
+            $amount = 0;
             $charges = 0;
             $gst = 0;
-            $payable = $amount;
+            $payable = 0 - $payment_shipment->payable;
         }
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
