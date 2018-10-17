@@ -1070,16 +1070,21 @@ class ReturnController extends Controller
     public function return_confirmed_revert(Request $request) {
         $shipment = Shipment::find($request->id);
 
-        $shipment->shipper_status_id = 13;
-        $shipment->consignee_status_id = 13;
+        if ($shipment->shipper_status_id == 20) {
+            $shipment->shipper_status_id = 13;
+            $shipment->consignee_status_id = 13;
 
-        $shipment->save();
+            $shipment->save();
 
-        ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
+            ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
 
-        AdminFinanceController::return_confirmed_revert($request->id);
+            AdminFinanceController::return_confirmed_revert($request->id);
 
-        return ['status' => 0, 'success' => 'Shipment has been marked to be Adjusted in Payment'];
+            return ['status' => 0, 'success' => 'Shipment has been Reverted'];
+        }
+        else {
+            return ['status' => 1, 'error' => 'Shipment has already been Reverted'];
+        }
     }
 
 }
