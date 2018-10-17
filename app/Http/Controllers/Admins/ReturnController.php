@@ -57,7 +57,8 @@ class ReturnController extends Controller
                     DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipments_journey as sret', function ($join) {
-                $join->on('sret.shipment_id', '=', 'shipments.id');
+                $join->on('sret.shipment_id', '=', 'shipments.id')
+                ->where('sret.shipper_status_id','=',13);
 //                    ->where('sret.id','=',
 //                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
             })
@@ -90,6 +91,7 @@ class ReturnController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->orderColumn('shipper_phone', 'u.phone $1, u.phone2 $1')
             ->addColumn('shipment_remarks',function ($shipments){
                 $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
                 return $remark;
