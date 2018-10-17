@@ -116,7 +116,7 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function add_index() {
-      $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7, 8])->get();
+      $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
 
       return view('client.substitute_account_management.add.index')->with(['permissions' => $permissions]);
     }
@@ -148,7 +148,7 @@ class ShipperSubstituteAccountManagementController extends Controller
     }
 
     public function update_index($id) {
-      $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7, 8])->get();
+      $permissions = SubstituteUserModulePermission::whereNotIn('id', [6, 7])->get();
       $substitute_user = SubstituteUser::find($id);
 
       if ($substitute_user->user_id == session('user_id')) {

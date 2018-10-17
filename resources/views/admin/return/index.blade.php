@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title','Return Marked Shipments')
+@section('title','Return Confirmation Pending Shipments')
 
 @section('content')
     <h1 class="mb-1">
-        Return Marked Shipments
+        Return Confirmation Pending Shipments
     </h1>
 
     <div class="card">
@@ -19,11 +19,13 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Shipper Name & Phone</th>
+                        <th class="border-primary border-darken-1">Shipper Name</th>
+                        <th class="border-primary border-darken-1">Shipper Phone(s)</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Consignee Name & Phone</th>
+                        <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -33,6 +35,7 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Re-Attempt Count</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -166,6 +169,7 @@
                 }
             } );
             var selected_rows = [];
+            var shipment_remarks = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0)
@@ -201,17 +205,30 @@
                                         dangerMode: true
                                     }).then(function (confirm) {
                                         if (confirm) {
+
+                                            table.rows().nodes().each(function(index) {
+                                                var row = table.row(index);
+
+                                                if ($(row.node()).hasClass('selected')) {
+                                                    id = parseInt(row.id());
+                                                    var remark = $(row.node()).find('td.shipment_remarks input').val();
+                                                    shipment_remarks[id] = remark;
+                                                }
+                                            });
+
                                             $.ajax({
                                                 url:"{{route('admin.return.marked.status')}}",
                                                 method:'POST',
                                                 data:{
                                                     'shipment_ids':selected_rows,
                                                     '_token':'{{ csrf_token() }}',
-                                                    'action': 'confirm'
+                                                    'action': 'confirm',
+                                                    'remark': shipment_remarks
                                                 }
                                             }).done(function (data) {
                                                 table.rows().deselect();
                                                 selected_rows = [];
+                                                shipment_remarks = [];
                                                 table.button('.confirm').disable();
                                                 table.button('.re-attempt').disable();
                                                 table.draw('false');
@@ -260,16 +277,28 @@
                                         dangerMode: true
                                     }).then(function (confirm) {
                                         if (confirm) {
+                                            table.rows().nodes().each(function(index) {
+                                                var row = table.row(index);
+
+                                                if ($(row.node()).hasClass('selected')) {
+                                                    id = parseInt(row.id());
+                                                    var remark = $(row.node()).find('td.shipment_remarks input').val();
+                                                    shipment_remarks[id] = remark;
+                                                }
+                                            });
+
                                             $.ajax({
                                                 url:"{{route('admin.return.marked.status')}}",
                                                 method:'POST',
                                                 data:{
                                                     'shipment_ids':selected_rows,
                                                     '_token':'{{ csrf_token() }}',
-                                                    'action': 'reattempt'
+                                                    'action': 'reattempt',
+                                                    'remark': shipment_remarks
                                                 }
                                             }).done(function (data) {
                                                 selected_rows = [];
+                                                shipment_remarks = [];
                                                 table.button('.confirm').disable();
                                                 table.button('.re-attempt').disable();
                                                 table.draw('false');
@@ -391,19 +420,22 @@
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle shipper_phone'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'consignee_phone_number_1', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
+                    {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -428,7 +460,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -458,12 +490,7 @@
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
                         obj.id = obj.id // replace pk with your identifier
-
-                        return obj;
-                    });
-                    var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.text = obj.text || obj.name; // replace name with the property used for the text
-
+                        obj.text = obj.text || obj.name;
                         return obj;
                     });
 
@@ -476,12 +503,7 @@
                     });
                     var data1 = $.map({!! $shipping_mode !!}, function (obj) {
                         obj.id = obj.id
-
-                        return obj;
-                    });
-                    var data1 = $.map({!! $shipping_mode !!}, function (obj) {
                         obj.text = obj.mode;
-
                         return obj;
                     });
 
@@ -493,16 +515,10 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data2 = $.map({!! $service_type !!}, function (obj) {
-                        obj.id = obj.id
-
-                        return obj;
-                    });
-                    var data2 = $.map({!! $service_type !!}, function (obj) {
+                        obj.id = obj.id;
                         obj.text = obj.booking_type;
-
                         return obj;
                     });
-
                     $("#service_select").prepend('<option value="" selected></option>').select2({
                         data:data2,
                         placeholder: "Select Service",
@@ -514,6 +530,7 @@
                 }
             });
             var hub_ids = [];
+
             $('#datatable tbody').on('click', 'tr td.select-checkbox', function() {
 
                 var id = parseInt($(this).parent('tr').attr('id'));
@@ -568,11 +585,13 @@
             $('body').on('click','.returnMarkStatus',function () {
                 var action = $(this).data('action');
                 var row_id = $(this).parents('tr').attr('id');
+                var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
                 if(action === 'confirm'){
                     atext = 'Select Yes to change shipment status to Return-Confirm!';
                 }else if(action === 'reattempt'){
                     atext = 'Select Yes to change shipment status to Re-Attempt!';
                 }
+
                 if(row_id != '' && action != ''){
                     swal({
                         title: 'Are You Sure?',
@@ -603,7 +622,8 @@
                                 data:{
                                     'shipment_id':row_id,
                                     '_token':'{{ csrf_token() }}',
-                                    'action': action
+                                    'action': action,
+                                    'remark':remark
                                 }
                             }).done(function (data) {
                                 if(data.status == 1){

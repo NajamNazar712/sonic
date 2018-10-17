@@ -516,6 +516,7 @@ class AdminFinanceController extends Controller
                 $payable = $amount - ($charges + $gst);
             }
             else {
+                $amount = 0;
                 $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
                 $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
 
@@ -627,10 +628,10 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($shipment_id);
 
-            $amount = 0 - $payment_shipment->payable;
+            $amount = 0;
             $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
             $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
-            $payable = $amount - ($charges + $gst);
+            $payable = (0 - $payment_shipment->payable) - ($charges + $gst);
         }
         else {
             if ($payment_type == 0) {
@@ -642,10 +643,10 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($shipment_id);
 
-            $amount = 0 - $payment_shipment->payable;
+            $amount = 0;
             $charges = 0;
             $gst = 0;
-            $payable = $amount;
+            $payable = 0 - $payment_shipment->payable;
         }
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
@@ -1008,11 +1009,15 @@ class AdminFinanceController extends Controller
     public function make_payments_export_bank_order(Request $request) {
         $done_payment_ids = explode(',', $request->done_payment_ids);
 
+        $filename = 'sonic_bank_order';
+
         $details = array();
 
         $details[] = ['Payment ID', 'Client', 'Account Title', 'IBAN', 'Bank', 'Payable'];
 
         foreach ($done_payment_ids as $done_payment_id) {
+            $filename .= '_' . $done_payment_id;
+
             $done_payment = DonePayment::find($done_payment_id);
 
             $shipper = User::find($done_payment->user_id);
@@ -1031,13 +1036,18 @@ class AdminFinanceController extends Controller
             $details[] = $row;
         }
 
+        $filename .= '.xlsx';
+
         $spreadsheet = new Spreadsheet();
+
+        $spreadsheet->getActiveSheet()->getStyle('F')->getNumberFormat()->setFormatCode('#,##0');
+
         $spreadsheet->getActiveSheet()->fromArray($details);
 
         $writer = new Xlsx($spreadsheet);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="sonic_bank_order.xlsx"');
+        header('Content-Disposition: attachment;filename="' . $filename .'"');
         header('Cache-Control: max-age=0');
 
         $writer->save('php://output');
@@ -1610,10 +1620,21 @@ class AdminFinanceController extends Controller
       foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
+            if ($done_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($done_payment_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
             $shipment_details .= '
                             <tr>
                               <td>' . $serial_number . '</td>
                               <td>' . $shipment->tracking_number . '</td>
+                              <td>' . $type . '</td>
                               <td>' . $shipment->order_id . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
                               <td>' . $shipment->consignee_city->name . '</td>
@@ -1621,6 +1642,7 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
                               <td>' . number_format($done_payment_shipment->charges) . '</td>
+                              <td>' . number_format($done_payment_shipment->gst) . '</td>
                               <td>' . number_format($done_payment_shipment->payable) . '</td>
                             </tr>
             ';
@@ -1658,6 +1680,7 @@ class AdminFinanceController extends Controller
                             <tr>
                               <td class="color primary"><strong>S. No.</strong></td>
                               <td class="color primary"><strong>Tracking No.</strong></td>
+                              <td class="color primary"><strong>Type</strong></td>
                               <td class="color primary"><strong>Order ID</strong></td>
                               <td class="color primary"><strong>Consignee</strong></td>
                               <td class="color primary"><strong>Destination</strong></td>
@@ -1665,6 +1688,7 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>Actual Weight</strong></td>
                               <td class="color primary"><strong>Amount</strong></td>
                               <td class="color primary"><strong>Charges</strong></td>
+                              <td class="color primary"><strong>GST</strong></td>
                               <td class="color primary"><strong>Payable</strong></td>
                             </tr>
       ';
@@ -1714,28 +1738,42 @@ class AdminFinanceController extends Controller
     public function done_payments_export_to_excel(Request $request) {
         $done_payment = DonePayment::find($request->id);
 
+        $filename = 'sonic_payment_details_' . $request->id . '.xlsx';
+
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'Payable'];
+        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'GST', 'Payable'];
 
         $serial_number = 1;
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
+            if ($done_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($done_payment_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
             $row = array();
 
             $row[] = $serial_number;
             $row[] = $shipment->tracking_number;
+            $row[] = $type;
             $row[] = $shipment->order_id;
             $row[] = $shipment->consignee_name;
             $row[] = $shipment->consignee_phone_number_1;
             $row[] = $shipment->consignee_city->name;
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
-            $row[] = number_format($done_payment_shipment->amount);
-            $row[] = number_format($done_payment_shipment->charges);
-            $row[] = number_format($done_payment_shipment->payable);
+            $row[] = $done_payment_shipment->amount;
+            $row[] = $done_payment_shipment->charges;
+            $row[] = $done_payment_shipment->gst;
+            $row[] = $done_payment_shipment->payable;
 
             $details[] = $row;
 
@@ -1745,13 +1783,17 @@ class AdminFinanceController extends Controller
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 
         $writer = new Xlsx($spreadsheet);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
-        header('Content-Disposition: attachment;filename="sonic_payment_details.xlsx"');
+        header('Content-Disposition: attachment;filename="' . $filename .'"');
         header('Cache-Control: max-age=0');
 
         $writer->save('php://output');

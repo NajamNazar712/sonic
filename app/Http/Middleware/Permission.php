@@ -292,7 +292,9 @@ class Permission
             'dispute.rebook.shipment.update' => 7,
 
             'reports.qsr.index' => 8,
-            'reports.qsr.list' => 8
+            'reports.qsr.list' => 8,
+            'reports.sales.index' => 8,
+            'reports.sales.list' => 8
         ]
     ];
 

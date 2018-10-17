@@ -71,14 +71,17 @@ class ShipperTrackingController extends Controller
         			$details['order_information']['instructions'] = $shipment->special_instructions;
 
         			foreach ($shipment->shipment_journey as $journey) {
-        				$journey_details = array();
+        			    if ($journey->verification) {
+                            $journey_details = array();
 
-        				$journey_details['date_time'] = $journey->created_at->toDateTimeString();
-        				$journey_details['status'] = $journey->shipment_status_shipper->name;
-        				$journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
-                        $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
+                            $journey_details['date_time'] = $journey->created_at->toDateTimeString();
+                            $journey_details['status'] = $journey->shipment_status_shipper->name;
+                            $journey_details['status_reason'] = ($journey->status_reason_id) ? $journey->shipment_status_reason->name : NULL;
+                            $journey_details['city'] = ($journey->city_id) ? $journey->city->name : '';
 
-        				$details['tracking_history'][] = $journey_details;
+                            $details['tracking_history'][] = $journey_details;
+                        }
+
         			}
 
                     $shipment_payment_journey = $shipment->shipment_payment_journey;

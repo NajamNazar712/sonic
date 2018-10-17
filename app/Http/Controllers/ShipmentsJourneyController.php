@@ -15,10 +15,11 @@ use Auth;
 
 class ShipmentsJourneyController extends Controller
 {
-    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL) {
+    static public function add($shipment_id, $shipper_status_id, $consignee_status_id, $status_reason_id, $remarks, $user_id, $admin_id, $reference_1_id = NULL, $reference_2_id = NULL,$verification = 1) {
       $shipment_journey = new ShipmentsJourney();
 
       $shipment_journey->shipment_id = $shipment_id;
+      $shipment_journey->verification = $verification;
       $shipment_journey->shipper_status_id = $shipper_status_id;
       $shipment_journey->consignee_status_id = $consignee_status_id;
       $shipment_journey->status_reason_id = $status_reason_id;

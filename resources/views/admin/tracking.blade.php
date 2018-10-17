@@ -132,8 +132,14 @@
 
 							shipment += '<div class="mt-4 border-primary">';
 							shipment += '<div class="d-flex align-items-center bg-primary">';
-							shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + '</div>';
-							shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + '>Print</button>';
+
+							@if (session('role_id') == 1)
+								shipment += '<div class="mb-0 ml-1 font-medium-3 white">' + details.tracking_number + '</div>';
+								shipment += '<button class="btn btn-secondary ml-auto print" id=' + id + '>Print</button>';
+							@else
+								shipment += '<div class="m-1 font-medium-3 white">' + details.tracking_number + '</div>';
+							@endif
+
 							shipment += '</div>';
 
 							shipment += '<div class="p-1">';
