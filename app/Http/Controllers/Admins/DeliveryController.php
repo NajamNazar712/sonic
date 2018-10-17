@@ -2592,24 +2592,19 @@ class DeliveryController extends Controller
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
-                if (($request->consignee_city_id != $shipment->consignee_city_id) && $shipment->shipper_status_id == 11) {
-                    $shipment->consignee_city_id = $request->consignee_city_id;
-                    $shipment->consignee_name = $request->consignee;
-                    $shipment->consignee_address = $request->address;
-                    $shipment->consignee_phone_number_1 = $request->phone1;
-                    $shipment->consignee_phone_number_2 = $request->phone2;
-                    $shipment->consignee_email = $request->email;
-                    $shipment->shipper_status_id = 4;
-                    $shipment->consignee_status_id = 4;
-                    $shipment->save();
+                $shipment->consignee_city_id = $request->consignee_city_id;
+                $shipment->consignee_name = $request->consignee;
+                $shipment->consignee_address = $request->address;
+                $shipment->consignee_phone_number_1 = $request->phone1;
+                $shipment->consignee_phone_number_2 = $request->phone2;
+                $shipment->consignee_email = $request->email;
+                $shipment->shipper_status_id = 4;
+                $shipment->consignee_status_id = 4;
+                $shipment->save();
 
-                    ShipmentsJourneyController::add($shipment->id, 4, 4, NULL, 'Misrouted shipment updated to new destination.', NULL, Auth::id());
+                ShipmentsJourneyController::add($shipment->id, 4, 4, NULL, 'Misrouted shipment updated to new destination.', NULL, Auth::id());
 
-                    return response()->json(['status' => 1, 'success' => 'Shipment has been updated successfully']);
-
-                } else {
-                    return response()->json(['status' => 0, 'error' => 'Please select new city!']);
-                }
+                return response()->json(['status' => 1, 'success' => 'Shipment has been updated successfully']);
             } else {
                 return response()->json(['status' => 0, 'error' => 'Shipment with Misroute Status not found!']);
 

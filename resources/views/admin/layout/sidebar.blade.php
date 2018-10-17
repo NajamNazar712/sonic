@@ -110,7 +110,7 @@
                 <li class=" nav-item"><a href="#"></i><span class="menu-title" data-i18n="nav.dash.main">Return</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(44, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.return.index') }}">Mark</a></li>
+                            <li><a class="menu-item" href="{{ route('admin.return.index') }}">Confirmation Pending</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(47, session('permissions')))

@@ -25,7 +25,7 @@
 								</div>
 
 								<div class="form-group ml-1">
-									<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required">
+									<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,1000]" data-msg-range="Weight needs to be from 0.01 to 1000">
 								</div>
 
 								<div class="form-group text-center mt-1 mb-1 ml-1 p-1 border border-light rounded">
@@ -34,15 +34,15 @@
 								</div>
 
 								<div class="form-group ml-1 volumetric_weights">
-									<input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" disabled="disabled">
+									<input type="text" name="length" class="form-control form-control-sm length" placeholder="Length (cm)*" data-rule-required="true" data-msg-required="Length is required" data-rule-range="[0.1,175]" data-msg-range="Length needs to be from 0.1 to 175" disabled="disabled">
 								</div>
 
 								<div class="form-group ml-1 volumetric_weights">
-									<input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" disabled="disabled">
+									<input type="text" name="breadth" class="form-control form-control-sm breadth" placeholder="Breadth (cm)*" data-rule-required="true" data-msg-required="Breadth is required" data-rule-range="[0.1,175]" data-msg-range="Length needs to be from 0.1 to 175" disabled="disabled">
 								</div>
 
 								<div class="form-group ml-1 volumetric_weights">
-									<input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" disabled="disabled">
+									<input type="text" name="height" class="form-control form-control-sm height" placeholder="Height (cm)*" data-rule-required="true" data-msg-required="Height is required" data-rule-range="[0.1,175]" data-msg-range="Length needs to be from 0.1 to 175" disabled="disabled">
 								</div>
 
 								<div class="form-group ml-1">
@@ -178,36 +178,28 @@
 				'alias': 'decimal',
 				'allowMinus': false,
 				'allowPlus': false,
-				'digits': 2,
-				'min': 0.1,
-				'max': 1000
+				'digits': 2
 			});
 
 			$('#add_shipment_form .volumetric_weights input.length').inputmask({
 				'alias': 'decimal',
 				'allowMinus': false,
 				'allowPlus': false,
-				'digits': 2,
-				'min': 0.1,
-				'max': 175
+				'digits': 2
 			});
 
 			$('#add_shipment_form .volumetric_weights input.breadth').inputmask({
 				'alias': 'decimal',
 				'allowMinus': false,
 				'allowPlus': false,
-				'digits': 2,
-				'min': 0.1,
-				'max': 175
+				'digits': 2
 			});
 
 			$('#add_shipment_form .volumetric_weights input.height').inputmask({
 				'alias': 'decimal',
 				'allowMinus': false,
 				'allowPlus': false,
-				'digits': 2,
-				'min': 0.1,
-				'max': 175
+				'digits': 2
 			});
 
 			$('#add_shipment_form').validate({
