@@ -38,7 +38,7 @@
                     </thead>
                 </table>
                 <div class="row justify-content-center">
-                    @if(!$delivery_note_status == 1)
+                    @if($pending_status == 1)
                     <div class="mr-1">
                         <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
                     </div>
