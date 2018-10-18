@@ -47,43 +47,43 @@
                                             </thead>
                                             <tbody>
                                             <tr>
-                                                <td>Name</td>
+                                                <td><b>Name</b></td>
                                                 <td>{{$user->name}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Email</td>
+                                                <td><b>Email</b></td>
                                                 <td>{{$user->email}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Address</td>
+                                                <td><b>Address</b></td>
                                                 <td>{{$user->address}}</td>
                                             </tr>
                                             <tr>
-                                                <td>POC</td>
+                                                <td><b>POC</b></td>
                                                 <td>{{$user->poc}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Phone</td>
+                                                <td><b>Phone</b></td>
                                                 <td>{{$user->phone}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Phone-2</td>
+                                                <td><b>Phone-2</b></td>
                                                 <td>{{$user->phone2}}</td>
                                             </tr>
                                             <tr>
-                                                <td>CNIC</td>
+                                                <td><b>CNIC</b></td>
                                                 <td>{{$user->cnic}}</td>
                                             </tr>
                                             <tr>
-                                                <td>NTN No.</td>
+                                                <td><b>No.</b></td>
                                                 <td>{{$user->ntn_no}}</td>
                                             </tr>
                                             <tr>
-                                                <td>URL</td>
+                                                <td><b>URL</b></td>
                                                 <td>{{$user->url}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Product</td>
+                                                <td><b>Product</b></td>
                                                 <td>{{$product_name}}</td>
                                             </tr>
 
@@ -110,6 +110,7 @@
                                                 <th class="border-primary border-darken-1">POC</th>
                                                 <th class="border-primary border-darken-1">Phone</th>
                                                 <th class="border-primary border-darken-1">Email</th>
+                                                <th class="border-primary border-darken-1">Status</th>
                                                 <th class="border-primary border-darken-1"></th>
                                             </tr>
                                             </thead>
@@ -128,31 +129,31 @@
                                             </thead>
                                             <tbody>
                                             <tr>
-                                                <td>Bank Name</td>
+                                                <td><b>Bank Name</b></td>
                                                 <td>{{$user->bank->bank->name}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Bank Branch</td>
+                                                <td><b>Bank Branch</b></td>
                                                 <td>{{$user->bank->bank_branch}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Account No.</td>
+                                                <td><b>Account No.</b></td>
                                                 <td>{{$user->bank->account_no}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Account Title</td>
+                                                <td><b>Account Title</b></td>
                                                 <td>{{$user->bank->account_title}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Account IBAN</td>
+                                                <td><b>Account IBAN</b></td>
                                                 <td>{{$user->bank->iban}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Payment Mode</td>
+                                                <td><b>Payment Mode</b></td>
                                                 <td>{{$user->bank->payment_mode}}</td>
                                             </tr>
                                             <tr>
-                                                <td>Payment Cycle</td>
+                                                <td><b>Payment Cycle</b></td>
                                                 <td>{{$user->bank->payment_cycle}}</td>
                                             </tr>
                                             </tbody>
@@ -176,21 +177,21 @@
                             <form id="main-form" class="form form-horizontal" style="display: none" method="post" action="{{route('cod.update.profile')}}">
                                 @csrf
                                 <div class="form-body">
-                                    <h4 class="form-section"><i class="la la-eye"></i> Profile Info</h4>
+                                    <h4 class="form-section">Profile Info</h4>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group row">
                                                 <label class="col-md-3 label-control" for="userinput2">POC</label>
-                                                <div class="col-md-9">
-                                                    <input type="text" id="userinput2" class="form-control border-primary" value="{{$user->poc}}" name="poc" required>
+                                                <div class="form-group col-md-9">
+                                                    <input type="text" id="poc" class="form-control border-primary" data-rule-required="true" data-msg-required="This field is required" value="{{$user->poc}}" name="poc" required>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group row">
                                                 <label class="col-md-3 label-control" for="userinput3">Phone Number</label>
-                                                <div class="col-md-9">
-                                                    <input type="text" id="userinput5" class="form-control border-primary" value="{{$user->phone}}" name="phone" required>
+                                                <div class="form-group col-md-9">
+                                                    <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="This field is required" value="{{$user->phone}}" name="phone" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -200,8 +201,8 @@
                                         <div class="col-md-6">
                                             <div class="form-group row">
                                                 <label class="col-md-3 label-control" for="userinput4">Phone Number-2</label>
-                                                <div class="col-md-9">
-                                                    <input type="text" id="userinput6" class="form-control border-primary" value="{{$user->phone2}}" name="phone2">
+                                                <div class="form-group col-md-9">
+                                                    <input type="text" id="phone2" class="form-control border-primary" data-rule-required="true" data-msg-required="This field is required" value="{{$user->phone2}}" name="phone2">
                                                     {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
                                                 </div>
                                             </div>
@@ -210,10 +211,10 @@
                                 </div>
                                 <div class="form-actions right">
                                     <button id="cancel-button" type="button" class="btn btn-warning mr-1">
-                                        <i class="ft-x"></i> Cancel
+                                        Cancel
                                     </button>
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="la la-check-square-o"></i> Update
+                                        Update
                                     </button>
                                 </div>
                             </form>
@@ -252,19 +253,19 @@
                             {{--</div>--}}
                             <div class="row">
                                 <div class="col-6 form-group">
-                                    <input type="text" name="pickup_address" id="pickup_address" class="form-control numeric flyer" placeholder="Add Pickup Address" required>
+                                    <input type="text" name="pickup_address" id="pickup_address" class="form-control numeric flyer" data-rule-required="true" data-msg-required="This field is required" placeholder="Add Pickup Address" required>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="phone" id="phone" class="form-control numeric flyer" placeholder="Add Phone Number" required>
+                                    <input type="text" name="phone" id="phone" class="form-control numeric flyer" data-rule-required="true" data-msg-required="This field is required" placeholder="Add Phone Number" required>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="poc" id="poc" class="form-control numeric flyer" placeholder="Add POC" required>
+                                    <input type="text" name="poc" id="poc" class="form-control numeric flyer" data-rule-required="true" data-msg-required="This field is required" placeholder="Add POC" required>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="email" name="email" id="add_stock_boxes" class="form-control numeric flyer" placeholder="Add Email" required>
+                                    <input type="email" name="email" id="add_stock_boxes" class="form-control numeric flyer" data-rule-required="true" data-msg-required="This field is required" placeholder="Add Email" required>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <select name="city_id" id="city_id" class="select2 form-control required" style="width: 100%" required>
+                                    <select name="city_id" id="city_id" class="select2 form-control required" data-rule-required="true" data-msg-required="This field is required" style="width: 100%" required>
                                         @foreach($pickup_city_list as $city)
                                             <option value="{{$city->id}}">{{$city->name}}</option>
                                         @endforeach
@@ -303,6 +304,8 @@
     <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/tables/datatable/dataTables.buttons.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+
 
 
 
@@ -319,6 +322,12 @@
             });
             $('#cancel-button').click(function () {
                 $("#main-form").hide();
+                $("#phone").val("");
+                $("#phone").val("{{$user->phone}}");
+                $("#phone2").val("");
+                $("#phone2").val("{{$user->phone2}}");
+                $("#poc").val("");
+                $("#poc").val("{{$user->poc}}");
                 $("#tabs").show();
             });
 
@@ -354,6 +363,7 @@
                     {data: 'poc', name: 'poc'},
                     {data: 'phone', name: 'phone'},
                     {data: 'email', name: 'email'},
+                    {data: 'status', name: 'status',class:'status'},
                     {data: 'action',orderable: false, name: 'action',class:'action'}
                 ],
                 rowCallback: function(row, data, index) {
@@ -367,12 +377,22 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Disabled</option>' +
+                        '<option value="1">Enabled</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
                         if ($(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
+                        }
+                        else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
                         }
                         else {
                             var current = $(input).appendTo($(search)).on('change', function() {
@@ -383,6 +403,12 @@
                                 current.val(column.search());
                             }
                         }
+                    });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
                     });
                     this.api().table().columns.adjust();
                 }
@@ -548,6 +574,31 @@
                 placeholder:'Select City',
                 dropdownParent:$('#add_pickup_form')
             });
+
+
+            $( "#add_pickup_form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                        form.submit();
+
+                }
+            });
+            $( "#main-form" ).validate({
+                errorClass:"danger",
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+
+                    form.submit();
+
+                }
+            });
+
 
         });
     </script>

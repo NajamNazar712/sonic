@@ -41,7 +41,7 @@
 												<option value="0">New</option>
 
 												@foreach($user->shipping as $shipping_information)
-													<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+													<option value="{{ $shipping_information['id'] }}" {{ ($shipping_information["default_address"]== 1) ? 'selected' : '' }} data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
 												@endforeach
 											</select>
 										</div>
@@ -595,7 +595,7 @@
 				}
 			});
 
-			$('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
+			$('#pickup_address').select2({
 				width: '100%',
 				placeholder: 'Pickup Address*'
 			}).bind('change', function() {

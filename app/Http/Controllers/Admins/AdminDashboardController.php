@@ -3482,7 +3482,6 @@ class AdminDashboardController extends Controller
             'address'=>'required|string|max:255',
             'poc'=>'required|string|max:255',
             'phone'=>'required|string|max:255',
-            'phone2'=>'string|max:255',
             'cnic'=>'required|string|max:255',
         ]);
 

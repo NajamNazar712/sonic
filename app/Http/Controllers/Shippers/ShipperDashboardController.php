@@ -263,6 +263,8 @@ class ShipperDashboardController extends Controller
 //                }
 
                 return $dropdown;
+            })->editColumn('status', function ($status) {
+                return ($status->status == 1)? 'Enabled': 'Disabled';
             })
             ->make(true);
     }
@@ -352,7 +354,6 @@ class ShipperDashboardController extends Controller
         $request->validate([
             'poc'=>'required|string|max:255',
             'phone'=>'required|string|max:255',
-            'phone2'=>'string|max:255',
         ]);
 
 
