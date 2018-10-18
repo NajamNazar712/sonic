@@ -96,8 +96,8 @@
                         <th class="border-primary border-darken-1">Return Charges</th>
                         <th class="border-primary border-darken-1">Replacement Charges</th>
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
-                        <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
+                        <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
                     </tr>
                     </thead>
@@ -276,8 +276,8 @@
                             head.push('Return Charges');
                             head.push('Replacement Charges');
                             head.push('Fuel Surcharge');
-                            head.push('GST');
                             head.push('Total Charges');
+                            head.push('GST');
                             head.push('Net Payable');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -301,8 +301,8 @@
                                 row.push(values.return_charges);
                                 row.push(values.replacement_charges);
                                 row.push(values.fuel_surcharge);
-                                row.push(values.p_gst);
                                 row.push(values.p_total_charges);
+                                row.push(values.p_gst);
                                 row.push(values.p_net_payable);
 
                                 body.push(row);
@@ -361,8 +361,8 @@
                     { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
                     { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
-                    { data:'p_gst' ,name: 'pps.gst', class: 'align-middle gst'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
+                    { data:'p_gst' ,name: 'pps.gst', class: 'align-middle gst'},
                     { data:'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'}
                 ],
                 rowCallback: function(row, data, index) {
