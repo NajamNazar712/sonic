@@ -559,4 +559,7 @@ class ShipperReceivingSheetController extends Controller
 
       return $html;
     }
+    public function create_view(){
+        return view('client.shipment.receiving_sheet.create');
+    }
 }
