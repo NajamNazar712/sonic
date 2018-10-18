@@ -122,11 +122,13 @@
                             head.push('S.No');
                             head.push('Tracking No.');
                             head.push('Order ID');
-                            head.push('Shipper Name / Phone');
+                            head.push('Shipper Name');
+                            head.push('Shipper Phone');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
-                            head.push('Consignee Name / Phone');
+                            head.push('Consignee Name');
+                            head.push('Consignee Phone');
                             head.push('Address');
                             head.push('Collection Amount');
                             head.push('Shipping Mode');
@@ -136,6 +138,7 @@
                             head.push('Remarks');
                             head.push('Arrival Date');
                             head.push('Status Date');
+                            head.push('Re-Attempt Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -145,10 +148,12 @@
                                 row.push(values.tracking);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
+                                row.push(values.shipper_phone);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.consignee_name);
+                                row.push(values.consignee_phone);
                                 row.push(values.consignee_address);
                                 row.push(values.amount);
                                 row.push(values.mode);
@@ -158,6 +163,7 @@
                                 row.push(values.remarks);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.reattempts);
 
                                 body.push(row);
                             });
@@ -425,7 +431,7 @@
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
-                    {data: 'consignee_phone_number_1', name: 'shipments.consignee_phone_number_1', class: 'align-middle consignee_phone_number_1'},
+                    {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
@@ -435,7 +441,7 @@
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts'},
+                    {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -460,7 +466,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))

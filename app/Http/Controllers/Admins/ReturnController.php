@@ -63,7 +63,7 @@ class ReturnController extends Controller
 //                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
-            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', DB::raw('count(sret.shipment_id) as reattempts'))
+            ->select('shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking','u.name as shipper','u.phone as shipper_phone1','u.phone2 as shipper_phone2','oc.name as origin','dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1','shipments.consignee_phone_number_2','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival', DB::raw('count(sret.shipment_id) as reattempts'))
             ->where('shipments.shipper_status_id', 12)
             ->groupBy('shipments.id');
 
@@ -81,6 +81,9 @@ class ReturnController extends Controller
             ->editColumn('shipper_phone',function ($shipper){
                 return "$shipper->shipper_phone1 | $shipper->shipper_phone2";
             })
+            ->editColumn('consignee_phone',function ($shipper){
+                return "$shipper->consignee_phone_number_1 | $shipper->consignee_phone_number_2";
+            })
             ->filterColumn('shipper_phone',function ($query,$keyword){
                 $keyword = strtolower($keyword);
                 if ($keyword != '') {
@@ -91,7 +94,18 @@ class ReturnController extends Controller
                     $query->whereRaw('false');
                 }
             })
+            ->filterColumn('consignee_phone',function ($query,$keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('shipments.consignee_phone_number_1', 'like', '%'.$keyword.'%')->orWhere('shipments.consignee_phone_number_2', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->orderColumn('shipper_phone', 'u.phone $1, u.phone2 $1')
+            ->orderColumn('consignee_phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
             ->addColumn('shipment_remarks',function ($shipments){
                 $remark = '<input class="form-control form-control-sm" value="'.$shipments->remarks.'" />';
                 return $remark;
