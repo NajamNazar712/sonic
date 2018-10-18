@@ -71,7 +71,7 @@
                                     <td>{{$user->cnic}}</td>
                                 </tr>
                                 <tr>
-                                    <td><b>No.</b></td>
+                                    <td><b>NTN No.</b></td>
                                     <td>{{$user->ntn_no}}</td>
                                 </tr>
                                 <tr>
@@ -401,6 +401,7 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
 @endsection
 
 @section('js')

@@ -75,7 +75,7 @@
                                                 <td>{{$user->cnic}}</td>
                                             </tr>
                                             <tr>
-                                                <td><b>No.</b></td>
+                                                <td><b>NTN No.</b></td>
                                                 <td>{{$user->ntn_no}}</td>
                                             </tr>
                                             <tr>
