@@ -83,7 +83,7 @@
                                     <td>{{$product_name}}</td>
                                 </tr>
                                 <tr>
-                                    <td><b>City Name</b></td>
+                                    <td><b>City</b></td>
                                     <td>{{$user->city->name}}</td>
                                 </tr>
                                 </tbody>
@@ -138,7 +138,7 @@
                                     <th class="border-primary border-darken-1">Pickup Address</th>
                                     <th class="border-primary border-darken-1">Person of Contact</th>
                                     <th class="border-primary border-darken-1">Phone Number</th>
-                                    <th class="border-primary border-darken-1">City Name</th>
+                                    <th class="border-primary border-darken-1">City</th>
                                     <th class="border-primary border-darken-1">Email Address</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                 </tr>
@@ -290,6 +290,29 @@
                                     <div class="col-md-9">
                                         <label for="userinput4">NTN Number</label>
                                         <input type="text" id="ntn_no" class="form-control border-primary" value="{{$user->ntn_no}}" name="ntn_no">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <div class="col-md-9">
+                                        <label for="userinput3">URL</label>
+                                        <input type="text" id="userinput9" class="form-control border-primary" value="{{$user->url}}" name="url">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group row">
+                                    <div class="form-group col-md-9">
+                                        <label for="userinput3">Product Type</label>
+                                        <span class="danger">*</span>
+                                        <select name="product_id" id="product_id" data-rule-required="true" data-msg-required="Product Type is required" class="select2 form-control required" style="width: 100%">
+                                            @foreach($products as $single_product)
+                                                <option value="{{$single_product->id}}" {{ $user->product_id == $single_product->id ? 'selected' : '' }} >{{$single_product->product_name}}</option>
+                                            @endforeach
+                                        </select>
                                     </div>
                                 </div>
                             </div>
@@ -450,6 +473,22 @@
 
     <script type="text/javascript">
         $(document).ready(function() {
+
+            $('#product_id').select2({
+                width: '100%',
+            });
+            $('#city_id').select2({
+                width: '100%',
+            });
+            $('#bank_name').select2({
+                width: '100%',
+            });
+            $('#payment_cycle').select2({
+                width: '100%',
+            });
+            $('#payment_mode').select2({
+                width: '100%',
+            });
             
             $('#edit-1').click(function () {
                 $("#profile-form").show();

@@ -109,7 +109,7 @@
                                                 <th class="border-primary border-darken-1">Pickup Address</th>
                                                 <th class="border-primary border-darken-1">Person of Contact</th>
                                                 <th class="border-primary border-darken-1">Phone Number</th>
-                                                <th class="border-primary border-darken-1">City Name</th>
+                                                <th class="border-primary border-darken-1">City</th>
                                                 <th class="border-primary border-darken-1">Email Address</th>
                                                 <th class="border-primary border-darken-1">Status</th>
                                                 <th class="border-primary border-darken-1"></th>

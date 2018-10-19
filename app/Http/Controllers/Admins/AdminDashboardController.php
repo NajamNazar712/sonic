@@ -3464,9 +3464,10 @@ class AdminDashboardController extends Controller
         //return dd($id);
         $user = User::find($id);
         $product = Product::find($user->product_id);
+        $products = Product::all();
         $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
-        return view('admin.user_management.user.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list]);
+        return view('admin.user_management.user.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products]);
     }
 
     public function updateProfile(Request $request)
@@ -3489,12 +3490,14 @@ class AdminDashboardController extends Controller
         if($request->password=="" || $request->password==null || $request->password==" ")
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id]);
+                'ntn_no'=>$request->ntn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
+                'url'=>$request->url,'product_id'=>$request->product_id]);
         }
         else
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
-                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id()]);
+                'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
+                'url'=>$request->url,'product_id'=>$request->product_id]);
         }
 
 //        UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
