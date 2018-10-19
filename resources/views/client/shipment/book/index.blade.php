@@ -597,7 +597,7 @@
 				}
 			});
 
-			$('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
+			$('#pickup_address').select2({
 				width: '100%',
 				placeholder: 'Pickup Address*'
 			}).bind('change', function() {

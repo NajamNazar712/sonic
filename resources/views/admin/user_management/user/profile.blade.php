@@ -553,7 +553,7 @@
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
                     {data: 'phone', name: 'phone'},
-                    {data: 'city_name', name: 'city_name'},
+                    {data: 'city_name', name: 'c.name'},
                     {data: 'email', name: 'email'},
                     {data: 'action', name: 'action',class:'action',orderable: false,}
                 ],

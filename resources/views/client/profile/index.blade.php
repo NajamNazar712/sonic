@@ -187,7 +187,7 @@
                                                 <div class="form-group col-md-9">
                                                     <label for="userinput2">Person of Contact:</label>
                                                     <span class="danger">*</span>
-                                                    <input type="text" id="poc" class="form-control border-primary" data-rule-required="true" data-msg-required="This field is required" value="{{$user->poc}}" name="poc" required>
+                                                    <input type="text" id="poc" class="form-control border-primary" data-rule-required="true" data-msg-required="Person of Contact is required" value="{{$user->poc}}" name="poc" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -196,7 +196,7 @@
                                                 <div class="form-group col-md-9">
                                                     <label for="userinput3">Phone Number 1:</label>
                                                     <span class="danger">*</span>
-                                                    <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="This field is required" value="{{$user->phone}}" name="phone" required>
+                                                    <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Phone Number is required" value="{{$user->phone}}" name="phone" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -207,7 +207,6 @@
                                             <div class="form-group row">
                                                 <div class="form-group col-md-9">
                                                     <label for="userinput4">Phone Number 2:</label>
-                                                    <span class="danger">*</span>
                                                     <input type="text" id="phone2" class="form-control border-primary"  value="{{$user->phone2}}" name="phone2">
                                                     {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
                                                 </div>
@@ -259,19 +258,19 @@
                             {{--</div>--}}
                             <div class="row">
                                 <div class="col-6 form-group">
-                                    <input type="text" name="pickup_address" id="pickup_address" class="form-control numeric flyer" data-rule-required="true" data-msg-required="This field is required" placeholder="Pickup Address" required>
+                                    <input type="text" name="pickup_address" id="pickup_address" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Pickup Address is required" placeholder="Pickup Address" required>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="phone" id="phone" class="form-control numeric flyer" data-rule-required="true" data-msg-required="This field is required" placeholder="Phone Number" required>
+                                    <input type="text" name="phone" id="phone" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Phone Number is required" placeholder="Phone Number" required>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="poc" id="poc" class="form-control numeric flyer" data-rule-required="true" data-msg-required="This field is required" placeholder="Person of Contact" required>
+                                    <input type="text" name="poc" id="poc" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Person of Contact is required" placeholder="Person of Contact" required>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="email" name="email" id="add_stock_boxes" class="form-control numeric flyer" data-rule-required="true" data-msg-required="This field is required" placeholder="Email Address" required>
+                                    <input type="email" name="email" id="add_stock_boxes" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Email Address is required" placeholder="Email Address" required>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <select name="city_id" id="city_id" class="select2 form-control required" data-rule-required="true" data-msg-required="This field is required" style="width: 100%" required>
+                                    <select name="city_id" id="city_id" class="select2 form-control required" data-rule-required="true" data-msg-required="City is required" style="width: 100%" required>
                                         @foreach($pickup_city_list as $city)
                                             <option value="{{$city->id}}">{{$city->name}}</option>
                                         @endforeach
@@ -375,7 +374,7 @@
                     {data: 'pickup_address', name: 'pickup_address'},
                     {data: 'poc', name: 'poc'},
                     {data: 'phone', name: 'phone'},
-                    {data: 'city_name', name: 'city_name'},
+                    {data: 'city_name', name: 'c.name'},
                     {data: 'email', name: 'email'},
                     {data: 'status', name: 'status',class:'status'},
                     {data: 'action',orderable: false, name: 'action',class:'action'}
