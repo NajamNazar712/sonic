@@ -175,7 +175,7 @@
                                     <td>{{$user->bank->account_title}}</td>
                                 </tr>
                                 <tr>
-                                    <td><b>Account IBAN</b></td>
+                                    <td><b>IBAN Number</b></td>
                                     <td>{{$user->bank->iban}}</td>
                                 </tr>
                                 <tr>
@@ -409,9 +409,9 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput8">IBAN</label>
+                                        <label for="userinput8">IBAN Number</label>
                                         <span class="danger">*</span>
-                                        <input id="iban" class="form-control border-primary" type="text" value="{{$user->bank->iban}}" data-rule-required="true" data-msg-required="IBAN is required" name="iban" required>
+                                        <input id="iban" class="form-control border-primary" type="text" value="{{$user->bank->iban}}" data-rule-required="true" data-msg-required="IBAN Number is required" name="iban" required>
                                         <input type="hidden" id="user_id" name="user_id" value="{{$user->id}}">
                                         {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
                                     </div>

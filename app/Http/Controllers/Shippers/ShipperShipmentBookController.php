@@ -715,7 +715,7 @@ class ShipperShipmentBookController extends Controller
       $booking_types = BookingType::where('id', '!=', 3)->get();
       $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
         $query->where('pickup', 1)->where('status', 1);
-      })->where('user_id', session('user_id'))->where('hidden', 0)->get();
+      })->where('user_id', session('user_id'))->where('hidden', 0)->where('status',1)->get();
       $cities = City::where('status', 1)->orderBy('name')->pluck('name');
       $products = Product::all();
 

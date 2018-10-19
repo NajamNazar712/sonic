@@ -146,7 +146,7 @@
                                                 <td>{{$user->bank->account_title}}</td>
                                             </tr>
                                             <tr>
-                                                <td><b>Account IBAN</b></td>
+                                                <td><b>IBAN Number</b></td>
                                                 <td>{{$user->bank->iban}}</td>
                                             </tr>
                                             <tr>
