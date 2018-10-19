@@ -612,7 +612,9 @@
                 }
             });
 
-
+            $('body').on('change','#main-form input',function() {
+                $(this).val($(this).val().trim());
+            });
 
         });
     </script>

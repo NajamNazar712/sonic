@@ -483,6 +483,9 @@
             $('#bank_name').select2({
                 width: '100%',
             });
+            $('#bank_city').select2({
+                width: '100%',
+            });
             $('#payment_cycle').select2({
                 width: '100%',
             });
@@ -612,6 +615,14 @@
 
                 }
             });
+
+            $('body').on('change','#profile-form input',function() {
+                $(this).val($(this).val().trim());
+            });
+            $('body').on('change','#bank-form input',function() {
+                $(this).val($(this).val().trim());
+            });
+
 
 
         });
