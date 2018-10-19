@@ -263,6 +263,8 @@ class Permission
             'shipment.receiving_sheet.list' => 3,
             'shipment.receiving_sheet.add' => 3,
             'shipment.receiving_sheet.void' => 3,
+            'shipment.receiving_sheet.new' => 3,
+            'shipment.receiving_sheet.info' => 3,
             'shipment.receiving_sheet_history.index' => 3,
             'shipment.receiving_sheet_history.short_received_list' => 3,
             'shipment.receiving_sheet_history.receiving_sheet_list' => 3,

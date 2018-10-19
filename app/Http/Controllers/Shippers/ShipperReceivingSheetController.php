@@ -3,12 +3,10 @@
 namespace App\Http\Controllers\Shippers;
 
 use App\Http\Models\BookingType;
-use App\Http\Models\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentItem;
 use App\Http\Models\ReceivingSheet;
 use App\Http\Models\ReceivingSheetShipment;
 
