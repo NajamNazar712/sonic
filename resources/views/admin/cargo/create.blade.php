@@ -299,26 +299,6 @@
 				}
 			});
 
-
-			$('#cargo_consignment').validate({
-				errorClass: 'danger',
-				successClass: 'success',
-				submitHandler: function(form) {
-					$(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-					swal({
-						title: 'Please Wait!',
-						text: 'Your cargo is being created!',
-						icon: 'info',
-						buttons: false,
-						closeOnClickOutside: false,
-						closeOnEsc: false
-					});
-
-					form.submit();
-				}
-			});
-
 			$('#cargo_consignment_confirm').bind('click', function() {
 				if ($('#cargo_consignment form .junction_1').hasClass('select2-hidden-accessible')) {
 					$('#cargo_consignment form .junction_1').html('').select2('destroy');
@@ -464,6 +444,20 @@
 						},
 						normalizer: function(value) {
 							return $.trim(value);
+						},
+						submitHandler: function(form) {
+							$(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+							swal({
+								title: 'Please Wait!',
+								text: 'Your cargo is being created!',
+								icon: 'info',
+								buttons: false,
+								closeOnClickOutside: false,
+								closeOnEsc: false
+							});
+
+							form.submit();
 						}
 					});
 				});

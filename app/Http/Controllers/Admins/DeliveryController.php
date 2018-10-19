@@ -887,7 +887,6 @@ class DeliveryController extends Controller
 
     public function receive_delivery_status_delivered(Request $request)
     {
-//        return $request->shipment_ids;
         if (!empty($request->shipment_ids)) {
             foreach ($request->shipment_ids as $shipment) {
                 $parcel = Shipment::where('id', $shipment)->whereNotIn('shipper_status_id', [14, 30, 36, 37]);
@@ -914,18 +913,21 @@ class DeliveryController extends Controller
                         Shipment::where('id', $shipment)->update(['received_amount' => $parcel->amount, 'shipper_status_id' => 14, 'consignee_status_id' => 14]);
                         DeliveryNoteShipment::where(['delivery_note_id' => $request->delivery_note_id, 'shipment_id' => $shipment])->update(['status' => 6]);
                     }
+
                 }
 
             }
             $updates_count = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status', 0)->count();
+            $delivered_status = array(14, 16, 30, 36, 37);
+            $pending_status = 0;
             if ($updates_count == 0) {
-                $delivered_status = array(14, 16, 30, 36, 37);
-                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->select('shipment_id')->get();
-                $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status)->get();
-                $dncc_amount = $filtered_shipments->sum('received_amount');
-                $count = count($filtered_shipments);
-                DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>1,'delivered_shipments'=>$count,'received_cod_amount'=>$dncc_amount]);
+                $pending_status = 1;
             }
+            $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
+            $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status)->get();
+            $dncc_amount = $filtered_shipments->sum('received_amount');
+            $count = count($filtered_shipments);
+            DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>$pending_status,'delivered_shipments'=>$count,'received_cod_amount'=>$dncc_amount]);
             return ['status' => 0, 'success' => 'Shipments status Delivered updated!'];
         } else {
             return ['status' => 1, 'error' => 'No Shipments selected'];
@@ -1322,7 +1324,7 @@ class DeliveryController extends Controller
                     DisputeController::add_delivery_wrong_status_dispute($delivery_note_id, $dispute_shipments);
                 }
                 $dncc_status = array(14, 16, 30, 36, 37);
-                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->select('shipment_id')->get();
+                $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
                 $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status);
                 $dncc_amount = $filtered_shipments->sum('received_amount');
                 $delivered_shipments = $filtered_shipments->count();
@@ -1420,7 +1422,7 @@ class DeliveryController extends Controller
             $total_shipments = 0;
             $total_cod_amount = 0;
             $dncc_status = array(14, 16, 30, 36, 37);
-            $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->id)->where('status','>',1)->select('shipment_id')->get();
+            $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
             $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->orderBy('id')->get();
             //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
             $shipment_details = '
@@ -2590,24 +2592,19 @@ class DeliveryController extends Controller
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
-                if (($request->consignee_city_id != $shipment->consignee_city_id) && $shipment->shipper_status_id == 11) {
-                    $shipment->consignee_city_id = $request->consignee_city_id;
-                    $shipment->consignee_name = $request->consignee;
-                    $shipment->consignee_address = $request->address;
-                    $shipment->consignee_phone_number_1 = $request->phone1;
-                    $shipment->consignee_phone_number_2 = $request->phone2;
-                    $shipment->consignee_email = $request->email;
-                    $shipment->shipper_status_id = 4;
-                    $shipment->consignee_status_id = 4;
-                    $shipment->save();
+                $shipment->consignee_city_id = $request->consignee_city_id;
+                $shipment->consignee_name = $request->consignee;
+                $shipment->consignee_address = $request->address;
+                $shipment->consignee_phone_number_1 = $request->phone1;
+                $shipment->consignee_phone_number_2 = $request->phone2;
+                $shipment->consignee_email = $request->email;
+                $shipment->shipper_status_id = 4;
+                $shipment->consignee_status_id = 4;
+                $shipment->save();
 
-                    ShipmentsJourneyController::add($shipment->id, 4, 4, NULL, 'Misrouted shipment updated to new destination.', NULL, Auth::id());
+                ShipmentsJourneyController::add($shipment->id, 4, 4, NULL, 'Misrouted shipment updated to new destination.', NULL, Auth::id());
 
-                    return response()->json(['status' => 1, 'success' => 'Shipment has been updated successfully']);
-
-                } else {
-                    return response()->json(['status' => 0, 'error' => 'Please select new city!']);
-                }
+                return response()->json(['status' => 1, 'success' => 'Shipment has been updated successfully']);
             } else {
                 return response()->json(['status' => 0, 'error' => 'Shipment with Misroute Status not found!']);
 

@@ -1,10 +1,10 @@
 @extends('client.layout.master')
 
-@section('title', 'Sales Report')
+@section('title', 'Report - Overall Sales')
 
 @section('content')
     <h1 class="mb-1">
-        Sales Report
+        Report - Overall Sales
     </h1>
 
     <div class="card">

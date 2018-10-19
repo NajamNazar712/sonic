@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class ModulePermission extends Model
 {
-    //
+    public $timestamps = FALSE;
 }

@@ -312,7 +312,8 @@
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '350px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons: [{
+                buttons: [
+                {
                     text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
                     enabled: false,
@@ -322,7 +323,8 @@
                         table.rows().deselect();
                         selected_rows = [];
                     }
-                }, {
+                },
+                {
                   extend: 'selectAll',
                   text: 'Select All',
                   className: 'select_all',
