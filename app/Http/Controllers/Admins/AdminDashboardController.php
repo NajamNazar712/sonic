@@ -3500,7 +3500,7 @@ class AdminDashboardController extends Controller
 //        UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
 //            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city]);
 
-        return redirect()->back()->with(['success'=>"Profile Successfully Updated"]);
+        return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
     }
 
     public function updateBankInfo(Request $request)
@@ -3516,13 +3516,16 @@ class AdminDashboardController extends Controller
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
             'iban'=>'required|string|max:255',
+            'payment_mode'=>'required|string|max:255',
+            'payment_cycle'=>'required|string|max:255',
         ]);
 
 
         UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city]);
+            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,
+            'payment_mode'=>$request->payment_mode,'payment_cycle'=>$request->payment_cycle]);
 
-        return redirect()->back()->with(['success'=>"Bank Info Successfully Updated"]);
+        return redirect()->back()->with(['success'=>"Bank Information Successfully Updated"]);
     }
 
 
@@ -3530,7 +3533,8 @@ class AdminDashboardController extends Controller
     public function getPickups(Request $request)
     {
         $user_id = $request->user_id;
-        $pickups = UserShippingInfo::select(['id','pickup_address','poc','phone','email','status','default_address','user_id'])->where('user_id',$user_id);
+        $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
+            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name'])->where('user_id',$user_id);
         return Datatables::of($pickups)
             ->addColumn("action", function ($result) {
                 $status = $result->default_address==1 ? "Default Address | " : "";

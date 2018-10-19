@@ -153,7 +153,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
-    Route::get('/email/match/{email}','Auth\RegisterController@checkCompanyEmail');
+    Route::get('/email/match/{email}/{id}','Auth\RegisterController@checkCompanyEmail')->name('check.email');
+    Route::get('/name/match/{name}/{id}','Auth\RegisterController@checkCompanyNameProfile')->name('check.name');
 
 
     //user profile
