@@ -56,6 +56,7 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
+                        <th class="border-primary border-darken-1">Notification</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -70,6 +71,7 @@
                         @csrf
                         <input type="hidden" name="hub_id" id="hub_id">
                         <input type="hidden" name="shipment_ids" id="shipment_ids">
+                        <input type="hidden" name="notification_ids" id="notification_ids">
                         <input type="hidden" name="selected_rider_id" id="selected_rider_id">
                         <input type="hidden" name="selected_route_id" id="selected_route_id">
                         <div class="col-3">
@@ -180,6 +182,7 @@
                     @endif
 
             var shipment_ids = [];
+            var notification_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: true, scrollY: '350px',
@@ -192,6 +195,7 @@
                     {name: 'destination', class: 'align-middle destination'},
                     {name: 'consignee_name', class: 'align-middle consignee_name'},
                     {name: 'phone', class: 'align-middle phone'},
+                    {name: 'notification', class: 'align-middle notification'},
                     {name: 'address', class: 'align-middle address'},
                     {name: 'amount', class: 'align-middle amount'},
                     {name: 'service_type', class: 'align-middle service_type'},
@@ -253,10 +257,12 @@
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
                                 var rowNo = table.rows().count();
-                                var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
+                                var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
+                                var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
+                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
+                                notification_ids.push(data.shId);
                                 $('#hub_id').val(data.hub);
                             }
 
@@ -283,10 +289,12 @@
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }else{
                                     var rowNo = table.rows().count();
-                                    var remove = '<a href="#" class="deliverynoterow">Delete</a>';
-                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
+                                    var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
+                                    var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
+                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
+                                    notification_ids.push(data.shId);
                                 }
 
                                 scan.val('');
@@ -311,6 +319,19 @@
                 shipment_ids.splice( $.inArray(rid, shipment_ids), 1 );
             });
 
+            $('.datatable tbody').on('click', 'tr td.notification', function() {
+                var id = parseInt($(this).parent('tr').attr('id'));
+
+                var index = $.inArray(id, notification_ids);
+
+                if (index === -1) {
+                    notification_ids.push(id);
+                }
+                else {
+                    notification_ids.splice(index, 1);
+                }
+
+            });
 
             $('#create_delivery_note_form').bind('submit', function(event) {
                 event.preventDefault();
@@ -363,6 +384,7 @@
                             if(confirm){
                                 $('#create_delivery_note_form button[type="submit"]').attr('disabled', 'disabled');
                                 $('#create_delivery_note_form input#shipment_ids').val(shipment_ids);
+                                $('#create_delivery_note_form input#notification_ids').val(notification_ids);
                                 $('#create_delivery_note_form input#selected_rider_id').val(rider);
                                 $('#create_delivery_note_form input#selected_route_id').val(route);
 

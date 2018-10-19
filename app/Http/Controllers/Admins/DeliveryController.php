@@ -251,7 +251,9 @@ class DeliveryController extends Controller
     }
 
     public function create_delivery_note(Request $request){
+
         $shipments = explode(',',$request->shipment_ids);
+        $notifications = explode(',',$request->notification_ids);
 
 
         $admin = Auth::id();
@@ -291,7 +293,9 @@ class DeliveryController extends Controller
             
                                 NotificationsController::send(10, $note->id, $shipment);
                                 NotificationsController::send(11, $note->id, $shipment);
-                                NotificationsController::send(12, $note->id, $shipment);
+                                if(in_array($shipment,$notifications)){
+                                    NotificationsController::send(12, $note->id, $shipment);
+                                }
                             }
                         }
             
