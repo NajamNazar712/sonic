@@ -1048,8 +1048,11 @@ class DeliveryController extends Controller
     {
 
         $note_data = DeliveryNote::where('id', $id)->first();
-
-        return view('admin.delivery.receive.verify_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->status]);
+        if($note_data){
+            return view('admin.delivery.receive.verify_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->status]);
+        }else{
+            return redirect(route('admin.delivery.receive.index'))->with('error','Delivery Note not found');
+        }
     }
 
     public function receive_delivery_verify_status_list(Request $request, $id)

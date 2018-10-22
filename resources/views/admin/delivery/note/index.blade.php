@@ -62,7 +62,7 @@
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Action</th>
+                        <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
                 </table>
@@ -260,6 +260,8 @@
                                 var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
+                                var remove = '<a href="#" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
+                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 notification_ids.push(data.shId);
@@ -292,6 +294,8 @@
                                     var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
+                                    var remove = '<a href="#" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
+                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
                                     notification_ids.push(data.shId);
@@ -313,10 +317,12 @@
                 }
             });
             $('body').on('click','a.deliverynoterow',function () {
-                var rid = $(this).parents('tr').attr('id');
-
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, shipment_ids);
+                if (index !== -1) {
+                    shipment_ids.splice(index, 1);
+                }
                 table.row( $(this).parents('tr') ).remove().draw();
-                shipment_ids.splice( $.inArray(rid, shipment_ids), 1 );
             });
 
             $('.datatable tbody').on('click', 'tr td.notification', function() {
@@ -344,7 +350,16 @@
                 var rider = $('#rider_name').val();
                 var route = $('#route').val();
 
-                
+
+                if (rider !== '' && rider !== null) {
+
+                    $('#rider_error').css('display', 'none');
+                } else {
+                    var error = "Rider not selected!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    errors = 1;
+                    $('#rider_error').css('display', 'block');
+                }
                 if (route !== '' && route !== null) {
 
                     $('#route_error').css('display', 'none');

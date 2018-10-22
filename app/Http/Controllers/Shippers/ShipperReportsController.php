@@ -87,12 +87,57 @@ class ShipperReportsController extends Controller
                         ->where('sj.created_at','=',
                             DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
                 })
-                ->leftjoin('pending_payment_shipments as pps', 'shipments.id', '=', 'pps.shipment_id')
-                ->select('shipments.tracking_number','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','sps.name as payment_status','shipments.amount as collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.packaging_material_charges','pps.gst','pps.charges as total_charges','pps.payable as net_payable')
+                ->leftJoin('pending_payment_shipments as pps', function ($join) {
+                    $join->on('pps.shipment_id', '=', 'shipments.id')
+                        ->where('pps.created_at','=',
+                            DB::raw('(select max(created_at) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
+                })
+                ->leftJoin('done_payment_shipments as dps', function ($join) {
+                    $join->on('dps.shipment_id', '=', 'shipments.id')
+                        ->where('dps.created_at','=',
+                            DB::raw('(select max(created_at) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
+                })
+                ->select('shipments.tracking_number','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable')
                 ->whereNotIn('shipments.shipper_status_id',[1,7,17,18])
                 ->where('u.id',Auth::id());
 
-            $datatable = Datatables::of($sales);
+            $datatable = Datatables::of($sales)
+                ->editColumn('p_collection_amount',function($sale){
+                    $amount = '';
+                    if($sale->p_collection_amount != null){
+                        $amount = $sale->p_collection_amount;
+                    }else if($sale->d_collection_amount != null){
+                        $amount = $sale->d_collection_amount;
+                    }
+                    return $amount;
+                })
+                ->editColumn('p_gst',function($sale){
+                    $gst = '';
+                    if($sale->p_gst != null){
+                        $gst = $sale->p_gst;
+                    }else if($sale->d_gst != null){
+                        $gst = $sale->d_gst;
+                    }
+                    return $gst;
+                })
+                ->editColumn('p_total_charges',function($sale){
+                    $total = '';
+                    if($sale->p_total_charges != null){
+                        $total = $sale->p_total_charges;
+                    }else if($sale->d_total_charges != null){
+                        $total = $sale->d_total_charges;
+                    }
+                    return $total;
+                })
+                ->editColumn('p_net_payable',function($sale){
+                    $payable = '';
+                    if($sale->p_net_payable != null){
+                        $payable = $sale->p_net_payable;
+                    }else if($sale->d_net_payable != null){
+                        $payable = $sale->d_net_payable;
+                    }
+                    return $payable;
+                });
             if($tracking = $request->get('search_tracking')){
                 $datatable->where('shipments.tracking_number', '=', $tracking);
             }
