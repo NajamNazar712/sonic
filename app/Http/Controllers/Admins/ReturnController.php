@@ -170,6 +170,7 @@ class ReturnController extends Controller
             ->make(true);
     }
     public function return_marked_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
+
         $shipment_ids = $request->shipment_ids;
         $admin = Auth::id();
         if($request->action == 'confirm'){
@@ -177,9 +178,11 @@ class ReturnController extends Controller
                 $parcel = Shipment::find($shipment);
 
                 if (!$parcel->packaging_material_request) {
+
+                    $remarks = ($request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
-                    ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $request->remark[$parcel->id], NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment, 20, 20, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
@@ -189,9 +192,10 @@ class ReturnController extends Controller
                     AdminFinanceController::add_payment($shipment, 1);
                 }
                 else {
+                    $remarks = ($request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
                     $shipment_history = ShipmentsJourney::where('shipment_id',$shipment)->latest()->first();
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
-                    ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $request->remark[$parcel->id], NULL, Auth::id());
+                    ShipmentsJourneyController::add($shipment, 17, 17, $shipment_history->status_reason_id, $remarks, NULL, Auth::id());
 
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
@@ -200,8 +204,10 @@ class ReturnController extends Controller
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
         }elseif($request->action == 'reattempt'){
             foreach ($shipment_ids as $shipment){
+                $parcel = Shipment::find($shipment);
+                $remarks = ($request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
                 Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
-                ShipmentsJourneyController::add($shipment, 13, 13, NULL, NULL, NULL, Auth::id());
+                ShipmentsJourneyController::add($shipment, 13, 13, NULL, $remarks, NULL, Auth::id());
 
                 NotificationsController::send(15, 0, $shipment);
                 NotificationsController::send(16, 0, $shipment);
