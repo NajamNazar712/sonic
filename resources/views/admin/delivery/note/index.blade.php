@@ -61,7 +61,7 @@
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Action</th>
+                        <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
                 </table>
@@ -253,7 +253,7 @@
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
                                 var rowNo = table.rows().count();
-                                var remove = '<a href="#" class="deliverynoterow">Delete</a>';
+                                var remove = '<a href="#" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                 table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
@@ -283,7 +283,7 @@
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }else{
                                     var rowNo = table.rows().count();
-                                    var remove = '<a href="#" class="deliverynoterow">Delete</a>';
+                                    var remove = '<a href="#" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                     table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
@@ -305,10 +305,12 @@
                 }
             });
             $('body').on('click','a.deliverynoterow',function () {
-                var rid = $(this).parents('tr').attr('id');
-
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, shipment_ids);
+                if (index !== -1) {
+                    shipment_ids.splice(index, 1);
+                }
                 table.row( $(this).parents('tr') ).remove().draw();
-                shipment_ids.splice( $.inArray(rid, shipment_ids), 1 );
             });
 
 
