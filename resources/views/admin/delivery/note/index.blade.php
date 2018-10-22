@@ -257,11 +257,9 @@
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
                                 var rowNo = table.rows().count();
-                                var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
+                                var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                 table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
-                                var remove = '<a href="#" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 notification_ids.push(data.shId);
@@ -291,11 +289,9 @@
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }else{
                                     var rowNo = table.rows().count();
-                                    var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
+                                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
                                     table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
-                                    var remove = '<a href="#" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
                                     notification_ids.push(data.shId);
