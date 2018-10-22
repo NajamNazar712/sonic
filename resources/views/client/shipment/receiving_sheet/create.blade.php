@@ -38,7 +38,7 @@
                                     <th class="border-primary border-darken-1">Origin</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Booking Date</th>
-                                    <th class="border-primary border-darken-1">Action</th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -173,7 +173,7 @@
                     {name: 'pickup_address', class: 'align-middle pickup_address'},
                     {name: 'product_type', class: 'align-middle product_type'},
                     {name: 'item_description', class: 'align-middle item_description'},
-                    {name: 'action', class: 'align-middle action'}
+                    {name: 'action', class: 'align-middle action',orderable: false,searchable:false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -218,7 +218,7 @@
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
                                 var rowNo = table.rows().count();
-                                var remove = '<a href="javascript:void(0);" class="deleterow">Delete</a>';
+                                var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deleterow"><i class="la la-close"></i></a>';
                                 table.row.add([rowNo+1,data.tracking_number,data.order_id,data.service_type,data.address,data.origin,data.destination,data.booking,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
@@ -245,7 +245,7 @@
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }else{
                                     var rowNo = table.rows().count();
-                                    var remove = '<a href="javascript:void(0);" class="deleterow">Delete</a>';
+                                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deleterow"><i class="la la-close"></i></a>';
                                     table.row.add([rowNo+1,data.tracking_number,data.order_id,data.service_type,data.address,data.origin,data.destination,data.booking,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
@@ -267,10 +267,12 @@
                 }
             });
             $('body').on('click','a.deleterow',function () {
-                var rid = $(this).parents('tr').attr('id');
-
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, shipment_ids);
+                if (index !== -1) {
+                    shipment_ids.splice(index, 1);
+                }
                 table.row( $(this).parents('tr') ).remove().draw();
-                shipment_ids.splice( $.inArray(rid, shipment_ids), 1 );
             });
 
 
