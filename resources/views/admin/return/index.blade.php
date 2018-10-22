@@ -214,11 +214,10 @@
 
                                             table.rows().nodes().each(function(index) {
                                                 var row = table.row(index);
-
                                                 if ($(row.node()).hasClass('selected')) {
-                                                    id = parseInt(row.id());
-                                                    var remark = $(row.node()).find('td.shipment_remarks input').val();
-                                                    shipment_remarks[id] = remark;
+                                                    var id = parseInt(row.id());
+                                                    var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                                                    shipment_remarks[id] = remarks;
                                                 }
                                             });
 
@@ -287,7 +286,7 @@
                                                 var row = table.row(index);
 
                                                 if ($(row.node()).hasClass('selected')) {
-                                                    id = parseInt(row.id());
+                                                    var id = parseInt(row.id());
                                                     var remark = $(row.node()).find('td.shipment_remarks input').val();
                                                     shipment_remarks[id] = remark;
                                                 }
@@ -495,8 +494,8 @@
                         }
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
-                        obj.text = obj.text || obj.name;
+                        obj.id = obj.id;
+                        obj.text = obj.name;
                         return obj;
                     });
 
@@ -508,7 +507,7 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data1 = $.map({!! $shipping_mode !!}, function (obj) {
-                        obj.id = obj.id
+                        obj.id = obj.id;
                         obj.text = obj.mode;
                         return obj;
                     });
