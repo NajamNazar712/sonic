@@ -90,7 +90,8 @@
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <input type="text" class="form-control required" value="{{ old('name') }}"  name="name">
-
+                                                        <span name="cname" class="danger" for="name" style="display: none;">Atleast 3 Characters Required</span>
+                                                        <span name="ename" class="danger" for="name" style="display: none;">Company Name Already Exists</span>
                                                     </div>
                                                 </div>
                                                 <div class="col-md-6">
@@ -620,14 +621,15 @@
         $('body').on('change','input[name="name"]',function () {
             var name = $(this).val();
             var error = 0;
-            var err0 = '<span name="cname" class="danger" for="name">Atleast 3 Characters Required</span>';
-            var err = '<span name="cname" class="danger" for="name">Company Name Already Exists</span>';
+            var err0 = $('span[name=cname]');
+            var err =  $('span[name=ename]');
             if(name.length < 3){
-                $(err0).insertAfter('input[name="name"]');
+                err0.css('display','block');
                 error = 1;
             }else{
                 error = 0;
-                $('span[name="cname"]').css('display','none');
+                err0.css('display','none');
+
             }
             if(error == 0){
                 $.ajax({
@@ -636,10 +638,11 @@
                     data: {name:name},
                     success: function(data) {
                         if(data.status == 0){
-                            $(err).insertAfter('input[name="name"]');
+                            err.css('display','block');
 
                         }else if(data.status == 1){
-                            $('span[name="cname"]').css('display','none');
+                            err.css('display','none');
+
 
 
                         }
