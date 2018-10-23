@@ -160,8 +160,7 @@
 											<form id="make_payments_form" class="form-inline mt-1 mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.finance.make_payments.store') }}">
 												{{ csrf_field() }}
 
-												<input type="hidden" name="pending_payment_ids" class="pending_payment_ids">
-												<input type="hidden" name="shipment_ids" class="shipment_ids">
+												<input type="hidden" name="pending_payment_shipment_ids" class="pending_payment_shipment_ids">
 
 												<div class="col-2">
 													<div class="form-group">
@@ -238,8 +237,6 @@
 			@endif
 
 			var selected_rows = [];
-
-			var selected_pending_payment_ids = [];
 
 			var selected_rows_shipments = [];
 
@@ -339,10 +336,7 @@
 							$('#make_payments #make_payments_form button.make').prop('disabled', true);
 							$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
-							$('#make_payments #make_payments_form .pending_payment_ids').val('');
-							$('#make_payments #make_payments_form .shipment_ids').val('');
-
-							selected_pending_payment_ids = selected_rows;
+							$('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
 
 							selected_rows_shipments = [];
 
@@ -465,6 +459,12 @@
 					var info = table.page.info();
 
 					$('td:eq(1)', row).html(index + 1 + info.page * info.length);
+
+					if (selected_rows.length != 0) {
+						if ($.inArray(data.id, selected_rows) !== -1) {
+							table.row(row).select();
+						}
+					}
 				},
 				initComplete: function() {
 					var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -603,7 +603,7 @@
 				ajax: {
 					url: '{{ route('admin.finance.make_payments.shipment_list') }}',
 					data: function (d) {
-						d.ids = selected_pending_payment_ids;
+						d.ids = selected_rows;
 					}
 				},
 				rowId: 'id',
@@ -821,15 +821,10 @@
 					$('#make_payments #make_payments_form button.make').prop('disabled', true);
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 
-					$('#make_payments #make_payments_form .pending_payment_ids').val('');
-					$('#make_payments #make_payments_form .shipment_ids').val('');
+					$('#make_payments #make_payments_form .pending_payment_shipment_ids').val('');
 
-
-					selected_pending_payment_ids = [];
 
 					selected_rows_shipments = [];
-
-					selected_pending_payment_ids.push(id);
 
 					make_payments_table.clear().draw();
 
@@ -893,8 +888,7 @@
 					$('#make_payments #make_payments_form button.export_bank_order').prop('disabled', true);
 				}
 
-				$('#make_payments #make_payments_form .pending_payment_ids').val(selected_pending_payment_ids);
-				$('#make_payments #make_payments_form .shipment_ids').val(selected_rows_shipments);
+				$('#make_payments #make_payments_form .pending_payment_shipment_ids').val(selected_rows_shipments);
 			}
 
 			$('#make_payments #make_payments_datatable tbody').on('click', 'tr td.select-checkbox', function() {
@@ -913,12 +907,11 @@
 					method: 'POST',
 					data: {
 						'_token': '{{ csrf_token() }}',
-						'pending_payment_ids': $('#make_payments #make_payments_form .pending_payment_ids').val(),
-						'shipment_ids': $('#make_payments #make_payments_form .shipment_ids').val()
+						'pending_payment_shipment_ids': $('#make_payments #make_payments_form .pending_payment_shipment_ids').val()
 					}
 				})
 				.done(function(data) {
-					if (data.status == 0) {
+					// if (data.status == 0) {
 						swal({
 							text: 'Are you sure, you want to make the Payments?',
 							icon: 'warning',
@@ -944,33 +937,33 @@
 								form.submit();
 							}
 						});
-					}
-					else {
-						var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
+					// }
+					// else {
+					// 	var html = 'Cannot proceed since following Shipper(s) have Overall Negative Payment(s) Selected:<br/>';
 
-						$.each(data.negative_payments, function(index, shipper) {
-							html += shipper + '<br/>';
-						});
+					// 	$.each(data.negative_payments, function(index, shipper) {
+					// 		html += shipper + '<br/>';
+					// 	});
 
-						content = document.createElement('div');
-						content.innerHTML = html;
+					// 	content = document.createElement('div');
+					// 	content.innerHTML = html;
 
-						swal({
-							content: content,
-							icon: 'warning',
-							buttons: {
-								cancel: {
-									text: 'Close',
-									value: null,
-									visible: true,
-									closeModal: true,
-								}
-							},
-							closeOnClickOutside: false,
-							closeOnEsc: false,
-							dangerMode: true
-						});
-					}
+					// 	swal({
+					// 		content: content,
+					// 		icon: 'warning',
+					// 		buttons: {
+					// 			cancel: {
+					// 				text: 'Close',
+					// 				value: null,
+					// 				visible: true,
+					// 				closeModal: true,
+					// 			}
+					// 		},
+					// 		closeOnClickOutside: false,
+					// 		closeOnEsc: false,
+					// 		dangerMode: true
+					// 	});
+					// }
 				});
 			});
 		});
