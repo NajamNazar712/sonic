@@ -3539,10 +3539,32 @@ class AdminDashboardController extends Controller
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
             ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name'])->where('user_id',$user_id);
         return Datatables::of($pickups)
-            ->addColumn("action", function ($result) {
-                $status = $result->default_address==1 ? "Default Address | " : "";
-                $status .= $result->status==1 ? "Enabled" : "Disabled";
+            ->addColumn("status", function ($result) {
+                if($result->default_address==1)
+                {
+                    $status =  "Default Address ";
+                }
+                elseif($result->status==1)
+                {
+                    $status =  "Enabled";
+                }
+                elseif($result->status==0)
+                {
+                    $status =  "Disabled";
+                }
                 return $status;
+            })
+            ->filterColumn('status',function($query,$keyword){
+                if ($keyword != '') {
+                    if($keyword == 2){
+                        $query->where('user_shipping_infos.default_address',1);
+                    }else{
+                        $query->where('user_shipping_infos.status',$keyword);
+                    }
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->make(true);
     }

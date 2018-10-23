@@ -157,6 +157,10 @@
                                                 <td><b>Payment Cycle</b></td>
                                                 <td>{{$user->bank->payment_cycle}}</td>
                                             </tr>
+                                            <tr>
+                                                <td><b>Bank City</b></td>
+                                                <td>{{$user->bank->city->name}}</td>
+                                            </tr>
                                             </tbody>
                                         </table>
                                     </div>
