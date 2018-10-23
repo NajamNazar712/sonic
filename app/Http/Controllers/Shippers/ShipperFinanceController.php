@@ -129,7 +129,7 @@ class ShipperFinanceController extends Controller
                     $shipments++;
                 }
 
-                $aging = round($days / $shipments) . 'd';
+                $aging = round(($days / $shipments), 2) . 'd';
 
                 return $aging;
             }

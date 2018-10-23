@@ -783,7 +783,7 @@ class AdminFinanceController extends Controller
                     $shipments++;
                 }
 
-                $aging = round($days / $shipments) . 'd';
+                $aging = round(($days / $shipments), 2) . 'd';
 
                 return $aging;
             }
@@ -1336,7 +1336,7 @@ class AdminFinanceController extends Controller
                     $shipments++;
                 }
 
-                $aging = round($days / $shipments) . 'd';
+                $aging = round(($days / $shipments), 2) . 'd';
 
                 return $aging;
             }
