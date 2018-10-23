@@ -796,7 +796,7 @@ class ShipperShipmentBookController extends Controller
           $query->where('id', '!=', 3);
         })],
         'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->where('user_id', $user_id)->where('status',1);
         })],
         'information_display' => ['required', 'string', 'in:NO,No,nO,no,YES,YEs,YeS,Yes,yES,yEs,yeS,yes'],
         'consignee_city_name' => ['required', 'string', 'between:1,100', 'exists:cities,name'],

@@ -187,7 +187,7 @@ class APIController extends Controller
       $rules = [
         'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
         'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->where('user_id', $user_id)->where('status',1);
         })],
         'information_display' => ['required', 'boolean'],
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
