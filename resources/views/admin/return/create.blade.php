@@ -59,7 +59,7 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Action</th>
+                        <th class="border-primary border-darken-1"></th>
                     </tr>
                     </thead>
                 </table>
@@ -194,7 +194,7 @@
                     {name: 'amount', class: 'align-middle amount'},
                     {name: 'service_type', class: 'align-middle service_type'},
                     {name: 'status', class: 'align-middle status'},
-                    {name: 'action', class: 'align-middle action'}
+                    {name: 'action', class: 'align-middle action',orderable: false,searchable:false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -251,7 +251,7 @@
                                 });
                             } else {
                                 var rowNo = table.rows().count();
-                                var remove = '<a href="javascript:void(0);" class="deliverynoterow">Delete</a>';
+                                var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
                                 table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
@@ -283,7 +283,7 @@
                                     });
                                 } else {
                                     var rowNo = table.rows().count();
-                                    var remove = '<a href="#" class="deliverynoterow">Delete</a>';
+                                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger returnnoterow"><i class="la la-close"></i></a>';
                                     table.row.add([rowNo + 1, data.tracking_number, data.destination, data.consignee_name, data.phone, data.address, data.amount, data.service_type, data.shipment_status, remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
@@ -307,11 +307,13 @@
                     }
                 }
             });
-            $('body').on('click','a.deliverynoterow',function () {
-                var rid = $(this).parents('tr').attr('id');
-
+            $('body').on('click','a.returnnoterow',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, shipment_ids);
+                if (index !== -1) {
+                    shipment_ids.splice(index, 1);
+                }
                 table.row( $(this).parents('tr') ).remove().draw();
-                shipment_ids.splice( $.inArray(rid, shipment_ids), 1 );
             });
 
 
