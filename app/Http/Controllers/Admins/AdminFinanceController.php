@@ -1193,12 +1193,10 @@ class AdminFinanceController extends Controller
 
                 $done_payment->save();
 
-                $pending_payment_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id);
-
-                $pending_payment->total_shipments = $pending_payment_shipments->count();
-                $pending_payment->delivered_shipments = $pending_payment_shipments->where('type', 0)->count();
-                $pending_payment->returned_shipments = $pending_payment_shipments->where('type', 1)->count();
-                $pending_payment->adjusted_shipments = $pending_payment_shipments->where('type', 2)->count();
+                $pending_payment->total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->count();
+                $pending_payment->delivered_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->where('type', 0)->count();
+                $pending_payment->returned_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->where('type', 1)->count();
+                $pending_payment->adjusted_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->where('type', 2)->count();
 
                 $pending_payment->save();
 
