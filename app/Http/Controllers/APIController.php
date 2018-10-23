@@ -105,6 +105,8 @@ class APIController extends Controller
             $detail['email_address'] = $pickup_address->email;
             $detail['address'] = $pickup_address->pickup_address;
             $detail['status'] = $pickup_address->status ==1 ? "Enabled" : "Disabled";
+            $detail['default'] = $pickup_address->default_address ==1 ? "true" : "false";
+
             $detail['city'] = array();
 
             $city = $pickup_address->city;
