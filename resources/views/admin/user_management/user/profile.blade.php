@@ -167,6 +167,10 @@
                                     <td>{{$user->bank->bank_branch}}</td>
                                 </tr>
                                 <tr>
+                                    <td><b>Bank City</b></td>
+                                    <td>{{$user->bank->city->name}}</td>
+                                </tr>
+                                <tr>
                                     <td><b>Account No.</b></td>
                                     <td>{{$user->bank->account_no}}</td>
                                 </tr>
@@ -185,10 +189,6 @@
                                 <tr>
                                     <td><b>Payment Cycle</b></td>
                                     <td>{{$user->bank->payment_cycle}}</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Bank City</b></td>
-                                    <td>{{$user->bank->city->name}}</td>
                                 </tr>
                                 </tbody>
                             </table>

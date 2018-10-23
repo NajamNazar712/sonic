@@ -79,7 +79,7 @@
                                                 <td>{{$user->ntn_no}}</td>
                                             </tr>
                                             <tr>
-                                                <td><b>Website / URL</b></td>
+                                                <td><b>URL</b></td>
                                                 <td>{{$user->url}}</td>
                                             </tr>
                                             <tr>
@@ -138,6 +138,10 @@
                                                 <td>{{$user->bank->bank_branch}}</td>
                                             </tr>
                                             <tr>
+                                                <td><b>Bank City</b></td>
+                                                <td>{{$user->bank->city->name}}</td>
+                                            </tr>
+                                            <tr>
                                                 <td><b>Account Number</b></td>
                                                 <td>{{$user->bank->account_no}}</td>
                                             </tr>
@@ -156,10 +160,6 @@
                                             <tr>
                                                 <td><b>Payment Cycle</b></td>
                                                 <td>{{$user->bank->payment_cycle}}</td>
-                                            </tr>
-                                            <tr>
-                                                <td><b>Bank City</b></td>
-                                                <td>{{$user->bank->city->name}}</td>
                                             </tr>
                                             </tbody>
                                         </table>
@@ -380,7 +380,7 @@
                     {data: 'phone', name: 'phone'},
                     {data: 'city_name', name: 'c.name'},
                     {data: 'email', name: 'email'},
-                    {data: 'status', name: 'status',class:'status'},
+                    {data: 'status',orderable: false, name: 'status',class:'status'},
                     {data: 'action',orderable: false, name: 'action',class:'action'}
                 ],
                 rowCallback: function(row, data, index) {
