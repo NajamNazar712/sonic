@@ -783,7 +783,7 @@ class AdminFinanceController extends Controller
                     $shipments++;
                 }
 
-                $aging = ($days / $shipments) . 'd';
+                $aging = round(($days / $shipments), 2) . 'd';
 
                 return $aging;
             }
@@ -922,7 +922,7 @@ class AdminFinanceController extends Controller
         $pending_payment_shipments = PendingPaymentShipment::join('shipments as s', 'pending_payment_shipments.shipment_id', '=', 's.id')
         ->join('users as u', 's.user_id', '=', 'u.id')
         ->join('shipment_status as ss', 's.shipper_status_id', '=', 'ss.id')
-        ->select('pending_payment_shipments.shipment_id as id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
+        ->select('pending_payment_shipments.id', 'u.name as shipper', 's.tracking_number as shipment', 'pending_payment_shipments.type', 'ss.name as status', 'pending_payment_shipments.created_at', 'pending_payment_shipments.amount', 'pending_payment_shipments.charges', 'pending_payment_shipments.gst', 'pending_payment_shipments.payable');
 
         if ($request->has('ids')) {
            $pending_payment_shipments->whereIn('pending_payment_shipments.pending_payment_id', $request->ids);
@@ -974,13 +974,12 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_verify(Request $request) {
-        $pending_payment_ids = explode(',', $request->pending_payment_ids);
-        $shipment_ids = explode(',', $request->shipment_ids);
+        $pending_payment_shipment_ids = explode(',', $request->pending_payment_shipment_ids);
 
         $pending_payment_payables = array();
 
-        foreach ($shipment_ids as $shipment_id) {
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', $pending_payment_ids)->first();
+        foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
+            $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
             if (!isset($pending_payment_payables[$pending_payment_shipment->pending_payment_id])) {
                 $pending_payment_payables[$pending_payment_shipment->pending_payment_id] = $pending_payment_shipment->payable;
@@ -1054,22 +1053,15 @@ class AdminFinanceController extends Controller
     }
 
     public function make_payments_store(Request $request) {
-        $pending_payment_ids = explode(',', $request->pending_payment_ids);
-        $shipment_ids = explode(',', $request->shipment_ids);
-
-        $pending_payment_shipment_ids = array();
-
-        foreach ($shipment_ids as $shipment_id) {
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id)->whereIn('pending_payment_id', $pending_payment_ids)->first();
-
-            $pending_payment_shipment_ids[$pending_payment_shipment->pending_payment_id][] = $shipment_id;
-        }
+        $pending_payment_shipment_ids = PendingPaymentShipment::whereIn('id', explode(',', $request->pending_payment_shipment_ids))->select('pending_payment_id', 'id')->get()->mapToGroups(function ($item, $key) {
+                return [$item['pending_payment_id'] => $item['id']];
+            })->toArray();
 
         $done_payment_ids = array();
 
-        foreach ($pending_payment_shipment_ids as $pending_payment_id => $shipment_ids) {
+        foreach ($pending_payment_shipment_ids as $pending_payment_id => $pending_payment_shipment_ids) {
             $total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->count();
-            $selected_shipments = count($shipment_ids);
+            $selected_shipments = count($pending_payment_shipment_ids);
 
             $pending_payment = PendingPayment::find($pending_payment_id);
 
@@ -1086,14 +1078,14 @@ class AdminFinanceController extends Controller
 
                 $pending_payment->delete();
 
-                foreach ($shipment_ids as $shipment_id) {
-                    $pending_payment_shipment = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('shipment_id', $shipment_id)->first();
+                foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
+                    $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
                     $done_payment_shipment = new DonePaymentShipment();
 
                     $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
                     $done_payment_shipment->done_payment_id = $done_payment->id;
-                    $done_payment_shipment->shipment_id = $shipment_id;
+                    $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
                     $done_payment_shipment->type = $pending_payment_shipment->type;
                     $done_payment_shipment->amount = $pending_payment_shipment->amount;
                     $done_payment_shipment->charges = $pending_payment_shipment->charges;
@@ -1105,7 +1097,7 @@ class AdminFinanceController extends Controller
                     $pending_payment_shipment->delete();
 
                     if ($done_payment_shipment->type == 0) {
-                        $shipment = Shipment::find($shipment_id);
+                        $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
                         $shipment->payment_status_id = 1;
 
@@ -1114,7 +1106,7 @@ class AdminFinanceController extends Controller
                         ShipmentsPaymentJourneyController::add($shipment->id, 1, Auth::id());
                     }
                     else if ($done_payment_shipment->type == 1) {
-                        $shipment = Shipment::find($shipment_id);
+                        $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
                         $shipment->payment_status_id = 5;
 
@@ -1144,8 +1136,8 @@ class AdminFinanceController extends Controller
                 $returned_shipments = 0;
                 $adjusted_shipments = 0;
 
-                foreach ($shipment_ids as $shipment_id) {
-                    $pending_payment_shipment = PendingPaymentShipment::where('pending_payment_id', $pending_payment_id)->where('shipment_id', $shipment_id)->first();
+                foreach ($pending_payment_shipment_ids as $pending_payment_shipment_id) {
+                    $pending_payment_shipment = PendingPaymentShipment::find($pending_payment_shipment_id);
 
                     $total_shipments++;
 
@@ -1163,7 +1155,7 @@ class AdminFinanceController extends Controller
 
                     $done_payment_shipment->created_at = $pending_payment_shipment->created_at;
                     $done_payment_shipment->done_payment_id = $done_payment->id;
-                    $done_payment_shipment->shipment_id = $shipment_id;
+                    $done_payment_shipment->shipment_id = $pending_payment_shipment->shipment_id;
                     $done_payment_shipment->type = $pending_payment_shipment->type;
                     $done_payment_shipment->amount = $pending_payment_shipment->amount;
                     $done_payment_shipment->charges = $pending_payment_shipment->charges;
@@ -1175,7 +1167,7 @@ class AdminFinanceController extends Controller
                     $pending_payment_shipment->delete();
 
                     if ($done_payment_shipment->type == 1) {
-                        $shipment = Shipment::find($shipment_id);
+                        $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
                         $shipment->payment_status_id = 5;
 
@@ -1184,7 +1176,7 @@ class AdminFinanceController extends Controller
                         ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id());
                     }
                     else {
-                        $shipment = Shipment::find($shipment_id);
+                        $shipment = Shipment::find($pending_payment_shipment->shipment_id);
 
                         $shipment->payment_status_id = 1;
 
@@ -1201,10 +1193,10 @@ class AdminFinanceController extends Controller
 
                 $done_payment->save();
 
-                $pending_payment->total_shipments = $pending_payment->total_shipments - $total_shipments;
-                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments - $delivered_shipments;
-                $pending_payment->returned_shipments = $pending_payment->returned_shipments - $returned_shipments;
-                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments - $adjusted_shipments;
+                $pending_payment->total_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->count();
+                $pending_payment->delivered_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->where('type', 0)->count();
+                $pending_payment->returned_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->where('type', 1)->count();
+                $pending_payment->adjusted_shipments = PendingPaymentShipment::where('pending_payment_id', $pending_payment_shipment->pending_payment_id)->where('type', 2)->count();
 
                 $pending_payment->save();
 
@@ -1344,7 +1336,7 @@ class AdminFinanceController extends Controller
                     $shipments++;
                 }
 
-                $aging = ($days / $shipments) . 'd';
+                $aging = round(($days / $shipments), 2) . 'd';
 
                 return $aging;
             }

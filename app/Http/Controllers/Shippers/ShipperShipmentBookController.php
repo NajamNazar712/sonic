@@ -715,7 +715,7 @@ class ShipperShipmentBookController extends Controller
       $booking_types = BookingType::where('id', '!=', 3)->get();
       $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
         $query->where('pickup', 1)->where('status', 1);
-      })->where('user_id', session('user_id'))->where('hidden', 0)->get();
+      })->where('user_id', session('user_id'))->where('hidden', 0)->where('status',1)->get();
       $cities = City::where('status', 1)->orderBy('name')->pluck('name');
       $products = Product::all();
 
@@ -895,6 +895,10 @@ class ShipperShipmentBookController extends Controller
               }
 
               $user_shipping_info = UserShippingInfo::find($row['pickup_address_id']);
+
+                if (!$user_shipping_info->status) {
+                    $errors['Row #' . $row_id][] = 'This Pickup Address ID is disabled';
+                }
 
               if (!$user_shipping_info->city->status) {
                 $errors['Row #' . $row_id][] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';

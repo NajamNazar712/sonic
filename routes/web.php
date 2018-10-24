@@ -155,6 +155,17 @@ Route::prefix('cod')->name('cod.')->group(function () {
     Route::get('/register/success','Auth\RegisterController@register_success');
     Route::post('/logout','Auth\LoginController@logout')->name('logout');
     Route::get('/name/match/{name}','Auth\RegisterController@checkCompanyName');
+    Route::get('/email/match/{email}/{id}','Auth\RegisterController@checkCompanyEmail')->name('check.email');
+    Route::get('/name/match/{name}/{id}','Auth\RegisterController@checkCompanyNameProfile')->name('check.name');
+
+
+    //user profile
+    Route::get('/profile','Shippers\ShipperDashboardController@userProfile')->name('edit.profile');
+    Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
+    Route::get('getpickups','Shippers\ShipperDashboardController@getPickups')->name('get.pickups');
+    Route::post('changepickupstatus','Shippers\ShipperDashboardController@pickupStatusChange')->name('change.pickup.status');
+    Route::post('addpickup','Shippers\ShipperDashboardController@addPickup')->name('add.pickup');
+    Route::post('updateprofile','Shippers\ShipperDashboardController@updateProfile')->name('update.profile');
 });
 //Admin Routes Start
 Route::prefix('admin')->name('admin.')->group(function () {
@@ -186,6 +197,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('status/block','Admins\AdminDashboardController@UserStatusBlock')->name('status.block');
         Route::post('status/change','Admins\AdminDashboardController@UserStatusChange')->name('status.change');
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
+
+
+        //user profile
+        Route::get('/accounts/{id}/view','Admins\AdminDashboardController@userProfile')->name('view.profile');
+        Route::post('/accounts/updateprofile','Admins\AdminDashboardController@updateProfile')->name('update.profile');
+        Route::get('getpickups','Admins\AdminDashboardController@getPickups')->name('get.pickups');
+        Route::post('/accounts/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
+
     });
 
    //Datatables data using ajax calls

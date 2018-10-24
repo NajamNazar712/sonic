@@ -194,4 +194,48 @@ class RegisterController extends Controller
                 ]);
             }
     }
+
+    public function checkCompanyEmail(Request $request){
+
+//        dd($request);
+        $email = $request->email;
+        $id = $request->id;
+        $res = User::where('email',$email)->where('id','<>',$id)->get();
+        if(!$res->isEmpty()){
+//            return response()->json([
+//                'message' => 'email already exists',
+//                'status' => 0
+//            ]);
+            return 'false';
+        }else{
+//            return response()->json([
+//                'message' => 'email available',
+//                'status' => 1
+//            ]);
+            return 'true';
+        }
+    }
+
+    public function checkCompanyNameProfile(Request $request){
+
+//        dd($request);
+        $name = $request->name;
+        $id = $request->id;
+        $res = User::where('name',$name)->where('id','<>',$id)->get();
+        if(!$res->isEmpty()){
+//            return response()->json([
+//                'message' => 'name already exists',
+//                'status' => 0
+//            ]);
+            return 'false';
+        }else{
+//            return response()->json([
+//                'message' => 'name available',
+//                'status' => 1
+//            ]);
+            return 'true';
+
+        }
+    }
+
 }

@@ -104,6 +104,9 @@ class APIController extends Controller
             $detail['phone_number'] = $pickup_address->phone;
             $detail['email_address'] = $pickup_address->email;
             $detail['address'] = $pickup_address->pickup_address;
+            $detail['status'] = $pickup_address->status ==1 ? "Enabled" : "Disabled";
+            $detail['default'] = $pickup_address->default_address ==1 ? "true" : "false";
+
             $detail['city'] = array();
 
             $city = $pickup_address->city;
@@ -241,6 +244,10 @@ class APIController extends Controller
         }
 
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
+
+          if (!$user_shipping_info->status) {
+              return response()->json(['status' => 1, 'message' => 'This Pickup Address is disabled']);
+          }
 
         if (!$user_shipping_info->city->status) {
           return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';

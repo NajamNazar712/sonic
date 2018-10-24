@@ -388,7 +388,7 @@ class DeliveryController extends Controller
                     $updatedstatusCheck = DeliveryNoteShipment::where('delivery_note_id', $result->delivery_note)->where('status', '>', 0)->exists();
 
 
-                    if ((!$statusCheck->isEmpty()) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
+                    if (($result->pending_status == 0) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
                         $dropdown .= $receive_button;
                     }
 
@@ -400,11 +400,11 @@ class DeliveryController extends Controller
                     }
 
 
-                    if (($statusCheck->isEmpty()) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
+                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(39, session('permissions')))) {
                         $dropdown .= $verify_statuses_button;
                     }
 
-                    if (($statusCheck->isEmpty()) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
+                    if (($result->pending_status == 1) && (session('role_id') == 1 || in_array(37, session('permissions')))) {
                         $dropdown .= $print_temporary_dncc_button;
 
                         $dropdown .= $print_undelivered_performa_button;
@@ -738,7 +738,7 @@ class DeliveryController extends Controller
 
             if($note_data->status == 0){
 
-                return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed]);
+                return view('admin.delivery.receive.add_status')->with(['delivery_note_id'=>$id,'shipments_count'=>$note_data->shipments_count,'delivery_note_status'=>$note_data->pending_status,'shipment_update'=>$shipment_update,'undelivered_printed'=>$undelivered_printed]);
             }else{
                 return redirect(route('admin.delivery.receive.index'));
             }
@@ -1052,10 +1052,10 @@ class DeliveryController extends Controller
     {
 
         $note_data = DeliveryNote::where('id', $id)->first();
-        if($note_data){
+        if($note_data && ($note_data->pending_status ==1)){
             return view('admin.delivery.receive.verify_status')->with(['delivery_note_id' => $id, 'shipments_count' => $note_data->shipments_count, 'delivery_note_status' => $note_data->status]);
         }else{
-            return redirect(route('admin.delivery.receive.index'))->with('error','Delivery Note not found');
+            return redirect(route('admin.delivery.receive.index'))->with('error','Delivery Note not ready for verification!');
         }
     }
 
