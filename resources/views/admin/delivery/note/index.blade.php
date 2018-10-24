@@ -57,6 +57,7 @@
                         <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">Phone</th>
                         <th class="border-primary border-darken-1">Notification</th>
+                        <th class="border-primary border-darken-1">Rider Information</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -196,6 +197,7 @@
                     {name: 'consignee_name', class: 'align-middle consignee_name'},
                     {name: 'phone', class: 'align-middle phone'},
                     {name: 'notification', class: 'align-middle notification'},
+                    {name: 'rider_information', class: 'align-middle rider_information'},
                     {name: 'address', class: 'align-middle address'},
                     {name: 'amount', class: 'align-middle amount'},
                     {name: 'service_type', class: 'align-middle service_type'},

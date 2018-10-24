@@ -286,14 +286,18 @@ class DeliveryController extends Controller
                             foreach ($valid_shipments as $shipment) {
                                 DeliveryNoteShipment::create([
                                     'delivery_note_id' => $note->id,
-                                    'shipment_id' => $shipment
+                                    'shipment_id' => $shipment,
+                                    'notification' => $a,
+                                    'rider_information' => $b
                                 ]);
+
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
                                 ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
             
                                 NotificationsController::send(10, $note->id, $shipment);
                                 NotificationsController::send(11, $note->id, $shipment);
-                                if(in_array($shipment,$notifications)){
+
+                                if($a) {
                                     NotificationsController::send(12, $note->id, $shipment);
                                 }
                             }
