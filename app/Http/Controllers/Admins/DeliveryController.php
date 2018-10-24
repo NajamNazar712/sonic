@@ -251,9 +251,9 @@ class DeliveryController extends Controller
     }
 
     public function create_delivery_note(Request $request){
-
         $shipments = explode(',',$request->shipment_ids);
         $notifications = explode(',',$request->notification_ids);
+        $rider_informations = explode(',',$request->rider_info_ids);
 
 
         $admin = Auth::id();
@@ -283,12 +283,12 @@ class DeliveryController extends Controller
                         ]);
             
                         if ($note) {
-                            foreach ($valid_shipments as $shipment) {
+                            foreach ($valid_shipments as $index => $shipment) {
                                 DeliveryNoteShipment::create([
                                     'delivery_note_id' => $note->id,
                                     'shipment_id' => $shipment,
-                                    'notification' => $a,
-                                    'rider_information' => $b
+                                    'notification' => $notifications[$index],
+                                    'rider_information' => $rider_informations[$index]
                                 ]);
 
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
@@ -297,7 +297,7 @@ class DeliveryController extends Controller
                                 NotificationsController::send(10, $note->id, $shipment);
                                 NotificationsController::send(11, $note->id, $shipment);
 
-                                if($a) {
+                                if($notifications[$index]) {
                                     NotificationsController::send(12, $note->id, $shipment);
                                 }
                             }
