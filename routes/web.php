@@ -67,6 +67,8 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::put('add', 'Shippers\ShipperReceivingSheetController@add')->name('add');
             Route::put('void', 'Shippers\ShipperReceivingSheetController@void')->name('void');
             Route::post('print', 'Shippers\ShipperReceivingSheetController@print')->name('print');
+            Route::get('new','Shippers\ShipperReceivingSheetController@create_view')->name('new');
+            Route::get('info','Shippers\ShipperReceivingSheetController@get_shipment_details')->name('info');
         });
 
         Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
