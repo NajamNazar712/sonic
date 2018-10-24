@@ -156,7 +156,7 @@ class RegisterController extends Controller
                     'default_address' => TRUE
                 ]);
 
-                first = FALSE;
+                $first = FALSE;
             }
             else {
                 UserShippingInfo::create([
