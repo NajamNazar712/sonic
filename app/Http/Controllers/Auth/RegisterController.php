@@ -142,15 +142,32 @@ class RegisterController extends Controller
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
 
+        $first = TRUE;
+
         foreach ($data['pickup_address'] as $index => $pickup_address) {
-            UserShippingInfo::create([
-                'user_id' => $newUser->id,
-                'pickup_address' => $pickup_address,
-                'poc' => $data['shipping_poc'][$index],
-                'phone' => $data['shipping_phone'][$index],
-                'email' => $data['shipping_email'][$index],
-                'city_id' => $data['shipping_city'][$index],
-            ]);
+            if ($first) {
+                UserShippingInfo::create([
+                    'user_id' => $newUser->id,
+                    'pickup_address' => $pickup_address,
+                    'poc' => $data['shipping_poc'][$index],
+                    'phone' => $data['shipping_phone'][$index],
+                    'email' => $data['shipping_email'][$index],
+                    'city_id' => $data['shipping_city'][$index],
+                    'default_address' => TRUE
+                ]);
+
+                $first = FALSE;
+            }
+            else {
+                UserShippingInfo::create([
+                    'user_id' => $newUser->id,
+                    'pickup_address' => $pickup_address,
+                    'poc' => $data['shipping_poc'][$index],
+                    'phone' => $data['shipping_phone'][$index],
+                    'email' => $data['shipping_email'][$index],
+                    'city_id' => $data['shipping_city'][$index]
+                ]);
+            }
         }
         UserBankInfo::create([
                 'user_id'=>$newUser->id,
