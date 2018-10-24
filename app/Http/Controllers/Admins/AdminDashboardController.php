@@ -3308,7 +3308,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if(session('role_id') == 1 || in_array(109, session('permissions')))
+                if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
@@ -3395,7 +3395,7 @@ class AdminDashboardController extends Controller
                 }
 
 
-                if(session('role_id') == 1 || in_array(109, session('permissions')))
+                if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
@@ -3441,7 +3441,7 @@ class AdminDashboardController extends Controller
             }
 
 
-            if(session('role_id') == 1 || in_array(109, session('permissions')))
+            if(session('role_id') == 1 || in_array(110, session('permissions')))
             {
                 $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
             }

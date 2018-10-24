@@ -90,7 +90,7 @@
                             </table>
                         </div>
                         <br>
-                        @if (session('role_id') == 1 || in_array(110, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(111, session('permissions')))
                         <div class="row justify-content-center">
                             <div class="col-3">
                                 <button id="edit-1" type="button" class="btn btn-primary btn-block">Edit</button>
@@ -194,7 +194,7 @@
                             </table>
                         </div>
                         <br>
-                        @if (session('role_id') == 1 || in_array(111, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(112, session('permissions')))
                         <div class="row justify-content-center">
                             <div class="col-3">
                                 <button id="edit-2" type="button" class="btn btn-primary btn-block">Edit</button>
