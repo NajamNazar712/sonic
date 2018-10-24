@@ -209,65 +209,54 @@ class ShipperDashboardController extends Controller
 
     public function userProfile()
     {
-        //return dd($id);
-        $user = User::find(Auth::id());
+        $user = User::find(session('user_id'));
         $product = Product::find($user->product_id);
         $banks = BanksList::all();
         $pickup_city_list = City::where('pickup',1)->where('status',1)->get();
         return view('client.profile.index')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'pickup_city_list'=>$pickup_city_list]);
     }
 
-    public function getPickups(Request $request)
-    {
-        $user_id = $request->user_id;
+    public function getPickups(Request $request) {
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name'])->where('user_id',$user_id);
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name'])
+        ->where('user_id', session('user_id'))
+        ->where('hidden', 0);
+
         return Datatables::of($pickups)
-            ->addColumn("action", function ($result) {
-                $dropdown = '
-              <div class="btn-group">
-                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                <div class="dropdown-menu dropdown-menu-sm">
+        ->addColumn('action', function ($pickup) {
+            $dropdown = '
+                <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
-                $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
-                $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
+            $disable_button = '<button type="button" class="dropdown-item disable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x-circle"></i></div><div class="col-9 offset-1">Disable</div></button>';
+            $enable_button = '<button type="button" class="dropdown-item enable"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Enable</div></button>';
+            $default_button = '<button type="button" class="dropdown-item default"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Make Default Address</div></button>';
 
-
-                if($result->status==1 && UserShippingInfo::where('user_id',$result->user_id)->count()>1 && $result->default_address!==1)
-                {
+            if ($pickup->default_address == 1) {
+                $dropdown = 'Default Address';
+            }
+            else {
+                if ($pickup->status == 0) {
+                    $dropdown .= $enable_button . $default_button;
+                }
+                else if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
                     $dropdown .= $disable_button;
                 }
-                elseif($result->status==0)
-                {
-                    $dropdown .= $enable_button;
-                }
+            }
 
-                if($result->default_address!==1 && $result->status==1)
-                {
-                    $dropdown .= $default_button;
-                }
-                elseif($result->default_address==1)
-                {
-                    $dropdown = "<div style='text-align: center' '>Default Address</div>";
-                }
-
-
-                $dropdown .= '
+            $dropdown .= '
+                    </div>
                 </div>
-              </div>
             ';
-//                if(UserShippingInfo::where('user_id',$result->user_id)->count()==1 && $result->default_address==1 )
-//                {
-//                    $dropdown = "";
-//                }
 
-                return $dropdown;
-            })->editColumn('status', function ($status) {
-                return ($status->status == 1)? 'Enabled': 'Disabled';
-            })
-            ->make(true);
+            return $dropdown;
+        })
+        ->editColumn('status', function ($pickup) {
+            return ($pickup->status == 1) ? 'Enabled' : 'Disabled';
+        })
+        ->make(true);
     }
 
 
@@ -278,7 +267,6 @@ class ShipperDashboardController extends Controller
         if($shipping_info->exists()){
             if($status == 'enable'){
                 if($shipping_info->status == 0){
-//                    $shipping_info->update(['status'=>1]);
                     $shipping_info->status = 1;
                     $shipping_info->save();
                     return response()->json(['status'=>1,'success'=>"Pickup Address is now enabled!"]);
@@ -291,7 +279,6 @@ class ShipperDashboardController extends Controller
                     return response()->json(['status'=>0,'error'=>"Single Pickup Address cannot be set to disabled"]);
                 }
                 if($shipping_info->status == 1){
-//                    $shipping_info->update(['status'=>0]);
                     $shipping_info->status = 0;
                     $shipping_info->save();
                     return response()->json(['status'=>1,'success'=>"Pickup Address is now disabled!"]);
@@ -306,7 +293,7 @@ class ShipperDashboardController extends Controller
                 {
                     $shipping_info->default_address = 1;
                     $shipping_info->save();
-                    UserShippingInfo::where('user_id',$shipping_info->user_id)->where('id','<>',$pickup_id)->update(['default_address'=>0]);
+                    UserShippingInfo::where('user_id', $shipping_info->user_id)->where('id', '!=', $pickup_id)->update(['default_address' => 0]);
                     return response()->json(['status'=>1,'success'=>"This Pickup Address is now default Pickup Address"]);
                 }
                 else
@@ -323,15 +310,13 @@ class ShipperDashboardController extends Controller
 
 
 
-    public function addPickup(Request $request){
-
-
+    public function addPickup(Request $request) {
         $pickup_address = $request->pickup_address;
         $phone = $request->phone;
         $poc = $request->poc;
         $email = $request->email;
         $city_id = $request->city_id;
-        $user_id = Auth::id();
+        $user_id = session('user_id');
 
         if($pickup_address != null && $phone != null && $poc != null && $email != null && $city_id != null)
         {
@@ -358,8 +343,8 @@ class ShipperDashboardController extends Controller
         ]);
 
 
-        User::where('id',Auth::id())->update(['poc'=>$request->poc,'phone'=>$request->phone,'phone2'=>$request->phone2,
-            'updated_by_type'=>0,'updated_by_id'=>Auth::id()]);
+        User::where('id', session('user_id'))->update(['poc'=>$request->poc,'phone'=>$request->phone,'phone2'=>$request->phone2,
+            'updated_by_type'=>0,'updated_by_id'=> session('user_id')]);
 
 
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);

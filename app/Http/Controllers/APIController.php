@@ -104,8 +104,8 @@ class APIController extends Controller
             $detail['phone_number'] = $pickup_address->phone;
             $detail['email_address'] = $pickup_address->email;
             $detail['address'] = $pickup_address->pickup_address;
-            $detail['status'] = $pickup_address->status ==1 ? "Enabled" : "Disabled";
-            $detail['default'] = $pickup_address->default_address ==1 ? "true" : "false";
+            $detail['status'] = $pickup_address->status;
+            $detail['default'] = ($pickup_address->default_address) ? TRUE : FALSE;
 
             $detail['city'] = array();
 
@@ -190,7 +190,7 @@ class APIController extends Controller
       $rules = [
         'service_type_id' => ['required', 'integer', 'digits_between:1,10', 'exists:booking_types,id'],
         'pickup_address_id' => ['required', 'integer', 'digits_between:1,10', Rule::exists('user_shipping_infos', 'id')->where(function($query) use($user_id) {
-          $query->where('user_id', $user_id);
+          $query->where('user_id', $user_id)->where('hidden', 0);
         })],
         'information_display' => ['required', 'boolean'],
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
@@ -246,7 +246,7 @@ class APIController extends Controller
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
           if (!$user_shipping_info->status) {
-              return response()->json(['status' => 1, 'message' => 'This Pickup Address is disabled']);
+            return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
           }
 
         if (!$user_shipping_info->city->status) {
