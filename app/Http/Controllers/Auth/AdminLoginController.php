@@ -36,6 +36,11 @@ class AdminLoginController extends Controller
 
             $admin = Auth::guard('admin');
 
+            if ($admin->user()->status == 0) {
+                auth('admin')->logout();
+                return back()->with('info', 'Your Account is Disabled, Contact Admin');
+            }
+
             $id = $admin->id();
             $role_id = $admin->user()->role_id;
 
