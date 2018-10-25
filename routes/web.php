@@ -200,10 +200,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
 
         //user profile
-        Route::get('/accounts/{id}/view','Admins\AdminDashboardController@userProfile')->name('view.profile');
-        Route::post('/accounts/updateprofile','Admins\AdminDashboardController@updateProfile')->name('update.profile');
+        Route::get('/{id}/view','Admins\AdminDashboardController@userProfile')->name('view.profile');
+        Route::post('/updateprofile','Admins\AdminDashboardController@updateProfile')->name('update.profile');
         Route::get('getpickups','Admins\AdminDashboardController@getPickups')->name('get.pickups');
-        Route::post('/accounts/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
+        Route::post('/updatebankinfo','Admins\AdminDashboardController@updateBankInfo')->name('update.bank');
 
     });
 

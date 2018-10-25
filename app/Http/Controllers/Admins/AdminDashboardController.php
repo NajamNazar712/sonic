@@ -3466,7 +3466,7 @@ class AdminDashboardController extends Controller
         $products = Product::all();
         $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
-        return view('admin.user_management.user.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products]);
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products]);
     }
 
     public function updateProfile(Request $request)

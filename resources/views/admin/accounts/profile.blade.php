@@ -5,7 +5,7 @@
 @section('content')
 
     <h1 class="mb-1">
-        User Profile
+        Shipper Profile
     </h1>
     <div class="card">
         <div class="card-header">
@@ -224,7 +224,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput1">Company Name:</label>
+                                        <label>Company Name:</label>
                                         <span class="danger">*</span>
                                         <input type="text" minlength="3" id="name" class="form-control border-primary" data-rule-remote="{{ route('cod.check.name', ['id' => $user->id,'name'=>$user->name]) }}" data-msg-remote="Company Name must be unique" data-rule-required="true" data-msg-required="Company Name is required" value="{{$user->name}}" name="name" required>
                                     </div>
@@ -233,7 +233,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label  for="userinput2">Person of Contact:</label>
+                                        <label>Person of Contact:</label>
                                         <span class="danger">*</span>
                                         <input type="text" id="poc"  data-rule-required="true" data-msg-required="Person of Contact is required" class="form-control border-primary" value="{{$user->poc}}" name="poc" required>
                                     </div>
@@ -244,7 +244,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput3">Email Address</label>
+                                        <label>Email Address</label>
                                         <span class="danger">*</span>
                                         <input type="email" id="email" class="form-control border-primary" data-rule-remote="{{ route('cod.check.email', ['id' => $user->id,'email'=>$user->email]) }}" data-msg-remote="Email must be unique" data-rule-required="true" data-msg-required="Email address is required" value="{{$user->email}}" name="email" required>
                                     </div>
@@ -253,7 +253,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput4">Address:</label>
+                                        <label>Address:</label>
                                         <span class="danger">*</span>
                                         <input type="text" id="address" class="form-control border-primary" data-rule-required="true" data-msg-required="Address is required" value="{{$user->address}}" name="address" required>
                                     </div>
@@ -264,7 +264,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput3">Phone Number 1</label>
+                                        <label>Phone Number 1</label>
                                         <span class="danger">*</span>
                                         <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Phone number is required" value="{{$user->phone}}" name="phone" required>
                                     </div>
@@ -273,7 +273,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="col-md-9">
-                                        <label for="userinput4">Phone Number 2:</label>
+                                        <label>Phone Number 2:</label>
                                         <input type="text" id="phone2" class="form-control border-primary" value="{{$user->phone2}}" name="phone2">
                                     </div>
                                 </div>
@@ -283,7 +283,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput3">CNIC No.</label>
+                                        <label>CNIC No.</label>
                                         <span class="danger">*</span>
                                         <input type="text" id="cnic" class="form-control border-primary" data-rule-required="true" data-msg-required="CNIC Number is required" value="{{$user->cnic}}" name="cnic" required>
                                     </div>
@@ -292,7 +292,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="col-md-9">
-                                        <label for="userinput4">NTN Number</label>
+                                        <label>NTN Number</label>
                                         <input type="text" id="ntn_no" class="form-control border-primary" value="{{$user->ntn_no}}" name="ntn_no">
                                     </div>
                                 </div>
@@ -302,15 +302,15 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="col-md-9">
-                                        <label for="userinput3">URL</label>
-                                        <input type="text" id="userinput9" class="form-control border-primary" value="{{$user->url}}" name="url">
+                                        <label>URL</label>
+                                        <input type="text" id="url" class="form-control border-primary" value="{{$user->url}}" name="url">
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput3">Product Type</label>
+                                        <label>Product Type</label>
                                         <span class="danger">*</span>
                                         <select name="product_id" id="product_id" data-rule-required="true" data-msg-required="Product Type is required" class="select2 form-control required" style="width: 100%">
                                             @foreach($products as $single_product)
@@ -325,8 +325,8 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="col-md-9">
-                                        <label for="userinput3">Password:</label>
-                                        <input type="password" id="userinput9" class="form-control border-primary" value="" name="password">
+                                        <label>Password:</label>
+                                        <input type="password" id="password" class="form-control border-primary" value="" name="password">
                                     </div>
                                 </div>
                             </div>
@@ -334,7 +334,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput3">City</label>
+                                        <label>City</label>
                                         <span class="danger">*</span>
                                         <select name="city_id" id="city_id" data-rule-required="true" data-msg-required="City is required" class="select2 form-control required" style="width: 100%">
                                             @foreach($all_cities as $city)
@@ -365,7 +365,7 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput5">Bank Name</label>
+                                        <label>Bank Name</label>
                                         <span class="danger">*</span>
                                         <select name="bank_name" id="bank_name" data-rule-required="true" data-msg-required="Bank name is required" class="select2 form-control required" style="width: 100%">
                                             @foreach($banks as $bank)
@@ -378,21 +378,21 @@
 
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput6">Bank Branch</label>
+                                        <label>Bank Branch</label>
                                         <span class="danger">*</span>
                                         <input type="text" id="bank_branch" class="form-control border-primary" data-rule-required="true" data-msg-required="Bank branch is required" value="{{$user->bank->bank_branch}}" name="bank_branch" required>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label >Account Number</label>
+                                        <label>Account Number</label>
                                         <span class="danger">*</span>
                                         <input id="account_no" class="form-control border-primary" type="text" value="{{$user->bank->account_no}}" data-rule-required="true" data-msg-required="Account Number is required" name="account_no"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label >Payment Cycle</label>
+                                        <label>Payment Cycle</label>
                                         <span class="danger">*</span>
                                         <select name="payment_cycle" id="payment_cycle" data-rule-required="true" data-msg-required="Payment Cycle is required" class="select2 form-control required" style="width: 100%">
                                             <option value="daily" {{ $user->bank->payment_cycle == 'daily' ? 'selected' : '' }}>Daily</option>
@@ -406,14 +406,14 @@
                             <div class="col-md-6">
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput8">Account Title</label>
+                                        <label>Account Title</label>
                                         <span class="danger">*</span>
                                         <input id="account_title" class="form-control border-primary" type="text" value="{{$user->bank->account_title}}" data-rule-required="true" data-msg-required="Account Title is required" name="account_title"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput8">IBAN Number</label>
+                                        <label>IBAN Number</label>
                                         <span class="danger">*</span>
                                         <input id="iban" class="form-control border-primary" type="text" value="{{$user->bank->iban}}" data-rule-required="true" data-msg-required="IBAN Number is required" name="iban" required>
                                         <input type="hidden" id="user_id" name="user_id" value="{{$user->id}}">
@@ -422,7 +422,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput8">Bank City</label>
+                                        <label>Bank City</label>
                                         <span class="danger">*</span>
                                         <select name="bank_city" id="bank_city" data-rule-required="true" data-msg-required="Bank City is required" class="select2 form-control required" style="width: 100%">
                                             @foreach($all_cities as $bank_city)
@@ -433,7 +433,7 @@
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
-                                        <label for="userinput5">Payment Mode</label>
+                                        <label>Payment Mode</label>
                                         <span class="danger">*</span>
                                         <select name="payment_mode" id="payment_mode" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required" style="width: 100%">
                                             <option value="ibft" {{ $user->bank->payment_mode == 'ibft' ? 'selected' : '' }}>IBFT Reimbursements</option>
@@ -510,20 +510,8 @@
                 $("#profile-form").validate().resetForm();
                 $("#profile-form")[0].reset();
                 $("#profile-form").find(".danger").removeClass("danger");
-                $("#name").val("");
-                $("#name").val("{{$user->name}}");
-                $("#address").val("");
-                $("#address").val("{{$user->address}}");
-                $("#email").val("");
-                $("#email").val("{{$user->email}}");
-                $("#cnic").val("");
-                $("#cnic").val("{{$user->cnic}}");
-                $("#phone").val("");
-                $("#phone").val("{{$user->phone}}");
-                $("#phone2").val("");
-                $("#phone2").val("{{$user->phone2}}");
-                $("#poc").val("");
-                $("#poc").val("{{$user->poc}}");
+                $("#city_id").val("{{$user->city_id}}").trigger('change');
+                $("#product_id").val("{{$user->product_id}}").trigger('change');
                 $("#tabs").show();
             });
             $('#cancel-button-bank').click(function () {
@@ -531,14 +519,10 @@
                 $("#bank-form").validate().resetForm();
                 $("#bank-form")[0].reset();
                 $("#bank-form").find(".danger").removeClass("danger");
-                $("#bank_branch").val("");
-                $("#bank_branch").val("{{$user->bank->bank_branch}}");
-                $("#account_no").val("");
-                $("#account_no").val("{{$user->bank->account_no}}");
-                $("#account_title").val("");
-                $("#account_title").val("{{$user->bank->account_title}}");
-                $("#iban").val("");
-                $("#iban").val("{{$user->bank->iban}}");
+                $("#bank_name").val("{{$bank->id}}").trigger('change');
+                $("#payment_cycle").val("{{$user->bank->payment_cycle}}").trigger('change');
+                $("#bank_city").val("{{$bank_city->id}}").trigger('change');
+                $("#payment_mode").val("{{$user->bank->payment_mode}}").trigger('change');
                 $("#tabs").show();
             });
 
@@ -615,6 +599,9 @@
 
             $( "#profile-form" ).validate({
                 errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
@@ -626,6 +613,9 @@
             });
             $( "#bank-form" ).validate({
                 errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
@@ -634,13 +624,6 @@
                     form.submit();
 
                 }
-            });
-
-            $('body').on('change','#profile-form input',function() {
-                $(this).val($(this).val().trim());
-            });
-            $('body').on('change','#bank-form input',function() {
-                $(this).val($(this).val().trim());
             });
 
 

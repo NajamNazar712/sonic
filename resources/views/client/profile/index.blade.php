@@ -86,7 +86,10 @@
                                                 <td><b>Product Type</b></td>
                                                 <td>{{$product_name}}</td>
                                             </tr>
-
+                                            <tr>
+                                                <td><b>City</b></td>
+                                                <td>{{$user->city->name}}</td>
+                                            </tr>
                                             </tbody>
                                         </table>
                                     </div>
@@ -189,7 +192,7 @@
 
 
                                                 <div class="form-group col-md-9">
-                                                    <label for="userinput2">Person of Contact:</label>
+                                                    <label>Person of Contact:</label>
                                                     <span class="danger">*</span>
                                                     <input type="text" id="poc" class="form-control border-primary" data-rule-required="true" data-msg-required="Person of Contact is required" value="{{$user->poc}}" name="poc" required>
                                                 </div>
@@ -198,7 +201,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group row">
                                                 <div class="form-group col-md-9">
-                                                    <label for="userinput3">Phone Number 1:</label>
+                                                    <label>Phone Number 1:</label>
                                                     <span class="danger">*</span>
                                                     <input type="text" id="phone" class="form-control border-primary" data-rule-required="true" data-msg-required="Phone Number is required" value="{{$user->phone}}" name="phone" required>
                                                 </div>
@@ -210,7 +213,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group row">
                                                 <div class="form-group col-md-9">
-                                                    <label for="userinput4">Phone Number 2:</label>
+                                                    <label>Phone Number 2:</label>
                                                     <input type="text" id="phone2" class="form-control border-primary"  value="{{$user->phone2}}" name="phone2">
                                                     {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
                                                 </div>
@@ -262,13 +265,13 @@
                             {{--</div>--}}
                             <div class="row">
                                 <div class="col-6 form-group">
-                                    <input type="text" name="pickup_address" id="pickup_address" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Pickup Address is required" placeholder="Pickup Address" required>
+                                    <input type="text" name="pickup_address" id="pickup_address" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Pickup Address is required" placeholder="Address" required>
                                 </div>
                                 <div class="col-6 form-group">
                                     <input type="text" name="phone" id="phone" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Phone Number is required" placeholder="Phone Number" required>
                                 </div>
                                 <div class="col-6 form-group">
-                                    <input type="text" name="poc" id="poc" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Person of Contact is required" placeholder="Person of Contact" required>
+                                    <input type="text" name="poc" id="poc" class="form-control numeric flyer" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters" data-rule-required="true" data-msg-required="Person of Contact is required" placeholder="Person of Contact" required>
                                 </div>
                                 <div class="col-6 form-group">
                                     <input type="email" name="email" id="add_stock_boxes" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Email Address is required" placeholder="Email Address" required>
@@ -595,6 +598,9 @@
 
             $( "#add_pickup_form" ).validate({
                 errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
@@ -606,6 +612,9 @@
             });
             $( "#main-form" ).validate({
                 errorClass:"danger",
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
                 errorPlacement: function(error, element) {
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
@@ -616,9 +625,6 @@
                 }
             });
 
-            $('body').on('change','#main-form input',function() {
-                $(this).val($(this).val().trim());
-            });
 
         });
     </script>
