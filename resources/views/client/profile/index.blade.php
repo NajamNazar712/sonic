@@ -194,7 +194,7 @@
                                                 <div class="form-group col-md-9">
                                                     <label>Person of Contact:</label>
                                                     <span class="danger">*</span>
-                                                    <input type="text" id="poc" class="form-control border-primary" data-rule-required="true" data-msg-required="Person of Contact is required" value="{{$user->poc}}" name="poc" required>
+                                                    <input type="text" id="poc" class="form-control border-primary" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters" data-rule-required="true" data-msg-required="Person of Contact is required" value="{{$user->poc}}" name="poc" required>
                                                 </div>
                                             </div>
                                         </div>
@@ -265,7 +265,7 @@
                             {{--</div>--}}
                             <div class="row">
                                 <div class="col-6 form-group">
-                                    <input type="text" name="pickup_address" id="pickup_address" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Pickup Address is required" placeholder="Address" required>
+                                    <textarea type="text" name="pickup_address" id="pickup_address" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Pickup Address is required" placeholder="Address" required></textarea>
                                 </div>
                                 <div class="col-6 form-group">
                                     <input type="text" name="phone" id="phone" class="form-control numeric flyer" data-rule-required="true" data-msg-required="Phone Number is required" placeholder="Phone Number" required>

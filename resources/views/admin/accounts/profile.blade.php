@@ -235,7 +235,7 @@
                                     <div class="form-group col-md-9">
                                         <label>Person of Contact:</label>
                                         <span class="danger">*</span>
-                                        <input type="text" id="poc"  data-rule-required="true" data-msg-required="Person of Contact is required" class="form-control border-primary" value="{{$user->poc}}" name="poc" required>
+                                        <input type="text" id="poc"  data-rule-required="true" data-msg-required="Person of Contact is required" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters" class="form-control border-primary" value="{{$user->poc}}" name="poc" required>
                                     </div>
                                 </div>
                             </div>
@@ -255,7 +255,7 @@
                                     <div class="form-group col-md-9">
                                         <label>Address:</label>
                                         <span class="danger">*</span>
-                                        <input type="text" id="address" class="form-control border-primary" data-rule-required="true" data-msg-required="Address is required" value="{{$user->address}}" name="address" required>
+                                        <textarea type="text" id="address" class="form-control border-primary" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters" data-rule-required="true" data-msg-required="Address is required" value="{{$user->address}}" name="address" required>{{$user->address}}</textarea>
                                     </div>
                                 </div>
                             </div>
@@ -303,7 +303,7 @@
                                 <div class="form-group row">
                                     <div class="col-md-9">
                                         <label>URL</label>
-                                        <input type="text" id="url" class="form-control border-primary" value="{{$user->url}}" name="url">
+                                        <input type="text" data-rule-maxlength="190" data-msg-maxlength="URL can be maximum 190 characters" id="url" class="form-control border-primary" value="{{$user->url}}" name="url">
                                     </div>
                                 </div>
                             </div>
@@ -380,14 +380,14 @@
                                     <div class="form-group col-md-9">
                                         <label>Bank Branch</label>
                                         <span class="danger">*</span>
-                                        <input type="text" id="bank_branch" class="form-control border-primary" data-rule-required="true" data-msg-required="Bank branch is required" value="{{$user->bank->bank_branch}}" name="bank_branch" required>
+                                        <input type="text" id="bank_branch" data-rule-maxlength="190" data-msg-maxlength="Bank Branch can be maximum 190 characters" class="form-control border-primary" data-rule-required="true" data-msg-required="Bank branch is required" value="{{$user->bank->bank_branch}}" name="bank_branch" required>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
                                         <label>Account Number</label>
                                         <span class="danger">*</span>
-                                        <input id="account_no" class="form-control border-primary" type="text" value="{{$user->bank->account_no}}" data-rule-required="true" data-msg-required="Account Number is required" name="account_no"  required>
+                                        <input id="account_no" class="form-control border-primary" data-rule-maxlength="190" data-msg-maxlength="Account Number can be maximum 190 characters" type="text" value="{{$user->bank->account_no}}" data-rule-required="true" data-msg-required="Account Number is required" name="account_no"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row">
@@ -408,14 +408,14 @@
                                     <div class="form-group col-md-9">
                                         <label>Account Title</label>
                                         <span class="danger">*</span>
-                                        <input id="account_title" class="form-control border-primary" type="text" value="{{$user->bank->account_title}}" data-rule-required="true" data-msg-required="Account Title is required" name="account_title"  required>
+                                        <input id="account_title" class="form-control border-primary" type="text" data-rule-maxlength="190" data-msg-maxlength="Account Title can be maximum 190 characters" value="{{$user->bank->account_title}}" data-rule-required="true" data-msg-required="Account Title is required" name="account_title"  required>
                                     </div>
                                 </div>
                                 <div class="form-group row">
                                     <div class="form-group col-md-9">
                                         <label>IBAN Number</label>
                                         <span class="danger">*</span>
-                                        <input id="iban" class="form-control border-primary" type="text" value="{{$user->bank->iban}}" data-rule-required="true" data-msg-required="IBAN Number is required" name="iban" required>
+                                        <input id="iban" class="form-control border-primary" type="text" value="{{$user->bank->iban}}" data-rule-maxlength="190" data-msg-maxlength="IBAN Number can be maximum 190 characters" data-rule-required="true" data-msg-required="IBAN Number is required" name="iban" required>
                                         <input type="hidden" id="user_id" name="user_id" value="{{$user->id}}">
                                         {{--<input type="hidden" name="user_id" value="{{$user->id}}">--}}
                                     </div>
