@@ -53,6 +53,8 @@ class Permission
             'pickups.receive.summary.request.over_short_received' => 24,
             'pickups.receive.summary.request.done' => 24,
             'pickups.receive.summary.request.not_done' => 24,
+            'pickups.bookedvsreceived.index' => 113,
+            'pickups.bookedvsreceived.list' => 113,
 
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
