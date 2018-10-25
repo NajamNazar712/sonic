@@ -11,7 +11,7 @@ class DeliveryNoteShipment extends Model
 	public $incrementing = FALSE;
 	public $timestamps = FALSE;
 	protected $fillable = [
-		'delivery_note_id','shipment_id'
+		'delivery_note_id','shipment_id','status','call_verification','notification','rider_information'
 	];
 
 	protected function setKeysForSaveQuery(Builder $query) {
