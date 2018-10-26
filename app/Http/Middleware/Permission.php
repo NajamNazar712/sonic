@@ -73,6 +73,7 @@ class Permission
             'cargo.in_transit.forwarding_details' => 27,
             'cargo.in_transit.update' => 28,
             'cargo.in_transit.receive' => 31,
+            'cargo.in_transit.shipments' => 27,
             'cargo.receive.index' => 31,
             'cargo.receive.shipment_details' => 31,
             'cargo.receive.short_received' => 31,
