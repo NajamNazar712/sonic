@@ -279,6 +279,25 @@
 									</div>
 								</div>
 							</div>
+
+							<div class="modal fade" id="shipments" role="dialog" aria-labelledby="shipments_title" aria-hidden="true">
+								<div class="modal-dialog modal-sm" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="shipments_title">Shipment(s)</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body text-center">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -378,7 +397,7 @@
                                 row.push(values.id_padded);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.shipments);
+                                row.push(values.shipments_count);
                                 row.push(values.shipping_mode);
                                 row.push(values.junction_1);
                                 row.push(values.junction_2);
@@ -476,7 +495,7 @@
 					{data: 'id_padded', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
 					{data: 'origin', name: 'oh.name', class: 'align-middle origin'},
 					{data: 'destination', name: 'dh.name', class: 'align-middle destination'},
-					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle shipments'},
+					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle text-center shipments'},
 					{data: 'shipping_mode', name: 'shipping_mode', class: 'align-middle shipping_mode'},
 					{data: 'junction_1', name: 'jh1.name', class: 'align-middle junction_1'},
 					{data: 'junction_2', name: 'jh2.name', class: 'align-middle junction_2'},
@@ -615,6 +634,34 @@
                     });
 					this.api().table().columns.adjust();
 				}
+			});
+
+			$('#datatable tbody').on('click', 'tr td.shipments button', function() {
+				var id = parseInt($(this).parents('tr').attr('id'));
+
+				$('#shipments .modal-body').html('');
+
+				$.ajax({
+					url: '{!! route('admin.cargo.in_transit.shipments') !!}',
+					method: 'POST',
+					data: {
+						'_token': '{{ csrf_token() }}',
+						'id': id
+					}
+				})
+				.done(function(data) {
+					if (data) {
+						var tracking_numbers = '';
+
+						$.each(data, function(index, tracking_number) {
+							tracking_numbers += tracking_number + '<br/>';
+						});
+
+						$('#shipments .modal-body').html(tracking_numbers);
+
+						$('#shipments').modal('show');
+					}
+				});
 			});
 
 			var cargo_consignment_ids = [];
