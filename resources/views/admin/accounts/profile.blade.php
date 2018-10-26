@@ -390,18 +390,18 @@
                                         <input id="account_no" class="form-control border-primary" data-rule-maxlength="190" data-msg-maxlength="Account Number can be maximum 190 characters" type="text" value="{{$user->bank->account_no}}" data-rule-required="true" data-msg-required="Account Number is required" name="account_no"  required>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <div class="form-group col-md-9">
-                                        <label>Payment Cycle</label>
-                                        <span class="danger">*</span>
-                                        <select name="payment_cycle" id="payment_cycle" data-rule-required="true" data-msg-required="Payment Cycle is required" class="select2 form-control required" style="width: 100%">
-                                            <option value="daily" {{ $user->bank->payment_cycle == 'daily' ? 'selected' : '' }}>Daily</option>
-                                            <option value="weekly" {{ $user->bank->payment_cycle == 'weekly' ? 'selected' : '' }}>Weekly</option>
-                                            <option value="fortnight" {{ $user->bank->payment_cycle == 'fortnight' ? 'selected' : '' }}>Fortnight</option>
-                                            <option value="monthly" {{ $user->bank->payment_cycle == 'monthly' ? 'selected' : '' }}>Monthly</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                {{--<div class="form-group row">--}}
+                                    {{--<div class="form-group col-md-9">--}}
+                                        {{--<label>Payment Cycle</label>--}}
+                                        {{--<span class="danger">*</span>--}}
+                                        {{--<select name="payment_cycle" id="payment_cycle" data-rule-required="true" data-msg-required="Payment Cycle is required" class="select2 form-control required" style="width: 100%">--}}
+                                            {{--<option value="daily" {{ $user->bank->payment_cycle == 'daily' ? 'selected' : '' }}>Daily</option>--}}
+                                            {{--<option value="weekly" {{ $user->bank->payment_cycle == 'weekly' ? 'selected' : '' }}>Weekly</option>--}}
+                                            {{--<option value="fortnight" {{ $user->bank->payment_cycle == 'fortnight' ? 'selected' : '' }}>Fortnight</option>--}}
+                                            {{--<option value="monthly" {{ $user->bank->payment_cycle == 'monthly' ? 'selected' : '' }}>Monthly</option>--}}
+                                        {{--</select>--}}
+                                    {{--</div>--}}
+                                {{--</div>--}}
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group row">
@@ -431,16 +431,16 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <div class="form-group col-md-9">
-                                        <label>Payment Mode</label>
-                                        <span class="danger">*</span>
-                                        <select name="payment_mode" id="payment_mode" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required" style="width: 100%">
-                                            <option value="ibft" {{ $user->bank->payment_mode == 'ibft' ? 'selected' : '' }}>IBFT Reimbursements</option>
-                                            <option value="invoices" {{ $user->bank->payment_mode == 'invoices' ? 'selected' : '' }}>Invoices</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                {{--<div class="form-group row">--}}
+                                    {{--<div class="form-group col-md-9">--}}
+                                        {{--<label>Payment Mode</label>--}}
+                                        {{--<span class="danger">*</span>--}}
+                                        {{--<select name="payment_mode" id="payment_mode" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required" style="width: 100%">--}}
+                                            {{--<option value="ibft" {{ $user->bank->payment_mode == 'ibft' ? 'selected' : '' }}>IBFT Reimbursements</option>--}}
+                                            {{--<option value="invoices" {{ $user->bank->payment_mode == 'invoices' ? 'selected' : '' }}>Invoices</option>--}}
+                                        {{--</select>--}}
+                                    {{--</div>--}}
+                                {{--</div>--}}
                             </div>
                         </div>
                     </div>
