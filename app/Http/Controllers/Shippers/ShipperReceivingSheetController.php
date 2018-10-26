@@ -29,6 +29,7 @@ class ShipperReceivingSheetController extends Controller
     }
 
     public function store(Request $request) {
+
       $shipment_ids = $request->input('shipment_ids');
 
       $pickup_address_id = 0;
@@ -559,4 +560,51 @@ class ShipperReceivingSheetController extends Controller
 
       return $html;
     }
+    public function create_view(){
+        return view('client.shipment.receiving_sheet.create');
+    }
+
+    public function get_shipment_details(Request $request){
+        $tracking_number = $request->tracking;
+
+        if($tracking_number != ''){
+            $shipment = Shipment::where('tracking_number',$tracking_number);
+            if($shipment->exists()){
+                $shipment = $shipment->first();
+                $pickup_id = $shipment->pickup_address_id;
+
+                if ($shipment->user_id != session('user_id')) {
+                    return ['status' => 1, 'error' => $shipment->tracking_number . ' doesn\'t belong to you'];
+                }
+
+                if (ReceivingSheetShipment::where('shipment_id', $shipment->id)->exists()) {
+                    return ['status' => 1, 'error' => $shipment->tracking_number . ' is already in a Receiving Sheet'];
+                }
+
+                if($request->has('pickup_address_id')){
+                    if($request->pickup_address_id == $pickup_id){
+                        $service = $shipment->booking_type->booking_type;
+                        $origin = $shipment->pickup_address->city->name;
+                        $destination = $shipment->consignee_city->name;
+                        $address = $shipment->pickup_address->pickup_address;
+                        $booking = $shipment->created_at->toDateTimeString();
+                        return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number,'order_id'=>$shipment->order_id,'service_type'=>$service,'origin'=>$origin,'destination'=>$destination, 'address' => $address,'booking'=>$booking]);
+                    }else{
+                        return ['status' => 1, 'error' => 'Given Shipments Pickup Addresses are different from one another and cannot be added to the same Receiving Sheet'];
+                    }
+                }else{
+                    $service = $shipment->booking_type->booking_type;
+                    $origin = $shipment->pickup_address->city->name;
+                    $destination = $shipment->consignee_city->name;
+                    $address = $shipment->pickup_address->pickup_address;
+                    $booking = $shipment->created_at->toDateTimeString();
+                    return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number,'order_id'=>$shipment->order_id,'service_type'=>$service,'origin'=>$origin,'destination'=>$destination, 'address' => $address,'booking'=>$booking,'pickup_address'=>$pickup_id]);
+                }
+            }else{
+                return ['status' => 1, 'error' => 'Shipment with given tracking number doesn\'t exists'];
+            }
+        }
+    }
+
+
 }

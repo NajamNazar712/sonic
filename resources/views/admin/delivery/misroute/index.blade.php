@@ -64,7 +64,6 @@
                             <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                                 <h3>Consignee Information</h3>
                                 <div class="form-group">
-                                    <input type="hidden" id="old_consignee_city">
                                     <select name="consignee_city" id="consignee_city" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
                                         <option></option>
                                     </select>
@@ -381,55 +380,47 @@
                 var postObject = new Object;
                 var shipment_id = $.trim($('#shipment_id').val());
                 var consignee_city = $.trim($('#consignee_city').val());
-                var old_consignee_city = $.trim($('#old_consignee_city').val());
-                if(consignee_city !== old_consignee_city) {
-                    var consignee = $.trim($('#consignee').val());
-                    var address = $.trim($('#address').val());
-                    var phone1 = $.trim($('#phone1').val());
-                    var phone2 = $.trim($('#phone2').val());
-                    var email = $.trim($('#email').val());
-                    postObject.shipment_id = shipment_id;
-                    postObject.consignee_city_id = consignee_city;
-                    postObject.consignee = consignee;
-                    postObject.address = address;
-                    postObject.phone1 = phone1;
-                    postObject.phone2 = phone2;
-                    postObject.email = email;
-                    postObject._token = '{{ csrf_token() }}';
-                    var errors = 0;
-                    if (postObject.email !== '') {
-                        if (!validateEmail(postObject.email)) {
-                            errors = 1;
-                        }
-                    }
-                    if (errors === 0) {
-                        $.ajax({
-                            url: "{{route('admin.delivery.misroute.shipment.update')}}",
-                            method: 'POST',
-                            data: postObject,
-                        }).done(function (data) {
-                            if (data.status === 1) {
-                                toastr.success(data.success, 'Success!', {
-                                    positionClass: 'toast-bottom-center',
-                                    containerId: 'toast-bottom-center'
-                                });
-                                $('#RebookModal').modal('hide');
-                                table.draw();
 
-                            } else {
-                                $('#RebookModal').modal('hide');
-                                toastr.error(data.error, 'Error!', {
-                                    positionClass: 'toast-top-center',
-                                    containerId: 'toast-top-center'
-                                });
-                            }
-                        });
+                var consignee = $.trim($('#consignee').val());
+                var address = $.trim($('#address').val());
+                var phone1 = $.trim($('#phone1').val());
+                var phone2 = $.trim($('#phone2').val());
+                var email = $.trim($('#email').val());
+                postObject.shipment_id = shipment_id;
+                postObject.consignee_city_id = consignee_city;
+                postObject.consignee = consignee;
+                postObject.address = address;
+                postObject.phone1 = phone1;
+                postObject.phone2 = phone2;
+                postObject.email = email;
+                postObject._token = '{{ csrf_token() }}';
+                var errors = 0;
+                if (postObject.email !== '') {
+                    if (!validateEmail(postObject.email)) {
+                        errors = 1;
                     }
-                }else{
-                    var err = 'Select different city!';
-                    toastr.error(err, 'Error!', {
-                        positionClass: 'toast-bottom-center',
-                        containerId: 'toast-bottom-center'
+                }
+                if (errors === 0) {
+                    $.ajax({
+                        url: "{{route('admin.delivery.misroute.shipment.update')}}",
+                        method: 'POST',
+                        data: postObject,
+                    }).done(function (data) {
+                        if (data.status === 1) {
+                            toastr.success(data.success, 'Success!', {
+                                positionClass: 'toast-bottom-center',
+                                containerId: 'toast-bottom-center'
+                            });
+                            $('#RebookModal').modal('hide');
+                            table.draw();
+
+                        } else {
+                            $('#RebookModal').modal('hide');
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
                     });
                 }
             }
@@ -471,7 +462,7 @@
                         $('#phone1').val(data.data.consignee_phone1);
                         $('#phone2').val(data.data.consignee_phone2);
                         $('#email').val(data.data.consignee_email);
-                        $('#old_consignee_city').val(data.data.consignee_city_id);
+
                         // $('#payment_mode').val(data.data.amount).trigger('change');
                         $.each(data.cities,function(key,value){
                             var newOption = new Option(value.name, value.id, false, false);

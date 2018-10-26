@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title','Return Marked Shipments')
+@section('title','Return Confirmation Pending Shipments')
 
 @section('content')
     <h1 class="mb-1">
-        Return Marked Shipments
+        Return Confirmation Pending Shipments
     </h1>
 
     <div class="card">
@@ -19,11 +19,13 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Shipper Name & Phone</th>
+                        <th class="border-primary border-darken-1">Shipper Name</th>
+                        <th class="border-primary border-darken-1">Shipper Phone(s)</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Consignee Name & Phone</th>
+                        <th class="border-primary border-darken-1">Consignee Name</th>
+                        <th class="border-primary border-darken-1">Consignee Phone</th>
                         <th class="border-primary border-darken-1">Address</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
@@ -33,6 +35,7 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
+                        <th class="border-primary border-darken-1">Re-Attempt Count</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -119,11 +122,13 @@
                             head.push('S.No');
                             head.push('Tracking No.');
                             head.push('Order ID');
-                            head.push('Shipper Name / Phone');
+                            head.push('Shipper Name');
+                            head.push('Shipper Phone');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
-                            head.push('Consignee Name / Phone');
+                            head.push('Consignee Name');
+                            head.push('Consignee Phone');
                             head.push('Address');
                             head.push('Collection Amount');
                             head.push('Shipping Mode');
@@ -133,6 +138,7 @@
                             head.push('Remarks');
                             head.push('Arrival Date');
                             head.push('Status Date');
+                            head.push('Re-Attempt Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -142,10 +148,12 @@
                                 row.push(values.tracking);
                                 row.push(values.order_id);
                                 row.push(values.shipper);
+                                row.push(values.shipper_phone);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.consignee_name);
+                                row.push(values.consignee_phone);
                                 row.push(values.consignee_address);
                                 row.push(values.amount);
                                 row.push(values.mode);
@@ -155,6 +163,7 @@
                                 row.push(values.remarks);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
+                                row.push(values.reattempts);
 
                                 body.push(row);
                             });
@@ -205,11 +214,10 @@
 
                                             table.rows().nodes().each(function(index) {
                                                 var row = table.row(index);
-
                                                 if ($(row.node()).hasClass('selected')) {
-                                                    id = parseInt(row.id());
-                                                    var remark = $(row.node()).find('td.shipment_remarks input').val();
-                                                    shipment_remarks[id] = remark;
+                                                    var id = parseInt(row.id());
+                                                    var remarks = $(row.node()).find('td.shipment_remarks input').val();
+                                                    shipment_remarks[id] = remarks;
                                                 }
                                             });
 
@@ -278,7 +286,7 @@
                                                 var row = table.row(index);
 
                                                 if ($(row.node()).hasClass('selected')) {
-                                                    id = parseInt(row.id());
+                                                    var id = parseInt(row.id());
                                                     var remark = $(row.node()).find('td.shipment_remarks input').val();
                                                     shipment_remarks[id] = remark;
                                                 }
@@ -417,10 +425,12 @@
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle shipper_phone'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data: 'consignee_phone', name: 'consignee_phone', class: 'align-middle consignee_phone'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'mode', name: 'sm.id', class: 'align-middle mode'},
@@ -430,6 +440,7 @@
                     {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
+                    {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -454,7 +465,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
@@ -483,8 +494,8 @@
                         }
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
-                        obj.text = obj.text || obj.name;
+                        obj.id = obj.id;
+                        obj.text = obj.name;
                         return obj;
                     });
 
@@ -496,7 +507,7 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data1 = $.map({!! $shipping_mode !!}, function (obj) {
-                        obj.id = obj.id
+                        obj.id = obj.id;
                         obj.text = obj.mode;
                         return obj;
                     });

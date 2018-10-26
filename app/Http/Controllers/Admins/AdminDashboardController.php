@@ -3308,7 +3308,7 @@ class AdminDashboardController extends Controller
                     }
                 }
 
-                if(session('role_id') == 1 || in_array(109, session('permissions')))
+                if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id'=> $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
@@ -3395,7 +3395,7 @@ class AdminDashboardController extends Controller
                 }
 
 
-                if(session('role_id') == 1 || in_array(109, session('permissions')))
+                if(session('role_id') == 1 || in_array(110, session('permissions')))
                 {
                     $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
                 }
@@ -3441,7 +3441,7 @@ class AdminDashboardController extends Controller
             }
 
 
-            if(session('role_id') == 1 || in_array(109, session('permissions')))
+            if(session('role_id') == 1 || in_array(110, session('permissions')))
             {
                 $dropdown .= '<button onclick="location.href=\'' . route('admin.accounts.view.profile', ['id' => $result->id]) . '\'" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Profile</div></button>';
             }
@@ -3461,13 +3461,12 @@ class AdminDashboardController extends Controller
 
     public function userProfile($id)
     {
-        //return dd($id);
         $user = User::find($id);
         $product = Product::find($user->product_id);
         $products = Product::all();
         $banks = BanksList::all();
         $city_list = City::where('status',1)->get();
-        return view('admin.user_management.user.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products]);
+        return view('admin.accounts.profile')->with(['user'=>$user,'product_name'=>$product->product_name,'banks'=>$banks,'all_cities'=>$city_list,'products'=>$products]);
     }
 
     public function updateProfile(Request $request)
@@ -3487,7 +3486,7 @@ class AdminDashboardController extends Controller
         ]);
 
 
-        if($request->password=="" || $request->password==null || $request->password==" ")
+        if($request->password=="" || $request->password==null)
         {
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
                 'ntn_no'=>$request->ntn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
@@ -3499,9 +3498,6 @@ class AdminDashboardController extends Controller
                 'ntn_no'=>$request->ntn_no,"password"=>Hash::make($request->password),'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
                 'url'=>$request->url,'product_id'=>$request->product_id]);
         }
-
-//        UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-//            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city]);
 
         return redirect()->back()->with(['success'=>"Profile Information Successfully Updated"]);
     }
@@ -3535,38 +3531,40 @@ class AdminDashboardController extends Controller
 
     public function getPickups(Request $request)
     {
-        $user_id = $request->user_id;
         $pickups = UserShippingInfo::join('cities as c', 'user_shipping_infos.city_id', '=', 'c.id')
-            ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name'])->where('user_id',$user_id);
+        ->select(['user_shipping_infos.id as id','user_shipping_infos.pickup_address as pickup_address','user_shipping_infos.poc as poc','user_shipping_infos.phone as phone','user_shipping_infos.email as email','user_shipping_infos.status as status','user_shipping_infos.default_address as default_address','user_shipping_infos.user_id as user_id','c.name as city_name'])
+        ->where('user_id',$request->user_id)
+        ->where('hidden', 0);
+
         return Datatables::of($pickups)
-            ->addColumn("status", function ($result) {
-                if($result->default_address==1)
-                {
-                    $status =  "Default Address ";
+        ->addColumn("status", function ($result) {
+            if($result->default_address==1)
+            {
+                $status =  "Default Address";
+            }
+            elseif($result->status==1)
+            {
+                $status =  "Enabled";
+            }
+            elseif($result->status==0)
+            {
+                $status =  "Disabled";
+            }
+            return $status;
+        })
+        ->filterColumn('status',function($query,$keyword){
+            if ($keyword != '') {
+                if($keyword == 2){
+                    $query->where('user_shipping_infos.default_address',1);
+                }else{
+                    $query->where('user_shipping_infos.status',$keyword);
                 }
-                elseif($result->status==1)
-                {
-                    $status =  "Enabled";
-                }
-                elseif($result->status==0)
-                {
-                    $status =  "Disabled";
-                }
-                return $status;
-            })
-            ->filterColumn('status',function($query,$keyword){
-                if ($keyword != '') {
-                    if($keyword == 2){
-                        $query->where('user_shipping_infos.default_address',1);
-                    }else{
-                        $query->where('user_shipping_infos.status',$keyword);
-                    }
-                }
-                else {
-                    $query->whereRaw('false');
-                }
-            })
-            ->make(true);
+            }
+            else {
+                $query->whereRaw('false');
+            }
+        })
+        ->make(true);
     }
 
 
