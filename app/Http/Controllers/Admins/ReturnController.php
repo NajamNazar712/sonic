@@ -412,6 +412,7 @@ class ReturnController extends Controller
                 $destination_id = $shipment->pickup_address->city_id;
                 $destination_id = City::where('id', $destination_id)->select('hub_id')->first();
                 $destination_id = $destination_id->hub_id;//first it was origin now for return its destination
+                if(session('role_id') == 1 || in_array($destination_id, session('hubs'))){
                 $origin = $shipment->consignee_city->hub_id;//let's suppose consignee city is origin now
                 if(!$request->has('hub_id')){
                     if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46)) {
@@ -538,6 +539,9 @@ class ReturnController extends Controller
                     }
                 }else{
                 return ['status' => 1, 'error' => 'Different hub, scan shipments of same hub!.'];
+                }
+                } else {
+                    return ['status' => 1, 'error' => 'This Shipment doesn\'t belongs to your assigned hubs!','dest'=>$destination_id,'assigned'=>session('hubs')];
                 }
             }else{
                 return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present, Check tracking'];

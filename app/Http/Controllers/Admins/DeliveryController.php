@@ -180,6 +180,8 @@ class DeliveryController extends Controller
             $status = '';
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
+                $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
+                if(session('role_id') == 1 || in_array($admin_hub, session('hubs'))){
                 $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment->id)->orderBy('delivery_note_id', 'desc');
                 if ($old_delivery_note_id->exists()) {
                     $old_delivery_note_id = $old_delivery_note_id->first();
@@ -189,7 +191,6 @@ class DeliveryController extends Controller
                 }
 
                 if ($is_updateable == 0) {
-//                return $shipment->consignee_city_id
                     if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
                         return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
                     }
@@ -241,6 +242,9 @@ class DeliveryController extends Controller
                 } else {
                     return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];
 
+                }
+                } else {
+                    return ['status' => 1, 'error' => 'This Shipment doesn\'t belongs to your assigned hubs!'];
                 }
             } else {
                 return ['status' => 1, 'error' => 'This Shipment is not ready for delivery yet or already in delivery note, please check tracking!'];
