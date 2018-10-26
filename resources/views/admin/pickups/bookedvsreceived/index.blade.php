@@ -156,7 +156,7 @@
                             shipment += '<tbody>';
                             $.each(data.shipments,function (id,details) {
                                 shipment += '<tr><td class="align-middle shipper">'+details.shipper+'</td>';
-                                shipment += '<td class="align-middle booked">'+details.booked+'</td>';
+                                shipment += '<td class="align-middle booked"><button class="btn btn-sm btn-outline-info align-middle">'+details.booked+'</button></td>';
                                 shipment += '<td class="align-middle received">'+details.received+'</td></tr>';
                             });
                             shipment += '</tbody></table>';
@@ -193,7 +193,9 @@
 
 
             });
+            $('#datatable tbody').on('click', 'tr td.booked', function() {
 
+            });
 
         });
     </script>
