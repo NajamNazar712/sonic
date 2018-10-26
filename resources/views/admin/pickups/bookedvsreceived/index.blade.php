@@ -58,6 +58,9 @@
 
                             </div>
                             </form>
+                            <input type="hidden" name="city_id" id="city_id">
+                            <input type="hidden" name="date_from" id="date_from">
+                            <input type="hidden" name="date_to" id="date_to">
                                 <div id="booked_table_div" style="min-height: 300px;"></div>
                             </div>
                         </div>
@@ -66,6 +69,42 @@
 
             </div>
         </div>
+    <div class="modal fade" id="booked_shipments" role="dialog" aria-labelledby="booked_shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="booked_shipments_title">Booked Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="modal fade" id="received_shipments" role="dialog" aria-labelledby="received_shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="received_shipments_title">Received Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -131,6 +170,9 @@
                     var search_from = $('input[name="search_date_from_formatted"]').val();
                     var search_to = $('input[name="search_date_to_formatted"]').val();
 
+                    $('#city_id').val(city_select);
+                    $('#date_from').val(search_from);
+                    $('#date_to').val(search_to);
                     $.ajax({
                         url: '{!! route('admin.pickups.bookedvsreceived.list') !!}',
                         method: 'POST',
@@ -155,9 +197,9 @@
                                 '                    </thead>';
                             shipment += '<tbody>';
                             $.each(data.shipments,function (id,details) {
-                                shipment += '<tr><td class="align-middle shipper">'+details.shipper+'</td>';
-                                shipment += '<td class="align-middle booked"><button class="btn btn-sm btn-outline-info align-middle">'+details.booked+'</button></td>';
-                                shipment += '<td class="align-middle received">'+details.received+'</td></tr>';
+                                shipment += '<tr id="'+ details.shipper_id+'"><td class="align-middle shipper">'+details.shipper+'</td>';
+                                shipment += '<td class="align-middle text-center booked"><button class="btn btn-sm btn-outline-info">'+details.booked+'</button></td>';
+                                shipment += '<td class="align-middle text-center received"><button class="btn btn-sm btn-outline-info">'+details.received+'</button></td></tr>';
                             });
                             shipment += '</tbody></table>';
                             $('#booked_table_div').html('');
@@ -193,7 +235,66 @@
 
 
             });
-            $('#datatable tbody').on('click', 'tr td.booked', function() {
+            $('body').on('click', 'tr td.booked button', function() {
+                var shipper_id = parseInt($(this).parents('tr').attr('id'));
+                var city = $('#city_id').val();
+                var date_from = $('#date_from').val();
+                var date_to = $('#date_to').val();
+
+                $.ajax({
+                    url: '{!! route('admin.pickups.bookedvsreceived.booked') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipper_id':shipper_id,
+                        'city_id': city,
+                        'search_from': date_from,
+                        'search_to': date_to,
+                    }
+                }).done(function (data) {
+                    if (data.status == 1) {
+                        var tracking_numbers = '';
+
+                        $.each(data.shipments, function(index, tracking_number) {
+                            tracking_numbers += tracking_number.tracking_number + '<br/>';
+                        });
+
+                        $('#booked_shipments .modal-body').html(tracking_numbers);
+
+                        $('#booked_shipments').modal('show');
+                    }
+                });
+
+            });
+            $('body').on('click', 'tr td.received button', function() {
+                var shipper_id = parseInt($(this).parents('tr').attr('id'));
+                var city = $('#city_id').val();
+                var date_from = $('#date_from').val();
+                var date_to = $('#date_to').val();
+
+                $.ajax({
+                    url: '{!! route('admin.pickups.bookedvsreceived.received') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipper_id':shipper_id,
+                        'city_id': city,
+                        'search_from': date_from,
+                        'search_to': date_to,
+                    }
+                }).done(function (data) {
+                    if (data.status == 1) {
+                        var tracking_numbers = '';
+
+                        $.each(data.shipments, function(index, tracking_number) {
+                            tracking_numbers += tracking_number.tracking_number + '<br/>';
+                        });
+
+                        $('#received_shipments .modal-body').html(tracking_numbers);
+
+                        $('#received_shipments').modal('show');
+                    }
+                });
 
             });
 

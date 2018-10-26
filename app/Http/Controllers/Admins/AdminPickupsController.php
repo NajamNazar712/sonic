@@ -1725,18 +1725,45 @@ class AdminPickupsController extends Controller
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
-            ->join('cities as h', 'dc.hub_id', '=', 'h.id')
             ->leftJoin('shipments_journey as srec', function ($join) {
                 $join->on('srec.shipment_id', '=', 'shipments.id')
                     ->where('srec.shipper_status_id','=',2);
             })
-            ->select('u.name as shipper',DB::raw('count(shipments.id) as booked'),DB::raw('count(srec.shipment_id) as received'))
+            ->select('u.name as shipper','u.id as shipper_id',DB::raw('count(shipments.id) as booked'),DB::raw('count(srec.shipment_id) as received'))
             ->where('usi.city_id',$request->city_select)
             ->where('shipments.shipper_status_id','!=',17)
             ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
             ->groupBy('u.id')->get();
         return response()->json(['status'=>1,'shipments'=>$shipments]);
 
+    }
+    public function bookedvsreceived_booked_list(Request $request){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->select('shipments.tracking_number')
+            ->where('usi.city_id',$request->city_id)
+            ->where('u.id',$request->shipper_id)
+            ->where('shipments.shipper_status_id','!=',17)
+            ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
+            ->get();
+        return response()->json(['status'=>1,'shipments'=>$shipments]);
+    }
+    public function bookedvsreceived_received_list(Request $request){
+        $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
+            ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftJoin('shipments_journey as srec', function ($join) {
+                $join->on('srec.shipment_id', '=', 'shipments.id')
+                    ->where('srec.shipper_status_id','=',2);
+            })
+            ->select('shipments.tracking_number')
+            ->where('usi.city_id',$request->city_id)
+            ->where('u.id',$request->shipper_id)
+            ->where('srec.shipper_status_id',2)
+            ->where('shipments.shipper_status_id','!=',17)
+            ->whereBetween('shipments.created_at',[$request->search_from,$request->search_to])
+            ->get();
+        return response()->json(['status'=>1,'shipments'=>$shipments]);
     }
 }
