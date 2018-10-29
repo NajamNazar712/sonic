@@ -1268,7 +1268,7 @@ class AdminReportsController extends Controller
                     ->where('dps.created_at','=',
                         DB::raw('(select max(created_at) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
             })
-            ->select('shipments.tracking_number','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable')
+            ->select('shipments.tracking_number','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
         if (session('role_id') != 1) {
             $sales = $sales->whereIn('dc.hub_id', session('hubs'));
@@ -1280,8 +1280,6 @@ class AdminReportsController extends Controller
                     $amount = $sale->p_collection_amount;
                 }else if($sale->d_collection_amount != null){
                     $amount = $sale->d_collection_amount;
-                }else{
-                    $amount = $sale->s_collection_amount;
                 }
                 return $amount;
             })
