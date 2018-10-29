@@ -541,10 +541,10 @@ class ReturnController extends Controller
                 return ['status' => 1, 'error' => 'Different hub, scan shipments of same hub!.'];
                 }
                 } else {
-                    return ['status' => 1, 'error' => 'This Shipment doesn\'t belongs to your assigned hubs!','dest'=>$destination_id,'assigned'=>session('hubs')];
+                    return ['status' => 1, 'error' => 'This Shipment doesn\'t belongs to your assigned hubs!'];
                 }
             }else{
-                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present, Check tracking'];
+                return ['status' => 1, 'error' => 'No Shipment with given Tracking Number is present, Check tracking!'];
             }
 
 
