@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Models\Admin\DeliveryNoteShipment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use App\Http\Controllers\Controller;
@@ -685,6 +686,8 @@ class NotificationsController extends Controller
 
             $delivery_note = DeliveryNote::find($reference_1_id);
 
+            $delivery_note_shipment = DeliveryNoteShipment::where('delivery_note_id', $reference_1_id)->where('shipment_id', $reference_2_id)->first();
+
             $shipment = Shipment::find($reference_2_id);
 
             $shipper = $shipment->user;
@@ -709,7 +712,12 @@ class NotificationsController extends Controller
             }
 
             if (strpos($body, '[rider]') !== FALSE) {
-              $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
+                if ($delivery_note_shipment->rider_information) {
+                    $body = str_replace('[rider]', $delivery_note->rider->name . ' (' . $delivery_note->rider->phone . ')', $body);
+                }
+                else {
+                    $body = str_replace('[rider]', '', $body);
+                }
             }
 
             if (strpos($body, '[company_name]') !== FALSE) {

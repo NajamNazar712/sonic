@@ -142,15 +142,32 @@ class RegisterController extends Controller
         $shipper = User::find($newUser->id);
 //        $shipper->products()->attach($data['product_type']);
 
+        $first = TRUE;
+
         foreach ($data['pickup_address'] as $index => $pickup_address) {
-            UserShippingInfo::create([
-                'user_id' => $newUser->id,
-                'pickup_address' => $pickup_address,
-                'poc' => $data['shipping_poc'][$index],
-                'phone' => $data['shipping_phone'][$index],
-                'email' => $data['shipping_email'][$index],
-                'city_id' => $data['shipping_city'][$index],
-            ]);
+            if ($first) {
+                UserShippingInfo::create([
+                    'user_id' => $newUser->id,
+                    'pickup_address' => $pickup_address,
+                    'poc' => $data['shipping_poc'][$index],
+                    'phone' => $data['shipping_phone'][$index],
+                    'email' => $data['shipping_email'][$index],
+                    'city_id' => $data['shipping_city'][$index],
+                    'default_address' => TRUE
+                ]);
+
+                $first = FALSE;
+            }
+            else {
+                UserShippingInfo::create([
+                    'user_id' => $newUser->id,
+                    'pickup_address' => $pickup_address,
+                    'poc' => $data['shipping_poc'][$index],
+                    'phone' => $data['shipping_phone'][$index],
+                    'email' => $data['shipping_email'][$index],
+                    'city_id' => $data['shipping_city'][$index]
+                ]);
+            }
         }
         UserBankInfo::create([
                 'user_id'=>$newUser->id,
@@ -194,4 +211,48 @@ class RegisterController extends Controller
                 ]);
             }
     }
+
+    public function checkCompanyEmail(Request $request){
+
+//        dd($request);
+        $email = $request->email;
+        $id = $request->id;
+        $res = User::where('email',$email)->where('id','<>',$id)->get();
+        if(!$res->isEmpty()){
+//            return response()->json([
+//                'message' => 'email already exists',
+//                'status' => 0
+//            ]);
+            return 'false';
+        }else{
+//            return response()->json([
+//                'message' => 'email available',
+//                'status' => 1
+//            ]);
+            return 'true';
+        }
+    }
+
+    public function checkCompanyNameProfile(Request $request){
+
+//        dd($request);
+        $name = $request->name;
+        $id = $request->id;
+        $res = User::where('name',$name)->where('id','<>',$id)->get();
+        if(!$res->isEmpty()){
+//            return response()->json([
+//                'message' => 'name already exists',
+//                'status' => 0
+//            ]);
+            return 'false';
+        }else{
+//            return response()->json([
+//                'message' => 'name available',
+//                'status' => 1
+//            ]);
+            return 'true';
+
+        }
+    }
+
 }

@@ -13,6 +13,7 @@
               @endif
 
               @if (session('user_type') == 1 || in_array(3, session('permissions')))
+                <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.new') }}">Create Receiving Sheet</a></li>
                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet.index') }}">Receiving Sheet</a></li>
                 <li><a class="menu-item" href="{{ route('cod.shipment.receiving_sheet_history.index') }}">Receiving Sheet History</a></li>
               @endif

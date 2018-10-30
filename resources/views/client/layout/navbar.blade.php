@@ -42,6 +42,7 @@
                 <i class="ft-chevron-down"></i>
               </a>
               <div class="dropdown-menu dropdown-menu-right">
+                  <a class="dropdown-item" href="{{ route('cod.edit.profile') }}"><span class="menu-title"><i class="ft-user"></i>Profile</span></a>
                 <a class="dropdown-item" href="{{route('cod.logout')}}" onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();"><i class="ft-power"></i> Logout</a>
                 <form id="logout-form" action="{{ route('cod.logout') }}" method="POST" style="display: none;">

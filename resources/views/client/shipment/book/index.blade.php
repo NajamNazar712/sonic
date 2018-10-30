@@ -40,8 +40,18 @@
 											<select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
 												<option value="0">New</option>
 
+												@php ($default_pickup_address = FALSE)
+
 												@foreach($user->shipping as $shipping_information)
-													<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+													@if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+														@if ($shipping_information['default_address'] == 1)
+															@php ($default_pickup_address = TRUE)
+
+															<option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+														@else
+															<option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+														@endif
+													@endif
 												@endforeach
 											</select>
 										</div>
@@ -595,7 +605,12 @@
 				}
 			});
 
-			$('#pickup_address').prepend('<option value="" selected="selected"></option>').select2({
+
+			@if (!$default_pickup_address)
+				$('#pickup_address').prepend('<option value="" selected="selected"></option>');
+			@endif
+
+			$('#pickup_address').select2({
 				width: '100%',
 				placeholder: 'Pickup Address*'
 			}).bind('change', function() {

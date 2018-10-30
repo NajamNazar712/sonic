@@ -527,6 +527,12 @@ class AdminCargoController extends Controller
       ->addColumn('id_padded', function ($cargo_consignment) {
           return str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
       })
+      ->addColumn('shipments_count', function ($cargo_consignment) {
+          return $cargo_consignment->shipments;
+      })
+      ->addColumn('shipments', function ($cargo_consignment) {
+          return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_consignment->shipments . '</button>';
+      })
       ->filterColumn('cargo_consignments.id', function ($query, $keyword) {
           return $query->where('cargo_consignments.id', '=', $keyword);
       })
@@ -1017,6 +1023,20 @@ class AdminCargoController extends Controller
       else {
         return back()->withErrors('Missing Cargo Number!');
       }
+    }
+
+    public function in_transit_shipments(Request $request) {
+      $tracking_numbers = array();
+
+      $cargo_consignments_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $request->id)->get();
+
+      foreach ($cargo_consignments_shipments as $cargo_consignments_shipment) {
+          $shipment = $cargo_consignments_shipment->shipment;
+
+          $tracking_numbers[] = $shipment->tracking_number;
+      }
+
+      return $tracking_numbers;
     }
 
     public function receive_index() {

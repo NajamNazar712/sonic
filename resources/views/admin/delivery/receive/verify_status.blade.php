@@ -26,6 +26,7 @@
                             <th class="border-primary border-darken-1">Shipment ID</th>
                             <th class="border-primary border-darken-1">Tracking No.</th>
                             <th class="border-primary border-darken-1">Consignee</th>
+                            <th class="border-primary border-darken-1">Consignee Phone</th>
                             <th class="border-primary border-darken-1">Collection Amount</th>
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
@@ -152,6 +153,7 @@
                     {data:'shipment_id_padded',name: 'shipments.id', class: 'align-middle shipment_id'},
                     {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
+                    {data:'consignee_phone',name: 'shipments.consignee_phone', class: 'align-middle consignee_phone'},
                     {data:'amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
