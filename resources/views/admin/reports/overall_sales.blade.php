@@ -115,6 +115,7 @@
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
+                        <th class="border-primary border-darken-1">Chargeable Weight</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
                         <th class="border-primary border-darken-1">Insurance Charges</th>
@@ -314,6 +315,7 @@
                             head.push('Shipping Mode');
                             head.push('Collection Amount');
                             head.push('Actual Weight');
+                            head.push('Chargeable Weight');
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
                             head.push('Insurance Charges');
@@ -342,6 +344,7 @@
                                 row.push(values.shipping_mode);
                                 row.push(values.p_collection_amount);
                                 row.push(values.actual_weight);
+                                row.push(values.chargeable_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
                                 row.push(values.insurance_charges);
@@ -407,6 +410,7 @@
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
+                    { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle chargeable_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
                     { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
