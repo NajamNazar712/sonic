@@ -239,10 +239,14 @@ class ShipperDashboardController extends Controller
             }
             else {
                 if ($pickup->status == 0) {
-                    $dropdown .= $enable_button . $default_button;
+                    $dropdown .= $enable_button;
                 }
-                else if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
-                    $dropdown .= $disable_button;
+                else {
+                    $dropdown .= $default_button;
+
+                    if (UserShippingInfo::where('user_id', $pickup->user_id)->where('hidden', 0)->count() > 1) {
+                        $dropdown .= $disable_button;
+                    }
                 }
             }
 
