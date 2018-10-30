@@ -1009,11 +1009,16 @@ class AdminCargoController extends Controller
         $cargo_consignment = CargoConsignment::find($request->get('cargo_number'));
 
         if ($cargo_consignment) {
-          if (in_array($cargo_consignment->status_id, [1, 2, 4])) {
-            return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
+          if (session('role_id') == 1 || (in_array($cargo_consignment->destination_hub_id, session('hubs')))) {
+            if (in_array($cargo_consignment->status_id, [1, 2, 4])) {
+              return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
+            }
+            else {
+              return back()->withErrors('Given Cargo Number has already been modified!');
+            }
           }
           else {
-            return back()->withErrors('Given Cargo Number has already been modified!');
+            return back()->withErrors('Cargo doesn\'t belong to your assigned hub(s)!');
           }
         }
         else {
