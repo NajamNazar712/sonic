@@ -86,6 +86,10 @@
                                     <td><b>City</b></td>
                                     <td>{{$user->city->name}}</td>
                                 </tr>
+                                <tr>
+                                    <td><b>API Key</b></td>
+                                    <td>{{$user->api_token}}</td>
+                                </tr>
                                 </tbody>
                             </table>
                         </div>
