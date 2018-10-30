@@ -215,6 +215,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     //edit rates
     Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('edit.rates');
     Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
+    //
+    Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
 
     //ajax request
 
