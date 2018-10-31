@@ -39,6 +39,6 @@ class ReturnConfirmationPendingEmail extends Command
      */
     public function handle()
     {
-        echo NotificationsController::send(23, 0);
+        NotificationsController::send(23, 0);
     }
 }

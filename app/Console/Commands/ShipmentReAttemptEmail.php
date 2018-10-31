@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
+use App\Http\Controllers\NotificationsController;
+
 class ShipmentReAttemptEmail extends Command
 {
     /**
@@ -37,6 +39,6 @@ class ShipmentReAttemptEmail extends Command
      */
     public function handle()
     {
-        //
+        NotificationsController::send(25, 0);
     }
 }
