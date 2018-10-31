@@ -965,6 +965,14 @@ class AdminFinanceController extends Controller
                 return 'Adjusted';
             }
         })
+        ->filterColumn('type',function ($query,$keyword){
+            if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
+                $query->where('pending_payment_shipments.type', '=', $keyword);
+            }
+            else{
+                $query->whereIn('pending_payment_shipments.type', [0,1,2]);
+            }
+        })
         ->filterColumn('deductable', function ($query, $keyword) {
             $query->where(DB::raw('pending_payment_shipments.charges + pending_payment_shipments.gst'), '=', $keyword);
         })
