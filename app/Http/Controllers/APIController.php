@@ -527,6 +527,8 @@ class APIController extends Controller
 
         if ($type == 0) {
           $details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+          $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+          $details['order_information']['amount'] = $shipment->amount;
           $details['order_information']['instructions'] = $shipment->special_instructions;
         }
 
