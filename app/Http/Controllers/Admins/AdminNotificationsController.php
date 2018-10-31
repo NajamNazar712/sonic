@@ -202,6 +202,9 @@ class AdminNotificationsController extends Controller
         else if ($id == 22) {
              $details['fields'] = ['company_name', 'person_of_contact', 'phone_number', 'address', 'city'];
         }
+        else if ($id == 23) {
+             $details['fields'] = ['company_name', 'service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_phone_number_1', 'consignee_phone_number_2', 'consignee_email', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'amount', 'payment_mode', 'status', 'status_reason', 'status_date', 'arrival_date', 'tracking_number'];
+        }
 
         return $details;
     }

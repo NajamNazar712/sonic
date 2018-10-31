@@ -10,6 +10,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Models\Notification;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\PickupNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\Admin\Admin;
@@ -771,44 +772,46 @@ class NotificationsController extends Controller
             foreach ($delivery_note->delivery_note_shipments as $delivery_note_shipment) {
               $shipment = $delivery_note_shipment->shipment;
 
-              $shipper = $shipment->user;
+              if ($shipment->shipper_status_id != 12) {
+                $shipper = $shipment->user;
 
-              $to = $shipper->email;
+                $to = $shipper->email;
 
-              foreach ($shipment_fields as $key => $field) {
-                if (strpos($subject, '[' . $key . ']') !== FALSE) {
-                  $subject = str_replace('[' . $key . ']', $shipment[$field], $subject);
+                foreach ($shipment_fields as $key => $field) {
+                  if (strpos($subject, '[' . $key . ']') !== FALSE) {
+                    $subject = str_replace('[' . $key . ']', $shipment[$field], $subject);
+                  }
+
+                  if (strpos($body, '[' . $key . ']') !== FALSE) {
+                    $body = str_replace('[' . $key . ']', $shipment[$field], $body);
+                  }
                 }
 
-                if (strpos($body, '[' . $key . ']') !== FALSE) {
-                  $body = str_replace('[' . $key . ']', $shipment[$field], $body);
+                if (strpos($subject, '[company_name]') !== FALSE) {
+                  $subject = str_replace('[company_name]', $shipper->name, $subject);
                 }
+
+                if (strpos($body, '[company_name]') !== FALSE) {
+                  $body = str_replace('[company_name]', $shipper->name, $body);
+                }
+
+                if (strpos($subject, '[status]') !== FALSE) {
+                  $status_parts = explode(' - ', $shipment->status_shipper->name);
+
+                  $subject = str_replace('[status]', $status_parts[1], $subject);
+                }
+
+                if (strpos($body, '[status]') !== FALSE) {
+                  $status_parts = explode(' - ', $shipment->status_shipper->name);
+
+                  $body = str_replace('[status]', $status_parts[1], $body);
+                }
+
+                self::email($subject, $body, $to);
+
+                $subject = $original_subject;
+                $body = $original_body;
               }
-
-              if (strpos($subject, '[company_name]') !== FALSE) {
-                $subject = str_replace('[company_name]', $shipper->name, $subject);
-              }
-
-              if (strpos($body, '[company_name]') !== FALSE) {
-                $body = str_replace('[company_name]', $shipper->name, $body);
-              }
-
-              if (strpos($subject, '[status]') !== FALSE) {
-                $status_parts = explode(' - ', $shipment->status_shipper->name);
-
-                $subject = str_replace('[status]', $status_parts[1], $subject);
-              }
-
-              if (strpos($body, '[status]') !== FALSE) {
-                $status_parts = explode(' - ', $shipment->status_shipper->name);
-
-                $body = str_replace('[status]', $status_parts[1], $body);
-              }
-
-              self::email($subject, $body, $to);
-
-              $subject = $original_subject;
-              $body = $original_body;
             }
           }
           else if ($id == 14) {
@@ -838,29 +841,31 @@ class NotificationsController extends Controller
             foreach ($delivery_note->delivery_note_shipments as $delivery_note_shipment) {
               $shipment = $delivery_note_shipment->shipment;
 
-              $shipper = $shipment->user;
+              if ($shipment->shipper_status_id != 12) {
+                $shipper = $shipment->user;
 
-              $to = $shipper->phone;
+                $to = $shipper->phone;
 
-              foreach ($shipment_fields as $key => $field) {
-                if (strpos($body, '[' . $key . ']') !== FALSE) {
-                  $body = str_replace('[' . $key . ']', $shipment[$field], $body);
+                foreach ($shipment_fields as $key => $field) {
+                  if (strpos($body, '[' . $key . ']') !== FALSE) {
+                    $body = str_replace('[' . $key . ']', $shipment[$field], $body);
+                  }
                 }
+
+                if (strpos($body, '[company_name]') !== FALSE) {
+                  $body = str_replace('[company_name]', $shipper->name, $body);
+                }
+
+                if (strpos($body, '[status]') !== FALSE) {
+                  $status_parts = explode(' - ', $shipment->status_shipper->name);
+
+                  $body = str_replace('[status]', $status_parts[1], $body);
+                }
+
+                self::sms($body, $to);
+
+                $body = $original_body;
               }
-
-              if (strpos($body, '[company_name]') !== FALSE) {
-                $body = str_replace('[company_name]', $shipper->name, $body);
-              }
-
-              if (strpos($body, '[status]') !== FALSE) {
-                $status_parts = explode(' - ', $shipment->status_shipper->name);
-
-                $body = str_replace('[status]', $status_parts[1], $body);
-              }
-
-              self::sms($body, $to);
-
-              $body = $original_body;
             }
           }
           else if ($id == 15) {
@@ -1685,6 +1690,142 @@ class NotificationsController extends Controller
             $body = str_replace('[' . $first_field . ']', $pickup_details, $body);
 
             self::sms($body, $to);
+          }
+          else if ($id == 23) {
+            $shipments = Shipment::where('shipper_status_id', 12);
+
+            if ($shipments->exists()) {
+              $subject = $notification->subject;
+              $body = $notification->body;
+
+              $possible_fields = ['service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_phone_number_1', 'consignee_phone_number_2', 'consignee_email', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'amount', 'payment_mode', 'status', 'status_reason', 'status_date', 'arrival_date', 'tracking_number'];
+
+              $present_fields = array();
+
+              $first_field = NULL;
+
+              $position = NULL;
+
+              foreach ($possible_fields as $field) {
+                $new_position = strpos($body, '[' . $field . ']');
+
+                if ($new_position !== FALSE) {
+                  if ($position == NULL) {
+                    $present_fields[] = $field;
+
+                    $first_field = $field;
+                  }
+                  else if ($new_position > $position) {
+                    $present_fields[] = $field;
+                  }
+                  else {
+                    array_unshift($present_fields, $field);
+                  }
+
+                  $position = $new_position;
+                }
+              }
+
+              $shipments = $shipments->get();
+
+              $user_wise_shipments = array();
+
+              foreach ($shipments as $shipment) {
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 12)->latest()->first();
+
+                if ($shipment_journey && $shipment_journey->verification) {
+                  $details = array();
+
+                  $details['service_type'] = $shipment->booking_type->booking_type;
+                  $details['pickup_address'] = $shipment->pickup_address->address;
+                  $details['pickup_city'] = $shipment->pickup_address->city->name;
+                  $details['consignee_name'] = $shipment->consignee_name;
+                  $details['consignee_phone_number_1'] = $shipment->consignee_phone_number_1;
+                  $details['consignee_phone_number_2'] = $shipment->consignee_phone_number_2;
+                  $details['consignee_email'] = $shipment->consignee_email;
+                  $details['consignee_address'] = $shipment->consignee_address;
+                  $details['consignee_city'] = $shipment->consignee_city->name;
+                  $details['order_id'] = $shipment->order_id;
+                  $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                  $details['amount'] = $shipment->amount;
+                  $details['payment_mode'] = $shipment->payment_mode->mode;
+
+                  $status_parts = explode(' - ', $shipment_journey->shipment_status_shipper->name);
+                  $details['status'] = $status_parts[1];
+
+                  if ($shipment_journey->status_reason_id) {
+                    $details['status_reason'] = $shipment_journey->shipment_status_reason->name;
+                  }
+
+                  $details['status_date'] = $shipment_journey->created_at;
+
+                  $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id', 2)->first();
+
+                  if ($shipment_journey) {
+                    $details['arrival_date'] = $shipment_journey->created_at;
+                  }
+                  else {
+                    $details['arrival_date'] = $shipment->created_at;
+                  }
+
+                  $details['tracking_number'] = $shipment->tracking_number;
+
+                  $user_wise_shipments[$shipment->user_id][] = $details;
+                }
+              }
+
+              if (!empty($user_wise_shipments)) {
+                $original_subject = $subject;
+                $original_body = $body;
+
+                foreach ($user_wise_shipments as $user_id => $shipments) {
+                  $shipper = User::find($user_id);
+
+                  if (strpos($subject, '[company_name]') !== FALSE) {
+                    $subject = str_replace('[company_name]', $shipper->name, $subject);
+                  }
+
+                  if (strpos($body, '[company_name]') !== FALSE) {
+                    $body = str_replace('[company_name]', $shipper->name, $body);
+                  }
+
+                  $to = $shipper->email;
+
+                  $shipment_details = '';
+
+                  foreach ($shipments as $shipment) {
+                    foreach ($present_fields as $field) {
+                      if (!empty($shipment[$field])) {
+                        $shipment_details .= $shipment[$field] . ', ';
+                      }
+                    }
+
+                    $shipment_details = substr($shipment_details, 0, -2) . PHP_EOL;
+                  }
+
+                  foreach ($present_fields as $field) {
+                    if ($field != $first_field) {
+                      $body = str_replace('[' . $field . ']', '', $body);
+                    }
+                  }
+
+                  $body = str_replace('[' . $first_field . ']', $shipment_details, $body);
+
+                  $cc = array();
+
+                  $general_admins = Admin::whereIn('role_id', [6, 15])->where('status', 1);
+
+                  if ($general_admins->exists()) {
+                    $cc = array_merge($cc, $general_admins->pluck('email')->toArray());
+                  }
+
+                  self::email($subject, $body, $to, $cc);
+
+                  $subject = $original_subject;
+                  $body = $original_body;
+                }
+              }
+            }
           }
         }
       }
