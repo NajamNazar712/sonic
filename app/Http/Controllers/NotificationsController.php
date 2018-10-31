@@ -198,6 +198,8 @@ class NotificationsController extends Controller
           else if ($id == 4) {
             $possible_fields = ['pickup_city', 'consignee_name', 'consignee_city', 'order_id', 'weight', 'tracking_number'];
 
+            $field_names = ['pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'weight' => 'Weight', 'tracking_number' => 'Tracking Number'];
+
             $present_fields = array();
 
             $first_field = NULL;
@@ -267,17 +269,38 @@ class NotificationsController extends Controller
 
               $to = $shipper->email;
 
-              $shipment_details = '';
+              $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+
+              $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
+
+              foreach ($present_fields as $field) {
+                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">' . $field_names[$field] . '</td>';
+              }
+
+              $shipment_details .= '</tr>';
+
+              $serial_number = 1;
 
               foreach ($shipments as $shipment) {
+                $shipment_details .= '<tr>';
+
+                $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+
                 foreach ($present_fields as $field) {
                   if (!empty($shipment[$field])) {
-                    $shipment_details .= $shipment[$field] . ', ';
+                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment[$field] . '</td>';
+                  }
+                  else {
+                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                   }
                 }
 
-                $shipment_details = substr($shipment_details, 0, -2) . PHP_EOL;
+                $shipment_details .= '</tr>';
+
+                $serial_number++;
               }
+
+              $shipment_details .= '</tbody></table>';
 
               foreach ($present_fields as $field) {
                 if ($field != $first_field) {
@@ -1271,7 +1294,9 @@ class NotificationsController extends Controller
             self::email($subject, $body, $to);
           }
           else if ($id == 20) {
-            $possible_fields = ['consignee_name', 'consignee_city', 'order_id', 'estimated_weight', 'actual_weight', 'tracking_number', 'amount', 'charges', 'gst', 'payable'];
+            $possible_fields = ['consignee_name', 'consignee_city', 'order_id', 'estimated_weight', 'actual_weight', 'chargeable_weight', 'tracking_number', 'amount', 'weight_charges', 'cash_handling_charges', 'charges', 'gst', 'payable'];
+
+            $field_names = ['consignee_name' => 'Consignee Name', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'estimated_weight' => 'Estimated Weight', 'actual_weight' => 'Actual Weight', 'chargeable_weight' => 'Chargeable Weight', 'tracking_number' => 'Tracking Number', 'amount' => 'Collection Amount (PKR)', 'weight_charges' => 'Weight Charges (PKR)', 'cash_handling_charges' => 'Cash Handling Charges (PKR)', 'charges' => 'Total Charges (PKR)', 'gst' => 'GST (PKR)', 'payable' => 'Payable (PKR)'];
 
             $present_fields = array();
 
@@ -1433,35 +1458,82 @@ class NotificationsController extends Controller
 
             $to = $shipper->email;
 
-            $shipment_details = '';
+            $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+
+            $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
+
+            foreach ($present_fields as $field) {
+              $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">' . $field_names[$field] . '</td>';
+            }
+
+            $shipment_details .= '</tr>';
+
+            $serial_number = 1;
 
             $total_amount = 0;
-            $total_charges = 0;
+            $total_weight_charges = 0;
+            $total_cash_handling_charges = 0;
+            $total_insurance_charges = 0;
+            $total_replacement_charges = 0;
+            // $total_try_and_buy_charges = 0;
+            $total_return_charges = 0;
+            $total_packaging_material_charges = 0;
+            $total_fuel_surcharge = 0;
             $total_gst = 0;
+            $total_charges = 0;
             $total_payable = 0;
 
             foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
+              $shipment_details .= '<tr>';
+
+              $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+
               $shipment = $done_payment_shipment->shipment;
 
               foreach ($present_fields as $field) {
                 if (in_array($field, ['amount', 'charges', 'gst', 'payable'])) {
-                  $shipment_details .= $done_payment_shipment[$field] . ', ';
+                  $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $done_payment_shipment[$field] . '</td>';
                 }
                 else if ($field == 'consignee_city') {
-                  $shipment_details .= $shipment->consignee_city->name . ', ';
+                  $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment->consignee_city->name . '</td>';
                 }
                 else if (!empty($shipment[$field])) {
-                  $shipment_details .= $shipment[$field] . ', ';
+                  $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment[$field] . '</td>';
+                }
+                else {
+                  $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                 }
               }
 
-              $shipment_details = substr($shipment_details, 0, -2) . PHP_EOL;
+              $shipment_details .= '</tr>';
 
-              $total_amount += $done_payment_shipment->amount;
-              $total_charges += $done_payment_shipment->charges;
+              $serial_number++;
+
+              if ($done_payment_shipment->type == 0) {
+                  $total_amount += $done_payment_shipment->amount;
+                  $total_cash_handling_charges += $shipment->cash_handling_charges;
+                  $total_replacement_charges += $shipment->replacement_charges;
+                  // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+              }
+              else {
+                  $total_return_charges += $shipment->return_charges;
+              }
+
+              $total_weight_charges += $shipment->weight_charges;
+
+              if ($shipment->packaging_material_request) {
+                  $total_packaging_material_charges += $shipment->packaging_material_charges;
+              }
+
+              $total_insurance_charges += $shipment->insurance_charges;
+              $total_fuel_surcharge += $shipment->fuel_surcharge;
+
               $total_gst += $done_payment_shipment->gst;
+              $total_charges += $done_payment_shipment->charges + $done_payment_shipment->gst;
               $total_payable += $done_payment_shipment->payable;
             }
+
+            $shipment_details .= '</tbody></table>';
 
             foreach ($present_fields as $field) {
               if ($field != $first_field) {
@@ -1479,12 +1551,68 @@ class NotificationsController extends Controller
               $body = str_replace('[total_amount]', $total_amount, $body);
             }
 
-            if (strpos($subject, '[total_charges]') !== FALSE) {
-              $subject = str_replace('[total_charges]', $total_charges, $subject);
+            if (strpos($subject, '[total_weight_charges]') !== FALSE) {
+              $subject = str_replace('[total_weight_charges]', $total_weight_charges, $subject);
             }
 
-            if (strpos($body, '[total_charges]') !== FALSE) {
-              $body = str_replace('[total_charges]', $total_charges, $body);
+            if (strpos($body, '[total_weight_charges]') !== FALSE) {
+              $body = str_replace('[total_weight_charges]', $total_weight_charges, $body);
+            }
+
+            if (strpos($subject, '[total_cash_handling_charges]') !== FALSE) {
+              $subject = str_replace('[total_cash_handling_charges]', $total_cash_handling_charges, $subject);
+            }
+
+            if (strpos($body, '[total_cash_handling_charges]') !== FALSE) {
+              $body = str_replace('[total_cash_handling_charges]', $total_cash_handling_charges, $body);
+            }
+
+            if (strpos($subject, '[total_insurance_charges]') !== FALSE) {
+              $subject = str_replace('[total_insurance_charges]', $total_insurance_charges, $subject);
+            }
+
+            if (strpos($body, '[total_insurance_charges]') !== FALSE) {
+              $body = str_replace('[total_insurance_charges]', $total_insurance_charges, $body);
+            }
+
+            if (strpos($subject, '[total_replacement_charges]') !== FALSE) {
+              $subject = str_replace('[total_replacement_charges]', $total_replacement_charges, $subject);
+            }
+
+            if (strpos($body, '[total_replacement_charges]') !== FALSE) {
+              $body = str_replace('[total_replacement_charges]', $total_replacement_charges, $body);
+            }
+
+            // if (strpos($subject, '[total_try_and_buy_charges]') !== FALSE) {
+            //   $subject = str_replace('[total_try_and_buy_charges]', $total_try_and_buy_charges, $subject);
+            // }
+
+            // if (strpos($body, '[total_try_and_buy_charges]') !== FALSE) {
+            //   $body = str_replace('[total_try_and_buy_charges]', $total_try_and_buy_charges, $body);
+            // }
+
+            if (strpos($subject, '[total_return_charges]') !== FALSE) {
+              $subject = str_replace('[total_return_charges]', $total_return_charges, $subject);
+            }
+
+            if (strpos($body, '[total_return_charges]') !== FALSE) {
+              $body = str_replace('[total_return_charges]', $total_return_charges, $body);
+            }
+
+            if (strpos($subject, '[total_packaging_material_charges]') !== FALSE) {
+              $subject = str_replace('[total_packaging_material_charges]', $total_packaging_material_charges, $subject);
+            }
+
+            if (strpos($body, '[total_packaging_material_charges]') !== FALSE) {
+              $body = str_replace('[total_packaging_material_charges]', $total_packaging_material_charges, $body);
+            }
+
+            if (strpos($subject, '[total_fuel_surcharge]') !== FALSE) {
+              $subject = str_replace('[total_fuel_surcharge]', $total_fuel_surcharge, $subject);
+            }
+
+            if (strpos($body, '[total_fuel_surcharge]') !== FALSE) {
+              $body = str_replace('[total_fuel_surcharge]', $total_fuel_surcharge, $body);
             }
 
             if (strpos($subject, '[total_gst]') !== FALSE) {
@@ -1493,6 +1621,14 @@ class NotificationsController extends Controller
 
             if (strpos($body, '[total_gst]') !== FALSE) {
               $body = str_replace('[total_gst]', $total_gst, $body);
+            }
+
+            if (strpos($subject, '[total_charges]') !== FALSE) {
+              $subject = str_replace('[total_charges]', $total_charges, $subject);
+            }
+
+            if (strpos($body, '[total_charges]') !== FALSE) {
+              $body = str_replace('[total_charges]', $total_charges, $body);
             }
 
             if (strpos($subject, '[total_payable]') !== FALSE) {
@@ -1683,6 +1819,8 @@ class NotificationsController extends Controller
 
               $possible_fields = ['service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_phone_number_1', 'consignee_phone_number_2', 'consignee_email', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'amount', 'payment_mode', 'status', 'status_reason', 'status_date', 'arrival_date', 'tracking_number'];
 
+              $field_names = ['service_type' => 'Service Type', 'pickup_address' => 'Pickup Address', 'pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_phone_number_1' => 'Consignee Phone Number 1', 'consignee_phone_number_2' => 'Consignee Phone Number 2', 'consignee_email' => 'Consignee Email', 'consignee_address' => 'Consignee Address', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'shipping_mode' => 'Shipping Mode', 'amount' => 'Amount', 'payment_mode' => 'Payment Mode', 'status' => 'Status', 'status_reason' => 'Status Reason', 'status_date' => 'Status Date', 'arrival_date' => 'Arrival Date', 'tracking_number' => 'Tracking Number'];
+
               $present_fields = array();
 
               $first_field = NULL;
@@ -1772,17 +1910,38 @@ class NotificationsController extends Controller
 
                   $to = $shipper->email;
 
-                  $shipment_details = '';
+                  $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+
+                  $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
+
+                  foreach ($present_fields as $field) {
+                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">' . $field_names[$field] . '</td>';
+                  }
+
+                  $shipment_details .= '</tr>';
+
+                  $serial_number = 1;
 
                   foreach ($shipments as $shipment) {
+                    $shipment_details .= '<tr>';
+
+                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+
                     foreach ($present_fields as $field) {
                       if (!empty($shipment[$field])) {
-                        $shipment_details .= $shipment[$field] . ', ';
+                        $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment[$field] . '</td>';
+                      }
+                      else {
+                        $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                       }
                     }
 
-                    $shipment_details = substr($shipment_details, 0, -2) . PHP_EOL;
+                    $shipment_details .= '</tr>';
+
+                    $serial_number++;
                   }
+
+                  $shipment_details .= '</tbody></table>';
 
                   foreach ($present_fields as $field) {
                     if ($field != $first_field) {
@@ -1816,6 +1975,8 @@ class NotificationsController extends Controller
               $body = $notification->body;
 
               $possible_fields = ['service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_phone_number_1', 'consignee_phone_number_2', 'consignee_email', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'status', 'status_reason', 'status_date', 'tracking_number'];
+
+              $field_names = ['service_type' => 'Service Type', 'pickup_address' => 'Pickup Address', 'pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_phone_number_1' => 'Consignee Phone Number 1', 'consignee_phone_number_2' => 'Consignee Phone Number 2', 'consignee_email' => 'Consignee Email', 'consignee_address' => 'Consignee Address', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'shipping_mode' => 'Shipping Mode', 'status' => 'Status', 'status_reason' => 'Status Reason', 'status_date' => 'Status Date', 'tracking_number' => 'Tracking Number'];
 
               $present_fields = array();
 
@@ -1893,17 +2054,38 @@ class NotificationsController extends Controller
                     $body = str_replace('[hub]', $hub->name, $body);
                   }
 
-                  $shipment_details = '';
+                  $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+
+                  $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
+
+                  foreach ($present_fields as $field) {
+                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">' . $field_names[$field] . '</td>';
+                  }
+
+                  $shipment_details .= '</tr>';
+
+                  $serial_number = 1;
 
                   foreach ($shipments as $shipment) {
+                    $shipment_details .= '<tr>';
+
+                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+
                     foreach ($present_fields as $field) {
                       if (!empty($shipment[$field])) {
-                        $shipment_details .= $shipment[$field] . ', ';
+                        $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment[$field] . '</td>';
+                      }
+                      else {
+                        $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                       }
                     }
 
-                    $shipment_details = substr($shipment_details, 0, -2) . PHP_EOL;
+                    $shipment_details .= '</tr>';
+
+                    $serial_number++;
                   }
+
+                  $shipment_details .= '</tbody></table>';
 
                   foreach ($present_fields as $field) {
                     if ($field != $first_field) {
@@ -1945,6 +2127,8 @@ class NotificationsController extends Controller
               $body = $notification->body;
 
               $possible_fields = ['service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_phone_number_1', 'consignee_phone_number_2', 'consignee_email', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'status', 'status_reason', 'status_date', 'tracking_number'];
+
+              $field_names = ['service_type' => 'Service Type', 'pickup_address' => 'Pickup Address', 'pickup_city' => 'Pickup City', 'consignee_name' => 'Consignee Name', 'consignee_phone_number_1' => 'Consignee Phone Number 1', 'consignee_phone_number_2' => 'Consignee Phone Number 2', 'consignee_email' => 'Consignee Email', 'consignee_address' => 'Consignee Address', 'consignee_city' => 'Consignee City', 'order_id' => 'Order ID', 'shipping_mode' => 'Shipping Mode', 'status' => 'Status', 'status_reason' => 'Status Reason', 'status_date' => 'Status Date', 'tracking_number' => 'Tracking Number'];
 
               $present_fields = array();
 
@@ -2022,17 +2206,38 @@ class NotificationsController extends Controller
                     $body = str_replace('[hub]', $hub->name, $body);
                   }
 
-                  $shipment_details = '';
+                  $shipment_details = '<table style="padding:5px; border: 1px solid black; border-collapse: collapse;"><tbody><tr>';
+
+                  $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">S. No.</td>';
+
+                  foreach ($present_fields as $field) {
+                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse; font-weight: bold;">' . $field_names[$field] . '</td>';
+                  }
+
+                  $shipment_details .= '</tr>';
+
+                  $serial_number = 1;
 
                   foreach ($shipments as $shipment) {
+                    $shipment_details .= '<tr>';
+
+                    $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $serial_number . '</td>';
+
                     foreach ($present_fields as $field) {
                       if (!empty($shipment[$field])) {
-                        $shipment_details .= $shipment[$field] . ', ';
+                        $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;">' . $shipment[$field] . '</td>';
+                      }
+                      else {
+                        $shipment_details .= '<td style="padding:5px; border: 1px solid black; border-collapse: collapse;"></td>';
                       }
                     }
 
-                    $shipment_details = substr($shipment_details, 0, -2) . PHP_EOL;
+                    $shipment_details .= '</tr>';
+
+                    $serial_number++;
                   }
+
+                  $shipment_details .= '</tbody></table>';
 
                   foreach ($present_fields as $field) {
                     if ($field != $first_field) {
