@@ -76,6 +76,8 @@ class ShipmentChargesController extends Controller
                         $shipment->weight_charges = ROUND(($charges - $discount), 0, PHP_ROUND_HALF_DOWN);
                     }
 
+                    $shipment->chargeable_weight = $weight_charge->range_down;
+
                     $shipment->save();
                 }
                 else {
@@ -87,6 +89,8 @@ class ShipmentChargesController extends Controller
                     else {
                         $charges = ($weight_charge->national_or_sameday * $multiplier);
                     }
+
+                    $shipment->chargeable_weight = $weight_charge->range_up * ($multiplier + 1);
 
                     $previous = TRUE;
 

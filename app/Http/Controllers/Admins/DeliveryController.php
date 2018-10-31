@@ -256,8 +256,6 @@ class DeliveryController extends Controller
 
     public function create_delivery_note(Request $request){
         $shipments = explode(',',$request->shipment_ids);
-        $notifications = explode(',',$request->notification_ids);
-        $rider_informations = explode(',',$request->rider_info_ids);
 
 
         $admin = Auth::id();
@@ -269,7 +267,7 @@ class DeliveryController extends Controller
             $total_cod_amount = 0;
             foreach ($shipments as $shipment) {
                         $shipment_details = Shipment::find($shipment);
-            
+
                         if (in_array($shipment_details->shipper_status_id, $pending_status)) {
                             $valid_shipments[] = $shipment;
                             $shipments_count++;
@@ -285,35 +283,29 @@ class DeliveryController extends Controller
                             'admin_id' => $admin,
                             'total_cod_amount' => $total_cod_amount
                         ]);
-            
+
                         if ($note) {
-                            foreach ($valid_shipments as $index => $shipment) {
+                            foreach ($valid_shipments as $shipment) {
                                 DeliveryNoteShipment::create([
                                     'delivery_note_id' => $note->id,
-                                    'shipment_id' => $shipment,
-                                    'notification' => $notifications[$index],
-                                    'rider_information' => $rider_informations[$index]
+                                    'shipment_id' => $shipment
                                 ]);
-
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
                                 ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
-            
+
                                 NotificationsController::send(10, $note->id, $shipment);
                                 NotificationsController::send(11, $note->id, $shipment);
-
-                                if($notifications[$index]) {
-                                    NotificationsController::send(12, $note->id, $shipment);
-                                }
+                                NotificationsController::send(12, $note->id, $shipment);
                             }
                         }
-            
+
                         return redirect()->back()->with(['success'=>'Delivery note has been created successfully','print'=>$note->id]);
                     }
                     else {
                         return redirect()->back()->with(['error'=>'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
-            
+
             }
-       
+
     }
 
     public function delivery_note_receive_index()
@@ -1071,7 +1063,7 @@ class DeliveryController extends Controller
             ->join('cities AS oc', 'shipments.consignee_city_id', '=', 'oc.id')
             ->join('booking_types as bt', 'bt.id', '=', 'shipments.booking_type_id')
             ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
-            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number','shipments.consignee_phone_number_1 as consignee_phone', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification'])
+            ->select(['delivery_notes.id as delivery_note', 'shipments.tracking_number', 'shipments.id as shId', 'oc.name as destination', 'shipments.consignee_name', 'shipments.consignee_address as address', 'shipments.amount as amount', 'users.name as shipper', 'shipments.booking_type_id', 'bt.booking_type as service_type', 'ss.name as current_status', 'ss.id as current_status_id', 'dns.call_verification'])
             ->where('delivery_notes.id', $id);
 
         return Datatables::of($deliveries)

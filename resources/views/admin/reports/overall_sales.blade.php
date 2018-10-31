@@ -115,6 +115,7 @@
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
+                        <th class="border-primary border-darken-1">Chargeable Weight</th>
                         <th class="border-primary border-darken-1">Weight Charges</th>
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
                         <th class="border-primary border-darken-1">Insurance Charges</th>
@@ -124,8 +125,10 @@
                         <th class="border-primary border-darken-1">Try & Buy Charges</th>
                         <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
+                        <th class="border-primary border-darken-1">Estimated Charges</th>
                         <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
+                        <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -314,6 +317,7 @@
                             head.push('Shipping Mode');
                             head.push('Collection Amount');
                             head.push('Actual Weight');
+                            head.push('Chargeable Weight');
                             head.push('Weight Charges');
                             head.push('Cash Handling Charges');
                             head.push('Insurance Charges');
@@ -323,8 +327,10 @@
                             head.push('Try & Buy Charges');
                             head.push('Fuel Surcharge');
                             head.push('Total Charges');
+                            head.push('Estimated Charges');
                             head.push('GST');
                             head.push('Net Payable');
+                            head.push('Delivered / Returned Date');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -342,6 +348,7 @@
                                 row.push(values.shipping_mode);
                                 row.push(values.p_collection_amount);
                                 row.push(values.actual_weight);
+                                row.push(values.chargeable_weight);
                                 row.push(values.weight_charges);
                                 row.push(values.cash_handling_charges);
                                 row.push(values.insurance_charges);
@@ -351,8 +358,10 @@
                                 row.push(values.try_and_buy_charges);
                                 row.push(values.fuel_surcharge);
                                 row.push(values.p_total_charges);
+                                row.push(values.estimated_charges);
                                 row.push(values.p_gst);
                                 row.push(values.p_net_payable);
+                                row.push(values.delivered_or_returned);
 
                                 body.push(row);
                             });
@@ -407,6 +416,7 @@
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
+                    { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle chargeable_weight'},
                     { data:'weight_charges' ,name: 'shipments.weight_charges', class: 'align-middle weight_charges'},
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
                     { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
@@ -416,8 +426,10 @@
                     { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
+                    { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges'},
                     { data:'p_gst' ,name: 'pps.gst', class: 'align-middle gst'},
-                    { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'}
+                    { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
+                    { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

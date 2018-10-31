@@ -8,6 +8,7 @@ use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
 use App\Http\Models\Admin\StandardCashHandlingCharge;
@@ -458,11 +459,17 @@ class AdminDashboardController extends Controller
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
             ->join('shipping_modes as sm','sm.id','=','shipments.shipping_mode_id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
-            ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
+            ->leftJoin('shipments_journey', function ($join) {
+                $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
+                    ->where('shipments_journey.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
+            ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->leftjoin('shipment_items as si','si.shipment_id','=','shipments.id')
             ->leftjoin('products as p','p.id','=','si.product_type_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status'])
+            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason'])
             ->groupBy('shipments.id');
 
         if (session('role_id') != 1) {
