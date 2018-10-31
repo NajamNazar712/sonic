@@ -21,6 +21,8 @@
 								<form id="receive_pickup_note_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.pickups.receive.pickup_note') }}">
 									{{ csrf_field() }}
 
+									<input type="hidden" name="type" class="form-control type" value="0">
+
 									<div class="form-group">
 										<input type="text" name="pickup_note_no" class="form-control pickup_note_no" placeholder="Pickup Note No.*" data-rule-required="true" data-msg-required="Pickup Note No. is required">
 									</div>
@@ -337,10 +339,14 @@
 					if ($(this).hasClass('receive')) {
 						$('#receive_pickup_note_form input.pickup_note_no').val(pickup_note_id);
 
+						$('#receive_pickup_note_form input.type').val(0);
+
 						$('#receive_pickup_note_form').submit();
 					}
 					else if ($(this).hasClass('summary')) {
 						$('#receive_pickup_note_form input.pickup_note_no').val(pickup_note_id);
+
+						$('#receive_pickup_note_form input.type').val(1);
 
 						$('#receive_pickup_note_form').submit();
 					}
