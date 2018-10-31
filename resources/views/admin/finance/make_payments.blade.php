@@ -613,7 +613,7 @@
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'shipper', name: 'u.name', class: 'align-middle shipper'},
 					{data:'shipment', name: 's.tracking_number', class: 'align-middle shipment'},
-					{data:'type', name: 'pending_payment_shipments.type', class: 'align-middle type'},
+					{data:'type', name: 'type', class: 'align-middle type'},
 					{data:'status', name: 'ss.name', class: 'align-middle status'},
 					{data:'created_at', name: 'pending_payment_shipments.created_at', class: 'align-middle created_at'},
 					{data:'aging', name: 'aging', class: 'align-middle aging', orderable: false},
@@ -638,14 +638,24 @@
 					var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="3">All</option>' +
+                        '<option value="0">Delivered</option>' +
+                        '<option value="1">Returned</option>' +
+                        '<option value="2">Adjusted</option>' +
+                        '</select>';
 					this.api().columns().every(function(column_id) {
 						var column = this;
 						var header = column.header();
 
 						if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.aging')) {
 							$(td).appendTo($(search));
-						}
+						}else if($(header).is('.type')){
+                        $(drop_select).appendTo($(search))
+                            .on( 'change', function () {
+                                column.search($(this).val(), false, false, true).draw();
+                            } ).wrap(td);
+                    	}
 						else {
 							var current = $(input).appendTo($(search)).on('change', function() {
 								column.search($(this).val(), false, false, true).draw();
@@ -656,7 +666,12 @@
 							}
 						}
 					});
-
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Select Type",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
 					this.api().table().columns.adjust();
 				},
 				drawCallback: function() {
