@@ -1612,9 +1612,17 @@ class AdminFinanceController extends Controller
 
       $serial_number = 1;
 
-      $total_amount = 0;
-      $total_charges = 0;
+      $total_collection_amount = 0;
+      $total_weight_charges = 0;
+      $total_cash_handling_charges = 0;
+      $total_insurance_charges = 0;
+      $total_replacement_charges = 0;
+      // $total_try_and_buy_charges = 0;
+      $total_return_charges = 0;
+      $total_packaging_material_charges = 0;
+      $total_fuel_surcharge = 0;
       $total_gst = 0;
+      $overall_charges = 0;
       $total_payable = 0;
 
       foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
@@ -1641,35 +1649,44 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . number_format($done_payment_shipment->charges) . '</td>
-                              <td>' . number_format($done_payment_shipment->gst) . '</td>
-                              <td>' . number_format($done_payment_shipment->payable) . '</td>
+                              <td>' . number_format($shipment->weight_charges) . '</td>
+                              <td>' . (($done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '') . '</td>
                             </tr>
             ';
 
             $serial_number++;
 
-            $total_amount += $done_payment_shipment->amount;
-            $total_charges += $done_payment_shipment->charges;
+            if ($done_payment_shipment->type == 0) {
+                $total_collection_amount += $done_payment_shipment->amount;
+                $total_cash_handling_charges += $shipment->cash_handling_charges;
+                $total_replacement_charges += $shipment->replacement_charges;
+                // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+            }
+            else {
+                $total_return_charges += $shipment->return_charges;
+            }
+
+            $total_weight_charges += $shipment->weight_charges;
+
+            if ($shipment->packaging_material_request) {
+                $total_packaging_material_charges += $shipment->packaging_material_charges;
+            }
+
+            $total_insurance_charges += $shipment->insurance_charges;
+            $total_fuel_surcharge += $shipment->fuel_surcharge;
+
             $total_gst += $done_payment_shipment->gst;
+            $overall_charges += $done_payment_shipment->charges + $done_payment_shipment->gst;
             $total_payable += $done_payment_shipment->payable;
       }
 
       $html .= '
                             <tr>
-                              <td class="color secondary"><strong>Total Amount</strong></td>
-                              <td>' . number_format($total_amount) . '</td>
+                              <td class="color secondary"><strong>Total Collection Amount (PKR)</strong></td>
+                              <td>' . number_format($total_collection_amount) . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Total Charges</strong></td>
-                              <td>' . number_format($total_charges) . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Total GST</strong></td>
-                              <td>' . number_format($total_gst) . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Total Payable</strong></td>
+                              <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
                               <td>' . number_format($total_payable) . '</td>
                             </tr>
                           </tbody>
@@ -1685,17 +1702,48 @@ class AdminFinanceController extends Controller
                               <td class="color primary"><strong>Consignee</strong></td>
                               <td class="color primary"><strong>Destination</strong></td>
                               <td class="color primary"><strong>Service Type</strong></td>
-                              <td class="color primary"><strong>Actual Weight</strong></td>
-                              <td class="color primary"><strong>Amount</strong></td>
-                              <td class="color primary"><strong>Charges</strong></td>
-                              <td class="color primary"><strong>GST</strong></td>
-                              <td class="color primary"><strong>Payable</strong></td>
+                              <td class="color primary"><strong>Weight (kg)</strong></td>
+                              <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
+                              <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
                             </tr>
       ';
 
       $html .= $shipment_details;
 
       $html .= '
+                          </tbody>
+                        </table>
+
+                         <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                                <td class="color primary" colspan="6"><strong>Charges Summary (PKR)</strong></td>
+                            </tr>
+                            <tr>
+                                <td class="color secondary"><strong>Total Weight Charges</strong></td>
+                                <td>' . number_format($total_weight_charges) . '</td>
+                                <td class="color secondary"><strong>Total Cash Handling Charges</strong></td>
+                                <td>' . number_format($total_cash_handling_charges) . '</td>
+                                <td class="color secondary"><strong>Total Insurance Charges</strong></td>
+                                <td>' . number_format($total_insurance_charges) . '</td>
+                            </tr>
+                            <tr>
+                                <td class="color secondary"><strong>Total Replacement Charges</strong></td>
+                                <td>' . number_format($total_replacement_charges) . '</td>
+                                <td class="color secondary"><strong>Total Return Charges</strong></td>
+                                <td>' . number_format($total_return_charges) . '</td>
+                                <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
+                                <td>' . number_format($total_packaging_material_charges) . '</td>
+                            </tr>
+                            <tr>
+                                <td class="color secondary"><strong>Total Fuel Surcharge</strong></td>
+                                <td>' . number_format($total_fuel_surcharge) . '</td>
+                                <td class="color secondary"><strong>Total GST</strong></td>
+                                <td>' . number_format($total_gst) . '</td>
+                                <td class="color secondary"><strong>Overall Charges</strong></td>
+                                <td>' . number_format($overall_charges) . '</td>
+                            </tr>
                           </tbody>
                         </table>
                       </div>
@@ -1742,7 +1790,7 @@ class AdminFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'GST', 'Payable'];
+        $details[] = ['S. No.', 'Tracking No.', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)'];
 
         $serial_number = 1;
 
@@ -1771,9 +1819,8 @@ class AdminFinanceController extends Controller
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
             $row[] = $done_payment_shipment->amount;
-            $row[] = $done_payment_shipment->charges;
-            $row[] = $done_payment_shipment->gst;
-            $row[] = $done_payment_shipment->payable;
+            $row[] = $shipment->weight_charges;
+            $row[] = (($done_payment_shipment->type == 0) ? $shipment->cash_handling_charges : 0);
 
             $details[] = $row;
 
