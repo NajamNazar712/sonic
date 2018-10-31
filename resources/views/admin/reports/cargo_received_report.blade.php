@@ -70,6 +70,17 @@
 
                     </div>
                     <div class="col-3 ">
+                        <div class="form-group">
+                            <select name="cargo_type" class="select2" id="cargo_type">
+                                <option value="" selected="selected"></option>
+                                <option value="0">All</option>
+                                <option value="1">Normal</option>
+                                <option value="2">Return</option>
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="col-3 ">
 
                         <div class="form-group input-group ml-1">
                             <div class="input-group-prepend">
@@ -93,17 +104,7 @@
                         </div>
 
                     </div>
-                    <div class="col-3 ">
-                        <div class="form-group">
-                            <select name="cargo_type" class="select2" id="cargo_type">
-                                <option value="" selected="selected"></option>
-                                <option value="0">All</option>
-                                <option value="1">Normal</option>
-                                <option value="2">Return</option>
-                            </select>
-                        </div>
 
-                    </div>
 
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
