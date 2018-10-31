@@ -216,6 +216,34 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.reports.cargo_received.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
             $('#search_cargo_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -387,7 +415,7 @@
                 order: [[7, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'cargo_id', name: 'cargo_consignments.id', class: 'align-middle cargo_id'},
+                    {data: 'cargo_id_link', name: 'cargo_consignments.id', class: 'align-middle cargo_id_link'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'h.name', class: 'align-middle destination'},
                     {data: 'shipments_link', name: 'cargo_consignments.shipments', class: 'align-middle text-center shipments_link'},
@@ -410,13 +438,20 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
+
+            $('#datatable tbody').on('click', 'tr td a.cargo_print', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    print(id);
+                }
+            });
             $('#datatable tbody').on('click', 'tr td.shipments_link button', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
 
                 $('#shipments .modal-body').html('');
 
                 $.ajax({
-                    url: '{!! route('admin.cargo.in_transit.shipments') !!}',
+                    url: '{!! route('admin.reports.cargo_received.shipments') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
