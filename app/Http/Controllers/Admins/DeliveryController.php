@@ -1305,6 +1305,8 @@ class DeliveryController extends Controller
 
                                         AdminFinanceController::add_payment($shipment, 0);
                                     }
+
+                                    ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id,NULL, $verification);
                                 }
                             }
                         }//main if condition
