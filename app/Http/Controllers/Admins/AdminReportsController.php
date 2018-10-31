@@ -192,7 +192,7 @@ class AdminReportsController extends Controller
             ->join('shipping_modes as sm','sm.id','=','cargo_consignments.shipping_mode_id')
             ->join('admins as si','si.id','=','cargo_consignments.sender_id')
             ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
-            ->select(['cargo_consignments.id as cargo_id','oc.name as origin','h.name as destination','cargo_consignments.shipments','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments'])
+            ->select(['cargo_consignments.id as cargo_id','oc.name as origin','h.name as destination','cargo_consignments.shipments','cargo_consignments.shipments as shipments_link','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments','cargo_consignments.type as cargo_type'])
             ->where('cargo_consignments.status_id',3);
         if (session('role_id') != 1) {
             $cargo_received = $cargo_received->where(function ($query) {
@@ -202,6 +202,16 @@ class AdminReportsController extends Controller
         $cargo = Datatables::of($cargo_received)
             ->editColumn('cargo_id', function ($cargo_received) {
                 return str_pad($cargo_received->cargo_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('cargo_type',function ($cargo_received){
+                if($cargo_received->cargo_type == 1){
+                    return 'Normal';
+                }else{
+                    return 'Return';
+                }
+            })
+            ->editColumn('shipments_link',function ($cargo_received){
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_received->shipments . '</button>';
             });
 
         if($cargo_no = $request->get('search_cargo_no')){
@@ -226,6 +236,11 @@ class AdminReportsController extends Controller
             $from = $request->get('search_date_from');
             $to = $request->get('search_date_to');
             $cargo->whereBetween('cargo_consignments.created_at', [$from,$to]);
+        }
+        if ($cargo_type = $request->get('cargo_type')) {
+            if ($cargo_type != 0) {
+                $cargo->where('cargo_consignments.type', $cargo_type);
+            }
         }
         return $cargo->make(true);
     }
