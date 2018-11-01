@@ -2218,8 +2218,8 @@ class DeliveryController extends Controller
                 ->where('s.tracking_number', '=', $tracking_number);
         }
         if ($dncc = $request->get('scan_dncc')) {
-            $datatable->join('delivery_note_station_deposit_notes as dnsdn', 'station_deposit_notes.id', '=', 'dnsdn.station_deposit_note_id')
-                ->where('dnsdn.delivery_note_id', '=', $dncc);
+            $datatable->join('delivery_note_station_deposit_notes as dnsdns', 'station_deposit_notes.id', '=', 'dnsdns.station_deposit_note_id')
+                ->where('dnsdns.delivery_note_id', '=', $dncc);
         }
         return $datatable->make(true);
     }
