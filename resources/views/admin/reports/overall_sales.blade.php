@@ -426,7 +426,7 @@
                     { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
                     { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
-                    { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges'},
+                    { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
                     { data:'p_gst' ,name: 'pps.gst', class: 'align-middle gst'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
