@@ -84,7 +84,7 @@
 				<form id="receive_pickup_note_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate" method="POST" action="{{ route('admin.pickups.receive.pickup_note') }}">
 					{{ csrf_field() }}
 
-					<input type="hidden" name="summary" value="1">
+					<input type="hidden" name="type" value="0">
 
 					<input type="hidden" name="pickup_note_no" class="pickup_note_no" value="{{ session('pickup_receive_pickup_note_id') }}">
 				</form>

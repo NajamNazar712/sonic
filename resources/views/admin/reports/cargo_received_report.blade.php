@@ -69,7 +69,18 @@
                             </div>
 
                     </div>
-                    <div class="col-4 ">
+                    <div class="col-3 ">
+                        <div class="form-group">
+                            <select name="cargo_type" class="select2" id="cargo_type">
+                                <option value="" selected="selected"></option>
+                                <option value="0">All</option>
+                                <option value="1">Normal</option>
+                                <option value="2">Return</option>
+                            </select>
+                        </div>
+
+                    </div>
+                    <div class="col-3 ">
 
                         <div class="form-group input-group ml-1">
                             <div class="input-group-prepend">
@@ -81,7 +92,7 @@
                             <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
                         </div>
                     </div>
-                    <div class="col-4 ">
+                    <div class="col-3 ">
                         <div class="form-group input-group ml-1">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -93,6 +104,7 @@
                         </div>
 
                     </div>
+
 
                     <div class="col-2">
                         <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
@@ -108,6 +120,7 @@
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Shipment(s)</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
+                        <th class="border-primary border-darken-1">Cargo Type</th>
                         <th class="border-primary border-darken-1">Transitted By</th>
                         <th class="border-primary border-darken-1">Transit Date</th>
                         <th class="border-primary border-darken-1">Received By</th>
@@ -115,6 +128,25 @@
                     </tr>
                     </thead>
                 </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="shipments" role="dialog" aria-labelledby="shipments_title" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_title">Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
             </div>
         </div>
     </div>
@@ -185,6 +217,34 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.reports.cargo_received.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
             $('#search_cargo_no').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
@@ -204,6 +264,10 @@
                 placeholder:'Search Shipping Mode',
                 width:'100%',
                 allowClear:true
+            });
+            $('#cargo_type').select2({
+                width: '100%',
+                placeholder: 'Cargo Type'
             });
             var transit_date = $('#transit_date').pickadate({
                 firstDay: 1,
@@ -276,7 +340,8 @@
                             'search_transit_date': $('input[name="transit_date_formatted"]').val(),
                             'search_received_date': $('input[name="received_date_formatted"]').val(),
                             'search_date_from': $('input[name="search_date_from_formatted"]').val(),
-                            'search_date_to': $('input[name="search_date_to_formatted"]').val()
+                            'search_date_to': $('input[name="search_date_to_formatted"]').val(),
+                            'cargo_type': $('#cargo_type').val()
                         },
                         success: function (result) {
                             head = [];
@@ -287,6 +352,7 @@
                             head.push('Destination');
                             head.push('Shipment(s)');
                             head.push('Shipping Mode');
+                            head.push('Cargo Type');
                             head.push('Transitted By');
                             head.push('Transit Date');
                             head.push('Received By');
@@ -300,6 +366,7 @@
                                 row.push(values.destination);
                                 row.push(values.shipments);
                                 row.push(values.shipping_mode);
+                                row.push(values.cargo_type);
                                 row.push(values.transit_by);
                                 row.push(values.transit_at);
                                 row.push(values.received_by);
@@ -342,17 +409,19 @@
                         d.search_received_date = $('input[name="received_date_formatted"]').val();
                         d.search_date_from = $('input[name="search_date_from_formatted"]').val();
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
+                        d.cargo_type = $('#cargo_type').val();
                     }
                 },
                 rowId: 'cargo_id',
                 order: [[7, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'cargo_id', name: 'cargo_consignments.id', class: 'align-middle cargo_id'},
+                    {data: 'cargo_id_link', name: 'cargo_consignments.id', class: 'align-middle cargo_id_link'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'h.name', class: 'align-middle destination'},
-                    {data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle shipments'},
-                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},////
+                    {data: 'shipments_link', name: 'cargo_consignments.shipments', class: 'align-middle text-center shipments_link'},
+                    {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
+                    {data: 'cargo_type', name: 'cargo_consignments.type', class: 'align-middle cargo_type'},
                     {data: 'transit_by', name: 'si.name', class: 'align-middle transit_by'},
                     {data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
                     {data: 'received_by', name: 'ri.name', class: 'align-middle received_by'},
@@ -371,6 +440,39 @@
                 table.draw();
             });
 
+            $('#datatable tbody').on('click', 'tr td a.cargo_print', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    print(id);
+                }
+            });
+            $('#datatable tbody').on('click', 'tr td.shipments_link button', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+
+                $('#shipments .modal-body').html('');
+
+                $.ajax({
+                    url: '{!! route('admin.reports.cargo_received.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var tracking_numbers = '';
+
+                            $.each(data, function(index, tracking_number) {
+                                tracking_numbers += tracking_number + '<br/>';
+                            });
+
+                            $('#shipments .modal-body').html(tracking_numbers);
+
+                            $('#shipments').modal('show');
+                        }
+                    });
+            });
         });
 
     </script>

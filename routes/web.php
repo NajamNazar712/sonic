@@ -215,6 +215,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     //edit rates
     Route::get('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRatesView')->name('edit.rates');
     Route::put('/accounts/{id}/edit/rates','Admins\AdminDashboardController@editRates')->name('edit.rates.submit');
+    //
+    Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
 
     //ajax request
 
@@ -585,6 +587,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('cargo_received')->name('cargo_received.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@cargo_received_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_received_list')->name('list');
+            Route::post('shipments','Admins\AdminReportsController@cargo_shipments')->name('shipments');
+            Route::post('print', 'Admins\AdminReportsController@cargo_print')->name('print');
         });
         Route::prefix('lead_time')->name('lead_time.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@lead_time_index')->name('index');

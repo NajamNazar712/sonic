@@ -184,6 +184,8 @@ class Permission
             'reports.pickup_note.list' => 64,
             'reports.cargo_received.index' => 65,
             'reports.cargo_received.list' => 65,
+            'reports.cargo_received.shipments' => 65,
+            'reports.cargo_received.print' => 65,
             'reports.return_note.index' => 67,
             'reports.return_note.list' => 67,
             'reports.outstanding_shipments.index' => 68,

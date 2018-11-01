@@ -1,0 +1,24 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+
+use App\Http\Models\ShipmentsPaymentJourney;
+use App\Http\Models\Shipment;
+
+use Auth;
+
+class ShipmentsPaymentJourneyController extends Controller
+{
+    static public function add($shipment_id, $status_id, $admin_id) {
+      $shipment_payment_journey = new ShipmentsPaymentJourney();
+
+      $shipment_payment_journey->shipment_id = $shipment_id;
+      $shipment_payment_journey->status_id = $status_id;
+      $shipment_payment_journey->admin_id = $admin_id;
+
+      $shipment_payment_journey->save();
+    }
+}

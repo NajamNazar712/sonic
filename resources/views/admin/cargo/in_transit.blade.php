@@ -213,6 +213,12 @@
 															</div>
 														</div>
 
+														<div class="col">
+															<div class="form-group">
+																<input type="text" name="vendor_weight" class="form-control rounded-right vendor_weight" placeholder="Vendor Weight*" data-rule-required="true" data-msg-required="Vendor Weight is required">
+															</div>
+														</div>
+
 														<div class="w-100"></div>
 
 														<div class="col">
@@ -761,6 +767,15 @@
 					'allowPlus': false
 				});
 
+				$('#add_forwarding_details form .vendor_weight').inputmask({
+					'alias': 'decimal',
+					'allowMinus': false,
+					'allowPlus': false,
+					'digits': 2,
+					'min': 0.1,
+					'max': 10000
+				});
+
 				$('#add_forwarding_details form .weight_charges_per_kg').inputmask({
 					'alias': 'decimal',
 					'allowMinus': false,
@@ -1181,6 +1196,7 @@
 							$('#add_forwarding_details form .transport_mode_vendor').val(data.cargo_consignment.transport_mode_vendor_id).trigger('change');
 							$('#add_forwarding_details form .seal_number').val(data.cargo_consignment.seal_number);
 							$('#add_forwarding_details form .builty_number').val(data.cargo_consignment.builty_number);
+							$('#add_forwarding_details form .vendor_weight').val(data.cargo_consignment.vendor_weight);
 							$('#add_forwarding_details form .sender_name').html(data.cargo_consignment.sender_name);
 							$('#add_forwarding_details form .receiver_id').val(data.cargo_consignment.receiver_id).trigger('change');
 							$('#add_forwarding_details form .weight_charges_per_kg').val(data.cargo_consignment.weight_charges_per_kg);
@@ -1215,10 +1231,13 @@
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode_vendor + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + cargo_consignment.seal_number + '</td></tr>';
+
+
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((cargo_consignment.builty_number) ? cargo_consignment.builty_number : '') + '</td></tr>';
-						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((cargo_consignment.weight_charges_per_kg) ? cargo_consignment.weight_charges_per_kg : '') + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.shipments_weight + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.actual_weight + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Vendor Weight</strong></td><td class="align-middle text-center">' + ((cargo_consignment.vendor_weight) ? cargo_consignment.vendor_weight : '') + '</td></tr>';
+						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((cargo_consignment.weight_charges_per_kg) ? cargo_consignment.weight_charges_per_kg : '') + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Extra Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.extra_charges) ? cargo_consignment.extra_charges : '') + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Weight Charges</strong></td><td class="align-middle text-center">' + ((cargo_consignment.total_weight_charges) ? cargo_consignment.total_weight_charges : '') + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Sender Name</strong></td><td class="align-middle text-center">' + cargo_consignment.sender_name + '</td></tr>';
