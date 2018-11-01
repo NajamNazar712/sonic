@@ -244,8 +244,15 @@
                                 shipment += '<tr>';
                                 shipment += '<td><strong>Weight</strong></td>';
                                 shipment += '<td>' + details.order_information.weight + ' kg</td>';
-                                shipment += '<td><strong>Instruction</strong></td>';
-                                shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
+                                shipment += '<td><strong>Shipping Mode</strong></td>';
+                                shipment += '<td>' + details.order_information.shipping_mode + '</td>';
+                                shipment += '<td><strong>Collection Amount</strong></td>';
+                                shipment += '<td>Rs. ' + details.order_information.amount + '</td>';
+                                shipment += '</tr>';
+
+                                shipment += '<tr>';
+                                shipment += '<td><strong>Instructions</strong></td>';
+                                shipment += '<td colspan="5">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
                                 shipment += '</tr>';
 
                                 shipment += '</tbody>';

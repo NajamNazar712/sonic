@@ -13,7 +13,9 @@ class Kernel extends ConsoleKernel
      * @var array
      */
     protected $commands = [
-        //
+        '\App\Console\Commands\ReturnConfirmationPendingEmail',
+        '\App\Console\Commands\ReturnConfirmEmail',
+        '\App\Console\Commands\ShipmentReAttemptEmail'
     ];
 
     /**
@@ -24,8 +26,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // $schedule->command('inspire')
-        //          ->hourly();
+        $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
+        $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
+        $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
     }
 
     /**

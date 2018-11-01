@@ -68,6 +68,8 @@ class AdminTrackingController extends Controller
     			}
 
     			$details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
+                $details['order_information']['amount'] = $shipment->amount;
     			$details['order_information']['instructions'] = $shipment->special_instructions;
 
     			foreach ($shipment->shipment_journey as $journey) {

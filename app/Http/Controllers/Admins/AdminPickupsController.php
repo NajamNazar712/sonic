@@ -861,24 +861,13 @@ class AdminPickupsController extends Controller
         $view_button = '<button type="button" class="dropdown-item summary"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-target"></i></div><div class="col-9 offset-1">Summary</div></button>';
 
         if (session('role_id') == 1 || in_array(24, session('permissions'))) {
-          if ($pickup_note->status_id == 2) {
-            return '<div class="btn-group">
-                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                      <div class="dropdown-menu dropdown-menu-sm">
-                        ' . $receive_button . '
-                      </div>
+          return '<div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                      ' . $receive_button . $view_button . '
                     </div>
-            ';
-          }
-          else {
-            return '<div class="btn-group">
-                      <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                      <div class="dropdown-menu dropdown-menu-sm">
-                        ' . $view_button . '
-                      </div>
-                    </div>
-            ';
-          }
+                  </div>
+          ';
         }
         else {
           return '';
@@ -924,11 +913,13 @@ class AdminPickupsController extends Controller
         $pickup_note = PickupNote::find($request->get('pickup_note_no'));
 
         if ($pickup_note) {
-          if ($pickup_note->status_id == 2 || $request->has('summary')) {
-            return redirect()->route('admin.pickups.receive.arrival_of_shipments.index')->with('pickup_receive_pickup_note_id', $request->get('pickup_note_no'));
-          }
-          else if ($pickup_note->status_id == 3) {
-            return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->get('pickup_note_no'));
+          if (in_array($pickup_note->status_id, [2, 3])) {
+            if ($request->get('type') == 0) {
+              return redirect()->route('admin.pickups.receive.arrival_of_shipments.index')->with('pickup_receive_pickup_note_id', $request->get('pickup_note_no'));
+            }
+            else {
+               return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->get('pickup_note_no'));
+            }
           }
           else {
             return back()->withErrors('Given Pickup Note has already been modified!');

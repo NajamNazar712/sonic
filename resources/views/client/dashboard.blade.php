@@ -23,6 +23,7 @@
                                 <th class="border-primary border-darken-1">Order ID</th>
                                 <th class="border-primary border-darken-1">Service Type</th>
                                 <th class="border-primary border-darken-1">Status</th>
+                                <th class="border-primary border-darken-1">Reason</th>
                                 <th class="border-primary border-darken-1">Payment Status</th>
                                 <th class="border-primary border-darken-1">Origin</th>
                                 <th class="border-primary border-darken-1">Destination</th>
@@ -271,6 +272,7 @@
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
+                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
                     {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},

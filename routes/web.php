@@ -585,6 +585,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('cargo_received')->name('cargo_received.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@cargo_received_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@cargo_received_list')->name('list');
+            Route::post('shipments','Admins\AdminReportsController@cargo_shipments')->name('shipments');
+            Route::post('print', 'Admins\AdminReportsController@cargo_print')->name('print');
         });
         Route::prefix('lead_time')->name('lead_time.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@lead_time_index')->name('index');
