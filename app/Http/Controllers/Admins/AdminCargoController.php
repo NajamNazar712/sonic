@@ -914,6 +914,7 @@ class AdminCargoController extends Controller
 
       $details['cargo_consignment']['seal_number'] = $cargo_consignment->seal_number;
       $details['cargo_consignment']['builty_number'] = $cargo_consignment->builty_number;
+      $details['cargo_consignment']['vendor_weight'] = $cargo_consignment->vendor_weight;
       $details['cargo_consignment']['weight_charges_per_kg'] = $cargo_consignment->weight_charges_per_kg;
       $details['cargo_consignment']['extra_charges'] = $cargo_consignment->extra_charges;
       $details['cargo_consignment']['total_weight_charges'] = $cargo_consignment->total_weight_charges;
@@ -987,6 +988,7 @@ class AdminCargoController extends Controller
       }
 
       $cargo_consignment->builty_number = $request->input('builty_number');
+      $cargo_consignment->vendor_weight = $request->input('vendor_weight');
       $cargo_consignment->expected_arrival_date = $request->input('expected_arrival_date_formatted');
       $cargo_consignment->weight_charges_per_kg = $request->input('weight_charges_per_kg');
       $cargo_consignment->extra_charges = $request->input('extra_charges');
