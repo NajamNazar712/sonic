@@ -834,8 +834,9 @@ class DeliveryController extends Controller
         if ($delivery_note_id != '') {
             foreach ($shipments as $shipment) {
                 $statusId = "reason_drop.$shipment";
+                $status_drop = "status_drop.$shipment";
                 $shipment_status = Shipment::where('id', $shipment)->first();
-                if ($request->status_drop[$shipment] != null) {
+                if ($request->has($status_drop) && $request->status_drop[$shipment] != null) {
                     if ($request->status_drop[$shipment] == 7 || $request->status_drop[$shipment] == 18) {
                         if ($shipment_status->shipper_status_id != $request->status_drop[$shipment]) {
                             ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($statusId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $delivery_note_id, NULL, 0);
