@@ -237,17 +237,21 @@
             $('#scan_tracking').on('change',function() {
                 $(this).val($(this).val().trim());
             });
+            var rowsCount = 0;
+            function  countRows() {
+                rowsCount = table.row().count();
+            }
             $('input#scan_tracking').focus();
             $('#delivery_note_form').on('submit',function (e) {
                 e.preventDefault();
                 var scan = $('#scan_tracking');
                 var tracking = scan.val();
                 var hub_id = $('#hub_id').val();
-
-                if (tracking != '') {
+                if (tracking !== '') {
                     scan.attr('disabled', true);
+                    countRows();
 
-                    if(table.row().count() == 0) {
+                    if(rowsCount === 0) {
                         $.ajax({
                             url:'{{route('admin.delivery.note.shipment.info')}}',
                             type:'GET',
@@ -256,11 +260,13 @@
                                 'tracking':tracking
                             }
                         }).done(function (data) {
-
-                            if(data.status == 1){
+                            scan.val('');
+                            scan.attr('disabled', false);
+                            scan.focus();
+                            if(data.status === 1){
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
-                                var rowNo = table.rows().count();
+                                var rowNo = rowsCount;
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
@@ -272,9 +278,7 @@
                                 $('#hub_id').val(data.hub);
                             }
 
-                            scan.val('');
-                            scan.attr('disabled', false);
-                            scan.focus();
+
                         });
                     } else {
 
@@ -289,12 +293,14 @@
                                     'hub_id':hub_id
                                 }
                             }).done(function (data) {
-
-                                if(data.status == 1){
+                                scan.val('');
+                                scan.attr('disabled', false);
+                                scan.focus();
+                                if(data.status === 1){
 
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }else{
-                                    var rowNo = table.rows().count();
+                                    var rowNo = rowsCount;
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
@@ -305,9 +311,7 @@
                                     rider_info_ids.push(1);
                                 }
 
-                                scan.val('');
-                                scan.attr('disabled', false);
-                                scan.focus();
+
                             });
                         }else{
                             var error = 'Tracking Number already scanned!';
