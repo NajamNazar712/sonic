@@ -269,11 +269,12 @@ class DeliveryController extends Controller
             $total_cod_amount = 0;
             foreach ($shipments as $shipment) {
                         $shipment_details = Shipment::find($shipment);
-            
-                        if (in_array($shipment_details->shipper_status_id, $pending_status)) {
-                            $valid_shipments[] = $shipment;
-                            $shipments_count++;
-                            $total_cod_amount += $shipment_details->amount;
+                        if($shipment_details) {
+                            if (in_array($shipment_details->shipper_status_id, $pending_status)) {
+                                $valid_shipments[] = $shipment;
+                                $shipments_count++;
+                                $total_cod_amount += $shipment_details->amount;
+                            }
                         }
             }
             if ($shipments_count != 0) {
