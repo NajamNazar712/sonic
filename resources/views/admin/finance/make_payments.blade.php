@@ -826,6 +826,14 @@
 					});
 				}
 				else if ($(this).hasClass('make_payment')) {
+					selected_rows = [];
+
+					table.rows().deselect();
+
+					table.button('.make_payment').disable();
+
+					selected_rows.push(id);
+
 					$('#make_payments #make_payments_form .total_amount').val(0);
 					$('#make_payments #make_payments_form .total_charges').val(0);
 					$('#make_payments #make_payments_form .total_gst').val(0);

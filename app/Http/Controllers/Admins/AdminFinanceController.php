@@ -535,52 +535,16 @@ class AdminFinanceController extends Controller
         if ($pending_payment->exists()) {
             $pending_payment = $pending_payment->first();
 
-            $pending_payment_shipment = PendingPaymentShipment::where('pending_payment_id', $pending_payment->id)->where('shipment_id', $shipment_id);
+            $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
 
-            if (!$pending_payment_shipment->exists()) {
-                $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
-
-                if ($type == 0) {
-                    $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
-                }
-                else {
-                    $pending_payment->returned_shipments = $pending_payment->returned_shipments + 1;
-                }
-
-                $pending_payment->save();
-
-                $pending_payment_shipment = new PendingPaymentShipment();
-
-                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                $pending_payment_shipment->shipment_id = $shipment_id;
-                $pending_payment_shipment->type = $type;
-                $pending_payment_shipment->amount = $amount;
-                $pending_payment_shipment->charges = $charges;
-                $pending_payment_shipment->gst = $gst;
-                $pending_payment_shipment->payable = $payable;
-
-                $pending_payment_shipment->save();
+            if ($type == 0) {
+                $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
             }
             else {
-                $pending_payment_shipment = $pending_payment_shipment->first();
-
-                if ($pending_payment_shipment->type != $type) {
-                    if ($type == 0) {
-                        $pending_payment->delivered_shipments = $pending_payment->delivered_shipments + 1;
-                        $pending_payment->returned_shipments = $pending_payment->returned_shipments - 1;
-                    }
-                    else {
-                        $pending_payment->delivered_shipments = $pending_payment->delivered_shipments - 1;
-                        $pending_payment->returned_shipments = $pending_payment->returned_shipments + 1;
-                    }
-
-                    $pending_payment->save();
-
-                    $pending_payment_shipment->type = $type;
-
-                    $pending_payment_shipment->save();
-                }
+                $pending_payment->returned_shipments = $pending_payment->returned_shipments + 1;
             }
+
+            $pending_payment->save();
         }
         else {
             $pending_payment = new PendingPayment();
@@ -600,19 +564,19 @@ class AdminFinanceController extends Controller
             }
 
             $pending_payment->save();
-
-            $pending_payment_shipment = new PendingPaymentShipment();
-
-            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-            $pending_payment_shipment->shipment_id = $shipment_id;
-            $pending_payment_shipment->type = $type;
-            $pending_payment_shipment->amount = $amount;
-            $pending_payment_shipment->charges = $charges;
-            $pending_payment_shipment->gst = $gst;
-            $pending_payment_shipment->payable = $payable;
-
-            $pending_payment_shipment->save();
         }
+
+        $pending_payment_shipment = new PendingPaymentShipment();
+
+        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+        $pending_payment_shipment->shipment_id = $shipment_id;
+        $pending_payment_shipment->type = $type;
+        $pending_payment_shipment->amount = $amount;
+        $pending_payment_shipment->charges = $charges;
+        $pending_payment_shipment->gst = $gst;
+        $pending_payment_shipment->payable = $payable;
+
+        $pending_payment_shipment->save();
     }
 
     static private function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type) {
@@ -658,18 +622,6 @@ class AdminFinanceController extends Controller
             $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
 
             $pending_payment->save();
-
-            $pending_payment_shipment = new PendingPaymentShipment();
-
-            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-            $pending_payment_shipment->shipment_id = $shipment_id;
-            $pending_payment_shipment->type = 2;
-            $pending_payment_shipment->amount = $amount;
-            $pending_payment_shipment->charges = $charges;
-            $pending_payment_shipment->gst = $gst;
-            $pending_payment_shipment->payable = $payable;
-
-            $pending_payment_shipment->save();
         }
         else {
             $pending_payment = new PendingPayment();
@@ -681,19 +633,19 @@ class AdminFinanceController extends Controller
             $pending_payment->adjusted_shipments = 1;
 
             $pending_payment->save();
-
-            $pending_payment_shipment = new PendingPaymentShipment();
-
-            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-            $pending_payment_shipment->shipment_id = $shipment_id;
-            $pending_payment_shipment->type = 2;
-            $pending_payment_shipment->amount = $amount;
-            $pending_payment_shipment->charges = $charges;
-            $pending_payment_shipment->gst = $gst;
-            $pending_payment_shipment->payable = $payable;
-
-            $pending_payment_shipment->save();
         }
+
+        $pending_payment_shipment = new PendingPaymentShipment();
+
+        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+        $pending_payment_shipment->shipment_id = $shipment_id;
+        $pending_payment_shipment->type = 2;
+        $pending_payment_shipment->amount = $amount;
+        $pending_payment_shipment->charges = $charges;
+        $pending_payment_shipment->gst = $gst;
+        $pending_payment_shipment->payable = $payable;
+
+        $pending_payment_shipment->save();
     }
 
     public function make_payments_index() {
