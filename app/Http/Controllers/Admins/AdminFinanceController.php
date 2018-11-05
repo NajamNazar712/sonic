@@ -1514,6 +1514,10 @@ class AdminFinanceController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+
+                      .summary {
+                        page-break-inside: avoid;
+                      }
                     </style>
                   </head>
                   <body>
@@ -1574,7 +1578,7 @@ class AdminFinanceController extends Controller
       $total_packaging_material_charges = 0;
       $total_fuel_surcharge = 0;
       $total_gst = 0;
-      $overall_charges = 0;
+      $total_charges = 0;
       $total_payable = 0;
 
       foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
@@ -1628,9 +1632,19 @@ class AdminFinanceController extends Controller
             $total_fuel_surcharge += $shipment->fuel_surcharge;
 
             $total_gst += $done_payment_shipment->gst;
-            $overall_charges += $done_payment_shipment->charges + $done_payment_shipment->gst;
+            $total_charges += $done_payment_shipment->charges;
             $total_payable += $done_payment_shipment->payable;
       }
+
+      $shipment_details .= '
+                            <tr>
+                                <td colspan="7"></td>
+                                <td class="color primary"><strong>Total</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_weight_charges) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_cash_handling_charges) . '</strong></td>
+                            </tr>
+      ';
 
       $html .= '
                             <tr>
@@ -1667,37 +1681,57 @@ class AdminFinanceController extends Controller
                           </tbody>
                         </table>
 
-                         <table class="table table-sm table-bordered border">
-                          <tbody>
-                            <tr>
-                                <td class="color primary" colspan="6"><strong>Charges Summary (PKR)</strong></td>
-                            </tr>
-                            <tr>
-                                <td class="color secondary"><strong>Total Weight Charges</strong></td>
-                                <td>' . number_format($total_weight_charges) . '</td>
-                                <td class="color secondary"><strong>Total Cash Handling Charges</strong></td>
-                                <td>' . number_format($total_cash_handling_charges) . '</td>
-                                <td class="color secondary"><strong>Total Insurance Charges</strong></td>
-                                <td>' . number_format($total_insurance_charges) . '</td>
-                            </tr>
-                            <tr>
-                                <td class="color secondary"><strong>Total Replacement Charges</strong></td>
-                                <td>' . number_format($total_replacement_charges) . '</td>
-                                <td class="color secondary"><strong>Total Return Charges</strong></td>
-                                <td>' . number_format($total_return_charges) . '</td>
-                                <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
-                                <td>' . number_format($total_packaging_material_charges) . '</td>
-                            </tr>
-                            <tr>
-                                <td class="color secondary"><strong>Total Fuel Surcharge</strong></td>
-                                <td>' . number_format($total_fuel_surcharge) . '</td>
-                                <td class="color secondary"><strong>Total GST</strong></td>
-                                <td>' . number_format($total_gst) . '</td>
-                                <td class="color secondary"><strong>Overall Charges</strong></td>
-                                <td>' . number_format($overall_charges) . '</td>
-                            </tr>
-                          </tbody>
-                        </table>
+                        <div class="row">
+                            <div class="col-6">
+                                <table class="table table-sm table-bordered border summary">
+                                  <tbody>
+                                    <tr>
+                                        <td class="color primary" colspan="2"><strong>Charges Summary (PKR)</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Weight Charges</strong></td>
+                                        <td>' . number_format($total_weight_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Cash Handling Charges</strong></td>
+                                        <td>' . number_format($total_cash_handling_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Insurance Charges</strong></td>
+                                        <td>' . number_format($total_insurance_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Replacement Charges</strong></td>
+                                        <td>' . number_format($total_replacement_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Return Charges</strong></td>
+                                        <td>' . number_format($total_return_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Fuel Surcharge</strong></td>
+                                        <td>' . number_format($total_fuel_surcharge) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
+                                        <td>' . number_format($total_charges - $total_packaging_material_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total GST</strong></td>
+                                        <td>' . number_format($total_gst) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
+                                        <td>' . number_format($total_packaging_material_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color primary"><strong>Overall Charges</strong></td>
+                                        <td class="color secondary"><strong>' . number_format($total_charges + $total_gst) . '</strong></td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                            </div>
+                        </div>
                       </div>
                     </div>
 
