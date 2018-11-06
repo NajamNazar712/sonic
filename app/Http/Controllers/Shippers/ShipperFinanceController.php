@@ -33,14 +33,14 @@ class ShipperFinanceController extends Controller
       return view('client.finance.payments.index')->with(['banks'=>$banks,'company_banks'=>$company_banks]);
     }
 
-    public function payments_list() {
+    public function payments_list(Request $request) {
       $done_payments = DonePayment::join('users as u', 'done_payments.user_id', '=', 'u.id')
         ->join('cities as c', 'u.city_id', '=', 'c.id')
         ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
         ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
-        ->join('done_payment_shipments as pps', 'done_payments.id', '=', 'pps.done_payment_id')
+        ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
         ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-        ->select('done_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
+        ->select('done_payments.id as id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
         ->where('done_payments.user_id', session('user_id'))
         ->groupBy('done_payments.id');
 
@@ -189,6 +189,11 @@ class ShipperFinanceController extends Controller
                 }
         })
         ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
+
+        if ($tracking_number = $request->get('tracking_number')) {
+            $datatables->join('shipments as s', 'dps.shipment_id', '=', 's.id')
+            ->where('s.tracking_number', '=', $tracking_number);
+        }
 
         return $datatables->make(true);
     }
