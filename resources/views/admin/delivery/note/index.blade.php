@@ -246,7 +246,7 @@
             $('#delivery_note_form').on('submit',function (e) {
                 e.preventDefault();
                 var scan = $('#scan_tracking');
-                var tracking = scan.val();
+                var tracking = parseInt(scan.val());
                 var hub_id = $('#hub_id').val();
                 if (tracking !== '') {
                     scan.attr('disabled', true);
@@ -283,8 +283,11 @@
 
                         });
                     } else {
-                        var index = $.inArray(tracking, tracking_ids);
-                        if(index === -1){
+                        var is_indexed = $.inArray(tracking, tracking_ids);
+                        console.log(is_indexed)
+                        console.log(tracking_ids)
+                        console.log(tracking)
+                        if(is_indexed === -1){
                             // $('#hub_id').val('');
                             $.ajax({
                                 url:'{{route('admin.delivery.note.shipment.info')}}',
