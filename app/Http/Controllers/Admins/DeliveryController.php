@@ -1429,6 +1429,11 @@ class DeliveryController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+                      
+                      .w-150 {
+                        width: 150px;
+                      }
+                      
                       .w-200 {
                         width: 200px;
                       }
@@ -1557,7 +1562,16 @@ class DeliveryController extends Controller
             $html .= $shipment_details;
             $html .= '
                       <div class="mt-2 manual_form">
+                      <div class="row  mt-1">
+                         <div class="col">
+                            <div class="text-right">
+                                <span class="d-inline-block w-150 text-left"><strong>DNCC Amount</strong></span>
+                                <strong>Rs. '.number_format($total_cod_amount).'</strong>
+                            </div>
+                          </div>
+                        </div>
                         <hr>
+                        
                         <div class="row justify-content-center align-items-end mt-5">
                           <div class="col justify-content-center ">
                             <div class="text-center">
