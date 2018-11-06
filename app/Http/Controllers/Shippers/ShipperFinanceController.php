@@ -295,6 +295,10 @@ class ShipperFinanceController extends Controller
                       .border {
                         border: 1px solid #09262e !important;
                       }
+
+                      .summary {
+                        page-break-inside: avoid;
+                      }
                     </style>
                   </head>
                   <body>
@@ -345,53 +349,91 @@ class ShipperFinanceController extends Controller
 
       $serial_number = 1;
 
-      $total_amount = 0;
-      $total_charges = 0;
+      $total_collection_amount = 0;
+      $total_weight_charges = 0;
+      $total_cash_handling_charges = 0;
+      $total_insurance_charges = 0;
+      $total_replacement_charges = 0;
+      // $total_try_and_buy_charges = 0;
+      $total_return_charges = 0;
+      $total_packaging_material_charges = 0;
+      $total_fuel_surcharge = 0;
       $total_gst = 0;
+      $total_charges = 0;
       $total_payable = 0;
 
       foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
+            if ($done_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($done_payment_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
             $shipment_details .= '
                             <tr>
                               <td>' . $serial_number . '</td>
                               <td>' . $shipment->tracking_number . '</td>
+                              <td>' . $type . '</td>
                               <td>' . $shipment->order_id . '</td>
                               <td>' . $shipment->consignee_name . ' ' . $shipment->consignee_phone_number_1 . '</td>
                               <td>' . $shipment->consignee_city->name . '</td>
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . number_format($done_payment_shipment->charges) . '</td>
-                              <td>' . number_format($done_payment_shipment->gst) . '</td>
-                              <td>' . number_format($done_payment_shipment->payable) . '</td>
+                              <td>' . number_format($shipment->weight_charges) . '</td>
+                              <td>' . (($done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '') . '</td>
                             </tr>
             ';
 
             $serial_number++;
 
-            $total_amount += $done_payment_shipment->amount;
-            $total_charges += $done_payment_shipment->charges;
+            if ($done_payment_shipment->type == 0) {
+                $total_collection_amount += $done_payment_shipment->amount;
+                $total_cash_handling_charges += $shipment->cash_handling_charges;
+                $total_replacement_charges += $shipment->replacement_charges;
+                // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+            }
+            else {
+                $total_return_charges += $shipment->return_charges;
+            }
+
+            $total_weight_charges += $shipment->weight_charges;
+
+            if ($shipment->packaging_material_request) {
+                $total_packaging_material_charges += $shipment->packaging_material_charges;
+            }
+
+            $total_insurance_charges += $shipment->insurance_charges;
+            $total_fuel_surcharge += $shipment->fuel_surcharge;
+
             $total_gst += $done_payment_shipment->gst;
+            $total_charges += $done_payment_shipment->charges;
             $total_payable += $done_payment_shipment->payable;
       }
 
+      $shipment_details .= '
+                            <tr>
+                                <td colspan="7"></td>
+                                <td class="color primary"><strong>Total</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_weight_charges) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_cash_handling_charges) . '</strong></td>
+                            </tr>
+      ';
+
       $html .= '
                             <tr>
-                              <td class="color secondary"><strong>Total Amount</strong></td>
-                              <td>' . number_format($total_amount) . '</td>
+                              <td class="color secondary"><strong>Total Collection Amount (PKR)</strong></td>
+                              <td>' . number_format($total_collection_amount) . '</td>
                             </tr>
                             <tr>
-                              <td class="color secondary"><strong>Total Charges</strong></td>
-                              <td>' . number_format($total_charges) . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Total GST</strong></td>
-                              <td>' . number_format($total_gst) . '</td>
-                            </tr>
-                            <tr>
-                              <td class="color secondary"><strong>Total Payable</strong></td>
+                              <td class="color secondary"><strong>Total Payable (PKR)</strong></td>
                               <td>' . number_format($total_payable) . '</td>
                             </tr>
                           </tbody>
@@ -402,15 +444,15 @@ class ShipperFinanceController extends Controller
                             <tr>
                               <td class="color primary"><strong>S. No.</strong></td>
                               <td class="color primary"><strong>Tracking No.</strong></td>
+                              <td class="color primary"><strong>Type</strong></td>
                               <td class="color primary"><strong>Order ID</strong></td>
                               <td class="color primary"><strong>Consignee</strong></td>
                               <td class="color primary"><strong>Destination</strong></td>
                               <td class="color primary"><strong>Service Type</strong></td>
-                              <td class="color primary"><strong>Actual Weight</strong></td>
-                              <td class="color primary"><strong>Amount</strong></td>
-                              <td class="color primary"><strong>Charges</strong></td>
-                              <td class="color primary"><strong>GST</strong></td>
-                              <td class="color primary"><strong>Payable</strong></td>
+                              <td class="color primary"><strong>Weight (kg)</strong></td>
+                              <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
+                              <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
                             </tr>
       ';
 
@@ -419,6 +461,58 @@ class ShipperFinanceController extends Controller
       $html .= '
                           </tbody>
                         </table>
+
+                        <div class="row">
+                            <div class="col-6">
+                                <table class="table table-sm table-bordered border summary">
+                                  <tbody>
+                                    <tr>
+                                        <td class="color primary" colspan="2"><strong>Charges Summary (PKR)</strong></td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Weight Charges</strong></td>
+                                        <td>' . number_format($total_weight_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Cash Handling Charges</strong></td>
+                                        <td>' . number_format($total_cash_handling_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Insurance Charges</strong></td>
+                                        <td>' . number_format($total_insurance_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Replacement Charges</strong></td>
+                                        <td>' . number_format($total_replacement_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Return Charges</strong></td>
+                                        <td>' . number_format($total_return_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Fuel Surcharge</strong></td>
+                                        <td>' . number_format($total_fuel_surcharge) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Charges (w/o GST)</strong></td>
+                                        <td>' . number_format($total_charges - $total_packaging_material_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total GST</strong></td>
+                                        <td>' . number_format($total_gst) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color secondary"><strong>Total Packaging Material Charges</strong></td>
+                                        <td>' . number_format($total_packaging_material_charges) . '</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="color primary"><strong>Overall Charges</strong></td>
+                                        <td class="color secondary"><strong>' . number_format($total_charges + $total_gst) . '</strong></td>
+                                    </tr>
+                                  </tbody>
+                                </table>
+                            </div>
+                        </div>
                       </div>
                     </div>
 

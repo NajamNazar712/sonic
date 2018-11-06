@@ -7,6 +7,7 @@ use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\CargoConsignment;
+use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 use App\Http\Models\PickupNote;
 use App\Http\Models\Rider;
@@ -192,7 +193,7 @@ class AdminReportsController extends Controller
             ->join('shipping_modes as sm','sm.id','=','cargo_consignments.shipping_mode_id')
             ->join('admins as si','si.id','=','cargo_consignments.sender_id')
             ->join('admins as ri','ri.id','=','cargo_consignments.receiver_id')
-            ->select(['cargo_consignments.id as cargo_id','oc.name as origin','h.name as destination','cargo_consignments.shipments','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments'])
+            ->select(['cargo_consignments.id as cargo_id','cargo_consignments.id as cargo_id_link','oc.name as origin','h.name as destination','cargo_consignments.shipments','cargo_consignments.shipments as shipments_link','sm.mode as shipping_mode','cargo_consignments.created_at as transit_at','si.name as transit_by','ri.name as received_by','cargo_consignments.updated_at as received_at','cargo_consignments.received_shipments','cargo_consignments.type as cargo_type'])
             ->where('cargo_consignments.status_id',3);
         if (session('role_id') != 1) {
             $cargo_received = $cargo_received->where(function ($query) {
@@ -200,8 +201,19 @@ class AdminReportsController extends Controller
             });
         }
         $cargo = Datatables::of($cargo_received)
-            ->editColumn('cargo_id', function ($cargo_received) {
-                return str_pad($cargo_received->cargo_id, 6, '0', STR_PAD_LEFT);
+            ->editColumn('cargo_id_link', function ($cargo_received) {
+                $print_cargo = "<u><a href='javascript:void(0);' class='cargo_print'>" .str_pad($cargo_received->cargo_id, 6, '0', STR_PAD_LEFT)."</a></u>";
+                return $print_cargo;
+            })
+            ->editColumn('cargo_type',function ($cargo_received){
+                if($cargo_received->cargo_type == 1){
+                    return 'Normal';
+                }else{
+                    return 'Return';
+                }
+            })
+            ->editColumn('shipments_link',function ($cargo_received){
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_received->shipments . '</button>';
             });
 
         if($cargo_no = $request->get('search_cargo_no')){
@@ -227,7 +239,260 @@ class AdminReportsController extends Controller
             $to = $request->get('search_date_to');
             $cargo->whereBetween('cargo_consignments.created_at', [$from,$to]);
         }
+        if ($cargo_type = $request->get('cargo_type')) {
+            if ($cargo_type != 0) {
+                $cargo->where('cargo_consignments.type', $cargo_type);
+            }
+        }
         return $cargo->make(true);
+    }
+    public function cargo_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $cargo_consignments_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $request->id)->get();
+
+        foreach ($cargo_consignments_shipments as $cargo_consignments_shipment) {
+            $shipment = $cargo_consignments_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+    public function cargo_print(Request $request) {
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $cargo_consignment = CargoConsignment::find($request->id);
+
+        $sender = $cargo_consignment->sender;
+        $receiver = ($cargo_consignment->receiver_id) ? $cargo_consignment->receiver : NULL;
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Cargo Slip & Checklist</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .cargo_checklist {
+                        page-break-before: always;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+                      <div class="cargo_slip">
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle color primary"><strong>Cargo Slip</strong></td>
+                              <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                              </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Destination Hub</strong></td>
+                              <td>' . $cargo_consignment->destination_hub->name . '</td>
+                              <td rowspan="8" class="text-center align-middle">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <span><strong>' . str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Transit Date</strong></td>
+                              <td>' . $cargo_consignment->created_at . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Shipping Mode</strong></td>
+                              <td>' . $cargo_consignment->shipping_mode->mode . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Transport Mode</strong></td>
+                              <td>' . $cargo_consignment->transport_mode->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Vendor</strong></td>
+                              <td>' . $cargo_consignment->transport_mode_vendor->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Builty Number</strong></td>
+                              <td>' . $cargo_consignment->builty_number . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Expected Arrival Date</strong></td>
+                              <td>' . (($cargo_consignment->expected_arrival_date) ? Carbon::parse($cargo_consignment->expected_arrival_date)->format('d/m/Y') : '') . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>No. of Parcels</strong></td>
+                              <td>' . $cargo_consignment->shipments . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td colspan="2" class="color primary"><strong>Sender Information</strong></td>
+                              <td colspan="2" class="color primary"><strong>Receiver Information</strong></td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Name</strong></td>
+                              <td>' . $sender['name'] . '</td>
+                              <td class="color secondary"><strong>Name</strong></td>
+                              <td>' . (($receiver) ? $receiver['name'] : '') . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Role</strong></td>
+                              <td>' . $sender->role->name  . ' - ' . $sender->role->department->name . '</td>
+                              <td class="color secondary"><strong>Role</strong></td>
+                              <td>' . (($receiver) ? $receiver->role->department->name : '') . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Phone No.</strong></td>
+                              <td>' . $sender['phone_number'] . '</td>
+                              <td class="color secondary"><strong>Phone No.</strong></td>
+                              <td>' . (($receiver) ? $receiver['phone_number'] : '') . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="color primary"><strong>Route Information</strong></td>
+                            </tr>
+                            <tr>
+                              <td>' . $cargo_consignment->origin_hub->name . ' - ' . $cargo_consignment->junction_hub_1->name . ' - ' . (($cargo_consignment->junction_hub_2_id) ? ($cargo_consignment->junction_hub_2->name . ' - ') : '') . $cargo_consignment->destination_hub->name . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div class="cargo_checklist">
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                              <td class="text-center align-middle color primary"><strong>Cargo Checklist</strong></td>
+                              <td class="text-center align-middle  color secondary">Printed at ' . Carbon::now() . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Origin Hub</strong></td>
+                              <td>' . $cargo_consignment->origin_hub->name . '</td>
+                              <td rowspan="5" class="text-center align-middle">
+                                <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                                <span><strong>' . str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                              </td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Destination Hub</strong></td>
+                              <td>' . $cargo_consignment->destination_hub->name . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Transit Date</strong></td>
+                              <td>' . $cargo_consignment->created_at . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>Expected Arrival Date</strong></td>
+                              <td>' . (($cargo_consignment->expected_arrival_date) ? Carbon::parse($cargo_consignment->expected_arrival_date)->format('d/m/Y') : '') . '</td>
+                            </tr>
+                            <tr>
+                              <td class="color secondary"><strong>No. of Parcels</strong></td>
+                              <td>' . $cargo_consignment->shipments . '</td>
+                            </tr>
+                          </tbody>
+                        </table>
+
+                        <table class="table table-sm table-bordered border">
+                          <tbody>
+                            <tr>
+                              <td class="color primary"><strong>S. No.</strong></td>
+                              <td class="color primary"><strong>Tracking No.</strong></td>
+                              <td class="color primary"><strong>Consignee Name</strong></td>
+                              <td class="color primary"><strong>Consignee Phone</strong></td>
+                              <td class="color primary"><strong>Consignee City</strong></td>
+                              <td class="color primary"><strong>Amount</strong></td>
+      ';
+
+        $serial_number = 1;
+
+        foreach ($cargo_consignment->cargo_consignment_shipments as $cargo_consignment_shipment) {
+            $shipment = $cargo_consignment_shipment->shipment;
+
+
+            $html .= '
+                            <tr>
+                              <td>' . $serial_number . '</td>
+                              <td>' . $shipment->tracking_number . '</td>
+                              <td>' . $shipment->consignee_name . '</td>
+                              <td>' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
+                              <td>' . $shipment->consignee_city->name . '</td>
+                              <td>' . $shipment->amount . '</td>
+                            </tr>
+        ';
+
+            $serial_number++;
+        }
+
+        $html .= '
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
     }
     public function lead_time_index(Request $request){
 //        $shippers = User::all(['id','name']);
@@ -1252,6 +1517,7 @@ class AdminReportsController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
@@ -1268,7 +1534,12 @@ class AdminReportsController extends Controller
                     ->where('dps.created_at','=',
                         DB::raw('(select max(created_at) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
             })
-            ->select('shipments.tracking_number','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable')
+            ->leftJoin('shipments_journey as dr', function ($join) {
+                $join->on('dr.shipment_id', '=', 'shipments.id')
+                    ->where('dr.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37))'));
+            })
+            ->select('shipments.tracking_number','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
         if (session('role_id') != 1) {
             $sales = $sales->whereIn('dc.hub_id', session('hubs'));
@@ -1302,6 +1573,11 @@ class AdminReportsController extends Controller
                     $total = $sale->d_total_charges;
                 }
                 return $total;
+            })
+            ->addColumn('estimated_charges',function($sale){
+                $estimated = '';
+                $estimated = (($sale->weight_charges != null)? $sale->weight_charges:0) + (($sale->cash_handling_charges != null)? $sale->cash_handling_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->insurance_charges != null)? $sale->insurance_charges:0) + (($sale->return_charges != null)? $sale->return_charges:0) + (($sale->replacement_charges != null)? $sale->replacement_charges:0) + (($sale->fuel_surcharge != null)? $sale->fuel_surcharge:0) + (($sale->try_and_buy_charges != null)? $sale->try_and_buy_charges:0) + (($sale->packaging_material_charges != null)? $sale->packaging_material_charges:0);
+                return $estimated;
             })
             ->editColumn('p_net_payable',function($sale){
                 $payable = '';

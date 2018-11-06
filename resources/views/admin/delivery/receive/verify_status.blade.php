@@ -31,6 +31,7 @@
                             <th class="border-primary border-darken-1">Status</th>
                             <th class="border-primary border-darken-1">Reason</th>
                             <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Arrival Date</th>
                             <th class="border-primary border-darken-1">Call Verification</th>
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Destination</th>
@@ -151,13 +152,14 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data:'shipment_id_padded',name: 'shipments.id', class: 'align-middle shipment_id'},
-                    {data:'tracking_number',name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data:'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data:'consignee_name',name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data:'consignee_phone',name: 'shipments.consignee_phone', class: 'align-middle consignee_phone'},
                     {data:'amount',name: 'shipments.amount', class: 'align-middle amount'},
                     {data:'status',name: 'status', class: 'align-middle status statusOnChange',orderable: false, searchable: false},
                     {data:'reason',name: 'reason', class: 'align-middle reason reasonSelect',orderable: false, searchable: false},
                     {data:'remarks',name: 'remarks', class: 'align-middle remarks',orderable: false, searchable: false},
+                    {data:'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data:'call_verification',name: 'call_verification', class: 'align-middle call_verification',orderable: false, searchable: false},
                     {data:'address',name: 'shipments.consignee_address', class: 'align-middle address'},
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
