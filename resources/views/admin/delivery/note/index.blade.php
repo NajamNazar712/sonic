@@ -284,9 +284,6 @@
                         });
                     } else {
                         var is_indexed = $.inArray(tracking, tracking_ids);
-                        console.log(is_indexed)
-                        console.log(tracking_ids)
-                        console.log(tracking)
                         if(is_indexed === -1){
                             // $('#hub_id').val('');
                             $.ajax({
