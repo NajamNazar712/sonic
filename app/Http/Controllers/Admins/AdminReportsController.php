@@ -55,7 +55,12 @@ class AdminReportsController extends Controller
                     ->where('sj.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
-            ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount'])
+            ->leftJoin('shipments_journey as journey', function ($join) {
+                $join->on('journey.shipment_id', '=', 'shipments.id')
+                    ->where('journey.created_at', '=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->select(['shipments.id as shId','shipments.tracking_number','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name'])
             ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47]);
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -70,7 +75,16 @@ class AdminReportsController extends Controller
                 }else{
                     return $days;
                 }
-            });
+            })
+        ->addColumn('aging_last_status',function ($shipments){
+
+            $days = Carbon::now()->diffInDays($shipments->last_status_date);
+            if($days == 0){
+                return "-";
+            }else{
+                return $days;
+            }
+        });
         if ($shipper = $request->get('search_shipper')) {
             $datatable->where('u.id', '=', $shipper);
         }
