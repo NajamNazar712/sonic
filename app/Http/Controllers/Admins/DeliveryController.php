@@ -178,6 +178,7 @@ class DeliveryController extends Controller
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
             $remarks = '';
             $status = '';
+            $rider_name='';
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
                 $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
@@ -185,6 +186,8 @@ class DeliveryController extends Controller
                 $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment->id)->orderBy('delivery_note_id', 'desc');
                 if ($old_delivery_note_id->exists()) {
                     $old_delivery_note_id = $old_delivery_note_id->first();
+                    $delivery_note_rider = DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->first();
+                    $rider_name = $delivery_note_rider->rider->name;
                     $is_updateable = DeliveryNoteShipment::where('delivery_note_id', $old_delivery_note_id->delivery_note_id)->where('status', 0)->count();
                 } else {
                     $is_updateable = 0;
@@ -213,7 +216,7 @@ class DeliveryController extends Controller
                                     $status = ' - ';
                                 }
                             }
-                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status, 'remarks' => $remarks]);
+                            return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name, 'remarks' => $remarks]);
 
                         } else {
                             return ['status' => 1, 'error' => 'Different hub, Select shipments from same hub!', 'hub_old' => $request->hub_id, 'newHub' => $hub_id];
@@ -237,7 +240,7 @@ class DeliveryController extends Controller
                             }
                         }
 
-                        return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status, 'remarks' => $remarks]);
+                        return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status,'rider_name'=>$rider_name,'remarks' => $remarks]);
                     }
                 } else {
                     return ['status' => 1, 'error' => 'This Shipment is already in an unverified delivery note!'];
