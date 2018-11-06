@@ -184,6 +184,7 @@
                     @endif
 
             var shipment_ids = [];
+            var tracking_ids = [];
             var notification_ids = [];
             var rider_info_ids = [];
             var table = $('#datatable').DataTable({
@@ -273,6 +274,7 @@
                                 table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
+                                tracking_ids.push(data.tracking_number);
                                 notification_ids.push(1);
                                 rider_info_ids.push(1);
                                 $('#hub_id').val(data.hub);
@@ -281,8 +283,8 @@
 
                         });
                     } else {
-                        var index = $.inArray(tracking, shipment_ids);
-                        if(index !== -1){
+                        var index = $.inArray(tracking, tracking_ids);
+                        if(index === -1){
                             // $('#hub_id').val('');
                             $.ajax({
                                 url:'{{route('admin.delivery.note.shipment.info')}}',
@@ -307,6 +309,7 @@
                                     table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
+                                    tracking_ids.push(data.tracking_number);
                                     notification_ids.push(1);
                                     rider_info_ids.push(1);
                                 }
@@ -331,6 +334,7 @@
                 // var rider_info = $.inArray(rid, rider_info_ids);
                 if (index !== -1) {
                     shipment_ids.splice(index, 1);
+                    tracking_ids.splice(index, 1);
                     notification_ids.splice(index, 1);
                     rider_info_ids.splice(index, 1);
 
