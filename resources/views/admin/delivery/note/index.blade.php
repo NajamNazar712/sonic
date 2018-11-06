@@ -281,8 +281,8 @@
 
                         });
                     } else {
-
-                        if(table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1){
+                        var index = $.inArray(tracking, shipment_ids);
+                        if(index !== -1){
                             // $('#hub_id').val('');
                             $.ajax({
                                 url:'{{route('admin.delivery.note.shipment.info')}}',
