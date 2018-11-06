@@ -261,9 +261,6 @@
                                 'tracking':tracking
                             }
                         }).done(function (data) {
-                            scan.val('');
-                            scan.attr('disabled', false);
-                            scan.focus();
                             if(data.status === 1){
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
@@ -279,7 +276,9 @@
                                 rider_info_ids.push(1);
                                 $('#hub_id').val(data.hub);
                             }
-
+                            scan.val('');
+                            scan.attr('disabled', false);
+                            scan.focus();
 
                         });
                     } else {
@@ -295,9 +294,6 @@
                                     'hub_id':hub_id
                                 }
                             }).done(function (data) {
-                                scan.val('');
-                                scan.attr('disabled', false);
-                                scan.focus();
                                 if(data.status === 1){
 
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
@@ -313,7 +309,9 @@
                                     notification_ids.push(1);
                                     rider_info_ids.push(1);
                                 }
-
+                                scan.val('');
+                                scan.attr('disabled', false);
+                                scan.focus();
 
                             });
                         }else{
