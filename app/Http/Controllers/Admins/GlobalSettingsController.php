@@ -39,4 +39,15 @@ class GlobalSettingsController extends Controller
             }
         }
     }
+
+    public function shipment_cancellation_cut_off_days_index() {
+        $settings = GlobalSettings::where('type', '=', 'shipment_cancellation_cut_off_days')->first();
+
+        if ($settings->exists()) {
+            return view('admin.settings.shipment_cancellation_cut_off_days')->with('settings', $settings->first());
+        }
+        else {
+            return view('admin.settings.shipment_cancellation_cut_off_days')->with('settings', FALSE);
+        }
+    }
 }
