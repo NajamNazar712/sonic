@@ -214,7 +214,7 @@
 											</tr>
 											<tr role="row">
 												<td>Item Description</td>
-												<td class="text-center">190</td>
+												<td class="text-center">250</td>
 											</tr>
 											<tr role="row">
 												<td>Item Quantity</td>
