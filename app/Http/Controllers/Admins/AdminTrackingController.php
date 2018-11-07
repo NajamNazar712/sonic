@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admins;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentJourney;
 use App\Http\Models\ShipmentPaymentJourney;
@@ -79,23 +80,21 @@ class AdminTrackingController extends Controller
     				$journey_details['status'] = $journey->shipment_status_shipper->name;
 
     				if ($journey->reference_1_id) {
-    					$journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
+                        if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
+                            $journey_details['status'] .= ' (<button class="btn btn-sm btn-outline-info align-middle cargo_consignment_details" data-id="' . $journey->reference_1_id . '">' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT) . '</button>';
+                        }
+                        else {
+                            $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
 
-    					if ($journey->reference_2_id) {
-                            if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
-                                $rider = Rider::find($journey->reference_2_id);
+                            if ($journey->reference_2_id) {
+                                if (in_array($journey->shipper_status_id, [5, 23, 28, 34])) {
+                                    $rider = Rider::find($journey->reference_2_id);
 
-                                $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
-                            }
-                            else {
-                                $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
-                            }
-    					}
-                        else if (in_array($journey->shipper_status_id, [3, 21, 26, 32])) {
-                            $cargo_consignment = CargoConsignment::find($journey->reference_1_id);
-
-                            if ($cargo_consignment->builty_number && !empty($cargo_consignment->builty_number)) {
-                                $journey_details['status'] .= ' | ' . $cargo_consignment->builty_number;
+                                    $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
+                                }
+                                else {
+                                    $journey_details['status'] .= ' | ' . str_pad($journey->reference_2_id, 6, '0', STR_PAD_LEFT);
+                                }
                             }
                         }
 
@@ -146,6 +145,31 @@ class AdminTrackingController extends Controller
         $information['route'] = $rider->route->code . ' (' . $rider->route->start . ' to ' . $rider->route->end . ')';
 
         return $information;
+    }
+
+    public function cargo_consignment_details(Request $request) {
+        $cargo_consignment = CargoConsignment::find($request->id);
+
+        $details = array();
+
+        $details['junction_hub_1'] = $cargo_consignment->junction_hub_1->name;
+        $details['junction_hub_2'] = ($cargo_consignment->junction_hub_2_id) ? $cargo_consignment->junction_hub_2->name : '';
+        $details['expected_arrival_date'] = Carbon::parse($cargo_consignment->expected_arrival_date)->format('d/m/Y');
+        $details['shipping_mode'] = $cargo_consignment->shipping_mode->mode;
+        $details['transport_mode'] = $cargo_consignment->transport_mode->name;
+        $details['transport_mode_vendor'] = $cargo_consignment->transport_mode_vendor->name;
+        $details['seal_number'] = $cargo_consignment->seal_number;
+        $details['builty_number'] = $cargo_consignment->builty_number;
+        $details['shipments_weight'] = $cargo_consignment->shipments_weight;
+        $details['actual_weight'] = $cargo_consignment->actual_weight;
+        $details['vendor_weight'] = $cargo_consignment->vendor_weight;
+        $details['weight_charges_per_kg'] = $cargo_consignment->weight_charges_per_kg;
+        $details['extra_charges'] = $cargo_consignment->extra_charges;
+        $details['total_weight_charges'] = $cargo_consignment->total_weight_charges;
+        $details['sender_name'] = Admin::find($cargo_consignment->sender_id)->name;
+        $details['receiver_name'] = ($cargo_consignment->receiver_id) ? Admin::find($cargo_consignment->receiver_id)->name : '';
+
+        return $details;
     }
 
 }
