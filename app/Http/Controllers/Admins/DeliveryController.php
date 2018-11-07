@@ -284,7 +284,8 @@ class DeliveryController extends Controller
                             'route_id' => $request->selected_route_id,
                             'shipments_count' => $shipments_count,
                             'admin_id' => $admin,
-                            'total_cod_amount' => $total_cod_amount
+                            'total_cod_amount' => $total_cod_amount,
+                            'last_updated' => Carbon::now()
                         ]);
             
                         if ($note) {
@@ -329,7 +330,7 @@ class DeliveryController extends Controller
             ->join('riders', 'delivery_notes.rider_id', '=', 'riders.id')
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.pending_status', 'delivery_notes.created_at'])
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'delivery_notes.created_at', 'delivery_notes.total_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.pending_status', 'delivery_notes.created_at','delivery_notes.last_updated'])
             ->where('delivery_notes.status', 0);
 
         if (session('role_id') != 1) {
@@ -829,7 +830,6 @@ class DeliveryController extends Controller
 
     public function receive_delivery_status_submit(Request $request)
     {
-//            return $request;
         $shipments = explode(',', $request->shipment_ids);
         $delivery_note_id = $request->delivery_note_id;
         if ($delivery_note_id != '') {
@@ -889,10 +889,13 @@ class DeliveryController extends Controller
                 }
 
             }
+            $delivery_note_data = DeliveryNote::find($delivery_note_id);
+            $delivery_note_data->last_updated = Carbon::now();
             $updates_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', 0)->count();
             if ($updates_count == 0) {
-                DeliveryNote::where('id', $delivery_note_id)->update(['pending_status' => 1]);
+                $delivery_note_data->pending_status = 1;
             }
+            $delivery_note_data->save();
             return redirect()->back()->with('success', 'Statuses updated successfully!');
         } else {
             return redirect()->back()->with('error', 'Delivery note not found!');
@@ -941,7 +944,7 @@ class DeliveryController extends Controller
             $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status)->get();
             $dncc_amount = $filtered_shipments->sum('received_amount');
             $count = count($filtered_shipments);
-            DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>$pending_status,'delivered_shipments'=>$count,'received_cod_amount'=>$dncc_amount]);
+            DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>$pending_status,'delivered_shipments'=>$count,'received_cod_amount'=>$dncc_amount,'last_updated'=>Carbon::now()]);
             return ['status' => 0, 'success' => 'Shipments status Delivered updated!'];
         } else {
             return ['status' => 1, 'error' => 'No Shipments selected'];
@@ -1007,6 +1010,9 @@ class DeliveryController extends Controller
                 DeliveryNoteShipment::where('shipment_id', $shipment)->update(['status' => 4]);
             }
         }
+        $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
+        $delivery_note_data->last_updated = Carbon::now();
+        $delivery_note_data->save();
         return redirect()->back()->with(['success' => 'Selected Replacement\'s weight updated!']);
     }
 
@@ -1048,6 +1054,9 @@ class DeliveryController extends Controller
 
             DeliveryNoteShipment::where(['shipment_id' => $request->trybuy_shipment_id, 'delivery_note_id' => $request->delivery_note_trybuy])->update(['status' => 5]);
 
+            $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
+            $delivery_note_data->last_updated = Carbon::now();
+            $delivery_note_data->save();
             return redirect()->back()->with('success', 'Try & Buy shipment updated');
         }
 
@@ -1357,13 +1366,16 @@ class DeliveryController extends Controller
                 $dncc_amount = $filtered_shipments->sum('received_amount');
                 $delivered_shipments = $filtered_shipments->count();
 
-                DeliveryNote::where('id', $delivery_note_id)->update(['delivered_shipments' => $delivered_shipments, 'updated_by' => Auth::id(), 'received_cod_amount' => $dncc_amount, 'status' => 1]);
+                DeliveryNote::where('id', $delivery_note_id)->update(['delivered_shipments' => $delivered_shipments, 'updated_by' => Auth::id(), 'received_cod_amount' => $dncc_amount, 'status' => 1,'last_updated'=>Carbon::now()]);
 
 
                 NotificationsController::send(13, $delivery_note_id);
                 NotificationsController::send(14, $delivery_note_id);
                 return redirect()->back()->with('success', 'Delivery Note verified and updated successfully!');
             } else {
+                $delivery_note_data = DeliveryNote::find($delivery_note_id);
+                $delivery_note_data->last_updated = Carbon::now();
+                $delivery_note_data->save();
                 return redirect()->back()->with('success', 'Delivery Note updated successfully!');
             }
         } else {
@@ -1447,6 +1459,9 @@ class DeliveryController extends Controller
       ';
         $delivery_note = DeliveryNote::where('id', $request->id);
         if ($delivery_note->exists()) {
+            $delivery_note_data = $delivery_note->first();
+            $delivery_note_data->last_updated = Carbon::now();
+            $delivery_note_data->save();
             $total_shipments = 0;
             $total_cod_amount = 0;
             $dncc_status = array(14, 16, 30, 36, 37);
@@ -1631,6 +1646,7 @@ class DeliveryController extends Controller
             $delivery_note_print = $delivery_note->first();
             if ($delivery_note_print->undelivered_print == 0) {
                 $delivery_note_print->undelivered_print = 1;
+                $delivery_note_print->last_updated = Carbon::now();
                 $delivery_note_print->save();
             }
         }
