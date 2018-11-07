@@ -627,6 +627,7 @@
                                 type:'POST',
                                 dataType:'json',
                                 data: {
+                                    'delivery_note_id': delivery_note,
                                     'replacements':data.replacement,
                                     '_token': '{{ csrf_token() }}'
                                 }
@@ -696,6 +697,7 @@
                                 type:'POST',
                                 dataType:'json',
                                 data: {
+                                    'delivery_note_id': delivery_note,
                                     'trybuy':data.try,
                                     '_token': '{{ csrf_token() }}'
                                 }
