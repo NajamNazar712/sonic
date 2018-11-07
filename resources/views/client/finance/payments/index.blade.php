@@ -17,6 +17,12 @@
 						<div class="card-body">
 							@include('client.inc.messages')
 
+							<form id="tracking_number_search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+								<div class="form-group">
+									<input type="text" name="tracking_number" class="form-control tracking_number" id="tracking_number" placeholder="Tracking Number">
+								</div>
+							</form>
+
 							<table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
 								<thead>
 									<tr role="row" class="bg-primary white">
@@ -118,6 +124,7 @@
 @section('js')
 	<script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 
 
@@ -131,6 +138,7 @@
                         url: '{{ route('cod.finance.payments.list') }}',
                         data: {
                             'page': 'all',
+                            'tracking_number': $('#tracking_number_search_form #tracking_number').val()
                         },
                         success: function (result) {
                             head = [];
@@ -205,7 +213,12 @@
 				pagingType: 'full_numbers',
 				processing: true,
 				serverSide: true,
-				ajax: '{{ route('cod.finance.payments.list') }}',
+				ajax: {
+					url: '{{ route('cod.finance.payments.list') }}',
+					data: function (d) {
+						d.tracking_number = $('#tracking_number_search_form #tracking_number').val();
+					}
+				},
 				rowId: 'id',
 				order: [[1, 'desc']],
 				columns: [
@@ -324,6 +337,26 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
 					this.api().table().columns.adjust();
+				}
+			});
+
+			$('#tracking_number_search_form').bind('submit', function(e) {
+				e.preventDefault();
+
+				length = $('#tracking_number_search_form #tracking_number').val().length;
+
+				if (length == 0 || length >= 12) {
+					table.draw();
+				}
+			});
+
+			$('#tracking_number_search_form #tracking_number').inputmask({
+				'alias': 'integer',
+				'allowMinus': false,
+				'allowPlus': false
+			}).bind('input', function() {
+				if (this.value.length == 0 || this.value.length >= 12) {
+					table.draw();
 				}
 			});
 
