@@ -106,7 +106,7 @@
                             <li><a class="menu-item" href="{{ route('admin.delivery.misroute.index') }}">Misrouted</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(107, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(119, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.misroute.history.index') }}">Misrouted History</a></li>
                         @endif
 

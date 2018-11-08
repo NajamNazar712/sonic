@@ -139,7 +139,7 @@
                 order: [[2, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
+                    {data: 'tracking_number_link', name: 's.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'created_at', name: 'misrouted_history.created_at', class: 'align-middle created_at'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'old_consignee_city', name: 'odc.name', class: 'align-middle old_consignee_city'},
