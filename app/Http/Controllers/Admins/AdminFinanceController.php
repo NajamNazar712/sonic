@@ -1612,24 +1612,26 @@ class AdminFinanceController extends Controller
 
             $serial_number++;
 
-            if ($done_payment_shipment->type == 0) {
-                $total_collection_amount += $done_payment_shipment->amount;
-                $total_cash_handling_charges += $shipment->cash_handling_charges;
-                $total_replacement_charges += $shipment->replacement_charges;
-                // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-            }
-            else {
-                $total_return_charges += $shipment->return_charges;
-            }
+            if ($done_payment_shipment->type != 2) {
+                if ($done_payment_shipment->type == 0) {
+                    $total_collection_amount += $done_payment_shipment->amount;
+                    $total_cash_handling_charges += $shipment->cash_handling_charges;
+                    $total_replacement_charges += $shipment->replacement_charges;
+                    // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                }
+                else {
+                    $total_return_charges += $shipment->return_charges;
+                }
 
-            $total_weight_charges += $shipment->weight_charges;
+                $total_weight_charges += $shipment->weight_charges;
 
-            if ($shipment->packaging_material_request) {
-                $total_packaging_material_charges += $shipment->packaging_material_charges;
+                if ($shipment->packaging_material_request) {
+                    $total_packaging_material_charges += $shipment->packaging_material_charges;
+                }
+
+                $total_insurance_charges += $shipment->insurance_charges;
+                $total_fuel_surcharge += $shipment->fuel_surcharge;
             }
-
-            $total_insurance_charges += $shipment->insurance_charges;
-            $total_fuel_surcharge += $shipment->fuel_surcharge;
 
             $total_gst += $done_payment_shipment->gst;
             $total_charges += $done_payment_shipment->charges;
