@@ -372,8 +372,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
            Route::post('shipment/info','Admins\DeliveryController@get_shipment_info')->name('shipment.info');
            Route::post('shipment/update','Admins\DeliveryController@misroute_shipment_update')->name('shipment.update');
            Route::prefix('history')->name('history.')->group(function (){
-                Route::get('','Admins\MistoutedHistoryController@misrouted_history_index')->name('index');
-                Route::get('list','Admins\MistoutedHistoryController@misrouted_history_list')->name('list');
+                Route::get('','Admins\MisroutedHistoryController@misrouted_history_index')->name('index');
+                Route::get('list','Admins\MisroutedHistoryController@misrouted_history_list')->name('list');
 
            });
 
