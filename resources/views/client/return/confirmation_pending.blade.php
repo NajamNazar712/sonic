@@ -19,8 +19,6 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Order ID</th>
-                        <th class="border-primary border-darken-1">Shipper Name</th>
-                        <th class="border-primary border-darken-1">Shipper Phone(s)</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
@@ -34,7 +32,6 @@
                         <th class="border-primary border-darken-1">Reason</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
-                        <th class="border-primary border-darken-1">Re-Attempt Count</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -50,6 +47,10 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/tables/datatable/datatables.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
+
+
 
     <style>
         table.dataTable {
@@ -104,6 +105,10 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -175,10 +180,8 @@
             var shipment_remarks = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                @if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0)
-
                 buttons: [
-                        @if (session('role_id') == 1 || in_array(45, session('permissions')))
+
                     {
                         text: 'Confirm',
                         className: 'btn btn-primary confirm',
@@ -213,26 +216,20 @@
                                             var row = table.row(index);
                                             if ($(row.node()).hasClass('selected')) {
                                                 var id = parseInt(row.id());
-                                                var remarks = $(row.node()).find('td.shipment_remarks input').val();
-                                                shipment_remarks[id] = remarks;
                                             }
                                         });
 
                                         $.ajax({
-                                            url:"{{route('admin.return.marked.status')}}",
+                                            url:"{{route('cod.return.pending.marked.status')}}",
                                             method:'POST',
                                             data:{
                                                 'shipment_ids':selected_rows,
                                                 '_token':'{{ csrf_token() }}',
-                                                'action': 'confirm',
-                                                'remark': shipment_remarks
                                             }
                                         }).done(function (data) {
                                             table.rows().deselect();
                                             selected_rows = [];
-                                            shipment_remarks = [];
                                             table.button('.confirm').disable();
-                                            table.button('.re-attempt').disable();
                                             table.draw('false');
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
@@ -247,77 +244,10 @@
                             }
                         }
                     },
-                        @endif
 
-                        @if (session('role_id') == 1 || in_array(46, session('permissions')))
-                    {
-                        text: 'Re-Attempt',
-                        className: 'btn btn-primary re-attempt',
-                        enabled: false,
-                        action: function (e, dt, node, config) {
-                            if(selected_rows != ''){
-                                swal({
-                                    title: 'Are You Sure?',
-                                    text: 'Select Yes to change shipment status to Re-Attempt!',
-                                    icon: 'warning',
-                                    buttons: {
-                                        cancel: {
-                                            text: 'No',
-                                            value: null,
-                                            visible: true,
-                                            closeModal: true,
-                                        },
-                                        confirm: {
-                                            text: 'Yes',
-                                            value: true,
-                                            visible: true,
-                                            closeModal: true
-                                        }
-                                    },
-                                    closeOnClickOutside: false,
-                                    closeOnEsc: false,
-                                    dangerMode: true
-                                }).then(function (confirm) {
-                                    if (confirm) {
-                                        table.rows().nodes().each(function(index) {
-                                            var row = table.row(index);
-
-                                            if ($(row.node()).hasClass('selected')) {
-                                                var id = parseInt(row.id());
-                                                var remark = $(row.node()).find('td.shipment_remarks input').val();
-                                                shipment_remarks[id] = remark;
-                                            }
-                                        });
-
-                                        $.ajax({
-                                            url:"{{route('admin.return.marked.status')}}",
-                                            method:'POST',
-                                            data:{
-                                                'shipment_ids':selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                                'action': 'reattempt',
-                                                'remark': shipment_remarks
-                                            }
-                                        }).done(function (data) {
-                                            selected_rows = [];
-                                            shipment_remarks = [];
-                                            table.button('.confirm').disable();
-                                            table.button('.re-attempt').disable();
-                                            table.draw('false');
-                                            table.rows().deselect();
-                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
-                                        });
-                                    }
-                                });
-
-                            }
-                        }
-                    },
-                        @endif
                     {
                         extend: 'excel',
-                        title: 'Return Marked',
+                        title: 'Return Confirmation Pending',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }, {
@@ -356,7 +286,6 @@
                                         }
 
                                         table.button('.confirm').enable();
-                                        table.button('.re-attempt').enable();
                                     }
                                 }
                             });
@@ -384,7 +313,6 @@
 
                                     if (selected_rows.length == 0) {
                                         table.button('.confirm').disable();
-                                        table.button('.re-attempt').disable();
 
                                         hub_ids.splice(index, 1);
                                     }
@@ -393,14 +321,7 @@
                         }
                     }
                 ],
-                @else
-                buttons:[{
-                    extend: 'excel',
-                    title: 'Return Marked',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                }],
-                @endif
+
                 select: {
                     info: false,
                     style: 'multi',
@@ -413,16 +334,14 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.return.list') }}',
+                ajax: '{{ route('cod.return.pending.list') }}',
                 rowId: 'shId',
-                order: [[17, 'asc'], [16, 'asc']],
+                order: [[16, 'asc'], [15, 'asc']],
                 columns: [
                     {data: 'shId', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'id',defaultContent:'', orderable: false, searchable: false, class: 'align-middle serial_number'},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'order_id', name: 'shipments.order_id', class: 'align-middle order_id'},
-                    {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
-                    {data: 'shipper_phone', name: 'shipper_phone', class: 'align-middle shipper_phone'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
@@ -434,10 +353,8 @@
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                    {data: 'reattempts', name: 'sret.created_at', class: 'align-middle reattempts',orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -550,11 +467,9 @@
 
                     if (selected_rows.length > 0) {
                         table.button('.confirm').enable();
-                        table.button('.re-attempt').enable();
                     }
                     else {
                         table.button('.confirm').disable();
-                        table.button('.re-attempt').disable();
                     }
                 }else{
                     if(hub_ids[0] == hub_id){
@@ -569,11 +484,9 @@
 
                         if (selected_rows.length > 0) {
                             table.button('.confirm').enable();
-                            table.button('.re-attempt').enable();
                         }
                         else {
                             table.button('.confirm').disable();
-                            table.button('.re-attempt').disable();
                         }
                     }else{
                         var error = "Selected hubs should be the same!";
@@ -585,19 +498,13 @@
 
             });
             $('body').on('click','.returnMarkStatus',function () {
-                var action = $(this).data('action');
                 var row_id = $(this).parents('tr').attr('id');
-                var remark = $(this).parents('tr').find('td.shipment_remarks input').val();
-                if(action === 'confirm'){
-                    atext = 'Select Yes to change shipment status to Return-Confirm!';
-                }else if(action === 'reattempt'){
-                    atext = 'Select Yes to change shipment status to Re-Attempt!';
-                }
 
-                if(row_id != '' && action != ''){
+
+                if(row_id != ''){
                     swal({
                         title: 'Are You Sure?',
-                        text: atext,
+                        text: 'Select Yes to change shipment status to Return-Confirm!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
@@ -619,13 +526,11 @@
                     }).then(function (confirm) {
                         if (confirm) {
                             $.ajax({
-                                url:"{{route('admin.return.marked.status.single')}}",
+                                url:"{{route('cod.return.pending.marked.status.single')}}",
                                 method:'POST',
                                 data:{
                                     'shipment_id':row_id,
                                     '_token':'{{ csrf_token() }}',
-                                    'action': action,
-                                    'remark':remark
                                 }
                             }).done(function (data) {
                                 if(data.status == 1){
