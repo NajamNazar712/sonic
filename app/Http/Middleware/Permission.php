@@ -285,6 +285,11 @@ class Permission
             'shipment.receiving_sheet_history.void' => 3,
             'shipment.receiving_sheet_history.create' => 3,
 
+            'return.pending.index' => 9,
+            'return.pending.list' => 9,
+            'return.pending.marked.status' => 9,
+            'return.pending.marked.status.single' => 9,
+
             'packaging.requests.index' => 4,
             'packaging.requests.submit' => 4,
 

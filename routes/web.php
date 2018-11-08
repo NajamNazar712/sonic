@@ -110,6 +110,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
         });
     });
+    Route::prefix('return')->name('return.')->group(function (){
+        Route::prefix('pending')->name('pending.')->group(function (){
+            Route::get('','Shippers\ShipperReturnController@confirmation_pending_index')->name('index');
+            Route::get('list','Shippers\ShipperReturnController@confirmation_pending_list')->name('list');
+            Route::post('marked/status','Shippers\ShipperReturnController@return_marked_status')->name('marked.status');
+            Route::post('marked/status/single','Shippers\ShipperReturnController@return_marked_single_status')->name('marked.status.single');
+        });
+    });
 
     Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function() {
         Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@index')->name('index');
