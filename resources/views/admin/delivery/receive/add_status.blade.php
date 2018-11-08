@@ -371,11 +371,9 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
                 processing: true,
                 serverSide: false,
+                paging: false,
                 ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
                 order: [[2, 'asc']],
@@ -599,9 +597,7 @@
 
                             var repl = $('#replacementtable').DataTable({
                                 dom: 'ltipr',
-                                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                                pageLength: 50,
-                                pagingType: 'full_numbers',
+                                paging:false,
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                                     {name: 'tracking_number', class: 'align-middle tracking_number',orderable: false, searchable: false},
@@ -668,10 +664,7 @@
 
                             trybuy = $('#trybuytable').DataTable({
                                 dom: 'ltipr',
-                                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                                pageLength: 50,
-                                pagingType: 'full_numbers',
-
+                                paging:false,
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                                     {name: 'product_type', class: 'align-middle product_type'},
