@@ -148,7 +148,7 @@
                     {data: 'old_consignee_phone_number_1', name: 'misrouted_history.old_consignee_phone_number_1', class: 'align-middle old_consignee_phone_number_1'},
                     {data: 'old_consignee_phone_number_2', name: 'misrouted_history.old_consignee_phone_number_2', class: 'align-middle old_consignee_phone_number_2'},
                     {data: 'old_consignee_email', name: 'misrouted_history.old_consignee_email', class: 'align-middle old_consignee_email'},
-                    {data: 'new_consignee_city', name: 'odc.name', class: 'align-middle new_consignee_city'},
+                    {data: 'new_consignee_city', name: 'nc.name', class: 'align-middle new_consignee_city'},
                     {data: 'new_consignee_name', name: 'misrouted_history.new_consignee_name', class: 'align-middle new_consignee_name'},
                     {data: 'new_consignee_address', name: 'misrouted_history.new_consignee_address', class: 'align-middle new_consignee_address'},
                     {data: 'new_consignee_phone_number_1', name: 'misrouted_history.new_consignee_phone_number_1', class: 'align-middle new_consignee_phone_number_1'},
