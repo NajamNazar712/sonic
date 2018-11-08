@@ -1605,7 +1605,7 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($done_payment_shipment->type != 2) ? number_format($shipment->weight_charges) : '') . '</td>
+                              <td>' . number_format($shipment->weight_charges) . '</td>
                               <td>' . (($done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '') . '</td>
                             </tr>
             ';
