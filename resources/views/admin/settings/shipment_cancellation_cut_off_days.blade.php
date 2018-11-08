@@ -17,14 +17,19 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.store') }}" novalidate="novalidate">
-								{{ csrf_field() }}
+							<div class="row justify-content-center">
+								<div class="col-5 col-sm-4 col-md-3 col-lg-2">
+									<form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.shipment_cancellation_cut_off_days.store') }}" novalidate="novalidate">
+										{{ csrf_field() }}
 
-								<div class="form-group">
-									<input type="text" name="shipment_cancellation_cut_off_days" class="form-control" placeholder="Shipment Cancellation Cut-Off Days*" data-rule-required="true" data-msg-required="Shipment Cancellation Cut-Off Days is required" @if ($settings) value="{{ $settings->value }}" @endif>
+										<div class="form-group">
+											<input type="text" name="shipment_cancellation_cut_off_days" class="form-control shipment_cancellation_cut_off_days" placeholder="Shipment Cancellation Cut-Off Days*" data-rule-required="true" data-msg-required="Shipment Cancellation Cut-Off Days is required" value="{{ $settings->setting_value }}">
+										</div>
+
+										<button type="submit" class="btn btn-primary">Update</button>
+									</form>
 								</div>
-
-							</form>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -43,70 +48,17 @@
 
 	<script>
 		$(document).ready(function() {
-			$('#add_shipment_form input.tracking_number').inputmask({
+			$('#settings_form input.shipment_cancellation_cut_off_days').inputmask({
 				'alias': 'integer',
 				'allowMinus': false,
 				'allowPlus': false
 			});
 
-			$('#add_shipment_form').validate({
+			$('#settings_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
 				errorPlacement: function(error, element) {
-					error.addClass('w-100').appendTo(element.parents('form'));
-				},
-				submitHandler: function(form) {
-					$('#add_shipment_form button.add').prop('disabled', true);
-
-					var tracking_number = $(form).find('input.tracking_number').val();
-
-					form.reset();
-
-					if (table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking_number)) === -1) {
-						$.ajax({
-							url: '{!! route('admin.cargo.receive.shipment_details') !!}',
-							method: 'POST',
-							data: {
-								'tracking_number': tracking_number,
-								'cargo_consignment_id': cargo_consignment_id,
-								'_token': '{{ csrf_token() }}'
-							}
-						})
-						.done(function(data) {
-							if (data.status == 0) {
-								id = data.details.id;
-
-								var index = $.inArray(id, shipment_ids);
-
-								if (index === -1) {
-									table.row.add([0, data.details.tracking_number, data.details.origin, data.details.destination, data.details.hub, data.details.consignee, data.details.amount, data.details.shipping_mode, data.details.service_type]);
-									table.draw(false);
-
-									shipment_ids.push(data.details.id);
-
-									$('#information .scanned').html(shipment_ids.length);
-
-									$('#add_shipment_form button.add').prop('disabled', false);
-
-									$('#receive_form .receive').prop('disabled', false);
-
-									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-								}
-							}
-							else {
-								$('#add_shipment_form button.add').prop('disabled', false);
-
-								toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-							}
-						});
-					}
-					else {
-						$('#add_shipment_form button.add').prop('disabled', false);
-
-						toastr.error('Shipment has been added already', 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-					}
-
-					return false;
+					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				}
 			});
 		});

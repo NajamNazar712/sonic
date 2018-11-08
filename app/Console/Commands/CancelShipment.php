@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 
-use App\Http\Controllers\Admins\AdminCancelController;
+use App\Http\Controllers\Admins\AdminShipmentCancelController;
 
 class CancelShipment extends Command
 {
@@ -39,6 +39,6 @@ class CancelShipment extends Command
      */
     public function handle()
     {
-        AdminCancelController::cancel();
+        AdminShipmentCancelController::cancel();
     }
 }

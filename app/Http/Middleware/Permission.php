@@ -255,7 +255,14 @@ class Permission
             'notifications.edit' => 101,
 
             'settings.pickup.index' => 104,
-            'settings.pickup.weight.add' => 104
+            'settings.pickup.weight.add' => 104,
+
+            'settings.shipment_cancellation_cut_off_days.index' => 116,
+            'settings.shipment_cancellation_cut_off_days.store' => 116,
+
+            'cancelled_shipments.index' => 117,
+            'cancelled_shipments.list' => 117,
+            'cancelled_shipments.revert' => 118
         ],
 
         'shipper' => [

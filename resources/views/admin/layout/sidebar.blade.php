@@ -265,11 +265,15 @@
                 <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><span class="menu-title">Notifications</span></a></li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([104], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([104, 116], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
                 <ul class="menu-content">
                     @if (session('role_id') == 1 || in_array(104, session('permissions')))
-                        <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}" data-i18n="nav.dash.ecommerce">Pickup Weight Threshold</a></li>
+                        <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}">Pickup Weight Threshold</a></li>
+                    @endif
+
+                    @if (session('role_id') == 1 || in_array(116, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.settings.shipment_cancellation_cut_off_days.index')}}">Shipment Cancellation Cut-Off Days</a></li>
                     @endif
                 </ul>
             </li>

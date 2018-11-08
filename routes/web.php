@@ -631,6 +631,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     //Reports end
+
+    Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
+        Route::get('','Admins\AdminShipmentCancelController@index')->name('index');
+        Route::get('list', 'Admins\AdminShipmentCancelController@list')->name('list');
+        Route::post('revert', 'Admins\AdminShipmentCancelController@revert')->name('revert');
+    });
+
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');
@@ -647,6 +654,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@pickup_index')->name('index');
             Route::post('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
             Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+        });
+
+        Route::prefix('shipment_cancellation_cut_off_days')->name('shipment_cancellation_cut_off_days.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_store')->name('store');
         });
     });
 });
