@@ -92,9 +92,6 @@ class ShipmentChargesController extends Controller
 
                     $shipment->chargeable_weight = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
 
-
-                    ((actual/kg range) +1) kg range
-
                     $previous = TRUE;
 
                     while ($previous) {
