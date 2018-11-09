@@ -47,9 +47,9 @@ class AdminShipmentCancelController extends Controller
 
                 $shipment->save();
 
-                AdminPickupsController::cancel($shipment_id);
+                AdminPickupsController::cancel($shipment->id);
 
-                ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
+                ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
             }
         }
     }
