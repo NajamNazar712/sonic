@@ -23,7 +23,7 @@
 										{{ csrf_field() }}
 
 										<div class="form-group">
-											<input type="text" name="shipment_cancellation_cut_off_days" class="form-control shipment_cancellation_cut_off_days" placeholder="Shipment Cancellation Cut-Off Days*" data-rule-required="true" data-msg-required="Shipment Cancellation Cut-Off Days is required" value="{{ $settings->setting_value }}">
+											<input type="text" name="shipment_cancellation_cut_off_days" class="form-control shipment_cancellation_cut_off_days" placeholder="Shipment Cancellation Cut-Off Days*" data-rule-required="true" data-msg-required="Shipment Cancellation Cut-Off Days is required" value="{{ $settings->setting_value }}" data-rule-min="1" data-msg-min="Shipment Cancellation Cut-Off Days can not be less than 1">
 										</div>
 
 										<button type="submit" class="btn btn-primary">Update</button>
