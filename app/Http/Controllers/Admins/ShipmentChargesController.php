@@ -90,7 +90,7 @@ class ShipmentChargesController extends Controller
                         $charges = ($weight_charge->national_or_sameday * $multiplier);
                     }
 
-                    $shipment->chargeable_weight = $weight_charge->range_up * ($multiplier + 1);
+                    $shipment->chargeable_weight = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
 
                     $previous = TRUE;
 

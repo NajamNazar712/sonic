@@ -110,6 +110,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
         });
     });
+    Route::prefix('return')->name('return.')->group(function (){
+        Route::prefix('pending')->name('pending.')->group(function (){
+            Route::get('','Shippers\ShipperReturnController@confirmation_pending_index')->name('index');
+            Route::get('list','Shippers\ShipperReturnController@confirmation_pending_list')->name('list');
+            Route::post('marked/status','Shippers\ShipperReturnController@return_marked_status')->name('marked.status');
+            Route::post('marked/status/single','Shippers\ShipperReturnController@return_marked_single_status')->name('marked.status.single');
+        });
+    });
 
     Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function() {
         Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@index')->name('index');
@@ -371,6 +379,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
            Route::get('list','Admins\DeliveryController@misroute_list')->name('list');
            Route::post('shipment/info','Admins\DeliveryController@get_shipment_info')->name('shipment.info');
            Route::post('shipment/update','Admins\DeliveryController@misroute_shipment_update')->name('shipment.update');
+           Route::prefix('history')->name('history.')->group(function (){
+                Route::get('','Admins\MisroutedHistoryController@misrouted_history_index')->name('index');
+                Route::get('list','Admins\MisroutedHistoryController@misrouted_history_list')->name('list');
+
+           });
 
         });
     });
@@ -458,6 +471,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('{tracking_number?}', 'Admins\AdminTrackingController@index')->name('index');
         Route::post('track', 'Admins\AdminTrackingController@track')->name('track');
         Route::post('rider_information', 'Admins\AdminTrackingController@rider_information')->name('rider_information');
+        Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
     });
 
     Route::prefix('user_management')->name('user_management.')->group(function() {
@@ -630,6 +644,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     //Reports end
+
+    Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
+        Route::get('','Admins\AdminShipmentCancelController@index')->name('index');
+        Route::get('list', 'Admins\AdminShipmentCancelController@list')->name('list');
+        Route::put('revert', 'Admins\AdminShipmentCancelController@revert')->name('revert');
+    });
+
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::post('/logout','Auth\AdminLoginController@logout')->name('logout');
     Route::get('/accounts/pending/{id}/bank' ,'Admins\AdminDashboardController@viewBankInfo');
@@ -646,6 +667,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@pickup_index')->name('index');
             Route::post('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
             Route::put('weight/add', 'Admins\GlobalSettingsController@add_pickup_weight')->name('weight.add');
+        });
+
+        Route::prefix('shipment_cancellation_cut_off_days')->name('shipment_cancellation_cut_off_days.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_store')->name('store');
         });
     });
 });

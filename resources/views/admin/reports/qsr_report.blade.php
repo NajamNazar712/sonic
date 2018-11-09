@@ -81,14 +81,17 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Consignee Name</th>
                         <th class="border-primary border-darken-1">History Status</th>
                         <th class="border-primary border-darken-1">Service</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
+                        <th class="border-primary border-darken-1">Last Status Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
-                        <th class="border-primary border-darken-1">Aging</th>
+                        <th class="border-primary border-darken-1">Aging (Arrival)</th>
+                        <th class="border-primary border-darken-1">Aging (Last Status)</th>
                     </tr>
                     </thead>
                 </table>
@@ -236,14 +239,17 @@
                             head.push('S.No');
                             head.push('Tracking .No');
                             head.push('Shipper');
+                            head.push('Consignee Name');
                             head.push('History Status');
                             head.push('Service Type');
                             head.push('Arrival');
+                            head.push('Last Status Date');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
                             head.push('Amount');
-                            head.push('Aging');
+                            head.push('Aging (Arrival)');
+                            head.push('Aging (Last Status)');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -251,14 +257,17 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.shipper);
+                                row.push(values.name);
                                 row.push(values.history_status);
                                 row.push(values.service_type);
                                 row.push(values.arrival);
+                                row.push(values.last_status_date);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
                                 row.push(values.amount);
                                 row.push(values.aging);
+                                row.push(values.aging_last_status);
 
                                 body.push(row);
                             });
@@ -300,19 +309,22 @@
                     }
                 },
                 rowId: 'shId',
-                order: [[5, 'asc']],
+                order: [[6, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
+                    {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},
                     {data: 'service_type', name: 'bt.booking_type', class: 'align-middle service_type'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
+                    {data: 'last_status_date', name: 'journey.created_at', class: 'align-middle last_status_date'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false}
+                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
+                    {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false}
 
                 ],
                 rowCallback: function(row, data, index) {

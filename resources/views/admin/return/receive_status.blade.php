@@ -256,9 +256,7 @@
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
                 scrollX: true, scrollY: '350px',
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
+                paging:false,
                 processing: true,
                 serverSide: false,
                 ajax: '{{ route('admin.return.receive.status.list',['id'=>$return_note_id]) }}',
