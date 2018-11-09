@@ -110,6 +110,14 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::post('submit','Shippers\ShipperPackagingMaterialController@packaging_request_submit')->name('submit');
         });
     });
+    Route::prefix('return')->name('return.')->group(function (){
+        Route::prefix('pending')->name('pending.')->group(function (){
+            Route::get('','Shippers\ShipperReturnController@confirmation_pending_index')->name('index');
+            Route::get('list','Shippers\ShipperReturnController@confirmation_pending_list')->name('list');
+            Route::post('marked/status','Shippers\ShipperReturnController@return_marked_status')->name('marked.status');
+            Route::post('marked/status/single','Shippers\ShipperReturnController@return_marked_single_status')->name('marked.status.single');
+        });
+    });
 
     Route::prefix('substitute_account_management')->name('substitute_account_management.')->group(function() {
         Route::get('', 'Shippers\ShipperSubstituteAccountManagementController@index')->name('index');
@@ -371,6 +379,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
            Route::get('list','Admins\DeliveryController@misroute_list')->name('list');
            Route::post('shipment/info','Admins\DeliveryController@get_shipment_info')->name('shipment.info');
            Route::post('shipment/update','Admins\DeliveryController@misroute_shipment_update')->name('shipment.update');
+           Route::prefix('history')->name('history.')->group(function (){
+                Route::get('','Admins\MisroutedHistoryController@misrouted_history_index')->name('index');
+                Route::get('list','Admins\MisroutedHistoryController@misrouted_history_list')->name('list');
+
+           });
 
         });
     });
