@@ -239,9 +239,9 @@
                 $(this).val($(this).val().trim());
             });
             var rowsCount = 0;
-            function  countRows() {
-                rowsCount = table.row().count();
-            }
+            // function  countRows() {
+            //     rowsCount = table.row().count();
+            // }
             $('input#scan_tracking').focus();
             $('#delivery_note_form').on('submit',function (e) {
                 e.preventDefault();
@@ -250,7 +250,7 @@
                 var hub_id = $('#hub_id').val();
                 if (tracking !== '') {
                     scan.attr('disabled', true);
-                    countRows();
+                    //countRows();
 
                     if(rowsCount === 0) {
                         $.ajax({
@@ -264,11 +264,12 @@
                             if(data.status === 1){
                                 toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                             }else{
+                                rowsCount += 1;
                                 var rowNo = rowsCount;
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
+                                table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 tracking_ids.push(data.tracking_number);
@@ -298,16 +299,18 @@
 
                                     toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                                 }else{
+                                    rowsCount += 1;
                                     var rowNo = rowsCount;
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
+                                    table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
                                     tracking_ids.push(data.tracking_number);
                                     notification_ids.push(1);
                                     rider_info_ids.push(1);
+
                                 }
                                 scan.val('');
                                 scan.attr('disabled', false);
@@ -335,7 +338,7 @@
                     tracking_ids.splice(index, 1);
                     notification_ids.splice(index, 1);
                     rider_info_ids.splice(index, 1);
-
+                    rowsCount -= 1;
                 }
                 // if (notification !== -1) {
                 //     notification_ids.splice(notification, 1);
