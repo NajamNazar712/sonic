@@ -261,6 +261,10 @@
 
             <li class=" nav-item"><a href="{{ route('admin.tracking.index') }}"><span class="menu-title">Tracking</span></a></li>
 
+            @if (session('role_id') == 1 || in_array(117, session('permissions')))
+                <li class=" nav-item"><a href="{{ route('admin.cancelled_shipments.index') }}"><span class="menu-title">Cancelled Shipments</span></a></li>
+            @endif
+
             @if (session('role_id') == 1 || in_array(100, session('permissions')))
                 <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><span class="menu-title">Notifications</span></a></li>
             @endif

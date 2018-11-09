@@ -27,9 +27,7 @@
                                         <th class="border-primary border-darken-1">Account No.</th>
                                         <th class="border-primary border-darken-1">Shipper</th>
                                         <th class="border-primary border-darken-1">Service Type</th>
-                                        <th class="border-primary border-darken-1">Status</th>
-                                        <th class="border-primary border-darken-1">Reason</th>
-                                        <th class="border-primary border-darken-1">Payment Status</th>
+                                        <th class="border-primary border-darken-1">Remarks</th>
                                         <th class="border-primary border-darken-1">Origin</th>
                                         <th class="border-primary border-darken-1">Destination</th>
                                         <th class="border-primary border-darken-1">Consignee Name</th>
@@ -52,10 +50,12 @@
 @endsection
 
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 	<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script type="text/javascript">
@@ -185,7 +185,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.cancelled_shipments.list') }}',
                 rowId: 'id',
-                order: [[16, 'desc']],
+                order: [[15, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -194,15 +194,13 @@
                     {data: 'account_number', name: 'u.id', class: 'align-middle account_number'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'service_type', name: 'service_type', class: 'align-middle service_type'},
-                    {data: 'status', name: 'status', class: 'align-middle status'},
-                    {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'payment_status', name: 'payment_status', class: 'align-middle payment_status'},
+                    {data: 'remarks', name: 'sj.remarks', class: 'align-middle remarks'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'consignee_name', name: 'shipments.consignee_name', class: 'align-middle consignee_name'},
                     {data: 'consignee_contact', name: 'consignee_contact', class: 'align-middle consignee_contact'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
-                    {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
+                    {data: 'collection_amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
@@ -253,12 +251,6 @@
                         }
                         else if ($(header).is('.product_type')) {
                             $(product_select).appendTo($(search))
-                            .on('change', function () {
-                                column.search($(this).val(), false, false, true).draw();
-                            }).wrap(td);
-                        }
-                        else if ($(header).is('.payment_status')) {
-                            $(payment_select).appendTo($(search))
                             .on('change', function () {
                                 column.search($(this).val(), false, false, true).draw();
                             }).wrap(td);
@@ -318,6 +310,7 @@
 
                         return obj;
                     });
+
                     var data3 = $.map({!! $products !!}, function (obj) {
                         obj.text = obj.product_name;
 
@@ -327,24 +320,6 @@
                     $('#product_select').prepend('<option value="" selected></option>').select2({
                         data:data3,
                         placeholder: "Select Product",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
-                    var data4 = $.map({!! $payment_status !!}, function (obj) {
-                        obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data4 = $.map({!! $payment_status !!}, function (obj) {
-                        obj.text = obj.name;
-
-                        return obj;
-                    });
-
-                    $('#payment_select').prepend('<option value="" selected></option>').select2({
-                        data:data4,
-                        placeholder: "Select Payment",
                         width:'100%',
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'

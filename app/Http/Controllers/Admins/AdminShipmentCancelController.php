@@ -9,11 +9,19 @@ use App\Http\Controllers\Admins\AdminPickupsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipment;
+use App\Http\Models\City;
+use App\Http\Models\ShipmentStatus;
+use App\Http\Models\BookingType;
+use App\Http\Models\Product;
+use App\Http\Models\ShipmentPaymentStatus;
 
 use Auth;
+use DB;
 
 use Carbon\Carbon;
+use Yajra\Datatables\Datatables;
 
 class AdminShipmentCancelController extends Controller
 {
@@ -52,9 +60,8 @@ class AdminShipmentCancelController extends Controller
         $shipment_status = ShipmentStatus::select('id', 'name')->get();
         $service_type = BookingType::all();
         $products = Product::select('id', 'product_name')->get();
-        $payment_status = ShipmentPaymentStatus::all();
 
-        return view('admin.cancelled_shipments')->with(['cities' => $cities, 'shippers' => $shippers, 'shipment_status' => $shipment_status, 'service_type' => $service_type, 'products' => $products, 'payment_status' => $payment_status]);
+        return view('admin.cancelled_shipments.index')->with(['cities' => $cities, 'shippers' => $shippers, 'shipment_status' => $shipment_status, 'service_type' => $service_type, 'products' => $products]);
     }
 
     public function list(Request $request) {
@@ -69,12 +76,10 @@ class AdminShipmentCancelController extends Controller
             $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
             ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
         })
-        ->join('shipment_status as ss', 'ss.id', '=', 'shipments_journey.shipper_status_id')
-        ->leftjoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
         ->leftjoin('shipment_items as si', 'si.shipment_id', '=', 'shipments.id')
         ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
         ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-        ->select(['shipments.id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'u.id as account_number', 'u.name as shipper', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'sps.name as payment_status', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount as collection_amount', 'p.product_name as product_type', 'shipments.created_at as booking_date', 'shipments.special_instructions as instructions'])
+        ->select(['shipments.id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'u.id as account_number', 'u.name as shipper', 'bt.booking_type as service_type', 'shipments_journey.remarks', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount as collection_amount', 'p.product_name as product_type', 'shipments.created_at as booking_date', 'shipments.special_instructions as instructions'])
         ->where('shipments.shipper_status_id', '=', 17);
 
         if (session('role_id') != 1) {
@@ -149,14 +154,6 @@ class AdminShipmentCancelController extends Controller
                 $query->whereRaw('false');
             }
         })
-        ->filterColumn('payment_status',function ($query, $keyword) {
-            if ($keyword != '') {
-                $query->where('sps.id', $keyword);
-            }
-            else {
-                $query->whereRaw('false');
-            }
-        })
         ->filterColumn('product_type',function ($query, $keyword) {
             if ($keyword != '') {
                 $query->where('p.id', $keyword);
@@ -165,7 +162,7 @@ class AdminShipmentCancelController extends Controller
                 $query->whereRaw('false');
             }
         })
-        ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1')
+        ->orderColumn('phone', 'shipments.consignee_phone_number_1 $1, shipments.consignee_phone_number_2 $1');
 
         return $datatables->make(true);
     }
