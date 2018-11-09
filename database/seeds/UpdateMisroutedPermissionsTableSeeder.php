@@ -12,8 +12,7 @@ class UpdateMisroutedPermissionsTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 114, 'name' => 'Pending - View Rates', 'module_id' => 2),
-            array('id' => 115, 'name' => 'Active - View Rates', 'module_id' => 2),
+            array('id' => 119, 'name' => 'Misrouted History - View', 'module_id' => 6),
         ));
     }
 }
