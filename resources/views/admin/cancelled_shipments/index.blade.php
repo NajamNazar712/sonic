@@ -64,7 +64,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.cargo.pending.list') }}',
+                        url: '{{ route('admin.cancelled_shipments.list') }}',
                         data: {
                             'page': 'all',
                             'shipment_type': $('#shipment_type_search_form #shipment_type').val()
@@ -231,6 +231,11 @@
                       }
                     });
                   }
+                }, {
+                    extend: 'excel',
+                    title: 'Cancelled Shipments',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-file-excel-o"></i> Excel',
                 }],
                 select: {
                     info: false,
@@ -245,7 +250,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.cancelled_shipments.list') }}',
                 rowId: 'id',
-                order: [[15, 'desc']],
+                order: [[14, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
