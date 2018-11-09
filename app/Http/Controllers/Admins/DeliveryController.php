@@ -14,6 +14,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BanksList;
 use App\Http\Models\BookingType;
 use App\Http\Models\City;
+use App\Http\Models\MisroutedHistory;
 use App\Http\Models\Rider;
 use App\Http\Models\Route;
 use App\Http\Models\Shipment;
@@ -2653,6 +2654,23 @@ class DeliveryController extends Controller
             if ($shipment->exists()) {
                 $shipment = $shipment->first();
 
+                $misrouted_history = MisroutedHistory::create([
+                    'shipment_id' => $shipment_id,
+                    'old_consignee_city_id' => $shipment->consignee_city_id,
+                    'old_consignee_name' => $shipment->consignee_name,
+                    'old_consignee_address' => $shipment->consignee_address,
+                    'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                    'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                    'old_consignee_email' => $shipment->consignee_email,
+                    'new_consignee_city_id' => $request->consignee_city_id,
+                    'new_consignee_name' => $request->consignee,
+                    'new_consignee_address' => $request->address,
+                    'new_consignee_phone_number_1' => $request->phone1,
+                    'new_consignee_phone_number_2' => $request->phone2,
+                    'new_consignee_email' => $request->email,
+                    'admin_id' => Auth::id()
+
+                ]);
                 $shipment->consignee_city_id = $request->consignee_city_id;
                 $shipment->consignee_name = $request->consignee;
                 $shipment->consignee_address = $request->address;
