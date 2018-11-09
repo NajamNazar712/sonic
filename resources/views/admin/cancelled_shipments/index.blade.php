@@ -21,7 +21,7 @@
 								<thead>
 									<tr role="row" class="bg-primary white">
                                         <th class="border-primary border-darken-1"></th>
-                                        <th class="border-primary border-darken-1">S No.</th>
+                                        <th class="border-primary border-darken-1">S. No.</th>
                                         <th class="border-primary border-darken-1">Tracking No.</th>
                                         <th class="border-primary border-darken-1">Order ID</th>
                                         <th class="border-primary border-darken-1">Account No.</th>
@@ -34,7 +34,6 @@
                                         <th class="border-primary border-darken-1">Consignee Contact</th>
                                         <th class="border-primary border-darken-1">Consignee Address</th>
                                         <th class="border-primary border-darken-1">Collection Amount</th>
-                                        <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Booking Date</th>
                                         <th class="border-primary border-darken-1">Instructions</th>
                                         <th class="border-primary border-darken-1"></th>
@@ -72,36 +71,41 @@
                         },
                         success: function (result) {
                             head = [];
-                            head.push('S.No');
-                            head.push('Tracking Number');
+
+                            head.push('S No.');
+                            head.push('Tracking No.');
                             head.push('Order ID');
+                            head.push('Account No.');
+                            head.push('Shipper');
                             head.push('Service Type');
-                            head.push('Status');
+                            head.push('Remarks');
                             head.push('Origin');
                             head.push('Destination');
-                            head.push('Shipper');
-                            head.push('Amount');
-                            head.push('Shipping Mode');
-                            head.push('Booked Datetime');
-                            head.push('Arrival Datetime');
-
+                            head.push('Consignee Name');
+                            head.push('Consignee Contact');
+                            head.push('Consignee Address');
+                            head.push('Collection Amount');
+                            head.push('Booking Date');
+                            head.push('Instructions');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking);
+                                row.push(values.tracking_number);
                                 row.push(values.order_id);
+                                row.push(values.account_number);
+                                row.push(values.shipper);
                                 row.push(values.service_type);
-                                row.push(values.status);
+                                row.push(values.remarks);
                                 row.push(values.origin);
                                 row.push(values.destination);
-                                row.push(values.shipper);
-                                row.push(values.amount);
-                                row.push(values.shipping_mode);
-                                row.push(values.booked_at);
-                                row.push(values.arrival_at);
-
+                                row.push(values.consignee_name);
+                                row.push(values.consignee_contact);
+                                row.push(values.consignee_address);
+                                row.push(values.collection_amount);
+                                row.push(values.booking_date);
+                                row.push(values.instructions);
 
                                 body.push(row);
                             });
@@ -119,6 +123,62 @@
                 scrollX: true, scrollY: '350px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                @if (session('role_id') == 1 || in_array(118, session('permissions')))
+                    {
+                        text: 'Revert',
+                        className: 'btn btn-primary revert',
+                        action: function (e, dt, node, config) {
+                            swal({
+                                text: 'Are you sure, you want to Revert these Shipment(s)?',
+                                icon: 'warning',
+                                buttons: {
+                                    cancel: {
+                                        text: 'No',
+                                        value: null,
+                                        visible: true,
+                                        closeModal: true,
+                                    },
+                                    confirm: {
+                                        text: 'Yes',
+                                        value: true,
+                                        visible: true,
+                                        closeModal: true
+                                    }
+                                },
+                                closeOnClickOutside: false,
+                                closeOnEsc: false,
+                                dangerMode: true
+                            }).then(function(confirm) {
+                                if (confirm) {
+                                    $.ajax({
+                                        url: '{!! route('admin.cancelled_shipments.revert') !!}',
+                                        method: 'PUT',
+                                        data: {
+                                            '_token': '{{ csrf_token() }}',
+                                            'shipment_ids': selected_rows
+                                        }
+                                    })
+                                    .done(function(data) {
+                                        if (data.status == 0) {
+                                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        }
+                                        else {
+                                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                        }
+
+                                        table.rows().deselect();
+
+                                        selected_rows = [];
+
+                                        table.button('.revert').disable();
+
+                                        table.draw('false');
+                                    });
+                                }
+                            });
+                        }
+                    },
+                @endif
                 {
                   extend: 'selectAll',
                   text: 'Select All',
@@ -140,7 +200,7 @@
                           selected_rows.push(id);
                         }
 
-                        table.button('.print').enable();
+                        table.button('.revert').enable();
                       }
                     });
                   }
@@ -166,7 +226,7 @@
                         }
 
                         if (selected_rows.length == 0) {
-                            table.button('.print').disable();
+                            table.button('.revert').disable();
                         }
                       }
                     });
@@ -201,7 +261,6 @@
                     {data: 'consignee_contact', name: 'consignee_contact', class: 'align-middle consignee_contact'},
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'collection_amount', name: 'shipments.amount', class: 'align-middle amount'},
-                    {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -347,6 +406,61 @@
                 else {
                     table.button('.revert').disable();
                 }
+            });
+
+            $('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item.revert', function() {
+                var shipment_id = parseInt($(this).parents('tr').attr('id'));
+
+                swal({
+                    text: 'Are you sure, you want to Revert this Shipment?',
+                    icon: 'warning',
+                    buttons: {
+                        cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                        },
+                        confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                        }
+                    },
+                    closeOnClickOutside: false,
+                    closeOnEsc: false,
+                    dangerMode: true
+                }).then(function(confirm) {
+                    selected_rows = [];
+
+                    table.rows().deselect();
+
+                    table.button('.revert').disable();
+
+                    selected_rows.push(shipment_id);
+
+                    if (confirm) {
+                        $.ajax({
+                            url: '{!! route('admin.cancelled_shipments.revert') !!}',
+                            method: 'PUT',
+                            data: {
+                                '_token': '{{ csrf_token() }}',
+                                'shipment_ids': selected_rows
+                            }
+                        })
+                        .done(function(data) {
+                            if (data.status == 0) {
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                            table.draw('false');
+                        });
+                    }
+                });
             });
 		});
 	</script>

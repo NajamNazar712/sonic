@@ -635,7 +635,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
         Route::get('','Admins\AdminShipmentCancelController@index')->name('index');
         Route::get('list', 'Admins\AdminShipmentCancelController@list')->name('list');
-        Route::post('revert', 'Admins\AdminShipmentCancelController@revert')->name('revert');
+        Route::put('revert', 'Admins\AdminShipmentCancelController@revert')->name('revert');
     });
 
     Route::get('/logout','Auth\AdminLoginController@logout')->name('logout');

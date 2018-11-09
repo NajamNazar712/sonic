@@ -47,9 +47,9 @@ class AdminShipmentCancelController extends Controller
 
                 $shipment->save();
 
-                AdminPickupsController::cancel($shipment->id);
+                AdminPickupsController::cancel($shipment_id);
 
-                ShipmentsJourneyController::add($shipment->id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
+                ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, 'Auto Cancellation after ' . $days . ' Day(s)', $shipment->user_id, NULL);
             }
         }
     }
@@ -76,10 +76,8 @@ class AdminShipmentCancelController extends Controller
             $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
             ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
         })
-        ->leftjoin('shipment_items as si', 'si.shipment_id', '=', 'shipments.id')
-        ->leftjoin('products as p', 'p.id', '=', 'si.product_type_id')
         ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-        ->select(['shipments.id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'u.id as account_number', 'u.name as shipper', 'bt.booking_type as service_type', 'shipments_journey.remarks', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount as collection_amount', 'p.product_name as product_type', 'shipments.created_at as booking_date', 'shipments.special_instructions as instructions'])
+        ->select(['shipments.id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'u.id as account_number', 'u.name as shipper', 'bt.booking_type as service_type', 'shipments_journey.remarks', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount as collection_amount', 'shipments.created_at as booking_date', 'shipments.special_instructions as instructions'])
         ->where('shipments.shipper_status_id', '=', 17);
 
         if (session('role_id') != 1) {
@@ -90,7 +88,7 @@ class AdminShipmentCancelController extends Controller
 
         $datatables = Datatables::of($shipments)
         ->addColumn('tracking_number_hyperlink', function ($shipment) {
-            return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $shipment->tracking_number . ' class="tracking" target="_blank"></a></u>';
+            return '<u><a href=' . route('admin.tracking.index') . '?tracking_number=' . $shipment->tracking_number . ' class="tracking" target="_blank">' . $shipment->tracking_number . '</a></u>';
         })
         ->addColumn('consignee_contact', function ($shipment) {
             $consignee_contact = $shipment->consignee_phone_number_1;
@@ -167,6 +165,23 @@ class AdminShipmentCancelController extends Controller
         return $datatables->make(true);
     }
 
-    public function revert(Request $request) {}
+    public function revert(Request $request) {
+        foreach ($request->shipment_ids as $shipment_id) {
+            $shipment = Shipment::find($shipment_id);
+
+            if ($shipment->shipper_status_id == 17) {
+                $shipment->shipper_status_id = 1;
+                $shipment->consignee_status_id = 1;
+
+                $shipment->save();
+
+                AdminPickupsController::generate($shipment_id);
+
+                ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Reverted', Auth::id(), NULL);
+            }
+        }
+
+        return ['status' => 0, 'success' => 'Shipment(s) has been Reverted'];
+    }
 
 }
