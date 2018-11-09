@@ -127,6 +127,7 @@
                     {
                         text: 'Revert',
                         className: 'btn btn-primary revert',
+                        enabled: false,
                         action: function (e, dt, node, config) {
                             swal({
                                 text: 'Are you sure, you want to Revert these Shipment(s)?',
