@@ -220,14 +220,6 @@ class AdminPickupsController extends Controller
     }
 
     public function pending_index() {
-      if (Auth::id() == 3) {
-        ShipmentChargesController::return(290723);
-        ShipmentChargesController::return(296639);
-
-        AdminFinanceController::add_payment(290723, 1);
-        AdminFinanceController::add_payment(296639, 1);
-      }
-
       $riders = Rider::where('status',1)->select(['id', 'name']);
 
       if (session('role_id') != 1) {
