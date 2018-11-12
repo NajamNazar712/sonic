@@ -12,6 +12,7 @@ class VerifyCsrfToken extends Middleware
      * @var array
      */
     protected $except = [
-        //
+        'http://sonic.pk/admin/finance/make_payments/verify',
+        'http://sonic.pk/admin/finance/make_payments/store'
     ];
 }
