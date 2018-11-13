@@ -125,6 +125,7 @@
                         <th class="border-primary border-darken-1">Transit Date</th>
                         <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1">Received Date</th>
+                        <th class="border-primary border-darken-1">Aging</th>
                     </tr>
                     </thead>
                 </table>
@@ -426,6 +427,7 @@
                     {data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
                     {data: 'received_by', name: 'ri.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'},
+                    {data: 'aging', name: 'aging', class: 'align-middle aging'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
