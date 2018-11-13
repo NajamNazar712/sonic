@@ -1231,8 +1231,6 @@
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + cargo_consignment.transport_mode_vendor + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + cargo_consignment.seal_number + '</td></tr>';
-
-
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((cargo_consignment.builty_number) ? cargo_consignment.builty_number : '') + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.shipments_weight + '</td></tr>';
 						details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + cargo_consignment.actual_weight + '</td></tr>';

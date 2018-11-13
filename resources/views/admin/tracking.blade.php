@@ -48,6 +48,25 @@
 									</div>
 								</div>
 							</div>
+
+							<div class="modal fade" id="cargo_consignment_details" role="dialog" aria-labelledby="cargo_consignment_details_title" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="cargo_consignment_details_title">Cargo Consignment Details</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -404,22 +423,61 @@
 					'_token': '{{ csrf_token() }}',
 					'id': id
 				}
-			})
-			.done(function(data) {
-				var details = '<table class="table table-sm table-bordered"><tbody>';
+				})
+				.done(function(data) {
+					var details = '<table class="table table-sm table-bordered"><tbody>';
 
-				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' + data.name + '</td></tr>';
-				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' + data.phone_number + '</td></tr>';
-				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' + data.city + '</td></tr>';
-				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' + data.category + '</td></tr>';
-				details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' + data.route + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Name</strong></td><td class="align-middle text-center">' + data.name + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Phone Number</strong></td><td class="align-middle text-center">' + data.phone_number + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="align-middle text-center">' + data.city + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Category</strong></td><td class="align-middle text-center">' + data.category + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Route</strong></td><td class="align-middle text-center">' + data.route + '</td></tr>';
 
-				details += '</tbody></table>';
+					details += '</tbody></table>';
 
-				$('#rider_information .modal-body').html(details);
+					$('#rider_information .modal-body').html(details);
 
-				$('#rider_information').modal('show');
+					$('#rider_information').modal('show');
+				});
 			});
+
+			$('#tracking').on('click', '.cargo_consignment_details', function() {
+				id = $(this).attr('data-id');
+
+				$.ajax({
+				url: '{!! route('admin.tracking.cargo_consignment_details') !!}',
+				method: 'POST',
+				data: {
+					'_token': '{{ csrf_token() }}',
+					'id': id
+				}
+				})
+				.done(function(data) {
+					var details = '<table class="table table-sm table-bordered"><tbody>';
+
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 1</strong></td><td class="align-middle text-center">' + data.junction_hub_1 + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Junction 2</strong></td><td class="align-middle text-center">' + ((data.junction_hub_2) ? data.junction_hub_2 : '') + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Expected Arrival Date</strong></td><td class="align-middle text-center">' + data.expected_arrival_date + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipping Mode</strong></td><td class="align-middle text-center">' + data.shipping_mode + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode</strong></td><td class="align-middle text-center">' + data.transport_mode + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Transport Mode Vendor</strong></td><td class="align-middle text-center">' + data.transport_mode_vendor + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Seal Number</strong></td><td class="align-middle text-center">' + data.seal_number + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Builty Number</strong></td><td class="align-middle text-center">' + ((data.builty_number) ? data.builty_number : '') + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Shipments Weight</strong></td><td class="align-middle text-center">' + data.shipments_weight + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td><td class="align-middle text-center">' + data.actual_weight + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Vendor Weight</strong></td><td class="align-middle text-center">' + ((data.vendor_weight) ? data.vendor_weight : '') + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Weight Charges / kg</strong></td><td class="align-middle text-center">' + ((data.weight_charges_per_kg) ? data.weight_charges_per_kg : '') + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Extra Charges</strong></td><td class="align-middle text-center">' + ((data.extra_charges) ? data.extra_charges : '') + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Total Weight Charges</strong></td><td class="align-middle text-center">' + ((data.total_weight_charges) ? data.total_weight_charges : '') + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Sender Name</strong></td><td class="align-middle text-center">' + data.sender_name + '</td></tr>';
+					details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>Receiver Name</strong></td><td class="align-middle text-center">' + data.receiver_name + '</td></tr>';
+
+					details += '</tbody></table>';
+
+					$('#cargo_consignment_details .modal-body').html(details);
+
+					$('#cargo_consignment_details').modal('show');
+				});
 			});
 		});
 	</script>

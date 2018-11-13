@@ -56,6 +56,10 @@ html body .content .content-wrapper {
 	background: #64a0d2;
 }
 
+.navigation li a {
+	white-space: normal;
+}
+
 .btn-outline-primary:not(:disabled):not(.disabled):active {
 	background: #5a8cb9;
 	border-color: #5a8cb9;

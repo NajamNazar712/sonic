@@ -51,6 +51,7 @@
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Total Collection</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Last Update</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -149,6 +150,7 @@
                             head.push('Assigned Date');
                             head.push('Total COD');
                             head.push('Status');
+                            head.push('Last Update');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -163,6 +165,7 @@
                                 row.push(values.created_at);
                                 row.push(values.amount);
                                 row.push(values.pending_status);
+                                row.push(values.last_update);
                                 body.push(row);
                             });
                         },
@@ -208,6 +211,7 @@
                     { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     { data:'pending_status' ,name: 'pending_status', class: 'align-middle pending_status'},
+                    { data:'last_updated' ,name: 'delivery_notes.last_updated', class: 'align-middle last_updated'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
