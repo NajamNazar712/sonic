@@ -269,7 +269,7 @@
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,rider_name,data.remarks,remove]).node().id = data.shId;
+                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 tracking_ids.push(data.tracking_number);
@@ -304,7 +304,8 @@
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;                                    table.draw(false);
+                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
+                                    table.draw(false);
                                     shipment_ids.push(data.shId);
                                     tracking_ids.push(data.tracking_number);
                                     notification_ids.push(1);
