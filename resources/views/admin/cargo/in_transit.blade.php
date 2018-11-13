@@ -537,7 +537,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.shipping_mode')){
                             $(mode_drop_select).appendTo($(search))
