@@ -358,6 +358,7 @@
                             head.push('Transit Date');
                             head.push('Received By');
                             head.push('Received Date');
+                            head.push('Aging');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -372,6 +373,7 @@
                                 row.push(values.transit_at);
                                 row.push(values.received_by);
                                 row.push(values.received_at);
+                                row.push(values.aging);
 
                                 body.push(row);
                             });
