@@ -72,6 +72,7 @@
 										<th class="border-primary border-darken-1">Builty No.</th>
 										<th class="border-primary border-darken-1">Transit Datetime</th>
 										<th class="border-primary border-darken-1">Transitted By</th>
+										<th class="border-primary border-darken-1">Aging</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -393,6 +394,7 @@
                             head.push('Builty No.');
                             head.push('Transit Datetime');
                             head.push('Transitted By');
+                            head.push('Aging');
                             head.push('Status');
 
 
@@ -412,6 +414,7 @@
                                 row.push(values.builty_number);
                                 row.push(values.transit_at);
                                 row.push(values.transitted_by);
+                                row.push(values.aging);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -510,6 +513,7 @@
 					{data: 'builty_number', name: 'cargo_consignments.builty_number', class: 'align-middle builty_number'},
 					{data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
 					{data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
+					{data: 'aging', name: 'aging', class: 'align-middle aging', searchable: false, orderable: false},
 					{data: 'status', name: 'status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
