@@ -599,9 +599,7 @@
 
                             var repl = $('#replacementtable').DataTable({
                                 dom: 'ltipr',
-                                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                                pageLength: 50,
-                                pagingType: 'full_numbers',
+                                paging:false,
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                                     {name: 'tracking_number', class: 'align-middle tracking_number',orderable: false, searchable: false},
@@ -613,13 +611,8 @@
                                     var info = repl.page.info();
 
                                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                                    if ($.inArray(data.id, selected_rows) !== -1) {
-                                        repl.row(row).select();
-                                    }
-                                },
-                                initComplete: function() {
 
-                                }
+                                },
                             });
 
                             $.ajax({
@@ -667,9 +660,7 @@
 
                             trybuy = $('#trybuytable').DataTable({
                                 dom: 'ltipr',
-                                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                                pageLength: 50,
-                                pagingType: 'full_numbers',
+                                paging:false,
 
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -683,9 +674,7 @@
                                     var info = trybuy.page.info();
 
                                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                                    if ($.inArray(data.id, selected_rows) !== -1) {
-                                        trybuy.row(row).select();
-                                    }
+
                                 }
                             });
 
@@ -721,9 +710,7 @@
 
 
                         } else if (data.status == 0) {
-                            console.log(data.error);
-                            console.log(shipments_count);
-
+                            
                         }
                     }
                     shipments_count = shipments_count-1;
