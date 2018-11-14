@@ -71,7 +71,7 @@ class ShipperDashboardController extends Controller
             ->where('shipments.user_id', session('user_id'))
             ->groupBy('shipments.id');
 
-        return Datatables::of($shipments)
+        $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number', function ($shipments) {
                 $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -173,8 +173,11 @@ class ShipperDashboardController extends Controller
                 else {
                     $query->whereRaw('false');
                 }
-            })
-            ->make(true);
+            });
+            if ($tracking_numbers = $request->get('tracking_numbers')) {
+                $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            }
+            return $datatable->make(true);
     }
     public function order_cancel(Request $request){
         $shipment_id = $request->shipment_id;

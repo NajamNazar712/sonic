@@ -20,7 +20,13 @@
             </ul>
           </li>
         @endif
-
+          @if (session('user_type') == 1 || in_array(9, session('permissions')))
+              <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Return</span></a>
+                  <ul class="menu-content">
+                          <li><a class="menu-item" href="{{ route('cod.return.pending.index') }}">Confirmation Pending</a></li>
+                  </ul>
+              </li>
+          @endif
         @if(session('packaging_charges_check') && (session('user_type') == 1 || in_array(4, session('permissions'))))
           <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Packaging Material</span></a>
               <ul class="menu-content">

@@ -62,6 +62,7 @@
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Last Rider Name</th>
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1"></th>
                     </tr>
@@ -190,9 +191,7 @@
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
                 scrollX: true, scrollY: '350px',
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
+                paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {name: 'tracking_number', class: 'align-middle tracking_number'},
@@ -205,6 +204,7 @@
                     {name: 'amount', class: 'align-middle amount'},
                     {name: 'service_type', class: 'align-middle service_type'},
                     {name: 'status', class: 'align-middle status'},
+                    {name: 'rider_name', class: 'align-middle rider_name'},
                     {name: 'remarks', class: 'align-middle remarks'},
                     {name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
@@ -269,7 +269,7 @@
                                 var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                 var rider_information = '<input type="checkbox" class="form-control select select-checkbox rider_information" name="rider_information[]" checked>';
                                 var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
+                                table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
                                 table.draw(false);
                                 shipment_ids.push(data.shId);
                                 tracking_ids.push(data.tracking_number);
@@ -304,7 +304,7 @@
                                     var notification_check = '<input type="checkbox" class="form-control notification" name="notification['+data.shId+']" checked>';
                                     var rider_information = '<input type="checkbox" class="form-control rider_information" name="rider_information[]" checked>';
                                     var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger deliverynoterow"><i class="la la-close"></i></a>';
-                                    table.row.add([rowNo,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.remarks,remove]).node().id = data.shId;
+                                    table.row.add([rowNo+1,data.tracking_number,data.destination,data.consignee_name,data.phone,notification_check,rider_information,data.address,data.amount,data.service_type,data.shipment_status,data.rider_name,data.remarks,remove]).node().id = data.shId;
                                     table.draw(false);
                                     shipment_ids.push(data.shId);
                                     tracking_ids.push(data.tracking_number);

@@ -117,14 +117,16 @@ class Permission
             'delivery.sdn.details' => 42,
             'delivery.sdn.ajax' => 42,
             'delivery.sdn.slip' => 43,
-            'cash_collection.pending.index' => 105,
-            'cash_collection.pending.list' => 105,
-            'cash_collection.pending.collect' => 106,
-            'cash_collection.pending.all' => 106,
-            'misroute.index' => 107,
-            'misroute.list' => 107,
-            'misroute.shipment.info' => 108,
-            'misroute.shipment.update' => 108,
+            'delivery.cash_collection.pending.index' => 105,
+            'delivery.cash_collection.pending.list' => 105,
+            'delivery.cash_collection.pending.collect' => 106,
+            'delivery.cash_collection.pending.all' => 106,
+            'delivery.misroute.index' => 107,
+            'delivery.misroute.list' => 107,
+            'delivery.misroute.shipment.info' => 108,
+            'delivery.misroute.shipment.update' => 108,
+            'delivery.misroute.history.index' => 119,
+            'delivery.misroute.history.list' => 119,
 
             'return.index' => 44,
             'return.list' => 44,
@@ -255,7 +257,14 @@ class Permission
             'notifications.edit' => 101,
 
             'settings.pickup.index' => 104,
-            'settings.pickup.weight.add' => 104
+            'settings.pickup.weight.add' => 104,
+
+            'settings.shipment_cancellation_cut_off_days.index' => 116,
+            'settings.shipment_cancellation_cut_off_days.store' => 116,
+
+            'cancelled_shipments.index' => 117,
+            'cancelled_shipments.list' => 117,
+            'cancelled_shipments.revert' => 118
         ],
 
         'shipper' => [
@@ -282,6 +291,11 @@ class Permission
             'shipment.receiving_sheet_history.short_received_shipments' => 3,
             'shipment.receiving_sheet_history.void' => 3,
             'shipment.receiving_sheet_history.create' => 3,
+
+            'return.pending.index' => 9,
+            'return.pending.list' => 9,
+            'return.pending.marked.status' => 9,
+            'return.pending.marked.status.single' => 9,
 
             'packaging.requests.index' => 4,
             'packaging.requests.submit' => 4,

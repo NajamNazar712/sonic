@@ -371,11 +371,9 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
                 processing: true,
                 serverSide: false,
+                paging: false,
                 ajax: '{{ route('admin.delivery.receive.add.list',['id'=>$delivery_note_id]) }}',
                 rowId: 'shId',
                 order: [[2, 'asc']],
@@ -620,6 +618,7 @@
                                 type:'POST',
                                 dataType:'json',
                                 data: {
+                                    'delivery_note_id': delivery_note,
                                     'replacements':data.replacement,
                                     '_token': '{{ csrf_token() }}'
                                 }
@@ -661,7 +660,10 @@
                             trybuy = $('#trybuytable').DataTable({
                                 dom: 'ltipr',
                                 paging:false,
+<<<<<<< HEAD
 
+=======
+>>>>>>> efb5d4421555e54778b11d41f2ca44a315e708cf
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                                     {name: 'product_type', class: 'align-middle product_type'},
@@ -685,6 +687,7 @@
                                 type:'POST',
                                 dataType:'json',
                                 data: {
+                                    'delivery_note_id': delivery_note,
                                     'trybuy':data.try,
                                     '_token': '{{ csrf_token() }}'
                                 }
