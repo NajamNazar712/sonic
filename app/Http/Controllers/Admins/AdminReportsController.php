@@ -215,6 +215,9 @@ class AdminReportsController extends Controller
             });
         }
         $cargo = Datatables::of($cargo_received)
+            ->addColumn('aging',function ($cargo_received){
+                return ($cargo_received->received_at && $cargo_received->transit_at)? with(new Carbon($cargo_received->received_at, 'UTC'))->diffInDays($cargo_received->transit_at) :'-';
+            })
             ->editColumn('cargo_id_link', function ($cargo_received) {
                 $print_cargo = "<u><a href='javascript:void(0);' class='cargo_print'>" .str_pad($cargo_received->cargo_id, 6, '0', STR_PAD_LEFT)."</a></u>";
                 return $print_cargo;
