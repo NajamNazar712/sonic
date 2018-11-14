@@ -117,7 +117,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.list') }}',
+                        url: '{{ route('cod.return.pending.list') }}',
                         data: {
                             'page': 'all',
                         },
@@ -126,8 +126,6 @@
                             head.push('S.No');
                             head.push('Tracking No.');
                             head.push('Order ID');
-                            head.push('Shipper Name');
-                            head.push('Shipper Phone');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -141,7 +139,6 @@
                             head.push('Reason');
                             head.push('Arrival Date');
                             head.push('Status Date');
-                            head.push('Re-Attempt Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -150,8 +147,6 @@
                                 row.push(index + 1);
                                 row.push(values.tracking);
                                 row.push(values.order_id);
-                                row.push(values.shipper);
-                                row.push(values.shipper_phone);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -165,7 +160,6 @@
                                 row.push(values.reason);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
-                                row.push(values.reattempts);
 
                                 body.push(row);
                             });
@@ -177,7 +171,6 @@
                 }
             } );
             var selected_rows = [];
-            var shipment_remarks = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
@@ -379,7 +372,7 @@
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action') || $(header).is('.shipment_remarks')|| $(header).is('.reattempts')) {
+                        if ($(header).is('.select') || $(header).is('.serial_number') || $(header).is('.action')) {
                             $(td).appendTo($(search));
                         }else if($(header).is('.status')){
                             $(drop_select).appendTo($(search))
