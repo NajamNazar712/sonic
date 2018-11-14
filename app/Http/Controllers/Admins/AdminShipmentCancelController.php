@@ -177,7 +177,7 @@ class AdminShipmentCancelController extends Controller
 
                 AdminPickupsController::generate($shipment_id);
 
-                ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Reverted', Auth::id(), NULL);
+                ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, 'Shipment has been Reverted', NULL, Auth::id());
             }
         }
 
