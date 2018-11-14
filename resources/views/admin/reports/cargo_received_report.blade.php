@@ -429,7 +429,7 @@
                     {data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
                     {data: 'received_by', name: 'ri.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'},
-                    {data: 'aging', name: 'aging', class: 'align-middle aging'},
+                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
