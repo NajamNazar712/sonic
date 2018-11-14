@@ -556,6 +556,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
         });
+
+        Route::prefix('generate_invoices')->name('generate_invoices.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@generate_invoices_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@generate_invoices_list')->name('list');
+        });
     });
 
     Route::prefix('sameday')->name('sameday.')->group(function (){

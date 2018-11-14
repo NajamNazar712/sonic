@@ -1845,4 +1845,81 @@ class AdminFinanceController extends Controller
         $writer->save('php://output');
     }
 
+    public function generate_invoices_index() {
+        $users = User::whereIn('status', [3, 4])->get();
+
+        $banks = BanksList::all();
+
+        return view('admin.finance.generate_invoices')->with(['users' => $users, 'banks' => $banks]);
+    }
+
+    public function generate_invoices_list(Request $request) {
+        $pending_invoice_shipments = PendingInvoiceShipment::join('users as u', 'pending_invoice_shipments.user_id', '=', 'u.id')
+        ->join('cities as c', 'u.city_id', '=', 'c.id')
+        ->join('user_bank_infos as ubi', 'pending_payments.user_id', '=', 'ubi.user_id')
+        ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
+        ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
+        ->select('pending_invoice_shipments.shipment_id', 'pending_invoice_shipments.type', 'pending_invoice_shipments.created_at', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_invoice_shipments.charges', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle')
+        ->where('pending_invoice_shipments.shipper_id', $request->shipper_id)
+        ->whereDate('pending_invoice_shipments.created_at', '<=', $request->start_date)
+        ->whereDate('pending_invoice_shipments.created_at', '>=', $request->end_date);
+
+        $datatables = Datatables::of($pending_invoice_shipments)
+        ->editColumn('type', function($pending_invoice_shipment) {
+            if ($pending_invoice_shipment->type == 0) {
+                return 'Delivered';
+            }
+            else if ($pending_invoice_shipment->type == 1) {
+                return 'Returned';
+            }
+            else {
+                return 'Adjusted';
+            }
+        })
+        ->editColumn('charges', function($pending_invoice_shipment) {
+            return number_format($pending_invoice_shipment->charges);
+        })
+        ->addColumn('phone_numbers', function($pending_invoice_shipment) {
+            $phone_numbers = $pending_invoice_shipment->phone;
+
+            if (!empty($pending_invoice_shipment->phone2)) {
+                $phone_numbers .= ' - ' . $pending_invoice_shipment->phone2;
+            }
+
+            return $phone_numbers;
+        })
+        ->removeColumn('phone')
+        ->removeColumn('phone2')
+        ->filterColumn('type', function ($query, $keyword) {
+            if ($keyword == 0 || $keyword == 1 || $keyword == 2) {
+                $query->where('pending_invoice_shipments.type', '=', $keyword);
+            }
+        })
+        ->filterColumn('phone_numbers', function($query, $keyword) {
+            $search = str_replace('-', '', $keyword);
+
+            if ($keyword != '') {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('u.phone', 'like', '%' . $keyword . '%')
+                    ->orWhere('u.phone2', 'like', '%' . $keyword . '%');
+                });
+            }
+
+            else {
+                $query->whereRaw('false');
+            }
+        })
+        ->filterColumn('bank', function($query, $keyword) {
+            if ($keyword !='') {
+                $query->where('ub.id', '=', $keyword);
+            }
+            else {
+                $query->whereRaw('false');
+            }
+        })
+        ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
+
+        return $datatables->make(true);
+    }
+
 }
