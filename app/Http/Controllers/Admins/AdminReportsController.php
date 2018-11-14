@@ -114,11 +114,14 @@ class AdminReportsController extends Controller
         $return_note = ReturnNote::join('riders','riders.id','=','return_notes.rider_id')
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
-            ->select(['return_notes.id as return_note_id','up.name as updated_by','return_notes.shipments_count as count','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at']);
+            ->select(['return_notes.id as return_note_id','up.name as updated_by','return_notes.shipments_count as count','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at']);
         if (session('role_id') != 1) {
             $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
         }
         $return = Datatables::of($return_note)
+            ->addColumn('aging',function ($return_note){
+                return ($return_note->submission_date && $return_note->created_at)? with(new Carbon($return_note->submission_date, 'UTC'))->diffInDays($return_note->created_at) :'-';
+            })
             ->editColumn('return_note_id', function ($return_note) {
                 return str_pad($return_note->return_note_id, 6, '0', STR_PAD_LEFT);
             });
