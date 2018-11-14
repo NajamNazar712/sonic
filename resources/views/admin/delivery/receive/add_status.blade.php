@@ -660,10 +660,7 @@
                             trybuy = $('#trybuytable').DataTable({
                                 dom: 'ltipr',
                                 paging:false,
-<<<<<<< HEAD
 
-=======
->>>>>>> efb5d4421555e54778b11d41f2ca44a315e708cf
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                                     {name: 'product_type', class: 'align-middle product_type'},
