@@ -783,11 +783,11 @@ class ReturnController extends Controller
                     return $deliveries->current_status_name;
                 }else{
                     if($deliveries->booking_type_id == 1){
-                        $where = array(24);
+                        $where = array(24,47,48);
                     }else if($deliveries->booking_type_id == 2){
-                        $where = array(29);
+                        $where = array(29,47,48);
                     }else if($deliveries->booking_type_id == 3){
-                        $where = array(35);
+                        $where = array(35,47,48);
                     }
                     $statuses = ShipmentStatus::whereIn('id',$where)->get();
                     $drops = '';
