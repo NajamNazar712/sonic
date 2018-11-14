@@ -187,6 +187,9 @@
         table.dataTable tbody tr.statusDelivered {
             background-color:springgreen;
         }
+        table.dataTable tbody tr.statusReturn {
+            background-color:#ef5753;
+        }
         table.dataTable tbody tr td {
             padding-left: 0.5em;
             padding-right: 0.5em;

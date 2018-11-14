@@ -784,7 +784,11 @@ class DeliveryController extends Controller
                         $delivered_statuses = array(14, 16, 30, 36);
                         if (in_array($deliveries->current_status_id, $delivered_statuses)) {
                             return 'statusDelivered';
-                        } else {
+                        }
+                        else if($deliveries->current_status_id==20)
+                        {
+                            return 'statusReturn';
+                        }else {
                             return 'statusUpdated';
                         }
                     } else {
@@ -1367,7 +1371,7 @@ class DeliveryController extends Controller
                 }
             }
             if($verification == 0){
-                DeliveryNote::where('id', $delivery_note_id)->update('updated_by', Auth::id());
+                DeliveryNote::where('id', $delivery_note_id)->update(['updated_by'=> Auth::id()]);
             }
             if ($request->submit_button_id == 'statusVerifySubmit') {
                 if (!empty($dispute_shipments)) {
