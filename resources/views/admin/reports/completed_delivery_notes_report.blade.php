@@ -106,6 +106,9 @@
                         <th class="border-primary border-darken-1">Verified By</th>
                         <th class="border-primary border-darken-1">Verified Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">Aging (Added to Updated)</th>
+                        <th class="border-primary border-darken-1">Aging (Updated to Verified)</th>
+                        <th class="border-primary border-darken-1">Aging (Added to Verified)</th>
                     </tr>
                     </thead>
                 </table>
@@ -282,7 +285,12 @@
                             head.push('Assigned Date');
                             head.push('Updated By');
                             head.push('Updated Date');
+                            head.push('Verified By');
+                            head.push('Verified Date');
                             head.push('DNCC Amount');
+                            head.push('Aging (Added to Updated)');
+                            head.push('Aging (Updated to Verified)');
+                            head.push('Aging (Added to Verified)');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -297,7 +305,12 @@
                                 row.push(values.created_at);
                                 row.push(values.updated_by);
                                 row.push(values.updated_at);
+                                row.push(values.verified_by);
+                                row.push(values.verified_time);
                                 row.push(values.amount);
+                                row.push(values.aging_create_update);
+                                row.push(values.aging_update_verified);
+                                row.push(values.aging_create_verified);
 
                                 body.push(row);
                             });
@@ -359,6 +372,9 @@
                     { data:'verified_by' ,name: 'vb.name', class: 'align-middle verified_by'},
                     { data:'verified_time' ,name: 'delivery_notes.last_updated', class: 'align-middle verified_time'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
+                    {orderable: false, searchable: false, data:'aging_create_update' ,name: 'aging_create_update', class: 'align-middle aging_create_update'},
+                    {orderable: false, searchable: false, data:'aging_update_verified' ,name: 'aging_update_verified', class: 'align-middle aging_update_verified'},
+                    {orderable: false, searchable: false, data:'aging_create_verified' ,name: 'aging_create_verified', class: 'align-middle aging_create_verified'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
