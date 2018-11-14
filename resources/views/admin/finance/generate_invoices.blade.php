@@ -71,6 +71,22 @@
 					//
 				}
 			});
+
+			$('#pickup_date').pickadate({
+				firstDay: 1,
+				clear: '',
+				min: '{{ Carbon\Carbon::now() }}',
+				selectYears: true,
+				selectMonths: true,
+				formatSubmit: 'yyyy-mm-dd 00:00:00',
+				hiddenSuffix: '_formatted',
+				onOpen: function() {
+					$('#pickup_date_root').css('top', '-350px');
+				},
+				onSet: function(context) {
+					$('#pickup_date').valid();
+				}
+			});
 		});
 	</script>
 @endsection
