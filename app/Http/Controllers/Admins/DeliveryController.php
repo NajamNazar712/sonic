@@ -903,6 +903,7 @@ class DeliveryController extends Controller
             $updates_count = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status', 0)->count();
             if ($updates_count == 0) {
                 $delivery_note_data->pending_status = 1;
+                $delivery_note_data->updated_by = Auth::id();
             }
             $delivery_note_data->save();
             return redirect()->back()->with('success', 'Statuses updated successfully!');
@@ -953,7 +954,7 @@ class DeliveryController extends Controller
             $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status)->get();
             $dncc_amount = $filtered_shipments->sum('received_amount');
             $count = count($filtered_shipments);
-            DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>$pending_status,'delivered_shipments'=>$count,'received_cod_amount'=>$dncc_amount,'last_updated'=>Carbon::now()]);
+            DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>$pending_status,'delivered_shipments'=>$count,'received_cod_amount'=>$dncc_amount,'updated_by'=>Auth::id(),'last_updated'=>Carbon::now()]);
             return ['status' => 0, 'success' => 'Shipments status Delivered updated!'];
         } else {
             return ['status' => 1, 'error' => 'No Shipments selected'];
@@ -1365,6 +1366,9 @@ class DeliveryController extends Controller
                     }
                 }
             }
+            if($verification == 0){
+                DeliveryNote::where('id', $delivery_note_id)->update('updated_by', Auth::id());
+            }
             if ($request->submit_button_id == 'statusVerifySubmit') {
                 if (!empty($dispute_shipments)) {
                     DisputeController::add_delivery_wrong_status_dispute($delivery_note_id, $dispute_shipments);
@@ -1375,7 +1379,7 @@ class DeliveryController extends Controller
                 $dncc_amount = $filtered_shipments->sum('received_amount');
                 $delivered_shipments = $filtered_shipments->count();
 
-                DeliveryNote::where('id', $delivery_note_id)->update(['delivered_shipments' => $delivered_shipments, 'updated_by' => Auth::id(), 'received_cod_amount' => $dncc_amount, 'status' => 1,'last_updated'=>Carbon::now()]);
+                DeliveryNote::where('id', $delivery_note_id)->update(['delivered_shipments' => $delivered_shipments, 'verified_by' => Auth::id(), 'received_cod_amount' => $dncc_amount, 'status' => 1,'last_updated'=>Carbon::now()]);
 
 
                 NotificationsController::send(13, $delivery_note_id);

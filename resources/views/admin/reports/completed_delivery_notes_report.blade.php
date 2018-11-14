@@ -103,6 +103,8 @@
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Update Date</th>
+                        <th class="border-primary border-darken-1">Verified By</th>
+                        <th class="border-primary border-darken-1">Verified Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
                     </tr>
                     </thead>
@@ -354,6 +356,8 @@
                     { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
                     { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
+                    { data:'verified_by' ,name: 'vb.name', class: 'align-middle verified_by'},
+                    { data:'verified_time' ,name: 'delivery_notes.last_updated', class: 'align-middle verified_time'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                 ],
                 rowCallback: function(row, data, index) {
