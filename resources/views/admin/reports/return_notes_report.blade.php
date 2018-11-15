@@ -101,6 +101,7 @@
                         <th class="border-primary border-darken-1">Rider Name</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Creation Date</th>
+                        <th class="border-primary border-darken-1">Aging</th>
                     </tr>
                     </thead>
                 </table>
@@ -261,6 +262,7 @@
                             head.push('Rider Name');
                             head.push('Created By');
                             head.push('Creation Date');
+                            head.push('Aging');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -272,6 +274,7 @@
                                 row.push(values.rider);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
+                                row.push(values.aging);
 
                                 body.push(row);
                             });
@@ -322,7 +325,8 @@
                     {data: 'submission_date', name: 'return_notes.updated_at', class: 'align-middle submission_date'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'created_by', name: 'cr.name', class: 'align-middle created_by'},
-                    {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle created_at'}
+                    {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle created_at'},
+                    {orderable: false, searchable: false,xdata: 'aging', name: 'aging', class: 'align-middle aging'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
