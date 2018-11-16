@@ -326,7 +326,7 @@
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'created_by', name: 'cr.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'return_notes.created_at', class: 'align-middle created_at'},
-                    {orderable: false, searchable: false,xdata: 'aging', name: 'aging', class: 'align-middle aging'}
+                    {orderable: false, searchable: false,data: 'aging', name: 'aging', class: 'align-middle aging'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
