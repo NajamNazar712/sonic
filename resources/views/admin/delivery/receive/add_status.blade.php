@@ -183,12 +183,15 @@
         }
         table.dataTable tbody tr.statusUpdated {
             background-color:yellow;
+            color: #000;
         }
         table.dataTable tbody tr.statusDelivered {
             background-color:springgreen;
+            color: #000;
         }
         table.dataTable tbody tr.statusReturn {
-            background-color:#ef5753;
+            background-color: #ef5753;
+            color: #000;
         }
         table.dataTable tbody tr td {
             padding-left: 0.5em;
