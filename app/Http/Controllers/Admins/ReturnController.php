@@ -172,7 +172,7 @@ class ReturnController extends Controller
     public function return_marked_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
 
         $shipment_ids = $request->shipment_ids;
-        $admin = Auth::id();
+
         if($request->action == 'confirm'){
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);

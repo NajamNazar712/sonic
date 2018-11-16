@@ -114,11 +114,14 @@ class AdminReportsController extends Controller
         $return_note = ReturnNote::join('riders','riders.id','=','return_notes.rider_id')
             ->join('admins as cr','cr.id','=','return_notes.admin_id')
             ->leftjoin('admins as up','up.id','=','return_notes.updated_by')
-            ->select(['return_notes.id as return_note_id','up.name as updated_by','return_notes.shipments_count as count','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at']);
+            ->select(['return_notes.id as return_note_id','up.name as updated_by','return_notes.shipments_count as count','return_notes.updated_at as submission_date','riders.name as rider','cr.name as created_by','return_notes.created_at as created_at']);
         if (session('role_id') != 1) {
             $return_note = $return_note->whereIn('return_notes.hub_id', session('hubs'));
         }
         $return = Datatables::of($return_note)
+            ->addColumn('aging',function ($return_note){
+                return ($return_note->submission_date && $return_note->created_at)? with(new Carbon($return_note->submission_date, 'UTC'))->diffInDays($return_note->created_at) :'-';
+            })
             ->editColumn('return_note_id', function ($return_note) {
                 return str_pad($return_note->return_note_id, 6, '0', STR_PAD_LEFT);
             });
@@ -215,6 +218,9 @@ class AdminReportsController extends Controller
             });
         }
         $cargo = Datatables::of($cargo_received)
+            ->addColumn('aging',function ($cargo_received){
+                return ($cargo_received->received_at && $cargo_received->transit_at)? with(new Carbon($cargo_received->received_at, 'UTC'))->diffInDays($cargo_received->transit_at) :'-';
+            })
             ->editColumn('cargo_id_link', function ($cargo_received) {
                 $print_cargo = "<u><a href='javascript:void(0);' class='cargo_print'>" .str_pad($cargo_received->cargo_id, 6, '0', STR_PAD_LEFT)."</a></u>";
                 return $print_cargo;
@@ -1281,13 +1287,23 @@ class AdminReportsController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins','admins.id','=','delivery_notes.admin_id')
             ->leftjoin('admins as ub','ub.id','=','delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count'])
+            ->leftjoin('admins as vb','vb.id','=','delivery_notes.verified_by')
+            ->select(['delivery_notes.id as delivery_note','delivery_notes.id as delivery_note_id','oc.id as hub_id','oc.name as hub','riders.name as rider','routes.code as route','routes.start','routes.end','admins.name as assignee','ub.name as updated_by','delivery_notes.updated_at as updated_at','delivery_notes.delivered_shipments','delivery_notes.created_at as created_at','delivery_notes.total_cod_amount as amount','delivery_notes.shipments_count','delivery_notes.last_updated as verified_time','vb.name as verified_by'])
             ->where('delivery_notes.status',1);
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
         }
 
         $datatable = Datatables::of($deliveries)
+            ->addColumn('aging_create_update',function ($deliveries){
+                return ($deliveries->created_at && $deliveries->updated_at)? with(new Carbon($deliveries->updated_at, 'UTC'))->diffInDays($deliveries->created_at) :'-';
+            })
+            ->addColumn('aging_update_verified',function ($deliveries){
+                return ($deliveries->updated_at && $deliveries->verified_time)? with(new Carbon($deliveries->verified_time, 'UTC'))->diffInDays($deliveries->updated_at) :'-';
+            })
+            ->addColumn('aging_create_verified',function ($deliveries){
+                return ($deliveries->created_at && $deliveries->verified_time)? with(new Carbon($deliveries->verified_time, 'UTC'))->diffInDays($deliveries->created_at) :'-';
+            })
             ->editColumn('delivery_note', function ($deliveries) {
                 return str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT);
             })
