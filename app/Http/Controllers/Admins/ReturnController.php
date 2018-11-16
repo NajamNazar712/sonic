@@ -851,12 +851,13 @@ class ReturnController extends Controller
         $shipments = explode(',',$request->shipment_ids);
         $return_note_id = $request->return_note_id;
         $array_returned = array(25,31,38);
+        $array_returned_status = array(24,29,35,47,48);
         if($return_note_id != '') {
             foreach ($shipments as $shipment) {
                 $reasonId = "reason_drop.$shipment";
                 $parcel = Shipment::where('id', $shipment)->first();
                 if (!in_array($parcel->shipper_status_id, $array_returned)) {
-                if ($request->status_drop[$shipment] == 24 || $request->status_drop[$shipment] == 29 || $request->status_drop[$shipment] == 35) {
+                if (in_array($request->status_drop[$shipment],$array_returned_status)) {
                     if($request->status_drop[$shipment] != $parcel->shipper_status_id){
                         ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $return_note_id);
 
