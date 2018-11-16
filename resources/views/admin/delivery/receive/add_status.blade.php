@@ -247,6 +247,7 @@
             });
             var shipment_status = [];
             var shipment_reason = [];
+            var shipment_remarks = [];
             var selected_rows = [];
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
@@ -282,13 +283,24 @@
                             dangerMode: true
                         }).then(function (confirm) {
                             if (confirm) {
+
+                                table.rows().nodes().each(function(index) {
+                                    var row = table.row(index);
+                                    if ($(row.node()).hasClass('selected')) {
+                                        var id = parseInt(row.id());
+                                        var remarks = $(row.node()).find('td.remarks input').val();
+                                        shipment_remarks[id] = remarks;
+                                    }
+                                });
+
                                 $.ajax({
                                     url: '{!! route('admin.delivery.receive.delivered') !!}',
                                     method: 'POST',
                                     data: {
                                         'shipment_ids': selected_rows,
                                         'delivery_note_id': note_id,
-                                        '_token': '{{ csrf_token() }}'
+                                        '_token': '{{ csrf_token() }}',
+                                        'remark': shipment_remarks
                                     }
                                 }).done(function (data) {
                                     if(data.status === 0){
