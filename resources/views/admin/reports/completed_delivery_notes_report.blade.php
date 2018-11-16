@@ -304,9 +304,9 @@
                                 row.push(values.assignee);
                                 row.push(values.created_at);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.status_updated);
                                 row.push(values.verified_by);
-                                row.push(values.verified_time);
+                                row.push(values.status_verified);
                                 row.push(values.amount);
                                 row.push(values.aging_create_update);
                                 row.push(values.aging_update_verified);
@@ -368,9 +368,9 @@
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
-                    { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
+                    { data:'status_updated' ,name: 'delivery_notes.status_updated_at', class: 'align-middle updated_at'},
                     { data:'verified_by' ,name: 'vb.name', class: 'align-middle verified_by'},
-                    { data:'verified_time' ,name: 'delivery_notes.last_updated', class: 'align-middle verified_time'},
+                    { data:'status_verified' ,name: 'delivery_notes.status_verified_at', class: 'align-middle verified_time'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     {orderable: false, searchable: false, data:'aging_create_update' ,name: 'aging_create_update', class: 'align-middle aging_create_update'},
                     {orderable: false, searchable: false, data:'aging_update_verified' ,name: 'aging_update_verified', class: 'align-middle aging_update_verified'},
