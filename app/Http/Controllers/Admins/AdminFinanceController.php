@@ -1480,7 +1480,7 @@ class AdminFinanceController extends Controller
                 $pending_payment_shipment->amount = $amount;
                 $pending_payment_shipment->charges = 0;
                 $pending_payment_shipment->gst = 0;
-                $pending_payment_shipment->payable = 0 - $amount;
+                $pending_payment_shipment->payable = $amount;
 
                 $pending_payment_shipment->save();
             }
@@ -2947,6 +2947,7 @@ class AdminFinanceController extends Controller
             $invoice_shipment = new InvoiceShipment();
 
             $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
+            $invoice_shipment->invoice = $pending_invoice_shipment->invoice->id;
             $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
             $invoice_shipment->type = $pending_invoice_shipment->type;
 
@@ -3411,13 +3412,13 @@ class AdminFinanceController extends Controller
             return number_format($invoice->total_invoice_amount);
         })
         ->editColumn('billing_period_from_date', function($invoice) {
-            return Carbon::parse($invoice->billing_period_from_date)->format('d/m/Y');
+            return Carbon::parse($invoice->billing_period_from_date)->format('Y-m-d');
         })
         ->editColumn('billing_period_to_date', function($invoice) {
-            return Carbon::parse($invoice->billing_period_to_date)->format('d/m/Y');
+            return Carbon::parse($invoice->billing_period_to_date)->format('Y-m-d');
         })
         ->editColumn('due_date', function($invoice) {
-            return Carbon::parse($invoice->due_date)->format('d/m/Y');
+            return Carbon::parse($invoice->due_date)->format('Y-m-d');
         });
 
         return $datatables->make(true);
