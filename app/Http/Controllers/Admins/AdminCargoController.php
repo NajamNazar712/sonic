@@ -524,6 +524,15 @@ class AdminCargoController extends Controller
       }
 
       $datatables = Datatables::of($cargo_consignments)
+          ->addColumn('aging',function ($cargo_consignment){
+
+              $days = Carbon::now()->diffInDays($cargo_consignment->transit_at);
+              if($days == 0){
+                  return "-";
+              }else{
+                  return $days;
+              }
+          })
       ->addColumn('id_padded', function ($cargo_consignment) {
           return str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
       })

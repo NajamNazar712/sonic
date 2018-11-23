@@ -535,6 +535,7 @@ class DeliveryController extends Controller
 
     public function received_print(Request $request)
     {
+        $delivery_note_id = $request->id;
         $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
 
         $html = '
@@ -620,6 +621,7 @@ class DeliveryController extends Controller
                             <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
                             <td class="color primary"><strong>Collection Amount</strong></td>
+                            <td class="color primary"><strong>Remarks</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Receiver\'s Name</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
                           </tr>
@@ -652,8 +654,11 @@ class DeliveryController extends Controller
                 ';
                 }
 
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->where('reference_1_id','!=',$delivery_note_id)->select('remarks')->latest()->first();
+
                 $shipment_details_row_start .= '
                             <td>Rs ' . number_format($shipment->amount) . '</td>
+                            <td>' . $shipment_journey->remarks. '</td>
                             <td></td>
                             <td></td>
                           </tr>
