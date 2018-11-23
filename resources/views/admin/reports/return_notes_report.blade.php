@@ -108,7 +108,26 @@
             </div>
         </div>
     </div>
+    <!--Shipments popup -->
+    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Shipment(s)</h4>
 
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
 @endsection
 
 @section('css')
@@ -269,7 +288,7 @@
                                 row.push(index + 1);
                                 row.push(values.return_note_id);
                                 row.push(values.updated_by);
-                                row.push(values.count);
+                                row.push(values.shipments_count);
                                 row.push(values.submission_date);
                                 row.push(values.rider);
                                 row.push(values.created_by);
@@ -315,13 +334,13 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                rowId: 'return_note_id',
+                rowId: 'id',
                 order: [[4, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'return_note_id', name: 'return_notes.id', class: 'align-middle return_note_id'},
+                    {data: 'return_note_link', name: 'return_notes.id', class: 'align-middle return_note_link text-center'},
                     {data: 'updated_by', name: 'up.name', class: 'align-middle updated_by'},
-                    {data: 'count', name: 'return_notes.shipments_count', class: 'align-middle count'},
+                    {data: 'shipments_count_link', name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     {data: 'submission_date', name: 'return_notes.updated_at', class: 'align-middle submission_date'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'created_by', name: 'cr.name', class: 'align-middle created_by'},
@@ -341,6 +360,72 @@
                 table.draw();
             });
 
+            $('#datatable tbody').on('click', 'tr td.return_note_link button.print', function() {
+                var return_note_id = parseInt($(this).parents('tr').attr('id'));
+
+                print(return_note_id);
+            });
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.reports.return_note.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
+            var route = '{!! route('admin.tracking.index') !!}';
+
+            $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.reports.return_note.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'return_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }else{
+                                var html = 'No shipments found!';
+
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
         });
 
     </script>

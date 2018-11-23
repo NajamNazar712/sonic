@@ -403,7 +403,7 @@
                 order: [[7, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
+                    { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},

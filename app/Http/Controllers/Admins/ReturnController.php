@@ -617,7 +617,7 @@ class ReturnController extends Controller
         join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
             ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
             ->join('admins','admins.id','=','return_notes.admin_id')
-            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count'])
+            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assignee','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link'])
             ->where('return_notes.status',0);
 
         if (session('role_id') != 1) {
@@ -630,6 +630,14 @@ class ReturnController extends Controller
         })
         ->addColumn('return_note_id_padded', function ($deliveries) {
             return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
+        })
+        ->editColumn('shipments_count_link', function($deliveries) {
+            if ($deliveries->shipments_count != 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+            }
+            else {
+                return 0;
+            }
         })
         ->filterColumn('return_notes.id', function ($query, $keyword) {
             return $query->where('return_notes.id', '=', $keyword);
@@ -1112,5 +1120,19 @@ class ReturnController extends Controller
             return ['status' => 1, 'error' => 'Shipment has already been Reverted'];
         }
     }
-
+    public function receive_return_shipments(Request $request){
+        $return_note_id = $request->input('return_note_id');
+        $return_note_details = ReturnNote::find($return_note_id);
+        $return_note_shipments = $return_note_details->return_note_shipments;
+        $shipments = array();
+        if($return_note_shipments->count() != 0){
+            foreach ($return_note_shipments as $return_note_shipment){
+                $shipment = Shipment::find($return_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Return Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Return Note Shipments', 'shipments' => FALSE];
+        }
+    }
 }

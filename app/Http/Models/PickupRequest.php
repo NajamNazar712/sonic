@@ -21,6 +21,9 @@ class PickupRequest extends Model
 	public function pickup_request_assigned_shipments() {
 		return $this->hasMany('App\Http\Models\PickupRequestAssignedShipment');
 	}
+	public function pickup_request_received_shipments() {
+		return $this->hasMany('App\Http\Models\PickupRequestReceivedShipment');
+	}
 
 	public function pickup_request_short_received_shipments() {
 		return $this->hasMany('App\Http\Models\PickupRequestShortReceivedShipment');
