@@ -56,7 +56,26 @@
             </div>
         </div>
     </div>
+    <!--Shipments popup -->
+    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Return Note Shipment(s)</h4>
 
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
 @endsection
 
 @section('css')
@@ -192,7 +211,7 @@
                     { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'shipments_count' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count'},
+                    { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
@@ -284,40 +303,35 @@
                 // console.log(returnnote)
             });
 
-            {{--$('#scan_tracking').on('change',function () {--}}
-            {{--var scan = $(this);--}}
-            {{--var tracking = $(this).val();--}}
-            {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
-            {{--if(numberRegex.test(tracking)) {--}}
+            var route = '{!! route('admin.tracking.index') !!}';
 
-            {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
-            {{--url = url.replace('id',tracking);--}}
+            $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
 
-            {{--window.location.href = url;--}}
-            {{--}else{--}}
-            {{--scan.val('');--}}
-            {{--}--}}
-            {{--});--}}
-            {{--$('body').on('click','.verifyDeliveryNote',function () {--}}
-                {{--var note_id = parseInt($(this).parents('tr').attr('id'));--}}
-                {{--$.ajax({--}}
-                    {{--url: '{!! route('admin.delivery.receive.dn.verify') !!}',--}}
-                    {{--method: 'POST',--}}
-                    {{--data: {--}}
-                        {{--'note_id': note_id,--}}
-                        {{--'_token': '{{ csrf_token() }}'--}}
-                    {{--}--}}
-                {{--}).done(function (data) {--}}
-                    {{--if(data.status == 0){--}}
-                        {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-                        {{--table.ajax.reload();--}}
-                    {{--}else{--}}
-                        {{--// console.log(data.delivery_note_id);--}}
-                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                    {{--}--}}
-                {{--});--}}
+                $.ajax({
+                    url: '{!! route('admin.return.receive.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'return_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
 
-            {{--});--}}
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
 
         });
     </script>

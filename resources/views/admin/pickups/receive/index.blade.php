@@ -83,6 +83,26 @@
 			</div>
 		</div>
 	</div>
+	<!--Shipments popup -->
+	<div class="modal fade" id="bookings_modal" data-backdrop="static" role="dialog" aria-labelledby="bookings_modal" aria-hidden="true">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="bookings_modal_title">Booking Shipment(s)</h4>
+
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--Shipments popup -->
 @endsection
 
 @section('css')
@@ -208,7 +228,7 @@
 					{data: 'route', name: 'route', class: 'align-middle route'},
 					{data: 'city', name: 'c.name', class: 'align-middle city'},
 					{data: 'pickups', name: 'pickup_notes.pickups', class: 'align-middle pickups'},
-					{data: 'bookings', name: 'pickup_notes.bookings', class: 'align-middle bookings'},
+					{data: 'bookings_link', name: 'pickup_notes.bookings', class: 'align-middle bookings_link text-center'},
 					{data: 'pickup_type', name: 'pickup_notes.pickup_type', class: 'align-middle pickup_type'},
 					{data: 'assigned_date', name: 'pickup_notes.created_at', class: 'align-middle assigned_date'},
 					{data: 'assigned_by', name: 'a.name', class: 'align-middle assigned_by'},
@@ -274,14 +294,10 @@
                     });
                     var data1 = $.map({!! $rider_category !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data1 = $.map({!! $rider_category !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
+
 
                     $("#rider_select").prepend('<option value="" selected></option>').select2({
                         data:data1,
@@ -292,12 +308,7 @@
                     });
                     var data2 = $.map({!! $pickup_status !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data2 = $.map({!! $pickup_status !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
 
@@ -372,6 +383,39 @@
 					table.draw();
 				}
 			});
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('#datatable tbody').on('click','tr td.bookings_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#bookings_modal .modal-body').html('');
+                $('#bookings_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.pickups.receive.bookings.all') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+
+                            var shipments = '';
+                            if (data.booked) {
+                                $.each(data.booked, function(index, shipment_ids) {
+
+                                    shipments += "<div><b>Shipper : "+index+"</b></div>";
+                                    $.each(shipment_ids, function (index,tracking_numbers) {
+                                        shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+
+                                    });
+                                });
+                            }
+                            $('#bookings_modal .modal-body').html(shipments);
+                        }
+                    });
+
+            });
 		});
 	</script>
 @endsection

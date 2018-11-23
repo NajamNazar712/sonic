@@ -265,8 +265,8 @@
 					{data:'status', name: 'ss.id', class: 'align-middle text-center status'},
 					{data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
 					{data:'remarks', name: 'sj.remarks', class: 'align-middle text-center remarks'},
-					{data:'dncc', name: 'delivery_note_shipments.delivery_note_id', class: 'align-middle text-center dncc'},
-					{data:'sdn', name: 'dnsdn.station_deposit_note_id', class: 'align-middle text-center sdn'},
+					{data:'dncc_link', name: 'delivery_note_shipments.delivery_note_id', class: 'align-middle text-center dncc_link'},
+					{data:'sdn_link', name: 'dnsdn.station_deposit_note_id', class: 'align-middle text-center sdn_link'},
 					{data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
@@ -446,6 +446,79 @@
 					});
 				}
 			});
+
+            function printDNCC(id) {
+                $.ajax({
+                    url: '{!! route('admin.finance.outstanding_shipments.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            $('#datatable tbody').on('click', 'tr td.dncc_link button.print', function() {
+                var delivery_note_id = parseInt($(this).parents('tr').data('dncc'));
+
+                printDNCC(delivery_note_id);
+            });
+
+            function printSDN(id) {
+                $.ajax({
+                    url: '{!! route('admin.finance.outstanding_shipments.sdn.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            $('#datatable tbody').on('click', 'tr td.sdn_link button.print', function() {
+                var sdn = parseInt($(this).parents('tr').data('sdn'));
+				if(sdn){
+                    printSDN(sdn);
+                }else{
+				    var error = "Station Deposit Note not found!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                }
+            });
 		});
 	</script>
 @endsection

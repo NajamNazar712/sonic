@@ -72,6 +72,7 @@
 										<th class="border-primary border-darken-1">Builty No.</th>
 										<th class="border-primary border-darken-1">Transit Datetime</th>
 										<th class="border-primary border-darken-1">Transitted By</th>
+										<th class="border-primary border-darken-1">Aging</th>
 										<th class="border-primary border-darken-1">Status</th>
 										<th class="border-primary border-darken-1"></th>
 									</tr>
@@ -393,6 +394,7 @@
                             head.push('Builty No.');
                             head.push('Transit Datetime');
                             head.push('Transitted By');
+                            head.push('Aging');
                             head.push('Status');
 
 
@@ -412,6 +414,7 @@
                                 row.push(values.builty_number);
                                 row.push(values.transit_at);
                                 row.push(values.transitted_by);
+                                row.push(values.aging);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -498,7 +501,7 @@
 				order: [[11, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data: 'id_padded', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
+					{data: 'id_padded_link', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
 					{data: 'origin', name: 'oh.name', class: 'align-middle origin'},
 					{data: 'destination', name: 'dh.name', class: 'align-middle destination'},
 					{data: 'shipments', name: 'cargo_consignments.shipments', class: 'align-middle text-center shipments'},
@@ -510,6 +513,7 @@
 					{data: 'builty_number', name: 'cargo_consignments.builty_number', class: 'align-middle builty_number'},
 					{data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
 					{data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
+					{data: 'aging', name: 'aging', class: 'align-middle aging', searchable: false, orderable: false},
 					{data: 'status', name: 'status', class: 'align-middle status'},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 				],
@@ -533,7 +537,7 @@
 						var column = this;
 						var header = column.header();
 
-						if ($(header).is('.serial_number') || $(header).is('.action')) {
+						if ($(header).is('.serial_number') || $(header).is('.aging') || $(header).is('.action')) {
 							$(td).appendTo($(search));
 						}else if($(header).is('.shipping_mode')){
                             $(mode_drop_select).appendTo($(search))
@@ -567,13 +571,8 @@
 						}
 					});
                     var data1 = $.map({!! $shipping_mode !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
-
-                        return obj;
-                    });
-                    var data1 = $.map({!! $shipping_mode !!}, function (obj) {
-                        obj.text = obj.mode; // replace name with the property used for the text
-
+                        obj.id = obj.id;
+                        obj.text = obj.mode;
                         return obj;
                     });
 
@@ -585,13 +584,8 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data2 = $.map({!! $cargo_status !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
-
-                        return obj;
-                    });
-                    var data2 = $.map({!! $cargo_status !!}, function (obj) {
-                        obj.text = obj.name; // replace name with the property used for the text
-
+                        obj.id = obj.id;
+                        obj.text = obj.name;
                         return obj;
                     });
 
@@ -603,13 +597,8 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data3 = $.map({!! $transport_mode !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
-
-                        return obj;
-                    });
-                    var data3 = $.map({!! $transport_mode !!}, function (obj) {
-                        obj.text = obj.name; // replace name with the property used for the text
-
+                        obj.id = obj.id;
+                        obj.text = obj.name;
                         return obj;
                     });
 
@@ -621,15 +610,11 @@
                         dropdownCssClass: 'form-control-sm p-0'
                     });
                     var data4 = $.map({!! $transport_vendor !!}, function (obj) {
-                        obj.id = obj.id // replace pk with your identifier
-
+                        obj.id = obj.id;
+                        obj.text = obj.name;
                         return obj;
                     });
-                    var data4 = $.map({!! $transport_vendor !!}, function (obj) {
-                        obj.text = obj.name; // replace name with the property used for the text
 
-                        return obj;
-                    });
 
                     $("#vendor_select").prepend('<option value="" selected></option>').select2({
                         data:data4,
@@ -641,6 +626,7 @@
 					this.api().table().columns.adjust();
 				}
 			});
+            var route = '{!! route('admin.tracking.index') !!}';
 
 			$('#datatable tbody').on('click', 'tr td.shipments button', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
@@ -660,7 +646,7 @@
 						var tracking_numbers = '';
 
 						$.each(data, function(index, tracking_number) {
-							tracking_numbers += tracking_number + '<br/>';
+							tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
 						});
 
 						$('#shipments .modal-body').html(tracking_numbers);
@@ -961,8 +947,7 @@
 
 				var max_char = 190;
 				$('#universal_description').on('keypress copy paste',function (e) {
-	                // var comment = $(this).val();
-	                // console.log(comment)
+
 	                if ($(this).val().length == max_char) {
 	                    e.preventDefault();
 	                } else if ($(this).val().length > max_char) {
@@ -1256,6 +1241,12 @@
 					}
 				@endif
 			});
+
+            $('#datatable tbody').on('click','tr td.cargo_number button.print',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+				print(id);
+
+            });
 		});
 	</script>
 @endsection

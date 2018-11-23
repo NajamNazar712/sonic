@@ -112,7 +112,26 @@
             </div>
         </div>
     </div>
+    <!--Shipments popup -->
+    <div class="modal fade" id="bookings_modal" data-backdrop="static" role="dialog" aria-labelledby="bookings_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="bookings_modal_title">Booking Shipment(s)</h4>
 
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
 @endsection
 
 @section('css')
@@ -284,7 +303,7 @@
                                 row.push(values.pn_id);
                                 row.push(values.city);
                                 row.push(values.pickups);
-                                row.push(values.count);
+                                row.push(values.bookings);
                                 row.push(values.rider);
                                 row.push(values.assigned_date);
                                 row.push(values.assigned_by);
@@ -301,7 +320,7 @@
                 }
             } );
 
-            var index_column = 0;
+
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '350px',
@@ -334,10 +353,10 @@
                 order: [[6, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'pn_id', name: 'pickup_notes.id', class: 'align-middle pn_id'},
+                    {data: 'pickup_note_no', name: 'pickup_notes.id', class: 'align-middle pickup_note_no'},
                     {data: 'city', name: 'cities.name', class: 'align-middle city'},
                     {data: 'pickups', name: 'pickup_notes.pickups', class: 'align-middle pickups'},
-                    {data: 'count', name: 'pickup_notes.bookings', class: 'align-middle count'},
+                    {data: 'bookings_link', name: 'pickup_notes.bookings', class: 'align-middle bookings_link text-center'},
                     {data: 'rider', name: 'riders.name', class: 'align-middle rider'},
                     {data: 'assigned_date', name: 'pickup_notes.created_at', class: 'align-middle assigned_date'},
                     {data: 'assigned_by', name: 'ab.name', class: 'align-middle assigned_by'},
@@ -357,7 +376,72 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
+            $('#datatable tbody').on('click', 'tr td.pickup_note_no button.print', function() {
+                var pickup_note_id = parseInt($(this).parents('tr').attr('id'));
 
+                print(pickup_note_id);
+            });
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.reports.pickup_note.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids': [id],
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('#datatable tbody').on('click','tr td.bookings_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#bookings_modal .modal-body').html('');
+                $('#bookings_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.reports.pickup_note.bookings') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+
+                            var shipments = '';
+                            if (data.booked) {
+                                $.each(data.booked, function(index, shipment_ids) {
+
+                                    shipments += "<div><b>Shipper : "+index+"</b></div>";
+                                    $.each(shipment_ids, function (index,tracking_numbers) {
+                                        shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+
+                                    });
+                                });
+                            }
+                            $('#bookings_modal .modal-body').html(shipments);
+                        }
+                    });
+
+            });
         });
 
     </script>

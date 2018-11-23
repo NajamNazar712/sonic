@@ -387,7 +387,6 @@
                                                         <div>
                                                         <select name="mode_of_payment" id="mode_of_payment" class="select2 form-control required" style="width: 100%;">
                                                             <option value="IBFT" {{ old('mode_of_payment') == 'IBFT' ? 'selected' : '' }}>IBFT Reimbursements</option>
-                                                            <option value="Invoices" {{ old('mode_of_payment') == 'Invoices' ? 'selected' : '' }}>Invoices</option>
                                                         </select>
                                                         </div>
                                                     </div>

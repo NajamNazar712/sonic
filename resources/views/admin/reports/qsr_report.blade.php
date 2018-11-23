@@ -312,7 +312,7 @@
                 order: [[6, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'tracking_number', name: 'shipments.tracking_number', class: 'align-middle tracking_number'},
+                    {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'name', name: 'shipments.consignee_name', class: 'align-middle name'},
                     {data: 'history_status', name: 'ss.name', class: 'align-middle history_status'},

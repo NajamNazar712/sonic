@@ -3553,12 +3553,13 @@ class AdminDashboardController extends Controller
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
             'iban'=>'required|string|max:255',
+            'payment_mode'=>'required|string|max:255',
+            'payment_cycle'=>'required|string|max:255'
         ]);
 
 
         UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
-            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,
-            ]);
+            'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_mode'=>$request->payment_mode,'payment_cycle'=>$request->payment_cycle]);
 
         return redirect()->back()->with(['success'=>"Bank Information Successfully Updated"]);
     }
