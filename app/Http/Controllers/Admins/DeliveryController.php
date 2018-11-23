@@ -2859,7 +2859,7 @@ class DeliveryController extends Controller
         $delivery_note = DeliveryNote::where('id', $request->id);
         if ($delivery_note->exists()) {
             $delivery_note_data = $delivery_note->first();
-            $delivery_note_data->last_updated = Carbon::now();
+            $delivery_note_data->last_updated_at = Carbon::now();
             $delivery_note_data->save();
             $total_shipments = 0;
             $total_cod_amount = 0;
