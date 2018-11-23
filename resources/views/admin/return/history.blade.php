@@ -1,10 +1,10 @@
 
 @extends('admin.layout.master')
-@section('title','Receive Deliveries')
+@section('title','Return Deliveries History')
 
 @section('content')
     <h1 class="mb-1">
-        Receive Deliveries
+        Return Deliveries History
     </h1>
 
     <div class="card">
@@ -13,46 +13,20 @@
                 @include('admin.inc.messages')
 
 
-
-                <div class="row mb-2 justify-content-center">
-
-                    <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Scan Delivery Note Number" name="scan_delivery_note" id="scan_delivery_note">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
-                        </fieldset>
-                    </div>
-                    <div class="col-3">
-                        <fieldset class="position-relative has-icon-left">
-                            <input type="text" class="form-control" placeholder="Search By Tracking Number" name="search_tracking" id="search_tracking">
-                            <div class="form-control-position">
-                                <i class="ft-search"></i>
-                            </div>
-                        </fieldset>
-                    </div>
-
-
-                </div>
-
-
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Delivery Note No.</th>
+                        <th class="border-primary border-darken-1">Return Note No.</th>
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
-                        <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
-                        <th class="border-primary border-darken-1">Assigned By</th>
-                        <th class="border-primary border-darken-1">Assigned Date</th>
-                        <th class="border-primary border-darken-1">Total Collection</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Last Update</th>
-                        <th class="border-primary border-darken-1">Action</th>
+                        <th class="border-primary border-darken-1">Created By</th>
+                        <th class="border-primary border-darken-1">Created Date</th>
+                        <th class="border-primary border-darken-1">Submitted By</th>
+                        <th class="border-primary border-darken-1">Submitted Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -60,13 +34,12 @@
             </div>
         </div>
     </div>
-
     <!--Shipments popup -->
     <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="shipments_modal_title">Shipment(s)</h4>
+                    <h4 class="modal-title" id="shipments_modal_title">Return Note Shipment(s)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -81,14 +54,13 @@
         </div>
     </div>
     <!--Shipments popup -->
-
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-    <style>
+    <style type="text/css">
         table.dataTable {
             font-size: 12px;
         }
@@ -151,41 +123,38 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                            url: '{{ route('admin.delivery.receive.list') }}',
-                            data: {
-                                'page': 'all',
-                                'delivery_note_number' : $('#scan_delivery_note').val(),
-                                'search_tracking' : $('#search_tracking').val(),
-                            },
+                        url: '{{ route('admin.return.history.list') }}',
+                        data: {
+                            'page': 'all'
+                        },
                         success: function (result) {
                             head = [];
-
                             head.push('S.No');
-                            head.push('Delivery Note No.');
+                            head.push('Return Note No.');
+                            head.push('Status');
                             head.push('Hub');
                             head.push('Rider');
-                            head.push('Route');
                             head.push('No. Of Shipments');
-                            head.push('Assigned By');
-                            head.push('Assigned Date');
-                            head.push('Total COD');
-                            head.push('Status');
-                            head.push('Last Update');
+                            head.push('Created By');
+                            head.push('Created Date');
+                            head.push('Submitted By');
+                            head.push('Submitted Date');
+
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.delivery_note_id_padded);
+                                row.push(values.return_note_id_padded);
+                                row.push(values.main_status);
                                 row.push(values.hub);
                                 row.push(values.rider);
-                                row.push(values.route);
                                 row.push(values.shipments_count);
-                                row.push(values.assignee);
+                                row.push(values.assigned_by);
                                 row.push(values.created_at);
-                                row.push(values.amount);
-                                row.push(values.pending_status);
-                                row.push(values.last_updated_at);
+                                row.push(values.submitted_by);
+                                row.push(values.submitted_at);
+
                                 body.push(row);
                             });
                         },
@@ -195,47 +164,39 @@
                     return {body: body, header: head};
                 }
             } );
-
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true, scrollY: '350px',
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Receive Deliveries',
+                        title: 'Receive Return Deliveries',
                         text: '<i class="la la-file-excel-o"></i> Excel',
-                    },
+                    }
                 ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: {
-                    url: '{{ route('admin.delivery.receive.list') }}',
-                    data: function (d) {
-                        d.delivery_note_number = $('#scan_delivery_note').val();
-                        d.search_tracking = $('#search_tracking').val();
-                    }
-                },
-                rowId: 'delivery_note_id',
-                order: [[1, 'desc']],
+                ajax:'{{ route('admin.return.history.list') }}',
+                rowId: 'return_note_id',
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle delivery_note'},
+                    { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
+                    { data:'main_status' ,name: 'main_status', class: 'align-middle status',orderable:false},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
-                    { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
-                    { data:'pending_status' ,name: 'pending_status', class: 'align-middle pending_status'},
-                    { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
-                    {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
+                    { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data:'assigned_by' ,name: 'admins.name', class: 'align-middle assigned_by'},
+                    { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
+                    { data:'submitted_by' ,name: 'sb.name', class: 'align-middle submitted_by'},
+                    { data:'submitted_at' ,name: 'return_notes.updated_at', class: 'align-middle submitted_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
+
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
                 },
                 initComplete: function() {
@@ -244,18 +205,19 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '<option value="0">Pending for Update</option>' +
-                        '<option value="1">Pending for Verification</option>' +
+                        '<option value="1">Verified</option>' +
+                        '<option value="2">Cancelled</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
 
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                        if ($(header).is('.serial_number')) {
                             $(td).appendTo($(search));
-                        }else if($(header).is('.pending_status')){
-                            $(drop_select).appendTo($(search))
+                        }else if($(header).is('.status')){
+                            $(status_select).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -285,12 +247,12 @@
                 'allowMinus': false,
                 'allowPlus': false
             }).bind('input', function() {
-                if (this.value.length == 0 || this.value.length >= 12) {
+                if (this.value.length == 0 || this.value.length >= 10) {
                     table.draw();
                 }
             });
 
-            $('#scan_delivery_note').inputmask({
+            $('#scan_return_note').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false
@@ -298,10 +260,9 @@
                 table.draw();
             });
 
-
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.delivery.receive.print') !!}',
+                    url: '{!! route('admin.return.receive.rn.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -327,78 +288,11 @@
                         }
                     });
             }
-            $('body').on('click','.printdeliverynote',function () {
-                var deliverynote = $(this).parents('tr').attr('id');
-                print(deliverynote);
+            $('body').on('click','.printreturnnote',function () {
+                var returnnote = $(this).parents('tr').attr('id');
+                print(returnnote);
+                // console.log(returnnote)
             });
-            $('body').on('click','.printTempDNCC',function () {
-                var note_id = $(this).parents('tr').attr('id');
-                var temporary = 'temporary';
-                printTemp(note_id,temporary);
-            });
-            $('body').on('click','.printUndeliveredDNCC',function () {
-                var note_id = $(this).parents('tr').attr('id');
-                printUndelivered(note_id);
-            });
-
-
-            function printTemp(id,temp = null) {
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.dncc.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        'temporary':temp,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
-            function printUndelivered(id) {
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.undelivered.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
 
             var route = '{!! route('admin.tracking.index') !!}';
 
@@ -408,11 +302,11 @@
                 $('#shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.delivery.receive.shipments') !!}',
+                    url: '{!! route('admin.return.history.shipments') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
+                        'return_note_id': id
                     }
                 })
                     .done(function(data) {
@@ -429,22 +323,6 @@
                     });
 
             });
-
-            {{--$('#scan_tracking').on('change',function () {--}}
-                {{--var scan = $(this);--}}
-                {{--var tracking = $(this).val();--}}
-                {{--var numberRegex = /^[+-]?\d+(\.\d+)?([eE][+-]?\d+)?$/;--}}
-                {{--if(numberRegex.test(tracking)) {--}}
-
-                    {{--var url = "{{route("admin.delivery.receive.status","id")}}";--}}
-                    {{--url = url.replace('id',tracking);--}}
-
-                    {{--window.location.href = url;--}}
-                {{--}else{--}}
-                    {{--scan.val('');--}}
-                {{--}--}}
-            {{--});--}}
-
 
         });
     </script>

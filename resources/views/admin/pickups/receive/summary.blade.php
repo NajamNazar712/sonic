@@ -88,6 +88,48 @@
 
 					<input type="hidden" name="pickup_note_no" class="pickup_note_no" value="{{ session('pickup_receive_pickup_note_id') }}">
 				</form>
+
+				<!--Shipments popup -->
+				<div class="modal fade" id="bookings_modal" data-backdrop="static" role="dialog" aria-labelledby="bookings_modal" aria-hidden="true">
+					<div class="modal-dialog modal-sm" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title" id="bookings_modal_title">Booking Shipment(s)</h4>
+
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">×</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!--Shipments popup -->
+				<!--Shipments Received popup -->
+				<div class="modal fade" id="received_bookings_modal" data-backdrop="static" role="dialog" aria-labelledby="received_bookings_modal" aria-hidden="true">
+					<div class="modal-dialog modal-sm" role="document">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h4 class="modal-title" id="received_bookings_modal_title">Received Booking Shipment(s)</h4>
+
+								<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+									<span aria-hidden="true">×</span>
+								</button>
+							</div>
+							<div class="modal-body text-center">
+							</div>
+							<div class="modal-footer">
+								<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+							</div>
+						</div>
+					</div>
+				</div>
+				<!--Shipments popup -->
+
 			</div>
 		</div>
 	</div>
@@ -126,10 +168,10 @@
 					{data: 'contact_number', name: 'usi.phone', class: 'align-middle contact_number'},
 					{data: 'address', name: 'usi.pickup_address', class: 'align-middle address'},
 					{data: 'city', name: 'ci.name', class: 'align-middle city'},
-					{data: 'bookings', name: 'pickup_requests.bookings', class: 'align-middle bookings'},
-					{data: 'received', name: 'pickup_requests.received', class: 'align-middle received'},
-					{data: 'short_received', name: 'pickup_requests.short_received', class: 'align-middle short_received'},
-					{data: 'over_received', name: 'pickup_requests.over_received', class: 'align-middle over_received'},
+					{data: 'bookings_link', name: 'pickup_requests.bookings', class: 'align-middle bookings_link text-center'},
+					{data: 'received_link', name: 'pickup_requests.received', class: 'align-middle received_link text-center'},
+					{data: 'short_received', name: 'pickup_requests.short_received', class: 'align-middle short_received text-center'},
+					{data: 'over_received', name: 'pickup_requests.over_received', class: 'align-middle over_received text-center'},
 					{data: 'pickup_type', name: 'pickup_type', class: 'align-middle pickup_type'},
 					{data: 'booking_date', name: 'pickup_requests.created_at', class: 'align-middle booking_date'},
 					{data: 'assigned_date', name: 'pn.created_at', class: 'align-middle assigned_date'},
@@ -421,6 +463,65 @@
 					});
 				}
 			});
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('#datatable tbody').on('click','tr td.bookings_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#bookings_modal .modal-body').html('');
+                $('#bookings_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.pickups.receive.summary.bookings.all') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_request_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+
+                            if (data.booked) {
+                                $.each(data.booked, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#bookings_modal .modal-body').html(shipments);
+
+
+                        }
+                    });
+
+            });
+            $('#datatable tbody').on('click','tr td.received_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#received_bookings_modal .modal-body').html('');
+                $('#received_bookings_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.pickups.receive.summary.received') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'pickup_request_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var shipments = '';
+
+                            if (data.booked) {
+                                $.each(data.booked, function(index, tracking_numbers) {
+                                    shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
+                                });
+                            }
+                            $('#received_bookings_modal .modal-body').html(shipments);
+
+
+                        }
+                    });
+
+            });
 		});
 	</script>
 @endsection

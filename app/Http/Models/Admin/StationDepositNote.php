@@ -19,4 +19,7 @@ class StationDepositNote extends Model
     public function bank(){
         return $this->belongsTo('App\Http\Models\BanksList','banks_list_id','id');
     }
+    public function delivery_notes_list(){
+        return $this->hasMany('App\Http\Models\Admin\DeliveryNoteStationDepositNote');
+    }
 }
