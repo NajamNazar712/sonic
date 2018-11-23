@@ -185,7 +185,7 @@
                                 row.push(values.created_at);
                                 row.push(values.amount);
                                 row.push(values.pending_status);
-                                row.push(values.last_update);
+                                row.push(values.last_updated_at);
                                 body.push(row);
                             });
                         },
@@ -231,7 +231,7 @@
                     { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
                     { data:'pending_status' ,name: 'pending_status', class: 'align-middle pending_status'},
-                    { data:'last_updated' ,name: 'delivery_notes.last_updated', class: 'align-middle last_updated'},
+                    { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
                     {data:'action' ,name: 'action', class: 'align-middle action',orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
