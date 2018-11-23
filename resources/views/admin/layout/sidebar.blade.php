@@ -136,7 +136,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61, 120, 121, 122], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Finance</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || count(array_intersect([52, 54], session('permissions'))) !== 0)
@@ -171,15 +171,15 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([59, 61], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([120, 121, 122], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Invoices</span></a>
                                 <ul class="menu-content">
-                                    @if (session('role_id') == 1 || in_array(59, session('permissions')))
+                                    @if (session('role_id') == 1 || in_array(120, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.finance.generate_invoices.index') }}">Generate</a></li>
                                     @endif
 
-                                    @if (session('role_id') == 1 || in_array(61, session('permissions')))
-                                        <li><a class="menu-item" href="{{ route('admin.finance.done_payments.index') }}">History</a></li>
+                                    @if (session('role_id') == 1 || in_array(122, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.finance.invoices_history.index') }}">History</a></li>
                                     @endif
                                 </ul>
                             </li>

@@ -560,6 +560,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('generate_invoices')->name('generate_invoices.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@generate_invoices_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@generate_invoices_list')->name('list');
+            Route::post('', 'Admins\AdminFinanceController@generate_invoices_store')->name('store');
+            Route::get('print', 'Admins\AdminFinanceController@generate_invoices_print')->name('print');
+        });
+
+        Route::prefix('invoices_history')->name('invoices_history.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@invoices_history_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@invoices_history_list')->name('list');
+            Route::post('delivered_shipments', 'Admins\AdminFinanceController@invoices_history_delivered_shipments')->name('delivered_shipments');
+            Route::post('returned_shipments', 'Admins\AdminFinanceController@invoices_history_returned_shipments')->name('returned_shipments');
+            Route::post('adjusted_shipments', 'Admins\AdminFinanceController@invoices_history_adjusted_shipments')->name('adjusted_shipments');
         });
     });
 

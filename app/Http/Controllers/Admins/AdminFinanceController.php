@@ -24,6 +24,9 @@ use App\Http\Models\PendingPayment;
 use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\DonePayment;
 use App\Http\Models\DonePaymentShipment;
+use App\Http\Models\PendingInvoiceShipment;
+use App\Http\Models\Invoice;
+use App\Http\Models\InvoiceShipment;
 
 use Auth;
 use DB;
@@ -33,9 +36,29 @@ use Carbon\Carbon;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use NumberToWords\NumberToWords;
 
 class AdminFinanceController extends Controller
 {
+    private function amount_to_words($amount) {
+        $number_to_words = new NumberToWords();
+        $number_transformer = $number_to_words->getNumberTransformer('en');
+
+        $amount_in_words = $number_transformer->toWords($amount, 'PKR');
+
+        $last_position = strrpos($amount_in_words, ' ');
+
+        if ($last_position !== FALSE) {
+            $amount_in_words = substr_replace($amount_in_words, ' & ', $last_position, strlen(' '));
+        }
+
+        $amount_in_words = str_replace('-', ' ', $amount_in_words);
+
+        $amount_in_words = ucwords($amount_in_words);
+
+        return $amount_in_words;
+    }
+
     static private function gst($hub_id) {
         $hub_ids = [101, 106, 109, 110, 111, 119, 122, 125, 128, 130, 134, 135, 144, 158, 165, 174, 176, 186, 465, 199, 223, 414, 238, 244, 251, 255, 264, 267, 271, 281, 283, 284, 293, 302, 315, 304, 319, 339, 340];
 
@@ -372,33 +395,85 @@ class AdminFinanceController extends Controller
 
             $shipment = Shipment::find($request->id);
 
-            $shipment->shipper_status_id = 20;
-            $shipment->consignee_status_id = 20;
+            $shipment->shipper_status_id = 13;
+            $shipment->consignee_status_id = 13;
 
             $shipment->payment_status_id = 4;
 
             $shipment->save();
 
-            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $request->id);
+            $payment_mode = $shipment->user->bank->payment_mode;
 
-            if ($pending_payment_shipment->exists()) {
-                $pending_payment_shipment = $pending_payment_shipment->first();
+            if ($payment_mode == 'IBFT') {
+                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $request->id);
 
-                $this->adjust_payment($pending_payment_shipment->pending_payment_id, $request->id, 0, 0);
+                if ($pending_payment_shipment->exists()) {
+                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                    $this->adjust_payment($pending_payment_shipment->pending_payment_id, $request->id, 0);
+                }
+                else {
+                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $request->id);
+
+                    if ($done_payment_shipment->exists()) {
+                        $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                        $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id, 1);
+                    }
+                }
             }
             else {
-                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $request->id);
+                $payment_shipment_id = NULL;
+                $payment_type = NULL;
+                $invoice_shipment_id = NULL;
+                $invoice_type = NULL;
 
-                if ($done_payment_shipment->exists()) {
-                    $done_payment_shipment = $done_payment_shipment->first();
+                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
 
-                    $this->adjust_payment($done_payment_shipment->done_payment_id, $request->id, 1, 0);
+                if ($pending_payment_shipment->exists()) {
+                    $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                    $payment_shipment_id = $pending_payment_shipment->id;
+                    $payment_type = 0;
+                }
+                else {
+                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+
+                    if ($done_payment_shipment->exists()) {
+                        $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                        $payment_shipment_id = $done_payment_shipment->id;
+                        $payment_type = 1;
+                    }
+                }
+
+                $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id);
+
+                if ($pending_invoice_shipment->exists()) {
+                    $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+
+                    $invoice_shipment_id = $pending_invoice_shipment->id;
+                    $invoice_type = 0;
+                }
+                else {
+                    $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment_id);
+
+                    if ($done_invoice_shipment->exists()) {
+                        $done_invoice_shipment = $done_invoice_shipment->latest()->first();
+
+                        $invoice_shipment_id = $done_invoice_shipment->id;
+                        $invoice_type = 1;
+                    }
+                }
+
+                if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
+                    self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type);
                 }
             }
 
             ShipmentsPaymentJourneyController::add($request->id, 4, Auth::id());
 
-            ShipmentsJourneyController::add($request->id, 20, 20, NULL, NULL, NULL, Auth::id());
+            ShipmentsJourneyController::add($request->id, 13, 13, NULL, NULL, NULL, Auth::id());
 
             NotificationsController::send(21, $request->id, Auth::id());
 
@@ -483,20 +558,72 @@ class AdminFinanceController extends Controller
 
         $shipment->save();
 
-        $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+        $payment_mode = $shipment->user->bank->payment_mode;
 
-        if ($pending_payment_shipment->exists()) {
-            $pending_payment_shipment = $pending_payment_shipment->first();
+        if ($payment_mode == 'IBFT') {
+            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
 
-            self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0, 1);
+            if ($pending_payment_shipment->exists()) {
+                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                self::adjust_payment($pending_payment_shipment->pending_payment_id, $shipment_id, 0);
+            }
+            else {
+                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+
+                if ($done_payment_shipment->exists()) {
+                    $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                    self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1);
+                }
+            }
         }
         else {
-            $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+            $payment_shipment_id = NULL;
+            $payment_type = NULL;
+            $invoice_shipment_id = NULL;
+            $invoice_type = NULL;
 
-            if ($done_payment_shipment->exists()) {
-                $done_payment_shipment = $done_payment_shipment->first();
+            $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
 
-                self::adjust_payment($done_payment_shipment->done_payment_id, $shipment_id, 1, 1);
+            if ($pending_payment_shipment->exists()) {
+                $pending_payment_shipment = $pending_payment_shipment->latest()->first();
+
+                $payment_shipment_id = $pending_payment_shipment->id;
+                $payment_type = 0;
+            }
+            else {
+                $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+
+                if ($done_payment_shipment->exists()) {
+                    $done_payment_shipment = $done_payment_shipment->latest()->first();
+
+                    $payment_shipment_id = $done_payment_shipment->id;
+                    $payment_type = 1;
+                }
+            }
+
+            $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id);
+
+            if ($pending_invoice_shipment->exists()) {
+                $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
+
+                $invoice_shipment_id = $pending_invoice_shipment->id;
+                $invoice_type = 0;
+            }
+            else {
+                $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment_id);
+
+                if ($done_invoice_shipment->exists()) {
+                    $done_invoice_shipment = $done_invoice_shipment->latest()->first();
+
+                    $invoice_shipment_id = $done_invoice_shipment->id;
+                    $invoice_type = 1;
+                }
+            }
+
+            if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
+                self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type);
             }
         }
 
@@ -566,52 +693,60 @@ class AdminFinanceController extends Controller
             $pending_payment->save();
         }
 
+        $payment_mode = $shipment->user->bank->payment_mode;
+
         $pending_payment_shipment = new PendingPaymentShipment();
 
-        $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-        $pending_payment_shipment->shipment_id = $shipment_id;
-        $pending_payment_shipment->type = $type;
-        $pending_payment_shipment->amount = $amount;
-        $pending_payment_shipment->charges = $charges;
-        $pending_payment_shipment->gst = $gst;
-        $pending_payment_shipment->payable = $payable;
+        if ($payment_mode == 'IBFT') {
+            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+            $pending_payment_shipment->shipment_id = $shipment_id;
+            $pending_payment_shipment->type = $type;
+            $pending_payment_shipment->amount = $amount;
+            $pending_payment_shipment->charges = $charges;
+            $pending_payment_shipment->gst = $gst;
+            $pending_payment_shipment->payable = $payable;
 
-        $pending_payment_shipment->save();
-    }
-
-    static private function adjust_payment($payment_id, $shipment_id, $payment_type, $adjustment_type) {
-        if ($adjustment_type == 0) {
-            if ($payment_type == 0) {
-                $payment_shipment = PendingPaymentShipment::where('pending_payment_id', $payment_id)->where('shipment_id', $shipment_id)->first();
-            }
-            else {
-                $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment_id)->where('shipment_id', $shipment_id)->first();
-            }
-
-            ShipmentChargesController::return($shipment_id);
-
-            $shipment = Shipment::find($shipment_id);
-
-            $amount = 0;
-            $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
-            $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
-            $payable = (0 - $payment_shipment->payable) - ($charges + $gst);
+            $pending_payment_shipment->save();
         }
         else {
-            if ($payment_type == 0) {
-                $payment_shipment = PendingPaymentShipment::where('pending_payment_id', $payment_id)->where('shipment_id', $shipment_id)->first();
-            }
-            else {
-                $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment_id)->where('shipment_id', $shipment_id)->first();
+            if ($amount != 0) {
+                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                $pending_payment_shipment->shipment_id = $shipment_id;
+                $pending_payment_shipment->type = $type;
+                $pending_payment_shipment->amount = $amount;
+                $pending_payment_shipment->charges = 0;
+                $pending_payment_shipment->gst = 0;
+                $pending_payment_shipment->payable = 0 - $amount;
+
+                $pending_payment_shipment->save();
             }
 
-            $shipment = Shipment::find($shipment_id);
+            $pending_invoice_shipment = new PendingInvoiceShipment();
 
-            $amount = 0;
-            $charges = 0;
-            $gst = 0;
-            $payable = 0 - $payment_shipment->payable;
+            $pending_invoice_shipment->shipment_id = $shipment_id;
+            $pending_invoice_shipment->type = $type;
+            $pending_invoice_shipment->charges = $charges;
+            $pending_invoice_shipment->gst = $gst;
+            $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+            $pending_invoice_shipment->save();
         }
+    }
+
+    static private function adjust_payment($payment_id, $shipment_id, $payment_type) {
+        if ($payment_type == 0) {
+            $payment_shipment = PendingPaymentShipment::where('pending_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
+        }
+        else {
+            $payment_shipment = DonePaymentShipment::where('done_payment_id', $payment_id)->where('shipment_id', $shipment_id)->latest()->first();
+        }
+
+        $shipment = Shipment::find($shipment_id);
+
+        $amount = 0;
+        $charges = 0;
+        $gst = 0;
+        $payable = 0 - $payment_shipment->payable;
 
         $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
 
@@ -635,6 +770,8 @@ class AdminFinanceController extends Controller
             $pending_payment->save();
         }
 
+        $payment_mode = $shipment->user->bank->payment_mode;
+
         $pending_payment_shipment = new PendingPaymentShipment();
 
         $pending_payment_shipment->pending_payment_id = $pending_payment->id;
@@ -646,6 +783,81 @@ class AdminFinanceController extends Controller
         $pending_payment_shipment->payable = $payable;
 
         $pending_payment_shipment->save();
+    }
+
+    static private function adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type) {
+        if ($payment_shipment_id) {
+            if ($payment_type == 0) {
+                $payment_shipment = PendingPaymentShipment::find($payment_shipment_id);
+            }
+            else {
+                $payment_shipment = DonePaymentShipment::find($payment_shipment_id);
+            }
+
+            if ($payment_shipment) {
+                $pending_invoice_shipment = new PendingInvoiceShipment();
+
+                $pending_invoice_shipment->shipment_id = $shipment_id;
+                $pending_invoice_shipment->type = 2;
+                $pending_invoice_shipment->charges = 0;
+                $pending_invoice_shipment->gst = 0;
+                $pending_invoice_shipment->invoice_amount = $payment_shipment->payable;
+
+                $pending_invoice_shipment->save();
+            }
+        }
+
+        if ($invoice_shipment_id) {
+            if ($invoice_type == 0) {
+                $invoice_shipment = PendingInvoiceShipment::find($invoice_shipment_id);
+            }
+            else {
+                $invoice_shipment = InvoiceShipment::find($invoice_shipment_id);
+            }
+
+            if ($invoice_shipment) {
+                $shipment = Shipment::find($shipment_id);
+
+                $amount = 0;
+                $charges = 0;
+                $gst = 0;
+                $payable = $invoice_shipment->invoice_amount;
+
+                $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+
+                if ($pending_payment->exists()) {
+                    $pending_payment = $pending_payment->first();
+
+                    $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+                    $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
+
+                    $pending_payment->save();
+                }
+                else {
+                    $pending_payment = new PendingPayment();
+
+                    $pending_payment->user_id = $shipment->user_id;
+                    $pending_payment->total_shipments = 1;
+                    $pending_payment->delivered_shipments = 0;
+                    $pending_payment->returned_shipments = 0;
+                    $pending_payment->adjusted_shipments = 1;
+
+                    $pending_payment->save();
+                }
+
+                $pending_payment_shipment = new PendingPaymentShipment();
+
+                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                $pending_payment_shipment->shipment_id = $shipment_id;
+                $pending_payment_shipment->type = 2;
+                $pending_payment_shipment->amount = $amount;
+                $pending_payment_shipment->charges = $charges;
+                $pending_payment_shipment->gst = $gst;
+                $pending_payment_shipment->payable = $payable;
+
+                $pending_payment_shipment->save();
+            }
+        }
     }
 
     public function make_payments_index() {
@@ -1573,7 +1785,7 @@ class AdminFinanceController extends Controller
                               <td class="color secondary"><strong>Reference Number</strong></td>
                               <td>' . $done_payment->reference_number . '</td>
                             </tr>
-      ';
+        ';
 
       $shipment_details = '';
 
@@ -1854,15 +2066,22 @@ class AdminFinanceController extends Controller
     }
 
     public function generate_invoices_list(Request $request) {
-        $pending_invoice_shipments = PendingInvoiceShipment::join('users as u', 'pending_invoice_shipments.user_id', '=', 'u.id')
+        $pending_invoice_shipments = PendingInvoiceShipment::join('shipments as s', 'pending_invoice_shipments.shipment_id', '=', 's.id')
+        ->join('users as u', 's.user_id', '=', 'u.id')
         ->join('cities as c', 'u.city_id', '=', 'c.id')
-        ->join('user_bank_infos as ubi', 'pending_payments.user_id', '=', 'ubi.user_id')
+        ->join('user_bank_infos as ubi', 's.user_id', '=', 'ubi.user_id')
         ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
         ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
-        ->select('pending_invoice_shipments.shipment_id', 'pending_invoice_shipments.type', 'pending_invoice_shipments.created_at', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_invoice_shipments.charges', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle')
-        ->where('pending_invoice_shipments.shipper_id', $request->shipper_id)
-        ->whereDate('pending_invoice_shipments.created_at', '<=', $request->start_date)
-        ->whereDate('pending_invoice_shipments.created_at', '>=', $request->end_date);
+        ->select('pending_invoice_shipments.id', 'u.name as shipper', 's.tracking_number', 'pending_invoice_shipments.type', 'pending_invoice_shipments.created_at', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_invoice_shipments.charges', 'pending_invoice_shipments.gst', 'pending_invoice_shipments.invoice_amount', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city');
+
+        if ($request->shipper && $request->from_date && $request->to_date) {
+            $pending_invoice_shipments = $pending_invoice_shipments->where('s.user_id', $request->shipper)
+            ->whereDate('pending_invoice_shipments.created_at', '>=', $request->from_date)
+            ->whereDate('pending_invoice_shipments.created_at', '<=', $request->to_date);
+        }
+        else {
+            $pending_invoice_shipments = $pending_invoice_shipments->whereRaw('FALSE');
+        }
 
         $datatables = Datatables::of($pending_invoice_shipments)
         ->editColumn('type', function($pending_invoice_shipment) {
@@ -1920,6 +2139,552 @@ class AdminFinanceController extends Controller
         ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
         return $datatables->make(true);
+    }
+
+    public function generate_invoices_store(Request $request) {
+        $pending_invoice_shipment_ids = explode(',', $request->pending_invoice_shipment_ids);
+
+        $invoice = new Invoice();
+
+        $invoice->user_id = $request->shipper_id;
+        $invoice->billing_period_from_date = $request->from_date;
+        $invoice->billing_period_to_date = $request->to_date;
+        $invoice->due_date = $request->due_date_formatted;
+
+        $invoice->save();
+
+        $total_shipments = 0;
+        $total_delivered_shipments = 0;
+        $total_returned_shipments = 0;
+        $total_adjusted_shipments = 0;
+        $total_charges = 0;
+        $total_gst = 0;
+        $total_invoice_amount = 0;
+
+        foreach ($pending_invoice_shipment_ids as $pending_invoice_shipment_id) {
+            $pending_invoice_shipment = PendingInvoiceShipment::find($pending_invoice_shipment_id);
+
+            $shipment = Shipment::find($pending_invoice_shipment->shipment_id);
+
+            $invoice_shipment = new InvoiceShipment();
+
+            $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
+            $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
+            $invoice_shipment->type = $pending_invoice_shipment->type;
+
+            if ($pending_invoice_shipment->type == 2) {
+                $invoice_shipment->adjustment_charges = $pending_invoice_shipment->charges;
+            }
+            else {
+                if ($shipment->packaging_material_charges) {
+                    $invoice_shipment->packaging_material_charges = $shipment->packaging_material_charges;
+                }
+                else {
+                    $invoice_shipment->weight_charges = $shipment->weight_charges;
+                    $invoice_shipment->insurance_charges = $shipment->insurance_charges;
+                    $invoice_shipment->fuel_surcharge = $shipment->fuel_surcharge;
+
+                    if ($pending_invoice_shipment->type == 0) {
+                        $invoice_shipment->cash_handling_charges = $shipment->cash_handling_charges;
+                        $invoice_shipment->replacement_charges = $shipment->replacement_charges;
+                        // $invoice_shipment->try_and_buy_charges = $shipment->try_and_buy_charges;
+                    }
+                    else {
+                        $invoice_shipment->return_charges = $shipment->return_charges;
+                    }
+                }
+            }
+
+            $invoice_shipment->charges = $pending_invoice_shipment->charges;
+            $invoice_shipment->gst = $pending_invoice_shipment->gst;
+            $invoice_shipment->invoice_amount = $pending_invoice_shipment->invoice_amount;
+
+            $invoice_shipment->save();
+
+            $pending_invoice_shipment->delete();
+
+            $total_shipments++;
+
+            if ($pending_invoice_shipment->type == 0) {
+                $total_delivered_shipments++;
+            }
+            else if ($pending_invoice_shipment->type == 1) {
+                $total_returned_shipments++;
+            }
+            else {
+                $total_adjusted_shipments++;
+            }
+
+            $total_charges = $total_charges + $pending_invoice_shipment->charges;
+            $total_gst = $total_gst + $pending_invoice_shipment->gst;
+            $total_invoice_amount = $total_invoice_amount + $pending_invoice_shipment->charges;
+        }
+
+        $shipper = User::find($request->shipper_id);
+
+        $invoice->invoice_number = str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '-' . $shipper->city_id . '-' . str_pad($invoice->id, 6, '0', STR_PAD_LEFT);
+        $invoice->total_shipments = $total_shipments;
+        $invoice->total_delivered_shipments = $total_delivered_shipments;
+        $invoice->total_returned_shipments = $total_returned_shipments;
+        $invoice->total_adjusted_shipments = $total_adjusted_shipments;
+        $invoice->total_charges = $total_charges;
+        $invoice->total_gst = $total_gst;
+        $invoice->total_invoice_amount = $total_invoice_amount;
+
+        $invoice->save();
+
+        return redirect()->back()->with(['success' => 'Invoice(s) has been Generated.', 'print' => $invoice->id]);
+    }
+
+    public function generate_invoices_print(Request $request) {
+        $invoice = Invoice::find($request->id);
+
+        $shipper = $invoice->shipper;
+
+        $shipper_bank = $shipper->bank;
+
+        $html = '
+            <!doctype html>
+            <html lang="en">
+              <head>
+                <meta charset="utf-8">
+                <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                <title>Invoice</title>
+
+                <style>
+                  @page {
+                    size: A4 portrait;
+                  }
+
+                  * {
+                    -webkit-print-color-adjust: exact !important;
+                    color-adjust: exact !important;
+                  }
+
+                  body {
+                    background: none !important;
+                    color: #09262e !important;
+                    font-size: 0.9rem !important;
+                  }
+
+                  hr {
+                    border-top: 1px dashed #000000;
+                  }
+
+                  table.table-bordered {
+                    page-break-inside: avoid;
+                  }
+
+                  table.table-bordered tbody tr td {
+                    border: 1px solid #09262e !important;
+                  }
+
+                  .color.primary {
+                    background: #c8c8c8 !important;
+                  }
+
+                  .color.secondary {
+                    background: #ebebeb !important;
+                  }
+
+                  .border {
+                    border: 1px solid #09262e !important;
+                  }
+
+                  .summary {
+                    page-break-inside: avoid;
+                  }
+
+                  .shipments_summary {
+                    page-break-before: always;
+                  }
+                </style>
+              </head>
+              <body>
+                <div>
+                  <div class="p-1">
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="text-left align-middle">
+                            <img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mb-1">
+                            <div><strong>TRAX ONLINE PRIVATE LIMITED</strong></div>
+                            <div><strong>Address:</strong> Plot #4, DMCHS, Block #7/8, Adjacent to IBL Building Centre, Tipu Sultan Road, Karachi.</div>
+                            <div><strong>NTN:</strong> 7930679-5</div>
+                          </td>
+                          <td class="text-center align-middle color primary"><strong>INVOICE</strong></td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="row align-items-start justify-content-between summary">
+                        <div class="col-6">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary" colspan="2"><strong>Customer Details</strong></td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Account No.</strong></td>
+                                    <td>' . str_pad($shipper->id, 6, '0', STR_PAD_LEFT) . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Name</strong></td>
+                                    <td>' . $shipper->name . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Address</strong></td>
+                                    <td>' . $shipper->address . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color secondary"><strong>Contact No.</strong></td>
+                                    <td>' . $shipper->phone_number_1 . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary"><strong>NTN</strong></td>
+                                  <td>' . $shipper_bank->ntn_no . '</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                    <td class="color primary"><strong>Billing Period</strong></td>
+                                    <td>' . Carbon::parse($invoice->from_date)->format('d/m/Y') . ' - ' . Carbon::parse($invoice->to_date)->format('d/m/Y') . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>Invoice No.</strong></td>
+                                    <td>' . $invoice->invoice_number . '</td>
+                                </tr>
+                                <tr>
+                                    <td class="color primary"><strong>Due Date</strong></td>
+                                    <td>' . Carbon::parse($invoice->due_date)->format('d/m/Y') . '</td>
+                                </tr>
+                               </tbody>
+                            </table>
+                        </div>
+                    </div>
+        ';
+
+        $shipment_details = '';
+
+        $serial_number = 1;
+
+        $total_weight_charges = 0;
+        $total_cash_handling_charges = 0;
+        $total_insurance_charges = 0;
+        $total_return_charges = 0;
+        $total_fuel_surcharge = 0;
+        $total_replacement_charges = 0;
+        // $total_try_and_buy_charges = 0;
+        $total_packaging_material_charges = 0;
+        $total_adjustment_charges = 0;
+        $total_charges = 0;
+        $total_gst = 0;
+        $total_invoice_amount = 0;
+
+        foreach ($invoice->invoice_shipments as $invoice_shipment) {
+            $shipment = $invoice_shipment->shipment;
+
+            if ($invoice_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($invoice_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
+            $shipment_details .= '
+                        <tr>
+                          <td>' . $serial_number . '</td>
+                          <td>' . $shipment->tracking_number . '</td>
+                          <td>' . $shipment->consignee_city->name . '</td>
+                          <td>' . $invoice_shipment->created_at . '</td>
+                          <td>' . $shipment->actual_weight . '</td>
+                          <td>' . number_format($invoice_shipment->weight_charges) . '</td>
+                          <td>' . number_format($invoice_shipment->cash_handling_charges) . '</td>
+                          <td>' . number_format($invoice_shipment->insurance_charges) . '</td>
+                          <td>' . number_format($invoice_shipment->replacement_charges) . '</td>
+                          <td>' . number_format($invoice_shipment->return_charges) . '</td>
+                          <td>' . number_format($invoice_shipment->fuel_surcharge) . '</td>
+                          <td>' . number_format($invoice_shipment->packaging_material_charges) . '</td>
+                          <td>' . number_format($invoice_shipment->adjustment_charges) . '</td>
+                          <td>' . number_format($invoice_shipment->charges) . '</td>
+                          <td>' . number_format($invoice_shipment->gst) . '</td>
+                          <td>' . number_format($invoice_shipment->invoice_amount) . '</td>
+                        </tr>
+            ';
+
+            $serial_number++;
+
+            $total_weight_charges += $invoice_shipment->weight_charges;
+            $total_cash_handling_charges += $invoice_shipment->cash_handling_charges;
+            $total_insurance_charges += $invoice_shipment->insurance_charges;
+            $total_return_charges += $invoice_shipment->return_charges;
+            $total_fuel_surcharge += $invoice_shipment->fuel_surcharge;
+            $total_replacement_charges += $invoice_shipment->replacement_charges;
+            // $total_try_and_buy_charges += $invoice_shipment->try_and_buy_charges;
+            $total_packaging_material_charges += $invoice_shipment->packaging_material_charges;
+            $total_adjustment_charges += $invoice_shipment->adjustment_charges;
+            $total_charges += $invoice_shipment->charges;
+            $total_gst += $invoice_shipment->gst;
+            $total_invoice_amount += $invoice_shipment->invoice_amount;
+        }
+
+        $html .= '
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                            <td class="color primary text-left"><strong>Invoice Summary</strong></td>
+                            <td class="color primary text-right" style="width: 20%;"><strong>Amount (PKR)</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Weight Charges</td>
+                          <td class="text-right">' . number_format($total_weight_charges) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Cash Handling Charges</td>
+                          <td class="text-right">' . number_format($total_cash_handling_charges) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Insurance Charges</td>
+                          <td class="text-right">' . number_format($total_insurance_charges) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Replacement Charges</td>
+                          <td class="text-right">' . number_format($total_return_charges) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Return Charges</td>
+                          <td class="text-right">' . number_format($total_fuel_surcharge) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Fuel Surcharge</td>
+                          <td class="text-right">' . number_format($total_replacement_charges) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Packaging Charges</td>
+                          <td class="text-right">' . number_format($total_packaging_material_charges) . '</td>
+                        </tr>
+                        <tr>
+                          <td class="text-left">Adjustment Charges</td>
+                          <td class="text-right">' . number_format($total_adjustment_charges) . '</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="row justify-content-end">
+                        <div class="col-4">
+                            <table class="table table-sm table-bordered border">
+                              <tbody>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>Subtotal (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_charges) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color secondary text-left"><strong>GST (PKR)</strong></td>
+                                  <td class="text-right">' . number_format($total_gst) . '</td>
+                                </tr>
+                                <tr>
+                                  <td class="color primary text-left"><strong>Total Invoice Amount (PKR)</strong></td>
+                                  <td class="color secondary text-right">' . number_format($total_invoice_amount) . '</td>
+                                </tr>
+                              </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary" style="width: 150px;"><strong>Amount in Words</strong></td>
+                          <td class="color secondary">' . $this->amount_to_words($total_invoice_amount) . ' Only</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <table class="table table-sm table-bordered border">
+                      <tbody>
+                        <tr>
+                          <td class="color primary text-center" colspan="2"><strong>Bank Account Details</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Benificiary Name</strong></td>
+                          <td>Trax Online Private Limited</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Bank</strong></td>
+                          <td>Meezan Bank</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Account No.</strong></td>
+                          <td>0102951143</td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary" style="width: 150px;"><strong>Branch No.</strong></td>
+                          <td>9912</td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <div class="mb-1 text-center font-italic"><strong>Disclaimer:</strong> This is a system generated invoice. No signature required.</div>
+
+                    <table class="table table-sm table-bordered border shipments_summary">
+                      <tbody>
+                        <tr>
+                            <td class="color primary text-center" colspan="16"><strong>Shipment(s) Summary</strong></td>
+                        </tr>
+                        <tr>
+                          <td class="color secondary"><strong>S. No.</strong></td>
+                          <td class="color secondary"><strong>Tracking No.</strong></td>
+                          <td class="color secondary"><strong>Destination</strong></td>
+                          <td class="color secondary"><strong>Datetime</strong></td>
+                          <td class="color secondary"><strong>Weight (kg)</strong></td>
+                          <td class="color secondary"><strong>Weight Charges (PKR)</strong></td>
+                          <td class="color secondary"><strong>Cash Handling Charges (PKR)</strong></td>
+                          <td class="color secondary"><strong>Insurance Charges (PKR)</strong></td>
+                          <td class="color secondary"><strong>Replacement Charges (PKR)</strong></td>
+                          <td class="color secondary"><strong>Return Charges (PKR)</strong></td>
+                          <td class="color secondary"><strong>Fuel Surcharge (PKR)</strong></td>
+                          <td class="color secondary"><strong>Packaging Charges (PKR)</strong></td>
+                          <td class="color secondary"><strong>Adjustment Charges (PKR)</strong></td>
+                          <td class="color secondary"><strong>Total Charges (PKR)</strong></td>
+                          <td class="color secondary"><strong>GST (PKR)</strong></td>
+                          <td class="color secondary"><strong>Invoice Amount (PKR)</strong></td>
+                        </tr>
+        ';
+
+        $html .= $shipment_details;
+
+        $html .= '
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <script>
+                  window.onload = function() {
+                    history.replaceState(history.state, "", "/");
+
+                    window.print();
+                  }
+                </script>
+              </body>
+            </html>
+        ';
+
+        return $html;
+    }
+
+    public function invoices_history_index() {
+        return view('admin.finance.invoices_history');
+    }
+
+    public function invoices_history_list(Request $request) {
+        $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
+        ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'invoices.total_shipments', 'invoices.total_delivered_shipments', 'invoices.total_returned_shipments', 'invoices.total_adjusted_shipments', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.billing_period_from_date', 'invoices.billing_period_to_date', 'invoices.due_date');
+
+        $datatables = Datatables::of($invoices)
+        ->addColumn('id_padded', function($invoice) {
+            return '<button class="btn btn-sm btn-outline-info align-middle">' . str_pad($invoice->id, 6, '0', STR_PAD_LEFT) . '</button>';
+        })
+        ->filterColumn('invoices.id', function ($query, $keyword) {
+            return $query->where('invoices.id', '=', $keyword);
+        })
+        ->editColumn('total_delivered_shipments', function($invoice) {
+            if ($invoice->total_delivered_shipments != 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->total_delivered_shipments . '</button>';
+            }
+            else {
+                return 0;
+            }
+        })
+        ->editColumn('total_returned_shipments', function($invoice) {
+            if ($invoice->total_returned_shipments != 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->total_returned_shipments . '</button>';
+            }
+            else {
+                return 0;
+            }
+        })
+        ->editColumn('total_adjusted_shipments', function($invoice) {
+            if ($invoice->total_adjusted_shipments != 0) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->total_adjusted_shipments . '</button>';
+            }
+            else {
+                return 0;
+            }
+        })
+        ->editColumn('total_charges', function($invoice) {
+            return number_format($invoice->total_charges);
+        })
+        ->editColumn('total_gst', function($invoice) {
+            return number_format($invoice->total_gst);
+        })
+        ->editColumn('total_invoice_amount', function($invoice) {
+            return number_format($invoice->total_invoice_amount);
+        })
+        ->editColumn('billing_period_from_date', function($invoice) {
+            return Carbon::parse($invoice->billing_period_from_date)->format('d/m/Y');
+        })
+        ->editColumn('billing_period_to_date', function($invoice) {
+            return Carbon::parse($invoice->billing_period_to_date)->format('d/m/Y');
+        })
+        ->editColumn('due_date', function($invoice) {
+            return Carbon::parse($invoice->due_date)->format('d/m/Y');
+        });
+
+        return $datatables->make(true);
+    }
+
+    public function invoices_history_delivered_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $invoice_shipments = InvoiceShipment::where('invoice_id', $request->id)->where('type', 0)->get();
+
+        foreach ($invoice_shipments as $invoice_shipment) {
+            $shipment = $invoice_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+    public function invoices_history_returned_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $invoice_shipments = InvoiceShipment::where('invoice_id', $request->id)->where('type', 1)->get();
+
+        foreach ($invoice_shipments as $invoice_shipment) {
+            $shipment = $invoice_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
+
+    public function invoices_history_adjusted_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $invoice_shipments = InvoiceShipment::where('invoice_id', $request->id)->where('type', 2)->get();
+
+        foreach ($invoice_shipments as $invoice_shipment) {
+            $shipment = $invoice_shipment->shipment;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
     }
 
 }
