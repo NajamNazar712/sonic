@@ -278,7 +278,70 @@
 					table.button('.generate_invoice').disable();
 				}
 			}
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
 
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.finance.generate_invoices.list') }}',
+                        data: {
+                            'page': 'all',
+                            'shipper' : $('#search_form #shipper').val(),
+                    		'from_date' : $('#search_form input[name="from_date_formatted"]').val(),
+                    		'to_date': $('#search_form input[name="to_date_formatted"]').val()
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Shipper');
+                            head.push('Tracking Number');
+                            head.push('Type');
+                            head.push('Created Datetime');
+                            head.push('City');
+                            head.push('Phone No(s)');
+                            head.push('Address');
+                            head.push('Charges');
+                            head.push('GST');
+                            head.push('Invoice Amount');
+                            head.push('Bank');
+                            head.push('Bank Branch');
+                            head.push('Account No.');
+                            head.push('Account Title');
+                            head.push('IBAN');
+                            head.push('Account City');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.shipper);
+                                row.push(values.tracking_number);
+                                row.push(values.type);
+                                row.push(values.created_at);
+                                row.push(values.city);
+                                row.push(values.phone_numbers);
+                                row.push(values.address);
+                                row.push(values.charges);
+                                row.push(values.gst);
+                                row.push(values.invoice_amount);
+                                row.push(values.bank);
+                                row.push(values.bank_branch);
+                                row.push(values.account_no);
+                                row.push(values.account_title);
+                                row.push(values.iban);
+                                row.push(values.account_city);
+
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			selected_rows = [];
 
 			var table = $('#datatable').DataTable({
@@ -373,7 +436,7 @@
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select select-checkbox p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
-					{data:'tracking_number', name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
+					{data:'tracking_number_link', name: 's.tracking_number', class: 'align-middle text-center tracking_number_link'},
 					{data:'type', name: 'type', class: 'align-middle text-center type'},
 					{data:'created_at', name: 'pending_invoice_shipments.created_at', class: 'align-middle text-center created_at'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},

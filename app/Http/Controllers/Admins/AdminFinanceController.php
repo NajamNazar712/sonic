@@ -2850,7 +2850,7 @@ class AdminFinanceController extends Controller
         ->join('user_bank_infos as ubi', 's.user_id', '=', 'ubi.user_id')
         ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
         ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
-        ->select('pending_invoice_shipments.id', 'u.name as shipper', 's.tracking_number', 'pending_invoice_shipments.type', 'pending_invoice_shipments.created_at', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_invoice_shipments.charges', 'pending_invoice_shipments.gst', 'pending_invoice_shipments.invoice_amount', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city');
+        ->select('pending_invoice_shipments.id', 'u.name as shipper', 's.tracking_number', 's.tracking_number as tracking_number_link', 'pending_invoice_shipments.type', 'pending_invoice_shipments.created_at', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_invoice_shipments.charges', 'pending_invoice_shipments.gst', 'pending_invoice_shipments.invoice_amount', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city');
 
         if ($request->shipper && $request->from_date && $request->to_date) {
             $pending_invoice_shipments = $pending_invoice_shipments->where('s.user_id', $request->shipper)
@@ -2862,6 +2862,10 @@ class AdminFinanceController extends Controller
         }
 
         $datatables = Datatables::of($pending_invoice_shipments)
+            ->editColumn('tracking_number_link', function ($pending_invoice_shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$pending_invoice_shipments->tracking_number' class='tracking' target='_blank'>$pending_invoice_shipments->tracking_number</a></u>";
+            })
         ->editColumn('type', function($pending_invoice_shipment) {
             if ($pending_invoice_shipment->type == 0) {
                 return 'Delivered';

@@ -100,6 +100,59 @@
 @section('js')
 	<script>
 		$(document).ready(function() {
+            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.finance.invoices_history.list') }}',
+                        data: {
+                            'page': 'all'
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S.No');
+                            head.push('Invoice ID');
+                            head.push('Invoice No.');
+                            head.push('Shipper');
+                            head.push('Total Shipment(s)');
+                            head.push('Delivered Shipment(s)');
+                            head.push('Adjusted Shipment(s)');
+                            head.push('Total Charges');
+                            head.push('Total GST');
+                            head.push('Total Invoice Amount');
+                            head.push('Billing Period (From)');
+                            head.push('Billing Period (To)');
+                            head.push('Due Date');
+
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.id_padded);
+                                row.push(values.invoice_number);
+                                row.push(values.shipper);
+                                row.push(values.total_shipments);
+                                row.push(values.total_delivered_shipments);
+                                row.push(values.total_adjusted_shipments);
+                                row.push(values.total_charges);
+                                row.push(values.total_gst);
+                                row.push(values.total_invoice_amount);
+                                row.push(values.billing_period_from_date);
+                                row.push(values.billing_period_to_date);
+                                row.push(values.due_date);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            } );
 			var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [{
