@@ -1,10 +1,10 @@
 {
     "_readme": [
         "This file locks the dependencies of your project to a known state",
-        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b44c9c7ac2463c84ee4ca408e27f446f",
+    "content-hash": "b038fa84962d3f49f7df5e32fa7b258f",
     "packages": [
         {
             "name": "buzz/laravel-google-captcha",
@@ -1085,6 +1085,57 @@
                 "tokenizer"
             ],
             "time": "2018-03-21T22:21:57+00:00"
+        },
+        {
+            "name": "kwn/number-to-words",
+            "version": "1.6.2",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kwn/number-to-words.git",
+                "reference": "3b22e9614bc3bc0f3b7235b14c469ced94fb1617"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kwn/number-to-words/zipball/3b22e9614bc3bc0f3b7235b14c469ced94fb1617",
+                "reference": "3b22e9614bc3bc0f3b7235b14c469ced94fb1617",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6"
+            },
+            "require-dev": {
+                "codeclimate/php-test-reporter": "^0.4.4",
+                "phpmd/phpmd": "^2.6.0",
+                "phpunit/phpunit": "^5.7.9",
+                "squizlabs/php_codesniffer": "^3.3.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "NumberToWords\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Karol Wnuk",
+                    "email": "k.wnuk@ascetic.pl"
+                }
+            ],
+            "description": "Multi language standalone PHP number to words converter. Fully tested, open for extensions and new languages.",
+            "keywords": [
+                "angle",
+                "currency",
+                "money",
+                "number",
+                "string",
+                "to",
+                "words"
+            ],
+            "time": "2018-11-12T08:42:31+00:00"
         },
         {
             "name": "laravel/framework",

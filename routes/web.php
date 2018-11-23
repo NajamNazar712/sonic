@@ -601,6 +601,21 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('update_details', 'Admins\AdminFinanceController@done_payments_update_details')->name('update_details');
             Route::get('export_to_excel', 'Admins\AdminFinanceController@done_payments_export_to_excel')->name('export_to_excel');
         });
+
+        Route::prefix('generate_invoices')->name('generate_invoices.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@generate_invoices_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@generate_invoices_list')->name('list');
+            Route::post('', 'Admins\AdminFinanceController@generate_invoices_store')->name('store');
+            Route::get('print', 'Admins\AdminFinanceController@generate_invoices_print')->name('print');
+        });
+
+        Route::prefix('invoices_history')->name('invoices_history.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@invoices_history_index')->name('index');
+            Route::get('list', 'Admins\AdminFinanceController@invoices_history_list')->name('list');
+            Route::post('delivered_shipments', 'Admins\AdminFinanceController@invoices_history_delivered_shipments')->name('delivered_shipments');
+            Route::post('returned_shipments', 'Admins\AdminFinanceController@invoices_history_returned_shipments')->name('returned_shipments');
+            Route::post('adjusted_shipments', 'Admins\AdminFinanceController@invoices_history_adjusted_shipments')->name('adjusted_shipments');
+        });
     });
 
     Route::prefix('sameday')->name('sameday.')->group(function (){
