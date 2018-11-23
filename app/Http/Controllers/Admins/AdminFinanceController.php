@@ -1192,7 +1192,7 @@ class AdminFinanceController extends Controller
                 $invoice_shipment_id = NULL;
                 $invoice_type = NULL;
 
-                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment_id);
+                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
 
                 if ($pending_payment_shipment->exists()) {
                     $pending_payment_shipment = $pending_payment_shipment->latest()->first();
@@ -1201,7 +1201,7 @@ class AdminFinanceController extends Controller
                     $payment_type = 0;
                 }
                 else {
-                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment_id);
+                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
 
                     if ($done_payment_shipment->exists()) {
                         $done_payment_shipment = $done_payment_shipment->latest()->first();
@@ -1211,7 +1211,7 @@ class AdminFinanceController extends Controller
                     }
                 }
 
-                $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment_id);
+                $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
 
                 if ($pending_invoice_shipment->exists()) {
                     $pending_invoice_shipment = $pending_invoice_shipment->latest()->first();
@@ -1220,7 +1220,7 @@ class AdminFinanceController extends Controller
                     $invoice_type = 0;
                 }
                 else {
-                    $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment_id);
+                    $done_invoice_shipment = InvoiceShipment::where('shipment_id', $shipment->id);
 
                     if ($done_invoice_shipment->exists()) {
                         $done_invoice_shipment = $done_invoice_shipment->latest()->first();
@@ -1231,7 +1231,7 @@ class AdminFinanceController extends Controller
                 }
 
                 if ($payment_shipment_id != NULL || $invoice_shipment_id != NULL) {
-                    self::adjust_invoice($shipment_id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type);
+                    self::adjust_invoice($shipment->id, $payment_shipment_id, $payment_type, $invoice_shipment_id, $invoice_type);
                 }
             }
 
@@ -2951,7 +2951,7 @@ class AdminFinanceController extends Controller
             $invoice_shipment = new InvoiceShipment();
 
             $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
-            $invoice_shipment->invoice = $invoice->id;
+            $invoice_shipment->invoice_id = $invoice->id;
             $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
             $invoice_shipment->type = $pending_invoice_shipment->type;
 
