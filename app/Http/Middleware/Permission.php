@@ -64,6 +64,9 @@ class Permission
             'pickups.bookedvsreceived.list' => 113,
             'pickups.bookedvsreceived.booked' => 113,
             'pickups.bookedvsreceived.received' => 113,
+            'pickups.history.index' => 123,
+            'pickups.history.list' => 123,
+            'pickups.history.bookings.all' => 123,
 
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
@@ -84,7 +87,10 @@ class Permission
             'cargo.receive.shipment_details' => 31,
             'cargo.receive.short_received' => 31,
             'cargo.receive.store' => 31,
-
+            'cargo.history.index' => 124,
+            'cargo.history.list' => 124,
+            'cargo.history.shipments.' => 124,
+            'cargo.history.print.' => 124,
             'sameday.index' => 32,
             'sameday.list' => 32,
 
@@ -140,6 +146,10 @@ class Permission
             'delivery.misroute.shipment.update' => 108,
             'delivery.misroute.history.index' => 119,
             'delivery.misroute.history.list' => 119,
+            'delivery.history.index' => 125,
+            'delivery.history.list' => 125,
+            'delivery.history.shipments' => 125,
+            'delivery.history.shipments.delivered' => 125,
 
             'return.index' => 44,
             'return.list' => 44,
@@ -161,6 +171,9 @@ class Permission
             'return.receive.status.list' => 50,
             'return.receive.reason' => 50,
             'return.receive.rn.print' => 49,
+            'return.history.index' => 126,
+            'return.history.list' => 126,
+            'return.history.shipments' => 126,
 
             'finance.outstanding_sdn.index' => 52,
             'finance.outstanding_sdn.list' => 52,

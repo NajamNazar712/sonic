@@ -294,14 +294,10 @@
                     });
                     var data1 = $.map({!! $rider_category !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data1 = $.map({!! $rider_category !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
+
 
                     $("#rider_select").prepend('<option value="" selected></option>').select2({
                         data:data1,
@@ -312,12 +308,7 @@
                     });
                     var data2 = $.map({!! $pickup_status !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data2 = $.map({!! $pickup_status !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
 

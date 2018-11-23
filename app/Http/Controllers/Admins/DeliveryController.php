@@ -3153,7 +3153,7 @@ class DeliveryController extends Controller
             ->join('routes', 'delivery_notes.route_id', '=', 'routes.id')
             ->join('admins', 'admins.id', '=', 'delivery_notes.admin_id')
             ->leftjoin('admins as ub', 'ub.id', '=', 'delivery_notes.updated_by')
-            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.last_updated_at']);
+            ->select(['delivery_notes.id as delivery_note', 'delivery_notes.id as delivery_note_id', 'oc.id as hub_id', 'oc.name as hub', 'riders.name as rider', 'routes.code as route', 'routes.start', 'routes.end', 'admins.name as assignee', 'ub.name as updated_by', 'delivery_notes.updated_at as updated_at', 'delivery_notes.delivered_shipments', 'delivery_notes.delivered_shipments as delivered_shipments_link', 'delivery_notes.created_at', 'delivery_notes.received_cod_amount as amount', 'delivery_notes.shipments_count', 'delivery_notes.shipments_count as shipments_count_link','delivery_notes.status','delivery_notes.pending_status','delivery_notes.cash_collection_status','delivery_notes.dncc_status','delivery_notes.last_updated_at']);
 
         if (session('role_id') != 1) {
             $deliveries = $deliveries->whereIn('delivery_notes.hub_id', session('hubs'));
@@ -3185,6 +3185,40 @@ class DeliveryController extends Controller
                     return 0;
                 }
             })
+            ->addColumn('main_status', function($deliveries) {
+                if($deliveries->status == 0){
+                    if($deliveries->pending_status == 0){
+                        return 'Pending for Update';
+                    }else if($deliveries->pending_status == 1){
+                        return 'Pending for Verificatin';
+                    }
+                }else if($deliveries->status == 1){
+                    if($deliveries->dncc_status == 1) {
+                        return 'Completed';
+                    }else if($deliveries->cash_collection_status == 1){
+                        return 'Cash Collected';
+                    }else{
+                        return 'Verified';
+                    }
+                }else if($deliveries->status == 4){
+                    return 'Canceled';
+                }
+            })
+            ->filterColumn('main_status',function ($query,$keyword){
+                if($keyword == 0){
+                    $query->where('delivery_notes.pending_status',0)->where('delivery_notes.status',0);
+                }else if($keyword == 1){
+                    $query->where('delivery_notes.pending_status',1)->where('delivery_notes.status',0);
+                }else if($keyword == 2){
+                    $query->where('delivery_notes.cash_collection_status',1)->where('delivery_notes.dncc_status',0);
+                }else if($keyword == 3){
+                    $query->where('delivery_notes.dncc_status',1)->where('delivery_notes.cash_collection_status',1);
+                }else if($keyword == 4){
+                    $query->where('delivery_notes.status',1)->where('delivery_notes.cash_collection_status',0);
+                }else if($keyword == 5){
+                    $query->where('delivery_notes.status',4);
+                }
+            })
             ->editColumn('route', function ($rider) {
                 return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
             })
@@ -3196,13 +3230,37 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             });
-        if ($tracking_number = $request->get('search_tracking')) {
-            $datatable->join('delivery_note_shipments as dns', 'delivery_notes.id', '=', 'dns.delivery_note_id')
-                ->join('shipments as s', 'dns.shipment_id', '=', 's.id')
-                ->where('s.tracking_number', '=', $tracking_number);
-        }
-
         return $datatable->make(true);
 
+    }
+    public function history_shipments(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments;
+        $shipments = array();
+        if($delivery_note_shipments->count() != 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+    public function history_shipments_delivered(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('status','>',1)->get();
+        $shipments = array();
+        if($delivery_note_shipments->count() != 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
     }
 }

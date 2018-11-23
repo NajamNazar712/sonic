@@ -1135,4 +1135,74 @@ class ReturnController extends Controller
             return ['status' => 0, 'success' => 'No Return Note Shipments', 'shipments' => FALSE];
         }
     }
+    public function history_index(){
+        return view('admin.return.history');
+    }
+    public function history_list(Request $request){
+        $deliveries = ReturnNote::
+        join('cities AS oc', 'return_notes.hub_id', '=', 'oc.id')
+            ->join('riders', 'return_notes.rider_id', '=', 'riders.id')
+            ->join('admins','admins.id','=','return_notes.admin_id')
+            ->join('admins as sb','sb.id','=','return_notes.updated_by')
+            ->select(['return_notes.id as return_note','return_notes.id as return_note_id','oc.name as hub','riders.name as rider','admins.name as assigned_by','return_notes.created_at','return_notes.shipments_count','return_notes.shipments_count as shipments_count_link','return_notes.status','sb.name as submitted_by','return_notes.updated_at as submitted_at']);
+
+        if (session('role_id') != 1) {
+            $deliveries = $deliveries->whereIn('oc.hub_id', session('hubs'));
+        }
+
+        $datatables = Datatables::of($deliveries)
+            ->editColumn('return_note', function ($deliveries) {
+                return "<a href='javascript:void(0);' class='printreturnnote'><u>" . str_pad($deliveries->return_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->addColumn('return_note_id_padded', function ($deliveries) {
+                return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('shipments_count_link', function($deliveries) {
+                if ($deliveries->shipments_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->filterColumn('return_notes.id', function ($query, $keyword) {
+                return $query->where('return_notes.id', '=', $keyword);
+            })
+
+            ->addColumn('main_status', function($deliveries) {
+                if($deliveries->status == 0){
+                        return 'Pending for Update';
+                }else if($deliveries->status == 1){
+                        return 'Verified';
+                }else if($deliveries->status == 2){
+                    return 'Canceled';
+                }
+            })
+            ->filterColumn('main_status',function ($query,$keyword){
+                if($keyword == 0){
+                    $query->where('return_notes.status',0);
+                }else if($keyword == 1){
+                    $query->where('return_notes.status',1);
+                }else if($keyword == 2){
+                    $query->where('return_notes.status',2);
+                }
+            });
+
+        return $datatables->make(true);
+    }
+    public function history_shipments(Request $request){
+        $return_note_id = $request->input('return_note_id');
+        $return_note_details = ReturnNote::find($return_note_id);
+        $return_note_shipments = $return_note_details->return_note_shipments;
+        $shipments = array();
+        if($return_note_shipments->count() != 0){
+            foreach ($return_note_shipments as $return_note_shipment){
+                $shipment = Shipment::find($return_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Return Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Return Note Shipments', 'shipments' => FALSE];
+        }
+    }
 }

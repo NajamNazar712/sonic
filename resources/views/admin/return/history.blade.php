@@ -1,8 +1,10 @@
+
 @extends('admin.layout.master')
-@section('title','Delivery Note History')
+@section('title','Return Deliveries History')
+
 @section('content')
     <h1 class="mb-1">
-        Delivery Note History
+        Return Deliveries History
     </h1>
 
     <div class="card">
@@ -10,24 +12,21 @@
             <div class="card-body">
                 @include('admin.inc.messages')
 
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
 
                         <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Delivery Note No.</th>
+                        <th class="border-primary border-darken-1">Return Note No.</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Rider</th>
-                        <th class="border-primary border-darken-1">Route</th>
                         <th class="border-primary border-darken-1">No. Of Shipments</th>
-                        <th class="border-primary border-darken-1">No. Of Shipments Delivered</th>
-                        <th class="border-primary border-darken-1">Assigned By</th>
-                        <th class="border-primary border-darken-1">Assigned Date</th>
-                        <th class="border-primary border-darken-1">Updated By</th>
-                        <th class="border-primary border-darken-1">Update Date</th>
-                        <th class="border-primary border-darken-1">DNCC Amount</th>
-                        <th class="border-primary border-darken-1">Last Updated At</th>
+                        <th class="border-primary border-darken-1">Created By</th>
+                        <th class="border-primary border-darken-1">Created Date</th>
+                        <th class="border-primary border-darken-1">Submitted By</th>
+                        <th class="border-primary border-darken-1">Submitted Date</th>
                     </tr>
                     </thead>
                 </table>
@@ -35,13 +34,12 @@
             </div>
         </div>
     </div>
-
     <!--Shipments popup -->
     <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="shipments_modal_title">Shipment(s)</h4>
+                    <h4 class="modal-title" id="shipments_modal_title">Return Note Shipment(s)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -56,34 +54,13 @@
         </div>
     </div>
     <!--Shipments popup -->
-    <!--Delivered Shipments popup -->
-    <div class="modal fade" id="delivered_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="delivered_shipments_modal" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title" id="delivered_shipments_modal_title">Delivered Shipment(s)</h4>
-
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <!--Shipments popup -->
-
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
-    <style>
+    <style type="text/css">
         table.dataTable {
             font-size: 12px;
         }
@@ -134,6 +111,8 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+
     {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
@@ -144,46 +123,37 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.delivery.history.list') }}',
+                        url: '{{ route('admin.return.history.list') }}',
                         data: {
                             'page': 'all'
                         },
                         success: function (result) {
                             head = [];
-
                             head.push('S.No');
-                            head.push('Delivery Note No.');
+                            head.push('Return Note No.');
                             head.push('Status');
                             head.push('Hub');
                             head.push('Rider');
-                            head.push('Route');
                             head.push('No. Of Shipments');
-                            head.push('No. Of Shipments Delivered');
-                            head.push('Assigned By');
-                            head.push('Assigned Date');
-                            head.push('Updated By');
-                            head.push('Updated Date');
-                            head.push('DNCC Amount');
-                            head.push('Last Updated At');
+                            head.push('Created By');
+                            head.push('Created Date');
+                            head.push('Submitted By');
+                            head.push('Submitted Date');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
-                                row.push(values.delivery_note_id_padded);
+                                row.push(values.return_note_id_padded);
                                 row.push(values.main_status);
                                 row.push(values.hub);
                                 row.push(values.rider);
-                                row.push(values.route);
                                 row.push(values.shipments_count);
-                                row.push(values.delivered_shipments);
-                                row.push(values.assignee);
+                                row.push(values.assigned_by);
                                 row.push(values.created_at);
-                                row.push(values.updated_by);
-                                row.push(values.updated_at);
-                                row.push(values.amount);
-                                row.push(values.last_updated_at);
+                                row.push(values.submitted_by);
+                                row.push(values.submitted_at);
 
                                 body.push(row);
                             });
@@ -194,45 +164,40 @@
                     return {body: body, header: head};
                 }
             } );
-            var selected_rows = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                buttons:[{
-                    extend: 'excel',
-                    title: 'Delivery Note History',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                }],
                 scrollX: true, scrollY: '350px',
+                buttons: [
+                    {
+                        extend: 'excel',
+                        title: 'Receive Return Deliveries',
+                        text: '<i class="la la-file-excel-o"></i> Excel',
+                    }
+                ],
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax:'{{ route('admin.delivery.history.list') }}',
-                rowId: 'delivery_note_id',
-                order: [[9, 'desc']],
+                ajax:'{{ route('admin.return.history.list') }}',
+                rowId: 'return_note_id',
+                order: [[7, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
+                    { data:'return_note' ,name: 'return_notes.id', class: 'align-middle return_note'},
                     { data:'main_status' ,name: 'main_status', class: 'align-middle status',orderable:false},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
-                    { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
-                    { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
-                    { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
-                    { data:'created_at' ,name: 'created_at', class: 'align-middle created_at'},
-                    { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
-                    { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
-                    { data:'amount' ,name: 'delivery_notes.received_cod_amount', class: 'align-middle amount'},
-                    { data:'last_updated_at' ,name: 'delivery_notes.last_updated_at', class: 'align-middle last_updated_at'},
+                    { data:'shipments_count_link' ,name: 'return_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data:'assigned_by' ,name: 'admins.name', class: 'align-middle assigned_by'},
+                    { data:'created_at' ,name: 'return_notes.created_at', class: 'align-middle created_at'},
+                    { data:'submitted_by' ,name: 'sb.name', class: 'align-middle submitted_by'},
+                    { data:'submitted_at' ,name: 'return_notes.updated_at', class: 'align-middle submitted_at'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-
                 },
                 initComplete: function() {
                     var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
@@ -242,11 +207,8 @@
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
                         '<option value="0">Pending for Update</option>' +
-                        '<option value="1">Pending for Verification</option>' +
-                        '<option value="2">Cash Collected</option>' +
-                        '<option value="3">Completed</option>' +
-                        '<option value="4">Verified</option>' +
-                        '<option value="5">Canceled</option>' +
+                        '<option value="1">Verified</option>' +
+                        '<option value="2">Cancelled</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -280,10 +242,27 @@
                 }
             });
 
+            $('#search_tracking').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function() {
+                if (this.value.length == 0 || this.value.length >= 10) {
+                    table.draw();
+                }
+            });
+
+            $('#scan_return_note').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            }).bind('input', function() {
+                table.draw();
+            });
 
             function print(id) {
                 $.ajax({
-                    url: '{!! route('admin.delivery.receive.print') !!}',
+                    url: '{!! route('admin.return.receive.rn.print') !!}',
                     method: 'POST',
                     data: {
                         'id': id,
@@ -309,46 +288,11 @@
                         }
                     });
             }
-            $('body').on('click','.printdeliverynote',function () {
-                var deliverynote = $(this).parents('tr').attr('id');
-                // console.log(deliverynote);
-                print(deliverynote);
+            $('body').on('click','.printreturnnote',function () {
+                var returnnote = $(this).parents('tr').attr('id');
+                print(returnnote);
+                // console.log(returnnote)
             });
-            function printDNCC(id) {
-                $.ajax({
-                    url: '{!! route('admin.delivery.receive.dncc.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
-
-            $('body').on('click','.printDNCC',function () {
-                var note_id = $(this).parents('tr').attr('id');
-                printDNCC(note_id);
-            });
-
-
 
             var route = '{!! route('admin.tracking.index') !!}';
 
@@ -358,11 +302,11 @@
                 $('#shipments_modal').modal('show');
 
                 $.ajax({
-                    url: '{!! route('admin.delivery.history.shipments') !!}',
+                    url: '{!! route('admin.return.history.shipments') !!}',
                     method: 'POST',
                     data: {
                         '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
+                        'return_note_id': id
                     }
                 })
                     .done(function(data) {
@@ -375,33 +319,6 @@
                                 });
                             }
                             $('#shipments_modal .modal-body').html(html);
-                        }
-                    });
-
-            });
-            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
-                var id = parseInt($(this).parents('tr').attr('id'));
-                $('#delivered_shipments_modal .modal-body').html('');
-                $('#delivered_shipments_modal').modal('show');
-
-                $.ajax({
-                    url: '{!! route('admin.delivery.history.shipments.delivered') !!}',
-                    method: 'POST',
-                    data: {
-                        '_token': '{{ csrf_token() }}',
-                        'delivery_note_id': id
-                    }
-                })
-                    .done(function(data) {
-                        if (data) {
-                            var html = '';
-
-                            if (data.shipments) {
-                                $.each(data.shipments, function(index, tracking_number) {
-                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
-                                });
-                            }
-                            $('#delivered_shipments_modal .modal-body').html(html);
                         }
                     });
 

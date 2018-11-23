@@ -48,9 +48,9 @@
                             <li><a class="menu-item" href="{{ route('admin.pickups.bookedvsreceived.index') }}">Booked VS Received</a></li>
                         @endif
 
-
-                            <li><a class="menu-item" href="{{ route('admin.pickups.history.index') }}">History</a></li>
-
+                        @if (session('role_id') == 1 || in_array(123, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.pickups.history.index') }}">History</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
@@ -69,8 +69,9 @@
                     @if (session('role_id') == 1 || in_array(27, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a>
                     @endif
-
+                        @if (session('role_id') == 1 || in_array(124, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.cargo.history.index') }}">History</a>
+                        @endif
                     </li>
                 </ul>
             </li>
@@ -114,7 +115,10 @@
                         @if (session('role_id') == 1 || in_array(119, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.delivery.misroute.history.index') }}">Misrouted History</a></li>
                         @endif
-{{--                            <li><a class="menu-item" href="{{ route('admin.delivery.history.index') }}">History</a></li>--}}
+
+                        @if (session('role_id') == 1 || in_array(125, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.delivery.history.index') }}">History</a></li>
+                        @endif
 
                     </ul>
                 </li>
@@ -137,6 +141,9 @@
 
                         @if (session('role_id') == 1 || in_array(49, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.return.receive.index') }}">Receive</a></li>
+                        @endif
+                        @if (session('role_id') == 1 || in_array(126, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.return.history.index') }}">History</a></li>
                         @endif
                     </ul>
                 </li>

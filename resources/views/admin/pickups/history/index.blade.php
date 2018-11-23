@@ -155,7 +155,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Receive Pickups',
+                        title: 'Pickups History',
                         className:'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }
@@ -226,12 +226,7 @@
 
                     var data2 = $.map({!! $pickup_status !!}, function (obj) {
                         obj.id = obj.id;
-
-                        return obj;
-                    });
-                    var data2 = $.map({!! $pickup_status !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
 
@@ -278,6 +273,11 @@
                         }
                     });
 
+            });
+            $('#datatable tbody').on('click', 'tr td.pickup_note_no button.print', function() {
+                var pickup_note_id = parseInt($(this).parents('tr').attr('id'));
+
+                print(pickup_note_id);
             });
         });
     </script>

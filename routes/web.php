@@ -409,7 +409,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\DeliveryController@history_index')->name('index');
             Route::get('list', 'Admins\DeliveryController@history_list')->name('list');
             Route::post('shipments', 'Admins\DeliveryController@history_shipments')->name('shipments');
-            Route::post('print', 'Admins\DeliveryController@history_delivery_note_print')->name('print');
+            Route::post('shipments/delivered', 'Admins\DeliveryController@history_shipments_delivered')->name('shipments.delivered');
+
         });
     });
     Route::prefix('return')->name('return.')->group(function (){
@@ -443,6 +444,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('reason','Admins\ReturnController@receive_return_reason')->name('reason');
             Route::post('rn.print','Admins\ReturnController@rrd_print')->name('rn.print');
             Route::post('shipments','Admins\ReturnController@receive_return_shipments')->name('shipments');
+
+        });
+        Route::prefix('history')->name('history.')->group(function () {
+            Route::get('', 'Admins\ReturnController@history_index')->name('index');
+            Route::get('list', 'Admins\ReturnController@history_list')->name('list');
+            Route::post('shipments', 'Admins\ReturnController@history_shipments')->name('shipments');
 
         });
     });
