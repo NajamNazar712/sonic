@@ -103,7 +103,12 @@
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Updated By</th>
                         <th class="border-primary border-darken-1">Update Date</th>
+                        <th class="border-primary border-darken-1">Verified By</th>
+                        <th class="border-primary border-darken-1">Verified Date</th>
                         <th class="border-primary border-darken-1">DNCC Amount</th>
+                        <th class="border-primary border-darken-1">Aging (Added to Updated)</th>
+                        <th class="border-primary border-darken-1">Aging (Updated to Verified)</th>
+                        <th class="border-primary border-darken-1">Aging (Added to Verified)</th>
                     </tr>
                     </thead>
                 </table>
@@ -112,6 +117,47 @@
         </div>
     </div>
 
+
+    <!--Shipments popup -->
+    <div class="modal fade" id="shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="shipments_modal_title">Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
+    <!--Delivered Shipments popup -->
+    <div class="modal fade" id="delivered_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="delivered_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="delivered_shipments_modal_title">Delivered Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
 
 @endsection
 
@@ -280,7 +326,12 @@
                             head.push('Assigned Date');
                             head.push('Updated By');
                             head.push('Updated Date');
+                            head.push('Verified By');
+                            head.push('Verified Date');
                             head.push('DNCC Amount');
+                            head.push('Aging (Added to Updated)');
+                            head.push('Aging (Updated to Verified)');
+                            head.push('Aging (Added to Verified)');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -294,8 +345,13 @@
                                 row.push(values.assignee);
                                 row.push(values.created_at);
                                 row.push(values.updated_by);
-                                row.push(values.updated_at);
+                                row.push(values.status_updated);
+                                row.push(values.verified_by);
+                                row.push(values.status_verified);
                                 row.push(values.amount);
+                                row.push(values.aging_create_update);
+                                row.push(values.aging_update_verified);
+                                row.push(values.aging_create_verified);
 
                                 body.push(row);
                             });
@@ -341,20 +397,26 @@
                     d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                 }
                 },
+                rowId:'delivery_note_id',
                 order: [[10, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    { data:'delivery_note' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note'},
+                    { data:'delivery_note_link' ,name: 'delivery_notes.id', class: 'align-middle text-center delivery_note_link'},
                     { data:'hub' ,name: 'oc.name', class: 'align-middle hub'},
                     { data:'rider' ,name: 'riders.name', class: 'align-middle rider'},
                     { data:'route' ,name: 'route', class: 'align-middle route'},
-                    { data:'shipments_count' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count'},
-                    { data:'delivered_shipments' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments'},
+                    { data:'shipments_count_link' ,name: 'delivery_notes.shipments_count', class: 'align-middle shipments_count_link text-center'},
+                    { data:'delivered_shipments_link' ,name: 'delivery_notes.delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
                     { data:'assignee' ,name: 'admins.name', class: 'align-middle assignee'},
                     { data:'created_at' ,name: 'delivery_notes.created_at', class: 'align-middle created_at'},
                     { data:'updated_by' ,name: 'ub.name', class: 'align-middle updated_by'},
-                    { data:'updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle updated_at'},
+                    { data:'status_updated' ,name: 'delivery_notes.status_updated_at', class: 'align-middle updated_at'},
+                    { data:'verified_by' ,name: 'vb.name', class: 'align-middle verified_by'},
+                    { data:'status_verified' ,name: 'delivery_notes.status_verified_at', class: 'align-middle verified_time'},
                     { data:'amount' ,name: 'delivery_notes.total_cod_amount', class: 'align-middle amount'},
+                    {orderable: false, searchable: false, data:'aging_create_update' ,name: 'aging_create_update', class: 'align-middle aging_create_update'},
+                    {orderable: false, searchable: false, data:'aging_update_verified' ,name: 'aging_update_verified', class: 'align-middle aging_update_verified'},
+                    {orderable: false, searchable: false, data:'aging_create_verified' ,name: 'aging_create_verified', class: 'align-middle aging_create_verified'},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -367,7 +429,95 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
+            var route = '{!! route('admin.tracking.index') !!}';
 
+            $('#datatable tbody').on('click','tr td.shipments_count_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#shipments_modal .modal-body').html('');
+                $('#shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.reports.completed_delivery_notes.shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#delivered_shipments_modal .modal-body').html('');
+                $('#delivered_shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.reports.completed_delivery_notes.shipments.delivered') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'delivery_note_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#delivered_shipments_modal .modal-body').html(html);
+                        }
+                    });
+
+            });
+            function print(id) {
+                $.ajax({
+                    url: '{!! route('admin.reports.completed_delivery_notes.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+            $('#datatable tbody').on('click', 'tr td.delivery_note_link button.print', function() {
+                var delivery_note_id = parseInt($(this).parents('tr').attr('id'));
+
+                print(delivery_note_id);
+            });
         });
     </script>
 @endsection

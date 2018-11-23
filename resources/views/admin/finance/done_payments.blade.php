@@ -412,7 +412,7 @@
 				columns: [
 					{data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-					{data:'id_padded', name: 'done_payments.id', class: 'align-middle text-center id'},
+					{data:'payment_id', name: 'done_payments.id', class: 'align-middle text-center payment_id'},
 					{data:'shipper', name: 'u.name', class: 'align-middle text-center shipper'},
 					{data:'city', name: 'c.name', class: 'align-middle text-center city'},
 					{data:'phone_numbers', name: 'phone_numbers', class: 'align-middle text-center phone_numbers'},
@@ -579,6 +579,7 @@
 					table.button('.reverted').disable();
 				}
 			});
+            var route = '{!! route('admin.tracking.index') !!}';
 
 			$('#datatable tbody').on('click', 'tr td.delivered_shipments button', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
@@ -598,7 +599,7 @@
 						var tracking_numbers = '';
 
 						$.each(data, function(index, tracking_number) {
-							tracking_numbers += tracking_number + '<br/>';
+                            tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
 						});
 
 						$('#delivered_shipments .modal-body').html(tracking_numbers);
@@ -626,7 +627,7 @@
 						var tracking_numbers = '';
 
 						$.each(data, function(index, tracking_number) {
-							tracking_numbers += tracking_number + '<br/>';
+                            tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
 						});
 
 						$('#returned_shipments .modal-body').html(tracking_numbers);
@@ -654,7 +655,7 @@
 						var tracking_numbers = '';
 
 						$.each(data, function(index, tracking_number) {
-							tracking_numbers += tracking_number + '<br/>';
+                            tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
 						});
 
 						$('#adjusted_shipments .modal-body').html(tracking_numbers);
@@ -763,6 +764,44 @@
 					});
 				}
 			});
+			function print(id){
+                $.ajax({
+                    url: '{!! route('admin.finance.done_payments.details_print') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'id': id
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+			}
+            $('#datatable tbody').on('click', 'tr td.payment_id button', function() {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    print(id);
+                }else{
+                    var error = "Payment Details not found!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                }
+            });
 		});
 	</script>
 @endsection

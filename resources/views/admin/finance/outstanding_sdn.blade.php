@@ -84,6 +84,47 @@
 			</div>
 		</div>
 	</div>
+
+	<!--Shipments popup -->
+	<div class="modal fade" id="dncc_modal" data-backdrop="static" role="dialog" aria-labelledby="dncc_modal" aria-hidden="true">
+		<div class="modal-dialog modal-sm" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="dncc_modal_title">No. Of DNCC(s)</h4>
+
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">×</span>
+					</button>
+				</div>
+				<div class="modal-body text-center">
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
+	<!--Shipments popup -->
+    <!--Shipments popup -->
+    <div class="modal fade" id="delivered_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="delivered_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="delivered_shipments_modal_title">Delivered Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--Shipments popup -->
 @endsection
 
 @section('css')
@@ -195,8 +236,8 @@
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data:'sdn_number', name: 'station_deposit_notes.id', class: 'align-middle text-center sdn_number'},
 					{data:'hub', name: 'h.name', class: 'align-middle hub'},
-					{data:'dncc_count', name: 'station_deposit_notes.dncc_count', class: 'align-middle dnccs'},
-					{data:'sdn_delivered_shipments', name: 'sdn_delivered_shipments', class: 'align-middle delivered_shipments'},
+					{data:'dncc_count_link', name: 'station_deposit_notes.dncc_count', class: 'align-middle dnccs dncc_count_link text-center'},
+					{data:'delivered_shipments_link', name: 'sdn_delivered_shipments', class: 'align-middle delivered_shipments_link text-center'},
 					{data:'sdn_amount', name: 'station_deposit_notes.sdn_amount', class: 'align-middle amount'},
 					{data:'deposited_by', name: 'a.name', class: 'align-middle deposited_by'},
 					{data:'bank', name: 'bank', class: 'align-middle bank'},
@@ -422,6 +463,101 @@
 
 				$('#reconcile_delivery_notes #reconcile_delivery_notes_form .delivery_note_ids').val(selected_rows);
 			});
-		});
+
+            var route = '{!! route('admin.tracking.index') !!}';
+            $('#datatable tbody').on('click','tr td.dncc_count_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#dncc_modal .modal-body').html('');
+                $('#dncc_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.finance.outstanding_sdn.dncc') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'sdn_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var notes = '<div>DNCC Number(s) :</div>';
+
+                            if (data.delivery_notes) {
+                                $.each(data.delivery_notes, function(index, value) {
+                                    notes += '<u><a href="javascript:void(0);" class="dncc_print" dnid="'+value+'">'+value+'</a></u><br>';
+                                });
+                            }
+                            $('#dncc_modal .modal-body').html(notes);
+
+
+                        }
+                    });
+
+            });
+            $('#datatable tbody').on('click','tr td.delivered_shipments_link button',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#delivered_shipments_modal .modal-body').html('');
+                $('#delivered_shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.finance.outstanding_sdn.shipments.delivered') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'sdn_id': id
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '<div><b>Delivered Shipment(s) :</b></div>';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, value) {
+                                    html += 'DNCC Number '+ index +': <br>';
+                                    $.each(value, function (ind, tracking_number) {
+                                        html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                    });
+                                });
+                            }
+                            $('#delivered_shipments_modal .modal-body').html(html);
+
+                        }
+                    });
+
+            });
+            $('body').on('click','a.dncc_print',function(){
+                var id = parseInt($(this).attr('dnid'));
+                printDNCC(id);
+            });
+            function printDNCC(id) {
+                $.ajax({
+                    url: '{!! route('admin.delivery.sdn.dncc.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
+
+        });
 	</script>
 @endsection
