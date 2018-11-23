@@ -2951,7 +2951,7 @@ class AdminFinanceController extends Controller
             $invoice_shipment = new InvoiceShipment();
 
             $invoice_shipment->created_at = $pending_invoice_shipment->created_at;
-            $invoice_shipment->invoice = $pending_invoice_shipment->invoice->id;
+            $invoice_shipment->invoice = $invoice->id;
             $invoice_shipment->shipment_id = $pending_invoice_shipment->shipment_id;
             $invoice_shipment->type = $pending_invoice_shipment->type;
 
