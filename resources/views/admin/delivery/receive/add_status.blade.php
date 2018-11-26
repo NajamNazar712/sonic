@@ -94,6 +94,7 @@
                     </table>
 
                         <input type="hidden" name="shipment_id_list" id="shipment_id_list">
+                        <input type="hidden" name="delivery_note_id" value="{{$delivery_note_id}}">
 
                     <div class="row justify-content-center">
                         <div class="col-3">

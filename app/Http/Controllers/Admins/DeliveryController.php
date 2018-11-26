@@ -1080,7 +1080,7 @@ class DeliveryController extends Controller
 
             DeliveryNoteShipment::where(['shipment_id' => $request->trybuy_shipment_id, 'delivery_note_id' => $request->delivery_note_trybuy])->update(['status' => 5]);
 
-            $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
+            $delivery_note_data = DeliveryNote::find($request->delivery_note_trybuy);
             $delivery_note_data->last_updated_at = Carbon::now();
             $delivery_note_data->status_updated_at = Carbon::now();
             $delivery_note_data->save();
