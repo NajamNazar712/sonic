@@ -180,7 +180,7 @@
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                scrollX: true, scrollY: '350px',
+                scrollX: true,
                 paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -234,10 +234,10 @@
                     if(table.row().count() == 0) {
                         $.ajax({
                             url: '{{route('admin.return.create.shipment_details')}}',
-                            type: 'GET',
-                            dataType: 'JSON',
+                            type: 'POST',
                             data: {
-                                'tracking': tracking
+                                'tracking': tracking,
+                                '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
 
@@ -265,11 +265,11 @@
 
                             $.ajax({
                                 url: '{{route('admin.return.create.shipment_details')}}',
-                                type: 'GET',
-                                dataType: 'JSON',
+                                type: 'POST',
                                 data: {
                                     'tracking': tracking,
-                                    'hub_id':hub_id
+                                    'hub_id':hub_id,
+                                    '_token': '{{ csrf_token() }}'
                                 }
                             }).done(function (data) {
 

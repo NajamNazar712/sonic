@@ -21,22 +21,44 @@ use App\Http\Models\DonePayment;
 use App\Http\Models\City;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Psr7;
+use GuzzleHttp\Exception\RequestException;
 
 use App\Mail\Notifications;
 
 class NotificationsController extends Controller
 {
     static private function sms($body, $to) {
-      $client = new Client(['base_uri' => 'http://sms.its.com.pk/api/', 'http_errors' => FALSE]);
+      try {
+        $client = new Client(['base_uri' => 'http://sms.its.com.pk/api/', 'http_errors' => FALSE]);
 
-      $response = $client->get('', [
-        'query' => [
-          'username' => 'trax',
-          'password' => '123456',
-          'receiver' => str_replace('-', '', $to),
-          'msgdata' => $body
-        ]
-      ]);
+        $response = $client->get('', [
+          'query' => [
+            'username' => 'trax',
+            'password' => '123456',
+            'receiver' => str_replace('-', '', $to),
+            'msgdata' => $body
+          ]
+        ]);
+      } catch (RequestException $e) {
+        $error_to = 'muhammad.yousuf@trax.pk';
+
+        $error_subject = 'SMS API Down';
+
+        $error_body = '';
+
+        $error_body .= 'Sent To: ' . str_replace('-', '', $to) . PHP_EOL;
+
+        $error_body .= 'Message: ' PHP_EOL . $body . PHP_EOL;
+
+        $error_body .= PHP_EOL . PHP_EOL;
+
+        $error_body .= 'Request: ' . json_encode($e->getRequest()) . PHP_EOL;
+
+        $error_body .= 'Response: ' . json_encode($e->getResponse()) . PHP_EOL;
+
+        self::email($error_subject, $error_body, $error_to);
+      }
     }
 
     static private function email($subject, $body, $to, $cc = NULL, $bcc = NULL) {

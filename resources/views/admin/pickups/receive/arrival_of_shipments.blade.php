@@ -104,7 +104,7 @@
 
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
-				scrollX: true, scrollY: '350px',
+				scrollX: true,
 				paging:false,
 				columns: [
 					{orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},

@@ -1120,12 +1120,14 @@ class AdminCargoController extends Controller
     }
 
     public function receive_short_received(Request $request) {
+      $shipment_ids = array_unique($request->input('shipment_ids'));
+
       $cargo_consignment_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $request->input('cargo_consignment_id'))->where('status', 0);
 
-      if ($cargo_consignment_shipments->count() != count($request->input('shipment_ids'))) {
+      if ($cargo_consignment_shipments->count() != count($shipment_ids)) {
         $cargo_consignment_shipment_ids = $cargo_consignment_shipments->pluck('shipment_id')->toArray();
 
-        $short_shipment_ids = array_diff($cargo_consignment_shipment_ids, $request->input('shipment_ids'));
+        $short_shipment_ids = array_diff($cargo_consignment_shipment_ids, $shipment_ids);
 
         $short_shipments = array();
 
@@ -1145,11 +1147,11 @@ class AdminCargoController extends Controller
     public function receive_store(Request $request) {
       $cargo_consignment_id = $request->cargo_consignment_id;
 
-      $shipment_ids = explode(',', $request->shipment_ids);
+      $shipment_ids = array_unique(explode(',', $request->shipment_ids));
 
       $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
 
-      $cargo_consignment->received_shipments = count($shipment_ids);
+      $cargo_consignment->received_shipments = count(CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 1)->count());
 
       if ($request->short_received) {
         $cargo_consignment->status_id = 4;

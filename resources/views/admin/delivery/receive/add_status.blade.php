@@ -627,13 +627,8 @@
                                     var info = repl.page.info();
 
                                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                                    if ($.inArray(data.id, selected_rows) !== -1) {
-                                        repl.row(row).select();
-                                    }
-                                },
-                                initComplete: function() {
 
-                                }
+                                },
                             });
 
                             $.ajax({
@@ -683,6 +678,7 @@
                             trybuy = $('#trybuytable').DataTable({
                                 dom: 'ltipr',
                                 paging:false,
+
                                 columns: [
                                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                                     {name: 'product_type', class: 'align-middle product_type'},
@@ -695,9 +691,7 @@
                                     var info = trybuy.page.info();
 
                                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
-                                    if ($.inArray(data.id, selected_rows) !== -1) {
-                                        trybuy.row(row).select();
-                                    }
+
                                 }
                             });
 
@@ -734,9 +728,7 @@
 
 
                         } else if (data.status == 0) {
-                            console.log(data.error);
-                            console.log(shipments_count);
-
+                            
                         }
                     }
                     shipments_count = shipments_count-1;
