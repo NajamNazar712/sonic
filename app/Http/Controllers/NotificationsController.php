@@ -49,7 +49,7 @@ class NotificationsController extends Controller
 
         $error_body .= 'Sent To: ' . str_replace('-', '', $to) . PHP_EOL;
 
-        $error_body .= 'Message: ' PHP_EOL . $body . PHP_EOL;
+        $error_body .= 'Message: ' . PHP_EOL . $body . PHP_EOL;
 
         $error_body .= PHP_EOL . PHP_EOL;
 
