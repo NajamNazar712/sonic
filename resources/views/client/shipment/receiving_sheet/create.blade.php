@@ -207,10 +207,10 @@
                     if(table.row().count() == 0) {
                         $.ajax({
                             url:'{{route('cod.shipment.receiving_sheet.info')}}',
-                            type:'GET',
-                            dataType:'JSON',
+                            type:'POST',
                             data: {
-                                'tracking':tracking
+                                'tracking':tracking,
+                                '_token': '{!! csrf_token() !!}'
                             }
                         }).done(function (data) {
 
@@ -234,11 +234,11 @@
                         if(table.columns('.tracking_number').data().eq(0).indexOf(parseInt(tracking)) === -1){
                             $.ajax({
                                 url:'{{route('cod.shipment.receiving_sheet.info')}}',
-                                type:'GET',
-                                dataType:'JSON',
+                                type:'POST',
                                 data: {
                                     'tracking':tracking,
-                                    'pickup_address_id':pickup_address_id
+                                    'pickup_address_id':pickup_address_id,
+                                    '_token':'{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {
                                 if(data.status == 1){

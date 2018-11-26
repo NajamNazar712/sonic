@@ -234,10 +234,10 @@
                     if(table.row().count() == 0) {
                         $.ajax({
                             url: '{{route('admin.return.create.shipment_details')}}',
-                            type: 'GET',
-                            dataType: 'JSON',
+                            type: 'POST',
                             data: {
-                                'tracking': tracking
+                                'tracking': tracking,
+                                '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
 
@@ -265,11 +265,11 @@
 
                             $.ajax({
                                 url: '{{route('admin.return.create.shipment_details')}}',
-                                type: 'GET',
-                                dataType: 'JSON',
+                                type: 'POST',
                                 data: {
                                     'tracking': tracking,
-                                    'hub_id':hub_id
+                                    'hub_id':hub_id,
+                                    '_token': '{{ csrf_token() }}'
                                 }
                             }).done(function (data) {
 

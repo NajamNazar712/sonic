@@ -255,10 +255,10 @@
                     if(rowsCount === 0) {
                         $.ajax({
                             url:'{{route('admin.delivery.note.shipment.info')}}',
-                            type:'GET',
-                            dataType:'JSON',
+                            type:'POST',
                             data: {
-                                'tracking':tracking
+                                'tracking':tracking,
+                                '_token': '{{ csrf_token() }}'
                             }
                         }).done(function (data) {
                             if(data.status === 1){
@@ -288,11 +288,11 @@
                             // $('#hub_id').val('');
                             $.ajax({
                                 url:'{{route('admin.delivery.note.shipment.info')}}',
-                                type:'GET',
-                                dataType:'JSON',
+                                type:'POST',
                                 data: {
                                     'tracking':tracking,
-                                    'hub_id':hub_id
+                                    'hub_id':hub_id,
+                                    '_token':'{!! csrf_token() !!}'
                                 }
                             }).done(function (data) {
                                 if(data.status === 1){

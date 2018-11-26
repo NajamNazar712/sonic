@@ -68,7 +68,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::put('void', 'Shippers\ShipperReceivingSheetController@void')->name('void');
             Route::post('print', 'Shippers\ShipperReceivingSheetController@print')->name('print');
             Route::get('new','Shippers\ShipperReceivingSheetController@create_view')->name('new');
-            Route::get('info','Shippers\ShipperReceivingSheetController@get_shipment_details')->name('info');
+            Route::post('info','Shippers\ShipperReceivingSheetController@get_shipment_details')->name('info');
         });
 
         Route::resource('receiving_sheet', 'Shippers\ShipperReceivingSheetController');
@@ -320,7 +320,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('note')->name('note.')->group(function () {
             Route::get('','Admins\DeliveryController@delivery_note_index')->name('index');
-            Route::get('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
+            Route::post('shipment/info','Admins\DeliveryController@get_shipment_details')->name('shipment.info');
             Route::post('create','Admins\DeliveryController@create_delivery_note')->name('create');
 
         });
@@ -402,7 +402,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         Route::prefix('create')->name('create.')->group(function(){
             Route::get('','Admins\ReturnController@return_create_index')->name('index');
-            Route::get('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
+            Route::post('shipment_details','Admins\ReturnController@get_shipment_details')->name('shipment_details');
             Route::post('note/submit','Admins\ReturnController@return_create_note')->name('note.submit');
         });
         Route::prefix('receive')->name('receive.')->group(function (){
