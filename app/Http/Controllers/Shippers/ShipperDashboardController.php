@@ -185,15 +185,21 @@ class ShipperDashboardController extends Controller
             $shipment = Shipment::where('id',$shipment_id)->where('user_id', session('user_id'));
             if($shipment->exists()){
                 $shipment = $shipment->first();
-                $shipment->shipper_status_id = 17;
-                $shipment->consignee_status_id = 17;
-                $shipment->save();
 
-                AdminPickupsController::cancel($shipment_id);
+                if ($shipment->shipper_status_id == 1) {
+                    $shipment->shipper_status_id = 17;
+                    $shipment->consignee_status_id = 17;
+                    $shipment->save();
 
-                ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, session('user_id'), NULL);
+                    AdminPickupsController::cancel($shipment_id);
 
-                return response()->json(['status'=>1,'success'=>'Shipment has been cancelled successfully']);
+                    ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, session('user_id'), NULL);
+
+                    return response()->json(['status'=>1,'success'=>'Shipment has been cancelled successfully']);
+                }
+                else {
+                    return response()->json(['status'=>0,'error'=>'Shipment\'s Status has already been changed']);
+                }
             }else{
                 return response()->json(['status'=>0,'error'=>'Shipment not found']);
             }
