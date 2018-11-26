@@ -189,7 +189,103 @@
             var notification_ids = [];
             var rider_info_ids = [];
             var table = $('#datatable').DataTable({
-                dom: 'ltipr',
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                buttons: [
+                    {
+                        text: 'Select All Notification(s)',
+                        enabled: false,
+                        className: 'select_all_notifications',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                var notification_box = $(row.node()).find('td.notification input');
+                                if (!notification_box.is(':checked')) {
+                                    notification_box.prop('checked',true);
+                                    var id = parseInt($(notification_box).parents('tr').attr('id'));
+
+                                    var index = $.inArray(id, shipment_ids);
+                                    if(notification_ids[index] === 0){
+                                        notification_ids[index] = 1;
+                                    }
+                                }
+                            });
+                            table.button('.select_none_notifications').enable();
+                        }
+                    }, {
+                        text: 'Select None Notification(s)',
+                        className: 'select_none_notifications',
+                        enabled: false,
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                var notification_box = $(row.node()).find('td.notification input');
+                                if (notification_box.is(':checked')) {
+                                    notification_box.prop('checked',false);
+                                    var id = parseInt($(notification_box).parents('tr').attr('id'));
+
+                                    var index = $.inArray(id, shipment_ids);
+                                    if(notification_ids[index] === 1){
+                                        notification_ids[index] = 0;
+                                    }
+                                }
+                                console.log(notification_ids)
+
+                            });
+                            table.button('.select_all_notifications').enable();
+                        }
+                    },
+                    {
+                        text: 'Select All Rider Information(s)',
+                        enabled: false,
+                        className: 'select_all_rider_informations',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                var rider_information_box = $(row.node()).find('td.rider_information input');
+                                if (!rider_information_box.is(':checked')) {
+                                    rider_information_box.prop('checked',true);
+                                    var id = parseInt($(rider_information_box).parents('tr').attr('id'));
+
+                                    var index = $.inArray(id, shipment_ids);
+                                    if(rider_info_ids[index] === 0){
+                                        rider_info_ids[index] = 1;
+                                    }
+                                }
+                            });
+                            table.button('.select_none_rider_informations').enable();
+                        }
+                    }, {
+                        text: 'Select None Rider Informations(s)',
+                        className: 'select_none_rider_informations',
+                        enabled: false,
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                var rider_information_box = $(row.node()).find('td.rider_information input');
+                                if (rider_information_box.is(':checked')) {
+                                    rider_information_box.prop('checked',false);
+                                    var id = parseInt($(rider_information_box).parents('tr').attr('id'));
+
+                                    var index = $.inArray(id, shipment_ids);
+                                    if(rider_info_ids[index] === 1){
+                                        rider_info_ids[index] = 0;
+                                    }
+                                }
+                                console.log(rider_info_ids)
+
+                            });
+                            table.button('.select_all_rider_informations').enable();
+                        }
+                    },
+                    ],
                 scrollX: true,
                 paging:false,
                 columns: [
@@ -280,7 +376,10 @@
                             scan.val('');
                             scan.attr('disabled', false);
                             scan.focus();
-
+                            table.button('.select_all_notifications').enable();
+                            table.button('.select_none_notifications').enable();
+                            table.button('.select_all_rider_informations').enable();
+                            table.button('.select_none_rider_informations').enable();
                         });
                     } else {
                         var is_indexed = $.inArray(tracking, tracking_ids);
@@ -331,8 +430,7 @@
             $('body').on('click','a.deliverynoterow',function () {
                 var rid = parseInt($(this).parents('tr').attr('id'));
                 var index = $.inArray(rid, shipment_ids);
-                // var notification = $.inArray(rid, notification_ids);
-                // var rider_info = $.inArray(rid, rider_info_ids);
+
                 if (index !== -1) {
                     shipment_ids.splice(index, 1);
                     tracking_ids.splice(index, 1);
@@ -340,34 +438,18 @@
                     rider_info_ids.splice(index, 1);
                     rowsCount -= 1;
                 }
-                // if (notification !== -1) {
-                //     notification_ids.splice(notification, 1);
-                // }
-                // if (rider_info !== -1) {
-                //     rider_info_ids.splice(rider_info_ids, 1);
-                // }
+
                 table.row( $(this).parents('tr') ).remove().draw();
             });
 
             $('.datatable tbody').on('click', 'tr td.notification input', function() {
                 var id = parseInt($(this).parents('tr').attr('id'));
-                // console.log(id)
                 var index = $.inArray(id, shipment_ids);
-                // console.log("Before: "+shipment_ids)
-                // console.log("Before: "+notification_ids)
                 if(notification_ids[index] === 0){
                     notification_ids[index] = 1;
                 }else{
                     notification_ids[index] = 0;
                 }
-                // console.log("After: "+shipment_ids)
-                // console.log("After: "+notification_ids)
-                // if (index === -1) {
-                //     notification_ids.push(id);
-                // }
-                // else {
-                //     notification_ids.splice(index, 1);
-                // }
 
             });
             $('.datatable tbody').on('click', 'tr td.rider_information input', function() {
