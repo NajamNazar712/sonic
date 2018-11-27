@@ -662,15 +662,32 @@ class DeliveryController extends Controller
                 ';
                 }
 
-                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->where('reference_1_id','!=',$delivery_note_id)->select('remarks')->latest()->first();
-
                 $shipment_details_row_start .= '
                             <td>Rs ' . number_format($shipment->amount) . '</td>
+                ';
+
+                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('shipper_status_id','!=',5)->where('reference_1_id','!=',$delivery_note_id)->select('remarks');
+
+                if ($shipment_journey->exists()) {
+                    $shipment_journey = $shipment_journey->latest()->first();
+
+                    $shipment_details_row_start .= '
                             <td>' . $shipment_journey->remarks. '</td>
+                          </tr>
+                    ';
+                }
+                else {
+                    $shipment_details_row_start .= '
+                            <td></td>
+                    ';
+                }
+
+                $shipment_details_row_start .= '
                             <td></td>
                             <td></td>
                           </tr>
-            ';
+                ';
+
                 $total_cod_amount += $shipment->amount;
                 $shipment_details .= $shipment_details_row_start;
             }
