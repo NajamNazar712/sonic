@@ -673,7 +673,6 @@ class DeliveryController extends Controller
 
                     $shipment_details_row_start .= '
                             <td>' . $shipment_journey->remarks. '</td>
-                          </tr>
                     ';
                 }
                 else {
