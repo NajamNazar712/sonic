@@ -214,7 +214,7 @@
                             table.button('.select_none_notifications').enable();
                         }
                     }, {
-                        text: 'Select None Notification(s)',
+                        text: 'Unselect All Notification(s)',
                         className: 'select_none_notifications',
                         enabled: false,
                         action : function(e) {
@@ -261,7 +261,7 @@
                             table.button('.select_none_rider_informations').enable();
                         }
                     }, {
-                        text: 'Select None Rider Informations(s)',
+                        text: 'Unselect Rider Information(s)',
                         className: 'select_none_rider_informations',
                         enabled: false,
                         action : function(e) {
