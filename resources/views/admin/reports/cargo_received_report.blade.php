@@ -125,6 +125,7 @@
                         <th class="border-primary border-darken-1">Transit Date</th>
                         <th class="border-primary border-darken-1">Received By</th>
                         <th class="border-primary border-darken-1">Received Date</th>
+                        <th class="border-primary border-darken-1">Aging</th>
                     </tr>
                     </thead>
                 </table>
@@ -357,6 +358,7 @@
                             head.push('Transit Date');
                             head.push('Received By');
                             head.push('Received Date');
+                            head.push('Aging');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -371,6 +373,7 @@
                                 row.push(values.transit_at);
                                 row.push(values.received_by);
                                 row.push(values.received_at);
+                                row.push(values.aging);
 
                                 body.push(row);
                             });
@@ -426,6 +429,7 @@
                     {data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
                     {data: 'received_by', name: 'ri.name', class: 'align-middle received_by'},
                     {data: 'received_at', name: 'cargo_consignments.updated_at', class: 'align-middle received_at'},
+                    {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

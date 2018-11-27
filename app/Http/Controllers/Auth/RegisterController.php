@@ -92,7 +92,6 @@ class RegisterController extends Controller
             'account_no'=>'required|string|max:255',
             'account_title'=>'required|string|max:255',
             'iban_no'=>'required|string|max:255',
-            'mode_of_payment'=>'required|string|max:255',
             'cycle_of_payment'=>'required|string|max:255',
             'g-recaptcha-response' => 'required|captcha'
 

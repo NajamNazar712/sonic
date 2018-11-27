@@ -368,6 +368,7 @@
                     }
                 }).done(function (data) {
                     if(data.status === 0){
+                        reason.empty().trigger('change');
                         $.each(data.reasons,function (key,value) {
                             var newOption = new Option(value.name, value.id, false, false);
                             reason.append(newOption).trigger('change');

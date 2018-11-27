@@ -23,7 +23,7 @@
 								<div class="row align-items-center justify-content-center">
 									<div class="col">
 										<div class="form-group">
-											<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed">
+											<input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
 										</div>
 									</div>
 
@@ -309,6 +309,21 @@
 
 	<script>
 		$(document).ready(function() {
+			$.validator.addMethod('maxsize', function(value, element, params) {
+				if ($(element).attr('type') === 'file') {
+					if (element.files && element.files.length) {
+						console.log(element.files);
+						for (var c = 0; c < element.files.length; c++) {
+							if (element.files[c].size > params) {
+								return false;
+							}
+						}
+					}
+				}
+
+				return true;
+			}, $.validator.format("File Size must not exceed {0} bytes."));
+
 			$('#booking_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',

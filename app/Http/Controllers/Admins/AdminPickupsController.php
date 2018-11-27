@@ -239,7 +239,7 @@ class AdminPickupsController extends Controller
       $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
       ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
       ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
-      ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.pending_bookings', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
+      ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
       ->where('pickup_requests.status', 0);
 
       if (session('role_id') != 1) {
@@ -260,6 +260,22 @@ class AdminPickupsController extends Controller
       })
       ->editColumn('pickup_date', function($pickup_request) {
         return Carbon::parse($pickup_request->pickup_date)->format('Y-m-d');
+      })
+      ->editColumn('bookings_link', function($pickup_request) {
+          if ($pickup_request->bookings != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->bookings . '</button>';
+          }
+          else {
+              return 0;
+          }
+      })
+      ->editColumn('pending_bookings_link', function($pickup_request) {
+      if ($pickup_request->pending_bookings != 0) {
+          return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_request->pending_bookings . '</button>';
+      }
+      else {
+          return 0;
+      }
       })
       ->addColumn('action', function($pickup_request) {
         if (session('role_id') == 1 || in_array(18, session('permissions'))) {
@@ -444,7 +460,7 @@ class AdminPickupsController extends Controller
       ->join('cities as c', 'r.city_id', '=', 'c.id')
       ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
-      ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no')
+      ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.rider_id', 'pickup_notes.pickups', 'pickup_notes.pickups as pickups_link', 'pickup_notes.bookings', 'pickup_notes.bookings as bookings_link', 'pickup_notes.total_estimated_weight', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no')
       ->where('pickup_notes.status_id', '=', 1);
 
       if (session('role_id') != 1) {
@@ -458,6 +474,22 @@ class AdminPickupsController extends Controller
         ->filterColumn('pickup_notes.id', function ($query, $keyword) {
             return $query->where('pickup_notes.id', '=', $keyword);
         })
+      ->editColumn('bookings_link', function($pickup_notes) {
+          if ($pickup_notes->bookings != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->bookings . '</button>';
+          }
+          else {
+              return 0;
+          }
+      })
+      ->editColumn('pickups_link', function($pickup_notes) {
+          if ($pickup_notes->pickups != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->pickups . '</button>';
+          }
+          else {
+              return 0;
+          }
+      })
       ->addColumn('rider', function($pickup_note) {
         return $pickup_note->rider_name . '<br/>' . $pickup_note->rider_phone;
       })
@@ -807,7 +839,7 @@ class AdminPickupsController extends Controller
       ->join('cities as c', 'r.city_id', '=', 'c.id')
       ->join('admins as a', 'pickup_notes.assigned_by_user_id', '=', 'a.id')
       ->join('pickup_note_statuses as pns', 'pickup_notes.status_id', '=', 'pns.id')
-      ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no','pickup_notes.id as pickup_note_id', 'pickup_notes.status_id', 'pns.name as status')
+      ->select('pickup_notes.id', 'r.name as rider_name', 'r.phone as rider_phone', 'rc.name as rider_type', 'ro.code as route_code', 'ro.start as route_start', 'ro.end as route_end', 'c.name as city', 'pickup_notes.pickups', 'pickup_notes.bookings', 'pickup_notes.bookings as bookings_link', 'pickup_notes.pickup_type', 'pickup_notes.created_at as assigned_date', 'a.name as assigned_by', 'pickup_notes.id as pickup_note_no','pickup_notes.id as pickup_note_id', 'pickup_notes.status_id', 'pns.name as status')
       ->whereIn('pickup_notes.status_id', [2, 3]);
 
       if (session('role_id') != 1) {
@@ -823,6 +855,14 @@ class AdminPickupsController extends Controller
       })
       ->editColumn('pickup_type', function($pickup_note) {
         return ($pickup_note->pickup_type == 0) ? 'Light' : 'Heavy';
+      })
+      ->editColumn('bookings_link', function($pickup_notes) {
+          if ($pickup_notes->bookings != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->bookings . '</button>';
+          }
+          else {
+              return 0;
+          }
       })
       ->filterColumn('pickup_type', function($query, $keyword) {
           if($keyword == 0 || $keyword == 1){
@@ -1384,7 +1424,7 @@ class AdminPickupsController extends Controller
       ->join('pickup_note_requests as pnr', 'pickup_requests.id', '=', 'pnr.pickup_request_id')
       ->join('pickup_notes as pn', 'pnr.pickup_note_id', '=', 'pn.id')
       ->join('admins as a', 'pn.assigned_by_user_id', '=', 'a.id')
-      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.received', 'pickup_requests.short_received', 'pickup_requests.over_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no', 'pickup_requests.status')
+      ->select('pickup_requests.id', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link', 'pickup_requests.received', 'pickup_requests.received as received_link', 'pickup_requests.short_received', 'pickup_requests.over_received', 'pickup_requests.pickup_type', 'pickup_requests.created_at as booking_date', 'pn.created_at as assigned_date', 'a.name as assigned_by', 'pn.id as pickup_note_no', 'pickup_requests.status')
       ->where('pn.id', $request->pickup_receive_pickup_note_id);
 
       $datatables = Datatables::of($pickup_requests)
@@ -1408,6 +1448,19 @@ class AdminPickupsController extends Controller
           }
           else {
               return 0;
+          }
+      })
+      ->editColumn('bookings_link', function($pickup_notes) {
+          if ($pickup_notes->bookings != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->bookings . '</button>';
+          }
+          else {
+              return 0;
+          }
+      })
+      ->editColumn('received_link', function($pickup_notes) {
+          if ($pickup_notes->received != 0) {
+              return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->received . '</button>';
           }
       })
       ->editColumn('pickup_type', function($pickup_request) {
@@ -1759,4 +1812,209 @@ class AdminPickupsController extends Controller
             ->get();
         return response()->json(['status'=>1,'shipments'=>$shipments]);
     }
+    public function pending_all_bookings(Request $request){
+        $pickup_request_id = $request->input('pickup_request_id');
+
+        $pickup_request = PickupRequest::find($pickup_request_id);
+
+        $pickup_request_all_booked_shipments = $pickup_request->pickup_request_assigned_shipments;
+
+        if ($pickup_request_all_booked_shipments->count() != 0) {
+            $bookings = array();
+            foreach ($pickup_request_all_booked_shipments as $all_shipments) {
+                $shipment = $all_shipments->shipment_id;
+                $shipment_details = Shipment::find($shipment);
+                $bookings[] = $shipment_details->tracking_number;
+            }
+
+            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
+        }
+        else {
+            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+        }
+    }
+    public function pending_bookings(Request $request){
+        $pickup_request_id = $request->input('pickup_request_id');
+
+        $pickup_request = PickupRequest::find($pickup_request_id);
+
+        $pickup_request_all_booked_shipments = $pickup_request->pickup_request_assigned_shipments()->where('status',1)->get();
+
+        if ($pickup_request_all_booked_shipments->count() != 0) {
+            $bookings = array();
+            foreach ($pickup_request_all_booked_shipments as $all_shipments) {
+                $shipment = $all_shipments->shipment_id;
+                $shipment_details = Shipment::find($shipment);
+                $bookings[] = $shipment_details->tracking_number;
+            }
+
+            return ['status' => 0, 'success' => 'Pending Booked Shipments', 'booked' => $bookings];
+        }
+        else {
+            return ['status' => 0, 'success' => 'No Pending Booked Shipments', 'booked' => FALSE];
+        }
+    }
+    public function assigned_all_bookings(Request $request){
+        $pickup_note_id = $request->input('pickup_note_id');
+
+        $pickup_note = PickupNote::find($pickup_note_id);
+        $pickup_note_requests = $pickup_note->pickup_note_requests;
+        if($pickup_note_requests->count() != 0){
+            $bookings = array();
+            $shipments = array();
+            foreach ($pickup_note_requests as $pickup_note_request) {
+                $pickup_request = PickupRequest::find($pickup_note_request->pickup_request_id);
+                $shipper = $pickup_request->shipper->name;
+               $bookings [$shipper]= PickupRequestAssignedShipment::where('pickup_request_id',$pickup_note_request->pickup_request_id)->select('shipment_id')->get();
+                foreach ($bookings[$shipper] as $shipment) {
+                    $shipment_details = Shipment::find($shipment->shipment_id);
+                    $shipments [$shipper][] = $shipment_details->tracking_number;
+               }
+            }
+
+            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $shipments];
+        }else {
+            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+        }
+
+    }
+    public function assigned_pickups(Request $request){
+        $pickup_note_id = $request->input('pickup_note_id');
+
+        $pickup_note = PickupNote::find($pickup_note_id);
+        $pickup_note_requests = $pickup_note->pickup_note_requests;
+        if($pickup_note_requests->count() != 0){
+            $pickups = array();
+            foreach ($pickup_note_requests as $pickup_note_request) {
+              $pickup_details =  PickupRequest::find($pickup_note_request->pickup_request_id);
+              $pickups[$pickup_details->id]['name'] = $pickup_details->shipper->name;
+              $pickups[$pickup_details->id]['bookings'] = ($pickup_details->bookings != '')? $pickup_details->bookings:0;
+              $pickups[$pickup_details->id]['pending_bookings'] = ($pickup_details->pending_bookings != '')? $pickup_details->pending_bookings:0;
+            }
+            return ['status' => 0, 'success' => 'Pickup Requests', 'pickups' => $pickups];
+        }else {
+            return ['status' => 0, 'success' => 'No Pickup Requests', 'pickups' => FALSE];
+        }
+
+    }
+    public function receive_all_bookings(Request $request){
+        $pickup_note_id = $request->input('pickup_note_id');
+
+        $pickup_note = PickupNote::find($pickup_note_id);
+        $pickup_note_requests = $pickup_note->pickup_note_requests;
+        if($pickup_note_requests->count() != 0){
+            $bookings = array();
+            $shipments = array();
+            foreach ($pickup_note_requests as $pickup_note_request) {
+                $pickup_request = PickupRequest::find($pickup_note_request->pickup_request_id);
+                $shipper = $pickup_request->shipper->name;
+                $bookings [$shipper]= PickupRequestAssignedShipment::where('pickup_request_id',$pickup_note_request->pickup_request_id)->select('shipment_id')->get();
+                foreach ($bookings[$shipper] as $shipment) {
+                    $shipment_details = Shipment::find($shipment->shipment_id);
+                    $shipments [$shipper][] = $shipment_details->tracking_number;
+                }
+            }
+
+            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $shipments];
+        }else {
+            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+        }
+
+    }
+    public function summary_receive_all_bookings(Request $request){
+        $pickup_request_id = $request->input('pickup_request_id');
+        $pickup_request = PickupRequest::find($pickup_request_id);
+        $pickup_request_all_booked_shipments = $pickup_request->pickup_request_assigned_shipments;
+
+        if ($pickup_request_all_booked_shipments->count() != 0) {
+            $bookings = array();
+            foreach ($pickup_request_all_booked_shipments as $all_shipments) {
+                $shipment = $all_shipments->shipment_id;
+                $shipment_details = Shipment::find($shipment);
+                $bookings[] = $shipment_details->tracking_number;
+            }
+
+            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
+        }
+        else {
+            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+        }
+    }
+    public function summary_receive_shipments(Request $request){
+        $pickup_request_id = $request->input('pickup_request_id');
+        $pickup_request = PickupRequest::find($pickup_request_id);
+        $pickup_request_all_received_shipments = $pickup_request->pickup_request_received_shipments;
+
+        if ($pickup_request_all_received_shipments->count() != 0) {
+            $bookings = array();
+            foreach ($pickup_request_all_received_shipments as $all_shipments) {
+                $shipment = $all_shipments->shipment_id;
+                $shipment_details = Shipment::find($shipment);
+                $bookings[] = $shipment_details->tracking_number;
+            }
+
+            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
+        }
+        else {
+            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+        }
+    }
+
+    //History Section starts
+    public function history_index(){
+        $pickup_status = PickupNoteStatus::all();
+        return view('admin.pickups.history.index')->with(['pickup_status'=>$pickup_status]);
+    }
+    public function history_list(Request $request){
+        $pickup_note = PickupNote::join('cities','cities.id','=','pickup_notes.city_id')
+            ->leftjoin('riders','riders.id','=','pickup_notes.rider_id')
+            ->leftjoin('admins as ab','ab.id','=','pickup_notes.assigned_by_user_id')
+            ->leftjoin('admins as up','up.id','=','pickup_notes.updated_by')
+            ->leftjoin('pickup_note_statuses as pns','pickup_notes.status_id','pns.id')
+            ->select(['pickup_notes.id as pn_id','pickup_notes.id as pickup_note_no','pns.name as status','cities.name as city','pickup_notes.pickups','pickup_notes.bookings','pickup_notes.bookings as bookings_link','riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by']);
+        if (session('role_id') != 1) {
+            $pickup_note = $pickup_note->whereIn('cities.hub_id', session('hubs'));
+        }
+        $pickup_note = Datatables::of($pickup_note)
+            ->editColumn('pn_id', function ($pickup_note) {
+                return str_pad($pickup_note->pn_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('pickup_note_no', function($pickup_note) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            })
+            ->editColumn('bookings_link', function($pickup_notes) {
+                if ($pickup_notes->bookings != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->bookings . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            });
+        return $pickup_note->make(true);
+    }
+    public function history_bookings(Request $request){
+        $pickup_note_id = $request->input('pickup_note_id');
+
+        $pickup_note = PickupNote::find($pickup_note_id);
+        $pickup_note_requests = $pickup_note->pickup_note_requests;
+        if($pickup_note_requests->count() != 0){
+            $bookings = array();
+            $shipments = array();
+            foreach ($pickup_note_requests as $pickup_note_request) {
+                $pickup_request = PickupRequest::find($pickup_note_request->pickup_request_id);
+                $shipper = $pickup_request->shipper->name;
+                $bookings [$shipper]= PickupRequestAssignedShipment::where('pickup_request_id',$pickup_note_request->pickup_request_id)->select('shipment_id')->get();
+                foreach ($bookings[$shipper] as $shipment) {
+                    $shipment_details = Shipment::find($shipment->shipment_id);
+                    $shipments [$shipper][] = $shipment_details->tracking_number;
+                }
+            }
+
+            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $shipments];
+        }else {
+            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+        }
+
+    }
+
 }
