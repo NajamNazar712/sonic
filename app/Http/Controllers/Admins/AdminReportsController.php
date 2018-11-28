@@ -421,23 +421,28 @@ class AdminReportsController extends Controller
 
         $pickup_note = PickupNote::find($pickup_note_id);
         $pickup_note_requests = $pickup_note->pickup_note_requests;
-        if($pickup_note_requests->count() != 0){
-            $bookings = array();
-            $shipments = array();
-            foreach ($pickup_note_requests as $pickup_note_request) {
+        if ($pickup_note_requests->count() != 0){
+            foreach($pickup_note_requests as $pickup_note_request) {
                 $pickup_request = PickupRequest::find($pickup_note_request->pickup_request_id);
-                $shipper = $pickup_request->shipper->name;
-                $bookings [$shipper]= PickupRequestAssignedShipment::where('pickup_request_id',$pickup_note_request->pickup_request_id)->select('shipment_id')->get();
-                foreach ($bookings[$shipper] as $shipment) {
-                    $shipment_details = Shipment::find($shipment->shipment_id);
-                    $shipments [$shipper][] = $shipment_details->tracking_number;
+                $pickup_request_all_received_shipments = $pickup_request->pickup_request_received_shipments;
+
+                if ($pickup_request_all_received_shipments->count() != 0) {
+                    $bookings = array();
+                    foreach ($pickup_request_all_received_shipments as $all_shipments) {
+                        $shipment = $all_shipments->shipment_id;
+                        $shipment_details = Shipment::find($shipment);
+                        $bookings[] = $shipment_details->tracking_number;
+                    }
+
+                    return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
+                } else {
+                    return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
                 }
             }
-
-            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $shipments];
-        }else {
-            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+        }else{
+            return ['status' => 0, 'success' => 'No Pickup requests found', 'booked' => FALSE];
         }
+
 
     }
     //pickup note print start
