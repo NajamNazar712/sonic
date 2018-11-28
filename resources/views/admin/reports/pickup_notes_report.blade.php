@@ -425,13 +425,13 @@
                 })
                     .done(function(data) {
                         if (data) {
-                            console.log(data)
                             var shipments = '';
                             if (data.booked) {
-                                $.each(data.booked, function(index, shipment_ids) {
-
-                                        shipments += '<u><a href='+route+'?tracking_number='+shipment_ids+' target="_blank">'+shipment_ids+'</a></u><br>';
-
+                                $.each(data.booked, function (index,shipment_ids) {
+                                    shipments += "<div><b>Shipper : "+index+"</b></div>";
+                                    $.each(shipment_ids, function (index, tracking_numbers) {
+                                        shipments += '<u><a href=' + route + '?tracking_number=' + tracking_numbers + ' target="_blank">' + tracking_numbers + '</a></u><br>';
+                                    });
                                 });
                             }
                             $('#bookings_modal .modal-body').html(shipments);

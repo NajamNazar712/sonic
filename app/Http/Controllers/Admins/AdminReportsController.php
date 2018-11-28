@@ -421,24 +421,27 @@ class AdminReportsController extends Controller
 
         $pickup_note = PickupNote::find($pickup_note_id);
         $pickup_note_requests = $pickup_note->pickup_note_requests;
+
         if ($pickup_note_requests->count() != 0){
+            $pickup_request_all_received_shipments = array();
+            $bookings = array();
+
             foreach($pickup_note_requests as $pickup_note_request) {
                 $pickup_request = PickupRequest::find($pickup_note_request->pickup_request_id);
-                $pickup_request_all_received_shipments = $pickup_request->pickup_request_received_shipments;
+                $shipper = $pickup_request->shipper->name;
+                $pickup_request_all_received_shipments[$shipper] = $pickup_request->pickup_request_received_shipments;
+                if ($pickup_request_all_received_shipments[$shipper]->count() != 0) {
 
-                if ($pickup_request_all_received_shipments->count() != 0) {
-                    $bookings = array();
-                    foreach ($pickup_request_all_received_shipments as $all_shipments) {
+                    foreach ($pickup_request_all_received_shipments[$shipper] as $all_shipments) {
                         $shipment = $all_shipments->shipment_id;
                         $shipment_details = Shipment::find($shipment);
-                        $bookings[] = $shipment_details->tracking_number;
+                        $bookings[$shipper][] = $shipment_details->tracking_number;
                     }
-
-                    return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
-                } else {
-                    return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
                 }
+
             }
+                return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
+
         }else{
             return ['status' => 0, 'success' => 'No Pickup requests found', 'booked' => FALSE];
         }
