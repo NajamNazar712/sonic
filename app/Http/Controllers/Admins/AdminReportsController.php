@@ -427,7 +427,7 @@ class AdminReportsController extends Controller
             foreach ($pickup_note_requests as $pickup_note_request) {
                 $pickup_request = PickupRequest::find($pickup_note_request->pickup_request_id);
                 $shipper = $pickup_request->shipper->name;
-                $bookings[$shipper]= PickupRequestAssignedShipment::where('pickup_request_id',$pickup_note_request->pickup_request_id)->select('shipment_id')->get();
+                $bookings [$shipper]= PickupRequestAssignedShipment::where('pickup_request_id',$pickup_note_request->pickup_request_id)->select('shipment_id')->get();
                 foreach ($bookings[$shipper] as $shipment) {
                     $shipment_details = Shipment::find($shipment->shipment_id);
                     $shipments [$shipper][] = $shipment_details->tracking_number;
