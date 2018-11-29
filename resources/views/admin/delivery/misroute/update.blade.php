@@ -81,9 +81,10 @@
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-
                 scrollX: true,
+                "autoWidth": false,
                 paging:false,
+                orderable:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {name: 'tracking_number', class: 'align-middle tracking_number'},
@@ -94,7 +95,7 @@
                     {name: 'phone2', class: 'align-middle phone2'},
                     {name: 'email', class: 'align-middle email'},
                     {name: 'amount', class: 'align-middle amount'},
-                    {name: 'action', class: 'align-middle action', orderable: false, searchable: false}
+                    {name: 'action', class: 'align-middle action'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
