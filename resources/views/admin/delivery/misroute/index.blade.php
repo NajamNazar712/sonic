@@ -33,7 +33,6 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
-                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -41,62 +40,62 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="RebookModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RebookModal"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Update Shipment</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center rebook_body">
-                    <form id="updateRebook" action="#" method="post">
-                        <div class="row justify-content-center mb-2">
-                            <div class="col-6">
-                                <span class="form-label">Tracking Number :</span>
-                                <input type="text" name="tracking_number" id="tracking_number" readonly class="form-control text-center">
-                                <input type="hidden" name="shipment_id" id="shipment_id" readonly class="form-control text-center">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                <h3>Consignee Information</h3>
-                                <div class="form-group">
-                                    <select name="consignee_city" id="consignee_city" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                        <option></option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" id="consignee" name="consignee" class="form-control" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="This field is required">
-                                </div>
-                                <div class="form-group">
-                                    <textarea name="address" class="form-control" id="address" cols="49" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="This field is required"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="phone1" name="phone1" data-rule-required="true" data-msg-required="This field is required" placeholder="phone 1*">
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="phone2" name="phone2" placeholder="Phone 2">
-                                </div>
-                                <div class="form-group">
-                                    <input type="email" class="form-control" id="email" name="email" placeholder="Consignee Email">
-                                </div>
-                            </div>
-                            <div class="col justify-content-center">
-                                <div class="form-group text-center">
-                                    <button id="rebookSubmit" type="submit" class="btn btn-primary">Update</button>
+    {{--<div class="modal fade text-left" id="RebookModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RebookModal"--}}
+         {{--aria-hidden="true">--}}
+        {{--<div class="modal-dialog" role="document">--}}
+            {{--<div class="modal-content">--}}
+                {{--<div class="modal-header">--}}
+                    {{--<h4 class="modal-title">Update Shipment</h4>--}}
+                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                        {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--</button>--}}
+                {{--</div>--}}
+                {{--<div class="modal-body text-center rebook_body">--}}
+                    {{--<form id="updateRebook" action="#" method="post">--}}
+                        {{--<div class="row justify-content-center mb-2">--}}
+                            {{--<div class="col-6">--}}
+                                {{--<span class="form-label">Tracking Number :</span>--}}
+                                {{--<input type="text" name="tracking_number" id="tracking_number" readonly class="form-control text-center">--}}
+                                {{--<input type="hidden" name="shipment_id" id="shipment_id" readonly class="form-control text-center">--}}
+                            {{--</div>--}}
+                        {{--</div>--}}
+                        {{--<div class="row">--}}
+                            {{--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">--}}
+                                {{--<h3>Consignee Information</h3>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<select name="consignee_city" id="consignee_city" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">--}}
+                                        {{--<option></option>--}}
+                                    {{--</select>--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<input type="text" id="consignee" name="consignee" class="form-control" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="This field is required">--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<textarea name="address" class="form-control" id="address" cols="49" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="This field is required"></textarea>--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<input type="text" class="form-control" id="phone1" name="phone1" data-rule-required="true" data-msg-required="This field is required" placeholder="phone 1*">--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<input type="text" class="form-control" id="phone2" name="phone2" placeholder="Phone 2">--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<input type="email" class="form-control" id="email" name="email" placeholder="Consignee Email">--}}
+                                {{--</div>--}}
+                            {{--</div>--}}
+                            {{--<div class="col justify-content-center">--}}
+                                {{--<div class="form-group text-center">--}}
+                                    {{--<button id="rebookSubmit" type="submit" class="btn btn-primary">Update</button>--}}
 
-                                </div>
-                            </div>
+                                {{--</div>--}}
+                            {{--</div>--}}
 
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+                        {{--</div>--}}
+                    {{--</form>--}}
+                {{--</div>--}}
+            {{--</div>--}}
+        {{--</div>--}}
+    {{--</div>--}}
 
 @endsection
 
@@ -276,8 +275,6 @@
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
-
             ],
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
@@ -298,7 +295,7 @@
                     var header = column.header();
 
 
-                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.status')) {
+                    if ($(header).is('.serial_number') || $(header).is('.status')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.shipping_mode')){
                         $(mode_drop_select).appendTo($(search))

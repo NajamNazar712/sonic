@@ -29,6 +29,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Yajra\Datatables\Datatables;
 
 class DeliveryController extends Controller
@@ -2689,98 +2691,12 @@ class DeliveryController extends Controller
                     $query->whereRaw('false');
                 }
             })
-            ->addColumn("action", function ($result) {
-                if (session('role_id') == 1 || in_array(108, session('permissions'))) {
-                    $dropdown = '
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
-                        <div class="dropdown-menu dropdown-menu-sm">
-                            <a href="#" class="dropdown-item misroute_modal"><i class="ft-alert-circle primary"></i> Update</a>
-                        </div>
-                      </div>
-                    ';
-
-                    return $dropdown;
-
-                } else {
-                    return '';
-                }
-            })
             ->make(true);
     }
 
-    public function get_shipment_info(Request $request)
-    {
-        $shipment_id = $request->shipment_id;
-        if ($shipment_id != '') {
-            $shipment = Shipment::where('id', $shipment_id)->where('shipper_status_id', 11);
-            if ($shipment->exists()) {
-                $data = array();
-                $shipment = $shipment->first();
-                $cities = City::where('status', 1)->select('id', 'name')->get();
 
-                $data['tracking_number'] = $shipment->tracking_number;
-                $data['consignee_city_id'] = $shipment->consignee_city->id;
-//                $data['consignee_city_name'] = $shipment->consignee_city->name;
-                $data['consignee_name'] = $shipment->consignee_name;
-                $data['consignee_address'] = $shipment->consignee_address;
-                $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
-                $data['consignee_phone2'] = $shipment->consignee_phone_number_2;
-                $data['consignee_email'] = $shipment->consignee_email;
 
-                return response()->json(['status' => 1, 'data' => $data, 'cities' => $cities]);
 
-            } else {
-                return response()->json(['status' => 0, 'error' => 'Shipment not found']);
-            }
-
-        }
-    }
-
-    public function misroute_shipment_update(Request $request)
-    {
-        $shipment_id = $request->shipment_id;
-        if ($shipment_id != '') {
-            $shipment = Shipment::where('id', $shipment_id)->where('shipper_status_id', 11);
-            if ($shipment->exists()) {
-                $shipment = $shipment->first();
-
-                $misrouted_history = MisroutedHistory::create([
-                    'shipment_id' => $shipment_id,
-                    'old_consignee_city_id' => $shipment->consignee_city_id,
-                    'old_consignee_name' => $shipment->consignee_name,
-                    'old_consignee_address' => $shipment->consignee_address,
-                    'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
-                    'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
-                    'old_consignee_email' => $shipment->consignee_email,
-                    'new_consignee_city_id' => $request->consignee_city_id,
-                    'new_consignee_name' => $request->consignee,
-                    'new_consignee_address' => $request->address,
-                    'new_consignee_phone_number_1' => $request->phone1,
-                    'new_consignee_phone_number_2' => $request->phone2,
-                    'new_consignee_email' => $request->email,
-                    'admin_id' => Auth::id()
-
-                ]);
-                $shipment->consignee_city_id = $request->consignee_city_id;
-                $shipment->consignee_name = $request->consignee;
-                $shipment->consignee_address = $request->address;
-                $shipment->consignee_phone_number_1 = $request->phone1;
-                $shipment->consignee_phone_number_2 = $request->phone2;
-                $shipment->consignee_email = $request->email;
-                $shipment->shipper_status_id = 4;
-                $shipment->consignee_status_id = 4;
-                $shipment->save();
-
-                ShipmentsJourneyController::add($shipment->id, 4, 4, NULL, 'Misrouted shipment updated to new destination.', NULL, Auth::id());
-
-                return response()->json(['status' => 1, 'success' => 'Shipment has been updated successfully']);
-            } else {
-                return response()->json(['status' => 0, 'error' => 'Shipment with Misroute Status not found!']);
-
-            }
-        }
-    }
     public function sdn_dncc_list(Request $request){
         $sdn_id = $request->input('sdn_id');
         $sdn_details = StationDepositNote::find($sdn_id);
@@ -3277,6 +3193,129 @@ class DeliveryController extends Controller
             return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
         }else{
             return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+    public function misrouted_update_index(){
+        $cities = City::where('status', 1)->select(['id', 'name as text'])->get();
+        return view('admin.delivery.misroute.update')->with('cities',$cities);
+    }
+    public function get_misroute_shipment_info(Request $request)
+    {
+        $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
+        $tracking_number = $request->tracking_number;
+        if ($tracking_number != '') {
+            $shipment = Shipment::where('tracking_number', $tracking_number)->whereIn('shipper_status_id', $passing_status_array);
+            if ($shipment->exists()) {
+                $data = array();
+                $shipment = $shipment->first();
+
+
+                $data['id'] = $shipment->id;
+                $data['tracking_number'] = $shipment->tracking_number;
+                $data['consignee_city_id'] = $shipment->consignee_city->id;
+//                $data['consignee_city_name'] = $shipment->consignee_city->name;
+                $data['consignee_name'] = $shipment->consignee_name;
+                $data['consignee_address'] = $shipment->consignee_address;
+                $data['consignee_phone1'] = $shipment->consignee_phone_number_1;
+                $data['consignee_phone2'] = ($shipment->consignee_phone_number_2 != '')? $shipment->consignee_phone_number_2:'';
+                $data['consignee_email'] = ($shipment->consignee_email != '')? $shipment->consignee_email:'';
+                $data['amount'] = $shipment->amount;
+
+                return response()->json(['status' => 1, 'details' => $data]);
+
+            } else {
+                return response()->json(['status' => 0, 'error' => 'Shipment is not ready for misrouted!']);
+            }
+
+        }
+    }
+    public function misroute_shipment_update(Request $request)
+    {
+        $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
+
+        $shipments = explode(',', $request->shipment_ids);
+        if ($shipments) {
+            foreach ($shipments as $shipment_id){
+                $shipment = Shipment::where('id', $shipment_id)->whereIn('shipper_status_id', $passing_status_array);
+                if ($shipment->exists()) {
+                    $shipment = $shipment->first();
+
+                    $misrouted_history = MisroutedHistory::create([
+                        'shipment_id' => $shipment_id,
+                        'old_consignee_city_id' => $shipment->consignee_city_id,
+                        'old_consignee_name' => $shipment->consignee_name,
+                        'old_consignee_address' => $shipment->consignee_address,
+                        'old_consignee_phone_number_1' => $shipment->consignee_phone_number_1,
+                        'old_consignee_phone_number_2' => $shipment->consignee_phone_number_2,
+                        'old_consignee_email' => $shipment->consignee_email,
+                        'new_consignee_city_id' => $request->consignee_city[$shipment_id],
+                        'new_consignee_name' => $request->consignee_name[$shipment_id],
+                        'new_consignee_address' => $request->consignee_address[$shipment_id],
+                        'new_consignee_phone_number_1' => $request->consignee_phone1[$shipment_id],
+                        'new_consignee_phone_number_2' => ($request->consignee_phone2[$shipment_id] != '')? $request->consignee_phone2[$shipment_id]:'',
+                        'new_consignee_email' => ($request->consignee_email[$shipment_id] != '')? $request->consignee_email[$shipment_id]:'',
+                        'admin_id' => Auth::id()
+
+                    ]);
+                    $shipment->consignee_city_id = $request->consignee_city[$shipment_id];
+                    $shipment->consignee_name = $request->consignee_name[$shipment_id];
+                    $shipment->consignee_address = $request->consignee_address[$shipment_id];
+                    $shipment->consignee_phone_number_1 = $request->consignee_phone1[$shipment_id];
+                    $shipment->consignee_phone_number_2 = ($request->consignee_phone2[$shipment_id] != '')? $request->consignee_phone2[$shipment_id]:'';
+                    $shipment->consignee_email = ($request->consignee_email[$shipment_id] != '')? $request->consignee_email[$shipment_id]:'';
+                    $shipment->shipper_status_id = 49;
+                    $shipment->consignee_status_id = 49;
+                    $shipment->save();
+
+                    ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
+
+
+                }
+            }
+
+            return redirect()->back()->with(['success' => 'Misrouted Shipments has been updated successfully','shipments' => $shipments, 'excel' => True]);
+        }else {
+            return redirect()->back()->with(['error' => 'Shipment with Misroute Status not found!']);
+
+        }
+    }
+    public function misroute_shipment_excel(Request $request){
+        $shipments = explode(',' , $request->ids);
+        if (count($shipments) > 0) {
+
+            $details = array();
+
+            $details[] = ['S. No.', 'Tracking No.', 'Destination', 'Consignee Name', 'Address', 'Amount'];
+
+            $serial_number = 1;
+
+            foreach ($shipments as $shipment) {
+                $shipment_details = Shipment::find($shipment);
+
+                $row = array();
+
+                $row[] = $serial_number;
+                $row[] = $shipment_details->tracking_number;
+                $row[] = $shipment_details->consignee_city->name;
+                $row[] = $shipment_details->consignee_name;
+                $row[] = $shipment_details->consignee_address;
+                $row[] = $shipment_details->received_cod_amount;
+
+                $details[] = $row;
+
+                $serial_number++;
+            }
+
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->getActiveSheet()->fromArray($details);
+
+            $writer = new Xlsx($spreadsheet);
+
+            header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+            header('Content-Disposition: attachment;filename="misrouted_updated_shipments_' . Auth::id() . '.xlsx"');
+            header('Cache-Control: max-age=0');
+
+            $writer->save('php://output');
         }
     }
 }
