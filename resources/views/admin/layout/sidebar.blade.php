@@ -312,6 +312,16 @@
                 <li class=" nav-item"><a href="{{ route('admin.cancelled_shipments.index') }}"><span class="menu-title">Cancelled Shipments</span></a></li>
             @endif
 
+            @if (session('role_id') == 1 || in_array(127, session('permissions')))
+                <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Lost</span></a>
+                    <ul class="menu-content">
+                        @if (session('role_id') == 1 || in_array(104, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.lost.index')}}">Shipments</a></li>
+                        @endif
+                    </ul>
+                </li>
+            @endif
+
             @if (session('role_id') == 1 || in_array(100, session('permissions')))
                 <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><span class="menu-title">Notifications</span></a></li>
             @endif

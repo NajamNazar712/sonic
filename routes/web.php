@@ -720,7 +720,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
     });
 
     //Reports end
+    //Lost Module Start
+    Route::prefix('lost')->name('lost.')->group(function (){
+        Route::get('','Admins\LostShipmentsController@lost_shipments_index')->name('index');
+        Route::get('list','Admins\LostShipmentsController@lost_shipments_list')->name('list');
 
+    });
+    //Lost Module End
     Route::prefix('cancelled_shipments')->name('cancelled_shipments.')->group(function (){
         Route::get('','Admins\AdminShipmentCancelController@index')->name('index');
         Route::get('list', 'Admins\AdminShipmentCancelController@list')->name('list');

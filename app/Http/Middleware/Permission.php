@@ -258,6 +258,9 @@ class Permission
             'reports.overall_sales.index' => 75,
             'reports.overall_sales.list' => 75,
 
+            'lost.index' => 127,
+            'lost.list' => 127,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,
