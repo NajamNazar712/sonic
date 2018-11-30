@@ -65,7 +65,7 @@ class AdminCargoController extends Controller
             ->whereIn('dc.hub_id', session('hubs'));
           })
           ->orWhere(function ($sub_query) {
-            $sub_query->where('shipments.shipper_status_id', 2)
+            $sub_query->whereIn('shipments.shipper_status_id', [2,49])
             ->whereIn('oc.hub_id', session('hubs'));
           });
         });
@@ -127,7 +127,7 @@ class AdminCargoController extends Controller
             ->where('dc.name', 'like', '%' . $keyword . '%');
           })
           ->orWhere(function ($sub_query) use ($keyword) {
-            $sub_query->where('shipments.shipper_status_id', 2)
+            $sub_query->whereIn('shipments.shipper_status_id', [2,49])
             ->where('oc.name', 'like', '%' . $keyword . '%');
           });
       })
@@ -139,7 +139,7 @@ class AdminCargoController extends Controller
             ->where('oc.name', 'like', '%' . $keyword . '%');
           })
           ->orWhere(function ($sub_query) use ($keyword) {
-            $sub_query->where('shipments.shipper_status_id', 2)
+            $sub_query->whereIn('shipments.shipper_status_id', [2,49])
             ->where('dc.name', 'like', '%' . $keyword . '%');
           });
       })
@@ -148,17 +148,17 @@ class AdminCargoController extends Controller
 
       if ($shipment_type = $request->get('shipment_type')) {
         if ($shipment_type == 0) {
-          $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37]);
+          $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37, 49]);
         }
         else if ($shipment_type == 1) {
-          $datatables->where('shipments.shipper_status_id', 2);
+          $datatables->whereIn('shipments.shipper_status_id', [2,49]);
         }
         else if ($shipment_type == 2) {
           $datatables->whereIn('shipments.shipper_status_id', [20, 30, 36, 37]);
         }
       }
       else {
-        $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37]);
+        $datatables->whereIn('shipments.shipper_status_id', [2, 20, 30, 36, 37, 49]);
       }
 
       return $datatables->make(true);
@@ -174,18 +174,31 @@ class AdminCargoController extends Controller
       if ($shipment->exists()) {
         $shipment = $shipment->first();
 
-        if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37])) {
-          if ($shipment->shipper_status_id != 2) {
-            $hub_id = $shipment->consignee_city->hub_id;
+        if (in_array($shipment->shipper_status_id, [2, 20, 30, 36, 37, 49])) {
+          if ($shipment->shipper_status_id == 2) {
+              $hub_id = $shipment->pickup_address->city->hub_id;
+          }
+          else if($shipment->shipper_status_id == 49){
+            $shipment_details = $shipment->misrouted_history()->latest()->first();
+//            if($shipment_details->old_consignee_city_id != $shipment_details->new_consignee_city_id){
+                $city_details = City::find($shipment_details->old_consignee_city_id);
+                $hub_id = $city_details->hub_id;
+//            }else{
+//                $city_details = City::find($shipment_details->new_consignee_city_id);
+//                $hub_id = $city_details->hub_id;
+//            }
           }
           else {
-            $hub_id = $shipment->pickup_address->city->hub_id;
+              $hub_id = $shipment->consignee_city->hub_id;
+
           }
 
+
           if (session('role_id') == 1 || (in_array($hub_id, session('hubs')))) {
-            if ($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) {
+
+            if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (($shipment->shipper_status_id == 49) && ($shipment->consignee_city->hub_id != $hub_id) )) {
               if ($request->cargo_type != 0) {
-                if ($shipment->shipper_status_id == 2) {
+                if ($shipment->shipper_status_id == 2 && $shipment->shipper_status_id == 49) {
                   $hub_id = $shipment->consignee_city->hub_id;
                 }
                 else {
@@ -202,7 +215,7 @@ class AdminCargoController extends Controller
 
                   if ($request->cargo_type != 0) {
                     if ($request->cargo_type == 1) {
-                      if ($shipment->shipper_status_id != 2) {
+                      if (!in_array($shipment->shipper_status_id, [2, 49])) {
                         return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment is of Return Type while the Cargo is Normal Type'];
                       }
 
@@ -217,7 +230,7 @@ class AdminCargoController extends Controller
                     }
                   }
                   else {
-                    if ($shipment->shipper_status_id == 2) {
+                    if ($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 49) {
                       $details['cargo_type'] = 1;
 
                       $cargo_type = 1;
@@ -322,7 +335,15 @@ class AdminCargoController extends Controller
     public function create_consignment_details(Request $request) {
       $shipment = Shipment::find(current($request->shipment_ids));
 
-      $origin = $shipment->pickup_address->city->hub_city;
+      if ($shipment->shipper_status_id != 49) {
+          $origin = $shipment->pickup_address->city->hub_city;
+      }
+      else {
+          ///Old City
+          $shipment_details = $shipment->misrouted_history()->latest()->first();
+          $city_details = City::find($shipment_details->old_consignee_city_id);
+          $origin = $city_details->hub_city;
+      }
 
       $origin_details = array();
 

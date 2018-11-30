@@ -53,7 +53,7 @@ class DeliveryController extends Controller
 
     public function pending_list(Request $request)
     {
-        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15); //for pending deliveries
+        $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49); //for pending deliveries
         $normal = 2;
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
@@ -76,6 +76,7 @@ class DeliveryController extends Controller
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival')
             ->whereRaw('IF (shipments.shipper_status_id = 2, (oc.hub_id = dc.hub_id), TRUE)')
+//            ->whereRaw('IF (shipments.shipper_status_id = 49, (oc.hub_id = dc.hub_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
         if (session('role_id') != 1) {
@@ -176,7 +177,7 @@ class DeliveryController extends Controller
 
     public function get_shipment_details(Request $request)
     {
-        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15);
+        $pending_status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49);
         if ($request->tracking != '') {
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id', $pending_status);
             $remarks = '';
@@ -197,7 +198,7 @@ class DeliveryController extends Controller
                 }
 
                 if ($is_updateable == 0) {
-                    if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && $shipment->shipper_status_id == 2) {
+                    if (($shipment->consignee_city->hub_id != $shipment->pickup_address->city->hub_id) && ($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 49)) {
                         return ['status' => 1, 'error' => 'Cargo not arrived at destination center!'];
                     }
                     if ($request->has('hub_id')) {
