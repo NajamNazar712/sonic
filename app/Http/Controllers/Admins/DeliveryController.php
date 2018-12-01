@@ -13,6 +13,8 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BanksList;
 use App\Http\Models\BookingType;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\Rider;
@@ -3258,6 +3260,32 @@ class DeliveryController extends Controller
                         'admin_id' => Auth::id()
 
                     ]);
+
+                    if($shipment->shipper_status_id == 3){
+                        $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
+                        if ($cargo_consignment_shipment->exists()) {
+                            $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id')->first();
+                            $cargo = CargoConsignment::find($cargo_consignment_shipment->cargo_consignment_id);
+                            if(in_array($cargo->status_id, [1,2])){
+                                $shipments_count = $cargo->shipments;
+                                $shipment_weight = $cargo->weight;
+                                $cargo_consignment_shipment->shipments = $shipments_count-1;
+                                $cargo_consignment_shipment->save();
+                            }
+                        }
+                    }
+
+                    if(in_array($shipment->shipper_status_id, [6, 7, 8, 9, 10, 11, 13, 15])){
+                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id);
+                        if($delivery_note_shipment->exists()){
+                            $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id')->first();
+                            $delivery_note = DeliveryNote::find($delivery_note_shipment->delivery_note_id);
+                            if($delivery_note->status == 1){
+                                
+                            }
+                        }
+                    }
+
                     $shipment->consignee_city_id = $request->consignee_city[$shipment_id];
                     $shipment->consignee_name = $request->consignee_name[$shipment_id];
                     $shipment->consignee_address = $request->consignee_address[$shipment_id];
@@ -3267,6 +3295,7 @@ class DeliveryController extends Controller
                     $shipment->shipper_status_id = 49;
                     $shipment->consignee_status_id = 49;
                     $shipment->save();
+
 
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
 

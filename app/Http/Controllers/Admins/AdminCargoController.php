@@ -198,7 +198,7 @@ class AdminCargoController extends Controller
 
             if (($shipment->pickup_address->city->hub_id != $shipment->consignee_city->hub_id) || (($shipment->shipper_status_id == 49) && ($shipment->consignee_city->hub_id != $hub_id) )) {
               if ($request->cargo_type != 0) {
-                if ($shipment->shipper_status_id == 2 && $shipment->shipper_status_id == 49) {
+                if ($shipment->shipper_status_id == 2 || $shipment->shipper_status_id == 49) {
                   $hub_id = $shipment->consignee_city->hub_id;
                 }
                 else {
