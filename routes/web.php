@@ -413,12 +413,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('misroute')->name('misroute.')->group(function (){
            Route::get('','Admins\DeliveryController@misroute_index')->name('index');
            Route::get('list','Admins\DeliveryController@misroute_list')->name('list');
-           Route::post('shipment/info','Admins\DeliveryController@get_shipment_info')->name('shipment.info');
-           Route::post('shipment/update','Admins\DeliveryController@misroute_shipment_update')->name('shipment.update');
+
            Route::prefix('history')->name('history.')->group(function (){
                 Route::get('','Admins\MisroutedHistoryController@misrouted_history_index')->name('index');
                 Route::get('list','Admins\MisroutedHistoryController@misrouted_history_list')->name('list');
 
+           });
+           Route::prefix('update')->name('update.')->group(function (){
+                Route::get('','Admins\DeliveryController@misrouted_update_index')->name('index');
+//                Route::get('list','Admins\DeliveryController@misrouted_update_list')->name('list');
+                Route::post('shipment/info','Admins\DeliveryController@get_misroute_shipment_info')->name('shipment.info');
+               Route::post('store','Admins\DeliveryController@misroute_shipment_update')->name('store');
+               Route::get('excel','Admins\DeliveryController@misroute_shipment_excel')->name('excel');
            });
 
         });
