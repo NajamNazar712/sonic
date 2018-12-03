@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Add Zone')
+@section('title', 'Update Zone')
 
 @section('content')
 	<div class="app-content content">
@@ -9,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Add Zone
+					Update Zone
 				</h1>
 
 				<div class="card">
@@ -17,21 +17,21 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<form id="zone_form" class="form-horizontal" method="POST" action="{{ route('admin.management.zonal.add.store') }}" novalidate="novalidate">
+							<form id="zone_form" class="form-horizontal" method="POST" action="{{ route('admin.management.zonal.update.store', ['id' => $zone->id]) }}" novalidate="novalidate">
 								{{ csrf_field() }}
 
 								<div class="row">
 									<div class="col-8">
 										<div class="form-group">
 											<label>Name</label>
-											<input type="text" name="name" class="form-control subject" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required">
+											<input type="text" name="name" class="form-control subject" placeholder="Name*" data-rule-required="true" data-msg-required="Name is required" value="{{ $zone->name }}">
 										</div>
 									</div>
 
 									<div class="col-4">
 										<div class="form-group">
 											<label>GST</label>
-											<input type="text" name="gst" class="form-control gst" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required">
+											<input type="text" name="gst" class="form-control gst" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required"value="{{ $zone->gst }}">
 										</div>
 									</div>
 
@@ -49,22 +49,22 @@
 
 													<div class="col text-right">
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="0" data-rule-required="true" data-msg-required="Class is required">
+															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="0" data-rule-required="true" data-msg-required="Class is required" @if ($zone_class_cities[$city->id] == 0) checked="checked" @endif>
 															<label for="city_class_{{ $city->id }}">Class A</label>
 														</fieldset>
 
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="1"data-rule-required="true" data-msg-required="Class is required">
+															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="1"data-rule-required="true" data-msg-required="Class is required" @if ($zone_class_cities[$city->id] == 1) checked="checked" @endif>
 															<label for="city_class_{{ $city->id }}">Class B</label>
 														</fieldset>
 
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="2"data-rule-required="true" data-msg-required="Class is required">
+															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="2"data-rule-required="true" data-msg-required="Class is required" @if ($zone_class_cities[$city->id] == 2) checked="checked" @endif>
 															<label for="city_class_{{ $city->id }}">Class C</label>
 														</fieldset>
 
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required">
+															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required" @if ($zone_class_cities[$city->id] == 3) checked="checked" @endif>
 															<label for="city_class_{{ $city->id }}">Class D</label>
 														</fieldset>
 													</div>
@@ -77,7 +77,7 @@
 
 									<div class="col-12">
 										<div class="form-group text-center">
-											<button type="submit" class="btn btn-primary">Add</button>
+											<button type="submit" class="btn btn-primary">Update</button>
 										</div>
 									</div>
 								</div>
@@ -139,7 +139,7 @@
 
 					swal({
 						title: 'Please Wait!',
-						text: 'Zone is being created!',
+						text: 'Zone is being updated!',
 						icon: 'info',
 						buttons: false,
 						closeOnClickOutside: false,

@@ -42,7 +42,7 @@ class AdminZonalManagementController extends Controller
                   <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            if (session('role_id') == 1 || in_array(1, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(132, session('permissions'))) {
                 $dropdown .= $edit_button;
             }
 
@@ -73,7 +73,7 @@ class AdminZonalManagementController extends Controller
 
         $zone->save();
 
-        foreach ($city_class as $city_id => $class) {
+        foreach ($request->city_class as $city_id => $class) {
             $zone_class_city = new ZoneClassCity();
 
             $zone_class_city->zone_id = $zone->id;
@@ -84,5 +84,55 @@ class AdminZonalManagementController extends Controller
         }
 
         return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been added!']);
+    }
+
+    public function update_index($id) {
+        $cities = City::where('status', 1)->get();
+        $zone = Zone::find($id);
+        $zone_class_cities = ZoneClassCity::where('zone_id', $id)->pluck('class', 'city_id');
+
+        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities]);
+    }
+
+    public function update_store(Request $request, $id) {
+        $zone = Zone::find($id);
+
+        $zone->name = $request->name;
+        $zone->gst = $request->gst;
+
+        $zone->save();
+
+        foreach ($request->city_class as $city_id => $class) {
+            $zone_class_city = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city_id);
+
+            if ($zone_class_city->exists()) {
+                $zone_class_city = $zone_class_city->first();
+            }
+            else {
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city_id;
+            }
+
+            $zone_class_city->class = $class;
+
+            $zone_class_city->save();
+        }
+
+        return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been updated!']);
+    }
+
+    public function view_cities(Request $request) {
+        $cities = City::where('zone_id', $request->id)->where('status', 1);
+
+        if ($cities->exists()) {
+            $cities = $cities->get();
+
+            return $cities;
+        }
+        else {
+            return 0;
+        }
     }
 }

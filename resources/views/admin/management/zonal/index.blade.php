@@ -30,6 +30,25 @@
 									</tr>
 								</thead>
 							</table>
+
+							<div class="modal fade" id="view_cities" role="dialog" aria-labelledby="view_cities_title" aria-hidden="true">
+								<div class="modal-dialog modal-lg" role="document">
+									<div class="modal-content">
+										<div class="modal-header">
+											<h4 class="modal-title" id="view_cities_title">View Cities</h4>
+
+											<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+												<span aria-hidden="true">×</span>
+											</button>
+										</div>
+										<div class="modal-body">
+										</div>
+										<div class="modal-footer">
+											<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -44,10 +63,47 @@
 @section('js')
 	<script>
 		$(document).ready(function() {
+			jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+                if ( this.context.length ) {
+                    body = [];
+
+                    var jsonResult = $.ajax({
+                        url: '{{ route('admin.management.zonal.list') }}',
+                        data: {
+                            'page': 'all',
+                        },
+                        success: function (result) {
+                            head = [];
+
+                            head.push('S. No.');
+                            head.push('Name');
+                            head.push('GST');
+                            head.push('Created Datetime');
+                            head.push('Updated Datetime');
+
+                            $.each(result.data, function(index, values) {
+                                row = [];
+
+                                row.push(index + 1);
+                                row.push(values.name);
+                                row.push(values.GST);
+                                row.push(values.created_at);
+                                row.push(values.updated_at);
+
+                                body.push(row);
+                            });
+                        },
+                        async: false
+                    });
+
+                    return {body: body, header: head};
+                }
+            });
+
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				buttons: [
-					@if (session('role_id') == 1 || in_array(1, session('permissions')))
+					@if (session('role_id') == 1 || in_array(131, session('permissions')))
 					{
 						text: 'Add',
 						className: 'btn btn-primary add',
@@ -118,46 +174,46 @@
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 
-				@if (session('role_id') == 1 || in_array(1, session('permissions')))
+				@if (session('role_id') == 1 || in_array(132, session('permissions')))
 					if ($(this).hasClass('edit')) {
-						// $.ajax({
-						// 	url: '{!! route('admin.notifications.details') !!}',
-						// 	method: 'POST',
-						// 	data: {
-						// 		'_token': '{{ csrf_token() }}',
-						// 		'id': notification_id
-						// 	}
-						// })
-						// .done(function(data) {
-						// 	$('#edit .id').val(notification_id);
+						var link = '{{ route('admin.management.zonal.update.index', ["id" => 0]) }}';
 
-						// 	if (notification_type == 1) {
-						// 		$('#edit .email').removeClass('d-none');
-
-						// 		$('#edit .subject').val(data.subject);
-						// 	}
-						// 	else {
-						// 		$('#edit .email').addClass('d-none');
-
-						// 		$('#edit .subject').val('');
-						// 	}
-
-						// 	$('#edit .body').val(data.body);
-
-						// 	$('#edit .fields').html('');
-
-						// 	valid_fields = [];
-
-						// 	$.each(data.fields, function(index, field) {
-						// 		$('#edit .fields').append('<span class="d-inline-block mb-1 mr-1 bg-info text-highlight white">[' + field + ']</span>');
-
-						// 		valid_fields.push(field);
-						// 	});
-
-						// 	$('#edit').modal('show');
-						// });
+						window.location = link.substr(0, link.lastIndexOf('/')) + '/' + id;
 					}
 				@endif
+
+				if ($(this).hasClass('view_cities')) {
+					$('#view_cities .modal-body').html('');
+
+					$.ajax({
+						url: '{!! route('admin.management.zonal.view_cities') !!}',
+						method: 'POST',
+						data: {
+							'_token': '{{ csrf_token() }}',
+							'id': id
+						}
+					})
+					.done(function(data) {
+						if (data != 0) {
+							var details = '<table class="table table-sm table-bordered"><tbody>';
+
+							details += '<tr><td class="border-primary border-darken-1 align-middle text-center"><strong>City</strong></td><td class="border-primary border-darken-1 align-middle text-center"><strong>Pickup</strong></td></tr>';
+
+							$.each(data, function (index, city) {
+								details += '<tr><td class="align-middle text-center">' + city.name + '</td><td class="align-middle text-center">' + ((city.pickup) ? 'Yes' : 'No') + '</td></tr>';
+							});
+
+							details += '</tbody></table>';
+						}
+						else {
+							var details = '<div class="text-center">No City assigned to this Zone</div>';
+						}
+
+						$('#view_cities .modal-body').html(details);
+
+						$('#view_cities').modal('show');
+					});
+				}
 			});
 		});
 	</script>

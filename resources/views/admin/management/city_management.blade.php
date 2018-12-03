@@ -24,6 +24,7 @@
                                     <th class="border-primary border-darken-1">City Code</th>
                                     <th class="border-primary border-darken-1">Hub Name</th>
                                     <th class="border-primary border-darken-1">Hub Code</th>
+                                    <th class="border-primary border-darken-1">Zone</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -82,6 +83,7 @@
                             head.push('City Code');
                             head.push('Hub Name');
                             head.push('Hub Code');
+                            head.push('Zone');
                             head.push('Status');
 
 
@@ -93,6 +95,7 @@
                                 row.push(values.city_id);
                                 row.push(values.hub);
                                 row.push(values.hub_id);
+                                row.push(values.zone);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -152,6 +155,7 @@
                     {data: 'city_id', name: 'cities.id', class: 'align-middle city_id'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
                     {data: 'hub_id', name: 'cities.hub_id', class: 'align-middle hub_id'},
+                    {data: 'zone', name: 'z.name', class: 'align-middle zone'},
                     {data: 'status', name: 'cities.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'align-middle text-center action', orderable: false, searchable: false}
                 ],

@@ -270,6 +270,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
                 Route::get('', 'Admins\AdminZonalManagementController@add_index')->name('index');
                 Route::post('', 'Admins\AdminZonalManagementController@add_store')->name('store');
             });
+
+            Route::prefix('update/{id}')->name('update.')->group(function () {
+                Route::get('', 'Admins\AdminZonalManagementController@update_index')->name('index');
+                Route::post('', 'Admins\AdminZonalManagementController@update_store')->name('store');
+            });
+
+            Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
         });
     });
 	Route::prefix('pickups')->name('pickups.')->group(function () {

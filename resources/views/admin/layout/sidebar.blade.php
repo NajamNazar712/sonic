@@ -283,10 +283,10 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([88, 92, 96], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 130], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Network Management</span></a>
                 <ul class="menu-content">
-                    @if (session('role_id') == 1 || in_array(1, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(130, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.management.zonal.index')}}">Zonal Management</a></li>
                     @endif
 

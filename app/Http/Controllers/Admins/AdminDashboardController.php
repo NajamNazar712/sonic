@@ -20,6 +20,7 @@ use App\Http\Models\Admin\StandardBookingTypeCharge;
 use App\Http\Models\BookingType;
 use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\City;
+use App\Http\Models\Zone;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
@@ -3617,7 +3618,8 @@ class AdminDashboardController extends Controller
     }
     public function cityListAjax(){
         $cities = City::join('cities as h' ,'cities.hub_id', '=' , 'h.id')
-        ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','cities.hub as isHub','cities.status as status']);
+        ->join('zones as z', 'cities.zone_id', '=', 'z.id')
+        ->select(['cities.id as city_id','cities.name as name' ,'h.name as hub','cities.hub_id','z.name as zone','cities.hub as isHub','cities.status as status']);
 
         return Datatables::of($cities)
         ->editColumn('status', function ($cities) {
@@ -3673,9 +3675,10 @@ class AdminDashboardController extends Controller
 
     public function getCityForm(){
         $hubs = City::where('hub',1)->where('status',1)->get();
+        $zones = Zone::all();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::all();
-        return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'bookings'=>$booking]);
+        return view('admin.management.add_city_form')->with(['hubs'=>$hubs,'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking]);
     }
     public function getEditCityForm($id){
 //        return $id;
@@ -3697,9 +3700,10 @@ class AdminDashboardController extends Controller
 
 
         $hubs = City::where('hub',1)->where('status',1)->get();
+        $zones = Zone::all();
         $shippingMode = ShippingMode::all();
         $booking = BookingType::all();
-        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs,'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
+        return view('admin.management.edit_city_form')->with(['hubs'=>$hubs, 'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
 
     }
 
@@ -3710,6 +3714,7 @@ class AdminDashboardController extends Controller
                 'name'=>$request->cityName,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
+                'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
             ]);
@@ -3731,6 +3736,7 @@ class AdminDashboardController extends Controller
                 'name'=>$request->cityName,
                 'hub'=>1,
                 'hub_id'=>$id,
+                'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
             ]);
@@ -3760,6 +3766,7 @@ class AdminDashboardController extends Controller
                 'name'=>$request->cityName,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
+                'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
             ]);
@@ -3779,6 +3786,7 @@ class AdminDashboardController extends Controller
             $city = City::create([
                 'name'=>$request->cityName,
                 'hub'=>1,
+                'zone_id'=>$request->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
             ]);
