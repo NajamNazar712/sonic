@@ -16,12 +16,15 @@ class CreateZoneClassCitiesTable extends Migration
         Schema::create('zone_class_cities', function (Blueprint $table) {
             $table->increments('id');
             $table->timestamps();
+            $table->integer('zone_id');
             $table->integer('city_id');
-            $table->integer('zone');
+            $table->integer('class');
 
             $table->index('created_at');
             $table->index('updated_at');
-            $table->index('zone');
+            $table->index('zone_id');
+            $table->index('city_id');
+            $table->index('class');
         });
     }
 

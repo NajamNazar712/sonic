@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Zone;
+use App\Http\Models\ZoneClassCity;
 use App\Http\Models\City;
 
 use Auth;
@@ -64,5 +65,24 @@ class AdminZonalManagementController extends Controller
         return view('admin.management.zonal.add.index')->with('cities', $cities);
     }
 
-    public function add_store(Request $request) {}
+    public function add_store(Request $request) {
+        $zone = New Zone();
+
+        $zone->name = $request->name;
+        $zone->gst = $request->gst;
+
+        $zone->save();
+
+        foreach ($city_class as $city_id => $class) {
+            $zone_class_city = new ZoneClassCity();
+
+            $zone_class_city->zone_id = $zone->id;
+            $zone_class_city->city_id = $city_id;
+            $zone_class_city->class = $class;
+
+            $zone_class_city->save();
+        }
+
+        return redirect()->route('admin.management.zonal.index')->with(['success' => 'Zone: ' . $request->name . ' has been added!']);
+    }
 }
