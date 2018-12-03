@@ -625,6 +625,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td class="color primary"><strong>S. No.</strong></td>
                             <td class="color primary"><strong>Tracking No.</strong></td>
+                            <td class="color primary"><strong>Client Name & Phone</strong></td>
                             <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
                             <td class="color primary"><strong>Consignee Address</strong></td>
                             <td class="color primary"><strong>Service Type</strong></td>
@@ -644,6 +645,7 @@ class DeliveryController extends Controller
                           <tr>
                             <td>' . $total_shipments . '</td>
                             <td>' . $shipment->tracking_number . '</td>
+                            <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '') . '</td>
                             <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
                             <td>' . $shipment->consignee_address . '</td>
                 ';
