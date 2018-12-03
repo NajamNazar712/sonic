@@ -1473,27 +1473,40 @@ class AdminFinanceController extends Controller
             $pending_payment_shipment->save();
         }
         else {
-            if ($amount != 0) {
-                $pending_payment_shipment->pending_payment_id = $pending_payment->id;
-                $pending_payment_shipment->shipment_id = $shipment_id;
-                $pending_payment_shipment->type = $type;
-                $pending_payment_shipment->amount = $amount;
-                $pending_payment_shipment->charges = 0;
-                $pending_payment_shipment->gst = 0;
-                $pending_payment_shipment->payable = $amount;
+            if (!$shipment->packaging_material_request) {
+                if ($amount != 0) {
+                    $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+                    $pending_payment_shipment->shipment_id = $shipment_id;
+                    $pending_payment_shipment->type = $type;
+                    $pending_payment_shipment->amount = $amount;
+                    $pending_payment_shipment->charges = 0;
+                    $pending_payment_shipment->gst = 0;
+                    $pending_payment_shipment->payable = $amount;
 
-                $pending_payment_shipment->save();
+                    $pending_payment_shipment->save();
+                }
+
+                $pending_invoice_shipment = new PendingInvoiceShipment();
+
+                $pending_invoice_shipment->shipment_id = $shipment_id;
+                $pending_invoice_shipment->type = $type;
+                $pending_invoice_shipment->charges = $charges;
+                $pending_invoice_shipment->gst = $gst;
+                $pending_invoice_shipment->invoice_amount = $charges + $gst;
+
+                $pending_invoice_shipment->save();
             }
+            else {
+                $pending_invoice_shipment = new PendingInvoiceShipment();
 
-            $pending_invoice_shipment = new PendingInvoiceShipment();
+                $pending_invoice_shipment->shipment_id = $shipment_id;
+                $pending_invoice_shipment->type = $type;
+                $pending_invoice_shipment->charges = $charges;
+                $pending_invoice_shipment->gst = $gst;
+                $pending_invoice_shipment->invoice_amount = $charges + $gst;
 
-            $pending_invoice_shipment->shipment_id = $shipment_id;
-            $pending_invoice_shipment->type = $type;
-            $pending_invoice_shipment->charges = $charges;
-            $pending_invoice_shipment->gst = $gst;
-            $pending_invoice_shipment->invoice_amount = $charges + $gst;
-
-            $pending_invoice_shipment->save();
+                $pending_invoice_shipment->save();
+            }
         }
     }
 

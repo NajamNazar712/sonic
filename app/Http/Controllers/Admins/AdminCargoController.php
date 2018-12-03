@@ -1153,7 +1153,9 @@ class AdminCargoController extends Controller
 
       $cargo_consignment->received_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 1)->count();
 
-      if ($request->short_received) {
+      $short_received = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 0)->count();
+
+      if ($short_received > 0) {
         $cargo_consignment->status_id = 4;
       }
       else {
