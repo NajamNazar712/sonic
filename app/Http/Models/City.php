@@ -31,4 +31,8 @@ class City extends Model
     public function deliveries() {
         return $this->hasMany('App\Http\Models\CityDelivery');
     }
+
+    public function zone() {
+       return $this->belongsTo('App\Http\Models\Zone', 'zone_id');
+    }
 }
