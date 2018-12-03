@@ -3205,12 +3205,20 @@ class DeliveryController extends Controller
     public function get_misroute_shipment_info(Request $request)
     {
         $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
+        $passing_delivery_status_array = array(6, 7, 8, 9, 10, 11, 13, 15);
         $tracking_number = $request->tracking_number;
         if ($tracking_number != '') {
             $shipment = Shipment::where('tracking_number', $tracking_number)->whereIn('shipper_status_id', $passing_status_array);
             if ($shipment->exists()) {
                 $data = array();
                 $shipment = $shipment->first();
+                if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
+                    $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
+                    $delivery_note = DeliveryNote::find($delivery_note_shipments);
+                    if($delivery_note->status == 0){
+                        return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                    }
+                }
 
 
                 $data['id'] = $shipment->id;
@@ -3252,7 +3260,7 @@ class DeliveryController extends Controller
                             $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment->id)->delete();
                             if(in_array($cargo->status_id, [1,2])){
                                 $shipments_count = $cargo->shipments;
-                                $shipment_weight = $cargo->weight;
+                                $shipment_weight = $cargo->shipment_weight;
                                 $shipments_count = $shipments_count-1;
                                 $cargo->shipments = $shipments_count;
                                 $cargo->shipments_weight = $shipment_weight - $shipment->actual_weight;
