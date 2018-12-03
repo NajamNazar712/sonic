@@ -3243,6 +3243,38 @@ class DeliveryController extends Controller
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
 
+                    if($shipment->shipper_status_id == 3){
+                        $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
+                        if ($cargo_consignment_shipment->exists()) {
+                            $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
+
+                            $cargo = CargoConsignment::find($cargo_consignment_shipment);
+                            $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment->id)->delete();
+                            if(in_array($cargo->status_id, [1,2])){
+                                $shipments_count = $cargo->shipments;
+                                $shipment_weight = $cargo->weight;
+                                $shipments_count = $shipments_count-1;
+                                $cargo->shipments = $shipments_count;
+                                $cargo->shipments_weight = $shipment_weight - $shipment->actual_weight;
+                                if($shipments_count == 0){
+                                    $cargo->status_id = 5;
+                                }
+                                $cargo->save();
+                            }
+                        }
+                    }
+
+//                    if(in_array($shipment->shipper_status_id, [6, 7, 8, 9, 10, 11, 13, 15])){
+//                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id);
+//                        if($delivery_note_shipment->exists()){
+//                            $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id')->first();
+//                            $delivery_note = DeliveryNote::find($delivery_note_shipment->delivery_note_id);
+//                            if($delivery_note->status == 1){
+//
+//                            }
+//                        }
+//                    }
+
                     $misrouted_history = MisroutedHistory::create([
                         'shipment_id' => $shipment_id,
                         'old_consignee_city_id' => $shipment->consignee_city_id,
@@ -3260,31 +3292,6 @@ class DeliveryController extends Controller
                         'admin_id' => Auth::id()
 
                     ]);
-
-                    if($shipment->shipper_status_id == 3){
-                        $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
-                        if ($cargo_consignment_shipment->exists()) {
-                            $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id')->first();
-                            $cargo = CargoConsignment::find($cargo_consignment_shipment->cargo_consignment_id);
-                            if(in_array($cargo->status_id, [1,2])){
-                                $shipments_count = $cargo->shipments;
-                                $shipment_weight = $cargo->weight;
-                                $cargo_consignment_shipment->shipments = $shipments_count-1;
-                                $cargo_consignment_shipment->save();
-                            }
-                        }
-                    }
-
-                    if(in_array($shipment->shipper_status_id, [6, 7, 8, 9, 10, 11, 13, 15])){
-                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id);
-                        if($delivery_note_shipment->exists()){
-                            $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id')->first();
-                            $delivery_note = DeliveryNote::find($delivery_note_shipment->delivery_note_id);
-                            if($delivery_note->status == 1){
-                                
-                            }
-                        }
-                    }
 
                     $shipment->consignee_city_id = $request->consignee_city[$shipment_id];
                     $shipment->consignee_name = $request->consignee_name[$shipment_id];
