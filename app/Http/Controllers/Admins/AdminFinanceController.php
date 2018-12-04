@@ -13,6 +13,7 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
+use App\Http\Models\Zone;
 use App\Http\Models\BookingType;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
@@ -60,11 +61,11 @@ class AdminFinanceController extends Controller
         return $amount_in_words;
     }
 
-    static private function gst($hub_id) {
-        $hub_ids = [101, 106, 109, 110, 111, 119, 122, 125, 128, 130, 134, 135, 144, 158, 165, 174, 176, 186, 465, 199, 223, 414, 238, 244, 251, 255, 264, 267, 271, 281, 283, 284, 293, 302, 315, 304, 319, 339, 340];
+    static private function gst($zone_id) {
+        $zone = Zone::find($zone_id);
 
-        if (in_array($hub_id, $hub_ids)) {
-            return 0.16;
+        if ($zone) {
+            return $zone->gst;
         }
         else {
             return 0.13;
@@ -1402,14 +1403,14 @@ class AdminFinanceController extends Controller
         if (!$shipment->packaging_material_request) {
             if ($type == 0) {
                 $charges = $shipment->weight_charges + $shipment->cash_handling_charges + $shipment->insurance_charges + $shipment->fuel_surcharge + $shipment->replacement_charges + $shipment->try_and_buy_charges;
-                $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
+                $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 0, PHP_ROUND_HALF_DOWN);
 
                 $payable = $amount - ($charges + $gst);
             }
             else {
                 $amount = 0;
                 $charges = $shipment->weight_charges + $shipment->insurance_charges + $shipment->return_charges + $shipment->fuel_surcharge;
-                $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->hub_id)), 0, PHP_ROUND_HALF_DOWN);
+                $gst = ROUND(($charges * self::gst($shipment->pickup_address->city->zone_id)), 0, PHP_ROUND_HALF_DOWN);
 
                 $payable = 0 - ($charges + $gst);
             }
