@@ -222,7 +222,7 @@
                                             });
 
                                             $.ajax({
-                                                url:"{{route('admin.return.marked.status')}}",
+                                                url:"{{route('admin.return.confirm.status')}}",
                                                 method:'POST',
                                                 data:{
                                                     'shipment_ids':selected_rows,
@@ -293,7 +293,7 @@
                                             });
 
                                             $.ajax({
-                                                url:"{{route('admin.return.marked.status')}}",
+                                                url:"{{route('admin.return.reattempt.status')}}",
                                                 method:'POST',
                                                 data:{
                                                     'shipment_ids':selected_rows,
