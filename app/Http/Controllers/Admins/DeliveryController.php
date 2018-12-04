@@ -13,6 +13,8 @@ use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
 use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\BanksList;
 use App\Http\Models\BookingType;
+use App\Http\Models\CargoConsignment;
+use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
 use App\Http\Models\MisroutedHistory;
 use App\Http\Models\Rider;
@@ -3203,12 +3205,20 @@ class DeliveryController extends Controller
     public function get_misroute_shipment_info(Request $request)
     {
         $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
+        $passing_delivery_status_array = array(6, 7, 8, 9, 10, 11, 13, 15);
         $tracking_number = $request->tracking_number;
         if ($tracking_number != '') {
             $shipment = Shipment::where('tracking_number', $tracking_number)->whereIn('shipper_status_id', $passing_status_array);
             if ($shipment->exists()) {
                 $data = array();
                 $shipment = $shipment->first();
+                if(in_array($shipment->shipper_status_id, $passing_delivery_status_array)){
+                    $delivery_note_shipments = DeliveryNoteShipment::where('shipment_id',$shipment->id)->max('delivery_note_id');
+                    $delivery_note = DeliveryNote::find($delivery_note_shipments);
+                    if($delivery_note->status == 0){
+                        return response()->json(['status' => 0, 'error' => 'Shipment is added in an unverified delivery note!']);
+                    }
+                }
 
 
                 $data['id'] = $shipment->id;
@@ -3241,8 +3251,29 @@ class DeliveryController extends Controller
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
 
-                    MisroutedHistory::create([
-                        'shipment_id' => $shipment_id,
+                    
+                    if($shipment->shipper_status_id == 3){
+                        $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
+                        if ($cargo_consignment_shipment->exists()) {
+                            $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
+
+                            $cargo = CargoConsignment::find($cargo_consignment_shipment);
+                            $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment->id)->delete();
+                            if(in_array($cargo->status_id, [1,2])){
+                                $shipments_count = $cargo->shipments;
+                                $shipment_weight = $cargo->shipment_weight;
+                                $shipments_count = $shipments_count-1;
+                                $cargo->shipments = $shipments_count;
+                                $cargo->shipments_weight = $shipment_weight - $shipment->actual_weight;
+                                if($shipments_count == 0){
+                                    $cargo->status_id = 5;
+                                }
+                                $cargo->save();
+                            }
+                        }
+                    }
+					MisroutedHistory::create([
+					    'shipment_id' => $shipment_id,
                         'old_consignee_city_id' => $shipment->consignee_city_id,
                         'old_consignee_name' => $shipment->consignee_name,
                         'old_consignee_address' => $shipment->consignee_address,
@@ -3258,6 +3289,7 @@ class DeliveryController extends Controller
                         'admin_id' => Auth::id()
 
                     ]);
+
                     $shipment->consignee_city_id = $request->consignee_city[$shipment_id];
                     $shipment->consignee_name = $request->consignee_name[$shipment_id];
                     $shipment->consignee_address = $request->consignee_address[$shipment_id];
@@ -3267,7 +3299,6 @@ class DeliveryController extends Controller
                     $shipment->shipper_status_id = 49;
                     $shipment->consignee_status_id = 49;
                     $shipment->save();
-
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
 
 
