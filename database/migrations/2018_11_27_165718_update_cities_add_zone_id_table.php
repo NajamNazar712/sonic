@@ -14,7 +14,7 @@ class UpdateCitiesAddZoneIdTable extends Migration
     public function up()
     {
         Schema::table('cities', function (Blueprint $table) {
-            $table->integer('zone_id')->after('hub_id');
+            $table->integer('zone_id')->nullable()->default(NULL)->after('hub_id');
 
             $table->index('zone_id');
         });
