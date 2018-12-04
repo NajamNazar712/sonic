@@ -280,6 +280,14 @@ class Permission
             'user_management.roles.update.index' => 87,
             'user_management.roles.update.store' => 87,
 
+            'management.zonal.index' => 130,
+            'management.zonal.list' => 130,
+            'management.zonal.add.index' => 131,
+            'management.zonal.add.store' => 132,
+            'management.zonal.update.index' => 132,
+            'management.zonal.update.store' => 132,
+            'management.zonal.view_cities' => 130,
+
             'management.city.index' => 88,
             'management.city.ajax' => 88,
             'management.city.form' => 89,
