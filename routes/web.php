@@ -261,6 +261,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('{id}/edit', 'Admins\AdminDashboardController@editRiderDetails')->name('edit');
             Route::put('/status', 'Admins\AdminDashboardController@riderStatus')->name('status');
         });
+
+        Route::prefix('zonal')->name('zonal.')->group(function () {
+            Route::get('', 'Admins\AdminZonalManagementController@index')->name('index');
+            Route::get('/list', 'Admins\AdminZonalManagementController@list')->name('list');
+
+            Route::prefix('add')->name('add.')->group(function () {
+                Route::get('', 'Admins\AdminZonalManagementController@add_index')->name('index');
+                Route::post('', 'Admins\AdminZonalManagementController@add_store')->name('store');
+            });
+
+            Route::prefix('update/{id}')->name('update.')->group(function () {
+                Route::get('', 'Admins\AdminZonalManagementController@update_index')->name('index');
+                Route::post('', 'Admins\AdminZonalManagementController@update_store')->name('store');
+            });
+
+            Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
+        });
     });
 	Route::prefix('pickups')->name('pickups.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {

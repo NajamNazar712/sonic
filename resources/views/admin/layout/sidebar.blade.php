@@ -16,15 +16,15 @@
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Shipper Accounts</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(5, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.accounts.pending')}}" data-i18n="nav.dash.ecommerce">Pending</a></li>
+                            <li><a class="menu-item" href="{{route('admin.accounts.pending')}}">Pending</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(11, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.accounts.active')}}" data-i18n="nav.dash.ecommerce">Active</a></li>
+                            <li><a class="menu-item" href="{{route('admin.accounts.active')}}">Active</a></li>
                         @endif
 
                         @if (session('role_id') == 1 || in_array(15, session('permissions')))
-                            <li><a class="menu-item" href="{{route('admin.accounts.block')}}" data-i18n="nav.dash.ecommerce">Block</a></li>
+                            <li><a class="menu-item" href="{{route('admin.accounts.block')}}">Block</a></li>
                         @endif
                     </ul>
                 </li>
@@ -306,19 +306,23 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([88, 92, 96], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 130], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Network Management</span></a>
                 <ul class="menu-content">
+                    @if (session('role_id') == 1 || in_array(130, session('permissions')))
+                        <li><a class="menu-item" href="{{route('admin.management.zonal.index')}}">Zonal Management</a></li>
+                    @endif
+
                     @if (session('role_id') == 1 || in_array(88, session('permissions')))
-                        <li><a class="menu-item" href="{{route('admin.management.city.index')}}" data-i18n="nav.dash.ecommerce">City Management</a></li>
+                        <li><a class="menu-item" href="{{route('admin.management.city.index')}}">City Management</a></li>
                     @endif
 
                     @if (session('role_id') == 1 || in_array(92, session('permissions')))
-                        <li><a class="menu-item" href="{{route('admin.management.route.index')}}" data-i18n="nav.dash.ecommerce">Route Management</a></li>
+                        <li><a class="menu-item" href="{{route('admin.management.route.index')}}">Route Management</a></li>
                     @endif
 
                     @if (session('role_id') == 1 || in_array(96, session('permissions')))
-                        <li><a class="menu-item" href="{{route('admin.management.rider.index')}}" data-i18n="nav.dash.ecommerce">Rider Management</a></li>
+                        <li><a class="menu-item" href="{{route('admin.management.rider.index')}}">Rider Management</a></li>
                     @endif
 
                 </ul>
