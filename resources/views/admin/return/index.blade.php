@@ -44,7 +44,45 @@
             </div>
         </div>
     </div>
+    <div class="modal fade" id="excel_upload_modal" data-backdrop="static" role="dialog" aria-labelledby="excel_upload_modal" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="excel_upload_modal_title">Upload Excel</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                    <form id="return_status_form" class="form-horizontal" method="POST" action="{{ route('admin.return.excel.store') }}" novalidate="novalidate" enctype="multipart/form-data">
+                        {{ csrf_field() }}
+                        <div class="row align-items-center justify-content-center">
+                            <div class="col">
+                                <div class="form-group">
+                                    <input type="file" name="shipments" class="w-100 p-1 border-primary" title="Select File" data-rule-required="true" data-msg-required="File is required" data-rule-extension="xls|xlsx" data-msg-extension="Only file with extension xls or xlsx allowed" data-rule-accept="application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" data-msg-accept="Only Excel file allowed" data-rule-maxsize="5242880" data-msg-maxsize="File Size must not exceed 5 MB (5120 KB).">
+                                </div>
+                            </div>
 
+                            <div class="col">
+                                <div class="form-group text-left">
+                                    <button type="submit" name="upload" class="btn btn-primary">Upload</button>
+                                </div>
+                            </div>
+
+                            <div class="col ml-auto">
+                                <div class="form-group text-right">
+                                    <a href="{{ asset('file/Trax Return Status Template.xlsx') }}" class="btn btn-primary"><i class="la la-download"></i> Download Template</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -103,7 +141,8 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -394,7 +433,15 @@
                                   }
                                 });
                             }
-                        }
+                        },
+                        {
+                            title: 'Upload',
+                            className: 'btn btn-primary excel-upload',
+                            text: '<i class="la la-file-excel-o"></i> Upload',
+                            action : function(e) {
+                                $('#excel_upload_modal').modal('show');
+                            }
+                        },
                         ],
                 @else
                    buttons:[{
