@@ -7,8 +7,6 @@ use App\Http\Controllers\Controller;
 
 use App\Http\Models\Admin\Admin;
 use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentJourney;
-use App\Http\Models\ShipmentPaymentJourney;
 use App\Http\Models\Rider;
 use App\Http\Models\CargoConsignment;
 

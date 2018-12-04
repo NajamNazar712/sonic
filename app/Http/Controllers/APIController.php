@@ -14,7 +14,7 @@ use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\RateStatus;
 use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentJourney;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\City;
 use App\Http\Models\CityDelivery;
 
@@ -460,14 +460,24 @@ class APIController extends Controller
         $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
         if ($type == 0) {
-          $shipment_journey = ShipmentJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+          $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
 
-          $current_status = $shipment_journey->shipment_status_shipper->name;
+          if ($shipment_journey) {
+            $current_status = $shipment_journey->shipment_status_shipper->name;
+          }
+          else {
+            $current_status = $shipment->status_shipper->name;
+          }
         }
         else {
-          $shipment_journey = ShipmentJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
+          $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->whereNotNull('consignee_status_id')->latest()->first();
 
-          $current_status = $shipment_journey->shipment_status_consignee->name;
+          if ($shipment_journey) {
+            $current_status = $shipment_journey->shipment_status_consignee->name;
+          }
+          else {
+            $current_status = $shipment->status_consignee->name;
+          }
         }
 
         return response()->json(['status' => 0, 'message' => 'Status of Shipment #' . $tracking_number, 'current_status' => $current_status]);
