@@ -294,7 +294,7 @@ class DeliveryController extends Controller
                             'total_cod_amount' => $total_cod_amount,
                             'last_updated_at' => Carbon::now()
                         ]);
-            
+
                         if ($note) {
                             foreach ($valid_shipments as $index => $shipment) {
                                 DeliveryNoteShipment::create([
@@ -306,7 +306,7 @@ class DeliveryController extends Controller
 
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
                                 ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
-            
+
                                 NotificationsController::send(10, $note->id, $shipment);
                                 NotificationsController::send(11, $note->id, $shipment);
 
@@ -315,14 +315,14 @@ class DeliveryController extends Controller
                                 }
                             }
                         }
-            
+
                         return redirect()->back()->with(['success'=>'Delivery note has been created successfully','print'=>$note->id]);
                     }
                     else {
                         return redirect()->back()->with(['error'=>'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
-            
+
             }
-       
+
     }
 
     public function delivery_note_receive_index()
@@ -3241,7 +3241,7 @@ class DeliveryController extends Controller
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
 
-                    $misrouted_history = MisroutedHistory::create([
+                    MisroutedHistory::create([
                         'shipment_id' => $shipment_id,
                         'old_consignee_city_id' => $shipment->consignee_city_id,
                         'old_consignee_name' => $shipment->consignee_name,

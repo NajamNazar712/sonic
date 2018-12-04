@@ -2,12 +2,15 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\BookingType;
 use App\Http\Models\Shipment;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\ShippingMode;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Yajra\Datatables\Datatables;
 use Carbon\Carbon;
@@ -27,8 +30,6 @@ class LostShipmentsController extends Controller
         return view('admin.lost.index')->with(['shipment_status' => $shipment_status, 'shipping_mode' => $shipping_mode, 'service_type' => $service_type]);
     }
     public function lost_shipments_list(Request $request){
-            $status = array(2, 4, 6, 7, 8, 9, 10, 13, 15, 49); //for pending deliveries
-            $normal = 2;
             $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
                 ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
                 ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -48,10 +49,14 @@ class LostShipmentsController extends Controller
                             DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
                 })
                 ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
-                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival')
-                ->whereRaw('IF (shipments.shipper_status_id = 2, (oc.hub_id = dc.hub_id), TRUE)')
-//            ->whereRaw('IF (shipments.shipper_status_id = 49, (oc.hub_id = dc.hub_id), TRUE)')
-                ->whereIn('shipments.shipper_status_id', $status);
+//                ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
+                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id')
+//                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
+                ->where('shipments.shipper_status_id', 18)
+                ->where(function ($sub_query) {
+                    $sub_query->where('shipments.payment_status_id', '=', null)
+                        ->orWhere('shipments.payment_status_id', '>', 1);
+                });
 
             if (session('role_id') != 1) {
                 $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -96,5 +101,100 @@ class LostShipmentsController extends Controller
                 })
                 ->make(true);
     }
+    public function shipment_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
 
+        $shipment_ids = $request->shipment_ids;
+            foreach ($shipment_ids as $shipment){
+                $parcel = Shipment::find($shipment);
+                if($parcel->shipper_status_id == 18) {
+                    if (!$parcel->packaging_material_request) {
+                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 20, 'consignee_status_id' => 20]);
+                        ShipmentsJourneyController::add($shipment, 20, 20, NULL, NULL, NULL, Auth::id());
+                        ShipmentChargesController::return ($shipment);
+
+                        AdminFinanceController::add_payment($shipment, 1);
+                    } else {
+
+                        Shipment::where('id', $shipment)->update(['shipper_status_id' => 17, 'consignee_status_id' => 17]);
+                        ShipmentsJourneyController::add($shipment, 17, 17, NULL, NULL, NULL, Auth::id());
+                    }
+                }
+            }
+            return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
+    }
+    public function shipment_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
+
+        $shipment_ids = $request->shipment_ids;
+
+
+            foreach ($shipment_ids as $shipment){
+                $parcel = Shipment::find($shipment);
+                if($parcel->shipper_status_id == 18) {
+
+                    Shipment::where('id', $shipment)->update(['shipper_status_id' => 13, 'consignee_status_id' => 13]);
+                    ShipmentsJourneyController::add($shipment, 13, 13, NULL, NULL, NULL, Auth::id());
+                }
+            }
+            return ['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )"];
+
+
+    }
+
+    public function lost_add_index(){
+        return view('admin.lost.add_shipments');
+    }
+    public function get_shipment_info(Request $request)
+    {
+            $passing_status_array = array(1, 14, 17, 25, 30, 31);
+            $tracking_number = $request->tracking_number;
+            if ($tracking_number != '') {
+                $shipment = Shipment::where('tracking_number', $tracking_number)->whereNotIn('shipper_status_id', $passing_status_array);
+                if ($shipment->exists()) {
+                    $data = array();
+                    $shipment = $shipment->first();
+                    if($shipment->shipper_status_id != 18) {
+
+                        $data['id'] = $shipment->id;
+                        $data['tracking_number'] = $shipment->tracking_number;
+                        $data['shipper_name'] = $shipment->user->name;
+                        $data['origin'] = $shipment->consignee_city->name;
+                        $data['destination'] = $shipment->pickup_address->city->name;
+                        $data['hub'] = $shipment->pickup_address->city->hub_city->name;
+                        $data['amount'] = $shipment->amount;
+                        $data['mode'] = $shipment->shipping_mode->mode;
+                        $data['service_type'] = $shipment->booking_type->booking_type;
+
+                        return response()->json(['status' => 1, 'details' => $data]);
+                    }
+                    else
+                        {
+                            return response()->json(['status' => 0, 'error' => 'Shipment already added to lost shipments!']);
+
+                        }
+                } else {
+                    return response()->json(['status' => 0, 'error' => 'Shipment can not be added to lost!']);
+                }
+
+            }
+    }
+    public function add_lost_shipments(Request $request){
+        $passing_status_array = array(1, 14, 17, 18, 25, 30, 31);
+        $shipments = explode(',', $request->shipment_ids);
+        if(!empty($shipments)){
+            foreach ($shipments as $shipment){
+                $shipment_details = Shipment::where('id',$shipment)->whereNotIn('shipper_status_id',$passing_status_array);
+                if($shipment_details->exists()){
+                    $shipment_details = $shipment_details->first();
+                    $shipment_details->shipper_status_id = 18;
+                    $shipment_details->save();
+                    ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL,NULL,NULL,Auth::id());
+                }
+            }
+            return redirect()->back()->with(['success' => 'Shipment(s) has been added to Lost!']);
+
+        }
+        else{
+            return redirect()->back()->with(['error' => 'Shipment not selected!']);
+        }
+    }
 }

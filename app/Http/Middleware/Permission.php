@@ -152,9 +152,18 @@ class Permission
             'delivery.history.list' => 125,
             'delivery.history.shipments' => 125,
             'delivery.history.shipments.delivered' => 125,
+            'delivery.lost.index' => 127,
+            'delivery.lost.list' => 127,
+            'delivery.lost.confirm.status' => 128,
+            'delivery.lost.reattempt.status' => 129,
+            'delivery.lost.add.index' => 130,
+            'delivery.lost.add.shipment.info' => 130,
+            'delivery.lost.add.shipments.store' => 130,
 
             'return.index' => 44,
             'return.list' => 44,
+            'return.confirm.status' => 45,
+            'return.reattempt.status' => 46,
             'return.confirmed' => 47,
             'return.confirmed.list' => 47,
             'return.confirmed.revert' => 109,
@@ -258,8 +267,6 @@ class Permission
             'reports.overall_sales.index' => 75,
             'reports.overall_sales.list' => 75,
 
-            'lost.index' => 127,
-            'lost.list' => 127,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

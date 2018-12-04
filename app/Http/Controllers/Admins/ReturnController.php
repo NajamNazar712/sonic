@@ -169,7 +169,7 @@ class ReturnController extends Controller
             })
             ->make(true);
     }
-    public function return_marked_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
+    public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
 
         $shipment_ids = $request->shipment_ids;
 
@@ -202,7 +202,13 @@ class ReturnController extends Controller
                 }
             }
             return ['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )"];
-        }elseif($request->action == 'reattempt'){
+        }
+    }
+    public function return_reattempt_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
+
+        $shipment_ids = $request->shipment_ids;
+
+        if($request->action == 'reattempt'){
             foreach ($shipment_ids as $shipment){
                 $parcel = Shipment::find($shipment);
                 $remark_inp = "remark.$shipment";
