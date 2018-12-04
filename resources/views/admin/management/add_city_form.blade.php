@@ -36,6 +36,18 @@
         </div>
     </div>
 
+    <div class="row mb-2">
+        <div class="col-6">
+            <fieldset class="form-group">
+                <select name="zone_id" id="zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                    @foreach($zones as $zone)
+                        <option value="{{ $zone->id }}">{{ $zone->name }}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col">
             <h2 class="card-title"><U>Services</U></h2>
@@ -126,6 +138,12 @@
         $('.select2').select2({
             dropdownParent: $("#addCity")
         });
+
+
+    $('#zone').prepend('<option value="" selected></option>').select2({
+        placeholder: 'Zone',
+        width:'100%'
+    });
 
     $("input[type='radio'][name='city-radio']").on('ifChecked', function(event){
                var rtype = $(this).attr('rel');
