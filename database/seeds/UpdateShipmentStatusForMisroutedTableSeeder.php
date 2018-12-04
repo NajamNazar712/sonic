@@ -12,7 +12,7 @@ class UpdateShipmentStatusForMisroutedTableSeeder extends Seeder
     public function run()
     {
         DB::table('shipment_status')->insert(array(
-            array('id' => 49, 'code' => 'S-MP', 'name' => 'Shipment - Misroute-forwarded', 'description' => 'Misroute Shipment was updated to new destination'),
+            array('id' => 49, 'code' => 'S-MP', 'name' => 'Shipment - Misroute Forwarded', 'description' => 'Shipment is ready to forward to new destination'),
         ));
     }
 }
