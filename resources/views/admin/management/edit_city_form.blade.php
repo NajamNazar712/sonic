@@ -37,7 +37,7 @@
         </div>
     </div>
 
-    <div class="row mb-2">
+    <div class="row mb-2 {{(($isHub == 0) ? 'd-none' : '')}}" id="zone_selection">
         <div class="col-6">
             <fieldset class="form-group">
                 <select name="zone_id" id="zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
@@ -49,7 +49,7 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row" id="zone_selection">
         <div class="col">
             <h2 class="card-title"><U>Services</U></h2>
         </div>
@@ -204,6 +204,8 @@
                             if($('#hub_list_div').is(':hidden')){
                                 // $('#hub_list_div').css('display','block');
                                 $('#hub_list_div').fadeIn("slow");
+
+                                $('#zone_selection').addClass('d-none');
                             }
                         }
                     });
@@ -213,6 +215,8 @@
                     if($('#hub_list_div').is(':hidden')){
                         // $('#hub_list_div').css('display','block');
                         $('#hub_list_div').fadeIn("slow");
+
+                        $('#zone_selection').addClass('d-none');
                     }
                 }
             }else if(rtype == 'hub'){
@@ -222,6 +226,8 @@
                     $('#hub_list_div').fadeOut("slow");
 
                     // $('#hub_list_div').fadeIn('slow');
+
+                    $('#zone_selection').removeClass('d-none');
                 }
 
             }
