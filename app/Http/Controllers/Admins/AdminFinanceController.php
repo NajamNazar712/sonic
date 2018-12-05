@@ -1165,6 +1165,7 @@ class AdminFinanceController extends Controller
                 $delivery_note_amount = 0;
             }
 
+            $delivery_note->delivered_shipments = $delivery_note->delivered_shipments - 1;
             $delivery_note->received_cod_amount = $delivery_note_amount;
 
             $delivery_note->save();
@@ -1177,6 +1178,7 @@ class AdminFinanceController extends Controller
                 $station_deposit_note_amount = 0;
             }
 
+            $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
             $station_deposit_note->sdn_amount = $station_deposit_note_amount;
             $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
 
