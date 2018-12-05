@@ -694,6 +694,47 @@
 
                 }
             });
+
+            $.validator.addMethod('maxsize', function(value, element, params) {
+                if ($(element).attr('type') === 'file') {
+                    if (element.files && element.files.length) {
+                        console.log(element.files);
+                        for (var c = 0; c < element.files.length; c++) {
+                            if (element.files[c].size > params) {
+                                return false;
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }, $.validator.format("File Size must not exceed {0} bytes."));
+
+            $('#return_status_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                submitHandler: function(form) {
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your shipment(s) are being booked!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
+
+                    form.submit();
+                }
+            });
+
         });
     </script>
 @endsection
