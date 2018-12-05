@@ -999,7 +999,6 @@ class DeliveryController extends Controller
     //status 1 -> update , status 1 -> regular , status 2 -> replacement, status 3 -> try & buy
     public function receive_delivery_status_check(Request $request)
     {
-
         $note_id = $request->delivery_note_id;
         $shipments = DeliveryNoteShipment::where(['delivery_note_id' => $note_id])->count();
         if ($shipments > 0) {
@@ -1046,11 +1045,12 @@ class DeliveryController extends Controller
 
     public function receive_delivery_replacements_submit(Request $request)
     {
+        $delivery_note_id = $request->delivery_note_id;
         $shipments = explode(',', $request->shipment_id_list);
         foreach ($shipments as $shipment) {
             if ($request->weight[$shipment] != '') {
                 Shipment::where('id', $shipment)->update(['replacement_weight' => $request->weight[$shipment]]);
-                DeliveryNoteShipment::where('shipment_id', $shipment)->update(['status' => 4]);
+                DeliveryNoteShipment::where(['shipment_id'=> $shipment, 'delivery_note_id' => $delivery_note_id])->update(['status' => 4]);
             }
         }
         $delivery_note_data = DeliveryNote::find($request->delivery_note_id);
