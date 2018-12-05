@@ -1157,6 +1157,33 @@ class AdminFinanceController extends Controller
 
             $delivery_note_shipment->save();
 
+            $delivery_note = $delivery_note_shipment->delivery_note;
+
+            $delivery_note_amount = $delivery_note->received_cod_amount - $shipment->amount;
+
+            if ($delivery_note_amount < 0) {
+                $delivery_note_amount = 0;
+            }
+
+            $delivery_note->delivered_shipments = $delivery_note->delivered_shipments - 1;
+            $delivery_note->received_cod_amount = $delivery_note_amount;
+
+            $delivery_note->save();
+
+            $station_deposit_note = $delivery_note->station_deposit_note;
+
+            $station_deposit_note_amount = $station_deposit_note->sdn_amount - $shipment->amount;
+
+            if ($station_deposit_note_amount < 0) {
+                $station_deposit_note_amount = 0;
+            }
+
+            $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
+            $station_deposit_note->sdn_amount = $station_deposit_note_amount;
+            $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
+
+            $station_deposit_note->save();
+
             $shipment = Shipment::find($request->id);
 
             $shipment->shipper_status_id = 13;
