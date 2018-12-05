@@ -1260,39 +1260,53 @@ class AdminFinanceController extends Controller
             $shipment = $shipment->first();
 
             if (!in_array($shipment->shipper_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46])) {
-                $details = array();
+                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
 
-                $shipper = $shipment->user;
+                if (!$pending_payment_shipment->exists()) {
+                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
 
-                $details['id'] = $shipment->id;
+                    if (!$done_payment_shipment->exists()) {
+                        $details = array();
 
-                $details['tracking_number'] = $shipment->tracking_number;
-                $details['status'] = $shipment->status_shipper->name;
+                        $shipper = $shipment->user;
 
-                $details['service_type'] = $shipment->booking_type->booking_type;
-                $details['shipping_mode'] = $shipment->shipping_mode->mode;
-                $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+                        $details['id'] = $shipment->id;
 
-                $details['payment_mode'] = $shipment->payment_mode->mode;
-                $details['amount'] = $shipment->amount;
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['status'] = $shipment->status_shipper->name;
 
-                $details['shipper']['name'] = $shipper->name;
-                $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
-                $details['shipper']['phone_number_1'] = $shipper->phone;
-                $details['shipper']['phone_number_2'] = $shipper->phone2;
-                $details['shipper']['origin'] = $shipper->city->name;
-                $details['shipper']['address'] = $shipper->address;
+                        $details['service_type'] = $shipment->booking_type->booking_type;
+                        $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                        $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
 
-                $details['consignee']['name'] = $shipment->consignee_name;
-                $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
-                $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
-                $details['consignee']['destination'] = $shipment->consignee_city->name;
-                $details['consignee']['address'] = $shipment->consignee_address;
+                        $details['payment_mode'] = $shipment->payment_mode->mode;
+                        $details['amount'] = $shipment->amount;
 
-                return ['status' => 0, 'success' => 'Shipment\'s amount can be changed', 'details' => $details];
+                        $details['shipper']['name'] = $shipper->name;
+                        $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                        $details['shipper']['phone_number_1'] = $shipper->phone;
+                        $details['shipper']['phone_number_2'] = $shipper->phone2;
+                        $details['shipper']['origin'] = $shipper->city->name;
+                        $details['shipper']['address'] = $shipper->address;
+
+                        $details['consignee']['name'] = $shipment->consignee_name;
+                        $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                        $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                        $details['consignee']['destination'] = $shipment->consignee_city->name;
+                        $details['consignee']['address'] = $shipment->consignee_address;
+
+                        return ['status' => 0, 'success' => 'Shipment\'s amount can be changed', 'details' => $details];
+                    }
+                    else {
+                        return ['status' => 1, 'error' => 'A Payment of given Shipment has already been Processed'];
+                    }
+                }
+                else {
+                    return ['status' => 1, 'error' => 'A Payment of given Shipment is in Pending'];
+                }
             }
             else {
-                return ['status' => 1, 'error' => 'Shipment\'s Payment has already been Processed'];
+                return ['status' => 1, 'error' => 'Shipment has already been Delivered'];
             }
         }
         else {
@@ -1313,6 +1327,148 @@ class AdminFinanceController extends Controller
         ShipmentChargesController::cash_handling($shipment_id);
 
         return redirect()->route('admin.finance.change_shipment_amount.index')->with('success', 'Shipment\'s amount has been changed');
+    }
+
+    public function change_shipment_weight_index() {
+        return view('admin.finance.change_shipment_weight');
+    }
+
+    public function change_shipment_weight_shipment_details(Request $request) {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            if (!in_array($shipment->shipper_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 44, 45, 46])) {
+                $pending_payment_shipment = PendingPaymentShipment::where('shipment_id', $shipment->id);
+
+                if (!$pending_payment_shipment->exists()) {
+                    $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
+
+                    if (!$done_payment_shipment->exists()) {
+                        $details = array();
+
+                        $shipper = $shipment->user;
+
+                        $details['id'] = $shipment->id;
+
+                        $details['tracking_number'] = $shipment->tracking_number;
+                        $details['status'] = $shipment->status_shipper->name;
+
+                        $details['service_type'] = $shipment->booking_type->booking_type;
+                        $details['shipping_mode'] = $shipment->shipping_mode->mode;
+                        $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+
+                        $details['payment_mode'] = $shipment->payment_mode->mode;
+                        $details['amount'] = $shipment->amount;
+
+                        $details['shipper']['name'] = $shipper->name;
+                        $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+                        $details['shipper']['phone_number_1'] = $shipper->phone;
+                        $details['shipper']['phone_number_2'] = $shipper->phone2;
+                        $details['shipper']['origin'] = $shipper->city->name;
+                        $details['shipper']['address'] = $shipper->address;
+
+                        $details['consignee']['name'] = $shipment->consignee_name;
+                        $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+                        $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+                        $details['consignee']['destination'] = $shipment->consignee_city->name;
+                        $details['consignee']['address'] = $shipment->consignee_address;
+
+                        return ['status' => 0, 'success' => 'Shipment\'s weight can be changed', 'details' => $details];
+                    }
+                    else {
+                        return ['status' => 1, 'error' => 'A Payment of given Shipment has already been Processed'];
+                    }
+                }
+                else {
+                    return ['status' => 1, 'error' => 'A Payment of given Shipment is in Pending'];
+                }
+            }
+            else {
+                return ['status' => 1, 'error' => 'Shipment has already been Delivered'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment exists with given Tracking Number'];
+        }
+    }
+
+    public function change_shipment_weight_store(Request $request) {
+        $shipment_id = $request->input('shipment_id');
+        $weight = $request->input('weight');
+
+        $shipment = Shipment::find($shipment_id);
+
+        $shipment->actual_weight = $weight;
+
+        $shipment->save();
+
+        ShipmentChargesController::weight($shipment_id);
+
+        return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
+    }
+
+    public function add_shipment_adjustment_index() {
+        return view('admin.finance.add_shipment_adjustment');
+    }
+
+    public function add_shipment_adjustment_shipment_details(Request $request) {
+        $shipment = Shipment::where('tracking_number', $request->tracking_number);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            $details = array();
+
+            $shipper = $shipment->user;
+
+            $details['id'] = $shipment->id;
+
+            $details['tracking_number'] = $shipment->tracking_number;
+            $details['status'] = $shipment->status_shipper->name;
+
+            $details['service_type'] = $shipment->booking_type->booking_type;
+            $details['shipping_mode'] = $shipment->shipping_mode->mode;
+            $details['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
+
+            $details['payment_mode'] = $shipment->payment_mode->mode;
+            $details['amount'] = $shipment->amount;
+
+            $details['shipper']['name'] = $shipper->name;
+            $details['shipper']['account_number'] = str_pad($shipper->id, 6, '0', STR_PAD_LEFT);
+            $details['shipper']['phone_number_1'] = $shipper->phone;
+            $details['shipper']['phone_number_2'] = $shipper->phone2;
+            $details['shipper']['origin'] = $shipper->city->name;
+            $details['shipper']['address'] = $shipper->address;
+
+            $details['consignee']['name'] = $shipment->consignee_name;
+            $details['consignee']['phone_number_1'] = $shipment->consignee_phone_number_1;
+            $details['consignee']['phone_number_2'] = $shipment->consignee_phone_number_2;
+            $details['consignee']['destination'] = $shipment->consignee_city->name;
+            $details['consignee']['address'] = $shipment->consignee_address;
+
+            return ['status' => 0, 'success' => 'Shipment\'s weight can be changed', 'details' => $details];
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment exists with given Tracking Number'];
+        }
+    }
+
+    public function add_shipment_adjustment_store(Request $request) {
+        $shipment_id = $request->input('shipment_id');
+        $charges = $request->input('charges');
+        $gst = $request->input('gst');
+
+        $shipment = Shipment::find($shipment_id);
+
+        // $shipment->actual_weight = $weight;
+
+        // $shipment->save();
+
+        // ShipmentChargesController::weight($shipment_id);
+
+        // return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
     }
 
     static public function return_confirmed_revert($shipment_id) {

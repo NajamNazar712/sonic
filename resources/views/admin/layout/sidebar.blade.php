@@ -193,6 +193,14 @@
                             <li><a class="menu-item" href="{{ route('admin.finance.change_shipment_amount.index') }}">Change Shipment Amount</a></li>
                         @endif
 
+                        @if (session('role_id') == 1 || in_array(1, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.change_shipment_weight.index') }}">Change Shipment Weight</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(1, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.finance.add_shipment_adjustment.index') }}">Add Shipment Adjustment</a></li>
+                        @endif
+
                         @if (session('role_id') == 1 || count(array_intersect([59, 61], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Payments</span></a>
                                 <ul class="menu-content">
