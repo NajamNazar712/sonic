@@ -78,7 +78,7 @@ class DeliveryController extends Controller
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
             ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival')
             ->whereRaw('IF (shipments.shipper_status_id = 2, (oc.hub_id = dc.hub_id), TRUE)')
-//            ->whereRaw('IF (shipments.shipper_status_id = 49, (oc.hub_id = dc.hub_id), TRUE)')
+            ->whereRaw('IF (shipments.shipper_status_id = 49, (oc.hub_id = dc.hub_id), TRUE)')
             ->whereIn('shipments.shipper_status_id', $status);
 
         if (session('role_id') != 1) {
@@ -296,7 +296,7 @@ class DeliveryController extends Controller
                             'total_cod_amount' => $total_cod_amount,
                             'last_updated_at' => Carbon::now()
                         ]);
-            
+
                         if ($note) {
                             foreach ($valid_shipments as $index => $shipment) {
                                 DeliveryNoteShipment::create([
@@ -308,7 +308,7 @@ class DeliveryController extends Controller
 
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
                                 ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
-            
+
                                 NotificationsController::send(10, $note->id, $shipment);
                                 NotificationsController::send(11, $note->id, $shipment);
 
@@ -317,14 +317,14 @@ class DeliveryController extends Controller
                                 }
                             }
                         }
-            
+
                         return redirect()->back()->with(['success'=>'Delivery note has been created successfully','print'=>$note->id]);
                     }
                     else {
                         return redirect()->back()->with(['error'=>'All the Shipment(s) are not ready for delivery yet or already in another delivery note, please check tracking!']);
-            
+
             }
-       
+
     }
 
     public function delivery_note_receive_index()
@@ -3251,6 +3251,7 @@ class DeliveryController extends Controller
                 if ($shipment->exists()) {
                     $shipment = $shipment->first();
 
+                    
                     if($shipment->shipper_status_id == 3){
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
                         if ($cargo_consignment_shipment->exists()) {
@@ -3271,20 +3272,8 @@ class DeliveryController extends Controller
                             }
                         }
                     }
-
-//                    if(in_array($shipment->shipper_status_id, [6, 7, 8, 9, 10, 11, 13, 15])){
-//                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment->id);
-//                        if($delivery_note_shipment->exists()){
-//                            $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id')->first();
-//                            $delivery_note = DeliveryNote::find($delivery_note_shipment->delivery_note_id);
-//                            if($delivery_note->status == 1){
-//
-//                            }
-//                        }
-//                    }
-
-                    $misrouted_history = MisroutedHistory::create([
-                        'shipment_id' => $shipment_id,
+					MisroutedHistory::create([
+					    'shipment_id' => $shipment_id,
                         'old_consignee_city_id' => $shipment->consignee_city_id,
                         'old_consignee_name' => $shipment->consignee_name,
                         'old_consignee_address' => $shipment->consignee_address,
@@ -3310,8 +3299,6 @@ class DeliveryController extends Controller
                     $shipment->shipper_status_id = 49;
                     $shipment->consignee_status_id = 49;
                     $shipment->save();
-
-
                     ShipmentsJourneyController::add($shipment->id, 49, 49, NULL, NULL, NULL, Auth::id());
 
 

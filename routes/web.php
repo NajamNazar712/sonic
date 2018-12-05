@@ -435,15 +435,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments/delivered', 'Admins\DeliveryController@history_shipments_delivered')->name('shipments.delivered');
 
         });
+
+        //Lost Module Start
+        Route::prefix('lost')->name('lost.')->group(function (){
+            Route::get('','Admins\LostShipmentsController@lost_shipments_index')->name('index');
+            Route::get('list','Admins\LostShipmentsController@lost_shipments_list')->name('list');
+            Route::post('confirm/status','Admins\LostShipmentsController@shipment_confirm_status')->name('confirm.status');
+            Route::post('reattempt/status','Admins\LostShipmentsController@shipment_reattempt_status')->name('reattempt.status');
+            Route::prefix('add')->name('add.')->group(function(){
+                Route::get('index','Admins\LostShipmentsController@lost_add_index')->name('index');
+                Route::post('shipment/info','Admins\LostShipmentsController@get_shipment_info')->name('shipment.info');
+                Route::post('shipment/store','Admins\LostShipmentsController@add_lost_shipments')->name('shipments.store');
+            });
+        });
+        //Lost Module End
+
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
         Route::get('list','Admins\ReturnController@return_marked_list')->name('list');
-        Route::post('marked/status','Admins\ReturnController@return_marked_status')->name('marked.status');
+        Route::post('confirm/status','Admins\ReturnController@return_confirm_status')->name('confirm.status');
+        Route::post('reattempt/status','Admins\ReturnController@return_reattempt_status')->name('reattempt.status');
         Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
         Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
+        Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
 
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');
