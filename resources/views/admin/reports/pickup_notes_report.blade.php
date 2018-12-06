@@ -303,7 +303,7 @@
                                 row.push(values.pn_id);
                                 row.push(values.city);
                                 row.push(values.pickups);
-                                row.push(values.bookings);
+                                row.push(values.received);
                                 row.push(values.rider);
                                 row.push(values.assigned_date);
                                 row.push(values.assigned_by);
