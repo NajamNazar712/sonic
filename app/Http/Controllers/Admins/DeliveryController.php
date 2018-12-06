@@ -271,7 +271,7 @@ class DeliveryController extends Controller
 
         $admin = Auth::id();
 
-        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15);
+        $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15,49);
 
             $valid_shipments = array();
             $shipments_count = 0;

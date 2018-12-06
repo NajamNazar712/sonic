@@ -49,22 +49,22 @@
 
 													<div class="col text-right">
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="0" data-rule-required="true" data-msg-required="Class is required" @if ($zone_class_cities[$city->id] == 0) checked="checked" @endif>
+															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="0" data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 0) checked="checked" @endif>
 															<label for="city_class_{{ $city->id }}">Class A</label>
 														</fieldset>
 
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="1"data-rule-required="true" data-msg-required="Class is required" @if ($zone_class_cities[$city->id] == 1) checked="checked" @endif>
+															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="1"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 1) checked="checked" @endif>
 															<label for="city_class_{{ $city->id }}">Class B</label>
 														</fieldset>
 
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="2"data-rule-required="true" data-msg-required="Class is required" @if ($zone_class_cities[$city->id] == 2) checked="checked" @endif>
+															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="2"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 2) checked="checked" @endif>
 															<label for="city_class_{{ $city->id }}">Class C</label>
 														</fieldset>
 
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
-															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required" @if ($zone_class_cities[$city->id] == 3) checked="checked" @endif>
+															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required" @if (isset($zone_class_cities[$city->id]) && $zone_class_cities[$city->id] == 3) checked="checked" @endif>
 															<label for="city_class_{{ $city->id }}">Class D</label>
 														</fieldset>
 													</div>
