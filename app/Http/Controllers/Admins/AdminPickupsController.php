@@ -114,8 +114,6 @@ class AdminPickupsController extends Controller
       else {
         $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
 
-        $pickup_request_previous = $pickup_request_assigned_shipment->pickup_request;
-
         $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
         $pickup_request_assigned_shipment->status = 0;
 
