@@ -2657,8 +2657,11 @@ class AdminReportsController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftjoin('zone_class_cities as zcc', 'zcc.city_id', '=', 'dc.id')
+//            ->join('zone_class_cities as zcc','zcc.city_id', '=', 'dc.id')
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) {
@@ -2681,7 +2684,7 @@ class AdminReportsController extends Controller
                     ->where('dr.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37))'));
             })
-            ->select('shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned')
+            ->select('shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
         if (session('role_id') != 1) {
             $sales = $sales->whereIn('dc.hub_id', session('hubs'));
@@ -2733,6 +2736,27 @@ class AdminReportsController extends Controller
                     $payable = $sale->d_net_payable;
                 }
                 return $payable;
+            })
+            ->addColumn('class',function($sale){
+                $class = '';
+                if($sale->class != null){
+                    switch ($sale->class){
+                        case 0:
+                            $class = 'Class A';
+                            break;
+                        case 1:
+                            $class = 'Class B';
+                            break;
+                        case 2:
+                            $class = 'Class C';
+                            break;
+                        case 3:
+                            $class = 'Class D';
+                            break;
+                    }
+                    return $class;
+                }
+                return $class;
             });
 
         if($tracking = $request->get('search_tracking')){
