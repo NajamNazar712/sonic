@@ -37,15 +37,7 @@
 									<input type="hidden" name="shipment_id" class="shipment_id">
 
 									<div class="form-group">
-										<input type="text" name="charges" class="form-control charges" placeholder="Charges*" data-rule-required="true" data-msg-required="Charges is required" data-rule-range="[-500000,500000]" data-msg-range="Charges needs to be from -500000 to 500000">
-									</div>
-
-									<div class="form-group">
-										<input type="text" name="gst" class="form-control gst" placeholder="GST*" data-rule-required="true" data-msg-required="GST is required" data-rule-range="[-500000,500000]" data-msg-range="GST needs to be from -500000 to 500000">
-									</div>
-
-									<div class="form-group">
-										<input type="text" name="payable" class="form-control payable" placeholder="Payable" disabled="disabled">
+										<input type="text" name="payable" class="form-control payable" placeholder="Payable" data-rule-range="[-500000,500000]" data-msg-range="Payable needs to be from -500000 to 500000" data-rule-not="0" data-msg-not="Payable cannot be 0">
 									</div>
 
 									<div class="form-group ml-1">
@@ -227,29 +219,24 @@
 			});
 
 			@if (session('role_id') == 1 || in_array(1, session('permissions')))
-				$('#search_form input.charges').inputmask({
-					'alias': 'integer',
-					'allowMinus': true,
-					'allowPlus': true,
-					'groupSeparator': ',',
-					'autoGroup': true,
-					'min': -500000,
-					'max': 500000
-				});
+				$.validator.addMethod('not', function(value, element, param) {
+					return (value != param) && (value == parseInt(value, 10));
+				}, 'Invalid Value Entered');
 
-				$('#search_form input.gst').inputmask({
+				$('#add_adjustment_form input.payable').inputmask({
 					'alias': 'integer',
 					'allowMinus': true,
 					'allowPlus': true,
 					'groupSeparator': ',',
-					'autoGroup': true,
-					'min': -500000,
-					'max': 500000
+					'autoGroup': true
 				});
 
 				$('#add_adjustment_form').validate({
 					errorClass: 'danger',
 					successClass: 'success',
+					normalizer: function(value) {
+						return $.trim(value).replace(/,/g, '');
+					},
 					errorPlacement: function(error, element) {
 						error.addClass('w-100').appendTo(element.parents('form'));
 					}

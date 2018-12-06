@@ -219,7 +219,7 @@
 			});
 
 			@if (session('role_id') == 1 || in_array(1, session('permissions')))
-				$('#search_form input.weight').inputmask({
+				$('#change_weight_form input.weight').inputmask({
 					'alias': 'integer',
 					'allowMinus': false,
 					'allowPlus': false,

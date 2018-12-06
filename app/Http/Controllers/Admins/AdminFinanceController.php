@@ -1457,18 +1457,76 @@ class AdminFinanceController extends Controller
 
     public function add_shipment_adjustment_store(Request $request) {
         $shipment_id = $request->input('shipment_id');
-        $charges = $request->input('charges');
-        $gst = $request->input('gst');
+        $payable = str_replace(',', '', $request->input('payable'));
 
         $shipment = Shipment::find($shipment_id);
 
-        // $shipment->actual_weight = $weight;
+        $amount = 0;
+        $charges = 0;
+        $gst = 0;
 
-        // $shipment->save();
+        if ($payable > 0) {
+            $payment_type = 0;
+        }
+        else {
+            $payment_mode = $shipment->user->bank->payment_mode;
 
-        // ShipmentChargesController::weight($shipment_id);
+            if ($payment_mode == 'IBFT') {
+                $payment_type = 0;
+            }
+            else {
+                $payment_type = 1;
+            }
+        }
 
-        // return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
+        if ($payment_type == 0) {
+            $pending_payment = PendingPayment::where('user_id', $shipment->user_id);
+
+            if ($pending_payment->exists()) {
+                $pending_payment = $pending_payment->first();
+
+                $pending_payment->total_shipments = $pending_payment->total_shipments + 1;
+                $pending_payment->adjusted_shipments = $pending_payment->adjusted_shipments + 1;
+
+                $pending_payment->save();
+            }
+            else {
+                $pending_payment = new PendingPayment();
+
+                $pending_payment->user_id = $shipment->user_id;
+                $pending_payment->total_shipments = 1;
+                $pending_payment->delivered_shipments = 0;
+                $pending_payment->returned_shipments = 0;
+                $pending_payment->adjusted_shipments = 1;
+
+                $pending_payment->save();
+            }
+
+            $pending_payment_shipment = new PendingPaymentShipment();
+
+            $pending_payment_shipment->pending_payment_id = $pending_payment->id;
+            $pending_payment_shipment->shipment_id = $shipment_id;
+            $pending_payment_shipment->type = 2;
+            $pending_payment_shipment->amount = $amount;
+            $pending_payment_shipment->charges = $charges;
+            $pending_payment_shipment->gst = $gst;
+            $pending_payment_shipment->payable = $payable;
+
+            $pending_payment_shipment->save();
+        }
+        else {
+            $pending_invoice_shipment = new PendingInvoiceShipment();
+
+            $pending_invoice_shipment->shipment_id = $shipment_id;
+            $pending_invoice_shipment->type = $type;
+            $pending_invoice_shipment->charges = $charges;
+            $pending_invoice_shipment->gst = $gst;
+            $pending_invoice_shipment->invoice_amount = $payable;
+
+            $pending_invoice_shipment->save();
+        }
+
+        return redirect()->route('admin.finance.add_shipment_adjustment.index')->with('success', 'Shipment\'s adjustment has been added');
     }
 
     static public function return_confirmed_revert($shipment_id) {
@@ -1690,8 +1748,6 @@ class AdminFinanceController extends Controller
 
             $pending_payment->save();
         }
-
-        $payment_mode = $shipment->user->bank->payment_mode;
 
         $pending_payment_shipment = new PendingPaymentShipment();
 
