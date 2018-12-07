@@ -1432,6 +1432,7 @@ class AdminFinanceController extends Controller
         $shipment->save();
 
         ShipmentChargesController::weight($shipment_id);
+        ShipmentChargesController::fuel_surcharge($shipment_id);
 
         return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
     }
@@ -2881,7 +2882,7 @@ class AdminFinanceController extends Controller
                     $total_fuel_surcharge += $shipment->fuel_surcharge;
                 }
                 else {
-                    $total_adjustments += $done_payment->payable;
+                    $total_adjustments += $done_payment_shipment->payable;
                 }
 
                 $total_gst += $done_payment_shipment->gst;
@@ -2893,7 +2894,7 @@ class AdminFinanceController extends Controller
                     $total_collection_amount += $done_payment_shipment->amount;
                 }
                 else if ($done_payment_shipment->type == 2) {
-                    $total_adjustments += $done_payment->payable;
+                    $total_adjustments += $done_payment_shipment->payable;
                 }
 
                 $total_payable += $done_payment_shipment->payable;

@@ -172,18 +172,18 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61, 120, 121, 122, 133, 135], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61, 120, 121, 122, 134, 136], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Finance</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(57, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.finance.change_shipment_amount.index') }}">Change Shipment Amount</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(133, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(134, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.finance.change_shipment_weight.index') }}">Change Shipment Weight</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(135, session('permissions')))
+                        @if (session('role_id') == 1 || in_array(136, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.finance.add_shipment_adjustment.index') }}">Add Shipment Adjustment</a></li>
                         @endif
 
@@ -314,10 +314,10 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 130], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([88, 92, 96, 131], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Network Management</span></a>
                 <ul class="menu-content">
-                    @if (session('role_id') == 1 || in_array(130, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(131, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.management.zonal.index')}}">Zonal Management</a></li>
                     @endif
 
