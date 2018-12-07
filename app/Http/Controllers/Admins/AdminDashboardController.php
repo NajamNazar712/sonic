@@ -714,16 +714,17 @@ class AdminDashboardController extends Controller
 
     public function addRatesView($id){
         $user = User::find($id);
-        $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
-//        return $weight;
-
-        $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
-        $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
-        $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
-        $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
-        $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-        $packaging = StandardPackagingCharge::all()->groupBy('shipping_mode_id');
-        return view('admin.accounts.add_rates')->with(['shipper'=>$user,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging]);
+        if(!RateStatus::where('user_id', $user->id)->exists()) {
+            $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
+            $bookingType = StandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
+            $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
+            $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
+            $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
+            $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
+            $packaging = StandardPackagingCharge::all()->groupBy('shipping_mode_id');
+            return view('admin.accounts.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'packagingCharges' => $packaging]);
+        }
+        return redirect()->back()->with('error','User rates not found!');
     }
 
     public function viewRates($id){
@@ -765,7 +766,6 @@ class AdminDashboardController extends Controller
 
     }
     public function editRates(Request $request, $id){
-
 
         $messages = [
             'on_wa_range_up.*.required' => 'The overnight range up field is required.',
@@ -956,9 +956,6 @@ class AdminDashboardController extends Controller
             'sameday_wa_local_charges.*.numeric' => 'The sameday local charges field must be numeric.',
             'sameday_wa_class_0_charges.*.required' => 'The sameday class A charges field is required.',
             'sameday_wa_class_0_charges.*.numeric' => 'The sameday class A charges field must be numeric.',
-            'sameday_class_1_charges.*.required' => 'The sameday class B charges field is required.',
-            'sameday_class_2_charges.*.required' => 'The sameday class C charges field is required.',
-            'sameday_class_3_charges.*.required' => 'The sameday class D charges field is required.',
             'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
             'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
             'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
@@ -1123,9 +1120,6 @@ class AdminDashboardController extends Controller
                 'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'sameday_wa_local_charges.*' => 'required|numeric',
                 'sameday_class_0_charges.*' => 'required|numeric',
-                'sameday_class_1_charges.*' => 'required',
-                'sameday_class_2_charges.*' => 'required',
-                'sameday_class_3_charges.*' => 'required',
                 'sameday_wa_spkg.*'=>'numeric',
                 'sameday_replacement_charges'=>'required|numeric',
                 'sameday_tnb_charges'=>'required|numeric',
@@ -2075,9 +2069,9 @@ class AdminDashboardController extends Controller
                                 'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->sameday_wa_local_charges[$index],
                                 'national_charges_class_0' => $request->sameday_class_0_charges[$index],
-                                'national_charges_class_1' => $request->sameday_class_1_charges[$index],
-                                'national_charges_class_2' => $request->sameday_class_2_charges[$index],
-                                'national_charges_class_3' => $request->sameday_class_3_charges[$index]
+                                'national_charges_class_1' => 0,
+                                'national_charges_class_2' => 0,
+                                'national_charges_class_3' => 0
                             ]);
                     }
                     if($request->sameday_weight_record[$index] == null){
@@ -2090,9 +2084,9 @@ class AdminDashboardController extends Controller
                             'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->sameday_wa_local_charges[$index],
                             'national_charges_class_0' => $request->sameday_class_0_charges[$index],
-                            'national_charges_class_1' => $request->sameday_class_1_charges[$index],
-                            'national_charges_class_2' => $request->sameday_class_2_charges[$index],
-                            'national_charges_class_3' => $request->sameday_class_3_charges[$index]
+                            'national_charges_class_1' => 0,
+                            'national_charges_class_2' => 0,
+                            'national_charges_class_3' => 0
                         ]);
                     }
 
@@ -2496,9 +2490,6 @@ class AdminDashboardController extends Controller
             'sameday_wa_local_charges.*.numeric' => 'The sameday local charges field must be numeric.',
             'sameday_wa_class_0_charges.*.required' => 'The sameday class A charges field is required.',
             'sameday_wa_class_0_charges.*.numeric' => 'The sameday class A charges field must be numeric.',
-            'sameday_class_1_charges.*.required' => 'The sameday class B charges field is required.',
-            'sameday_class_2_charges.*.required' => 'The sameday class C charges field is required.',
-            'sameday_class_3_charges.*.required' => 'The sameday class D charges field is required.',
             'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
             'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
             'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
@@ -2663,9 +2654,6 @@ class AdminDashboardController extends Controller
                 'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'sameday_wa_local_charges.*' => 'required|numeric',
                 'sameday_class_0_charges.*' => 'required|numeric',
-                'sameday_class_1_charges.*' => 'required',
-                'sameday_class_2_charges.*' => 'required',
-                'sameday_class_3_charges.*' => 'required',
                 'sameday_wa_spkg.*'=>'numeric',
                 'sameday_replacement_charges'=>'required|numeric',
                 'sameday_tnb_charges'=>'required|numeric',
@@ -3233,9 +3221,9 @@ class AdminDashboardController extends Controller
                         'spkg' => $wa_spkg_sameday[$index],
                         'local_or_6hr' => $request->sameday_wa_local_charges[$index],
                         'national_charges_class_0' => $request->sameday_class_0_charges[$index],
-                        'national_charges_class_1' => $request->sameday_class_1_charges[$index],
-                        'national_charges_class_2' => $request->sameday_class_2_charges[$index],
-                        'national_charges_class_3' => $request->sameday_class_3_charges[$index]
+                        'national_charges_class_1' => 0,
+                        'national_charges_class_2' => 0,
+                        'national_charges_class_3' => 0
                     ]);
                 }
 

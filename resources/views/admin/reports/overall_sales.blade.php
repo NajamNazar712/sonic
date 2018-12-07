@@ -112,6 +112,8 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Zone</th>
+                        <th class="border-primary border-darken-1">Class</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
@@ -314,6 +316,8 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Zone');
+                            head.push('Class');
                             head.push('Shipping Mode');
                             head.push('Collection Amount');
                             head.push('Actual Weight');
@@ -345,6 +349,8 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.zone);
+                                row.push(values.class);
                                 row.push(values.shipping_mode);
                                 row.push(values.p_collection_amount);
                                 row.push(values.actual_weight);
@@ -413,6 +419,8 @@
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
                     { data:'hub' ,name: 'h.name', class: 'align-middle hub'},
+                    { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
+                    { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},

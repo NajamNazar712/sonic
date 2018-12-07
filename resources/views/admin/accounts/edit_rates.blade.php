@@ -2214,19 +2214,10 @@
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Local Charges</label>
+                                                    <label class="card-title">6hr Charges</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">National Charges Class A</label>
-                                                </div>
-                                                <div class="col text-center">
-                                                    <label class="card-title">National Charges Class B</label>
-                                                </div>
-                                                <div class="col text-center">
-                                                    <label class="card-title">National Charges Class C</label>
-                                                </div>
-                                                <div class="col text-center">
-                                                    <label class="card-title">National Charges Class D</label>
+                                                    <label class="card-title">Sameday Charges</label>
                                                 </div>
                                                 <div class="col-1"></div>
 
@@ -2270,21 +2261,6 @@
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_class_0_charges[{{$index}}]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_1}}" name="sameday_class_1_charges[{{$index}}]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_2}}" name="sameday_class_2_charges[{{$index}}]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_3}}" name="sameday_class_3_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col-1">
@@ -3692,7 +3668,7 @@
 
         var sameday_count = $('.same_weight_row').length;
         $('body').on('click','#sameday_weightadd',function () {
-            let htmdiv1 = '<div class="row same_weight_row" id="sameday_weight_row'+sameday_count+'"><input type="hidden" name="same_weight_record['+sameday_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_down['+sameday_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch['+sameday_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_0_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_1_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_2_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_3_charges['+sameday_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row same_weight_row" id="sameday_weight_row'+sameday_count+'"><input type="hidden" name="sameday_weight_record['+sameday_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_down['+sameday_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch['+sameday_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_0_charges['+sameday_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 sameday_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-sameday').append(htmdiv1);
             var sameday_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+sameday_count);
