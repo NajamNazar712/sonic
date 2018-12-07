@@ -58,53 +58,63 @@ class AdminPickupsController extends Controller
 
       $shipment = Shipment::find($shipment_id);
 
-      if (!PickupRequestAssignedShipment::where('shipment_id', $shipment_id)->exists()) {
-        $pickup_request = PickupRequest::whereDate('pickup_date', $shipment->pickup_date)->where('pickup_address_id', $shipment->pickup_address_id)->where('status', 0);
+      $pickup_request = PickupRequest::whereDate('pickup_date', $shipment->pickup_date)->where('pickup_address_id', $shipment->pickup_address_id)->where('status', 0);
 
-        if ($pickup_request->exists()) {
-          $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
+      if ($pickup_request->exists()) {
+        $pickup_request = $pickup_request->orderBy('id', 'DESC')->first();
 
-          $bookings = $pickup_request->bookings + 1;
-          $total_estimated_weight = $pickup_request->total_estimated_weight + $shipment->estimated_weight;
+        $bookings = $pickup_request->bookings + 1;
+        $total_estimated_weight = $pickup_request->total_estimated_weight + $shipment->estimated_weight;
 
-          if ($total_estimated_weight < $defined_pickup_weight) {
-            $pickup_type = 0;
-          }
-          else {
-            $pickup_type = 1;
-          }
-
-          $pickup_request->bookings = $bookings;
-          $pickup_request->total_estimated_weight = $total_estimated_weight;
-          $pickup_request->pickup_type = $pickup_type;
-
-          $pickup_request->save();
+        if ($total_estimated_weight < $defined_pickup_weight) {
+          $pickup_type = 0;
         }
         else {
-          $pickup_request = new PickupRequest();
-
-          $pickup_request->shipper_id = $shipment->user_id;
-          $pickup_request->pickup_address_id = $shipment->pickup_address_id;
-          $pickup_request->bookings = 1;
-          $pickup_request->total_estimated_weight = $shipment->estimated_weight;
-
-          if ($shipment->estimated_weight < $defined_pickup_weight) {
-            $pickup_request->pickup_type = 0;
-          }
-          else {
-            $pickup_request->pickup_type = 1;
-          }
-
-          $pickup_request->pickup_date = $shipment->pickup_date;
-          $pickup_request->status = 0;
-
-          $pickup_request->save();
+          $pickup_type = 1;
         }
 
+        $pickup_request->bookings = $bookings;
+        $pickup_request->total_estimated_weight = $total_estimated_weight;
+        $pickup_request->pickup_type = $pickup_type;
+
+        $pickup_request->save();
+      }
+      else {
+        $pickup_request = new PickupRequest();
+
+        $pickup_request->shipper_id = $shipment->user_id;
+        $pickup_request->pickup_address_id = $shipment->pickup_address_id;
+        $pickup_request->bookings = 1;
+        $pickup_request->total_estimated_weight = $shipment->estimated_weight;
+
+        if ($shipment->estimated_weight < $defined_pickup_weight) {
+          $pickup_request->pickup_type = 0;
+        }
+        else {
+          $pickup_request->pickup_type = 1;
+        }
+
+        $pickup_request->pickup_date = $shipment->pickup_date;
+        $pickup_request->status = 0;
+
+        $pickup_request->save();
+      }
+
+      $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id);
+
+      if (!$pickup_request_assigned_shipment->exists()) {
         $pickup_request_assigned_shipment = new PickupRequestAssignedShipment();
 
         $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
         $pickup_request_assigned_shipment->shipment_id = $shipment_id;
+        $pickup_request_assigned_shipment->status = 0;
+
+        $pickup_request_assigned_shipment->save();
+      }
+      else {
+        $pickup_request_assigned_shipment = $pickup_request_assigned_shipment->first();
+
+        $pickup_request_assigned_shipment->pickup_request_id = $pickup_request->id;
         $pickup_request_assigned_shipment->status = 0;
 
         $pickup_request_assigned_shipment->save();

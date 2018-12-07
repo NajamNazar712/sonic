@@ -43,4 +43,8 @@ class DeliveryNoteShipment extends Model
 	public function shipment() {
 		return $this->belongsTo('App\Http\Models\Shipment');
 	}
+
+	public function delivery_note() {
+		return $this->belongsTo('App\Http\Models\Admin\DeliveryNote');
+	}
 }

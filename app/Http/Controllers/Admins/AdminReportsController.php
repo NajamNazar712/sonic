@@ -370,7 +370,7 @@ class AdminReportsController extends Controller
             ->leftjoin('riders','riders.id','=','pickup_notes.rider_id')
             ->leftjoin('admins as ab','ab.id','=','pickup_notes.assigned_by_user_id')
             ->leftjoin('admins as up','up.id','=','pickup_notes.updated_by')
-            ->select(['pickup_notes.id as pn_id','pickup_notes.id as pickup_note_no','cities.name as city','pickup_notes.pickups','pickup_notes.bookings','pickup_notes.bookings as bookings_link','riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
+            ->select(['pickup_notes.id as pn_id','pickup_notes.id as pickup_note_no','cities.name as city','pickup_notes.pickups', DB::raw('(select SUM(received) as received from pickup_requests where pickup_requests.id in (select pickup_request_id from pickup_note_requests where pickup_note_id = pickup_notes.id)) AS received'), 'riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
             ->where('pickup_notes.status_id',4);
         if (session('role_id') != 1) {
             $pickup_note = $pickup_note->whereIn('cities.hub_id', session('hubs'));
@@ -382,9 +382,9 @@ class AdminReportsController extends Controller
             ->editColumn('pickup_note_no', function($pickup_note) {
                 return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
-            ->editColumn('bookings_link', function($pickup_notes) {
-                if ($pickup_notes->bookings != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->bookings . '</button>';
+            ->addColumn('bookings_link', function($pickup_notes) {
+                if ($pickup_notes->received != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->received . '</button>';
                 }
                 else {
                     return 0;
@@ -421,23 +421,31 @@ class AdminReportsController extends Controller
 
         $pickup_note = PickupNote::find($pickup_note_id);
         $pickup_note_requests = $pickup_note->pickup_note_requests;
-        if($pickup_note_requests->count() != 0){
+
+        if ($pickup_note_requests->count() != 0){
+            $pickup_request_all_received_shipments = array();
             $bookings = array();
-            $shipments = array();
-            foreach ($pickup_note_requests as $pickup_note_request) {
+
+            foreach($pickup_note_requests as $pickup_note_request) {
                 $pickup_request = PickupRequest::find($pickup_note_request->pickup_request_id);
                 $shipper = $pickup_request->shipper->name;
-                $bookings[$shipper]= PickupRequestAssignedShipment::where('pickup_request_id',$pickup_note_request->pickup_request_id)->select('shipment_id')->get();
-                foreach ($bookings[$shipper] as $shipment) {
-                    $shipment_details = Shipment::find($shipment->shipment_id);
-                    $shipments [$shipper][] = $shipment_details->tracking_number;
-                }
-            }
+                $pickup_request_all_received_shipments[$shipper] = $pickup_request->pickup_request_received_shipments;
+                if ($pickup_request_all_received_shipments[$shipper]->count() != 0) {
 
-            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $shipments];
-        }else {
-            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+                    foreach ($pickup_request_all_received_shipments[$shipper] as $all_shipments) {
+                        $shipment = $all_shipments->shipment_id;
+                        $shipment_details = Shipment::find($shipment);
+                        $bookings[$shipper][] = $shipment_details->tracking_number;
+                    }
+                }
+
+            }
+                return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
+
+        }else{
+            return ['status' => 0, 'success' => 'No Pickup requests found', 'booked' => FALSE];
         }
+
 
     }
     //pickup note print start

@@ -100,7 +100,7 @@
                         <th class="border-primary border-darken-1">Pickup Note No.</th>
                         <th class="border-primary border-darken-1">City</th>
                         <th class="border-primary border-darken-1">No. Of Pickups</th>
-                        <th class="border-primary border-darken-1">No. Of Shipments</th>
+                        <th class="border-primary border-darken-1">No. Of Shipments Received</th>
                         <th class="border-primary border-darken-1">Rider</th>
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Assigned By</th>
@@ -117,7 +117,7 @@
         <div class="modal-dialog modal-sm" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="bookings_modal_title">Booking Shipment(s)</h4>
+                    <h4 class="modal-title" id="bookings_modal_title">Received Shipment(s)</h4>
 
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">×</span>
@@ -303,7 +303,7 @@
                                 row.push(values.pn_id);
                                 row.push(values.city);
                                 row.push(values.pickups);
-                                row.push(values.bookings);
+                                row.push(values.received);
                                 row.push(values.rider);
                                 row.push(values.assigned_date);
                                 row.push(values.assigned_by);
@@ -425,15 +425,12 @@
                 })
                     .done(function(data) {
                         if (data) {
-
                             var shipments = '';
                             if (data.booked) {
-                                $.each(data.booked, function(index, shipment_ids) {
-
+                                $.each(data.booked, function (index,shipment_ids) {
                                     shipments += "<div><b>Shipper : "+index+"</b></div>";
-                                    $.each(shipment_ids, function (index,tracking_numbers) {
-                                        shipments += '<u><a href='+route+'?tracking_number='+tracking_numbers+' target="_blank">'+tracking_numbers+'</a></u><br>';
-
+                                    $.each(shipment_ids, function (index, tracking_numbers) {
+                                        shipments += '<u><a href=' + route + '?tracking_number=' + tracking_numbers + ' target="_blank">' + tracking_numbers + '</a></u><br>';
                                     });
                                 });
                             }

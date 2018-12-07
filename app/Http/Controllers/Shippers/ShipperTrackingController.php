@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use App\Http\Models\Shipment;
-use App\Http\Models\ShipmentJourney;
 use App\Http\Models\CargoConsignment;
 
 use Auth;
