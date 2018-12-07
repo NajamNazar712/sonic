@@ -47,16 +47,16 @@
 
                                             </div>
                                             <div class="row">
-                                                <div class="col text-center">
+                                                <div class="col-1 text-center">
                                                     <label class="card-title">Range Up</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-1 text-center">
                                                     <label class="card-title">Range Down</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-1 text-center">
                                                     <label class="card-title">Weight Addition</label>
                                                 </div>
-                                                <div class="col-2 text-center">
+                                                <div class="col text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
@@ -80,24 +80,24 @@
                                             @foreach($weight[1] as $index => $onweight)
                                                 <div class="row on_weight_row" id="on_weight_row{{$index}}">
                                                     <input type="hidden" name="on_weight_record[{{$index}}]" value="{{$onweight->id}}">
-                                                    <div class="col text-center">
+                                                    <div class="col-1 text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_up}}" name="on_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-1 text-center">
 
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->range_down}}" name="on_wa_range_down[{{$index}}]">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-1 text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="OvernightSwitch{{$index}}" class="switchery weightAdditionOvernight" data-color="success" data-size="sm" name="on_wa_switch[{{$index}}]" {{ ($onweight->weight_addition == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
-                                                    <div class="col-2 text-center">
+                                                    <div class="col text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -158,7 +158,7 @@
                                                             <input type="checkbox" id="OvernightSwitch0" class="switchery weightAdditionOvernight" data-color="success" data-size="sm" name="on_wa_switch[0]"/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -174,7 +174,22 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_national_charges[0]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="on_class_0_charges[0]">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_class_1_charges[0]">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_class_2_charges[0]">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_class_3_charges[0]">
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
@@ -299,7 +314,7 @@
                                                         </fieldset>
                                                     </div>
                                                     <div class="col"></div>
-                                                    
+
                                                 </div>
                                             @endif
                                         </div>
@@ -387,7 +402,7 @@
                                                             <input name="on_ins_charges[0]" data-rule-required="true" data-msg-required="This field is required" type="text" class="form-control dec-percent"  value="" {{$on_ins_sw}}>
                                                         </fieldset>
                                                     </div>
-                                                        <div class="col"></div>                                                    
+                                                        <div class="col"></div>
                                                 </div>
                                             @endif
                                         </div>
@@ -764,16 +779,16 @@
 
                                             </div>
                                             <div class="row">
-                                                <div class="col text-center">
+                                                <div class="col-1 text-center">
                                                     <label class="card-title">Range Up</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-1 text-center">
                                                     <label class="card-title">Range Down</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-1 text-center">
                                                     <label class="card-title">Weight Addition</label>
                                                 </div>
-                                                <div class="col-2 text-center">
+                                                <div class="col text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
@@ -797,24 +812,24 @@
                                             @foreach($weight[2] as $index => $olweight)
                                                 <div class="row ol_weight_row">
                                                     <input type="hidden" name="ol_weight_record[{{$index}}]" value="{{$olweight->id}}">
-                                                    <div class="col text-center">
+                                                    <div class="col-1 text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_up}}" name="ol_wa_range_up[{{$index}}]">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-1 text-center">
 
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->range_down}}" name="ol_wa_range_down[{{$index}}]">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-1 text-center">
 
                                                         <div class="form-group " style="padding-top: 8px;">
                                                             <input type="checkbox" id="OverlandSwitch{{$index}}" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="ol_wa_switch[{{$index}}]" {{ ($olweight->weight_addition == 1) ? 'checked' : '' }}/>
                                                         </div>
                                                     </div>
-                                                    <div class="col-2 text-center">
+                                                    <div class="col text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -875,7 +890,7 @@
                                                             <input type="checkbox" id="OverlandSwitch0" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="ol_wa_switch[0]"/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -891,10 +906,25 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_national_charges[0]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_class_0_charges[0]">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col"></div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_class_1_charges[0]">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_class_2_charges[0]">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_class_3_charges[0]">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-1"></div>
                                                 </div>{{--Row--}}
                                                 @endif
                                         </div>{{--weight addition div--}}
@@ -1132,7 +1162,7 @@
 
                                         <div class="row return-charges-div-overland">
                                             <input type="hidden" name="ol_return_record" value="{{ (isset($returnCharges[2][0]) && $returnCharges[2][0]->id != '')? $returnCharges[2][0]->id : ''}}">
-                                            
+
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Local Charges</label>
                                                 <fieldset class="form-group">
@@ -1172,7 +1202,7 @@
 
                                         <div class="row fuel-surcharge-div-overland">
                                             <input type="hidden" name="ol_fuel_record" value="{{ (isset($fuelCharges[2][0]) && $fuelCharges[2][0]->id != '')? $fuelCharges[2][0]->id : ''}}">
-                                            
+
                                             <div class="col-md-2 text-center">
                                                 <label class="card-title">Charges</label>
                                                 <fieldset>
@@ -1212,7 +1242,7 @@
 
                                         <div class="row packaging-charges-div-overland">
                                             <input type="hidden" name="ol_packaging_record" value="{{ (isset($packagingCharges[2][0]) && $packagingCharges[2][0]->id != '')? $packagingCharges[2][0]->id : ''}}">
-                                            
+
                                             <div class="col-md-3 text-center">
                                                 <label class="card-title">Small Flyer</label>
                                                 <fieldset class="form-group">
@@ -1591,7 +1621,7 @@
                                                             <input type="checkbox" id="DetainSwitch0" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[0]"/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -1607,10 +1637,25 @@
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_national_charges[0]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_class_0_charges[0]">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col"></div>
+                                                        <div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_class_1_charges[0]">
+                                                        </fieldset>
+                                                    </div>
+                                                        <div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_class_2_charges[0]">
+                                                        </fieldset>
+                                                    </div>
+                                                        <div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_class_3_charges[0]">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-1"></div>
 
                                                 </div>{{--Row--}}
                                                 @endif
@@ -2219,6 +2264,7 @@
                                                 <div class="col text-center">
                                                     <label class="card-title">Sameday Charges</label>
                                                 </div>
+
                                                 <div class="col-1"></div>
 
                                             </div>
@@ -2263,6 +2309,7 @@
                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_class_0_charges[{{$index}}]">
                                                         </fieldset>
                                                     </div>
+                                                    
                                                     <div class="col-1">
                                                         @if($index>0)
                                                             <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 sameday_weight_close"><i class="ft-x"></i></span>
@@ -2291,7 +2338,7 @@
                                                             <input type="checkbox" id="SamedaySwitch0" class="switchery weightAdditionSameday" data-color="success" data-size="sm" name="sameday_wa_switch[0]"/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -2307,10 +2354,10 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_national_charges[0]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_class_0_charges[0]">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col"></div>
+                                                    <div class="col-1"></div>
                                                 </div>{{--Row--}}
                                                 @endif
                                         </div>{{--weight addition div--}}
@@ -3093,8 +3140,8 @@
         });
         var count = $('.on_weight_row').length;
         $('body').on('click','#waddition_btn',function () {
-            
-            let htmdiv = '<div class="row on_weight_row" id="on_weight_row'+count+'"><input type="hidden" name="on_weight_record['+count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_up['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_down['+count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa_switch['+count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa_spkg['+count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="on_class_0_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_class_1_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_class_2_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_class_3_charges['+count+']"></fieldset></div><div class="col-1">\n' +
+
+            let htmdiv = '<div class="row on_weight_row" id="on_weight_row'+count+'"><input type="hidden" name="on_weight_record['+count+']" value=""><div class="col-1 text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_up['+count+']"></fieldset></div><div class="col-1 text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_down['+count+']"></fieldset></div><div class="col-1 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOvernight'+count+'" data-color="success" data-size="sm" name="on_wa_switch['+count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="on_wa_spkg['+count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="on_class_0_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_class_1_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_class_2_charges['+count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="on_class_3_charges['+count+']"></fieldset></div><div class="col-1">\n' +
                 '<span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-overnight').append(htmdiv);
             var switches = document.querySelector('.switchery.weightAdditionOvernight'+count);
@@ -3286,7 +3333,7 @@
         var overland_count = $('.ol_weight_row').length;
         $('body').on('click','#overland_weightadd',function () {
 
-            let htmdiv1 = '<div class="row ol_weight_row" id="ol_weight_row'+overland_count+'"><input type="hidden" name="ol_weight_record['+overland_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_up['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_down['+overland_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOverland'+overland_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+overland_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+overland_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_local_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_class_0_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_class_1_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_class_2_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_class_3_charges['+overland_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row ol_weight_row" id="ol_weight_row'+overland_count+'"><input type="hidden" name="ol_weight_record['+overland_count+']" value=""><div class="col-1 text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_up['+overland_count+']"></fieldset></div><div class="col-1 text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_down['+overland_count+']"></fieldset></div><div class="col-1 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionOverland'+overland_count+'" data-color="success" data-size="sm" name="ol_wa_switch['+overland_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="ol_wa_spkg['+overland_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_local_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_class_0_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_class_1_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_class_2_charges['+overland_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="ol_class_3_charges['+overland_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span class="btn btn-danger rounded btn-sm-width mr-1 mb-1 ol_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-overland').append(htmdiv1);
             var ol_weight_switches = document.querySelector('.switchery.weightAdditionOverland'+overland_count);
@@ -3477,7 +3524,7 @@
         var detain_count = $('.det_weight_row').length;
         $('body').on('click','#detain_weightadd',function () {
 
-            let htmdiv1 = '<div class="row det_weight_row" id="detain_weight_row'+detain_count+'"><input type="hidden" name="detain_weight_record['+detain_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_up['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_down['+detain_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+detain_count+'" data-color="success" data-size="sm" name="detain_wa_switch['+detain_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="detain_wa_spkg['+detain_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_local_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_class_0_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_class_1_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_class_2_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_class_3_charges['+detain_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row det_weight_row" id="detain_weight_row'+detain_count+'"><input type="hidden" name="detain_weight_record['+detain_count+']" value=""><div class="col-1 text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_up['+detain_count+']"></fieldset></div><div class="col-1 text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_down['+detain_count+']"></fieldset></div><div class="col-1 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+detain_count+'" data-color="success" data-size="sm" name="detain_wa_switch['+detain_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="detain_wa_spkg['+detain_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_local_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_class_0_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_class_1_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_class_2_charges['+detain_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="detain_class_3_charges['+detain_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="detain_weight_close" class="btn btn-danger rounded btn-sm-width mr-1 mb-1"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-detain').append(htmdiv1);
             var detain_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+detain_count);
@@ -3668,7 +3715,7 @@
 
         var sameday_count = $('.same_weight_row').length;
         $('body').on('click','#sameday_weightadd',function () {
-            let htmdiv1 = '<div class="row same_weight_row" id="sameday_weight_row'+sameday_count+'"><input type="hidden" name="sameday_weight_record['+sameday_count+']" value=""><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_down['+sameday_count+']"></fieldset></div><div class="col text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch['+sameday_count+']"/></div></div><div class="col-2 text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_0_charges['+sameday_count+']"></fieldset></div><div class="col-1">\n' +
+            let htmdiv1 = '<div class="row same_weight_row" id="sameday_weight_row'+sameday_count+'"><input type="hidden" name="same_weight_record['+sameday_count+']" value=""><div class="col-1 text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up['+sameday_count+']"></fieldset></div><div class="col-1 text-center"><fieldset class="form-group"><input type="text" class="form-control decimal validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_down['+sameday_count+']"></fieldset></div><div class="col-1 text-center"><div class="form-group " style="padding-top: 8px;"><input type="checkbox" id="" class="switchery weightAdditionDetain'+sameday_count+'" data-color="success" data-size="sm" name="sameday_wa_switch['+sameday_count+']"/></div></div><div class="col text-center"><fieldset style="padding-top: 5px;"><div class="input-group input-group-sm form-group"><input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success" data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg['+sameday_count+']"></div></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control amount validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_0_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_1_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_2_charges['+sameday_count+']"></fieldset></div><div class="col text-center"><fieldset class="form-group"><input type="text" class="form-control dec-percent validated" data-rule-required="true" data-msg-required="This field is required"  name="sameday_class_3_charges['+sameday_count+']"></fieldset></div><div class="col-1">\n' +
                 '<span id="" class="btn btn-danger rounded btn-sm-width mr-1 mb-1 sameday_weight_close"><i class="ft-x"></i></span></div></div>';
             $('.weight-addition-sameday').append(htmdiv1);
             var sameday_weight_switches = document.querySelector('.switchery.weightAdditionDetain'+sameday_count);
