@@ -2,6 +2,8 @@
 
 use Illuminate\Database\Seeder;
 
+use Carbon\Carbon;
+
 class ZonesTableSeeder extends Seeder
 {
     /**
