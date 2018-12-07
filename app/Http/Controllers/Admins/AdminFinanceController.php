@@ -1546,7 +1546,7 @@ class AdminFinanceController extends Controller
             $pending_invoice_shipment = new PendingInvoiceShipment();
 
             $pending_invoice_shipment->shipment_id = $shipment_id;
-            $pending_invoice_shipment->type = $type;
+            $pending_invoice_shipment->type = 2;
             $pending_invoice_shipment->charges = $charges;
             $pending_invoice_shipment->gst = $gst;
             $pending_invoice_shipment->invoice_amount = $payable;
