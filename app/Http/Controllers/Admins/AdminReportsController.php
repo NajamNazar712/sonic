@@ -2658,9 +2658,9 @@ class AdminReportsController extends Controller
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
-            ->leftjoin('zone_class_cities as zcc', function($join){
-                
-            })
+//            ->leftjoin('zone_class_cities as zcc', function($join){
+//                $join->on('z.id', '=', 'zcc.zone_id')
+//            })
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
 //            ->join('zone_class_cities as zcc','zcc.city_id', '=', 'dc.id')
