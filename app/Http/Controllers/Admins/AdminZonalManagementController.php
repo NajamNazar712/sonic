@@ -42,7 +42,7 @@ class AdminZonalManagementController extends Controller
                   <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-            if (session('role_id') == 1 || in_array(132, session('permissions'))) {
+            if (session('role_id') == 1 || in_array(133, session('permissions'))) {
                 $dropdown .= $edit_button;
             }
 
