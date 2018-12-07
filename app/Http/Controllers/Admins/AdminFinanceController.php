@@ -1432,6 +1432,7 @@ class AdminFinanceController extends Controller
         $shipment->save();
 
         ShipmentChargesController::weight($shipment_id);
+        ShipmentChargesController::fuel_surcharge($shipment_id);
 
         return redirect()->route('admin.finance.change_shipment_weight.index')->with('success', 'Shipment\'s weight has been changed');
     }
