@@ -56,16 +56,25 @@
                                                 <div class="col text-center">
                                                     <label class="card-title">Weight Addition</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-2 text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Local Charges</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">National Charges</label>
+                                                    <label class="card-title">National Charges Class A</label>
                                                 </div>
-                                                <div class="col"></div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class B</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class C</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class D</label>
+                                                </div>
+                                                <div class="col-1"></div>
                                             </div>
                                             @if(isset($weight[1]))
                                             @foreach($weight[1] as $index => $onweight)
@@ -88,7 +97,7 @@
                                                             <input type="checkbox" id="OvernightSwitch{{$index}}" class="switchery weightAdditionOvernight" data-color="success" data-size="sm" name="on_wa_switch[{{$index}}]" {{ ($onweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -104,57 +113,29 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_or_sameday}}" name="on_wa_national_charges[{{$index}}]" disabled>
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_0}}" name="on_class_0_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col">
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_1}}" name="on_class_0_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_2}}" name="on_class_0_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_3}}" name="on_class_0_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-1">
 
                                                     </div>
                                                 </div>
                                             @endforeach
-                                                @else
-                                                <div class="row on_weight_row" id="on_weight_row0">
-                                                    <input type="hidden" name="on_weight_record[0]" value="">
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_up[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_range_down[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="OvernightSwitch0" class="switchery weightAdditionOvernight" data-color="success" data-size="sm" name="on_wa_switch[0]"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="on_wa_spkg[0]" data-rule-required="true" data-msg-required="This field is required">
-                                                            </div>
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_local_charges[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_national_charges[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col">
-
-                                                    </div>
-                                                </div>
                                                 @endif
                                         </div>{{--weight addition div--}}
                                         <div class="row mt-2">
@@ -737,16 +718,25 @@
                                                 <div class="col text-center">
                                                     <label class="card-title">Weight Addition</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-2 text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Local Charges</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">National Charges</label>
+                                                    <label class="card-title">National Charges Class A</label>
                                                 </div>
-                                                <div class="col"></div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class B</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class C</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class D</label>
+                                                </div>
+                                                <div class="col-1"></div>
                                             </div>
                                             @if(isset($weight[2]))
                                             @foreach($weight[2] as $index => $olweight)
@@ -769,7 +759,7 @@
                                                             <input type="checkbox" id="OverlandSwitch{{$index}}" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="ol_wa_switch[{{$index}}]" {{ ($olweight->weight_addition == 1) ? 'checked' : '' }} disabled/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -785,57 +775,30 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_or_sameday}}" name="ol_wa_national_charges[{{$index}}]" disabled>
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_wa_national_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col">
-                                                        @if($index>0)
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_1}}" name="ol_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_2}}" name="ol_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_3}}" name="ol_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-1">
 
-                                                        @endif
                                                     </div>
                                                 </div>{{--Row--}}
                                             @endforeach
-                                                @else
-                                                <div class="row ol_weight_row">
-                                                    <input type="hidden" name="ol_weight_record[0]" value="">
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_up[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
 
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_range_down[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="OverlandSwitch0" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="ol_wa_switch[0]"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="ol_wa_spkg[0]" data-rule-required="true" data-msg-required="This field is required">
-                                                            </div>
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_local_charges[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_national_charges[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col"></div>
-                                                </div>{{--Row--}}
                                                 @endif
                                         </div>{{--weight addition div--}}
                                         <div>
@@ -1418,16 +1381,25 @@
                                                 <div class="col text-center">
                                                     <label class="card-title">Weight Addition</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-2 text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Local Charges</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">National Charges</label>
+                                                    <label class="card-title">National Charges Class A</label>
                                                 </div>
-                                                <div class="col"></div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class B</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class C</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class D</label>
+                                                </div>
+                                                <div class="col-1"></div>
                                             </div>
                                             @if(isset($weight[3]))
                                             @foreach($weight[3] as $index => $detweight)
@@ -1450,7 +1422,7 @@
                                                             <input type="checkbox" id="DetainSwitch{{$index}}" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[{{$index}}]" {{ ($detweight->weight_addition == 1) ? 'checked' : '' }} disabled/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -1466,58 +1438,28 @@
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_or_sameday}}" name="detain_wa_national_charges[{{$index}}]" disabled>
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_0}}" name="detain_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div><div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div><div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_2}}" name="detain_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div><div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_3}}" name="detain_wa_national_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col">
+                                                    <div class="col-1">
 
                                                     </div>
 
                                                 </div>{{--Row--}}
                                             @endforeach
-                                                @else
-                                                    <div class="row det_weight_row">
-                                                        <input type="hidden" name="detain_weight_record[0]" value="">
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_range_up[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal"data-rule-required="true" data-msg-required="This field is required"  value="" name="detain_wa_range_down[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="DetainSwitch0" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[0]"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" value="0" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="detain_wa_spkg[0]">
-                                                            </div>
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_local_charges[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_national_charges[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col"></div>
-
-                                                </div>{{--Row--}}
-                                                @endif
+                                            @endif
                                         </div>{{--weight addition div--}}
 
                                         <div class="row mt-2">
@@ -2103,16 +2045,17 @@
                                                 <div class="col text-center">
                                                     <label class="card-title">Weight Addition</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-2 text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">Local Charges</label>
+                                                    <label class="card-title">6hr Charges</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">National Charges</label>
+                                                    <label class="card-title">Sameday Charges</label>
                                                 </div>
-                                                <div class="col"></div>
+
+                                                <div class="col-1"></div>
 
                                             </div>
                                             @if(isset($weight[4]))
@@ -2137,7 +2080,7 @@
                                                             <input type="checkbox" id="SamedaySwitch{{$index}}" class="switchery weightAdditionSameday" data-color="success" data-size="sm" name="sameday_wa_switch[{{$index}}]" {{ ($sameweight->weight_addition == 1) ? 'checked' : '' }} disabled/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -2153,56 +2096,30 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_or_sameday}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col">
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_1}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_2}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_3}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-1">
 
                                                     </div>
                                                 </div>{{--Row--}}
                                             @endforeach
-                                                @else
-                                                <div class="row same_weight_row">
-                                                   <input type="hidden" name="sameday_weight_record[0]" value="">
 
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_up[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control decimal" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_range_down[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <div class="form-group " style="padding-top: 8px;">
-                                                            <input type="checkbox" id="SamedaySwitch0" class="switchery weightAdditionSameday" data-color="success" data-size="sm" name="sameday_wa_switch[0]"/>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col text-center">
-
-                                                        <fieldset style="padding-top: 5px;">
-                                                            <div class="input-group input-group-sm form-group">
-                                                                <input type="text" class="touchspin-color input-sm spkg" data-rule-required="true" data-msg-required="This field is required" value="0" disabled data-bts-button-down-class="btn btn-success"
-                                                                       data-bts-button-up-class="btn btn-success" name="sameday_wa_spkg[0]">
-                                                            </div>
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_local_charges[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="sameday_wa_national_charges[0]">
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col"></div>
-                                                </div>{{--Row--}}
                                                 @endif
                                         </div>{{--weight addition div--}}
 
@@ -2956,9 +2873,9 @@
             });
         }
 
-        $('body').on('click','.on_weight_close',function () {
-            $(this).parent().parent().remove();
-        });
+        // $('body').on('click','.on_weight_close',function () {
+        //     $(this).parent().parent().remove();
+        // });
         var count = $('.on_weight_row').length;
         $('body').on('click','#waddition_btn',function () {
             
@@ -3191,12 +3108,12 @@
         });
 
         //addMoreSlabs
-        $('body').on('click','.ol_weight_close',function () {
-            $(this).parent().parent().remove();
-        });
-        $('body').on('click','.ol_row_delete',function () {
-            $(this).parent().parent().remove();
-        });
+        // $('body').on('click','.ol_weight_close',function () {
+        //     $(this).parent().parent().remove();
+        // });
+        // $('body').on('click','.ol_row_delete',function () {
+        //     $(this).parent().parent().remove();
+        // });
         var ol_slab_count = $('.row.ol_cash_handling_row').length;
         $('body').on('click','#overlandaddMoreSlabs',function () {
             let htmdiv = '<div class="row ol_cash_handling_row" id="ol_cash_handle_'+ol_slab_count+'"><input type="hidden" name="ol_cash_record['+ol_slab_count+']" value="">\n' +
@@ -3382,12 +3299,12 @@
         });
 
         //addMoreSlabs
-        $('body').on('click','#detain_weight_close',function () {
-            $(this).parent().parent().remove();
-        });
-        $('body').on('click','.detain_row_delete',function () {
-            $(this).parent().parent().remove();
-        });
+        // $('body').on('click','#detain_weight_close',function () {
+        //     $(this).parent().parent().remove();
+        // });
+        // $('body').on('click','.detain_row_delete',function () {
+        //     $(this).parent().parent().remove();
+        // });
         var detain_slab_count = $('.row.det_cash_handling_row').length;
         $('body').on('click','#detainaddMoreSlabs',function () {
             let htmdiv = '<div class="row det_cash_handling_row" id="detain_cash_handle_'+detain_slab_count+'"><input type="hidden" name="detain_cash_record['+detain_slab_count+']" value="">\n' +
@@ -3573,12 +3490,12 @@
         });
 
         //addMoreSlabs
-        $('body').on('click','.sameday_weight_close',function () {
-            $(this).parent().parent().remove();
-        });
-        $('body').on('click','.sameday_row_delete',function () {
-            $(this).parent().parent().remove();
-        });
+        // $('body').on('click','.sameday_weight_close',function () {
+        //     $(this).parent().parent().remove();
+        // });
+        // $('body').on('click','.sameday_row_delete',function () {
+        //     $(this).parent().parent().remove();
+        // });
         var sameday_slab_count = $('.row.same_cash_handling_row').length;
         $('body').on('click','#samedayaddMoreSlabs',function () {
             let htmdiv = '<div class="row same_cash_handling_row" id="sameday_cash_handle_'+sameday_slab_count+'"><input type="hidden" name="sameday_cash_record['+sameday_slab_count+']" value="">\n' +
