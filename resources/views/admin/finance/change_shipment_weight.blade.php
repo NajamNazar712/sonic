@@ -220,7 +220,7 @@
 
 			@if (session('role_id') == 1 || in_array(134, session('permissions')))
 				$('#change_weight_form input.weight').inputmask({
-					'alias': 'integer',
+					'alias': 'decimal',
 					'allowMinus': false,
 					'allowPlus': false,
 					'digits': 2
