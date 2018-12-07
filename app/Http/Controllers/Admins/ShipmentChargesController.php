@@ -82,7 +82,7 @@ class ShipmentChargesController extends Controller
                                 $charges = (floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_1);
+                                $charges = floatval($weight_charge->national_charges_class_1) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else if ($class == 2) {
@@ -90,7 +90,7 @@ class ShipmentChargesController extends Controller
                                 $charges = (floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_2);
+                                $charges = floatval($weight_charge->national_charges_class_2) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else if ($class == 3) {
@@ -98,7 +98,7 @@ class ShipmentChargesController extends Controller
                                 $charges = (floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_3);
+                                $charges = floatval($weight_charge->national_charges_class_3) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else {
@@ -129,7 +129,7 @@ class ShipmentChargesController extends Controller
                                 $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_1 * $multiplier);
+                                $charges = floatval($weight_charge->national_charges_class_1 * $multiplier) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else if ($class == 2) {
@@ -137,7 +137,7 @@ class ShipmentChargesController extends Controller
                                 $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_2 * $multiplier);
+                                $charges = floatval($weight_charge->national_charges_class_2 * $multiplier) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else if ($class == 3) {
@@ -145,7 +145,7 @@ class ShipmentChargesController extends Controller
                                 $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_3 * $multiplier);
+                                $charges = floatval($weight_charge->national_charges_class_3 * $multiplier) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else {
@@ -173,7 +173,7 @@ class ShipmentChargesController extends Controller
                                             $charges += (floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_1);
+                                            $charges += floatval($weight_charge->national_charges_class_1) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else if ($class == 2) {
@@ -181,7 +181,7 @@ class ShipmentChargesController extends Controller
                                             $charges += (floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_2);
+                                            $charges += floatval($weight_charge->national_charges_class_2) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else if ($class == 3) {
@@ -189,7 +189,7 @@ class ShipmentChargesController extends Controller
                                             $charges += (floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_3);
+                                            $charges += floatval($weight_charge->national_charges_class_3) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else {
@@ -211,7 +211,7 @@ class ShipmentChargesController extends Controller
                                             $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_1 * $multiplier);
+                                            $charges += floatval($weight_charge->national_charges_class_1 * $multiplier) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else if ($class == 2) {
@@ -219,7 +219,7 @@ class ShipmentChargesController extends Controller
                                             $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_2 * $multiplier);
+                                            $charges += floatval($weight_charge->national_charges_class_2 * $multiplier) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else if ($class == 3) {
@@ -227,7 +227,7 @@ class ShipmentChargesController extends Controller
                                             $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_3 * $multiplier);
+                                            $charges += floatval($weight_charge->national_charges_class_3 * $multiplier) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else {
@@ -521,7 +521,7 @@ class ShipmentChargesController extends Controller
                                 $charges = (floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_1);
+                                $charges = floatval($weight_charge->national_charges_class_1) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else if ($class == 2) {
@@ -529,7 +529,7 @@ class ShipmentChargesController extends Controller
                                 $charges = (floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_2);
+                                $charges = floatval($weight_charge->national_charges_class_2) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else if ($class == 3) {
@@ -537,7 +537,7 @@ class ShipmentChargesController extends Controller
                                 $charges = (floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_3);
+                                $charges = floatval($weight_charge->national_charges_class_3) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else {
@@ -568,7 +568,7 @@ class ShipmentChargesController extends Controller
                                 $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_1 * $multiplier);
+                                $charges = floatval($weight_charge->national_charges_class_1 * $multiplier) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else if ($class == 2) {
@@ -576,7 +576,7 @@ class ShipmentChargesController extends Controller
                                 $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_2 * $multiplier);
+                                $charges = floatval($weight_charge->national_charges_class_2 * $multiplier) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else if ($class == 3) {
@@ -584,7 +584,7 @@ class ShipmentChargesController extends Controller
                                 $charges = ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                             }
                             else {
-                                $charges = floatval($weight_charge->national_charges_class_3 * $multiplier);
+                                $charges = floatval($weight_charge->national_charges_class_3 * $multiplier) + $weight_charge->national_charges_class_0;
                             }
                         }
                         else {
@@ -610,7 +610,7 @@ class ShipmentChargesController extends Controller
                                             $charges += (floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_1);
+                                            $charges += floatval($weight_charge->national_charges_class_1) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else if ($class == 2) {
@@ -618,7 +618,7 @@ class ShipmentChargesController extends Controller
                                             $charges += (floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_2);
+                                            $charges += floatval($weight_charge->national_charges_class_2) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else if ($class == 3) {
@@ -626,7 +626,7 @@ class ShipmentChargesController extends Controller
                                             $charges += (floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_3);
+                                            $charges += floatval($weight_charge->national_charges_class_3) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else {
@@ -648,7 +648,7 @@ class ShipmentChargesController extends Controller
                                             $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_1)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_1 * $multiplier);
+                                            $charges += floatval($weight_charge->national_charges_class_1 * $multiplier) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else if ($class == 2) {
@@ -656,7 +656,7 @@ class ShipmentChargesController extends Controller
                                             $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_2)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_2 * $multiplier);
+                                            $charges += floatval($weight_charge->national_charges_class_2 * $multiplier) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else if ($class == 3) {
@@ -664,7 +664,7 @@ class ShipmentChargesController extends Controller
                                             $charges += ((floatval(str_replace('%', '', $weight_charge->national_charges_class_3)) / 100) * $weight_charge->national_charges_class_0) * $multiplier;
                                         }
                                         else {
-                                            $charges += floatval($weight_charge->national_charges_class_3 * $multiplier);
+                                            $charges += floatval($weight_charge->national_charges_class_3 * $multiplier) + $weight_charge->national_charges_class_0;
                                         }
                                     }
                                     else {
