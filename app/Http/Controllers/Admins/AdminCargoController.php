@@ -1172,17 +1172,6 @@ class AdminCargoController extends Controller
 
       $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
 
-      $cargo_consignment->received_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 1)->count();
-
-      if ($request->short_received) {
-        $cargo_consignment->status_id = 4;
-      }
-      else {
-        $cargo_consignment->status_id = 3;
-      }
-      $cargo_consignment->receiver_id = Auth::id();
-      $cargo_consignment->save();
-
       foreach ($shipment_ids as $shipment_id) {
         $cargo_consignment_shipment = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('shipment_id', $shipment_id)->first();
 
@@ -1225,6 +1214,21 @@ class AdminCargoController extends Controller
 
         NotificationsController::send(8, $cargo_consignment_id, $shipment_id);
       }
+
+      $cargo_consignment->received_shipments = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 1)->count();
+
+      $short_received = CargoConsignmentShipment::where('cargo_consignment_id', $cargo_consignment_id)->where('status', 0)->count();
+
+      if ($short_received > 0) {
+        $cargo_consignment->status_id = 4;
+      }
+      else {
+        $cargo_consignment->status_id = 3;
+      }
+
+      $cargo_consignment->receiver_id = Auth::id();
+      $cargo_consignment->save();
+
       //dispute for short received
         if($cargo_consignment->status_id == 4){
             $cargo_short_received_shipments = CargoConsignmentShipment::where(['cargo_consignment_id'=>$cargo_consignment_id,'status'=>0])->select('shipment_id')->get();

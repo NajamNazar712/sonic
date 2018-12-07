@@ -370,7 +370,7 @@ class AdminReportsController extends Controller
             ->leftjoin('riders','riders.id','=','pickup_notes.rider_id')
             ->leftjoin('admins as ab','ab.id','=','pickup_notes.assigned_by_user_id')
             ->leftjoin('admins as up','up.id','=','pickup_notes.updated_by')
-            ->select(['pickup_notes.id as pn_id','pickup_notes.id as pickup_note_no','cities.name as city','pickup_notes.pickups','pickup_notes.bookings','pickup_notes.bookings as bookings_link','riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
+            ->select(['pickup_notes.id as pn_id','pickup_notes.id as pickup_note_no','cities.name as city','pickup_notes.pickups', DB::raw('(select SUM(received) as received from pickup_requests where pickup_requests.id in (select pickup_request_id from pickup_note_requests where pickup_note_id = pickup_notes.id)) AS received'), 'riders.name as rider','pickup_notes.created_at as assigned_date','ab.name as assigned_by','pickup_notes.updated_at as completed_date','up.name as completed_by'])
             ->where('pickup_notes.status_id',4);
         if (session('role_id') != 1) {
             $pickup_note = $pickup_note->whereIn('cities.hub_id', session('hubs'));
@@ -382,9 +382,9 @@ class AdminReportsController extends Controller
             ->editColumn('pickup_note_no', function($pickup_note) {
                 return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
-            ->editColumn('bookings_link', function($pickup_notes) {
-                if ($pickup_notes->bookings != 0) {
-                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->bookings . '</button>';
+            ->addColumn('bookings_link', function($pickup_notes) {
+                if ($pickup_notes->received != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->received . '</button>';
                 }
                 else {
                     return 0;
@@ -421,23 +421,31 @@ class AdminReportsController extends Controller
 
         $pickup_note = PickupNote::find($pickup_note_id);
         $pickup_note_requests = $pickup_note->pickup_note_requests;
-        if($pickup_note_requests->count() != 0){
+
+        if ($pickup_note_requests->count() != 0){
+            $pickup_request_all_received_shipments = array();
             $bookings = array();
-            $shipments = array();
-            foreach ($pickup_note_requests as $pickup_note_request) {
+
+            foreach($pickup_note_requests as $pickup_note_request) {
                 $pickup_request = PickupRequest::find($pickup_note_request->pickup_request_id);
                 $shipper = $pickup_request->shipper->name;
-                $bookings[$shipper]= PickupRequestAssignedShipment::where('pickup_request_id',$pickup_note_request->pickup_request_id)->select('shipment_id')->get();
-                foreach ($bookings[$shipper] as $shipment) {
-                    $shipment_details = Shipment::find($shipment->shipment_id);
-                    $shipments [$shipper][] = $shipment_details->tracking_number;
-                }
-            }
+                $pickup_request_all_received_shipments[$shipper] = $pickup_request->pickup_request_received_shipments;
+                if ($pickup_request_all_received_shipments[$shipper]->count() != 0) {
 
-            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $shipments];
-        }else {
-            return ['status' => 0, 'success' => 'No Booked Shipments', 'booked' => FALSE];
+                    foreach ($pickup_request_all_received_shipments[$shipper] as $all_shipments) {
+                        $shipment = $all_shipments->shipment_id;
+                        $shipment_details = Shipment::find($shipment);
+                        $bookings[$shipper][] = $shipment_details->tracking_number;
+                    }
+                }
+
+            }
+                return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
+
+        }else{
+            return ['status' => 0, 'success' => 'No Pickup requests found', 'booked' => FALSE];
         }
+
 
     }
     //pickup note print start
@@ -2657,8 +2665,13 @@ class AdminReportsController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
+            ->leftjoin('zones as z', 'z.id', '=', 'oc.zone_id')
             ->join('cities AS dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as h' ,'dc.hub_id', '=' , 'h.id')
+            ->leftjoin('zone_class_cities as zcc', function($join){
+                $join->on('z.id', '=', 'zcc.zone_id')->on('dc.id', '=', 'zcc.city_id');
+            })
+//            ->join('zone_class_cities as zcc','zcc.city_id', '=', 'dc.id')
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) {
@@ -2681,7 +2694,7 @@ class AdminReportsController extends Controller
                     ->where('dr.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37))'));
             })
-            ->select('shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned')
+            ->select('shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
         if (session('role_id') != 1) {
             $sales = $sales->whereIn('dc.hub_id', session('hubs'));
@@ -2733,6 +2746,27 @@ class AdminReportsController extends Controller
                     $payable = $sale->d_net_payable;
                 }
                 return $payable;
+            })
+            ->addColumn('class',function($sale){
+                $class = '';
+                if($sale->class){
+                    switch ($sale->class){
+                        case 0:
+                            $class = 'Class A';
+                            break;
+                        case 1:
+                            $class = 'Class B';
+                            break;
+                        case 2:
+                            $class = 'Class C';
+                            break;
+                        case 3:
+                            $class = 'Class D';
+                            break;
+                    }
+                    return $class;
+                }
+                return $class;
             });
 
         if($tracking = $request->get('search_tracking')){
