@@ -59,7 +59,7 @@
                                                 <div class="col text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-1 text-center">
                                                     <label class="card-title">Local Charges</label>
                                                 </div>
                                                 <div class="col text-center">
@@ -106,7 +106,7 @@
                                                             </div>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-1 text-center">
                                                         <fieldset class="form-group">
                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->local_or_6hr}}" name="on_wa_local_charges[{{$index}}]">
                                                         </fieldset>
@@ -765,13 +765,13 @@
                                             </div>
                                             <div class="row">
                                                 <div class="col-1 text-center">
-  -1                                                  <label class="card-title">Range Up</label>
+                                                    <label class="card-title">Range Up</label>
                                                 </div>
                                                 <div class="col-1 text-center">
-  -1                                                  <label class="card-title">Range Down</label>
+                                                    <label class="card-title">Range Down</label>
                                                 </div>
                                                 <div class="col-1 text-center">
-  -1                                                  <label class="card-title">Weight Addition</label>
+                                                    <label class="card-title">Weight Addition</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">KG Range</label>
@@ -792,7 +792,7 @@
                                                     <label class="card-title">National Charges Class D</label>
                                                 </div>
                                                 <div class="col-1"></div>
-  -1                                          </div>
+                                            </div>
                                             @if(isset($weight[2]))
                                             @foreach($weight[2] as $index => $olweight)
                                                 <div class="row ol_weight_row">
