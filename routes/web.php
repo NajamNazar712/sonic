@@ -615,6 +615,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\AdminFinanceController@change_shipment_amount_store')->name('store');
         });
 
+        Route::prefix('change_shipment_weight')->name('change_shipment_weight.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@change_shipment_weight_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminFinanceController@change_shipment_weight_shipment_details')->name('shipment_details');
+            Route::post('', 'Admins\AdminFinanceController@change_shipment_weight_store')->name('store');
+        });
+
+        Route::prefix('add_shipment_adjustment')->name('add_shipment_adjustment.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@add_shipment_adjustment_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminFinanceController@add_shipment_adjustment_shipment_details')->name('shipment_details');
+            Route::post('', 'Admins\AdminFinanceController@add_shipment_adjustment_store')->name('store');
+        });
+
         Route::prefix('make_payments')->name('make_payments.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@make_payments_index')->name('index');
             Route::get('list', 'Admins\AdminFinanceController@make_payments_list')->name('list');
