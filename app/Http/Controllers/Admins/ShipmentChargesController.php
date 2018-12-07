@@ -45,7 +45,7 @@ class ShipmentChargesController extends Controller
                     $discount = 0;
                 }
 
-                $zone = 0;
+                $class = 0;
 
                 if ($shipment->shipping_mode_id == 4) {
                     if ($shipment->same_day_timing_id == 1) {
@@ -67,7 +67,7 @@ class ShipmentChargesController extends Controller
                         if ($zone_class_city) {
                             $zone_class_city = $zone_class_city->first();
 
-                            $zone = $zone_class_city->zone;
+                            $class = $zone_class_city->class;
                         }
                     }
                 }
@@ -77,13 +77,13 @@ class ShipmentChargesController extends Controller
                         $charges = $weight_charge->local_or_6hr;
                     }
                     else {
-                        if ($zone == 1) {
+                        if ($class == 1) {
                             $charges = $weight_charge->national_charges_class_1;
                         }
-                        else if ($zone == 2) {
+                        else if ($class == 2) {
                             $charges = $weight_charge->national_charges_class_2;
                         }
-                        else if ($zone == 3) {
+                        else if ($class == 3) {
                             $charges = $weight_charge->national_charges_class_3;
                         }
                         else {
@@ -109,13 +109,13 @@ class ShipmentChargesController extends Controller
                         $charges = ($weight_charge->local_or_6hr * $multiplier);
                     }
                     else {
-                        if ($zone == 1) {
+                        if ($class == 1) {
                             $charges = ($weight_charge->national_charges_class_1 * $multiplier);
                         }
-                        else if ($zone == 2) {
+                        else if ($class == 2) {
                             $charges = ($weight_charge->national_charges_class_2 * $multiplier);
                         }
-                        else if ($zone == 3) {
+                        else if ($class == 3) {
                             $charges = ($weight_charge->national_charges_class_3 * $multiplier);
                         }
                         else {
@@ -138,13 +138,13 @@ class ShipmentChargesController extends Controller
                                     $charges += $weight_charge->local_or_6hr;
                                 }
                                 else {
-                                    if ($zone == 1) {
+                                    if ($class == 1) {
                                         $charges += $weight_charge->national_charges_class_1;
                                     }
-                                    else if ($zone == 2) {
+                                    else if ($class == 2) {
                                         $charges += $weight_charge->national_charges_class_2;
                                     }
-                                    else if ($zone == 3) {
+                                    else if ($class == 3) {
                                         $charges += $weight_charge->national_charges_class_3;
                                     }
                                     else {
@@ -163,13 +163,13 @@ class ShipmentChargesController extends Controller
                                 else {
                                     $charges += ($weight_charge->national_or_sameday * $multiplier);
 
-                                    if ($zone == 1) {
+                                    if ($class == 1) {
                                         $charges += ($weight_charge->national_charges_class_1 * $multiplier);
                                     }
-                                    else if ($zone == 2) {
+                                    else if ($class == 2) {
                                         $charges += ($weight_charge->national_charges_class_2 * $multiplier);
                                     }
-                                    else if ($zone == 3) {
+                                    else if ($class == 3) {
                                         $charges += ($weight_charge->national_charges_class_3 * $multiplier);
                                     }
                                     else {
