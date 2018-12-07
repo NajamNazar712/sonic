@@ -36,6 +36,18 @@
         </div>
     </div>
 
+    <div class="row mb-2 d-none" id="zone_selection">
+        <div class="col-6">
+            <fieldset class="form-group">
+                <select name="zone_id" id="zone" class="form-control select2" data-rule-required="true" data-msg-required="Zone is required">
+                    @foreach($zones as $zone)
+                        <option value="{{ $zone->id }}">{{ $zone->name }}</option>
+                    @endforeach
+                </select>
+            </fieldset>
+        </div>
+    </div>
+
     <div class="row">
         <div class="col">
             <h2 class="card-title"><U>Services</U></h2>
@@ -127,6 +139,12 @@
             dropdownParent: $("#addCity")
         });
 
+
+    $('#zone').prepend('<option value="" selected></option>').select2({
+        placeholder: 'Zone',
+        width:'100%'
+    });
+
     $("input[type='radio'][name='city-radio']").on('ifChecked', function(event){
                var rtype = $(this).attr('rel');
                if(rtype == 'city'){
@@ -134,6 +152,8 @@
                    if($('#hub_list_div').is(':hidden')){
                        // $('#hub_list_div').css('display','block');
                        $('#hub_list_div').fadeIn("slow");
+
+                       $('#zone_selection').addClass('d-none');
                    }
                }else if(rtype == 'hub'){
                    $('#city_type').val('hub');
@@ -142,6 +162,8 @@
                        $('#hub_list_div').fadeOut("slow");
 
                        // $('#hub_list_div').fadeIn('slow');
+
+                       $('#zone_selection').removeClass('d-none');
                    }
 
                }

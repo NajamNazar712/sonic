@@ -23,4 +23,8 @@ class DeliveryNote extends Model
     public function delivery_note_shipments() {
         return $this->hasMany('App\Http\Models\Admin\DeliveryNoteShipment');
     }
+
+    public function station_deposit_note() {
+        return $this->hasOne('App\Http\Models\Admin\StationDepositNote');
+    }
 }

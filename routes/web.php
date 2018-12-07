@@ -261,6 +261,23 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('{id}/edit', 'Admins\AdminDashboardController@editRiderDetails')->name('edit');
             Route::put('/status', 'Admins\AdminDashboardController@riderStatus')->name('status');
         });
+
+        Route::prefix('zonal')->name('zonal.')->group(function () {
+            Route::get('', 'Admins\AdminZonalManagementController@index')->name('index');
+            Route::get('/list', 'Admins\AdminZonalManagementController@list')->name('list');
+
+            Route::prefix('add')->name('add.')->group(function () {
+                Route::get('', 'Admins\AdminZonalManagementController@add_index')->name('index');
+                Route::post('', 'Admins\AdminZonalManagementController@add_store')->name('store');
+            });
+
+            Route::prefix('update/{id}')->name('update.')->group(function () {
+                Route::get('', 'Admins\AdminZonalManagementController@update_index')->name('index');
+                Route::post('', 'Admins\AdminZonalManagementController@update_store')->name('store');
+            });
+
+            Route::post('view_cities', 'Admins\AdminZonalManagementController@view_cities')->name('view_cities');
+        });
     });
 	Route::prefix('pickups')->name('pickups.')->group(function () {
         Route::prefix('pending')->name('pending.')->group(function () {
@@ -396,12 +413,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('misroute')->name('misroute.')->group(function (){
            Route::get('','Admins\DeliveryController@misroute_index')->name('index');
            Route::get('list','Admins\DeliveryController@misroute_list')->name('list');
-           Route::post('shipment/info','Admins\DeliveryController@get_shipment_info')->name('shipment.info');
-           Route::post('shipment/update','Admins\DeliveryController@misroute_shipment_update')->name('shipment.update');
+
            Route::prefix('history')->name('history.')->group(function (){
                 Route::get('','Admins\MisroutedHistoryController@misrouted_history_index')->name('index');
                 Route::get('list','Admins\MisroutedHistoryController@misrouted_history_list')->name('list');
 
+           });
+           Route::prefix('update')->name('update.')->group(function (){
+                Route::get('','Admins\DeliveryController@misrouted_update_index')->name('index');
+//                Route::get('list','Admins\DeliveryController@misrouted_update_list')->name('list');
+                Route::post('shipment/info','Admins\DeliveryController@get_misroute_shipment_info')->name('shipment.info');
+               Route::post('store','Admins\DeliveryController@misroute_shipment_update')->name('store');
+               Route::get('excel','Admins\DeliveryController@misroute_shipment_excel')->name('excel');
            });
 
         });
@@ -412,15 +435,32 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments/delivered', 'Admins\DeliveryController@history_shipments_delivered')->name('shipments.delivered');
 
         });
+
+        //Lost Module Start
+        Route::prefix('lost')->name('lost.')->group(function (){
+            Route::get('','Admins\LostShipmentsController@lost_shipments_index')->name('index');
+            Route::get('list','Admins\LostShipmentsController@lost_shipments_list')->name('list');
+            Route::post('confirm/status','Admins\LostShipmentsController@shipment_confirm_status')->name('confirm.status');
+            Route::post('reattempt/status','Admins\LostShipmentsController@shipment_reattempt_status')->name('reattempt.status');
+            Route::prefix('add')->name('add.')->group(function(){
+                Route::get('index','Admins\LostShipmentsController@lost_add_index')->name('index');
+                Route::post('shipment/info','Admins\LostShipmentsController@get_shipment_info')->name('shipment.info');
+                Route::post('shipment/store','Admins\LostShipmentsController@add_lost_shipments')->name('shipments.store');
+            });
+        });
+        //Lost Module End
+
     });
     Route::prefix('return')->name('return.')->group(function (){
         Route::get('','Admins\ReturnController@return_view')->name('index');
         Route::get('list','Admins\ReturnController@return_marked_list')->name('list');
-        Route::post('marked/status','Admins\ReturnController@return_marked_status')->name('marked.status');
+        Route::post('confirm/status','Admins\ReturnController@return_confirm_status')->name('confirm.status');
+        Route::post('reattempt/status','Admins\ReturnController@return_reattempt_status')->name('reattempt.status');
         Route::post('marked/status/single','Admins\ReturnController@return_marked_single_status')->name('marked.status.single');
         Route::get('confirmed','Admins\ReturnController@return_confirmed_view')->name('confirmed');
         Route::get('confirmed/list','Admins\ReturnController@return_confirmed_list')->name('confirmed.list');
         Route::post('confirmed/search','Admins\ReturnController@return_confirmed_search')->name('confirmed.search');
+        Route::post('excel/store','Admins\ReturnController@excel_store')->name('excel.store');
 
         Route::prefix('confirmed')->name('confirmed.')->group(function (){
             Route::post('revert','Admins\ReturnController@return_confirmed_revert')->name('revert');
@@ -573,6 +613,18 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminFinanceController@change_shipment_amount_index')->name('index');
             Route::post('shipment_details', 'Admins\AdminFinanceController@change_shipment_amount_shipment_details')->name('shipment_details');
             Route::post('', 'Admins\AdminFinanceController@change_shipment_amount_store')->name('store');
+        });
+
+        Route::prefix('change_shipment_weight')->name('change_shipment_weight.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@change_shipment_weight_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminFinanceController@change_shipment_weight_shipment_details')->name('shipment_details');
+            Route::post('', 'Admins\AdminFinanceController@change_shipment_weight_store')->name('store');
+        });
+
+        Route::prefix('add_shipment_adjustment')->name('add_shipment_adjustment.')->group(function () {
+            Route::get('', 'Admins\AdminFinanceController@add_shipment_adjustment_index')->name('index');
+            Route::post('shipment_details', 'Admins\AdminFinanceController@add_shipment_adjustment_shipment_details')->name('shipment_details');
+            Route::post('', 'Admins\AdminFinanceController@add_shipment_adjustment_store')->name('store');
         });
 
         Route::prefix('make_payments')->name('make_payments.')->group(function () {

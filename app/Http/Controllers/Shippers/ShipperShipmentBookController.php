@@ -134,8 +134,8 @@ class ShipperShipmentBookController extends Controller
     public function index() {
       $booking_types = BookingType::where('id', '!=', 3)->get();
       $user = User::with('shipping.city')->find(session('user_id'));
-      $cities = City::where('pickup', 1)->where('status', 1)->orderBy('name')->get();
-      $consignee_cities = City::where('status', 1)->orderBy('name')->get();
+      $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+      $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
       $products = Product::orderBy('product_name')->get();
       $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
       $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
@@ -714,9 +714,9 @@ class ShipperShipmentBookController extends Controller
     public function excel_index() {
       $booking_types = BookingType::where('id', '!=', 3)->get();
       $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
-        $query->where('pickup', 1)->where('status', 1);
+        $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
       })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->get();
-      $cities = City::where('status', 1)->orderBy('name')->pluck('name');
+      $cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->pluck('name');
       $products = Product::all();
 
       $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
@@ -904,6 +904,10 @@ class ShipperShipmentBookController extends Controller
                 $errors['Row #' . $row_id][] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
               }
 
+              if (!$user_shipping_info->city->zone_id) {
+                $errors['Row #' . $row_id][] = 'Pickup Address\'s City: ' . $user_shipping_info->city->name . ' is deactivated';
+              }
+
               if (!$user_shipping_info->city->pickup) {
                  $errors['Row #' . $row_id][] = 'Pickup is not allowed for City: ' . $user_shipping_info->city->name;
               }
@@ -911,6 +915,10 @@ class ShipperShipmentBookController extends Controller
               $consignee_city = City::where('name', $row['consignee_city_name'])->first();
 
               if (!$consignee_city->status) {
+                $errors['Row #' . $row_id][] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+              }
+
+              if (!$consignee_city->zone_id) {
                 $errors['Row #' . $row_id][] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
               }
 

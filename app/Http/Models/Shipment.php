@@ -58,4 +58,7 @@ class Shipment extends Model
     public function payment_status() {
     	return $this->belongsTo('App\Http\Models\ShipmentPaymentStatus', 'payment_status_id', 'id');
     }
+    public function misrouted_history(){
+        return $this->hasMany('App\Http\Models\MisroutedHistory');
+    }
 }
