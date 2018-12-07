@@ -3714,7 +3714,7 @@ class AdminDashboardController extends Controller
                 'name'=>$request->cityName,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
-                'zone_id'=>$request->zone_id,
+                'zone_id'=>City::find($request->hubs)->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
             ]);
@@ -3766,7 +3766,7 @@ class AdminDashboardController extends Controller
                 'name'=>$request->cityName,
                 'hub'=>0,
                 'hub_id'=>$request->hubs,
-                'zone_id'=>$request->zone_id,
+                'zone_id'=>City::find($request->hubs)->zone_id,
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
             ]);
