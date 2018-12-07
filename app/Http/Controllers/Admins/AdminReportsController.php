@@ -2749,23 +2749,22 @@ class AdminReportsController extends Controller
             })
             ->addColumn('class',function($sale){
                 $class = '';
-                if($sale->class){
-                    switch ($sale->class){
-                        case 0:
-                            $class = 'Class A';
-                            break;
-                        case 1:
-                            $class = 'Class B';
-                            break;
-                        case 2:
-                            $class = 'Class C';
-                            break;
-                        case 3:
-                            $class = 'Class D';
-                            break;
-                    }
-                    return $class;
+
+                switch ($sale->class) {
+                    case 0:
+                        $class = 'Class A';
+                        break;
+                    case 1:
+                        $class = 'Class B';
+                        break;
+                    case 2:
+                        $class = 'Class C';
+                        break;
+                    case 3:
+                        $class = 'Class D';
+                        break;
                 }
+
                 return $class;
             });
 
