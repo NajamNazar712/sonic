@@ -13,6 +13,7 @@ use App\Http\Models\ReturnCharge;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\DiscountCharge;
+use App\Http\Models\ZoneClassCity;
 
 use Carbon\Carbon;
 
@@ -44,6 +45,8 @@ class ShipmentChargesController extends Controller
                     $discount = 0;
                 }
 
+                $class = 0;
+
                 if ($shipment->shipping_mode_id == 4) {
                     if ($shipment->same_day_timing_id == 1) {
                         $type_of_charges = 0;
@@ -58,6 +61,14 @@ class ShipmentChargesController extends Controller
                     }
                     else {
                         $type_of_charges = 1;
+
+                        $zone_class_city = ZoneClassCity::where('zone_id', $shipment->pickup_address->city->zone_id)->where('city_id', $shipment->consignee_city_id);
+
+                        if ($zone_class_city) {
+                            $zone_class_city = $zone_class_city->first();
+
+                            $class = $zone_class_city->class;
+                        }
                     }
                 }
 
@@ -66,7 +77,18 @@ class ShipmentChargesController extends Controller
                         $charges = $weight_charge->local_or_6hr;
                     }
                     else {
-                        $charges = $weight_charge->national_or_sameday;
+                        if ($class == 1) {
+                            $charges = $weight_charge->national_charges_class_1;
+                        }
+                        else if ($class == 2) {
+                            $charges = $weight_charge->national_charges_class_2;
+                        }
+                        else if ($class == 3) {
+                            $charges = $weight_charge->national_charges_class_3;
+                        }
+                        else {
+                            $charges = $weight_charge->national_charges_class_0;
+                        }
                     }
 
                     if ($charges < $discount) {
@@ -87,7 +109,18 @@ class ShipmentChargesController extends Controller
                         $charges = ($weight_charge->local_or_6hr * $multiplier);
                     }
                     else {
-                        $charges = ($weight_charge->national_or_sameday * $multiplier);
+                        if ($class == 1) {
+                            $charges = ($weight_charge->national_charges_class_1 * $multiplier);
+                        }
+                        else if ($class == 2) {
+                            $charges = ($weight_charge->national_charges_class_2 * $multiplier);
+                        }
+                        else if ($class == 3) {
+                            $charges = ($weight_charge->national_charges_class_3 * $multiplier);
+                        }
+                        else {
+                            $charges = ($weight_charge->national_charges_class_0 * $multiplier);
+                        }
                     }
 
                     $shipment->chargeable_weight = $weight_charge->spkg * (intval($weight / $weight_charge->spkg) + 1);
@@ -105,7 +138,18 @@ class ShipmentChargesController extends Controller
                                     $charges += $weight_charge->local_or_6hr;
                                 }
                                 else {
-                                    $charges += $weight_charge->national_or_sameday;
+                                    if ($class == 1) {
+                                        $charges += $weight_charge->national_charges_class_1;
+                                    }
+                                    else if ($class == 2) {
+                                        $charges += $weight_charge->national_charges_class_2;
+                                    }
+                                    else if ($class == 3) {
+                                        $charges += $weight_charge->national_charges_class_3;
+                                    }
+                                    else {
+                                        $charges += $weight_charge->national_charges_class_0;
+                                    }
                                 }
 
                                 $previous = FALSE;
@@ -118,6 +162,19 @@ class ShipmentChargesController extends Controller
                                 }
                                 else {
                                     $charges += ($weight_charge->national_or_sameday * $multiplier);
+
+                                    if ($class == 1) {
+                                        $charges += ($weight_charge->national_charges_class_1 * $multiplier);
+                                    }
+                                    else if ($class == 2) {
+                                        $charges += ($weight_charge->national_charges_class_2 * $multiplier);
+                                    }
+                                    else if ($class == 3) {
+                                        $charges += ($weight_charge->national_charges_class_3 * $multiplier);
+                                    }
+                                    else {
+                                        $charges += ($weight_charge->national_charges_class_0 * $multiplier);
+                                    }
                                 }
                             }
                         }
