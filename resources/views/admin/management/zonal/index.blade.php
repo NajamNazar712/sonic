@@ -103,7 +103,7 @@
 			var table = $('#datatable').DataTable({
 				dom: '<"d-inline-block"l><"pull-right"B>tipr',
 				buttons: [
-					@if (session('role_id') == 1 || in_array(131, session('permissions')))
+					@if (session('role_id') == 1 || in_array(132, session('permissions')))
 					{
 						text: 'Add',
 						className: 'btn btn-primary add',
@@ -174,7 +174,7 @@
 			$('#datatable tbody').on('click', 'tr td.action .btn-group .dropdown-menu .dropdown-item', function() {
 				var id = parseInt($(this).parents('tr').attr('id'));
 
-				@if (session('role_id') == 1 || in_array(132, session('permissions')))
+				@if (session('role_id') == 1 || in_array(133, session('permissions')))
 					if ($(this).hasClass('edit')) {
 						var link = '{{ route('admin.management.zonal.update.index', ["id" => 0]) }}';
 

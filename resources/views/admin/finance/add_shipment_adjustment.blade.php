@@ -30,7 +30,7 @@
 							<div class="shipment mt-2" id="shipment">
 							</div>
 
-							@if (session('role_id') == 1 || in_array(136, session('permissions')))
+							@if (session('role_id') == 1 || in_array(137, session('permissions')))
 								<form id="add_adjustment_form" class="form-inline mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.add_shipment_adjustment.store') }}" novalidate="novalidate">
 									{{ csrf_field() }}
 
@@ -87,7 +87,7 @@
 
 					$('#shipment').html('');
 
-					@if (session('role_id') == 1 || in_array(136, session('permissions')))
+					@if (session('role_id') == 1 || in_array(137, session('permissions')))
 						$('#add_adjustment_form').addClass('d-none');
 
 						$('#add_adjustment_form input.tracking_number').val('');
@@ -197,7 +197,7 @@
 
 							$('#shipment').html(shipment);
 
-							@if (session('role_id') == 1 || in_array(136, session('permissions')))
+							@if (session('role_id') == 1 || in_array(137, session('permissions')))
 								$('#add_adjustment_form').removeClass('d-none');
 
 								$('#add_adjustment_form input.shipment_id').val(details.id);
@@ -218,7 +218,7 @@
 				}
 			});
 
-			@if (session('role_id') == 1 || in_array(136, session('permissions')))
+			@if (session('role_id') == 1 || in_array(137, session('permissions')))
 				$.validator.addMethod('not', function(value, element, param) {
 					return (value != param) && (value == parseInt(value, 10));
 				}, 'Invalid Value Entered');
