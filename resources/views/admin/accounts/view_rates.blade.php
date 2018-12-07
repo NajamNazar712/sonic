@@ -2099,21 +2099,7 @@
                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_0}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_1}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_2}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
-                                                        </fieldset>
-                                                    </div>
-                                                    <div class="col text-center">
-                                                        <fieldset class="form-group">
-                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$sameweight->national_charges_class_3}}" name="sameday_wa_national_charges[{{$index}}]" disabled>
-                                                        </fieldset>
-                                                    </div>
+                                                    
                                                     <div class="col-1">
 
                                                     </div>
