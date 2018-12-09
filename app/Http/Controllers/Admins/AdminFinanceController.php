@@ -1293,6 +1293,23 @@ class AdminFinanceController extends Controller
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
 
                     if (!$done_payment_shipment->exists()) {
+                        $payment_mode = $shipment->user->bank->payment_mode;
+
+                        if ($payment_mode != 'IBFT') {
+                            $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+
+                            if ($pending_invoice_shipment->exists()) {
+                                return ['status' => 1, 'error' => 'A Invoice Payment of given Shipment is in Pending'];
+                            }
+                            else {
+                                $invoice_shipment = InvoiceShipment::where('shipment_id', $shipment->id);
+
+                                if ($invoice_shipment->exists()) {
+                                    return ['status' => 1, 'error' => 'A Invoice Payment of given Shipment has already been Processed'];
+                                }
+                            }
+                        }
+
                         $details = array();
 
                         $shipper = $shipment->user;
@@ -1373,6 +1390,23 @@ class AdminFinanceController extends Controller
                     $done_payment_shipment = DonePaymentShipment::where('shipment_id', $shipment->id);
 
                     if (!$done_payment_shipment->exists()) {
+                        $payment_mode = $shipment->user->bank->payment_mode;
+
+                        if ($payment_mode != 'IBFT') {
+                            $pending_invoice_shipment = PendingInvoiceShipment::where('shipment_id', $shipment->id);
+
+                            if ($pending_invoice_shipment->exists()) {
+                                return ['status' => 1, 'error' => 'A Invoice Payment of given Shipment is in Pending'];
+                            }
+                            else {
+                                $invoice_shipment = InvoiceShipment::where('shipment_id', $shipment->id);
+
+                                if ($invoice_shipment->exists()) {
+                                    return ['status' => 1, 'error' => 'A Invoice Payment of given Shipment has already been Processed'];
+                                }
+                            }
+                        }
+
                         $details = array();
 
                         $shipper = $shipment->user;
