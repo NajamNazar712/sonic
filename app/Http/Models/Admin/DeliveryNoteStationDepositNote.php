@@ -38,4 +38,8 @@ class DeliveryNoteStationDepositNote extends Model
 
 		return $this->getAttribute($keyName);
 	}
+
+	public function station_deposit_note() {
+        return $this->hasOne('App\Http\Models\Admin\StationDepositNote');
+    }
 }
