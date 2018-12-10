@@ -1153,6 +1153,8 @@ class AdminFinanceController extends Controller
         if ($delivery_note_shipment->exists()) {
             $delivery_note_shipment = $delivery_note_shipment->first();
 
+            $shipment = Shipment::find($request->id);
+
             $delivery_note_shipment->status = 8;
 
             $delivery_note_shipment->save();
@@ -1183,8 +1185,6 @@ class AdminFinanceController extends Controller
             $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
 
             $station_deposit_note->save();
-
-            $shipment = Shipment::find($request->id);
 
             $shipment->shipper_status_id = 13;
             $shipment->consignee_status_id = 13;
