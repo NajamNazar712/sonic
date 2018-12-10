@@ -219,7 +219,7 @@
 			});
 
 			@if (session('role_id') == 1 || in_array(58, session('permissions')))
-				$('#change_weight_form input.amount').inputmask({
+				$('#change_amount_form input.amount').inputmask({
 					'alias': 'integer',
 					'allowMinus': false,
 					'allowPlus': false,
