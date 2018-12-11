@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
 
+use App\Http\Models\Admin\AdminHub;
+use App\Http\Models\Admin\SalePersonTag;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\Shipper\UserBankInfo;
@@ -21,6 +23,7 @@ use App\Http\Models\BookingType;
 use App\Http\Models\CashHandlingCharge;
 use App\Http\Models\City;
 use App\Http\Models\Zone;
+use App\Http\Models\Admin\Admin;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\InsuranceCharge;
 use App\Http\Models\PackagingCharge;
@@ -578,12 +581,14 @@ class AdminDashboardController extends Controller
         return view('admin.pending_booked_orders');
     }
     public function pendingAccountsList(){
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
-        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products]);
+        return view('admin.accounts.pending_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
     }
     public function activeAccountsList(){
+        $salesperson = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.name','admins.id'])->where('ar.department_id',7)->get();
         $products = Product::select('id','product_name')->get();
-        return view('admin.accounts.active_accounts_list')->with(['products'=>$products]);
+        return view('admin.accounts.active_accounts_list')->with(['products'=>$products,'sale_name'=>$salesperson]);
 
     }
     public function blockAccountsList(){
@@ -609,6 +614,34 @@ class AdminDashboardController extends Controller
             }else{
                 return back()->with('danger', 'This user\'s rates are not set.');
             }
+        }
+
+    }
+    public function tagSubmit(Request $request){
+        $tag_id = $request->admin_id;
+        $shipper_id = $request->shipper_id;
+        $user = User::find($shipper_id);
+        $shipper_hub_id = $user->city->hub_id;
+        if(AdminHub::where('admin_id',$tag_id)->where('hub_id',$shipper_hub_id)->exists()){
+            if(!SalePersonTag::where(['admin_id'=>$tag_id,'user_id'=>$shipper_id,'status'=>0])->exists()){
+                $shipper_data =SalePersonTag::where('user_id',$shipper_id)->where('status',0)->get();
+                if($shipper_data->count() > 0){
+                    SalePersonTag::where('user_id',$shipper_id)->where('status',0)->update(['status' => 1]);
+                }
+                $sale_person_tag = new SalePersonTag();
+                $sale_person_tag->admin_id=$tag_id;
+                $sale_person_tag->user_id=$shipper_id;
+                $sale_person_tag->save();
+            }
+            else{
+                return ['status'=>0,'error'=>"Shipper is already assigned to Tagged Sales Person!"];
+            }
+
+            return ['status'=>1,'success'=>"Shipper Hub is assigned to Tagged Sales Person!"];
+        }
+        else{
+            return ['status'=>0,'error'=>"Shipper Hub is not assigned to Tagged Sales Person!"];
+
         }
 
     }
@@ -726,6 +759,11 @@ class AdminDashboardController extends Controller
         }
         return redirect()->back()->with('error','User rates not found!');
     }
+//    public function salesTag(Request $name)
+//    {
+//        $salesperson = admins::join('admin_department as ad', 'admins.role_id', '=', 'ad.role_id')
+//            ->join('admin_roles as ar', 'ar.department_id', '=', 7)->get();
+//    }
 
     public function viewRates($id){
         $user = User::find($id);
@@ -3393,7 +3431,10 @@ class AdminDashboardController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
-
+                if($result->status == 3 && (session('role_id') == 1 || session('role_id') == 4))
+                {
+                    $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
+                }
                 if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(12, session('permissions')))) {
                     $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id'=> $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                 }
@@ -3433,6 +3474,7 @@ class AdminDashboardController extends Controller
 
 
     public function pendingAccountListAjax(){
+
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
             ->leftjoin('products','products.id','=','users.product_id')
             ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
@@ -3442,7 +3484,6 @@ class AdminDashboardController extends Controller
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
-
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
@@ -3482,7 +3523,10 @@ class AdminDashboardController extends Controller
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#BankInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Bank Info</div></button>';
 
                 $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#ShippingInfoModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Shipping Info</div></button>';
-
+                if($result->status == 0 && (session('role_id') == 1 || session('role_id') == 4))
+                {
+                    $dropdown .= '<button type="button" class="dropdown-item" data-target-id="' . $result->id . '" data-toggle="modal" data-target="#SalesTagModal"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Sales Person</div></button>';
+                }
                 if($result->status == 2 && (session('role_id') == 1 || in_array(9, session('permissions')))) {
                     $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
