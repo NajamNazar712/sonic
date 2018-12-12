@@ -314,7 +314,9 @@ class DeliveryController extends Controller
 
                                     if(DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->where('status',0)->exists()){
                                        $journey = ShipmentsJourney::where('shipment_id',$shipment)->where('verification',0)->latest()->first();
-                                       ShipmentsJourneyController::add($journey->shipment_id,$journey->shipper_status_id,$journey->consignee_status_id,$journey->status_reason_id,$journey->remarks,$journey->user_id,Auth::id(),$journey->reference_1_id,NULL,1);
+                                       if($journey->count() > 0){
+                                           ShipmentsJourneyController::add($journey->shipment_id,$journey->shipper_status_id,$journey->consignee_status_id,$journey->status_reason_id,$journey->remarks,$journey->user_id,Auth::id(),$journey->reference_1_id,NULL,1);
+                                       }
                                     }
 
                                 }
