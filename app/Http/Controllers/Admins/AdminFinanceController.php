@@ -625,15 +625,25 @@ class AdminFinanceController extends Controller
         ->filterColumn('delivery_note_shipments.delivery_note_id', function ($query, $keyword) {
             return $query->where('delivery_note_shipments.delivery_note_id', '=', $keyword);
         })
-        ->editColumn('dncc_link', function($shipments) {
-                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->dncc, 6, '0', STR_PAD_LEFT) . '</span></button>';
-            })
-        ->editColumn('sdn_link', function($shipments) {
-                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipments->sdn, 6, '0', STR_PAD_LEFT) . '</span></button>';
-            })
+        ->editColumn('dncc_link', function($shipment) {
+            if ($shipment->dncc) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipment->dncc, 6, '0', STR_PAD_LEFT) . '</span></button>';
+            }
+            else {
+                return '';
+            }
+        })
         ->editColumn('sdn', function ($shipment) {
             if ($shipment->sdn) {
                 return str_pad($shipment->sdn, 6, '0', STR_PAD_LEFT);
+            }
+            else {
+                return '';
+            }
+        })
+        ->editColumn('sdn_link', function($shipment) {
+            if ($shipment->sdn) {
+                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($shipment->sdn, 6, '0', STR_PAD_LEFT) . '</span></button>';
             }
             else {
                 return '';
@@ -1173,19 +1183,23 @@ class AdminFinanceController extends Controller
 
             $delivery_note->save();
 
-            $station_deposit_note = $delivery_note->station_deposit_note;
+            $delivery_note_station_deposit_note = $delivery_note->delivery_note_station_deposit_note;
 
-            $station_deposit_note_amount = $station_deposit_note->sdn_amount - $shipment->amount;
+            if ($delivery_note_station_deposit_note) {
+                $station_deposit_note = $delivery_note_station_deposit_note->station_deposit_note;
 
-            if ($station_deposit_note_amount < 0) {
-                $station_deposit_note_amount = 0;
+                $station_deposit_note_amount = $station_deposit_note->sdn_amount - $shipment->amount;
+
+                if ($station_deposit_note_amount < 0) {
+                    $station_deposit_note_amount = 0;
+                }
+
+                $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
+                $station_deposit_note->sdn_amount = $station_deposit_note_amount;
+                $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
+
+                $station_deposit_note->save();
             }
-
-            $station_deposit_note->sdn_delivered_shipments = $station_deposit_note->sdn_delivered_shipments - 1;
-            $station_deposit_note->sdn_amount = $station_deposit_note_amount;
-            $station_deposit_note->sdn_net_amount = $station_deposit_note_amount;
-
-            $station_deposit_note->save();
 
             $shipment->shipper_status_id = 13;
             $shipment->consignee_status_id = 13;

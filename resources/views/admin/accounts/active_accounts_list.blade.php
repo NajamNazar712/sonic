@@ -45,7 +45,27 @@
             </div>
         </div>
     </section>
+    <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Sale Person</h4>
+                    <input type="hidden" id="shipper_id">
+                    <select name="Sale_person" id="saletag" class="form-control select2">
+                        @foreach($sale_name as $sn)
+                            <option value="{{ $sn->id }}" > {{ $sn->name }} </option>
+                        @endforeach
+                    </select>
 
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline-success" id="salesTagSubmit">Submit</button>
+                    <button type="button" class="btn btn-outline-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -347,6 +367,44 @@
 
             });
 
+
+        });
+        $("#saletag").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Sales Person",
+            width:'100%'
+        });
+        $('#SalesTagModal').on('shown.bs.modal',function (e) {
+            var $invoker = $(e.relatedTarget);
+            var shipper_id = $invoker.data('target-id');
+            $('#shipper_id').val(shipper_id);
+        });
+        $('#salesTagSubmit').on('click',function () {
+            var shipper = $('#shipper_id').val();
+            var tag = parseInt($('#saletag').val());
+            if(tag){
+                $.ajax({
+                    url: '{!! route('admin.accounts.tag.submit') !!}',
+                    method: 'POST',
+                    data: {
+                        'admin_id': tag,
+                        'shipper_id':shipper,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+                    });
+            }else{
+                var error = "Sales Person Not Selected!";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
 
         });
         $('body').on('click','button.userenable',function () {
