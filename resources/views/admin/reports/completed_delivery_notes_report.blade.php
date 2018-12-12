@@ -63,7 +63,7 @@
                     </div>
                     <div class="col-4">
 
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group ml">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -74,7 +74,7 @@
                         </div>
                     </div>
                     <div class="col-4 ">
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group ml">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -87,7 +87,7 @@
                     </div>
                     <div class="col-4">
 
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group ml">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>
@@ -98,7 +98,7 @@
                         </div>
                     </div>
                     <div class="col-4 ">
-                        <div class="form-group input-group ml-1">
+                        <div class="form-group input-group ml">
                             <div class="input-group-prepend">
                             <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
                                 <span class="la la-calendar-o"></span>

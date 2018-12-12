@@ -107,6 +107,8 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
+                        <th class="border-primary border-darken-1">Payment Number</th>
+                        <th class="border-primary border-darken-1">SDN Number</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
@@ -311,6 +313,8 @@
                             head.push('Shipper');
                             head.push('Status');
                             head.push('Payment Status');
+                            head.push('Payment Number');
+                            head.push('SDN Number');
                             head.push('Service Type');
                             head.push('Arrival Date');
                             head.push('Origin');
@@ -344,6 +348,8 @@
                                 row.push(values.shipper);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
+                                row.push(values.payment_id);
+                                row.push(values.sdn_id);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
                                 row.push(values.origin);
@@ -414,6 +420,8 @@
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},
+                    { data:'payment_id' ,name: 'pd.id', class: 'align-middle payment_status'},
+                    { data:'sdn_id' ,name: 'sdn.id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
