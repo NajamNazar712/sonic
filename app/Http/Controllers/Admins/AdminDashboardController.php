@@ -3384,15 +3384,16 @@ class AdminDashboardController extends Controller
            ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
            ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
            ->leftjoin('admins as rabba','rabba.id','=','users.account_activated_by')
-           ->leftjoin('sale_person_tags as spt', 'users.id', '=', 'spt.user_id')
            ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
 
-        if((session('role_id') != 1 ) || ( session('department_id') == 7)){
-            $users = $users->where('spt.admin_id', Auth::id());
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $users = $users->whereIn('users.id', session('shippers'));
+            }
         }
 
         return Datatables::of($users)
@@ -3484,15 +3485,16 @@ class AdminDashboardController extends Controller
             ->leftjoin('products','products.id','=','users.product_id')
             ->leftjoin('admins as rab','rab.id','=','users.rates_added_by')
             ->leftjoin('admins as rabb','rabb.id','=','users.rates_authorized_by')
-//            ->leftjoin('sale_person_tags as spt','spt.user_id', '=', 'users.id')
             ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
-//        if(session('role_id') != 1 || session('department_id') == 7){
-////            $users = $users->whereIn('')
-//        }
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $users = $users->whereIn('users.id', session('shippers'));
+            }
+        }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
@@ -3577,12 +3579,17 @@ class AdminDashboardController extends Controller
     }
     public function blockAccountListAjax(){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
+            ->leftjoin('sale_person_tags as spt', 'users.id', '=', 'spt.user_id')
             ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
         }
-
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $users = $users->whereIn('users.id', session('shippers'));
+            }
+        }
         return Datatables::of($users)
             ->addColumn('id_padded', function ($user) {
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);

@@ -246,16 +246,20 @@ class AdminPickupsController extends Controller
     }
 
     public function pending_list(Request $request) {
-      $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
-      ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
-      ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
-      ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
-      ->where('pickup_requests.status', 0);
+          $pickup_requests = PickupRequest::join('users as u', 'pickup_requests.shipper_id', '=', 'u.id')
+          ->join('user_shipping_infos as usi', 'pickup_requests.pickup_address_id', '=', 'usi.id')
+          ->join('cities AS ci', 'usi.city_id', '=', 'ci.id')
+          ->select('pickup_requests.id', 'pickup_requests.created_at as requested_at', 'u.name as shipper', 'usi.poc AS contact_person', 'usi.phone AS contact_number', 'usi.pickup_address AS address', 'ci.name AS city', 'pickup_requests.bookings', 'pickup_requests.bookings as bookings_link' , 'pickup_requests.pending_bookings','pickup_requests.pending_bookings as pending_bookings_link', 'pickup_requests.total_estimated_weight', 'pickup_requests.pickup_type', 'pickup_requests.pickup_date')
+          ->where('pickup_requests.status', 0);
 
-      if (session('role_id') != 1) {
-        $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
-      }
-
+          if (session('role_id') != 1) {
+            $pickup_requests = $pickup_requests->whereIn('ci.hub_id', session('hubs'));
+          }
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $pickup_requests = $pickup_requests->whereIn('u.id', session('shippers'));
+            }
+        }
       $datatables = Datatables::of($pickup_requests)
       ->editColumn('total_estimated_weight', '{{ floatval($total_estimated_weight) }}')
       ->editColumn('pickup_type', function($pickup_request) {

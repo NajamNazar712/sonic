@@ -56,18 +56,19 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h4 class="modal-title" id="">Tag Sale Person</h4>
+                    <h4 class="modal-title" id="">Tag Sales Person</h4>
+                </div>
+                <div class="modal-body">
                     <input type="hidden" id="shipper_id">
                     <select name="Sale_person" id="saletag" class="form-control select2">
                         @foreach($sale_name as $sn)
                             <option value="{{ $sn->id }}" > {{ $sn->name }} </option>
                         @endforeach
                     </select>
-
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-outline-success" id="salesTagSubmit">Submit</button>
-                    <button type="button" class="btn btn-outline-info" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="salesTagSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
                 </div>
             </div>
         </div>
@@ -77,54 +78,6 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-
-    <style type="text/css">
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-    </style>
 @endsection
 
 @section('js')
@@ -401,7 +354,8 @@
         });
         $("#saletag").prepend('<option value="" selected></option>').select2({
             placeholder: "Select Sales Person",
-            width:'100%'
+            width:'100%',
+            dropdownParent:$('#SalesTagModal')
         });
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
             var $invoker = $(e.relatedTarget);
@@ -423,13 +377,15 @@
                 })
                     .done(function(data) {
                         if(data.status){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                         }
                         else {
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                         }
+                        $('#saletag').val('').trigger('change');
+                        $('#SalesTagModal').modal('hide');
                     });
             }else{
                 var error = "Sales Person Not Selected!";
