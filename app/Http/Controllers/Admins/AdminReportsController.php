@@ -72,7 +72,7 @@ class AdminReportsController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $shipments = $shipments->whereIn('shipments.user_id', session('shippers'));
+                $shipments = $shipments->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
         $datatable = Datatables::of($shipments)
@@ -135,7 +135,7 @@ class AdminReportsController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $return_note = $return_note->whereIn('shipments.user_id', session('shippers'));
+                $return_note = $return_note->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
         $return = Datatables::of($return_note)
@@ -390,7 +390,7 @@ class AdminReportsController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $deliveries = $deliveries->whereIn('pr.shipper_id', session('shippers'));
+                $deliveries = $deliveries->whereIn('pr.shipper_id', session('tagged_shippers'));
             }
         }
         $pickup_note = Datatables::of($pickup_note)
@@ -1791,7 +1791,7 @@ class AdminReportsController extends Controller
                 $hubs[] = $city;
             }else{
 
-                $hubs = City::whereIn('hub_id', session('hubs'))->select('id','name')->get();
+                $hubs = City::whereIn('id', session('hubs'))->select('id','name')->get();
             }
         }
 
@@ -1830,25 +1830,25 @@ class AdminReportsController extends Controller
                 if(session('role_id') != 4){
                     $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('hub_id', '=', $hub->id);
-                    })->whereDate('created_at',$date)->whereIn('shipments.user_id', session('shippers'))->count();
+                    })->whereDate('created_at',$date)->whereIn('shipments.user_id', session('tagged_shippers'))->count();
                     $received = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('hub_id', '=', $hub->id);
                     })->whereHas('shipment_journey', function($query) use ($date) {
                         $query->whereDate('created_at',$date)
                             ->where('shipper_status_id', 2);
-                    })->whereIn('shipments.user_id', session('shippers'))->count();
+                    })->whereIn('shipments.user_id', session('tagged_shippers'))->count();
                     $cod_collection = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('hub_id', '=', $hub->id);
                     })->whereHas('shipment_journey', function($query) use ($date) {
                         $query->whereDate('created_at',$date)
                             ->where('shipper_status_id', 2);
-                    })->whereIn('shipments.user_id', session('shippers'))->sum('amount');
+                    })->whereIn('shipments.user_id', session('tagged_shippers'))->sum('amount');
                     $revenue_wo_gst = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('hub_id', '=', $hub->id);
                     })->whereHas('shipment_journey', function($query) use ($date) {
                         $query->whereDate('created_at',$date)
                             ->where('shipper_status_id', 2);
-                    })->whereIn('shipments.user_id', session('shippers'))->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                    })->whereIn('shipments.user_id', session('tagged_shippers'))->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                 }else{
                     $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                         $query->where('hub_id', '=', $hub->id);
@@ -1900,7 +1900,7 @@ class AdminReportsController extends Controller
                 $shippers = User::where('city_id',$search_city)->where('status',3)->get();
             }else{
                 if(session('role_id') != 4){
-                    $shippers = User::where('city_id',$search_city)->where('status',3)->whereIn('id', session('shippers'))->get();
+                    $shippers = User::where('city_id',$search_city)->where('status',3)->whereIn('id', session('tagged_shippers'))->get();
                 }else{
                     $shippers = User::where('status',3)->get();
 
@@ -1911,7 +1911,7 @@ class AdminReportsController extends Controller
                 $shippers = User::where('status',3)->get();
             }else{
                 if(session('role_id') != 4){
-                    $shippers = User::where('status',3)->whereIn('id', session('shippers'))->get();
+                    $shippers = User::where('status',3)->whereIn('id', session('tagged_shippers'))->get();
 
                 }else{
                     $shippers = User::where('status',3)->get();
@@ -2031,10 +2031,24 @@ class AdminReportsController extends Controller
             $shippers = User::where('status',3)->get();
             $hubs = City::select('id','name')->where('hub',1)->get();
         }else{
-            $shippers = User::where('status',3)->whereHas('city', function($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            })->get();
             $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
+            if(session('department_id') != 7){
+                $shippers = User::where('status',3)->whereHas('city', function($query) {
+                    $query->whereIn('hub_id', session('hubs'));
+                })->get();
+
+            }else{
+                if(session('role_id') != 4){
+                    $shippers = User::where('status',3)->whereIn('users.id', session('tagged_shippers'))->whereHas('city', function($query) {
+                        $query->whereIn('hub_id', session('hubs'));
+                    })->get();
+                }else{
+                    $shippers = User::where('status',3)->whereHas('city', function($query) {
+                        $query->whereIn('hub_id', session('hubs'));
+                    })->get();
+
+                }
+            }
         }
         return view('admin.reports.customer_sales_report')->with(['hubs'=>$hubs,'shippers'=>$shippers]);
     }
@@ -2079,6 +2093,7 @@ class AdminReportsController extends Controller
             }else{
                 $city = City::whereIn('id',session('hubs'))->select('id','name')->get();
             }
+
         }
 
 
@@ -2095,16 +2110,28 @@ class AdminReportsController extends Controller
         $hubs = array();
         $users = array();
         foreach ($city as $c) {
-//            $hubid = $c->id;
             $details['hubs'][$c->id] = $c->name;
             if ($shipper_filter != '') {
                 $shippers = User::where('id', $shipper_filter)->whereHas('city', function ($query) use ($c) {
                     $query->where('hub_id', '=', $c->id);
                 });
             } else {
-                $shippers = User::whereHas('city', function ($query) use ($c) {
-                    $query->where('hub_id', '=', $c->id);
-                });
+                if(session('department_id') != 7){
+                    $shippers = User::whereHas('city', function ($query) use ($c) {
+                        $query->where('hub_id', '=', $c->id);
+                    });
+                }else{
+                    if(session('role_id') != 4){
+                        $shippers = User::whereHas('city', function ($query) use ($c) {
+                            $query->where('hub_id', '=', $c->id);
+                        })->whereIn('users.id', session('tagged_shippers'));
+                    }else{
+                        $shippers = User::whereHas('city', function ($query) use ($c) {
+                            $query->where('hub_id', '=', $c->id);
+                        });
+                    }
+                }
+
             }
 
             if ($shippers->exists()) {
@@ -2252,7 +2279,7 @@ class AdminReportsController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $deliveries = $deliveries->whereIn('shipments.user_id', session('shippers'));
+                $deliveries = $deliveries->whereIn('shipments.user_id', session('tagged_shippers'));
             }
         }
         $datatable = Datatables::of($deliveries)
@@ -2604,9 +2631,9 @@ class AdminReportsController extends Controller
                     $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->where('city_id',$hub)->count();
                 }else{
                     if(session('role_id') != 4){
-                        $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->where('city_id',$hub)->whereIn('id', session('shippers'))->count();
-                        $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->where('city_id',$hub)->whereIn('id', session('shippers'))->count();
-                        $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->where('city_id',$hub)->whereIn('id', session('shippers'))->count();
+                        $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->where('city_id',$hub)->whereIn('id', session('tagged_shippers'))->count();
+                        $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->where('city_id',$hub)->whereIn('id', session('tagged_shippers'))->count();
+                        $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->where('city_id',$hub)->whereIn('id', session('tagged_shippers'))->count();
                     }else{
                         $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->where('city_id',$hub)->count();
                         $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->where('city_id',$hub)->count();
@@ -2620,9 +2647,9 @@ class AdminReportsController extends Controller
                     $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->count();
                 }else{
                     if(session('role_id') != 4){
-                        $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->whereIn('id', session('shippers'))->count();
-                        $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->whereIn('id', session('shippers'))->count();
-                        $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->whereIn('id', session('shippers'))->count();
+                        $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count();
+                        $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->whereIn('id', session('tagged_shippers'))->count();
+                        $details['n'][$month] = User::whereBetween('activated_at',[$first_date,$last_date])->where('status',3)->whereIn('id', session('tagged_shippers'))->count();
                     }else{
                         $details['s'][$month] = User::whereDate('activated_at','<=',$first_date)->where('status',3)->count();
                         $details['e'][$month] = User::whereDate('activated_at','<=',$last_date)->where('status',3)->count();
@@ -2642,7 +2669,7 @@ class AdminReportsController extends Controller
             if (session('role_id') == 1 || in_array($hub, session('hubs'))) {
                 if(session('department_id') == 7 ){
                     if(session('role_id') != 4){
-                        $shippers['shipper'] = User::where('status','>=',3)->whereIn('id', session('shippers'))->get();
+                        $shippers['shipper'] = User::where('status','>=',3)->whereIn('id', session('tagged_shippers'))->get();
                     }else{
                         $shippers['shipper'] = User::whereHas('city', function($query) use ($hub) {
                             $query->where('hub_id', '=', $hub);
@@ -2666,7 +2693,7 @@ class AdminReportsController extends Controller
             else {
                 if(session('department_id') == 7){
                     if(session('role_id') != 4){
-                        $shippers['shipper'] = User::where('status','>=',3)->whereIn('id', session('shippers'))->get();
+                        $shippers['shipper'] = User::where('status','>=',3)->whereIn('id', session('tagged_shippers'))->get();
                     }else{
                         $shippers['shipper'] = User::whereHas('city', function($query) {
                             $query->whereIn('hub_id', session('hubs'));
@@ -2834,6 +2861,11 @@ class AdminReportsController extends Controller
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
         if (session('role_id') != 1) {
             $sales = $sales->whereIn('dc.hub_id', session('hubs'));
+        }
+        if(session('department_id') == 7){
+            if(session('role_id') != 4 ){
+                $sales = $sales->whereIn('u.id', session('tagged_shippers'));
+            }
         }
         $datatable = Datatables::of($sales)
             ->editColumn('tracking_number_link', function ($shipments) {

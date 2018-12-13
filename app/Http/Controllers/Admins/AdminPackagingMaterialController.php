@@ -258,7 +258,7 @@ class AdminPackagingMaterialController extends Controller
 
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $requests = $requests->whereIn('u.id', session('shippers'));
+                $requests = $requests->whereIn('u.id', session('tagged_shippers'));
             }
         }
         return Datatables::of($requests)

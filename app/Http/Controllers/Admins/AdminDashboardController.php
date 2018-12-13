@@ -3392,7 +3392,7 @@ class AdminDashboardController extends Controller
 
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $users = $users->whereIn('users.id', session('shippers'));
+                $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
 
@@ -3492,7 +3492,7 @@ class AdminDashboardController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $users = $users->whereIn('users.id', session('shippers'));
+                $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
         return Datatables::of($users)
@@ -3587,7 +3587,7 @@ class AdminDashboardController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $users = $users->whereIn('users.id', session('shippers'));
+                $users = $users->whereIn('users.id', session('tagged_shippers'));
             }
         }
         return Datatables::of($users)

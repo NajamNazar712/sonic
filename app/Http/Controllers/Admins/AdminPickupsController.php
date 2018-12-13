@@ -257,7 +257,7 @@ class AdminPickupsController extends Controller
           }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $pickup_requests = $pickup_requests->whereIn('u.id', session('shippers'));
+                $pickup_requests = $pickup_requests->whereIn('u.id', session('tagged_shippers'));
             }
         }
       $datatables = Datatables::of($pickup_requests)
