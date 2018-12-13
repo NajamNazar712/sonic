@@ -1868,28 +1868,30 @@ class AdminReportsController extends Controller
                     })->whereIn('shipments.user_id', session('tagged_shippers'))->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                 }else{
                     if($request->sales_person != null){
-//                        SalePersonTag::where('')
+                        $tagged_shippers = SalePersonTag::where('admin_id', $sales_person)->select('user_id')->get();
+
                         $booked = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('hub_id', '=', $hub->id);
-                        })->whereDate('created_at',$date)->whereIn('user_id', $request->sales_person)->count();
+                        })->whereDate('created_at',$date)->whereIn('user_id', $tagged_shippers)->count();
+
                         $received = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('hub_id', '=', $hub->id);
                         })->whereHas('shipment_journey', function($query) use ($date) {
                             $query->whereDate('created_at',$date)
                                 ->where('shipper_status_id', 2);
-                        })->where('user_id', $request->sales_person)->count();
+                        })->whereIn('user_id', $tagged_shippers)->count();
                         $cod_collection = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('hub_id', '=', $hub->id);
                         })->whereHas('shipment_journey', function($query) use ($date) {
                             $query->whereDate('created_at',$date)
                                 ->where('shipper_status_id', 2);
-                        })->where('user_id', $request->sales_person)->sum('amount');
+                        })->whereIn('user_id', $tagged_shippers)->sum('amount');
                         $revenue_wo_gst = Shipment::whereHas('pickup_address.city', function($query) use ($hub) {
                             $query->where('hub_id', '=', $hub->id);
                         })->whereHas('shipment_journey', function($query) use ($date) {
                             $query->whereDate('created_at',$date)
                                 ->where('shipper_status_id', 2);
-                        })->where('user_id', $request->sales_person)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
+                        })->whereIn('user_id', $tagged_shippers)->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
 
                     }else{
 
