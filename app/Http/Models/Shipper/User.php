@@ -39,4 +39,7 @@ class User extends Authenticatable
     public function shipping(){
         return $this->hasMany('App\Http\Models\Shipper\UserShippingInfo');
     }
+    public function sales_person(){
+        return $this->hasMany('App\Http\Models\Admin\SalePersonTag');
+    }
 }
