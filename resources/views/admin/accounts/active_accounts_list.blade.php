@@ -32,6 +32,8 @@
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
+                                        <th class="border-primary border-darken-1">Rate Updated By</th>
+                                        <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Approved By</th>
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
@@ -133,6 +135,8 @@
                         head.push('Status');
                         head.push('Request Date');
                         head.push('Rates Added By');
+                        head.push('Rates Updated By');
+                        head.push('Rates Status');
                         head.push('Rates Approved By');
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
@@ -152,6 +156,8 @@
                             row.push(values.status);
                             row.push(values.created_at);
                             row.push(values.added_by);
+                            row.push(values.updated_by);
+                            row.push(values.rate_status);
                             row.push(values.approved_by);
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
@@ -197,6 +203,8 @@
                 {data: 'status', name: 'status', class: 'align-middle status'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
+                {data: 'updated_by', name: 'rabna.name', class: 'align-middle updated_by'},
+                {data: 'rate_status', name: 'rate_status', class: 'align-middle rate_status'},
                 {data: 'approved_by', name: 'rabb.name', class: 'align-middle approved_by'},
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},

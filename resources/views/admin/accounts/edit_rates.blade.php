@@ -2927,12 +2927,16 @@
 
                             <div class="text-center mt-2">
                                 <input type="hidden" name="authorize" id="authorize">
+                                <input type="hidden" name="approve" id="approve">
                                 <div class="form-group">
 
                                     <button id="addRatesSubmit" type="submit" class="btn btn-outline-success round btn-min-width mr-1 mb-1">Update Rates</button>
 
                                     @if ($shipper->status == 1 && (session('role_id') == 1 || in_array(8, session('permissions'))))
                                         <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
+                                    @endif
+                                    @if ($rate_status==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(8, session('permissions'))))
+                                        <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
                                     @endif
                                 </div>
 
@@ -3020,6 +3024,10 @@
         });
         $('#accountActiveSubmit').on('click',function(){
             $('#authorize').val(1);
+            // console.log('ddd');
+        });
+        $('#accountApproveActiveSubmit').on('click',function(){
+            $('#approve').val(1);
             // console.log('ddd');
         });
 
