@@ -3026,4 +3026,34 @@ class AdminReportsController extends Controller
         }
         return $datatable->make(true);
     }
+
+    public function sales_person_performance_index(){
+        if (session('role_id') == 1){
+            $shippers = User::where('status', '>=',3)->get();
+            $hubs = City::select('id','name')->where('hub',1)->get();
+        }else{
+            $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
+            if(session('department_id') != 7){
+                $shippers = User::where('status',3)->whereHas('city', function($query) {
+                    $query->whereIn('hub_id', session('hubs'));
+                })->get();
+
+            }else{
+                if(session('role_id') != 4){
+                    $shippers = User::where('status',3)->whereIn('id', session('tagged_shippers'))->whereHas('city', function($query) {
+                        $query->whereIn('hub_id', session('hubs'));
+                    })->get();
+                }else{
+                    $shippers = User::where('status',3)->whereHas('city', function($query) {
+                        $query->whereIn('hub_id', session('hubs'));
+                    })->get();
+
+                }
+            }
+        }
+        return view('admin.reports.sales_person_performance_report')->with(['hubs'=>$hubs,'shippers'=>$shippers]);
+    }
+    public function sales_person_performance_export_to_excel(Request $request){
+
+    }
 }

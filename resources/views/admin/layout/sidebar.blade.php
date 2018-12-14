@@ -279,8 +279,8 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.customer_sales.index') }}">Monthwise Customer Sales</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(75, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.reports.overall_sales.index') }}">Overall Sales</a></li>
+                        @if (session('role_id') == 1 || in_array(134, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.sales_person_performance.index') }}">Sales Person Performance</a></li>
                         @endif
                     </ul>
                 </li>
