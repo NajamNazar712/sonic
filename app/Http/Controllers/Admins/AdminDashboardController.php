@@ -3383,8 +3383,6 @@ class AdminDashboardController extends Controller
             if ($request->approve == 1) {
                 $user = User::find($id);
 
-                $weight = WeightCharge::all()->where('user_id', $id);
-                $cash = CashHandlingCharge::all()->where('user_id', $id);
                 if($switches = RateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
 
                     HistoryRateStatus::create([
@@ -3434,21 +3432,66 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                    foreach ($weight as $w) {
+                    if($weight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
                         HistoryWeightCharge::create([
-                            'user_id' => $w['user_id'],
-                            'shipping_mode_id' => $w['shipping_mode_id'],
-                            'range_up' => $w['range_up'],
-                            'range_down' => $w['range_down'],
-                            'weight_addition' => $w['weight_addition'],
-                            'spkg' => $w['spkg'],
-                            'local_or_6hr' => $w['local_or_6hr'],
-                            'national_charges_class_0' => $w['national_charges_class_0'],
-                            'national_charges_class_1' => $w['national_charges_class_1'],
-                            'national_charges_class_2' => $w['national_charges_class_2'],
-                            'national_charges_class_3' => $w['national_charges_class_3'],
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'range_up' => $weight['range_up'],
+                            'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
+                            'local_or_6hr' => $weight['local_or_6hr'],
+                            'national_charges_class_0' => $weight['national_charges_class_0'],
+                            'national_charges_class_1' => $weight['national_charges_class_1'],
+                            'national_charges_class_2' => $weight['national_charges_class_2'],
+                            'national_charges_class_3' => $weight['national_charges_class_3'],
                         ]);
                     }
+                if($weight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
+                    HistoryWeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'range_up' => $weight['range_up'],
+                        'range_down' => $weight['range_down'],
+                        'weight_addition' => $weight['weight_addition'],
+                        'spkg' => $weight['spkg'],
+                        'local_or_6hr' => $weight['local_or_6hr'],
+                        'national_charges_class_0' => $weight['national_charges_class_0'],
+                        'national_charges_class_1' => $weight['national_charges_class_1'],
+                        'national_charges_class_2' => $weight['national_charges_class_2'],
+                        'national_charges_class_3' => $weight['national_charges_class_3'],
+                    ]);
+                }
+                if($weight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
+                    HistoryWeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'range_up' => $weight['range_up'],
+                        'range_down' => $weight['range_down'],
+                        'weight_addition' => $weight['weight_addition'],
+                        'spkg' => $weight['spkg'],
+                        'local_or_6hr' => $weight['local_or_6hr'],
+                        'national_charges_class_0' => $weight['national_charges_class_0'],
+                        'national_charges_class_1' => $weight['national_charges_class_1'],
+                        'national_charges_class_2' => $weight['national_charges_class_2'],
+                        'national_charges_class_3' => $weight['national_charges_class_3'],
+                    ]);
+                }
+                if($weight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
+                    HistoryWeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'range_up' => $weight['range_up'],
+                        'range_down' => $weight['range_down'],
+                        'weight_addition' => $weight['weight_addition'],
+                        'spkg' => $weight['spkg'],
+                        'local_or_6hr' => $weight['local_or_6hr'],
+                        'national_charges_class_0' => $weight['national_charges_class_0'],
+                        'national_charges_class_1' => $weight['national_charges_class_1'],
+                        'national_charges_class_2' => $weight['national_charges_class_2'],
+                        'national_charges_class_3' => $weight['national_charges_class_3'],
+                    ]);
+                }
                 if($bookingType = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
                     HistoryBookingTypeCharges::create([
                         'user_id' => $id,
@@ -3482,15 +3525,42 @@ class AdminDashboardController extends Controller
                     ]);
                 }
 
-                    foreach ($cash as $c) {
+                    if($cash = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
                         HistoryCashHandlingCharge::create([
-                            'user_id' => $c['user_id'],
-                            'shipping_mode_id' => $c['shipping_mode_id'],
-                            'range_up' => $c['range_up'],
-                            'range_down' => $c['range_down'],
-                            'charges' => $c['charges']
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'range_up' => $cash['range_up'],
+                            'range_down' => $cash['range_down'],
+                            'charges' => $cash['charges']
                         ]);
                     }
+                if($cash = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
+                    HistoryCashHandlingCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'range_up' => $cash['range_up'],
+                        'range_down' => $cash['range_down'],
+                        'charges' => $cash['charges']
+                    ]);
+                }
+                if($cash = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
+                    HistoryCashHandlingCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'range_up' => $cash['range_up'],
+                        'range_down' => $cash['range_down'],
+                        'charges' => $cash['charges']
+                    ]);
+                }
+                if($cash = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
+                    HistoryCashHandlingCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'range_up' => $cash['range_up'],
+                        'range_down' => $cash['range_down'],
+                        'charges' => $cash['charges']
+                    ]);
+                }
                 if($insurance = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
                 {
                     HistoryInsuranceCharge::create([
@@ -3708,7 +3778,7 @@ class AdminDashboardController extends Controller
                     ]);
                 }
                 RateHistory::create([
-                    'user_id' => $user['id'],
+                    'user_id' => $id,
                     'updated_by' => $user['rates_updated_by'],
                     'approved_by' => $user['rates_authorized_by']
                 ]);
@@ -3723,8 +3793,6 @@ class AdminDashboardController extends Controller
                 PackagingCharge::where('user_id', $id)->delete();
                 DiscountCharge::where('user_id', $id)->delete();
 
-                $pendingweight = PendingWeightCharge::all()->where('user_id', $id);
-                $pendingcash = PendingCashHandlingCharge::all()->where('user_id', $id);
                 if($pendingswitchs = PendingRateStatus::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
                     RateStatus::create([
                         'user_id' => $id,
@@ -3773,28 +3841,55 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $pendingswitchs['fuel_charges']
                     ]);
                 }
-                if($pendingweight->count()>1) {
-                    foreach ($pendingweight as $w) {
-                        WeightCharge::create([
-                            'user_id' => $w['user_id'],
-                            'shipping_mode_id' => $w['shipping_mode_id'],
-                            'range_up' => $w['range_up'],
-                            'range_down' => $w['range_down'],
-                            'weight_addition' => $w['weight_addition'],
-                            'spkg' => $w['spkg'],
-                            'local_or_6hr' => $w['local_or_6hr'],
-                            'national_charges_class_0' => $w['national_charges_class_0'],
-                            'national_charges_class_1' => $w['national_charges_class_1'],
-                            'national_charges_class_2' => $w['national_charges_class_2'],
-                            'national_charges_class_3' => $w['national_charges_class_3'],
-                        ]);
-                    }
-                }
-                else
-                {
+                if($pendingweight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
                     WeightCharge::create([
-                        'user_id' => $pendingweight['user_id'],
-                        'shipping_mode_id' => $pendingweight['shipping_mode_id'],
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'range_up' => $pendingweight['range_up'],
+                        'range_down' => $pendingweight['range_down'],
+                        'weight_addition' => $pendingweight['weight_addition'],
+                        'spkg' => $pendingweight['spkg'],
+                        'local_or_6hr' => $pendingweight['local_or_6hr'],
+                        'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                        'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                        'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                        'national_charges_class_3' => $pendingweight['national_charges_class_3'],
+                    ]);
+                }
+                if($pendingweight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
+                    WeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'range_up' => $pendingweight['range_up'],
+                        'range_down' => $pendingweight['range_down'],
+                        'weight_addition' => $pendingweight['weight_addition'],
+                        'spkg' => $pendingweight['spkg'],
+                        'local_or_6hr' => $pendingweight['local_or_6hr'],
+                        'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                        'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                        'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                        'national_charges_class_3' => $pendingweight['national_charges_class_3'],
+                    ]);
+                }
+                if($pendingweight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
+                    WeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'range_up' => $pendingweight['range_up'],
+                        'range_down' => $pendingweight['range_down'],
+                        'weight_addition' => $pendingweight['weight_addition'],
+                        'spkg' => $pendingweight['spkg'],
+                        'local_or_6hr' => $pendingweight['local_or_6hr'],
+                        'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                        'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                        'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                        'national_charges_class_3' => $pendingweight['national_charges_class_3'],
+                    ]);
+                }
+                if($pendingweight = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
+                    WeightCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
                         'range_up' => $pendingweight['range_up'],
                         'range_down' => $pendingweight['range_down'],
                         'weight_addition' => $pendingweight['weight_addition'],
@@ -3838,21 +3933,37 @@ class AdminDashboardController extends Controller
                         'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
                     ]);
                 }
-                if($pendingcash->count()>1) {
-                    foreach ($pendingcash as $c) {
-                        CashHandlingCharge::create([
-                            'user_id' => $c['user_id'],
-                            'shipping_mode_id' => $c['shipping_mode_id'],
-                            'range_up' => $c['range_up'],
-                            'range_down' => $c['range_down'],
-                            'charges' => $c['charges']
-                        ]);
-                    }
-                }
-                else{
+                if($pendingcash = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
                     CashHandlingCharge::create([
-                        'user_id' => $pendingcash['user_id'],
-                        'shipping_mode_id' => $pendingcash['shipping_mode_id'],
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'range_up' => $pendingcash['range_up'],
+                        'range_down' => $pendingcash['range_down'],
+                        'charges' => $pendingcash['charges']
+                    ]);
+                }
+                if($pendingcash = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
+                    CashHandlingCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'range_up' => $pendingcash['range_up'],
+                        'range_down' => $pendingcash['range_down'],
+                        'charges' => $pendingcash['charges']
+                    ]);
+                }
+                if($pendingcash = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
+                    CashHandlingCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'range_up' => $pendingcash['range_up'],
+                        'range_down' => $pendingcash['range_down'],
+                        'charges' => $pendingcash['charges']
+                    ]);
+                }
+                if($pendingcash = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
+                    CashHandlingCharge::create([
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
                         'range_up' => $pendingcash['range_up'],
                         'range_down' => $pendingcash['range_down'],
                         'charges' => $pendingcash['charges']
@@ -6036,6 +6147,7 @@ class AdminDashboardController extends Controller
             }
 
         }
+
 
     }
 
