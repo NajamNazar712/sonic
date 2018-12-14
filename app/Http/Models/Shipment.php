@@ -40,7 +40,7 @@ class Shipment extends Model
 	}
 
 	public function shipment_journey(){
-	    return $this->hasMany('App\Http\Models\ShipmentsJourney');
+	    return $this->hasMany('App\Http\Models\ShipmentsJourney')->orderBy('id', 'DESC');
     }
 
     public function shipment_payment_journey(){
