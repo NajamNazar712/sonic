@@ -2598,7 +2598,7 @@ class AdminReportsController extends Controller
                 $shippers = User::whereHas('city', function($query) {
                     $query->whereIn('hub_id', session('hubs'));
                 })->where('status','>=',3)->get();
-                $hubs = City::select('id','name')->where('id',session('hubs'))->get();
+                $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
             }else{
                 if(session('role_id') != 4){
                     $shippers = User::whereIn('id', session('tagged_shippers'))->where('status','>=',3)->get();
@@ -2607,7 +2607,7 @@ class AdminReportsController extends Controller
                     $shippers = User::whereHas('city', function($query) {
                         $query->whereIn('hub_id', session('hubs'));
                     })->where('status','>=',3)->get();
-                    $hubs = City::select('id','name')->where('id',session('hubs'))->get();
+                    $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
                 }
             }
 
