@@ -3072,35 +3072,47 @@ class AdminReportsController extends Controller
             $dates[] = $d->format('Y-m-d');
         }
 
-//        foreach ($dates as $date){
-//            return $date;
-//        }
         if($sales_person_filter != null){
                 $sales_person = Admin::where('id', $sales_person_filter)->get();
 
         }else{
             if(session('role_id') == 1){
-
+                $sales_person = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
             }else{
                 if(session('department_id') != 7){
-
+                    $sales_person = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
                 }else{
                     if(session('role_id') != 4){
-
+                        $sales_person = Admin::where('id', Auth::id())->get();
                     }else{
-
+                        $sales_person = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
                     }
                 }
             }
         }
 
         $details = array();
-        $sales_persons = array();
+        $sales_persons_data = array();
         $shippers = array();
-//        unset($months_array[0]);
 
         $details['header'] = ['Sales Persons', 'Client Name' ];
 //        $details['subheader'] = ['Parcels', 'Weight','Collection Amount','Revenue' ];
+
+        foreach ($sales_person as $person){
+            $sales_persons_data['sales_person'][$person->id]['name'] = $person->name;
+            $tagged_shippers = SalePersonTag::where('admin_id', $person->id)->select('user_id')->get();
+            foreach ($tagged_shippers as $shipper){
+                $user = User::find($shipper->user_id);
+                $sales_persons_data['sales_person'][$person->id]['shipper'][$user->id] = $user->name;
+                foreach ($dates as $date){
+                    $sales_persons_data['sales_person'][$person->id]['pickups'][$user->id][] = Shipment::whereHas('shipment_journey', function($query) use ($date) {
+                        $query->whereDate('created_at',$date)
+                            ->where('shipper_status_id', 2);
+                    })->where('shipments.user_id', $user->id)->count();
+                }
+
+            }
+        }
 
         foreach ($dates as $date){
             $details['dates'][] = $date;
@@ -3114,22 +3126,23 @@ class AdminReportsController extends Controller
             'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
         ];
         $sheet->getStyle('A1:B1')->applyFromArray($cell_st);
-
-        foreach ($sales_person as $person) {
-            $sheet->setCellValue('A2', $person->name);
+        $admin_index = 2;
+        foreach ($sales_persons_data as $sales_persons) {
+            foreach ($sales_persons as $person)
+                return $person;
+            $sheet->setCellValue('A'.$admin_index, $person->name);
         }
 
         $cellIndexcol1 = 3;
-        $cellIndexcol2 = 6;
-
         foreach ($details['dates'] as $key => $name) {
             $cellIndex1 = Coordinate::stringFromColumnIndex($cellIndexcol1);
             $cellIndex11 = $cellIndex1 . '1';
             $sheet->setCellValue($cellIndex11, $name);
             $cellIndexcol1 += 1;
 
-
         }
+
+
         $sheet->fromArray($details['header'],NULL,'A1');
         $writer = new Xlsx($spreadsheet);
 
