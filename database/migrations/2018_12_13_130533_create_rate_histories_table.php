@@ -19,6 +19,7 @@ class CreateRateHistoriesTable extends Migration
             $table->integer('updated_by')->nullable();
             $table->integer('approved_by')->nullable();
             $table->timestamps();
+
         });
     }
 

@@ -3827,6 +3827,7 @@ class AdminDashboardController extends Controller
                     'user_id' => $id,
                     'updated_by' => $user['rates_updated_by'],
                     'approved_by' => $user['rates_authorized_by']
+
                 ]);
 
                 RateStatus::where('user_id', $id)->delete();
