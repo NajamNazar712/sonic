@@ -391,7 +391,7 @@ class AdminReportsController extends Controller
         }
         if(session('department_id') == 7){
             if(session('role_id') != 4 ){
-                $deliveries = $deliveries->whereIn('pr.shipper_id', session('tagged_shippers'));
+                $pickup_note = $pickup_note->whereIn('pr.shipper_id', session('tagged_shippers'));
             }
         }
         $pickup_note = Datatables::of($pickup_note)
@@ -2653,15 +2653,28 @@ class AdminReportsController extends Controller
     }
     //completed_delivery_note
     public function customer_retention_index(){
-        if (session('role_id') != 1) {
-            $shippers = User::whereHas('city', function($query) {
-                $query->whereIn('hub_id', session('hubs'));
-            })->where('status','>=',3)->get();
-            $hubs = City::select('id','name')->where('id',session('hubs'))->get();
-
-        }else{
+        if (session('role_id') == 1) {
             $shippers = User::where('status','>=',3)->get();
             $hubs = City::select('id','name')->where('hub',1)->get();
+        }else{
+            if(session('department_id') != 7){
+                $shippers = User::whereHas('city', function($query) {
+                    $query->whereIn('hub_id', session('hubs'));
+                })->where('status','>=',3)->get();
+                $hubs = City::select('id','name')->where('id',session('hubs'))->get();
+            }else{
+                if(session('role_id') != 4){
+                    $shippers = User::whereIn('id', session('tagged_shippers'))->where('status','>=',3)->get();
+                    $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
+                }else{
+                    $shippers = User::whereHas('city', function($query) {
+                        $query->whereIn('hub_id', session('hubs'));
+                    })->where('status','>=',3)->get();
+                    $hubs = City::select('id','name')->where('id',session('hubs'))->get();
+                }
+            }
+
+
 
         }
 
