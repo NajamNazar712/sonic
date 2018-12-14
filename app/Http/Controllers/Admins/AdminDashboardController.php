@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\NotificationsController;
+use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\Admins\ShipmentChargesController;
+use App\Http\Controllers\Admins\AdminFinanceController;
 
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
@@ -481,8 +484,8 @@ class AdminDashboardController extends Controller
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                    ->where('shipments_journey.created_at', '=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                    ->where('shipments_journey.id', '=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
             ->join('shipment_status as ss','ss.id','=','shipments_journey.shipper_status_id')
             ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
@@ -695,6 +698,49 @@ class AdminDashboardController extends Controller
         $returnHTML = view('admin/components/shipment_charges')->with(['shipment'=>$shipment])->render();
         return response()->json($returnHTML);
     }
+
+    public function shipper_recall(Request $request) {
+        $shipment_ids = $request->shipment_ids;
+
+        if (!empty($shipment_ids)) {
+            $valid = FALSE;
+
+            foreach ($shipment_ids as $shipment_id) {
+                $shipment = Shipment::find($shipment_id);
+
+                if ($shipment && $shipment->shipper_status_id == 2 && !$shipment->packaging_material_request) {
+                    $valid = TRUE;
+
+                    $shipment->shipper_status_id = 20;
+                    $shipment->consignee_status_id = 20;
+
+                    $shipment->save();
+
+                    ShipmentsJourneyController::add($shipment_id, 50, 50, NULL, NULL, NULL, Auth::id());
+
+                    ShipmentsJourneyController::add($shipment_id, 20, 20, NULL, NULL, NULL, Auth::id());
+
+                    NotificationsController::send(15, 0, $shipment_id);
+                    NotificationsController::send(16, 0, $shipment_id);
+
+                    ShipmentChargesController::return($shipment_id);
+
+                    AdminFinanceController::add_payment($shipment_id, 1);
+                }
+            }
+
+            if ($valid) {
+                return ['status' => 0, 'success' => 'Shipment(s) has been marked for Return'];
+            }
+            else {
+                return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
+            }
+        }
+        else {
+            return ['status' => 1, 'error' => 'No Shipment Selected'];
+        }
+    }
+
     /**
      * @return \Illuminate\Http\JsonResponse
      * @throws \Throwable
