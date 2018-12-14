@@ -3579,7 +3579,6 @@ class AdminDashboardController extends Controller
     }
     public function blockAccountListAjax(){
         $users = User::join('cities', 'users.city_id', '=', 'cities.id')
-            ->leftjoin('sale_person_tags as spt', 'users.id', '=', 'spt.user_id')
             ->select(['users.id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','users.blacklist_reason as reason'])->where('blacklist',1);
 
         if (session('role_id') != 1) {
