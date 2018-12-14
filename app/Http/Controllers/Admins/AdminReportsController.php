@@ -2091,7 +2091,7 @@ class AdminReportsController extends Controller
 
     public function customer_sales_index(Request $request){
         if (session('role_id') == 1){
-            $shippers = User::where('status',3)->get();
+            $shippers = User::where('status','>=',3)->get();
             $hubs = City::select('id','name')->where('hub',1)->get();
         }else{
             $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
@@ -2102,7 +2102,7 @@ class AdminReportsController extends Controller
 
             }else{
                 if(session('role_id') != 4){
-                    $shippers = User::where('status',3)->whereIn('users.id', session('tagged_shippers'))->whereHas('city', function($query) {
+                    $shippers = User::where('status',3)->whereIn('id', session('tagged_shippers'))->whereHas('city', function($query) {
                         $query->whereIn('hub_id', session('hubs'));
                     })->get();
                 }else{
@@ -2673,9 +2673,6 @@ class AdminReportsController extends Controller
                     $hubs = City::select('id','name')->where('id',session('hubs'))->get();
                 }
             }
-
-
-
         }
 
         return view('admin.reports.customer_retention_report')->with(['hubs'=>$hubs,'shippers'=>$shippers]);
@@ -3041,32 +3038,114 @@ class AdminReportsController extends Controller
     }
 
     public function sales_person_performance_index(){
-        if (session('role_id') == 1){
-            $shippers = User::where('status', '>=',3)->get();
+        if (session('role_id') == 1) {
+            $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
             $hubs = City::select('id','name')->where('hub',1)->get();
         }else{
-            $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
             if(session('department_id') != 7){
-                $shippers = User::where('status',3)->whereHas('city', function($query) {
-                    $query->whereIn('hub_id', session('hubs'));
-                })->get();
-
+                $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
+                $hubs = City::select('id','name')->where('id',session('hubs'))->get();
             }else{
                 if(session('role_id') != 4){
-                    $shippers = User::where('status',3)->whereIn('id', session('tagged_shippers'))->whereHas('city', function($query) {
-                        $query->whereIn('hub_id', session('hubs'));
-                    })->get();
+                    $sales_persons = Admin::where('id', Auth::id())->select('id', 'name')->get();
+                    $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
                 }else{
-                    $shippers = User::where('status',3)->whereHas('city', function($query) {
-                        $query->whereIn('hub_id', session('hubs'));
-                    })->get();
-
+                    $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
+                    $hubs = City::select('id','name')->where('id',session('hubs'))->get();
                 }
             }
         }
-        return view('admin.reports.sales_person_performance_report')->with(['hubs'=>$hubs,'shippers'=>$shippers]);
+        return view('admin.reports.sales_person_performance_report')->with(['hubs'=>$hubs,'sales_persons'=>$sales_persons]);
     }
     public function sales_person_performance_export_to_excel(Request $request){
+        $hub = $request->city;
+        $sales_person_filter = $request->sales_person;
+        $start_date = $request->from_date;
+        $current_date = $request->to_date;
 
+        $start_date = Carbon::parse($start_date);
+        $current_date = Carbon::parse($current_date);
+        $number_of_days = $start_date->diffInDays($current_date);
+        $dates = [];
+
+        for($d = $start_date; $d->lte($current_date); $d->addDay()) {
+            $dates[] = $d->format('Y-m-d');
+        }
+
+//        foreach ($dates as $date){
+//            return $date;
+//        }
+        if($sales_person_filter != null){
+                $sales_person = Admin::where('id', $sales_person_filter)->get();
+
+        }else{
+            if(session('role_id') == 1){
+
+            }else{
+                if(session('department_id') != 7){
+
+                }else{
+                    if(session('role_id') != 4){
+
+                    }else{
+
+                    }
+                }
+            }
+        }
+
+        $details = array();
+        $sales_persons = array();
+        $shippers = array();
+//        unset($months_array[0]);
+
+        $details['header'] = ['Sales Persons', 'Client Name' ];
+//        $details['subheader'] = ['Parcels', 'Weight','Collection Amount','Revenue' ];
+
+        foreach ($dates as $date){
+            $details['dates'][] = $date;
+        }
+
+        $spreadsheet = new Spreadsheet();
+        $sheet = $spreadsheet->getActiveSheet();
+        $cell_st =[
+            'font' =>['bold' => true],
+            'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
+            'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        ];
+        $sheet->getStyle('A1:B1')->applyFromArray($cell_st);
+
+        foreach ($sales_person as $person) {
+            $sheet->setCellValue('A2', $person->name);
+        }
+
+        $cellIndexcol1 = 3;
+        $cellIndexcol2 = 6;
+
+        foreach ($details['dates'] as $key => $name) {
+            $cellIndex1 = Coordinate::stringFromColumnIndex($cellIndexcol1);
+            $cellIndex11 = $cellIndex1 . '1';
+            $sheet->setCellValue($cellIndex11, $name);
+            $cellIndexcol1 += 1;
+
+
+        }
+        $sheet->fromArray($details['header'],NULL,'A1');
+        $writer = new Xlsx($spreadsheet);
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="sales_person_performance.xlsx"');
+        header('Cache-Control: max-age=0');
+        $file_name = "reports/sales_person_performance".Auth::id()."xlsx";
+        $writer->save("$file_name");
+        return response()->json(['success'=>1,'file'=>'sales_person_performance.xlsx']);
+
+    }
+    public function sales_person_performance_download(Request $request){
+        $file_name = "/reports/sales_person_performance".Auth::id()."xlsx";
+
+        $file = public_path().$file_name;
+        $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
+        return Response::download($file, 'sales_person_performance.xlsx',$headers);
     }
 }

@@ -12,7 +12,7 @@ class UpdateSalePerformanceReportModulePermissionSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 134, 'name' => 'Sales Person Performance', 'module_id' => 9),
+            array('id' => 138, 'name' => 'Sales Person Performance', 'module_id' => 9),
         ));
     }
 }

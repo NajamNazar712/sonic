@@ -272,9 +272,9 @@ class Permission
             'reports.customer_sales.download' => 74,
             'reports.overall_sales.index' => 75,
             'reports.overall_sales.list' => 75,
-            'reports.sales_person_performance.index' => 134,
-            'reports.sales_person_performance.export_to_excel' => 134,
-            'reports.sales_person_performance.download' => 134,
+            'reports.sales_person_performance.index' => 138,
+            'reports.sales_person_performance.export_to_excel' => 138,
+            'reports.sales_person_performance.download' => 138,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

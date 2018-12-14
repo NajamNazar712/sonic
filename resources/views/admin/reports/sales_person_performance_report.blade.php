@@ -25,9 +25,9 @@
                             </div>
                             <div class="col-2">
                                 <div class="form-group ml-1">
-                                    <select name="shipper" class="select2" id="shipper">
-                                        @foreach($shippers as $shipper)
-                                            <option value="{{ $shipper->id }}">{{ $shipper->name }}</option>
+                                    <select name="sales_person" class="select2" id="sales_person_select">
+                                        @foreach($sales_persons as $sales)
+                                            <option value="{{ $sales->id }}">{{ $sales->name }}</option>
                                         @endforeach
                                     </select>
                                 </div></div>
@@ -123,12 +123,6 @@
             width: auto !important;
             text-align: left;
         }
-        #from_date_table{
-            display:none;
-        }
-        #to_date_table{
-            display:none;
-        }
     </style>
 @endsection
 @section('js')
@@ -148,13 +142,13 @@
                 placeholder: 'Select Hub',
                 allowClear:true
             }).bind('change', function() {
-                if(shipper_select.val() != ''){
-                    shipper_select.val(null).trigger('change.select2');
+                if(sales_select.val() != ''){
+                    sales_select.val(null).trigger('change.select2');
                 }
             });
-            var shipper_select = $('#search_form #shipper').prepend('<option value="" selected="selected"></option>').select2({
+            var sales_select = $('#search_form #sales_person_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
-                placeholder: 'Select Shipper',
+                placeholder: 'Select Sales Person',
                 allowClear:true
             }).bind('change', function() {
                 if(city_select.val() != ''){
@@ -162,15 +156,13 @@
                 }
             });
 
-            var max = '{{ Carbon\Carbon::now() }}';
-
+            var from_max = '{{ Carbon\Carbon::now() }}';
+            var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
                 firstDay: 1,
-                disable:[true],
-                clear: '',
-                today:'Select Current Month',
-                max: max,
-                format:'mmmm, yyyy',
+                clear: 'Clear',
+                max: from_max,
+                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
@@ -179,25 +171,15 @@
                     $('#from_date_root').css('top','40px');
                 },
                 onSet: function(context) {
-
-                    var from_month = $('#from_date_root .picker__select--month').val();
-                    var from_year = $('#from_date_root .picker__select--year').val();
-                    var from_date_selected = new Date(from_year,from_month, 1);
-
-                    from_date.pickadate('picker').set('select', from_date_selected,{muted:true});
-                    var current_date_formatted = $('input[name="from_date_formatted"]').val();
-                    to_date.pickadate('picker').set('min',new Date(current_date_formatted),{muted:true});
-                    $('#to_date_root button.picker__button--today').removeAttr('disabled');
-                    $('#from_date_root button.picker__button--today').removeAttr('disabled');
+                    var old_date_formatted = $('input[name="from_date_formatted"]').val();
+                    to_date.pickadate('picker').set('min', new Date(old_date_formatted),{muted:true});
                 }
             });
             var to_date = $('#to_date').pickadate({
                 firstDay: 1,
-                disable:[true,1],
-                clear: '',
-                today:'Select Current Month',
-                max: max,
-                format:'mmmm, yyyy',
+                clear: 'Clear',
+                max: to_max,
+                format:'dd mmmm, yyyy',
                 selectYears: true,
                 selectMonths: true,
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
@@ -206,21 +188,11 @@
                     $('#to_date_root').css('top', '40px');
                 },
                 onSet: function(context) {
-                    $('#to_date_root button.picker__button--today').removeAttr('disabled');
-                    $('#from_date_root button.picker__button--today').removeAttr('disabled');
-                    var to_month = $('#to_date_root .picker__select--month').val();
-                    var to_year = $('#to_date_root .picker__select--year').val();
-                    var to_date_selected = new Date(to_year,to_month, 1);
-
-                    to_date.pickadate('picker').set('select',to_date_selected,{muted:true});
-
                     var current_date_formatted = $('input[name="to_date_formatted"]').val();
-
-
                     from_date.pickadate('picker').set('max',new Date(current_date_formatted),{muted:true});
-                    // console.log(new Date(current_date_formatted,1))
                 }
             });
+
             $('#to_date_root button.picker__button--today').removeAttr('disabled');
             $('#from_date_root button.picker__button--today').removeAttr('disabled');
             $('#search_form').validate({
@@ -233,20 +205,20 @@
                     var from_date = $('#search_form input[name="from_date_formatted"]').val();
                     var to_date = $('#search_form input[name="to_date_formatted"]').val();
                     var city = $('#city').val();
-                    var shipper = $('#shipper').val();
+                    var sales_person = $('#sales_person_select').val();
                     $.ajax({
-                        url: '{!! route('admin.reports.customer_retention.export_to_excel') !!}',
+                        url: '{!! route('admin.reports.sales_person_performance.export_to_excel') !!}',
                         method: 'post',
                         data: {
                             '_token': '{{ csrf_token() }}',
                             'from_date': from_date,
                             'to_date': to_date,
                             'city': city,
-                            'shipper': shipper,
+                            'sales_person': sales_person,
                         }
                     }).done(function (data) {
                         if(data.success == 1){
-                            window.open("{!! route('admin.reports.customer_retention.download') !!}",'_black');
+                            window.open("{!! route('admin.reports.sales_person_performance.download') !!}",'_black');
                         }else{
                             toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
