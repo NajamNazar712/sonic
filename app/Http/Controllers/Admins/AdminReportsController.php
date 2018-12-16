@@ -3099,38 +3099,70 @@ class AdminReportsController extends Controller
 //        $details['subheader'] = ['Parcels', 'Weight','Collection Amount','Revenue' ];
 
         foreach ($sales_person as $person){
-            $sales_persons_data['sales_person'][$person->id]['name'] = $person->name;
-            $tagged_shippers = SalePersonTag::where('admin_id', $person->id)->select('user_id')->get();
+            $sales_persons_data[$person->id]['name'] = $person->name;
+            $tagged_shippers = SalePersonTag::where('admin_id', $person->id)->where('status', 0)->select('user_id')->get();
             foreach ($tagged_shippers as $shipper){
                 $user = User::find($shipper->user_id);
-                $sales_persons_data['sales_person'][$person->id]['shipper'][$user->id] = $user->name;
+                $sales_persons_data[$person->id]['shipper'][$user->id] = $user->name;
                 foreach ($dates as $date){
-                    $sales_persons_data['sales_person'][$person->id]['pickups'][$user->id][] = Shipment::whereHas('shipment_journey', function($query) use ($date) {
+                    $sales_persons_data[$person->id]['pickups'][$user->id][] = Shipment::whereHas('shipment_journey', function($query) use ($date) {
                         $query->whereDate('created_at',$date)
                             ->where('shipper_status_id', 2);
                     })->where('shipments.user_id', $user->id)->count();
+
                 }
+                $sum_of_pickups = array_sum($sales_persons_data[$person->id]['pickups'][$user->id]);
+                array_push($sales_persons_data[$person->id]['pickups'][$user->id],$sum_of_pickups);
 
             }
         }
-
+//        return $sales_persons_data;
         foreach ($dates as $date){
             $details['dates'][] = $date;
         }
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
+        $sheet->getDefaultColumnDimension()->setWidth(20);
         $cell_st =[
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
             'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
         ];
-        $sheet->getStyle('A1:B1')->applyFromArray($cell_st);
+
         $admin_index = 2;
+        $shipper_index = 2;
+        $pickup_index = 2;
+        $pickup_col_index = 3;
         foreach ($sales_persons_data as $sales_persons) {
-            foreach ($sales_persons as $person)
-                return $person;
-            $sheet->setCellValue('A'.$admin_index, $person->name);
+
+            $sheet->setCellValue('A'.$admin_index, $sales_persons['name']);
+
+            if(!empty($sales_persons['shipper'])) {
+                foreach ($sales_persons['shipper'] as $key => $person) {
+
+                    $sheet->setCellValue('B' . $shipper_index, $person);
+
+                    $shipper_index++;
+                    $admin_index++;
+
+                    foreach ($sales_persons['pickups'][$key] as $id => $pickup){
+
+//                        foreach ($pickup as $n){
+                            $cellIndex = Coordinate::stringFromColumnIndex($pickup_col_index);
+                            $sheet->setCellValue($cellIndex.$pickup_index, $pickup);
+                            $pickup_col_index++;
+//                            $pickup_index++;
+//                        }
+
+                    }
+
+                    $pickup_col_index = 3;
+                    $pickup_index++;
+                }
+
+            }
+
         }
 
         $cellIndexcol1 = 3;
@@ -3141,8 +3173,15 @@ class AdminReportsController extends Controller
             $cellIndexcol1 += 1;
 
         }
-
-
+        $grand_total_index = Coordinate::stringFromColumnIndex($cellIndexcol1);
+        $grand_total_index = $grand_total_index . '1';
+        $sheet->setCellValue($grand_total_index,'Grand Total');
+        $header_column_range = "A1:". $grand_total_index;
+        $sheet->getStyle($header_column_range)->applyFromArray($cell_st);        //header style
+        $sales_column_range = "A1:A" . $pickup_index;
+        $shipper_column_range = "B1:B" . $pickup_index;
+        $sheet->getStyle($sales_column_range)->applyFromArray($cell_st);        //header style
+        $sheet->getStyle($shipper_column_range)->applyFromArray($cell_st);        //header style
         $sheet->fromArray($details['header'],NULL,'A1');
         $writer = new Xlsx($spreadsheet);
 
