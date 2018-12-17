@@ -594,6 +594,35 @@ class APIController extends Controller
       }
     }
 
+    public function shipment_charges(Request $request) {}
+
+    public function shipment_payment_status(Request $request) {
+      $user_id = $request->user_id;
+
+      $rules = [
+        'tracking_number' => ['required', 'integer', 'digits_between:12,20', Rule::exists('shipments', 'tracking_number')->where(function($query) use($user_id) {
+          $query->where('user_id', $user_id);
+        })]
+      ];
+
+      $validate = Validator::make($request->all(), $rules, $this->messages);
+
+      $validate->setAttributeNames($this->names);
+
+      if ($validate->fails()) {
+        return response()->json(['status' => 1, 'message' => 'Error(s) in Input', 'errors' => $validate->errors()]);
+      }
+      else {
+        $tracking_number = $request->tracking_number;
+
+        $shipment = Shipment::where('tracking_number', $tracking_number)->first();
+
+        $current_payment_status = $shipment->shipment_payment_journey->status->name;
+
+        return response()->json(['status' => 0, 'message' => 'Payment Status of Shipment #' . $tracking_number, 'current_payment_status' => $current_payment_status]);
+      }
+    }
+
     public function cities(Request $request) {
       $user_id = $request->user_id;
 
