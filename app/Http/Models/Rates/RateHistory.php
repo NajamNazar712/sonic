@@ -8,6 +8,6 @@ class RateHistory extends Model
 {
     //
     protected $fillable = [
-        'user_id','rate_id','updated_by','approved_by'
+        'user_id','rate_id','updated_by','approved_by','from_date','to_date'
     ];
 }

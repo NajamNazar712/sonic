@@ -16,8 +16,12 @@ class CreateRateHistoriesTable extends Migration
         Schema::create('rate_histories', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id');
-            $table->integer('rate_id')->nullable();
+            $table->integer('updated_by')->nullable();
+            $table->integer('approved_by')->nullable();
+            $table->DateTime('from_date')->nullable();
+            $table->DateTime('to_date')->nullable();
             $table->timestamps();
+
         });
     }
 
