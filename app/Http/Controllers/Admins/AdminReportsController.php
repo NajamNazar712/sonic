@@ -3044,14 +3044,14 @@ class AdminReportsController extends Controller
         }else{
             if(session('department_id') != 7){
                 $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
-                $hubs = City::select('id','name')->where('id',session('hubs'))->get();
+                $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
             }else{
                 if(session('role_id') != 4){
                     $sales_persons = Admin::where('id', Auth::id())->select('id', 'name')->get();
                     $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
                 }else{
                     $sales_persons = Admin::join('admin_roles as ar', 'admins.role_id', '=', 'ar.id')->select(['admins.id', 'admins.name'])->where('ar.department_id', 7)->get();
-                    $hubs = City::select('id','name')->where('id',session('hubs'))->get();
+                    $hubs = City::select('id','name')->whereIn('id',session('hubs'))->get();
                 }
             }
         }
@@ -3092,6 +3092,14 @@ class AdminReportsController extends Controller
         }
 
         $details = array();
+        $date_sums = array();
+
+        foreach ($dates as $date){
+            $details['dates'][] = $date;
+
+            $date_sums[$date] = 0;
+        }
+        $overall_sum = 0;
         $sales_persons_data = array();
         $shippers = array();
 
@@ -3100,26 +3108,41 @@ class AdminReportsController extends Controller
 
         foreach ($sales_person as $person){
             $sales_persons_data[$person->id]['name'] = $person->name;
+
             $tagged_shippers = SalePersonTag::where('admin_id', $person->id)->where('status', 0)->select('user_id')->get();
             foreach ($tagged_shippers as $shipper){
                 $user = User::find($shipper->user_id);
                 $sales_persons_data[$person->id]['shipper'][$user->id] = $user->name;
                 foreach ($dates as $date){
-                    $sales_persons_data[$person->id]['pickups'][$user->id][] = Shipment::whereHas('shipment_journey', function($query) use ($date) {
-                        $query->whereDate('created_at',$date)
-                            ->where('shipper_status_id', 2);
-                    })->where('shipments.user_id', $user->id)->count();
+                    if($hub != null){
+                        $sum = Shipment::whereHas('shipment_journey', function($query) use ($date) {
+                            $query->whereDate('created_at',$date)
+                                ->where('shipper_status_id', 2);
+                        })->whereHas('pickup_address.city', function ($query) use ($hub) {
+                                $query->where('hub_id', '=', $hub);
+                            })->where('shipments.user_id', $user->id)->count();
+                    }else{
+                        $sum = Shipment::whereHas('shipment_journey', function($query) use ($date) {
+                            $query->whereDate('created_at',$date)
+                                ->where('shipper_status_id', 2);
+                        })->where('shipments.user_id', $user->id)->count();
+                    }
 
+
+                    $sales_persons_data[$person->id]['pickups'][$user->id][] = $sum;
+
+                    $date_sums[$date] += $sum;
+                    $overall_sum += $sum;
                 }
+
                 $sum_of_pickups = array_sum($sales_persons_data[$person->id]['pickups'][$user->id]);
                 array_push($sales_persons_data[$person->id]['pickups'][$user->id],$sum_of_pickups);
 
             }
         }
 //        return $sales_persons_data;
-        foreach ($dates as $date){
-            $details['dates'][] = $date;
-        }
+
+        array_push($date_sums, $overall_sum);
 
         $spreadsheet = new Spreadsheet();
         $sheet = $spreadsheet->getActiveSheet();
@@ -3128,6 +3151,9 @@ class AdminReportsController extends Controller
             'font' =>['bold' => true],
             'alignment' =>['horizontal' => \PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER],
             'borders'=>['bottom' =>['style'=> \PhpOffice\PhpSpreadsheet\Style\Border::BORDER_MEDIUM]]
+        ];
+        $footer_cell_st =[
+            'font' =>['bold' => true]
         ];
 
         $admin_index = 2;
@@ -3164,6 +3190,16 @@ class AdminReportsController extends Controller
             }
 
         }
+        $pickup_index += 2;
+        $date_sum_col_index = 3;
+        $date_sum_index = $pickup_index;
+        $sheet->setCellValue('A'.$date_sum_index, "Grand Total");
+        foreach ($date_sums as $date => $sum) {
+            $cellIndex = Coordinate::stringFromColumnIndex($date_sum_col_index);
+            $sheet->setCellValue($cellIndex . $date_sum_index, $sum);
+
+            $date_sum_col_index++;
+        }
 
         $cellIndexcol1 = 3;
         foreach ($details['dates'] as $key => $name) {
@@ -3174,12 +3210,14 @@ class AdminReportsController extends Controller
 
         }
         $grand_total_index = Coordinate::stringFromColumnIndex($cellIndexcol1);
-        $grand_total_index = $grand_total_index . '1';
-        $sheet->setCellValue($grand_total_index,'Grand Total');
-        $header_column_range = "A1:". $grand_total_index;
+        $grand_total_header_index = $grand_total_index . '1';
+        $sheet->setCellValue($grand_total_header_index,'Grand Total');
+        $header_column_range = "A1:". $grand_total_header_index;
         $sheet->getStyle($header_column_range)->applyFromArray($cell_st);        //header style
         $sales_column_range = "A1:A" . $pickup_index;
         $shipper_column_range = "B1:B" . $pickup_index;
+        $grand_total_last_column_range = "A".$pickup_index.":".$grand_total_index . $pickup_index;
+        $sheet->getStyle($grand_total_last_column_range)->applyFromArray($footer_cell_st);        //header style
         $sheet->getStyle($sales_column_range)->applyFromArray($cell_st);        //header style
         $sheet->getStyle($shipper_column_range)->applyFromArray($cell_st);        //header style
         $sheet->fromArray($details['header'],NULL,'A1');
