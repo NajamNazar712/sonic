@@ -3111,32 +3111,43 @@ class AdminReportsController extends Controller
 
             $tagged_shippers = SalePersonTag::where('admin_id', $person->id)->where('status', 0)->select('user_id')->get();
             foreach ($tagged_shippers as $shipper){
-                $user = User::find($shipper->user_id);
-                $sales_persons_data[$person->id]['shipper'][$user->id] = $user->name;
-                foreach ($dates as $date){
-                    if($hub != null){
-                        $sum = Shipment::whereHas('shipment_journey', function($query) use ($date) {
-                            $query->whereDate('created_at',$date)
-                                ->where('shipper_status_id', 2);
-                        })->whereHas('pickup_address.city', function ($query) use ($hub) {
+                if($hub != null){
+
+                        $user = User::whereHas('city',function($query) use($hub){
+                            $query->where('hub_id',$hub);
+                        })->where('id', $shipper->user_id)->first();
+                }else{
+
+                    $user = User::find($shipper->user_id);
+                }
+                if($user){
+
+                    $sales_persons_data[$person->id]['shipper'][$user->id] = $user->name;
+                    foreach ($dates as $date){
+                        if($hub != null){
+                            $sum = Shipment::whereHas('shipment_journey', function($query) use ($date) {
+                                $query->whereDate('created_at',$date)
+                                    ->where('shipper_status_id', 2);
+                            })->whereHas('pickup_address.city', function ($query) use ($hub) {
                                 $query->where('hub_id', '=', $hub);
                             })->where('shipments.user_id', $user->id)->count();
-                    }else{
-                        $sum = Shipment::whereHas('shipment_journey', function($query) use ($date) {
-                            $query->whereDate('created_at',$date)
-                                ->where('shipper_status_id', 2);
-                        })->where('shipments.user_id', $user->id)->count();
+                        }else{
+                            $sum = Shipment::whereHas('shipment_journey', function($query) use ($date) {
+                                $query->whereDate('created_at',$date)
+                                    ->where('shipper_status_id', 2);
+                            })->where('shipments.user_id', $user->id)->count();
+                        }
+
+
+                        $sales_persons_data[$person->id]['pickups'][$user->id][] = $sum;
+
+                        $date_sums[$date] += $sum;
+                        $overall_sum += $sum;
                     }
 
-
-                    $sales_persons_data[$person->id]['pickups'][$user->id][] = $sum;
-
-                    $date_sums[$date] += $sum;
-                    $overall_sum += $sum;
+                    $sum_of_pickups = array_sum($sales_persons_data[$person->id]['pickups'][$user->id]);
+                    array_push($sales_persons_data[$person->id]['pickups'][$user->id],$sum_of_pickups);
                 }
-
-                $sum_of_pickups = array_sum($sales_persons_data[$person->id]['pickups'][$user->id]);
-                array_push($sales_persons_data[$person->id]['pickups'][$user->id],$sum_of_pickups);
 
             }
         }

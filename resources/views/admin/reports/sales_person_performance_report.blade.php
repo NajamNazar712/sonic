@@ -141,19 +141,11 @@
                 width: '200px',
                 placeholder: 'Select Hub',
                 allowClear:true
-            }).bind('change', function() {
-                if(sales_select.val() != ''){
-                    sales_select.val(null).trigger('change.select2');
-                }
             });
             var sales_select = $('#search_form #sales_person_select').prepend('<option value="" selected="selected"></option>').select2({
                 width: '200px',
                 placeholder: 'Select Sales Person',
                 allowClear:true
-            }).bind('change', function() {
-                if(city_select.val() != ''){
-                    city_select.val(null).trigger('change.select2');
-                }
             });
 
             var from_max = '{{ Carbon\Carbon::now() }}';
