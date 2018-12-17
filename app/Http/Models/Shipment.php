@@ -44,7 +44,7 @@ class Shipment extends Model
     }
 
     public function shipment_payment_journey(){
-	    return $this->hasMany('App\Http\Models\ShipmentsPaymentJourney');
+	    return $this->hasMany('App\Http\Models\ShipmentsPaymentJourney')->orderBy('id', 'DESC');
     }
 
     public function status_shipper() {
@@ -60,5 +60,9 @@ class Shipment extends Model
     }
     public function misrouted_history(){
         return $this->hasMany('App\Http\Models\MisroutedHistory');
+    }
+
+    public function done_payment_shipments() {
+    	return $this->hasMany('App\Http\Models\DonePaymentShipment');
     }
 }
