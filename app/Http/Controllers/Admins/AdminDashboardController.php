@@ -3478,10 +3478,28 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $switches['fuel_charges']
                     ]);
                 }
-                    if($weight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
+                    if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                        foreach ($weights as $weight) {
+                            HistoryWeightCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'range_up' => $weight['range_up'],
+                                'range_down' => $weight['range_down'],
+                                'weight_addition' => $weight['weight_addition'],
+                                'spkg' => $weight['spkg'],
+                                'local_or_6hr' => $weight['local_or_6hr'],
+                                'national_charges_class_0' => $weight['national_charges_class_0'],
+                                'national_charges_class_1' => $weight['national_charges_class_1'],
+                                'national_charges_class_2' => $weight['national_charges_class_2'],
+                                'national_charges_class_3' => $weight['national_charges_class_3'],
+                            ]);
+                        }
+                    }
+                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($weights as $weight) {
                         HistoryWeightCharge::create([
                             'user_id' => $id,
-                            'shipping_mode_id' => 1,
+                            'shipping_mode_id' => 2,
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
                             'weight_addition' => $weight['weight_addition'],
@@ -3493,341 +3511,369 @@ class AdminDashboardController extends Controller
                             'national_charges_class_3' => $weight['national_charges_class_3'],
                         ]);
                     }
-                if($weight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
-                    HistoryWeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'range_up' => $weight['range_up'],
-                        'range_down' => $weight['range_down'],
-                        'weight_addition' => $weight['weight_addition'],
-                        'spkg' => $weight['spkg'],
-                        'local_or_6hr' => $weight['local_or_6hr'],
-                        'national_charges_class_0' => $weight['national_charges_class_0'],
-                        'national_charges_class_1' => $weight['national_charges_class_1'],
-                        'national_charges_class_2' => $weight['national_charges_class_2'],
-                        'national_charges_class_3' => $weight['national_charges_class_3'],
-                    ]);
                 }
-                if($weight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
-                    HistoryWeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'range_up' => $weight['range_up'],
-                        'range_down' => $weight['range_down'],
-                        'weight_addition' => $weight['weight_addition'],
-                        'spkg' => $weight['spkg'],
-                        'local_or_6hr' => $weight['local_or_6hr'],
-                        'national_charges_class_0' => $weight['national_charges_class_0'],
-                        'national_charges_class_1' => $weight['national_charges_class_1'],
-                        'national_charges_class_2' => $weight['national_charges_class_2'],
-                        'national_charges_class_3' => $weight['national_charges_class_3'],
-                    ]);
+                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($weights as $weight) {
+                        HistoryWeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'range_up' => $weight['range_up'],
+                            'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
+                            'local_or_6hr' => $weight['local_or_6hr'],
+                            'national_charges_class_0' => $weight['national_charges_class_0'],
+                            'national_charges_class_1' => $weight['national_charges_class_1'],
+                            'national_charges_class_2' => $weight['national_charges_class_2'],
+                            'national_charges_class_3' => $weight['national_charges_class_3'],
+                        ]);
+                    }
                 }
-                if($weight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
-                    HistoryWeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'range_up' => $weight['range_up'],
-                        'range_down' => $weight['range_down'],
-                        'weight_addition' => $weight['weight_addition'],
-                        'spkg' => $weight['spkg'],
-                        'local_or_6hr' => $weight['local_or_6hr'],
-                        'national_charges_class_0' => $weight['national_charges_class_0'],
-                        'national_charges_class_1' => $weight['national_charges_class_1'],
-                        'national_charges_class_2' => $weight['national_charges_class_2'],
-                        'national_charges_class_3' => $weight['national_charges_class_3'],
-                    ]);
+                if($weights = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($weights as $weight) {
+                        HistoryWeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'range_up' => $weight['range_up'],
+                            'range_down' => $weight['range_down'],
+                            'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
+                            'local_or_6hr' => $weight['local_or_6hr'],
+                            'national_charges_class_0' => $weight['national_charges_class_0'],
+                            'national_charges_class_1' => $weight['national_charges_class_1'],
+                            'national_charges_class_2' => $weight['national_charges_class_2'],
+                            'national_charges_class_3' => $weight['national_charges_class_3'],
+                        ]);
+                    }
                 }
-                if($bookingType = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
-                    HistoryBookingTypeCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'replacement_charges' => $bookingType['replacement_charges'],
-                        'try_and_buy_charges' => $bookingType['try_and_buy_charges']
-                    ]);
-                }
-                if($bookingType = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
-                    HistoryBookingTypeCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'replacement_charges' => $bookingType['replacement_charges'],
-                        'try_and_buy_charges' => $bookingType['try_and_buy_charges']
-                    ]);
-                }
-                if($bookingType = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
-                    HistoryBookingTypeCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'replacement_charges' => $bookingType['replacement_charges'],
-                        'try_and_buy_charges' => $bookingType['try_and_buy_charges']
-                    ]);
-                }
-                if($bookingType = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
-                    HistoryBookingTypeCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'replacement_charges' => $bookingType['replacement_charges'],
-                        'try_and_buy_charges' => $bookingType['try_and_buy_charges']
-                    ]);
-                }
-
-                    if($cash = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
-                        HistoryCashHandlingCharge::create([
+                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($bookingTypes as $bookingType) {
+                        HistoryBookingTypeCharges::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
+                            'replacement_charges' => $bookingType['replacement_charges'],
+                            'try_and_buy_charges' => $bookingType['try_and_buy_charges']
+                        ]);
+                    }
+                }
+                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($bookingTypes as $bookingType) {
+                        HistoryBookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'replacement_charges' => $bookingType['replacement_charges'],
+                            'try_and_buy_charges' => $bookingType['try_and_buy_charges']
+                        ]);
+                    }
+                }
+                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($bookingTypes as $bookingType) {
+                        HistoryBookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $bookingType['replacement_charges'],
+                            'try_and_buy_charges' => $bookingType['try_and_buy_charges']
+                        ]);
+                    }
+                }
+                if($bookingTypes = BookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($bookingTypes as $bookingType) {
+                        HistoryBookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'replacement_charges' => $bookingType['replacement_charges'],
+                            'try_and_buy_charges' => $bookingType['try_and_buy_charges']
+                        ]);
+                    }
+                }
+
+                    if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                        foreach ($cashs as $cash) {
+                            HistoryCashHandlingCharge::create([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'range_up' => $cash['range_up'],
+                                'range_down' => $cash['range_down'],
+                                'charges' => $cash['charges']
+                            ]);
+                        }
+                    }
+                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($cashs as $cash) {
+                        HistoryCashHandlingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
                             'range_up' => $cash['range_up'],
                             'range_down' => $cash['range_down'],
                             'charges' => $cash['charges']
                         ]);
                     }
-                if($cash = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
-                    HistoryCashHandlingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'range_up' => $cash['range_up'],
-                        'range_down' => $cash['range_down'],
-                        'charges' => $cash['charges']
-                    ]);
                 }
-                if($cash = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
-                    HistoryCashHandlingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'range_up' => $cash['range_up'],
-                        'range_down' => $cash['range_down'],
-                        'charges' => $cash['charges']
-                    ]);
+                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($cashs as $cash) {
+                        HistoryCashHandlingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'range_up' => $cash['range_up'],
+                            'range_down' => $cash['range_down'],
+                            'charges' => $cash['charges']
+                        ]);
+                    }
                 }
-                if($cash = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
-                    HistoryCashHandlingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'range_up' => $cash['range_up'],
-                        'range_down' => $cash['range_down'],
-                        'charges' => $cash['charges']
-                    ]);
+                if($cashs = CashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($cashs as $cash) {
+                        HistoryCashHandlingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'range_up' => $cash['range_up'],
+                            'range_down' => $cash['range_down'],
+                            'charges' => $cash['charges']
+                        ]);
+                    }
                 }
-                if($insurance = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    HistoryInsuranceCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'range_up' => $insurance['range_up'],
-                        'range_down' => $insurance['range_down'],
-                        'charges' => $insurance['charges']
-                    ]);
+                if($insurances = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($insurances as $insurance) {
+                        HistoryInsuranceCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'range_up' => $insurance['range_up'],
+                            'range_down' => $insurance['range_down'],
+                            'charges' => $insurance['charges']
+                        ]);
+                    }
                 }
-                if($insurance = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    HistoryInsuranceCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'range_up' => $insurance['range_up'],
-                        'range_down' => $insurance['range_down'],
-                        'charges' => $insurance['charges']
-                    ]);
+                if($insurances = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($insurances as $insurance) {
+                        HistoryInsuranceCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'range_up' => $insurance['range_up'],
+                            'range_down' => $insurance['range_down'],
+                            'charges' => $insurance['charges']
+                        ]);
+                    }
                 }
-                if($insurance = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    HistoryInsuranceCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'range_up' => $insurance['range_up'],
-                        'range_down' => $insurance['range_down'],
-                        'charges' => $insurance['charges']
-                    ]);
+                if($insurances = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($insurances as $insurance) {
+                        HistoryInsuranceCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'range_up' => $insurance['range_up'],
+                            'range_down' => $insurance['range_down'],
+                            'charges' => $insurance['charges']
+                        ]);
+                    }
                 }
-                if($insurance = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    HistoryInsuranceCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'range_up' => $insurance['range_up'],
-                        'range_down' => $insurance['range_down'],
-                        'charges' => $insurance['charges']
-                    ]);
+                if($insurances = InsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($insurances as $insurance) {
+                        HistoryInsuranceCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'range_up' => $insurance['range_up'],
+                            'range_down' => $insurance['range_down'],
+                            'charges' => $insurance['charges']
+                        ]);
+                    }
                 }
-                if($return = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    HistoryReturnCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'local' => $return['local'],
-                        'national' => $return['national']
-                    ]);
+                if($returns = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($returns as $return) {
+                        HistoryReturnCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'local' => $return['local'],
+                            'national' => $return['national']
+                        ]);
+                    }
                 }
-                if($return = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    HistoryReturnCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'local' => $return['local'],
-                        'national' => $return['national']
-                    ]);
+                if($returns = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($returns as $return) {
+                        HistoryReturnCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'local' => $return['local'],
+                            'national' => $return['national']
+                        ]);
+                    }
                 }
-                if($return = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    HistoryReturnCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'local' => $return['local'],
-                        'national' => $return['national']
-                    ]);
+                if($returns = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($returns as $return) {
+                        HistoryReturnCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'local' => $return['local'],
+                            'national' => $return['national']
+                        ]);
+                    }
                 }
-                if($return = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    HistoryReturnCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'local' => $return['local'],
-                        'national' => $return['national']
-                    ]);
+                if($returns = ReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($returns as $return) {
+                        HistoryReturnCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'local' => $return['local'],
+                            'national' => $return['national']
+                        ]);
+                    }
                 }
-                if($fuel = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    HistoryFuelSurcharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'fuel_surcharge' => $fuel['fuel_surcharge']
-                    ]);
+                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($fuels as $fuel) {
+                        HistoryFuelSurcharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'fuel_surcharge' => $fuel['fuel_surcharge']
+                        ]);
+                    }
                 }
-                if($fuel = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    HistoryFuelSurcharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'fuel_surcharge' => $fuel['fuel_surcharge']
-                    ]);
+                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($fuels as $fuel) {
+                        HistoryFuelSurcharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'fuel_surcharge' => $fuel['fuel_surcharge']
+                        ]);
+                    }
                 }
-                if($fuel = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    HistoryFuelSurcharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'fuel_surcharge' => $fuel['fuel_surcharge']
-                    ]);
+                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($fuels as $fuel) {
+                        HistoryFuelSurcharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'fuel_surcharge' => $fuel['fuel_surcharge']
+                        ]);
+                    }
                 }
-                if($fuel = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    HistoryFuelSurcharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'fuel_surcharge' => $fuel['fuel_surcharge']
-                    ]);
+                if($fuels = FuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($fuels as $fuel) {
+                        HistoryFuelSurcharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'fuel_surcharge' => $fuel['fuel_surcharge']
+                        ]);
+                    }
                 }
-                if($packaging = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    HistoryPackagingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'sm_flyer' => $packaging['sm_flyer'],
-                        'md_flyer' => $packaging['md_flyer'],
-                        'lg_flyer' => $packaging['lg_flyer'],
-                        'box_flyer' => $packaging['box_flyer']
-                    ]);
+                if($packagings = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($packagings as $packaging) {
+                        HistoryPackagingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'sm_flyer' => $packaging['sm_flyer'],
+                            'md_flyer' => $packaging['md_flyer'],
+                            'lg_flyer' => $packaging['lg_flyer'],
+                            'box_flyer' => $packaging['box_flyer']
+                        ]);
+                    }
                 }
-                if($packaging = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    HistoryPackagingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'sm_flyer' => $packaging['sm_flyer'],
-                        'md_flyer' => $packaging['md_flyer'],
-                        'lg_flyer' => $packaging['lg_flyer'],
-                        'box_flyer' => $packaging['box_flyer']
-                    ]);
+                if($packagings = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($packagings as $packaging) {
+                        HistoryPackagingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'sm_flyer' => $packaging['sm_flyer'],
+                            'md_flyer' => $packaging['md_flyer'],
+                            'lg_flyer' => $packaging['lg_flyer'],
+                            'box_flyer' => $packaging['box_flyer']
+                        ]);
+                    }
                 }
-                if($packaging = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    HistoryPackagingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'sm_flyer' => $packaging['sm_flyer'],
-                        'md_flyer' => $packaging['md_flyer'],
-                        'lg_flyer' => $packaging['lg_flyer'],
-                        'box_flyer' => $packaging['box_flyer']
-                    ]);
+                if($packagings = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($packagings as $packaging) {
+                        HistoryPackagingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'sm_flyer' => $packaging['sm_flyer'],
+                            'md_flyer' => $packaging['md_flyer'],
+                            'lg_flyer' => $packaging['lg_flyer'],
+                            'box_flyer' => $packaging['box_flyer']
+                        ]);
+                    }
                 }
-                if($packaging = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    HistoryPackagingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'sm_flyer' => $packaging['sm_flyer'],
-                        'md_flyer' => $packaging['md_flyer'],
-                        'lg_flyer' => $packaging['lg_flyer'],
-                        'box_flyer' => $packaging['box_flyer']
-                    ]);
+                if($packagings = PackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($packagings as $packaging) {
+                        HistoryPackagingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'sm_flyer' => $packaging['sm_flyer'],
+                            'md_flyer' => $packaging['md_flyer'],
+                            'lg_flyer' => $packaging['lg_flyer'],
+                            'box_flyer' => $packaging['box_flyer']
+                        ]);
+                    }
                 }
-                if($discount = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    HistoryDiscountCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'title' => $discount['title'],
-                        'weight' => $discount['weight'],
-                        'cash' => $discount['cash'],
-                        'insurance' => $discount['insurance'],
-                        'return' => $discount['return'],
-                        'packaging' => $discount['packaging'],
-                        'to' => $discount['to'],
-                        'from' => $discount['from'],
-                        'added_by' => $discount['added_by']
-                    ]);
+                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($discounts as $discount) {
+                        HistoryDiscountCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'title' => $discount['title'],
+                            'weight' => $discount['weight'],
+                            'cash' => $discount['cash'],
+                            'insurance' => $discount['insurance'],
+                            'return' => $discount['return'],
+                            'packaging' => $discount['packaging'],
+                            'to' => $discount['to'],
+                            'from' => $discount['from'],
+                            'added_by' => $discount['added_by']
+                        ]);
+                    }
                 }
-                if($discount = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    HistoryDiscountCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'title' => $discount['title'],
-                        'weight' => $discount['weight'],
-                        'cash' => $discount['cash'],
-                        'insurance' => $discount['insurance'],
-                        'return' => $discount['return'],
-                        'packaging' => $discount['packaging'],
-                        'to' => $discount['to'],
-                        'from' => $discount['from'],
-                        'added_by' => $discount['added_by']
-                    ]);
+                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($discounts as $discount) {
+                        HistoryDiscountCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'title' => $discount['title'],
+                            'weight' => $discount['weight'],
+                            'cash' => $discount['cash'],
+                            'insurance' => $discount['insurance'],
+                            'return' => $discount['return'],
+                            'packaging' => $discount['packaging'],
+                            'to' => $discount['to'],
+                            'from' => $discount['from'],
+                            'added_by' => $discount['added_by']
+                        ]);
+                    }
                 }
-                if($discount = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    HistoryDiscountCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'title' => $discount['title'],
-                        'weight' => $discount['weight'],
-                        'cash' => $discount['cash'],
-                        'insurance' => $discount['insurance'],
-                        'return' => $discount['return'],
-                        'packaging' => $discount['packaging'],
-                        'to' => $discount['to'],
-                        'from' => $discount['from'],
-                        'added_by' => $discount['added_by']
-                    ]);
+                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($discounts as $discount) {
+                        HistoryDiscountCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'title' => $discount['title'],
+                            'weight' => $discount['weight'],
+                            'cash' => $discount['cash'],
+                            'insurance' => $discount['insurance'],
+                            'return' => $discount['return'],
+                            'packaging' => $discount['packaging'],
+                            'to' => $discount['to'],
+                            'from' => $discount['from'],
+                            'added_by' => $discount['added_by']
+                        ]);
+                    }
                 }
-                if($discount = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    HistoryDiscountCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'title' => $discount['title'],
-                        'weight' => $discount['weight'],
-                        'cash' => $discount['cash'],
-                        'insurance' => $discount['insurance'],
-                        'return' => $discount['return'],
-                        'packaging' => $discount['packaging'],
-                        'to' => $discount['to'],
-                        'from' => $discount['from'],
-                        'added_by' => $discount['added_by']
-                    ]);
+                if($discounts = DiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($discounts as $discount) {
+                        HistoryDiscountCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'title' => $discount['title'],
+                            'weight' => $discount['weight'],
+                            'cash' => $discount['cash'],
+                            'insurance' => $discount['insurance'],
+                            'return' => $discount['return'],
+                            'packaging' => $discount['packaging'],
+                            'to' => $discount['to'],
+                            'from' => $discount['from'],
+                            'added_by' => $discount['added_by']
+                        ]);
+                    }
                 }
+                $s = RateStatus::where(['user_id' => $id ])->first();
                 RateHistory::create([
                     'user_id' => $id,
                     'updated_by' => $user['rates_updated_by'],
-                    'approved_by' => $user['rates_authorized_by']
-
+                    'approved_by' => $user['rates_authorized_by'],
+                    'from_date' => $s['created_at'],
+                    'to_date' => Carbon::now()
                 ]);
 
                 RateStatus::where('user_id', $id)->delete();
@@ -3888,349 +3934,393 @@ class AdminDashboardController extends Controller
                         'fuel_charges' => $pendingswitchs['fuel_charges']
                     ]);
                 }
-                if($pendingweight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
-                    WeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'range_up' => $pendingweight['range_up'],
-                        'range_down' => $pendingweight['range_down'],
-                        'weight_addition' => $pendingweight['weight_addition'],
-                        'spkg' => $pendingweight['spkg'],
-                        'local_or_6hr' => $pendingweight['local_or_6hr'],
-                        'national_charges_class_0' => $pendingweight['national_charges_class_0'],
-                        'national_charges_class_1' => $pendingweight['national_charges_class_1'],
-                        'national_charges_class_2' => $pendingweight['national_charges_class_2'],
-                        'national_charges_class_3' => $pendingweight['national_charges_class_3'],
-                    ]);
+                if($pendingweights = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($pendingweights as $pendingweight) {
+                        WeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'range_up' => $pendingweight['range_up'],
+                            'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
+                            'local_or_6hr' => $pendingweight['local_or_6hr'],
+                            'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingweight['national_charges_class_3'],
+                        ]);
+                    }
                 }
-                if($pendingweight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
-                    WeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'range_up' => $pendingweight['range_up'],
-                        'range_down' => $pendingweight['range_down'],
-                        'weight_addition' => $pendingweight['weight_addition'],
-                        'spkg' => $pendingweight['spkg'],
-                        'local_or_6hr' => $pendingweight['local_or_6hr'],
-                        'national_charges_class_0' => $pendingweight['national_charges_class_0'],
-                        'national_charges_class_1' => $pendingweight['national_charges_class_1'],
-                        'national_charges_class_2' => $pendingweight['national_charges_class_2'],
-                        'national_charges_class_3' => $pendingweight['national_charges_class_3'],
-                    ]);
+                if($pendingweights = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($pendingweights as $pendingweight) {
+                        WeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'range_up' => $pendingweight['range_up'],
+                            'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
+                            'local_or_6hr' => $pendingweight['local_or_6hr'],
+                            'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingweight['national_charges_class_3'],
+                        ]);
+                    }
                 }
-                if($pendingweight = WeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
-                    WeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'range_up' => $pendingweight['range_up'],
-                        'range_down' => $pendingweight['range_down'],
-                        'weight_addition' => $pendingweight['weight_addition'],
-                        'spkg' => $pendingweight['spkg'],
-                        'local_or_6hr' => $pendingweight['local_or_6hr'],
-                        'national_charges_class_0' => $pendingweight['national_charges_class_0'],
-                        'national_charges_class_1' => $pendingweight['national_charges_class_1'],
-                        'national_charges_class_2' => $pendingweight['national_charges_class_2'],
-                        'national_charges_class_3' => $pendingweight['national_charges_class_3'],
-                    ]);
+                if($pendingweights = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($pendingweights as $pendingweight) {
+                        WeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'range_up' => $pendingweight['range_up'],
+                            'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
+                            'local_or_6hr' => $pendingweight['local_or_6hr'],
+                            'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingweight['national_charges_class_3'],
+                        ]);
+                    }
                 }
-                if($pendingweight = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
-                    WeightCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'range_up' => $pendingweight['range_up'],
-                        'range_down' => $pendingweight['range_down'],
-                        'weight_addition' => $pendingweight['weight_addition'],
-                        'spkg' => $pendingweight['spkg'],
-                        'local_or_6hr' => $pendingweight['local_or_6hr'],
-                        'national_charges_class_0' => $pendingweight['national_charges_class_0'],
-                        'national_charges_class_1' => $pendingweight['national_charges_class_1'],
-                        'national_charges_class_2' => $pendingweight['national_charges_class_2'],
-                        'national_charges_class_3' => $pendingweight['national_charges_class_3'],
-                    ]);
+                if($pendingweights = PendingWeightCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($pendingweights as $pendingweight) {
+                        WeightCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'range_up' => $pendingweight['range_up'],
+                            'range_down' => $pendingweight['range_down'],
+                            'weight_addition' => $pendingweight['weight_addition'],
+                            'spkg' => $pendingweight['spkg'],
+                            'local_or_6hr' => $pendingweight['local_or_6hr'],
+                            'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingweight['national_charges_class_3'],
+                        ]);
+                    }
                 }
-                if($pendingbookingType = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
-                    BookingTypeCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'replacement_charges' => $pendingbookingType['replacement_charges'],
-                        'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
-                    ]);
+                if($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($pendingbookingTypes as $pendingbookingType) {
+                        BookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'replacement_charges' => $pendingbookingType['replacement_charges'],
+                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
+                        ]);
+                    }
                 }
-                if($pendingbookingType = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
-                    BookingTypeCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'replacement_charges' => $pendingbookingType['replacement_charges'],
-                        'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
-                    ]);
+                if($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($pendingbookingTypes as $pendingbookingType) {
+                        BookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'replacement_charges' => $pendingbookingType['replacement_charges'],
+                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
+                        ]);
+                    }
                 }
-                if($pendingbookingType = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
-                    BookingTypeCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'replacement_charges' => $pendingbookingType['replacement_charges'],
-                        'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
-                    ]);
+                if($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($pendingbookingTypes as $pendingbookingType) {
+                        BookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $pendingbookingType['replacement_charges'],
+                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
+                        ]);
+                    }
                 }
-                if($pendingbookingType = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
-                    BookingTypeCharges::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'replacement_charges' => $pendingbookingType['replacement_charges'],
-                        'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
-                    ]);
+                if($pendingbookingTypes = PendingBookingTypeCharges::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($pendingbookingTypes as $pendingbookingType) {
+                        BookingTypeCharges::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'replacement_charges' => $pendingbookingType['replacement_charges'],
+                            'try_and_buy_charges' => $pendingbookingType['try_and_buy_charges']
+                        ]);
+                    }
                 }
-                if($pendingcash = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first()) {
-                    CashHandlingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'range_up' => $pendingcash['range_up'],
-                        'range_down' => $pendingcash['range_down'],
-                        'charges' => $pendingcash['charges']
-                    ]);
+                if($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($pendingcashs as $pendingcash) {
+                        CashHandlingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'range_up' => $pendingcash['range_up'],
+                            'range_down' => $pendingcash['range_down'],
+                            'charges' => $pendingcash['charges']
+                        ]);
+                    }
                 }
-                if($pendingcash = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first()) {
-                    CashHandlingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'range_up' => $pendingcash['range_up'],
-                        'range_down' => $pendingcash['range_down'],
-                        'charges' => $pendingcash['charges']
-                    ]);
+                if($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($pendingcashs as $pendingcash) {
+                        CashHandlingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'range_up' => $pendingcash['range_up'],
+                            'range_down' => $pendingcash['range_down'],
+                            'charges' => $pendingcash['charges']
+                        ]);
+                    }
                 }
-                if($pendingcash = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first()) {
-                    CashHandlingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'range_up' => $pendingcash['range_up'],
-                        'range_down' => $pendingcash['range_down'],
-                        'charges' => $pendingcash['charges']
-                    ]);
+                if($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($pendingcashs as $pendingcash) {
+                        CashHandlingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'range_up' => $pendingcash['range_up'],
+                            'range_down' => $pendingcash['range_down'],
+                            'charges' => $pendingcash['charges']
+                        ]);
+                    }
                 }
-                if($pendingcash = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first()) {
-                    CashHandlingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'range_up' => $pendingcash['range_up'],
-                        'range_down' => $pendingcash['range_down'],
-                        'charges' => $pendingcash['charges']
-                    ]);
+                if($pendingcashs = PendingCashHandlingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($pendingcashs as $pendingcash) {
+                        CashHandlingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'range_up' => $pendingcash['range_up'],
+                            'range_down' => $pendingcash['range_down'],
+                            'charges' => $pendingcash['charges']
+                        ]);
+                    }
                 }
-                if($pendinginsurance = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    InsuranceCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'range_up' => $pendinginsurance['range_up'],
-                        'range_down' => $pendinginsurance['range_down'],
-                        'charges' => $pendinginsurance['charges']
-                    ]);
+                if($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($pendinginsurances as $pendinginsurance) {
+                        InsuranceCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'range_up' => $pendinginsurance['range_up'],
+                            'range_down' => $pendinginsurance['range_down'],
+                            'charges' => $pendinginsurance['charges']
+                        ]);
+                    }
                 }
-                if($pendinginsurance = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    InsuranceCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'range_up' => $pendinginsurance['range_up'],
-                        'range_down' => $pendinginsurance['range_down'],
-                        'charges' => $pendinginsurance['charges']
-                    ]);
+                if($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($pendinginsurances as $pendinginsurance) {
+                        InsuranceCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'range_up' => $pendinginsurance['range_up'],
+                            'range_down' => $pendinginsurance['range_down'],
+                            'charges' => $pendinginsurance['charges']
+                        ]);
+                    }
                 }
-                if($pendinginsurance = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    InsuranceCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'range_up' => $pendinginsurance['range_up'],
-                        'range_down' => $pendinginsurance['range_down'],
-                        'charges' => $pendinginsurance['charges']
-                    ]);
+                if($pendinginsurance = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($pendinginsurances as $pendinginsurance) {
+                        InsuranceCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'range_up' => $pendinginsurance['range_up'],
+                            'range_down' => $pendinginsurance['range_down'],
+                            'charges' => $pendinginsurance['charges']
+                        ]);
+                    }
                 }
-                if($pendinginsurance = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    InsuranceCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'range_up' => $pendinginsurance['range_up'],
-                        'range_down' => $pendinginsurance['range_down'],
-                        'charges' => $pendinginsurance['charges']
-                    ]);
+                if($pendinginsurances = PendingInsuranceCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($pendinginsurances as $pendinginsurance) {
+                        InsuranceCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'range_up' => $pendinginsurance['range_up'],
+                            'range_down' => $pendinginsurance['range_down'],
+                            'charges' => $pendinginsurance['charges']
+                        ]);
+                    }
                 }
-                if($pendingreturn = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    ReturnCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'local' => $pendingreturn['local'],
-                        'national' => $pendingreturn['national']
-                    ]);
+                if($pendingreturns = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($pendingreturns as $pendingreturn) {
+                        ReturnCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'local' => $pendingreturn['local'],
+                            'national' => $pendingreturn['national']
+                        ]);
+                    }
                 }
-                if($pendingreturn = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    ReturnCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'local' => $pendingreturn['local'],
-                        'national' => $pendingreturn['national']
-                    ]);
+                if($pendingreturns = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($pendingreturns as $pendingreturn) {
+                        ReturnCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'local' => $pendingreturn['local'],
+                            'national' => $pendingreturn['national']
+                        ]);
+                    }
                 }
-                if($pendingreturn = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    ReturnCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'local' => $pendingreturn['local'],
-                        'national' => $pendingreturn['national']
-                    ]);
+                if($pendingreturns = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($pendingreturns as $pendingreturn) {
+                        ReturnCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'local' => $pendingreturn['local'],
+                            'national' => $pendingreturn['national']
+                        ]);
+                    }
                 }
-                if($pendingreturn = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    ReturnCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'local' => $pendingreturn['local'],
-                        'national' => $pendingreturn['national']
-                    ]);
+                if($pendingreturns = PendingReturnCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($pendingreturns as $pendingreturn) {
+                        ReturnCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'local' => $pendingreturn['local'],
+                            'national' => $pendingreturn['national']
+                        ]);
+                    }
                 }
-                if($pendingfuel = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    FuelSurcharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'fuel_surcharge' => $pendingfuel['fuel_surcharge']
-                    ]);
+                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($pendingfuels as $pendingfuel) {
+                        FuelSurcharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'fuel_surcharge' => $pendingfuel['fuel_surcharge']
+                        ]);
+                    }
                 }
-                if($pendingfuel = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    FuelSurcharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'fuel_surcharge' => $pendingfuel['fuel_surcharge']
-                    ]);
+                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($pendingfuels as $pendingfuel) {
+                        FuelSurcharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'fuel_surcharge' => $pendingfuel['fuel_surcharge']
+                        ]);
+                    }
                 }
-                if($pendingfuel = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    FuelSurcharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'fuel_surcharge' => $pendingfuel['fuel_surcharge']
-                    ]);
+                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($pendingfuels as $pendingfuel) {
+                        FuelSurcharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'fuel_surcharge' => $pendingfuel['fuel_surcharge']
+                        ]);
+                    }
                 }
-                if($pendingfuel = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    FuelSurcharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'fuel_surcharge' => $pendingfuel['fuel_surcharge']
-                    ]);
+                if($pendingfuels = PendingFuelSurcharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($pendingfuels as $pendingfuel) {
+                        FuelSurcharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'fuel_surcharge' => $pendingfuel['fuel_surcharge']
+                        ]);
+                    }
                 }
-                if($pendingpackaging = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    PackagingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'sm_flyer' => $pendingpackaging['sm_flyer'],
-                        'md_flyer' => $pendingpackaging['md_flyer'],
-                        'lg_flyer' => $pendingpackaging['lg_flyer'],
-                        'box_flyer' => $pendingpackaging['box_flyer']
-                    ]);
+                if($pendingpackagings = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($pendingpackagings as $pendingpackaging) {
+                        PackagingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'sm_flyer' => $pendingpackaging['sm_flyer'],
+                            'md_flyer' => $pendingpackaging['md_flyer'],
+                            'lg_flyer' => $pendingpackaging['lg_flyer'],
+                            'box_flyer' => $pendingpackaging['box_flyer']
+                        ]);
+                    }
                 }
-                if($pendingpackaging = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    PackagingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'sm_flyer' => $pendingpackaging['sm_flyer'],
-                        'md_flyer' => $pendingpackaging['md_flyer'],
-                        'lg_flyer' => $pendingpackaging['lg_flyer'],
-                        'box_flyer' => $pendingpackaging['box_flyer']
-                    ]);
+                if($pendingpackagings = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($pendingpackagings as $pendingpackaging) {
+                        PackagingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'sm_flyer' => $pendingpackaging['sm_flyer'],
+                            'md_flyer' => $pendingpackaging['md_flyer'],
+                            'lg_flyer' => $pendingpackaging['lg_flyer'],
+                            'box_flyer' => $pendingpackaging['box_flyer']
+                        ]);
+                    }
                 }
-                if($pendingpackaging = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    PackagingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'sm_flyer' => $pendingpackaging['sm_flyer'],
-                        'md_flyer' => $pendingpackaging['md_flyer'],
-                        'lg_flyer' => $pendingpackaging['lg_flyer'],
-                        'box_flyer' => $pendingpackaging['box_flyer']
-                    ]);
+                if($pendingpackagings = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($pendingpackagings as $pendingpackaging) {
+                        PackagingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'sm_flyer' => $pendingpackaging['sm_flyer'],
+                            'md_flyer' => $pendingpackaging['md_flyer'],
+                            'lg_flyer' => $pendingpackaging['lg_flyer'],
+                            'box_flyer' => $pendingpackaging['box_flyer']
+                        ]);
+                    }
                 }
-                if($pendingpackaging = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    PackagingCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'sm_flyer' => $pendingpackaging['sm_flyer'],
-                        'md_flyer' => $pendingpackaging['md_flyer'],
-                        'lg_flyer' => $pendingpackaging['lg_flyer'],
-                        'box_flyer' => $pendingpackaging['box_flyer']
-                    ]);
+                if($pendingpackagings = PendingPackagingCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($pendingpackagings as $pendingpackaging) {
+                        PackagingCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'sm_flyer' => $pendingpackaging['sm_flyer'],
+                            'md_flyer' => $pendingpackaging['md_flyer'],
+                            'lg_flyer' => $pendingpackaging['lg_flyer'],
+                            'box_flyer' => $pendingpackaging['box_flyer']
+                        ]);
+                    }
                 }
-                if($pendingdiscount = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->first())
-                {
-                    DiscountCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 1,
-                        'title' => $pendingdiscount['title'],
-                        'weight' => $pendingdiscount['weight'],
-                        'cash' => $pendingdiscount['cash'],
-                        'insurance' => $pendingdiscount['insurance'],
-                        'return' => $pendingdiscount['return'],
-                        'packaging' => $pendingdiscount['packaging'],
-                        'to' => $pendingdiscount['to'],
-                        'from' => $pendingdiscount['from'],
-                        'added_by' => $pendingdiscount['added_by']
-                    ]);
+                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 1])->get()) {
+                    foreach ($pendingdiscounts as $pendingdiscount) {
+                        DiscountCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'title' => $pendingdiscount['title'],
+                            'weight' => $pendingdiscount['weight'],
+                            'cash' => $pendingdiscount['cash'],
+                            'insurance' => $pendingdiscount['insurance'],
+                            'return' => $pendingdiscount['return'],
+                            'packaging' => $pendingdiscount['packaging'],
+                            'to' => $pendingdiscount['to'],
+                            'from' => $pendingdiscount['from'],
+                            'added_by' => $pendingdiscount['added_by']
+                        ]);
+                    }
                 }
-                if($pendingdiscount = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->first())
-                {
-                    DiscountCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 2,
-                        'title' => $pendingdiscount['title'],
-                        'weight' => $pendingdiscount['weight'],
-                        'cash' => $pendingdiscount['cash'],
-                        'insurance' => $pendingdiscount['insurance'],
-                        'return' => $pendingdiscount['return'],
-                        'packaging' => $pendingdiscount['packaging'],
-                        'to' => $pendingdiscount['to'],
-                        'from' => $pendingdiscount['from'],
-                        'added_by' => $pendingdiscount['added_by']
-                    ]);
+                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 2])->get()) {
+                    foreach ($pendingdiscounts as $pendingdiscount) {
+                        DiscountCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'title' => $pendingdiscount['title'],
+                            'weight' => $pendingdiscount['weight'],
+                            'cash' => $pendingdiscount['cash'],
+                            'insurance' => $pendingdiscount['insurance'],
+                            'return' => $pendingdiscount['return'],
+                            'packaging' => $pendingdiscount['packaging'],
+                            'to' => $pendingdiscount['to'],
+                            'from' => $pendingdiscount['from'],
+                            'added_by' => $pendingdiscount['added_by']
+                        ]);
+                    }
                 }
-                if($pendingdiscount = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->first())
-                {
-                    DiscountCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 3,
-                        'title' => $pendingdiscount['title'],
-                        'weight' => $pendingdiscount['weight'],
-                        'cash' => $pendingdiscount['cash'],
-                        'insurance' => $pendingdiscount['insurance'],
-                        'return' => $pendingdiscount['return'],
-                        'packaging' => $pendingdiscount['packaging'],
-                        'to' => $pendingdiscount['to'],
-                        'from' => $pendingdiscount['from'],
-                        'added_by' => $pendingdiscount['added_by']
-                    ]);
+                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 3])->get()) {
+                    foreach ($pendingdiscounts as $pendingdiscount) {
+                        DiscountCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'title' => $pendingdiscount['title'],
+                            'weight' => $pendingdiscount['weight'],
+                            'cash' => $pendingdiscount['cash'],
+                            'insurance' => $pendingdiscount['insurance'],
+                            'return' => $pendingdiscount['return'],
+                            'packaging' => $pendingdiscount['packaging'],
+                            'to' => $pendingdiscount['to'],
+                            'from' => $pendingdiscount['from'],
+                            'added_by' => $pendingdiscount['added_by']
+                        ]);
+                    }
                 }
-                if($pendingdiscount = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->first())
-                {
-                    DiscountCharge::create([
-                        'user_id' => $id,
-                        'shipping_mode_id' => 4,
-                        'title' => $pendingdiscount['title'],
-                        'weight' => $pendingdiscount['weight'],
-                        'cash' => $pendingdiscount['cash'],
-                        'insurance' => $pendingdiscount['insurance'],
-                        'return' => $pendingdiscount['return'],
-                        'packaging' => $pendingdiscount['packaging'],
-                        'to' => $pendingdiscount['to'],
-                        'from' => $pendingdiscount['from'],
-                        'added_by' => $pendingdiscount['added_by']
-                    ]);
+                if($pendingdiscounts = PendingDiscountCharge::where(['user_id' => $id , 'shipping_mode_id' => 4])->get()) {
+                    foreach ($pendingdiscounts as $pendingdiscount) {
+                        DiscountCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'title' => $pendingdiscount['title'],
+                            'weight' => $pendingdiscount['weight'],
+                            'cash' => $pendingdiscount['cash'],
+                            'insurance' => $pendingdiscount['insurance'],
+                            'return' => $pendingdiscount['return'],
+                            'packaging' => $pendingdiscount['packaging'],
+                            'to' => $pendingdiscount['to'],
+                            'from' => $pendingdiscount['from'],
+                            'added_by' => $pendingdiscount['added_by']
+                        ]);
+                    }
                 }
                 PendingRateStatus::where('user_id', $id)->delete();
                 PendingWeightCharge::where('user_id', $id)->delete();

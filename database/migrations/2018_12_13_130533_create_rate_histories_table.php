@@ -18,6 +18,8 @@ class CreateRateHistoriesTable extends Migration
             $table->integer('user_id');
             $table->integer('updated_by')->nullable();
             $table->integer('approved_by')->nullable();
+            $table->DateTime('from_date')->nullable();
+            $table->DateTime('to_date')->nullable();
             $table->timestamps();
 
         });
