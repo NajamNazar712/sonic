@@ -61,4 +61,8 @@ class Shipment extends Model
     public function misrouted_history(){
         return $this->hasMany('App\Http\Models\MisroutedHistory');
     }
+
+    public function done_payment_shipments() {
+    	return $this->hasMany('App\Http\Models\DonePaymentShipment');
+    }
 }
