@@ -671,6 +671,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('month_closing')->name('month_closing.')->group(function (){
+        Route::get('','Admins\AdminMonthClosingController@month_closing_index')->name('index');
+        Route::get('list','Admins\AdminMonthClosingController@month_closing_list')->name('list');
+        Route::post('add','Admins\AdminMonthClosingController@month_closing_list')->name('add');
+    });
+
+
     Route::prefix('sameday')->name('sameday.')->group(function (){
         Route::get('','Admins\SamedayController@sameday_index')->name('index');
         Route::get('list','Admins\SamedayController@sameday_list')->name('list');
