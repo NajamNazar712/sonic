@@ -185,6 +185,42 @@ class LostShipmentsController extends Controller
                 $shipment_details = Shipment::where('id',$shipment)->whereNotIn('shipper_status_id',$passing_status_array);
                 if($shipment_details->exists()){
                     $shipment_details = $shipment_details->first();
+                    if($shipment_details->shipper_status_id == 3){
+                        $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
+                        if ($cargo_consignment_shipment->exists()) {
+                            $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
+
+                            $cargo = CargoConsignment::find($cargo_consignment_shipment);
+                            $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment_details->id)->delete();
+                            if(in_array($cargo->status_id, [1,2])){
+                                $shipments_count = $cargo->shipments;
+                                $shipment_weight = $cargo->shipment_weight;
+                                $shipments_count = $shipments_count-1;
+                                $cargo->shipments = $shipments_count;
+                                $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
+                                if($shipments_count == 0){
+                                    $cargo->status_id = 5;
+                                }
+                                $cargo->save();
+                            }else if($cargo->status_id == 4){
+                                $shipments_count = $cargo->shipments;
+                                $shipments_received_count = $cargo->received_shipments;
+                                $shipment_weight = $cargo->shipment_weight;
+                                $shipments_count = $shipments_count-1;
+                                $cargo->shipments = $shipments_count;
+                                $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
+                                if($shipments_count == 0){
+                                    $cargo->status_id = 5;
+                                }else if($shipments_count == $shipments_received_count){
+                                    $cargo->status_id = 3;
+                                }
+                                $cargo->save();
+                            }
+                            $shipment_details->shipper_status_id = 18;
+                            $shipment_details->save();
+                            ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL,NULL,NULL,Auth::id());
+                        }
+                    }else{
                     $shipment_details->shipper_status_id = 18;
                     $shipment_details->save();
                     ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL,NULL,NULL,Auth::id());
