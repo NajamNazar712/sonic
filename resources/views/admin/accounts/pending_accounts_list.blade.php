@@ -31,7 +31,7 @@
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Status</th>
-                                        <th class="border-primary border-darken-1">Sales person tagged</th>
+                                        <th class="border-primary border-darken-1">Sales Person Tagged</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
                                         <th class="border-primary border-darken-1">Rates Approved By</th>
                                         <th class="border-primary border-darken-1">Action</th>
@@ -111,7 +111,7 @@
                         head.push('Product Type');
                         head.push('Request Date');
                         head.push('Status');
-                        head.push('Sales person tagged');
+                        head.push('Sales Person Tagged');
                         head.push('Rates Added By');
                         head.push('Rates Approved By');
                         $.each(result.data, function(index, values) {

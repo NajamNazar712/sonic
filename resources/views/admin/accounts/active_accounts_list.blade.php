@@ -30,7 +30,7 @@
                                         <th class="border-primary border-darken-1">Email Address</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
-                                        <th class="border-primary border-darken-1">Sales person tagged</th>
+                                        <th class="border-primary border-darken-1">Sales Person Tagged</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Approved By</th>
@@ -107,7 +107,7 @@
                         head.push('Email Address');
                         head.push('Product Type');
                         head.push('Status');
-                        head.push('Sales person tagged');
+                        head.push('Sales Person Tagged');
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Approved By');
