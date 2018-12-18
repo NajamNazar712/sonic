@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\BookingType;
+use App\Http\Models\CargoConsignmentShipment;
+use App\Http\Models\CargoConsignment;
 use App\Http\Models\Shipment;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
@@ -181,49 +183,51 @@ class LostShipmentsController extends Controller
         $passing_status_array = array(1, 14, 17, 18, 25, 30, 31);
         $shipments = explode(',', $request->shipment_ids);
         if(!empty($shipments)){
-            foreach ($shipments as $shipment){
-                $shipment_details = Shipment::where('id',$shipment)->whereNotIn('shipper_status_id',$passing_status_array);
-                if($shipment_details->exists()){
+            foreach ($shipments as $shipment) {
+                $shipment_details = Shipment::where('id', $shipment)->whereNotIn('shipper_status_id', $passing_status_array);
+                if ($shipment_details->exists()) {
                     $shipment_details = $shipment_details->first();
-                    if($shipment_details->shipper_status_id == 3){
+                    if ($shipment_details->shipper_status_id == 3) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
                         if ($cargo_consignment_shipment->exists()) {
                             $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
 
                             $cargo = CargoConsignment::find($cargo_consignment_shipment);
-                            $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment_details->id)->delete();
-                            if(in_array($cargo->status_id, [1,2])){
+                            $cargo->cargo_consignment_shipments()->where('shipment_id', $shipment_details->id)->delete();
+                            if (in_array($cargo->status_id, [1, 2])) {
                                 $shipments_count = $cargo->shipments;
                                 $shipment_weight = $cargo->shipment_weight;
-                                $shipments_count = $shipments_count-1;
+                                $shipments_count = $shipments_count - 1;
                                 $cargo->shipments = $shipments_count;
                                 $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                if($shipments_count == 0){
+                                if ($shipments_count == 0) {
                                     $cargo->status_id = 5;
                                 }
                                 $cargo->save();
-                            }else if($cargo->status_id == 4){
+                            } else if ($cargo->status_id == 4) {
                                 $shipments_count = $cargo->shipments;
                                 $shipments_received_count = $cargo->received_shipments;
                                 $shipment_weight = $cargo->shipment_weight;
-                                $shipments_count = $shipments_count-1;
+                                $shipments_count = $shipments_count - 1;
                                 $cargo->shipments = $shipments_count;
                                 $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                if($shipments_count == 0){
+                                if ($shipments_count == 0) {
                                     $cargo->status_id = 5;
-                                }else if($shipments_count == $shipments_received_count){
+                                } else if ($shipments_count == $shipments_received_count) {
                                     $cargo->status_id = 3;
                                 }
                                 $cargo->save();
+                                $shipment_details->shipper_status_id = 18;
+                                $shipment_details->save();
+                                ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL,NULL,NULL,Auth::id());
                             }
-                            $shipment_details->shipper_status_id = 18;
-                            $shipment_details->save();
-                            ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL,NULL,NULL,Auth::id());
+
                         }
-                    }else{
-                    $shipment_details->shipper_status_id = 18;
-                    $shipment_details->save();
-                    ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL,NULL,NULL,Auth::id());
+                    } else {
+                        $shipment_details->shipper_status_id = 18;
+                        $shipment_details->save();
+                        ShipmentsJourneyController::add($shipment_details->id, 18, NULL, NULL, NULL, NULL, Auth::id());
+                    }
                 }
             }
             return redirect()->back()->with(['success' => 'Shipment(s) has been added to Lost!']);
