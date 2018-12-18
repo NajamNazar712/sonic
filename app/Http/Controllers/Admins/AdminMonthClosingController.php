@@ -157,11 +157,6 @@ class AdminMonthClosingController extends Controller
                                 $shipment_details->shipper_status_id = 51;
                                 $shipment_details->consignee_status_id = 51;
                                 $shipment_details->save();
-                            }
-                            else{
-                                $shipment_details->shipper_status_id = 51;
-                                $shipment_details->consignee_status_id = 51;
-                                $shipment_details->save();
                                 ShipmentsJourneyController::add($shipment_details->id,51,51, NULL, NULL, NULL, Auth::id());
                                 return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
                             }
