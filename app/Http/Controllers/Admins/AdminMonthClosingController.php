@@ -119,74 +119,72 @@ class AdminMonthClosingController extends Controller
             $shipment_details = $shipment->first();
             if($shipment_details->shipper_status_id != 51){
                 if(!in_array($shipment_details->shipper_status_id, $status_not_allowed)){
-                    if($shipment_details->shipper_status_id == 3){
+                    if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20])) {
+                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_details->id);
+                        if ($delivery_note_shipment->exists()) {
+                            $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
+                            $delivery = DeliveryNote::where('id', $delivery_note_shipment)->where('status', 0)->exists();
+                            if($delivery){
+                                return response()->json(['status' => 0, 'error' => 'Shipment is in an Unverified Delivery Note']);
+                            }
+                        }
+                    }
+                    if ($shipment_details->shipper_status_id == 3) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
                         if ($cargo_consignment_shipment->exists()) {
                             $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
 
                             $cargo = CargoConsignment::find($cargo_consignment_shipment);
-                            $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment_details->id)->delete();
-                            if(in_array($cargo->status_id, [1,2])){
+                            $cargo->cargo_consignment_shipments()->where('shipment_id', $shipment_details->id)->delete();
+                            if (in_array($cargo->status_id, [1, 2])) {
                                 $shipments_count = $cargo->shipments;
                                 $shipment_weight = $cargo->shipment_weight;
-                                $shipments_count = $shipments_count-1;
+                                $shipments_count = $shipments_count - 1;
                                 $cargo->shipments = $shipments_count;
                                 $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                if($shipments_count == 0){
+                                if ($shipments_count == 0) {
                                     $cargo->status_id = 5;
                                 }
                                 $cargo->save();
                                 $shipment_details->shipper_status_id = 51;
                                 $shipment_details->consignee_status_id = 51;
                                 $shipment_details->save();
-                                ShipmentsJourneyController::add($shipment_details->id,51,51, NULL, NULL, NULL, Auth::id());
+                                ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
                                 return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
-                            }else if($cargo->status_id == 4){
+                            } else if ($cargo->status_id == 4) {
                                 $shipments_count = $cargo->shipments;
                                 $shipments_received_count = $cargo->received_shipments;
                                 $shipment_weight = $cargo->shipment_weight;
-                                $shipments_count = $shipments_count-1;
+                                $shipments_count = $shipments_count - 1;
                                 $cargo->shipments = $shipments_count;
                                 $cargo->shipments_weight = $shipment_weight - $shipment_details->actual_weight;
-                                if($shipments_count == 0){
+                                if ($shipments_count == 0) {
                                     $cargo->status_id = 5;
-                                }else if($shipments_count == $shipments_received_count){
+                                } else if ($shipments_count == $shipments_received_count) {
                                     $cargo->status_id = 3;
                                 }
                                 $cargo->save();
                                 $shipment_details->shipper_status_id = 51;
                                 $shipment_details->consignee_status_id = 51;
                                 $shipment_details->save();
-                                ShipmentsJourneyController::add($shipment_details->id,51,51, NULL, NULL, NULL, Auth::id());
+                                ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
                                 return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
                             }
                         }
 
-                    }
-                    else if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20])){
-                        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_details->id);
-                        if($delivery_note_shipment->exists()){
-                            $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');
-                            $delivery = DeliveryNote::where('id', $delivery_note_shipment)->where('status', 1)->exists();
-                            if($delivery){
-                                $shipment_details->shipper_status_id = 51;
-                                $shipment_details->consignee_status_id = 51;
-                                $shipment_details->save();
-                                ShipmentsJourneyController::add($shipment_details->id,51,51, NULL, NULL, NULL, Auth::id());
-                                return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
-                            }else{
-                                return response()->json(['status' => 1, 'success' => 'Delivery note is not verified yet!']);
+                    } else {
+
+                            if(in_array($shipment_details->shipper_status_id, [20, 21, 22, 24, 26, 27, 29, 30, 47, 48])){
+                                AdminFinanceController::return_confirmed_revert($shipment_details->id);
                             }
 
-                        }
-
-                    }else{
                         $shipment_details->shipper_status_id = 51;
                         $shipment_details->consignee_status_id = 51;
                         $shipment_details->save();
-                        ShipmentsJourneyController::add($shipment_details->id,51,51, NULL, NULL, NULL, Auth::id());
+                        ShipmentsJourneyController::add($shipment_details->id, 51, 51, NULL, NULL, NULL, Auth::id());
                         return response()->json(['status' => 1, 'success' => 'Shipment is successfully added to Month Closing!']);
                     }
+
                 }
                 else{
                     return response()->json(['status' => 0, 'error' => 'Shipment can not added to Month Closing!']);
