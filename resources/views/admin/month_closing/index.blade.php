@@ -41,7 +41,7 @@
         </div>
     </div>
     <div class="modal fade" id="add_shipments_modal" role="dialog" aria-labelledby="add_shipments_title" aria-hidden="true">
-        <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h4 class="modal-title" id="add_shipments_title">Shipment(s)</h4>
@@ -51,14 +51,24 @@
                     </button>
                 </div>
                 <div class="modal-body text-center">
-                    <div class="form-group">
-                        <input type="text" id="tracking_number_input" class="form-control" placeholder="Enter Tracking Number">
-                    </div>
+                    <form id="add_shipment_form" class="form-horizontal mb-1 justify-content-center" novalidate="novalidate">
+
+                        <div class="form-group">
+                            <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
+                        <div class="form-group ml-1">
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add"><i class="la la-plus"></i> Add Shipment</button>
+                            <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
+
+                        </div>
+                    </form>
+
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" id="add_shipment_submit_btn">Submit</button>
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+
+                {{--<div class="modal-footer">--}}
+                    {{--<button type="submit" class="btn btn-primary" id="add_shipment_submit_btn">Submit</button>--}}
+                    {{--<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>--}}
+                {{--</div>--}}
             </div>
         </div>
     </div>
@@ -120,6 +130,7 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
@@ -510,7 +521,7 @@
                     {data: 'service_type', name: 'bt.id', class: 'align-middle service_type'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'reason', name: 'ssr.name', class: 'align-middle reason'},
-                    {data: 'shipment_remarks', name: 'shipments_journey.remarks', class: 'align-middle shipment_remarks'},
+                    {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                     {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                     {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'}
 
@@ -635,8 +646,75 @@
             $('#add_shipment_submit_btn').on('click', function () {
                 var tracking_number = $('#tracking_number_input').val();
                 console.log(tracking_number)
-            })
+            });
 
+            $('#add_shipment_form input.tracking_number').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false
+            });
+
+            $('#add_shipment_form').validate({
+                errorClass: 'danger',
+                successClass: 'success',
+                errorPlacement: function(error, element) {
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
+                },
+                normalizer: function(value) {
+                    return $.trim(value);
+                },
+                submitHandler: function(form) {
+                    // $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    swal({
+                        title: 'Are You Sure?',
+                        text: 'Select Yes to add as Month Closing Shipment!',
+                        icon: 'warning',
+                        buttons: {
+                            cancel: {
+                                text: 'No',
+                                value: null,
+                                visible: true,
+                                closeModal: true,
+                            },
+                            confirm: {
+                                text: 'Yes',
+                                value: true,
+                                visible: true,
+                                closeModal: true
+                            }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                    }).then(function (confirm) {
+                        if(confirm){
+                            var tracking_number = $('#add_shipment_form input.tracking_number').val();
+                            $('#add_shipment_form button[type="submit"]').attr('disabled', 'disabled');
+                            $.ajax({
+                                url: '{!! route('admin.month_closing.add') !!}',
+                                method: 'POST',
+                                data: {
+                                    'tracking_number': tracking_number,
+                                    '_token': '{{ csrf_token() }}'
+                                }
+                            }).done(function(data){
+                               if(data.status){
+                                    toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                    table.draw(true);
+                               }else{
+                                   toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                               }
+                                $('#add_shipment_form input.tracking_number').val('');
+                               $('#add_shipments_modal').modal('hide');
+                                $('#add_shipment_form button[type="submit"]').attr('disabled', false);
+                            });
+
+                        }
+                    });
+
+
+                }
+            });
 
         });
     </script>

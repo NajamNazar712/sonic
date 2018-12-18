@@ -674,7 +674,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('month_closing')->name('month_closing.')->group(function (){
         Route::get('','Admins\AdminMonthClosingController@month_closing_index')->name('index');
         Route::get('list','Admins\AdminMonthClosingController@month_closing_list')->name('list');
-        Route::post('add','Admins\AdminMonthClosingController@month_closing_list')->name('add');
+        Route::post('add','Admins\AdminMonthClosingController@add_shipment')->name('add');
     });
 
 

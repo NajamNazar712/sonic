@@ -188,7 +188,7 @@
                     // $(form).find('button[type=submit]').attr('disabled', 'disabled');
                     swal({
                         title: 'Are You Sure?',
-                        text: 'Select Yes to addd to Lost Shipments!',
+                        text: 'Select Yes to add to Lost Shipments!',
                         icon: 'warning',
                         buttons: {
                             cancel: {
