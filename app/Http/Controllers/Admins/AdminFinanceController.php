@@ -3045,7 +3045,7 @@ class AdminFinanceController extends Controller
                                     </tr>
                                     <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format($total_charges + $total_gst + $total_adjustments) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format($total_charges + $total_gst - $total_adjustments) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>
