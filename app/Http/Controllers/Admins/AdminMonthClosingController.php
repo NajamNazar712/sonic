@@ -121,7 +121,7 @@ class AdminMonthClosingController extends Controller
             $shipment_details = $shipment->first();
             if($shipment_details->shipper_status_id != 51){
                 if(!in_array($shipment_details->shipper_status_id, $status_not_allowed)){
-                    if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20])) {
+                    if(in_array($shipment_details->shipper_status_id, [7, 8, 9, 10, 11, 12, 15, 18, 20, 30])) {
                         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_details->id);
                         if ($delivery_note_shipment->exists()) {
                             $delivery_note_shipment = $delivery_note_shipment->max('delivery_note_id');

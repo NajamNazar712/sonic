@@ -2673,7 +2673,7 @@ class AdminFinanceController extends Controller
         return ['status' => 0, 'success' => 'Payment(s) marked Paid'];
     }
 
-    static public function done_payments_reverted(Request $request) {
+    public function done_payments_reverted(Request $request) {
         foreach ($request->ids as $done_payment_id) {
             $done_payment = DonePayment::find($done_payment_id);
 
