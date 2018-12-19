@@ -69,9 +69,12 @@
                     @if (session('role_id') == 1 || in_array(27, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.cargo.in_transit.index') }}">In Transit</a>
                     @endif
-                        @if (session('role_id') == 1 || in_array(124, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(124, session('permissions')))
                         <li><a class="menu-item" href="{{ route('admin.cargo.history.index') }}">History</a>
-                        @endif
+                    @endif
+                    @if (session('role_id') == 1 || in_array(145, session('permissions')))
+                        <li><a class="menu-item" href="{{ route('admin.cargo.draft.index') }}">Draft</a>
+                    @endif
                     </li>
                 </ul>
             </li>

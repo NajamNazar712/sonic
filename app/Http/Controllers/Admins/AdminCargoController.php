@@ -1581,6 +1581,9 @@ class AdminCargoController extends Controller
         return $html;
     }
 
+    public function draft_index(){
+        return view('admin.cargo.draft');
+    }
     public function draft_add(Request $request){
         $shipment_ids = $request->shipment_ids;
         $destination_id = $request->hub_id;
