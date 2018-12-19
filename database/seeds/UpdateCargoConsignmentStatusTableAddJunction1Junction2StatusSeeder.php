@@ -12,8 +12,8 @@ class UpdateCargoConsignmentStatusTableAddJunction1Junction2StatusSeeder extends
     public function run()
     {
         DB::table('cargo_consignment_status')->insert(array(
-            array('id' => 5, 'name' => 'Received at Junction 1'),
-            array('id' => 6, 'name' => 'Received at Junction 2')
+            array('id' => 6, 'name' => 'Received at Junction 1'),
+            array('id' => 7, 'name' => 'Received at Junction 2')
         ));
     }
 }

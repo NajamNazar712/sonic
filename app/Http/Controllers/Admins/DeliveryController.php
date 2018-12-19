@@ -3279,7 +3279,7 @@ class DeliveryController extends Controller
 
                             $cargo = CargoConsignment::find($cargo_consignment_shipment);
                             $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment->id)->delete();
-                            if(in_array($cargo->status_id, [1,2])){
+                            if(in_array($cargo->status_id, [1,2,6,7])){
                                 $shipments_count = $cargo->shipments;
                                 $shipment_weight = $cargo->shipment_weight;
                                 $shipments_count = $shipments_count-1;
