@@ -117,6 +117,8 @@ class AdminMonthClosingController extends Controller
         $tracking_number = $request->tracking_number;
         $shipment = Shipment::where('tracking_number', $tracking_number);
         $status_not_allowed = array(1, 5, 6, 14, 17, 23, 25, 28, 31, 44, 45, 51);
+        $intransit_status_array = array(3, 21, 26, 32);
+
         if($shipment->exists()){
             $shipment_details = $shipment->first();
             if($shipment_details->shipper_status_id != 51){
@@ -131,7 +133,7 @@ class AdminMonthClosingController extends Controller
                             }
                         }
                     }
-                    if ($shipment_details->shipper_status_id == 3) {
+                    if (in_array($shipment_details->shipper_status_id, $intransit_status_array )) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
                         if ($cargo_consignment_shipment->exists()) {
                             $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
