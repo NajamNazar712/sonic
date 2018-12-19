@@ -3289,6 +3289,19 @@ class DeliveryController extends Controller
                                     $cargo->status_id = 5;
                                 }
                                 $cargo->save();
+                            }else if($cargo->status_id == 4){
+                                $shipments_count = $cargo->shipments;
+                                $shipments_received_count = $cargo->received_shipments;
+                                $shipment_weight = $cargo->shipment_weight;
+                                $shipments_count = $shipments_count-1;
+                                $cargo->shipments = $shipments_count;
+                                $cargo->shipments_weight = $shipment_weight - $shipment->actual_weight;
+                                if($shipments_count == 0){
+                                    $cargo->status_id = 5;
+                                }else if($shipments_count == $shipments_received_count){
+                                    $cargo->status_id = 3;
+                                }
+                                $cargo->save();
                             }
                         }
                     }
