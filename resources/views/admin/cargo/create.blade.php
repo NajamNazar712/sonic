@@ -44,7 +44,8 @@
 								</thead>
 							</table>
 
-							<button type="submit" class="btn btn-primary d-block mx-auto" id="cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
+							<button type="submit" class="btn btn-primary center" id="cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
+							<button type="submit" class="btn btn-primary center" id="add_draft_cargo" data-toggle="modal" data-target="#draft_cargo" disabled="disabled" style="">Add To Draft</button>
 
 							<div class="modal fade" id="cargo_consignment" role="dialog" aria-labelledby="cargo_consignment_title" aria-hidden="true">
 								<div class="modal-dialog modal-lg" role="document">
