@@ -710,7 +710,11 @@ class APIController extends Controller
 
         $shipment = Shipment::where('tracking_number', $tracking_number)->first();
 
-        $current_payment_status = $shipment->shipment_payment_journey->status->name;
+        $shipment_payment_journey = $shipment->shipment_payment_journey;
+
+        if (!$shipment_payment_journey->isEmpty()) {
+          $current_payment_status = $shipment_payment_journey->first()->status->name;
+        }
 
         return response()->json(['status' => 0, 'message' => 'Payment Status of Shipment #' . $tracking_number, 'current_payment_status' => $current_payment_status]);
       }
@@ -739,7 +743,7 @@ class APIController extends Controller
 
         $done_payment_shipments = $shipment->done_payment_shipments;
 
-        if ($done_payment_shipments) {
+        if (!$done_payment_shipments->isEmpty()) {
           $payments = array();
 
           foreach ($done_payment_shipments as $done_payment_shipment) {
