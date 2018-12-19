@@ -3248,7 +3248,7 @@ class DeliveryController extends Controller
     public function misroute_shipment_update(Request $request)
     {
         $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
-
+        $intransit_status_array = array(3, 21, 26, 32);
         $shipments = explode(',', $request->shipment_ids);
         if ($shipments) {
             foreach ($shipments as $shipment_id){
@@ -3257,7 +3257,7 @@ class DeliveryController extends Controller
                     $shipment = $shipment->first();
 
                     
-                    if($shipment->shipper_status_id == 3){
+                    if(in_array($shipment->shipper_status_id, $intransit_status_array)){
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment->id);
                         if ($cargo_consignment_shipment->exists()) {
                             $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
