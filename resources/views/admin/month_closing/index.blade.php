@@ -57,7 +57,7 @@
                             <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
                         </div>
                         <div class="form-group ml-1">
-                            <button type="submit" name="add" class="btn btn-primary add" value="Add"><i class="la la-plus"></i> Add Shipment</button>
+                            <button type="submit" name="add" class="btn btn-primary add" value="Add">Add Shipment</button>
                             <button type="button" class="btn btn-secondary ml-2" data-dismiss="modal">Close</button>
 
                         </div>
@@ -142,7 +142,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.return.list') }}',
+                        url: '{{ route('admin.month_closing.list') }}',
                         data: {
                             'page': 'all',
                         },
@@ -150,9 +150,7 @@
                             head = [];
                             head.push('S.No');
                             head.push('Tracking No.');
-                            head.push('Order ID');
                             head.push('Shipper Name');
-                            head.push('Shipper Phone');
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
@@ -167,7 +165,6 @@
                             head.push('Remarks');
                             head.push('Arrival Date');
                             head.push('Status Date');
-                            head.push('Re-Attempt Count');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -175,9 +172,7 @@
 
                                 row.push(index + 1);
                                 row.push(values.tracking);
-                                row.push(values.order_id);
                                 row.push(values.shipper);
-                                row.push(values.shipper_phone);
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
@@ -192,7 +187,6 @@
                                 row.push(values.remarks);
                                 row.push(values.arrival);
                                 row.push(values.last_status_date);
-                                row.push(values.reattempts);
 
                                 body.push(row);
                             });
@@ -204,7 +198,6 @@
                 }
             } );
             var selected_rows = [];
-            var shipment_remarks = [];
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if (session('role_id') == 1 || count(array_intersect([45, 46], session('permissions'))) !== 0)
@@ -240,33 +233,40 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
-
-                                        table.rows().nodes().each(function(index) {
-                                            var row = table.row(index);
-                                            if ($(row.node()).hasClass('selected')) {
-                                                var id = parseInt(row.id());
-                                                var remarks = $(row.node()).find('td.shipment_remarks input').val();
-                                                shipment_remarks[id] = remarks;
-                                            }
-                                        });
-
                                         $.ajax({
-                                            url:"{{route('admin.return.confirm.status')}}",
+                                            url:"{{route('admin.month_closing.confirm')}}",
                                             method:'POST',
                                             data:{
                                                 'shipment_ids':selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                                'action': 'confirm',
-                                                'remark': shipment_remarks
+                                                '_token':'{{ csrf_token() }}'
                                             }
                                         }).done(function (data) {
-                                            table.rows().deselect();
                                             selected_rows = [];
-                                            shipment_remarks = [];
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
-                                            table.draw('false');
+                                            table.draw(true);
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                            // if(data.untouched){
+                                            //     var comma = '';
+                                            //     var shipments = '';
+                                            //     $.each(data.untouched_shipments, function (index, value) {
+                                            //         if(data.untouched_shipments != index+1){
+                                            //             comma = ", ";
+                                            //         }else{
+                                            //             comma = '';
+                                            //         }
+                                            //         shipments += value+comma;
+                                            //
+                                            //     });
+                                            //
+                                            //     swal({
+                                            //         title: 'Shipments Not updated!',
+                                            //         text: shipments,
+                                            //         icon: 'error',
+                                            //         closeOnClickOutside: false,
+                                            //         closeOnEsc: false
+                                            //     });
+                                            // }
 
                                         });
                                     }
@@ -311,32 +311,18 @@
                                     dangerMode: true
                                 }).then(function (confirm) {
                                     if (confirm) {
-                                        table.rows().nodes().each(function(index) {
-                                            var row = table.row(index);
-
-                                            if ($(row.node()).hasClass('selected')) {
-                                                var id = parseInt(row.id());
-                                                var remark = $(row.node()).find('td.shipment_remarks input').val();
-                                                shipment_remarks[id] = remark;
-                                            }
-                                        });
-
                                         $.ajax({
-                                            url:"{{route('admin.return.reattempt.status')}}",
+                                            url:"{{route('admin.month_closing.reattempt')}}",
                                             method:'POST',
                                             data:{
                                                 'shipment_ids':selected_rows,
-                                                '_token':'{{ csrf_token() }}',
-                                                'action': 'reattempt',
-                                                'remark': shipment_remarks
+                                                '_token':'{{ csrf_token() }}'
                                             }
                                         }).done(function (data) {
                                             selected_rows = [];
-                                            shipment_remarks = [];
                                             table.button('.confirm').disable();
                                             table.button('.re-attempt').disable();
-                                            table.draw('false');
-                                            table.rows().deselect();
+                                            table.draw(true);
                                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
                                         });
@@ -355,58 +341,12 @@
                             enabled: true,
                             action: function (e, dt, node, config) {
                                 $('#add_shipments_modal').modal('show');
-                                {{--if(selected_rows != ''){--}}
-                                    {{--swal({--}}
-                                        {{--title: 'Are You Sure?',--}}
-                                        {{--text: 'Select Yes to change shipment status to Re-Attempt!',--}}
-                                        {{--icon: 'warning',--}}
-                                        {{--buttons: {--}}
-                                            {{--cancel: {--}}
-                                                {{--text: 'No',--}}
-                                                {{--value: null,--}}
-                                                {{--visible: true,--}}
-                                                {{--closeModal: true,--}}
-                                            {{--},--}}
-                                            {{--confirm: {--}}
-                                                {{--text: 'Yes',--}}
-                                                {{--value: true,--}}
-                                                {{--visible: true,--}}
-                                                {{--closeModal: true--}}
-                                            {{--}--}}
-                                        {{--},--}}
-                                        {{--closeOnClickOutside: false,--}}
-                                        {{--closeOnEsc: false,--}}
-                                        {{--dangerMode: true--}}
-                                    {{--}).then(function (confirm) {--}}
-                                        {{--if (confirm) {--}}
-
-                                            {{--$.ajax({--}}
-                                                {{--url:"{{route('admin.month_closing.add')}}",--}}
-                                                {{--method:'POST',--}}
-                                                {{--data:{--}}
-                                                    {{--'shipment_ids':selected_rows,--}}
-                                                    {{--'_token':'{{ csrf_token() }}',--}}
-                                                {{--}--}}
-                                            {{--}).done(function (data) {--}}
-                                                {{--selected_rows = [];--}}
-                                                {{--shipment_remarks = [];--}}
-                                                {{--table.button('.confirm').disable();--}}
-                                                {{--table.button('.re-attempt').disable();--}}
-                                                {{--table.draw('false');--}}
-                                                {{--table.rows().deselect();--}}
-                                                {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
-
-                                            {{--});--}}
-                                        {{--}--}}
-                                    {{--});--}}
-
-                                {{--}--}}
                             }
                         },
                         @endif
                     {
                         extend: 'excel',
-                        title: 'Return Marked',
+                        title: 'Month Closing',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }, {
@@ -421,21 +361,6 @@
 
                                 if ($(row.node().firstChild).hasClass('select-checkbox') && !$(row.node()).hasClass('selected')) {
                                     id = parseInt(row.id());
-
-                                    hub_id = $(row.node()).data('hub');
-
-                                    var allow = false;
-
-                                    if(hub_ids.length == 0) {
-                                        hub_ids.push(hub_id);
-
-                                        allow = true;
-                                    }
-                                    else if(hub_ids[0] == hub_id) {
-                                        allow = true;
-                                    }
-
-                                    if (allow) {
                                         row.select();
 
                                         var index = $.inArray(id, selected_rows);
@@ -446,7 +371,7 @@
 
                                         table.button('.confirm').enable();
                                         table.button('.re-attempt').enable();
-                                    }
+
                                 }
                             });
                         }
@@ -474,8 +399,6 @@
                                     if (selected_rows.length == 0) {
                                         table.button('.confirm').disable();
                                         table.button('.re-attempt').disable();
-
-                                        hub_ids.splice(index, 1);
                                     }
                                 }
                             });
@@ -622,7 +545,6 @@
 
                 var id = parseInt($(this).parent('tr').attr('id'));
 
-                    hub_ids.push(hub_id);
                     var index = $.inArray(id, selected_rows);
 
                     if (index === -1) {
@@ -643,10 +565,6 @@
 
             });
 
-            $('#add_shipment_submit_btn').on('click', function () {
-                var tracking_number = $('#tracking_number_input').val();
-                console.log(tracking_number)
-            });
 
             $('#add_shipment_form input.tracking_number').inputmask({
                 'alias': 'integer',

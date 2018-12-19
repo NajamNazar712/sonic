@@ -238,6 +238,12 @@ class Permission
             'finance.invoices_history.returned_shipments' => 122,
             'finance.invoices_history.adjusted_shipments' => 122,
 
+            'admin.month_closing.index' => 141,
+            'admin.month_closing.list' => 141,
+            'admin.month_closing.confirm' => 142,
+            'admin.month_closing.reattempt' => 143,
+            'admin.month_closing.add' => 144,
+
             'reports.pickup_note.index' => 64,
             'reports.pickup_note.list' => 64,
             'reports.pickup_note.bookings' => 64,

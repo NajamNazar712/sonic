@@ -675,6 +675,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('','Admins\AdminMonthClosingController@month_closing_index')->name('index');
         Route::get('list','Admins\AdminMonthClosingController@month_closing_list')->name('list');
         Route::post('add','Admins\AdminMonthClosingController@add_shipment')->name('add');
+        Route::post('confirm','Admins\AdminMonthClosingController@return_confirm_shipment')->name('confirm');
+        Route::post('reattempt','Admins\AdminMonthClosingController@return_reattempt_shipment')->name('reattempt');
     });
 
 

@@ -2,11 +2,13 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\ShipmentsJourneyController;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Models\ShipmentStatus;
@@ -174,9 +176,12 @@ class AdminMonthClosingController extends Controller
 
                     } else {
 
-                            if(in_array($shipment_details->shipper_status_id, [20, 21, 22, 24, 26, 27, 29, 30, 47, 48])){
-                                AdminFinanceController::return_confirmed_revert($shipment_details->id);
-                            }
+                        if(in_array($shipment_details->shipper_status_id, [20, 21, 22, 24, 26, 27, 29, 30, 47, 48])){
+                            AdminFinanceController::return_confirmed_revert($shipment_details->id);
+                        }
+                        if($shipment_details->shipper_status_id == 30){
+                            AdminFinanceController::done_payments_reverted($shipment_details->id);
+                        }
 
                         $shipment_details->shipper_status_id = 51;
                         $shipment_details->consignee_status_id = 51;
@@ -201,4 +206,73 @@ class AdminMonthClosingController extends Controller
             return response()->json(['status' => 0, 'error' => 'Shipment with this tracking number not found!']);
         }
     }
+
+    public function return_confirm_shipment(Request $request){
+        $shipment_ids = $request->shipment_ids;
+        $not_updated_shipments = array();
+        $untouched = false;
+            if(!empty($shipment_ids)){
+
+                foreach ($shipment_ids as $shipment){
+                    $parcel = Shipment::find($shipment);
+                    if($parcel){
+                        if (!$parcel->packaging_material_request) {
+                            Shipment::where('id',$shipment)->update(['shipper_status_id'=>20,'consignee_status_id'=>20]);
+                            ShipmentsJourneyController::add($shipment, 20, 20, NULL, NULL, NULL, Auth::id());
+
+                            NotificationsController::send(15, 0, $shipment);
+                            NotificationsController::send(16, 0, $shipment);
+
+                            ShipmentChargesController::return($shipment);
+
+                            AdminFinanceController::add_payment($shipment, 1);
+                        }
+                        else {
+                            Shipment::where('id',$shipment)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
+                            ShipmentsJourneyController::add($shipment, 17, 17, NULL, NULL, NULL, Auth::id());
+
+                            NotificationsController::send(15, 0, $shipment);
+                            NotificationsController::send(16, 0, $shipment);
+                        }
+                    }else{
+                        $not_updated_shipments[] = $shipment;
+                    }
+                }
+            }
+
+            if(count($not_updated_shipments) > 0){
+                $untouched = true;
+            }
+
+            return response()->json(['status'=>1,'success'=>"Shipment successfully updated as ( Return Confirm )", 'untouched_shipments' => $not_updated_shipments, 'untouched' => $untouched]);
+    }
+
+     public function return_reattempt_shipment(Request $request){
+         $shipment_ids = $request->shipment_ids;
+         $not_updated_shipments = array();
+         $untouched = false;
+            if(!empty($shipment_ids)){
+
+                foreach ($shipment_ids as $shipment){
+                    $parcel = Shipment::find($shipment);
+                    if($parcel){
+                        Shipment::where('id',$shipment)->update(['shipper_status_id'=>13,'consignee_status_id'=>13]);
+                        ShipmentsJourneyController::add($shipment, 13, 13, NULL, NULL, NULL, Auth::id());
+
+                        NotificationsController::send(15, 0, $shipment);
+                        NotificationsController::send(16, 0, $shipment);
+                    }
+                    else{
+                        $not_updated_shipments[] = $shipment;
+                    }
+                }
+
+            }
+         if(count($not_updated_shipments) > 0){
+             $untouched = true;
+         }
+
+             return response()->json(['status'=>1,'success'=>"Shipment successfully updated as ( Re-Attempt )", 'untouched_shipments' => $not_updated_shipments, 'untouched' => $untouched]);
+
+     }
 }
