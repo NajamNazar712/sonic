@@ -1578,4 +1578,8 @@ class AdminCargoController extends Controller
 
         return $html;
     }
+
+    public function draft_add(Request $request){
+
+    }
 }

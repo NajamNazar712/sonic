@@ -533,6 +533,13 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\AdminCargoController@history_shipments')->name('shipments');
             Route::post('print', 'Admins\AdminCargoController@history_cargo_print')->name('print');
         });
+
+        Route::prefix('draft')->name('draft.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@draft_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@draft_list')->name('list');
+            Route::post('add', 'Admins\AdminCargoController@draft_add')->name('add');
+        });
+
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
        Route::get('','Admins\DisputeController@dispute_index')->name('index');
