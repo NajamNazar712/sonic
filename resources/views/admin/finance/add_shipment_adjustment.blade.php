@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Change Shipment Amount')
+@section('title', 'Add Shipment Adjustment')
 
 @section('content')
 	<div class="app-content content">
@@ -9,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Change Shipment Amount
+					Add Shipment Adjustment
 				</h1>
 
 				<div class="card">
@@ -30,18 +30,18 @@
 							<div class="shipment mt-2" id="shipment">
 							</div>
 
-							@if (session('role_id') == 1 || in_array(58, session('permissions')))
-								<form id="change_amount_form" class="form-inline mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_amount.store') }}" novalidate="novalidate">
+							@if (session('role_id') == 1 || in_array(137, session('permissions')))
+								<form id="add_adjustment_form" class="form-inline mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.add_shipment_adjustment.store') }}" novalidate="novalidate">
 									{{ csrf_field() }}
 
 									<input type="hidden" name="shipment_id" class="shipment_id">
 
 									<div class="form-group">
-										<input type="text" name="amount" class="form-control amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">
+										<input type="text" name="payable" class="form-control payable" placeholder="Payable" data-rule-range="[-500000,500000]" data-msg-range="Payable needs to be from -500000 to 500000" data-rule-not="0" data-msg-not="Payable cannot be 0">
 									</div>
 
 									<div class="form-group ml-1">
-										<button type="submit" name="change" class="btn btn-primary change" value="Change">Change</button>
+										<button type="submit" name="add" class="btn btn-primary add" value="Add">Add</button>
 									</div>
 								</form>
 							@endif
@@ -87,10 +87,10 @@
 
 					$('#shipment').html('');
 
-					@if (session('role_id') == 1 || in_array(58, session('permissions')))
-						$('#change_amount_form').addClass('d-none');
+					@if (session('role_id') == 1 || in_array(137, session('permissions')))
+						$('#add_adjustment_form').addClass('d-none');
 
-						$('#change_amount_form input.tracking_number').val('');
+						$('#add_adjustment_form input.tracking_number').val('');
 					@endif
 
 					var tracking_number = $(form).find('input.tracking_number').val();
@@ -98,7 +98,7 @@
 					form.reset();
 
 					$.ajax({
-						url: '{!! route('admin.finance.change_shipment_amount.shipment_details') !!}',
+						url: '{!! route('admin.finance.add_shipment_adjustment.shipment_details') !!}',
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -197,10 +197,10 @@
 
 							$('#shipment').html(shipment);
 
-							@if (session('role_id') == 1 || in_array(58, session('permissions')))
-								$('#change_amount_form').removeClass('d-none');
+							@if (session('role_id') == 1 || in_array(137, session('permissions')))
+								$('#add_adjustment_form').removeClass('d-none');
 
-								$('#change_amount_form input.shipment_id').val(details.id);
+								$('#add_adjustment_form input.shipment_id').val(details.id);
 							@endif
 
 							$(form).find('button.search').prop('disabled', false);
@@ -218,19 +218,25 @@
 				}
 			});
 
-			@if (session('role_id') == 1 || in_array(58, session('permissions')))
-				$('#change_amount_form input.amount').inputmask({
+			@if (session('role_id') == 1 || in_array(137, session('permissions')))
+				$.validator.addMethod('not', function(value, element, param) {
+					return (value != param) && (value == parseInt(value, 10));
+				}, 'Invalid Value Entered');
+
+				$('#add_adjustment_form input.payable').inputmask({
 					'alias': 'integer',
-					'allowMinus': false,
-					'allowPlus': false,
+					'allowMinus': true,
+					'allowPlus': true,
 					'groupSeparator': ',',
-					'autoGroup': true,
-					'max': 1000000
+					'autoGroup': true
 				});
 
-				$('#change_amount_form').validate({
+				$('#add_adjustment_form').validate({
 					errorClass: 'danger',
 					successClass: 'success',
+					normalizer: function(value) {
+						return $.trim(value).replace(/,/g, '');
+					},
 					errorPlacement: function(error, element) {
 						error.addClass('w-100').appendTo(element.parents('form'));
 					}

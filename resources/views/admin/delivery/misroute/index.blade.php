@@ -1,10 +1,10 @@
 
 @extends('admin.layout.master')
-@section('title','Misrouted Deliveries')
+@section('title','Misrouted Shipments')
 
 @section('content')
     <h1 class="mb-1">
-        Misrouted Deliveries
+        Misrouted Shipments
     </h1>
 
     <div class="card">
@@ -33,7 +33,6 @@
                         <th class="border-primary border-darken-1">Remarks</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Status Date</th>
-                        <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
                 </table>
@@ -41,62 +40,62 @@
         </div>
     </div>
 
-    <div class="modal fade text-left" id="RebookModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RebookModal"
-         aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h4 class="modal-title">Update Shipment</h4>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body text-center rebook_body">
-                    <form id="updateRebook" action="#" method="post">
-                        <div class="row justify-content-center mb-2">
-                            <div class="col-6">
-                                <span class="form-label">Tracking Number :</span>
-                                <input type="text" name="tracking_number" id="tracking_number" readonly class="form-control text-center">
-                                <input type="hidden" name="shipment_id" id="shipment_id" readonly class="form-control text-center">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                                <h3>Consignee Information</h3>
-                                <div class="form-group">
-                                    <select name="consignee_city" id="consignee_city" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">
-                                        <option></option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" id="consignee" name="consignee" class="form-control" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="This field is required">
-                                </div>
-                                <div class="form-group">
-                                    <textarea name="address" class="form-control" id="address" cols="49" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="This field is required"></textarea>
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="phone1" name="phone1" data-rule-required="true" data-msg-required="This field is required" placeholder="phone 1*">
-                                </div>
-                                <div class="form-group">
-                                    <input type="text" class="form-control" id="phone2" name="phone2" placeholder="Phone 2">
-                                </div>
-                                <div class="form-group">
-                                    <input type="email" class="form-control" id="email" name="email" placeholder="Consignee Email">
-                                </div>
-                            </div>
-                            <div class="col justify-content-center">
-                                <div class="form-group text-center">
-                                    <button id="rebookSubmit" type="submit" class="btn btn-primary">Update</button>
+    {{--<div class="modal fade text-left" id="RebookModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="RebookModal"--}}
+         {{--aria-hidden="true">--}}
+        {{--<div class="modal-dialog" role="document">--}}
+            {{--<div class="modal-content">--}}
+                {{--<div class="modal-header">--}}
+                    {{--<h4 class="modal-title">Update Shipment</h4>--}}
+                    {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
+                        {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--</button>--}}
+                {{--</div>--}}
+                {{--<div class="modal-body text-center rebook_body">--}}
+                    {{--<form id="updateRebook" action="#" method="post">--}}
+                        {{--<div class="row justify-content-center mb-2">--}}
+                            {{--<div class="col-6">--}}
+                                {{--<span class="form-label">Tracking Number :</span>--}}
+                                {{--<input type="text" name="tracking_number" id="tracking_number" readonly class="form-control text-center">--}}
+                                {{--<input type="hidden" name="shipment_id" id="shipment_id" readonly class="form-control text-center">--}}
+                            {{--</div>--}}
+                        {{--</div>--}}
+                        {{--<div class="row">--}}
+                            {{--<div class="col-xs-12 col-sm-12 col-md-12 col-lg-12">--}}
+                                {{--<h3>Consignee Information</h3>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<select name="consignee_city" id="consignee_city" class="select2 form-control" style="width:100%;" data-rule-required="true" data-msg-required="This field is required">--}}
+                                        {{--<option></option>--}}
+                                    {{--</select>--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<input type="text" id="consignee" name="consignee" class="form-control" placeholder="Consignee Name*" data-rule-required="true" data-msg-required="This field is required">--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<textarea name="address" class="form-control" id="address" cols="49" rows="5" placeholder="Address*" data-rule-required="true" data-msg-required="This field is required"></textarea>--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<input type="text" class="form-control" id="phone1" name="phone1" data-rule-required="true" data-msg-required="This field is required" placeholder="phone 1*">--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<input type="text" class="form-control" id="phone2" name="phone2" placeholder="Phone 2">--}}
+                                {{--</div>--}}
+                                {{--<div class="form-group">--}}
+                                    {{--<input type="email" class="form-control" id="email" name="email" placeholder="Consignee Email">--}}
+                                {{--</div>--}}
+                            {{--</div>--}}
+                            {{--<div class="col justify-content-center">--}}
+                                {{--<div class="form-group text-center">--}}
+                                    {{--<button id="rebookSubmit" type="submit" class="btn btn-primary">Update</button>--}}
 
-                                </div>
-                            </div>
+                                {{--</div>--}}
+                            {{--</div>--}}
 
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div>
+                        {{--</div>--}}
+                    {{--</form>--}}
+                {{--</div>--}}
+            {{--</div>--}}
+        {{--</div>--}}
+    {{--</div>--}}
 
 @endsection
 
@@ -276,8 +275,6 @@
                 {data: 'remarks', name: 'shipments_journey.remarks', class: 'align-middle remarks'},
                 {data: 'arrival', name: 'sj.created_at', class: 'align-middle arrival'},
                 {data: 'status_date', name: 'shipments_journey.created_at', class: 'align-middle status_date'},
-                {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
-
             ],
             rowCallback: function(row, data, index) {
                 var info = table.page.info();
@@ -298,7 +295,7 @@
                     var header = column.header();
 
 
-                    if ($(header).is('.action') || $(header).is('.serial_number') || $(header).is('.status')) {
+                    if ($(header).is('.serial_number') || $(header).is('.status')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.shipping_mode')){
                         $(mode_drop_select).appendTo($(search))
@@ -361,127 +358,7 @@
                 this.api().table().columns.adjust();
             }
         });
-
-        $("#phone1, #phone2").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
-        $('body').on('change','#RebookModal input,#RebookModal textarea',function() {
-            $(this).val($(this).val().trim());
-        });
-        $('body').on('change','#updateRebook input,#updateRebook textarea',function() {
-            $(this).val($(this).val().trim());
-        });
-        $("#updateRebook").validate({
-            errorClass: "danger",
-            errorPlacement: function (error, element) {
-                error.addClass('w-100').appendTo(element.parents('.form-group'));
-            },
-            submitHandler: function (form) {
-                // $(form).find('button[type=submit]').attr('disabled', 'disabled');
-
-                var postObject = new Object;
-                var shipment_id = $.trim($('#shipment_id').val());
-                var consignee_city = $.trim($('#consignee_city').val());
-
-                var consignee = $.trim($('#consignee').val());
-                var address = $.trim($('#address').val());
-                var phone1 = $.trim($('#phone1').val());
-                var phone2 = $.trim($('#phone2').val());
-                var email = $.trim($('#email').val());
-                postObject.shipment_id = shipment_id;
-                postObject.consignee_city_id = consignee_city;
-                postObject.consignee = consignee;
-                postObject.address = address;
-                postObject.phone1 = phone1;
-                postObject.phone2 = phone2;
-                postObject.email = email;
-                postObject._token = '{{ csrf_token() }}';
-                var errors = 0;
-                if (postObject.email !== '') {
-                    if (!validateEmail(postObject.email)) {
-                        errors = 1;
-                    }
-                }
-                if (errors === 0) {
-                    $.ajax({
-                        url: "{{route('admin.delivery.misroute.shipment.update')}}",
-                        method: 'POST',
-                        data: postObject,
-                    }).done(function (data) {
-                        if (data.status === 1) {
-                            toastr.success(data.success, 'Success!', {
-                                positionClass: 'toast-bottom-center',
-                                containerId: 'toast-bottom-center'
-                            });
-                            $('#RebookModal').modal('hide');
-                            table.draw();
-
-                        } else {
-                            $('#RebookModal').modal('hide');
-                            toastr.error(data.error, 'Error!', {
-                                positionClass: 'toast-top-center',
-                                containerId: 'toast-top-center'
-                            });
-                        }
-                    });
-                }
-            }
-
-
-        });
-        function validateEmail(email) {
-            var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-            return re.test(email);
-        }
-        $('body').on('click','.misroute_modal',function () {
-            var shipment_id = parseInt($(this).parents('tr').attr('id'));
-            $('#RebookModal').modal('show');
-            get_shipment_info(shipment_id);
-        });
-        function get_shipment_info(shipment_id) {
-            $('#shipment_id').val(shipment_id);
-            if(shipment_id != null){
-                $.ajax({
-                    url:"{{route('admin.delivery.misroute.shipment.info')}}",
-                    method:'POST',
-                    data:{
-                        'shipment_id':shipment_id,
-                        '_token':'{{ csrf_token() }}'
-                    }
-                }).done(function (data) {
-                    if(data.status == 1){
-                        // var city = data.cities;
-                        if(!$('#consignee_city').hasClass('select2-hidden-accessible')){
-                            $('#consignee_city').select2({
-                                placeholder: 'Select a city',
-                                dropdownParent: $('#RebookModal')
-                            });
-                        }
-
-                        $('#tracking_number').val(data.data.tracking_number);
-                        $('#consignee').val(data.data.consignee_name);
-                        $('#address').val(data.data.consignee_address);
-                        $('#phone1').val(data.data.consignee_phone1);
-                        $('#phone2').val(data.data.consignee_phone2);
-                        $('#email').val(data.data.consignee_email);
-
-                        // $('#payment_mode').val(data.data.amount).trigger('change');
-                        $.each(data.cities,function(key,value){
-                            var newOption = new Option(value.name, value.id, false, false);
-                            $('#consignee_city').append(newOption).trigger('select');
-                        });
-                        $('#consignee_city').val(data.data.consignee_city_id).trigger('change');
-
-                    }else{
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                    }
-
-                });
-            }
-        }
-        $('#RebookModal').on('hidden.bs.modal',function () {
-            $('#consignee_city').empty().trigger('change');
-            table.draw('false');
-        });
+        
 
     });
     </script>

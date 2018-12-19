@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Change Shipment Amount')
+@section('title', 'Change Shipment Weight')
 
 @section('content')
 	<div class="app-content content">
@@ -9,7 +9,7 @@
 			</div>
 			<div class="content-body">
 				<h1 class="mb-1">
-					Change Shipment Amount
+					Change Shipment Weight
 				</h1>
 
 				<div class="card">
@@ -30,14 +30,14 @@
 							<div class="shipment mt-2" id="shipment">
 							</div>
 
-							@if (session('role_id') == 1 || in_array(58, session('permissions')))
-								<form id="change_amount_form" class="form-inline mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_amount.store') }}" novalidate="novalidate">
+							@if (session('role_id') == 1 || in_array(135, session('permissions')))
+								<form id="change_weight_form" class="form-inline mb-1 justify-content-center mt-2 d-none" method="POST" action="{{ route('admin.finance.change_shipment_weight.store') }}" novalidate="novalidate">
 									{{ csrf_field() }}
 
 									<input type="hidden" name="shipment_id" class="shipment_id">
 
 									<div class="form-group">
-										<input type="text" name="amount" class="form-control amount" placeholder="Amount*" data-rule-required="true" data-msg-required="Amount is required">
+										<input type="text" name="weight" class="form-control weight" placeholder="Weight (kg)*" data-rule-required="true" data-msg-required="Weight is required" data-rule-range="[0.01,1000]" data-msg-range="Weight needs to be from 0.01 to 1000">
 									</div>
 
 									<div class="form-group ml-1">
@@ -87,10 +87,10 @@
 
 					$('#shipment').html('');
 
-					@if (session('role_id') == 1 || in_array(58, session('permissions')))
-						$('#change_amount_form').addClass('d-none');
+					@if (session('role_id') == 1 || in_array(135, session('permissions')))
+						$('#change_weight_form').addClass('d-none');
 
-						$('#change_amount_form input.tracking_number').val('');
+						$('#change_weight_form input.tracking_number').val('');
 					@endif
 
 					var tracking_number = $(form).find('input.tracking_number').val();
@@ -98,7 +98,7 @@
 					form.reset();
 
 					$.ajax({
-						url: '{!! route('admin.finance.change_shipment_amount.shipment_details') !!}',
+						url: '{!! route('admin.finance.change_shipment_weight.shipment_details') !!}',
 						method: 'POST',
 						data: {
 							'_token': '{{ csrf_token() }}',
@@ -197,10 +197,10 @@
 
 							$('#shipment').html(shipment);
 
-							@if (session('role_id') == 1 || in_array(58, session('permissions')))
-								$('#change_amount_form').removeClass('d-none');
+							@if (session('role_id') == 1 || in_array(135, session('permissions')))
+								$('#change_weight_form').removeClass('d-none');
 
-								$('#change_amount_form input.shipment_id').val(details.id);
+								$('#change_weight_form input.shipment_id').val(details.id);
 							@endif
 
 							$(form).find('button.search').prop('disabled', false);
@@ -218,17 +218,15 @@
 				}
 			});
 
-			@if (session('role_id') == 1 || in_array(58, session('permissions')))
-				$('#change_amount_form input.amount').inputmask({
-					'alias': 'integer',
+			@if (session('role_id') == 1 || in_array(135, session('permissions')))
+				$('#change_weight_form input.weight').inputmask({
+					'alias': 'decimal',
 					'allowMinus': false,
 					'allowPlus': false,
-					'groupSeparator': ',',
-					'autoGroup': true,
-					'max': 1000000
+					'digits': 2
 				});
 
-				$('#change_amount_form').validate({
+				$('#change_weight_form').validate({
 					errorClass: 'danger',
 					successClass: 'success',
 					errorPlacement: function(error, element) {

@@ -112,7 +112,7 @@ class APIController extends Controller
 
             $city = $pickup_address->city;
 
-            if ($city->status) {
+            if ($city->status && $city->zone_id) {
               $detail['city']['id'] = $city->id;
               $detail['city']['name'] = $city->name;
 
@@ -155,6 +155,10 @@ class APIController extends Controller
         $city = City::find($request->input('city_id'));
 
         if (!$city->status) {
+          return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('city_id')]) . ' is deactivated';
+        }
+
+        if (!$city->zone_id) {
           return response()->json(['status' => 1, 'message' => 'City ID #' . $request->input('city_id')]) . ' is deactivated';
         }
 
@@ -246,11 +250,15 @@ class APIController extends Controller
 
         $user_shipping_info = UserShippingInfo::find($request->input('pickup_address_id'));
 
-          if (!$user_shipping_info->status) {
-            return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
-          }
+        if (!$user_shipping_info->status) {
+          return response()->json(['status' => 1, 'message' => 'Pickup Address ID #' . $request->input('pickup_address_id') . ' is disabled']);
+        }
 
         if (!$user_shipping_info->city->status) {
+          return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
+        }
+
+        if (!$user_shipping_info->city->zone_id) {
           return response()->json(['status' => 1, 'message' => 'Pickup Address\'s City ID #' . $user_shipping_info->city_id]) . ' is deactivated';
         }
 
@@ -261,6 +269,10 @@ class APIController extends Controller
         $consignee_city = City::find($request->input('consignee_city_id'));
 
         if (!$consignee_city->status) {
+          return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
+        }
+
+        if (!$consignee_city->zone_id) {
           return response()->json(['status' => 1, 'message' => 'Consignee City ID #' . $request->input('consignee_city_id')]) . ' is deactivated';
         }
 

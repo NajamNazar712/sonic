@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class City extends Model
 {
     protected $fillable = [
-        'name','hub','hub_id','pickup','status'
+        'name','hub','hub_id','zone_id','pickup','status'
     ];
     public function hub(){
        return $this->belongsTo(self::class, 'hub_id');
@@ -30,5 +30,9 @@ class City extends Model
 
     public function deliveries() {
         return $this->hasMany('App\Http\Models\CityDelivery');
+    }
+
+    public function zone() {
+       return $this->belongsTo('App\Http\Models\Zone', 'zone_id');
     }
 }
