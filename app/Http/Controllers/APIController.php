@@ -685,7 +685,12 @@ class APIController extends Controller
           }
         }
 
-        return response()->json(['status' => 0, 'message' => 'Charges of Shipment #' . $tracking_number, 'charges' => $charges]);
+        if (!empty($charges)) {
+          return response()->json(['status' => 0, 'message' => 'Charges of Shipment #' . $tracking_number, 'charges' => $charges]);
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'No Charges']);
+        }
       }
     }
 
@@ -714,9 +719,12 @@ class APIController extends Controller
 
         if (!$shipment_payment_journey->isEmpty()) {
           $current_payment_status = $shipment_payment_journey->first()->status->name;
-        }
 
-        return response()->json(['status' => 0, 'message' => 'Payment Status of Shipment #' . $tracking_number, 'current_payment_status' => $current_payment_status]);
+          return response()->json(['status' => 0, 'message' => 'Payment Status of Shipment #' . $tracking_number, 'current_payment_status' => $current_payment_status]);
+        }
+        else {
+          return response()->json(['status' => 1, 'message' => 'No Payment Status']);
+        }
       }
     }
 
