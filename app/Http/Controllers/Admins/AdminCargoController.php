@@ -1632,17 +1632,32 @@ class AdminCargoController extends Controller
         return response()->json(['status' => 1, 'success' => 'Shipments Added to Draft # '.$draft_cargo_id]);
     }
     public function draft_list(){
-        $draft = DraftCargo::join('draft_cargo_shipments as dcs','draft_cargos.id','=','dcs.draft_cargo_id')
-            ->select('draft_cargos.id as id','draft_cargos.origin_id as origin_id','draft_cargos.destination_id as hub_id','draft_cargos.shipments_count as shipments_count','draft_cargos.cargo_type as cargo_type');
+        $draft = DraftCargo::join('cities as oc','oc.id','=','draft_cargos.origin_id')
+            ->join('cities as dc', 'dc.id', '=', 'draft_cargos.destination_id')
+            ->select('draft_cargos.id as id','oc.name as origin','dc.name as destination','draft_cargos.shipments_count as shipments_count','draft_cargos.cargo_type as cargo_type');
         return Datatables::of($draft)
             ->addColumn('shipments_count', function ($cargo_id) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_id->shipments_count . '</button>';
             })
+            ->editColumn('cargo_type', function ($draft){
+                if($draft->cargo_type == 1){
+                    return "Normal";
+                }else if($draft->cargo_type == 2){
+                    return "Return";
+                }
+            })
             ->addColumn('action', function($cargo_id) {
-                $button= '<div class="btn-group">
-            <button type="button" class="btn btn-sm btn-success" data-toggle="add" aria-haspopup="true" aria-expanded="false">Add</button>
-                </div>';
-                return $button;
+                $dropdown = '<div class="btn-group">
+            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+            <div class="dropdown-menu dropdown-menu-sm">';
+               $button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                $dropdown .= $button;
+
+                $dropdown .= '
+            </div>
+          </div>
+        ';
+                return $dropdown;
             })
             ->make(true);
     }
@@ -1653,10 +1668,10 @@ class AdminCargoController extends Controller
 
         foreach ($draft_cargo_shipments as $draft_cargo_shipment) {
             $shipment = $draft_cargo_shipment->shipment_id;
-
+            $shipment = Shipment::find($shipment);
             $tracking_numbers[] = $shipment->tracking_number;
         }
 
-        return $tracking_numbers;
+        return response()->json(['status' => 1, 'tracking_numbers' => $tracking_numbers]);
     }
 }
