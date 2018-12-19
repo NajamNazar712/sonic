@@ -1596,11 +1596,18 @@ class AdminCargoController extends Controller
                 $shipment_count++;
                $drafts = DraftCargoShipment::where('shipment_id', $shipments);
                if($drafts->exists()){
-                   $drafts = $drafts->first();
-                   $draft_details = DraftCargo::find($drafts->draft_cargo_id);
-                   $new_shipments_count = $draft_details->shipments_count - 1;
-                   $draft_details->shipments_count = $new_shipments_count;
-                   $drafts->delete();
+                   $drafts = $drafts->get();
+
+                   foreach ($drafts as $draft) {
+                       $draft_details = DraftCargo::find($draft->draft_cargo_id);
+                       $new_shipments_count = $draft_details->shipments_count - 1;
+                       $draft_details->shipments_count = $new_shipments_count;
+                       $draft_details->save();
+                       if($draft_details->shipments_count == 0){
+                           $draft_details->delete();
+                       }
+                       DraftCargoShipment::where('shipment_id', $shipments)->delete();
+                   }
                }
             }
         }
