@@ -1588,8 +1588,16 @@ class AdminCargoController extends Controller
         return view('admin.cargo.draft');
     }
     public function draft_list(){
-        $draft = DraftCargo::join('draft_cargo_shipments as dcs','draft_cargos.id','=','dcs.draft_cargo_id')
-            ->select('draft_cargos.id as id','draft_cargos.orgin_id as orgin_id','draft_cargos.destination_id as hub_id','draft_cargos.shipments_count as shipments_count','draft_cargos.cargo_type as cargo_type','dcs.shipment_id as shipment_id');
-        return Datatables::of($draft);
+        $draft = DraftCargo::join('cities as oc','oc.id','=','draft_cargos.origin_id')
+            ->join('cities as dc', 'dc.id', '=', 'draft_cargos.destination_id')
+            ->select('draft_cargos.id as id','oc.name as origin_id','dc.name as hub_id','draft_cargos.shipments_count as shipments_count','draft_cargos.cargo_type as cargo_type');
+        return Datatables::of($draft)
+            ->addColumn('action', function($cargo_id) {
+                $button= '<div class="btn-group">
+            <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                </div>';
+                return $button;
+            })
+            ->make(true);
     }
 }

@@ -13,4 +13,11 @@ class DraftCargo extends Model
     protected $fillable = [
         'origin_id','destination_id','shipments_count','cargo_type','added_by'
     ];
+    public function origin() {
+        return $this->belongsTo('App\Http\Models\City', 'origin_id', 'id');
+    }
+
+    public function destination() {
+        return $this->belongsTo('App\Http\Models\City', 'destination_id', 'id');
+    }
 }
