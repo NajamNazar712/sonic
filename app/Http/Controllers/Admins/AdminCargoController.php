@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentStatus;
+use App\Http\Models\DraftCargo;
+use App\Http\Models\DraftCargoShipment;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -1580,6 +1582,50 @@ class AdminCargoController extends Controller
     }
 
     public function draft_add(Request $request){
+        $shipment_ids = $request->shipment_ids;
+        $destination_id = $request->hub_id;
+        $cargo_type = $request->cargo_type;
+        $shipment_count = 0;
+        $shipment = Shipment::find(current($shipment_ids));
+        foreach ($shipment_ids as $shipments){
+            $shipment_details = Shipment::find($shipments);
+            if($shipment_details){
+                $shipment_count++;
+               $drafts = DraftCargoShipment::where('shipment_id', $shipments);
+               if($drafts->exists()){
+                   $drafts = $drafts->first();
+                   $draft_details = DraftCargo::find($drafts->draft_cargo_id);
+                   $new_shipments_count = $draft_details->shipments_count - 1;
+                   $draft_details->shipments_count = $new_shipments_count;
+                   $drafts->delete();
+               }
+            }
+        }
 
+        if ($shipment->shipper_status_id != 49) {
+            $origin = $shipment->pickup_address->city->hub_city;
+        }
+        else {
+            $shipment_details = $shipment->misrouted_history()->latest()->first();
+            $city_details = City::find($shipment_details->old_consignee_city_id);
+            $origin = $city_details->hub_city;
+        }
+        $draftcargo = new DraftCargo();
+        $draftcargo->origin_id = $origin->id;
+        $draftcargo->destination_id = $destination_id;
+        $draftcargo->destination_id = $destination_id;
+        $draftcargo->cargo_type = $cargo_type;
+        $draftcargo->shipments_count = $shipment_count;
+        $draftcargo->added_by = Auth::id();
+        $draftcargo->save();
+        $draft_cargo_id = $draftcargo->id;
+
+        foreach ($shipment_ids as $shipment_id){
+           $draft_shipments = new DraftCargoShipment();
+           $draft_shipments->draft_cargo_id = $draft_cargo_id;
+           $draft_shipments->shipment_id = $shipment_id;
+           $draft_shipments->save();
+        }
+        return response()->json(['status' => 1, 'success' => 'Shipments Added to Draft # '.$draft_cargo_id]);
     }
 }
