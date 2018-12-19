@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\BookingType;
 use App\Http\Models\CargoConsignmentStatus;
+use App\Http\Models\DraftCargo;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -1580,6 +1581,15 @@ class AdminCargoController extends Controller
     }
 
     public function draft_add(Request $request){
+    }
 
+    public function draft_index(){
+
+        return view('admin.cargo.draft');
+    }
+    public function draft_list(){
+        $draft = DraftCargo::join('draft_cargo_shipments as dcs','draft_cargos.id','=','dcs.draft_cargo_id')
+            ->select('draft_cargos.id as id','draft_cargos.orgin_id as orgin_id','draft_cargos.destination_id as hub_id','draft_cargos.shipments_count as shipments_count','draft_cargos.cargo_type as cargo_type','dcs.shipment_id as shipment_id');
+        return Datatables::of($draft);
     }
 }
