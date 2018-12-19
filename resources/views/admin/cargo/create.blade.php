@@ -488,7 +488,7 @@
                         }
                         window.location.reload();
 					});
-                    
+
 				}
             });
 		});

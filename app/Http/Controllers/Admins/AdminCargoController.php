@@ -1628,4 +1628,32 @@ class AdminCargoController extends Controller
         }
         return response()->json(['status' => 1, 'success' => 'Shipments Added to Draft # '.$draft_cargo_id]);
     }
+    public function draft_list(){
+        $draft = DraftCargo::join('draft_cargo_shipments as dcs','draft_cargos.id','=','dcs.draft_cargo_id')
+            ->select('draft_cargos.id as id','draft_cargos.origin_id as origin_id','draft_cargos.destination_id as hub_id','draft_cargos.shipments_count as shipments_count','draft_cargos.cargo_type as cargo_type');
+        return Datatables::of($draft)
+            ->addColumn('shipments_count', function ($cargo_id) {
+                return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_id->shipments_count . '</button>';
+            })
+            ->addColumn('action', function($cargo_id) {
+                $button= '<div class="btn-group">
+            <button type="button" class="btn btn-sm btn-success" data-toggle="add" aria-haspopup="true" aria-expanded="false">Add</button>
+                </div>';
+                return $button;
+            })
+            ->make(true);
+    }
+    public function draft_shipments(Request $request) {
+        $tracking_numbers = array();
+
+        $draft_cargo_shipments = DraftCargoShipment::where('draft_cargo_id', $request->id)->get();
+
+        foreach ($draft_cargo_shipments as $draft_cargo_shipment) {
+            $shipment = $draft_cargo_shipment->shipment_id;
+
+            $tracking_numbers[] = $shipment->tracking_number;
+        }
+
+        return $tracking_numbers;
+    }
 }

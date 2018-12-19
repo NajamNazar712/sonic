@@ -538,6 +538,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminCargoController@draft_index')->name('index');
             Route::get('list', 'Admins\AdminCargoController@draft_list')->name('list');
             Route::post('add', 'Admins\AdminCargoController@draft_add')->name('add');
+            Route::post('shipments', 'Admins\AdminCargoController@draft_shipments')->name('shipments');
         });
 
     });
