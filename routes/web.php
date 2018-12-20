@@ -534,6 +534,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\AdminCargoController@history_shipments')->name('shipments');
             Route::post('print', 'Admins\AdminCargoController@history_cargo_print')->name('print');
         });
+
+        Route::prefix('draft')->name('draft.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@draft_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@draft_list')->name('list');
+            Route::post('add', 'Admins\AdminCargoController@draft_add')->name('add');
+            Route::post('shipments', 'Admins\AdminCargoController@draft_shipments')->name('shipments');
+            Route::prefix('edit')->name('edit.')->group(function (){
+                Route::get('{draft}', 'Admins\AdminCargoController@edit_draft_index')->name('index');
+                Route::get('{draft}/list', 'Admins\AdminCargoController@edit_draft_list')->name('list');
+            });
+
+        });
+
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
        Route::get('','Admins\DisputeController@dispute_index')->name('index');

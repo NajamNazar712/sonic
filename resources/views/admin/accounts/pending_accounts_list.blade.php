@@ -31,6 +31,7 @@
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Sales Person Tagged</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
                                         <th class="border-primary border-darken-1">Rates Approved By</th>
                                         <th class="border-primary border-darken-1">Action</th>
@@ -110,6 +111,7 @@
                         head.push('Product Type');
                         head.push('Request Date');
                         head.push('Status');
+                        head.push('Sales Person Tagged');
                         head.push('Rates Added By');
                         head.push('Rates Approved By');
                         $.each(result.data, function(index, values) {
@@ -127,6 +129,7 @@
                             row.push(values.product_name);
                             row.push(values.created_at);
                             row.push(values.status);
+                            row.push(values.admin_tag_id);
                             row.push(values.rates_added_by);
                             row.push(values.rates_authorized_by);
 
@@ -171,6 +174,7 @@
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'created_at', name: 'created_at', class: 'align-middle created'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
+                {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
                 {data: 'rates_added_by', name: 'rab.name', class: 'align-middle rates_added_by'},
                 {data: 'rates_authorized_by', name: 'rabb.name', class: 'align-middle rates_authorized_by'},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}

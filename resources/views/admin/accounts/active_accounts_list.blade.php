@@ -30,6 +30,7 @@
                                         <th class="border-primary border-darken-1">Email Address</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Sales Person Tagged</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Updated By</th>
@@ -108,6 +109,7 @@
                         head.push('Email Address');
                         head.push('Product Type');
                         head.push('Status');
+                        head.push('Sales Person Tagged');
                         head.push('Request Date');
                         head.push('Rates Added By');
                         head.push('Rates Updated By');
@@ -129,6 +131,7 @@
                             row.push(values.email);
                             row.push(values.product_name);
                             row.push(values.status);
+                            row.push(values.admin_tag_id);
                             row.push(values.created_at);
                             row.push(values.added_by);
                             row.push(values.updated_by);
@@ -176,6 +179,7 @@
                 {data: 'email', name: 'email', class: 'align-middle email'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
+                {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
                 {data: 'updated_by', name: 'rabna.name', class: 'align-middle updated_by'},

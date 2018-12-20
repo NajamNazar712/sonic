@@ -72,6 +72,8 @@ class Permission
 
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
+            'cargo.draft.index' => 26,
+            'cargo.draft.list' => 26,
             'cargo.create.index' => 26,
             'cargo.create.shipment_details' => 26,
             'cargo.create.consignment_details' => 26,
