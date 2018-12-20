@@ -193,6 +193,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\AdminDashboardController@orders_list')->name('list');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
         Route::post('shipment_charges','Admins\AdminDashboardController@get_shipment_charges')->name('charges');
+        Route::post('shipper_recall','Admins\AdminDashboardController@shipper_recall')->name('shipper_recall');
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){

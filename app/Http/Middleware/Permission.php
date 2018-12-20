@@ -10,6 +10,8 @@ class Permission
 {
     private $actions = [
         'admin' => [
+            'orders.shipper_recall' => 139,
+
             'dispute.index' => 1,
             'dispute.list' => 1,
             'dispute.create' => 2,

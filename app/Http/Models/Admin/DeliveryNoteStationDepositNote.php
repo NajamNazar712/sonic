@@ -40,6 +40,6 @@ class DeliveryNoteStationDepositNote extends Model
 	}
 
 	public function station_deposit_note() {
-        return $this->hasOne('App\Http\Models\Admin\StationDepositNote');
+        return $this->hasOne('App\Http\Models\Admin\StationDepositNote', 'id', 'station_deposit_note_id');
     }
 }
