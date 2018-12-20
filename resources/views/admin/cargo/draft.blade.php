@@ -63,12 +63,49 @@
 <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 <script>
     $(document).ready(function() {
+        jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
+            if ( this.context.length ) {
+                body = [];
 
+                var jsonResult = $.ajax({
+                    url: '{{ route('admin.cargo.draft.list') }}',
+                    data: {
+                        'page': 'all',
+                    },
+                    success: function (result) {
+                        head = [];
+                        head.push('S.No');
+                        head.push('Draft Cargo ID.');
+                        head.push('Origin');
+                        head.push('Destination');
+                        head.push('Shipment(s)');
+                        head.push('Cargo Type');
+
+
+                        $.each(result.data, function(index, values) {
+                            row = [];
+
+                            row.push(index + 1);
+                            row.push(values.id);
+                            row.push(values.origin);
+                            row.push(values.destination);
+                            row.push(values.shipments_count);
+                            row.push(values.cargo_type);
+
+                            body.push(row);
+                        });
+                    },
+                    async: false
+                });
+
+                return {body: body, header: head};
+            }
+        } );
         var table = $('#datatable').DataTable({
             dom: '<"d-inline-block"l><"pull-right"B>tipr',
             buttons:[{
                 extend: 'excel',
-                title: 'Cargo In-transit',
+                title: 'Draft Cargos',
                 className: 'btn btn-primary',
                 text: '<i class="la la-file-excel-o"></i> Excel',
             }],
@@ -82,12 +119,13 @@
             paging: false,
             ajax: '{{ route('admin.cargo.draft.list') }}',
             rowId: 'id',
+            order: [[1, 'desc']],
             columns: [
                 {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                 {data: 'id', name:'draft_cargos.id', class: 'align-middle id'},
                 {data: 'origin', name:'oc.name', class: 'align-middle origin'},
                 {data: 'destination', name:'dc.name', class: 'align-middle destination'},
-                {data: 'shipments_count', name:'draft_cargos.shipments_count', class: 'align-middle shipments_count'},
+                {data: 'shipments_count_link', name:'draft_cargos.shipments_count', class: 'align-middle shipments_count_link'},
                 {data: 'cargo_type', name:'draft_cargos.cargo_type', class: 'align-middle cargo_type'},
                 {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
             ],

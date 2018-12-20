@@ -1640,9 +1640,9 @@ class AdminCargoController extends Controller
     public function draft_list(){
         $draft = DraftCargo::join('cities as oc','oc.id','=','draft_cargos.origin_id')
             ->join('cities as dc', 'dc.id', '=', 'draft_cargos.destination_id')
-            ->select('draft_cargos.id as id','oc.name as origin','dc.name as destination','draft_cargos.shipments_count as shipments_count','draft_cargos.cargo_type as cargo_type');
+            ->select('draft_cargos.id as id','oc.name as origin','dc.name as destination','draft_cargos.shipments_count as shipments_count','draft_cargos.shipments_count as shipments_count_link','draft_cargos.cargo_type as cargo_type');
         return Datatables::of($draft)
-            ->addColumn('shipments_count', function ($cargo_id) {
+            ->addColumn('shipments_count_link', function ($cargo_id) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $cargo_id->shipments_count . '</button>';
             })
             ->editColumn('cargo_type', function ($draft){
