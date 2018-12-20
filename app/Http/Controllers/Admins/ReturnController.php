@@ -907,9 +907,14 @@ class ReturnController extends Controller
         }
     }
     public function return_receive_status(Request $request,$id){
-        $return = ReturnNote::where('id',$id)->select('shipments_count')->first();
-        $shipment = Shipment::where('id',30)->first();
-        return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count]);
+        $return = ReturnNote::where('id',$id);
+        if($return->exists()){
+            $return = $return->first();
+            $shipment = Shipment::where('id',30)->first();
+            return view('admin.return.receive_status')->with(['return_note_id'=>$id,'shipments_count'=>$return->shipments_count]);
+        }else{
+            return redirect()->route('admin.return.receive.index')->with(['error' => 'Return Note not found']);
+        }
     }
     public function return_receive_status_list(Request $request){
         $deliveries = ReturnNote::join('return_note_shipments as dns','dns.return_note_id','=','return_notes.id')
