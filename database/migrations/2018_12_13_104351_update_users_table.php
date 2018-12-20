@@ -30,6 +30,7 @@ class UpdateUsersTable extends Migration
         //
         Schema::table('users', function (Blueprint $table) {
             $table->dropColumn('rate_status');
+            $table->dropColumn('rate_updated_by');
         });
     }
 }

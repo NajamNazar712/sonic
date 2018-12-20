@@ -45,67 +45,39 @@
                             <input type="hidden" name="_method" value="PUT">
                             <input type="hidden" name="shid" id="shid">
                             <input type="hidden" name="status" id="shstatus">
-
-
                         </form>
                     </div>
                 </div>
             </div>
         </div>
     </section>
+    <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Sales Person</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="shipper_id">
+                    <select name="Sale_person" id="saletag" class="form-control select2">
+                        @foreach($sale_name as $sn)
+                            <option value="{{ $sn->id }}" > {{ $sn->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="salesTagSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
-
-    <style type="text/css">
-        table.dataTable {
-            font-size: 12px;
-        }
-
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-    </style>
 @endsection
 
 @section('js')
@@ -378,6 +350,47 @@
 
             });
 
+
+        });
+        $("#saletag").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Sales Person",
+            width:'100%',
+            dropdownParent:$('#SalesTagModal')
+        });
+        $('#SalesTagModal').on('shown.bs.modal',function (e) {
+            var $invoker = $(e.relatedTarget);
+            var shipper_id = $invoker.data('target-id');
+            $('#shipper_id').val(shipper_id);
+        });
+        $('#salesTagSubmit').on('click',function () {
+            var shipper = $('#shipper_id').val();
+            var tag = parseInt($('#saletag').val());
+            if(tag){
+                $.ajax({
+                    url: '{!! route('admin.accounts.tag.submit') !!}',
+                    method: 'POST',
+                    data: {
+                        'admin_id': tag,
+                        'shipper_id':shipper,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                        }
+                        $('#saletag').val('').trigger('change');
+                        $('#SalesTagModal').modal('hide');
+                    });
+            }else{
+                var error = "Sales Person Not Selected!";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
 
         });
     });

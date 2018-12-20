@@ -242,6 +242,12 @@ class Permission
             'finance.invoices_history.returned_shipments' => 122,
             'finance.invoices_history.adjusted_shipments' => 122,
 
+            'admin.month_closing.index' => 141,
+            'admin.month_closing.list' => 141,
+            'admin.month_closing.confirm' => 142,
+            'admin.month_closing.reattempt' => 143,
+            'admin.month_closing.add' => 144,
+
             'reports.pickup_note.index' => 64,
             'reports.pickup_note.list' => 64,
             'reports.pickup_note.bookings' => 64,
@@ -276,7 +282,9 @@ class Permission
             'reports.customer_sales.download' => 74,
             'reports.overall_sales.index' => 75,
             'reports.overall_sales.list' => 75,
-
+            'reports.sales_person_performance.index' => 138,
+            'reports.sales_person_performance.export_to_excel' => 138,
+            'reports.sales_person_performance.download' => 138,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

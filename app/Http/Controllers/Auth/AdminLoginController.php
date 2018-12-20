@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\Http\Models\Admin\AdminRole;
+use App\Http\Models\Admin\SalePersonTag;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
@@ -45,9 +47,10 @@ class AdminLoginController extends Controller
             $role_id = $admin->user()->role_id;
 
             $hubs = AdminHub::where('admin_id', $id)->pluck('hub_id')->toArray();
+            $shippers = SalePersonTag::where('admin_id', $id)->where('status', 0)->pluck('user_id')->toArray();
             $permissions = AdminRoleModulePermission::where('role_id', $role_id)->pluck('permission_id')->toArray();
-
-            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions]);
+            $department = AdminRole::find($role_id)->department_id;
+            session(['role_id' => $role_id, 'hubs' => $hubs, 'permissions' => $permissions, 'department_id' => $department, 'tagged_shippers' => $shippers]);
 
             return redirect()->intended(route('admin.dashboard'));
         }

@@ -47,4 +47,7 @@ class Admin extends Authenticatable
     public function hubs() {
         return $this->hasMany('App\Http\Models\Admin\AdminHub', 'admin_id', 'id');
     }
+    public function tagged_shippers(){
+        return $this->hasMany('App\Http\Models\Admin\SalePersonTag');
+    }
 }

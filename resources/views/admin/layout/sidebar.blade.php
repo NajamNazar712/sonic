@@ -235,6 +235,11 @@
                 </li>
             @endif
 
+            @if (session('role_id') == 1 || in_array(141, session('permissions')))
+                <li class=" nav-item"><a href={{ route('admin.month_closing.index') }}><span class="menu-title">Month Closing</span></a>
+                </li>
+            @endif
+
             @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Reports</span></a>
                     <ul class="menu-content">
@@ -282,8 +287,8 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.customer_sales.index') }}">Monthwise Customer Sales</a></li>
                         @endif
 
-                        @if (session('role_id') == 1 || in_array(75, session('permissions')))
-                            <li><a class="menu-item" href="{{ route('admin.reports.overall_sales.index') }}">Overall Sales</a></li>
+                        @if (session('role_id') == 1 || in_array(138, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.sales_person_performance.index') }}">Sales Person Performance</a></li>
                         @endif
                     </ul>
                 </li>

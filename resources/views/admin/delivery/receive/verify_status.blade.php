@@ -139,7 +139,7 @@
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                scrollX: true, scrollY: '350px',
+                scrollX: true,
                 paging:false,
                 processing: true,
                 serverSide: false,

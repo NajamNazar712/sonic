@@ -206,6 +206,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('status/block','Admins\AdminDashboardController@UserStatusBlock')->name('status.block');
         Route::post('status/change','Admins\AdminDashboardController@UserStatusChange')->name('status.change');
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
+        Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
 
 
         //user profile
@@ -684,6 +685,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('month_closing')->name('month_closing.')->group(function (){
+        Route::get('','Admins\AdminMonthClosingController@month_closing_index')->name('index');
+        Route::get('list','Admins\AdminMonthClosingController@month_closing_list')->name('list');
+        Route::post('add','Admins\AdminMonthClosingController@add_shipment')->name('add');
+        Route::post('confirm','Admins\AdminMonthClosingController@return_confirm_shipment')->name('confirm');
+        Route::post('reattempt','Admins\AdminMonthClosingController@return_reattempt_shipment')->name('reattempt');
+    });
+
+
     Route::prefix('sameday')->name('sameday.')->group(function (){
         Route::get('','Admins\SamedayController@sameday_index')->name('index');
         Route::get('list','Admins\SamedayController@sameday_list')->name('list');
@@ -775,6 +785,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@overall_sales_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
 
+        });
+        Route::prefix('sales_person_performance')->name('sales_person_performance.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@sales_person_performance_index')->name('index');
+            Route::post('export_to_excel', 'Admins\AdminReportsController@sales_person_performance_export_to_excel')->name('export_to_excel');
+            Route::get('download', 'Admins\AdminReportsController@sales_person_performance_download')->name('download');
         });
 
     });

@@ -15,13 +15,20 @@
                     <form id="search_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
                         <div class="form-group">
                             <select name="city" class="select2" id="city">
-                                {{--<option value="0">All</option>--}}
-
                                 @foreach($cities as $city)
                                     <option value="{{ $city->id }}">{{ $city->name }}</option>
                                 @endforeach
                             </select>
                         </div>
+                        @if(session('role_id') == 4 )
+                        <div class="form-group ml-1">
+                            <select name="sales_person" class="select2" id="sales_person">
+                                @foreach($sales_persons as $person)
+                                    <option value="{{ $person->id }}">{{ $person->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        @endif
                         <div class="form-group input-group ml-1">
                             <div class="input-group-prepend">
 										<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
@@ -114,6 +121,11 @@
                 placeholder: 'Select City',
                 allowClear:true
             });
+            $('#search_form #sales_person').prepend('<option value="" selected="selected"></option>').select2({
+                width: '200px',
+                placeholder: 'Select Sales Person',
+                allowClear:true
+            });
             // $('#search_form #shipment_type').prepend('<option value="" selected="selected"></option>').select2({
             //     width: '200px',
             //     placeholder: 'Select Shipment Type'
@@ -138,6 +150,10 @@
                 e.preventDefault();
                 var search_date = $('#search_form input[name="search_date_formatted"]').val();
                 var city = $('#city').val();
+                var sales = '';
+                @if(session('role_id') == 4)
+                sales = $('#sales_person').val();
+                @endif
                 $.ajax({
                     url: '{!! route('admin.reports.daily_pickup_sales.export_to_excel') !!}',
                     method: 'post',
@@ -145,6 +161,7 @@
                         '_token': '{{ csrf_token() }}',
                         'date': search_date,
                         'city': city,
+                        'sales_person': sales
                     }
                 }).done(function (data) {
                     // window.open("",'_black');

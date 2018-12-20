@@ -937,7 +937,15 @@ class AdminCargoController extends Controller
 
         $cargo_consignment = CargoConsignment::find($cargo_consignment_id);
 
-        $cargo_consignment->status_id = 2;
+        if ($cargo_consignment->junction_hub_1_id == $request->junction) {
+          $cargo_consignment->status_id = 6;
+        }
+        else if ($cargo_consignment->junction_hub_2_id == $request->junction) {
+          $cargo_consignment->status_id = 7;
+        }
+        else {
+          $cargo_consignment->status_id = 2;
+        }
 
         $cargo_consignment->save();
       }

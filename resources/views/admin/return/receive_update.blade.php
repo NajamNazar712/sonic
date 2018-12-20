@@ -102,7 +102,7 @@
             // var delivery_note = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
-                scrollX: true, scrollY: '350px',
+                scrollX: true,
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',

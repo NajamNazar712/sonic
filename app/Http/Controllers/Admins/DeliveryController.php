@@ -3263,7 +3263,6 @@ class DeliveryController extends Controller
     public function misroute_shipment_update(Request $request)
     {
         $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
-
         $shipments = explode(',', $request->shipment_ids);
         if ($shipments) {
             foreach ($shipments as $shipment_id){
@@ -3279,7 +3278,7 @@ class DeliveryController extends Controller
 
                             $cargo = CargoConsignment::find($cargo_consignment_shipment);
                             $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment->id)->delete();
-                            if(in_array($cargo->status_id, [1,2])){
+                            if(in_array($cargo->status_id, [1,2,6,7])){
                                 $shipments_count = $cargo->shipments;
                                 $shipment_weight = $cargo->shipment_weight;
                                 $shipments_count = $shipments_count-1;
@@ -3287,6 +3286,19 @@ class DeliveryController extends Controller
                                 $cargo->shipments_weight = $shipment_weight - $shipment->actual_weight;
                                 if($shipments_count == 0){
                                     $cargo->status_id = 5;
+                                }
+                                $cargo->save();
+                            }else if($cargo->status_id == 4){
+                                $shipments_count = $cargo->shipments;
+                                $shipments_received_count = $cargo->received_shipments;
+                                $shipment_weight = $cargo->shipment_weight;
+                                $shipments_count = $shipments_count-1;
+                                $cargo->shipments = $shipments_count;
+                                $cargo->shipments_weight = $shipment_weight - $shipment->actual_weight;
+                                if($shipments_count == 0){
+                                    $cargo->status_id = 5;
+                                }else if($shipments_count == $shipments_received_count){
+                                    $cargo->status_id = 3;
                                 }
                                 $cargo->save();
                             }
