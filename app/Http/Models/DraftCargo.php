@@ -20,4 +20,7 @@ class DraftCargo extends Model
     public function destination() {
         return $this->belongsTo('App\Http\Models\City', 'destination_id', 'id');
     }
+    public function shipping_mode() {
+        return $this->belongsTo('App\Http\Models\ShippingMode');
+    }
 }

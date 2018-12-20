@@ -44,8 +44,8 @@
                                 </thead>
                             </table>
                             <div class="text-center">
-                                <button type="submit" class="btn btn-primary" id="cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
-                                <button type="submit" class="btn btn-primary" id="add_draft_cargo"  disabled="disabled" style="">Save To Draft</button>
+                                <button type="submit" class="btn btn-primary mr-2" id="cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
+                                <button type="submit" class="btn btn-primary" id="add_draft_cargo"  style="">Save To Draft</button>
                             </div>
 
                             <div class="modal fade" id="cargo_consignment" role="dialog" aria-labelledby="cargo_consignment_title" aria-hidden="true">
@@ -54,11 +54,11 @@
                                         <form class="form-horizontal" method="POST" action="{{ route('admin.cargo.create.store') }}" novalidate="novalidate">
                                             {{ csrf_field() }}
 
-                                            <input type="hidden" name="cargo_type" class="cargo_type">
+                                            <input type="hidden" name="cargo_type" class="cargo_type" value="{{$draft['cargo_type']}}">
 
-                                            <input type="hidden" name="shipping_mode_id" class="shipping_mode_id">
+                                            <input type="hidden" name="shipping_mode_id" class="shipping_mode_id" value="{{$draft['shipping_mode_id']}}">
 
-                                            <input type="hidden" name="shipment_ids" class="shipment_ids">
+                                            <input type="hidden" name="shipment_ids" class="shipment_ids" value="@json($shipment_ids)">
 
                                             <div class="modal-header">
                                                 <h4 class="modal-title" id="cargo_consignment_title">Cargo Consignment</h4>
@@ -188,6 +188,7 @@
             var hub_id = '{!! $draft['destination_id'] !!}';
             var cargo_type = '{!! $draft['cargo_type'] !!}';
             var shipping_mode_id = '{!! $draft['shipping_mode_id'] !!}';
+            var shipments_count = '{!! $draft['shipments_count'] !!}';
 
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
@@ -198,12 +199,12 @@
                 processing: true,
                 serverSide: false,
                 columns: [
-                    {data:'serial_number' ,name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data:'tracking_number' ,name: 's.tracking_number', class: 'align-middle tracking_number'},
-                    {data:'order_id' ,name: 's.order_id', class: 'align-middle order_id'},
-                    {data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data:'destination' ,name: 'dc.name', class: 'align-middle destination'},
-                    {data:'amount' ,name: 's.amount', class: 'align-middle amount'}
+                    {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
+                    {data:'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
+                    {data:'order_id', name: 'order_id', class: 'align-middle order_id'},
+                    {data:'service_type', name: 'service_type', class: 'align-middle service_type'},
+                    {data:'destination', name: 'destination', class: 'align-middle destination'},
+                    {data:'amount', name: 'amount', class: 'align-middle amount'}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -215,6 +216,26 @@
                     this.api().table().columns.adjust();
                 }
             });
+            var rows_count = 0;
+            function rowsCount(){
+                var hub_name = '{!! $hub !!}';
+                var mode = '{!! $mode !!}';
+                var total_shipments = '{!! $total_shipments !!}';
+                var default_shipments = @json($shipment_ids);
+                $.each(default_shipments, function(index, value){
+                    shipment_ids.push(value);
+                    rows_count++;
+                });
+                if(shipments_count > 0){
+                    $('#information .hub').text(hub_name);
+                    $('#information .shipping_mode').html(mode);
+                    $('#information .total').text(total_shipments);
+                    $('#information .scanned').html(shipment_ids.length);
+                    $('#cargo_consignment_confirm').prop('disabled', false);
+                    $('#add_draft_cargo').prop('disabled', false);
+                }
+            }
+            rowsCount();
 
             $('#add_shipment_form input.tracking_number').inputmask({
                 'alias': 'integer',
@@ -250,12 +271,15 @@
                             .done(function(data) {
                                 if (data.status == 0) {
                                     id = data.details.id;
-
+                                    var order_id = (data.details.order_id == null)? '' : data.details.order_id ;
                                     var index = $.inArray(id, shipment_ids);
 
                                     if (index === -1) {
-                                        table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount]);
-                                        table.draw(false);
+                                        rows_count++;
+                                        // table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount]).draw(false);
+                                        var data_row = '<tr role="row" class="even"><td class="align-middle serial_number sorting_1">'+rows_count+'</td><td class=" align-middle tracking_number">'+data.details.tracking_number+'</td><td class=" align-middle order_id">'+order_id+'</td><td class=" align-middle service_type">'+data.details.service_type+'</td><td class=" align-middle destination">'+data.details.destination+'</td><td class=" align-middle amount">'+data.details.amount+'</td></tr>';
+                                        $('#datatable tbody').append(data_row);
+                                        // table.draw(true);
 
                                         shipment_ids.push(data.details.id);
 
@@ -468,6 +492,7 @@
                     });
             });
             //Draft
+            var route = '{!! route('admin.cargo.draft.index') !!}';
             $('#add_draft_cargo').on('click', function () {
                 if(shipment_ids.length > 0){
 
@@ -478,6 +503,7 @@
                             'shipment_ids': shipment_ids,
                             'cargo_type': cargo_type,
                             'hub_id' : hub_id,
+                            'shipping_mode_id': shipping_mode_id,
                             '_token': '{{ csrf_token() }}'
                         }
                     })
@@ -489,7 +515,7 @@
                                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                             }
-                            window.location.reload();
+                            window.location = route;
                         });
 
                 }

@@ -43,10 +43,8 @@
 									</tr>
 								</thead>
 							</table>
-							<div class="text-center">
-								<button type="submit" class="btn btn-primary" id="cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
-								<button type="submit" class="btn btn-primary" id="add_draft_cargo"  disabled="disabled" style="">Save To Draft</button>
-							</div>
+
+							<button type="submit" class="btn btn-primary d-block mx-auto" id="cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
 
 							<div class="modal fade" id="cargo_consignment" role="dialog" aria-labelledby="cargo_consignment_title" aria-hidden="true">
 								<div class="modal-dialog modal-lg" role="document">
@@ -193,7 +191,6 @@
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
 				scrollX: true,
-                "autoWidth": false,
                 paging:false,
                 columns: [
 					{name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
@@ -279,7 +276,6 @@
 									$('#add_shipment_form button.add').prop('disabled', false);
 
 									$('#cargo_consignment_confirm').prop('disabled', false);
-									$('#add_draft_cargo').prop('disabled', false);
 
 									toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 								}
@@ -464,34 +460,6 @@
 					});
 				});
 			});
-			//Draft
-			$('#add_draft_cargo').on('click', function () {
-				if(shipment_ids.length > 0){
-
-                    $.ajax({
-                        url: '{!! route('admin.cargo.draft.add') !!}',
-                        method: 'POST',
-                        data: {
-                            'shipment_ids': shipment_ids,
-                            'cargo_type': cargo_type,
-							'hub_id' : hub_id,
-							'shipping_mode_id': shipping_mode_id,
-                            '_token': '{{ csrf_token() }}'
-                        }
-                    })
-					.done(function (data) {
-                        if(data.status){
-                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-                        }else{
-                            var error = "Something went wrong, Please try again";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                        }
-                        window.location.reload();
-					});
-
-				}
-            });
 		});
 	</script>
 @endsection

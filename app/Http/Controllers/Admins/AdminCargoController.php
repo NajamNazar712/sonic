@@ -335,6 +335,7 @@ class AdminCargoController extends Controller
     }
 
     public function create_consignment_details(Request $request) {
+
       $shipment = Shipment::find(current($request->shipment_ids));
 
       if ($shipment->shipper_status_id != 49) {
@@ -501,6 +502,8 @@ class AdminCargoController extends Controller
         $shipment->save();
 
         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $cargo_consignment->id, $cargo_consignment->builty_number);
+
+        self::check_draft_shipments($shipment_id);
 
         NotificationsController::send(5, $id, $shipment_id);
 
@@ -1595,21 +1598,7 @@ class AdminCargoController extends Controller
             $shipment_details = Shipment::find($shipments);
             if($shipment_details){
                 $shipment_count++;
-               $drafts = DraftCargoShipment::where('shipment_id', $shipments);
-               if($drafts->exists()){
-                   $drafts = $drafts->get();
-
-                   foreach ($drafts as $draft) {
-                       $draft_details = DraftCargo::find($draft->draft_cargo_id);
-                       $new_shipments_count = $draft_details->shipments_count - 1;
-                       $draft_details->shipments_count = $new_shipments_count;
-                       $draft_details->save();
-                       if($draft_details->shipments_count == 0){
-                           $draft_details->delete();
-                       }
-                       DraftCargoShipment::where('shipment_id', $shipments)->delete();
-                   }
-               }
+                static::check_draft_shipments($shipments);
             }
         }
 
@@ -1656,7 +1645,7 @@ class AdminCargoController extends Controller
                 }
             })
             ->addColumn('action', function($draft) {
-                $route = route('admin.cargo.draft.edit', ['draft' => $draft->id]);
+                $route = route('admin.cargo.draft.edit.index', ['draft' => $draft->id]);
                 $dropdown = '<div class="btn-group">
             <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
             <div class="dropdown-menu dropdown-menu-sm">';
@@ -1687,7 +1676,50 @@ class AdminCargoController extends Controller
 
     public function edit_draft_index(Request $request, $id){
         $draft = DraftCargo::find($id);
-        return view('admin.cargo.create_draft_cargo')->with(['draft' => $draft]);
+        if($draft) {
+            $hub_name = $draft->destination->name;
+            $mode = $draft->shipping_mode->mode;
+
+            $cargo_type = $draft->cargo_type;
+            $shipment_ids = array();
+            foreach ($draft->draft_cargo_shipment as $draft_cargo_ids){
+                $shipment_ids[] = $draft_cargo_ids->shipment_id;
+            }
+
+            if ($cargo_type == 1) {
+                $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                    ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+                    ->join('cities as dc', function ($join) {
+                        $join->on('shipments.consignee_city_id', '=', 'dc.id')
+                            ->on('oc.hub_id', '!=', 'dc.hub_id');
+                    })
+                    ->select(DB::raw('count(shipments.id) as count'))
+                    ->where('dc.hub_id', $draft->destination_id)
+                    ->where('shipments.shipper_status_id', 2)
+                    ->where('shipments.shipping_mode_id', $draft->shipping_mode_id);
+            } else {
+                $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
+                    ->join('cities as dc', 'usi.city_id', '=', 'dc.id')
+                    ->join('cities as oc', function ($join) {
+                        $join->on('shipments.consignee_city_id', '=', 'oc.id')
+                            ->on('dc.hub_id', '!=', 'oc.hub_id');
+                    })
+                    ->select(DB::raw('count(shipments.id) as count'))
+                    ->where('dc.hub_id', $draft->destination_id)
+                    ->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
+                    ->where('shipments.shipping_mode_id', $draft->shipping_mode_id);
+            }
+
+            if (session('role_id') != 1) {
+                $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
+            }
+
+            $shipments = $shipments->first();
+
+            $total = $shipments->count;
+            return view('admin.cargo.create_draft_cargo')->with(['draft' => $draft, 'hub' => $hub_name, 'mode' => $mode, 'total_shipments' => $total, 'shipment_ids' => $shipment_ids]);
+        }
+        return redirect()->back()->with(['error'=>'Draft Not found']);
     }
 
     public function edit_draft_list(Request $request, $draft){
@@ -1696,8 +1728,7 @@ class AdminCargoController extends Controller
             ->join('cities as oc','oc.id', '=', 'drc.origin_id')
             ->join('cities as dc','dc.id', '=', 'drc.destination_id')
             ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
-            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'oc.name as origin','dc.name as destination', 'shipments.amount')->where('drc.id', $draft);
-
+            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'oc.name as origin','dc.name as destination', 'shipments.amount')->where('drc.id', $draft);
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
                 $query->where(function ($sub_query) {
@@ -1712,5 +1743,23 @@ class AdminCargoController extends Controller
         }
        return Datatables::of($shipments)->make(true);
 
+    }
+
+    static public function check_draft_shipments($shipment_id){
+        $drafts = DraftCargoShipment::where('shipment_id', $shipment_id);
+        if($drafts->exists()){
+            $drafts = $drafts->get();
+
+            foreach ($drafts as $draft) {
+                $draft_details = DraftCargo::find($draft->draft_cargo_id);
+                $new_shipments_count = $draft_details->shipments_count - 1;
+                $draft_details->shipments_count = $new_shipments_count;
+                $draft_details->save();
+                if($draft_details->shipments_count == 0){
+                    $draft_details->delete();
+                }
+                DraftCargoShipment::where('shipment_id', $shipment_id)->delete();
+            }
+        }
     }
 }

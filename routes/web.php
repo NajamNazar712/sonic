@@ -539,8 +539,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminCargoController@draft_list')->name('list');
             Route::post('add', 'Admins\AdminCargoController@draft_add')->name('add');
             Route::post('shipments', 'Admins\AdminCargoController@draft_shipments')->name('shipments');
-            Route::get('edit/{draft}', 'Admins\AdminCargoController@edit_draft_index')->name('edit');
-            Route::get('edit/list', 'Admins\AdminCargoController@edit_draft_list')->name('edit.list');
+            Route::prefix('edit')->name('edit.')->group(function (){
+                Route::get('{draft}', 'Admins\AdminCargoController@edit_draft_index')->name('index');
+                Route::get('{draft}/list', 'Admins\AdminCargoController@edit_draft_list')->name('list');
+            });
+
         });
 
     });
