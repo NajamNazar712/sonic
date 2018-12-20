@@ -182,7 +182,7 @@ class AdminMonthClosingController extends Controller
                             AdminFinanceController::return_confirmed_revert($shipment_details->id);
                         }
                         if($shipment_details->shipper_status_id == 30){
-                            AdminFinanceController::done_payments_reverted($shipment_details->id);
+                            AdminFinanceController::replacement_collected_adjust_in_payment($shipment_details->id);
                         }
 
                         $shipment_details->shipper_status_id = 51;
