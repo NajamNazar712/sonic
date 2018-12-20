@@ -3303,6 +3303,8 @@ class DeliveryController extends Controller
                                 $cargo->save();
                             }
                         }
+                        AdminCargoController::check_draft_shipments($shipment_id);
+
                     }
 					MisroutedHistory::create([
 					    'shipment_id' => $shipment_id,
