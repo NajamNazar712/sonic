@@ -361,7 +361,7 @@
             width:'100%',
             dropdownParent:$('#SalesTagModal')
         });
-        var route = '{!! route('admin.accounts.pending') !!}';
+        
         $('#SalesTagModal').on('shown.bs.modal',function (e) {
             var $invoker = $(e.relatedTarget);
             var shipper_id = $invoker.data('target-id');
