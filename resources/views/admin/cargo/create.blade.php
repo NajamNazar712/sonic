@@ -191,6 +191,7 @@
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
 				scrollX: true,
+                "autoWidth": false,
                 paging:false,
                 columns: [
 					{name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
