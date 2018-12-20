@@ -45,7 +45,7 @@
                             </table>
                             <div class="text-center">
                                 <button type="submit" class="btn btn-primary mr-2" id="cargo_consignment_confirm" data-toggle="modal" data-target="#cargo_consignment" disabled="disabled">Confirm</button>
-                                <button type="submit" class="btn btn-primary" id="add_draft_cargo"  style="">Save To Draft</button>
+                                <button type="submit" class="btn btn-primary" id="add_draft_cargo"  disabled="disabled">Save To Draft</button>
                             </div>
 
                             <div class="modal fade" id="cargo_consignment" role="dialog" aria-labelledby="cargo_consignment_title" aria-hidden="true">
