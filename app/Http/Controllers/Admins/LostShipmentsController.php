@@ -181,13 +181,14 @@ class LostShipmentsController extends Controller
     }
     public function add_lost_shipments(Request $request){
         $passing_status_array = array(1, 14, 17, 18, 25, 30, 31);
+        $intransit_status_array = array(3, 21, 26, 32);
         $shipments = explode(',', $request->shipment_ids);
         if(!empty($shipments)){
             foreach ($shipments as $shipment) {
                 $shipment_details = Shipment::where('id', $shipment)->whereNotIn('shipper_status_id', $passing_status_array);
                 if ($shipment_details->exists()) {
                     $shipment_details = $shipment_details->first();
-                    if ($shipment_details->shipper_status_id == 3) {
+                    if (in_array($shipment_details->shipper_status_id, $intransit_status_array)) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
                         if ($cargo_consignment_shipment->exists()) {
                             $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');

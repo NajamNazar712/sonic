@@ -3263,7 +3263,6 @@ class DeliveryController extends Controller
     public function misroute_shipment_update(Request $request)
     {
         $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
-
         $shipments = explode(',', $request->shipment_ids);
         if ($shipments) {
             foreach ($shipments as $shipment_id){

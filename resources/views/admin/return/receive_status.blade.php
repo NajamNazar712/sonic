@@ -255,7 +255,7 @@
                     selector: 'td.select-checkbox',
                     className: 'selected bg-primary bg-lighten-5 primary'
                 },
-                scrollX: true, scrollY: '350px',
+                scrollX: true,
                 paging:false,
                 processing: true,
                 serverSide: false,
