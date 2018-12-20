@@ -475,6 +475,7 @@
                             'shipment_ids': shipment_ids,
                             'cargo_type': cargo_type,
 							'hub_id' : hub_id,
+							'shipping_mode_id': shipping_mode_id,
                             '_token': '{{ csrf_token() }}'
                         }
                     })

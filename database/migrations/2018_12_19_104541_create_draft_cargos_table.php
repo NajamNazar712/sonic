@@ -19,6 +19,7 @@ class CreateDraftCargosTable extends Migration
             $table->integer('destination_id');
             $table->integer('shipments_count');
             $table->boolean('cargo_type');
+            $table->integer('shipping_mode_id');
             $table->integer('added_by');
             $table->timestamps();
         });

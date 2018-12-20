@@ -1588,6 +1588,7 @@ class AdminCargoController extends Controller
         $shipment_ids = $request->shipment_ids;
         $destination_id = $request->hub_id;
         $cargo_type = $request->cargo_type;
+        $shipping_mode_id = $request->shipping_mode_id;
         $shipment_count = 0;
         $shipment = Shipment::find(current($shipment_ids));
         foreach ($shipment_ids as $shipments){
@@ -1625,6 +1626,7 @@ class AdminCargoController extends Controller
         $draftcargo->destination_id = $destination_id;
         $draftcargo->destination_id = $destination_id;
         $draftcargo->cargo_type = $cargo_type;
+        $draftcargo->shipping_mode_id = $shipping_mode_id;
         $draftcargo->shipments_count = $shipment_count;
         $draftcargo->added_by = Auth::id();
         $draftcargo->save();
@@ -1653,11 +1655,12 @@ class AdminCargoController extends Controller
                     return "Return";
                 }
             })
-            ->addColumn('action', function($cargo_id) {
+            ->addColumn('action', function($draft) {
+                $route = route('admin.cargo.draft.edit', ['draft' => $draft->id]);
                 $dropdown = '<div class="btn-group">
             <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
             <div class="dropdown-menu dropdown-menu-sm">';
-               $button = '<button type="button" class="dropdown-item edit"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+               $button = "<a href='{$route}' class='dropdown-item edit'>Edit</a>";
                 $dropdown .= $button;
 
                 $dropdown .= '
@@ -1680,5 +1683,34 @@ class AdminCargoController extends Controller
         }
 
         return response()->json(['status' => 1, 'tracking_numbers' => $tracking_numbers]);
+    }
+
+    public function edit_draft_index(Request $request, $id){
+        $draft = DraftCargo::find($id);
+        return view('admin.cargo.create_draft_cargo')->with(['draft' => $draft]);
+    }
+
+    public function edit_draft_list(Request $request, $draft){
+        $shipments =  Shipment::join('draft_cargo_shipments as dcs','shipments.id', '=', 'dcs.shipment_id')
+            ->join('draft_cargos as drc', 'drc.id', '=', 'dcs.draft_cargo_id')
+            ->join('cities as oc','oc.id', '=', 'drc.origin_id')
+            ->join('cities as dc','dc.id', '=', 'drc.destination_id')
+            ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'oc.name as origin','dc.name as destination', 'shipments.amount')->where('drc.id', $draft);
+
+        if (session('role_id') != 1) {
+            $shipments = $shipments->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->whereIn('s.shipper_status_id', [20, 30, 36, 37])
+                        ->whereIn('dc.hub_id', session('hubs'));
+                })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->whereIn('s.shipper_status_id', [2,49])
+                            ->whereIn('oc.hub_id', session('hubs'));
+                    });
+            });
+        }
+       return Datatables::of($shipments)->make(true);
+
     }
 }
