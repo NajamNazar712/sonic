@@ -2914,39 +2914,39 @@ class AdminReportsController extends Controller
             ->leftjoin('zone_class_cities as zcc', function($join){
                 $join->on('z.id', '=', 'zcc.zone_id')->on('dc.id', '=', 'zcc.city_id');
             })
-//            ->join('zone_class_cities as zcc','zcc.city_id', '=', 'dc.id')
             ->join('shipping_modes as sm', 'sm.id', '=', 'shipments.shipping_mode_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('pending_payment_shipments as pps', function ($join) {
                 $join->on('pps.shipment_id', '=', 'shipments.id')
-                    ->where('pps.created_at','=',
-                        DB::raw('(select max(created_at) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
+                    ->where('pps.id','=',
+                        DB::raw('(select max(id) from pending_payment_shipments where pending_payment_shipments.shipment_id = shipments.id)'));
             })
             ->leftJoin('done_payment_shipments as dps', function ($join) {
                 $join->on('dps.shipment_id', '=', 'shipments.id')
-                    ->where('dps.created_at','=',
-                        DB::raw('(select max(created_at) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
+                    ->where('dps.id','=',
+                        DB::raw('(select max(id) from done_payment_shipments where done_payment_shipments.shipment_id = shipments.id)'));
             })
             ->leftJoin('shipments_journey as dr', function ($join) {
                 $join->on('dr.shipment_id', '=', 'shipments.id')
-                    ->where('dr.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37))'));
+                    ->where('dr.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37))'));
             })
             ->select('shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','shipments.insurance_charges','shipments.return_charges','shipments.replacement_charges','shipments.fuel_surcharge','shipments.try_and_buy_charges','shipments.packaging_material_charges','pps.gst as p_gst','pps.charges as p_total_charges','pps.payable as p_net_payable','dps.amount as d_collection_amount','dps.gst as d_gst','dps.charges as d_total_charges','dps.payable as d_net_payable', 'sm.mode as shipping_mode','shipments.chargeable_weight','dr.created_at as delivered_or_returned','z.name as zone','zcc.class', 'oc.id as origin_city_id', 'dc.id as destination_city_id', 'sdn.id as sdn_id', 'dp.id as payment_id')
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
         if (session('role_id') != 1) {
-            $sales = $sales->whereIn('dc.hub_id', session('hubs'));
-        }
-        if(session('department_id') == 7){
-            if(session('role_id') != 4 ){
+            if (session('department_id') == 7 && session('role_id') != 4) {
                 $sales = $sales->whereIn('u.id', session('tagged_shippers'));
             }
+            else {
+                $sales = $sales->whereIn('dc.hub_id', session('hubs'));
+            }
         }
+
         $datatable = Datatables::of($sales)
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
