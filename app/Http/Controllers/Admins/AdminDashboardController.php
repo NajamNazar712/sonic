@@ -762,7 +762,7 @@ class AdminDashboardController extends Controller
             }
 
             if ($valid) {
-                return ['status' => 0, 'success' => 'Shipment(s) has been marked for Return'];
+                return ['status' => 0, 'success' => 'Shipment(s) has been marked as Return Confirm due to Shipper Recall'];
             }
             else {
                 return ['status' => 1, 'error' => 'No Valid Shipment(s) were Selected'];
