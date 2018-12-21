@@ -268,12 +268,12 @@ class DeliveryController extends Controller
         $notifications = explode(',',$request->notification_ids);
         $rider_informations = explode(',',$request->rider_info_ids);
 
-
         $admin = Auth::id();
 
         $pending_status = array(2, 4, 6, 7, 8, 9,10, 13, 15,49);
 
             $valid_shipments = array();
+
             $shipments_count = 0;
             $total_cod_amount = 0;
             foreach ($shipments as $shipment) {
@@ -307,8 +307,23 @@ class DeliveryController extends Controller
                                 ]);
 
                                 Shipment::where('id', $shipment)->update(['shipper_status_id' => 5, 'consignee_status_id' => 5]);
-                                ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+                                $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment)->where('status','>', 0)->orderBy('delivery_note_id', 'desc');
 
+                                if ($old_delivery_note_id->exists()) {
+                                    $old_delivery_note_id = $old_delivery_note_id->first();
+
+                                    if(DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->where('status',0)->exists()){
+                                       $journey = ShipmentsJourney::where('shipment_id',$shipment)->where('verification',0)->latest()->first();
+                                       if($journey->count() > 0){
+                                           ShipmentsJourneyController::add($journey->shipment_id,$journey->shipper_status_id,$journey->consignee_status_id,$journey->status_reason_id,$journey->remarks,$journey->user_id,Auth::id(),$journey->reference_1_id,NULL,1);
+                                       }
+                                    }
+
+                                }
+                                ShipmentsJourneyController::add($shipment, 5, 5, NULL, NULL, NULL, Auth::id(), $note->id, $note->rider_id);
+                            }
+
+                            foreach ($valid_shipments as $index => $shipment) {
                                 NotificationsController::send(10, $note->id, $shipment);
                                 NotificationsController::send(11, $note->id, $shipment);
 
@@ -3248,7 +3263,6 @@ class DeliveryController extends Controller
     public function misroute_shipment_update(Request $request)
     {
         $passing_status_array = array(2, 3, 4, 6, 7, 8, 9, 10, 11, 13, 15);
-
         $shipments = explode(',', $request->shipment_ids);
         if ($shipments) {
             foreach ($shipments as $shipment_id){
@@ -3264,7 +3278,7 @@ class DeliveryController extends Controller
 
                             $cargo = CargoConsignment::find($cargo_consignment_shipment);
                             $cargo->cargo_consignment_shipments()->where('shipment_id',$shipment->id)->delete();
-                            if(in_array($cargo->status_id, [1,2])){
+                            if(in_array($cargo->status_id, [1,2,6,7])){
                                 $shipments_count = $cargo->shipments;
                                 $shipment_weight = $cargo->shipment_weight;
                                 $shipments_count = $shipments_count-1;
@@ -3289,6 +3303,8 @@ class DeliveryController extends Controller
                                 $cargo->save();
                             }
                         }
+                        AdminCargoController::check_draft_shipments($shipment_id);
+
                     }
 					MisroutedHistory::create([
 					    'shipment_id' => $shipment_id,

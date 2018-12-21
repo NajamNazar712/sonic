@@ -29,7 +29,7 @@ class ShipmentsJourneyController extends Controller
       $shipment_journey->reference_1_id = $reference_1_id;
       $shipment_journey->reference_2_id = $reference_2_id;
 
-      if (in_array($shipper_status_id, [1, 2, 17, 19, 39, 40, 41, 42, 43, 47])) {
+      if (in_array($shipper_status_id, [1, 2, 17, 19, 39, 40, 41, 42, 43, 47, 50])) {
         $shipment = Shipment::find($shipment_id);
 
         if ($shipment) {

@@ -30,8 +30,11 @@
                                         <th class="border-primary border-darken-1">Email Address</th>
                                         <th class="border-primary border-darken-1">Product Type</th>
                                         <th class="border-primary border-darken-1">Status</th>
+                                        <th class="border-primary border-darken-1">Sales Person Tagged</th>
                                         <th class="border-primary border-darken-1">Request Date</th>
                                         <th class="border-primary border-darken-1">Rate Added By</th>
+                                        <th class="border-primary border-darken-1">Rate Updated By</th>
+                                        <th class="border-primary border-darken-1">Rate Status</th>
                                         <th class="border-primary border-darken-1">Rate Approved By</th>
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
@@ -45,7 +48,28 @@
             </div>
         </div>
     </section>
-
+    <div class="modal fade text-left" id="SalesTagModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="SalesTagModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-md" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="">Tag Sales Person</h4>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="shipper_id">
+                    <select name="Sale_person" id="saletag" class="form-control select2">
+                        @foreach($sale_name as $sn)
+                            <option value="{{ $sn->id }}" > {{ $sn->name }} </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-success" id="salesTagSubmit">Submit</button>
+                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('css')
@@ -53,53 +77,7 @@
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
 
 
-    <style type="text/css">
-        table.dataTable {
-            font-size: 12px;
-        }
 
-        table.dataTable thead tr th {
-            padding-left: 0.5em;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        table.dataTable thead tr th:before,
-        table.dataTable thead tr th:after {
-            height: 20px;
-            margin-bottom: -10px;
-            bottom: 50% !important;
-        }
-
-        table.dataTable tbody tr td {
-            padding-left: 0.5em;
-            padding-right: 0.5em;
-        }
-
-        table.dataTable tbody tr td.select-checkbox:before {
-            top: 50%;
-            border-color: #64a0d2;
-        }
-
-        table.dataTable tbody tr.selected td.select-checkbox:after {
-            top: 50%;
-            text-shadow: none;
-        }
-
-        .btn-group .dropdown-menu .dropdown-item {
-            white-space: normal;
-        }
-
-        #toast-bottom-center.toast-container {
-            text-align: center;
-        }
-
-        #toast-bottom-center.toast-container .toast {
-            display: table;
-            width: auto !important;
-            text-align: left;
-        }
-    </style>
 @endsection
 
 @section('js')
@@ -131,8 +109,11 @@
                         head.push('Email Address');
                         head.push('Product Type');
                         head.push('Status');
+                        head.push('Sales Person Tagged');
                         head.push('Request Date');
                         head.push('Rates Added By');
+                        head.push('Rates Updated By');
+                        head.push('Rates Status');
                         head.push('Rates Approved By');
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
@@ -150,8 +131,11 @@
                             row.push(values.email);
                             row.push(values.product_name);
                             row.push(values.status);
+                            row.push(values.admin_tag_id);
                             row.push(values.created_at);
                             row.push(values.added_by);
+                            row.push(values.updated_by);
+                            row.push(values.rate_status);
                             row.push(values.approved_by);
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
@@ -195,8 +179,11 @@
                 {data: 'email', name: 'email', class: 'align-middle email'},
                 {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                 {data: 'status', name: 'status', class: 'align-middle status'},
+                {data: 'admin_tag_id', name: 'ad.name', class: 'align-middle admin_tag_id'},
                 {data: 'created_at', name: 'users.created_at', class: 'align-middle created_at'},
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
+                {data: 'updated_by', name: 'rabna.name', class: 'align-middle updated_by'},
+                {data: 'rate_status', name: 'rate_status', class: 'align-middle rate_status'},
                 {data: 'approved_by', name: 'rabb.name', class: 'align-middle approved_by'},
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
@@ -347,6 +334,45 @@
 
             });
 
+
+        });
+        $("#saletag").prepend('<option value="" selected></option>').select2({
+            placeholder: "Select Sales Person",
+            width:'100%',
+            dropdownParent:$('#SalesTagModal')
+        });
+        $('#SalesTagModal').on('shown.bs.modal',function (e) {
+            var $invoker = $(e.relatedTarget);
+            var shipper_id = $invoker.data('target-id');
+            $('#shipper_id').val(shipper_id);
+        });
+        $('#salesTagSubmit').on('click',function () {
+            var shipper = $('#shipper_id').val();
+            var tag = parseInt($('#saletag').val());
+            if(tag){
+                $.ajax({
+                    url: '{!! route('admin.accounts.tag.submit') !!}',
+                    method: 'POST',
+                    data: {
+                        'admin_id': tag,
+                        'shipper_id':shipper,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        if(data.status){
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        }
+                        else {
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                        $('#saletag').val('').trigger('change');
+                        $('#SalesTagModal').modal('hide');
+                    });
+            }else{
+                var error = "Sales Person Not Selected!";
+                toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+            }
 
         });
         $('body').on('click','button.userenable',function () {

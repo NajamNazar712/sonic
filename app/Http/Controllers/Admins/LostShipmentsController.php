@@ -181,20 +181,21 @@ class LostShipmentsController extends Controller
     }
     public function add_lost_shipments(Request $request){
         $passing_status_array = array(1, 14, 17, 18, 25, 30, 31);
+        $intransit_status_array = array(3, 21, 26, 32);
         $shipments = explode(',', $request->shipment_ids);
         if(!empty($shipments)){
             foreach ($shipments as $shipment) {
                 $shipment_details = Shipment::where('id', $shipment)->whereNotIn('shipper_status_id', $passing_status_array);
                 if ($shipment_details->exists()) {
                     $shipment_details = $shipment_details->first();
-                    if ($shipment_details->shipper_status_id == 3) {
+                    if (in_array($shipment_details->shipper_status_id, $intransit_status_array)) {
                         $cargo_consignment_shipment = CargoConsignmentShipment::where('shipment_id', $shipment_details->id);
                         if ($cargo_consignment_shipment->exists()) {
                             $cargo_consignment_shipment = $cargo_consignment_shipment->max('cargo_consignment_id');
 
                             $cargo = CargoConsignment::find($cargo_consignment_shipment);
                             $cargo->cargo_consignment_shipments()->where('shipment_id', $shipment_details->id)->delete();
-                            if (in_array($cargo->status_id, [1, 2])) {
+                            if (in_array($cargo->status_id, [1, 2, 6, 7])) {
                                 $shipments_count = $cargo->shipments;
                                 $shipment_weight = $cargo->shipment_weight;
                                 $shipments_count = $shipments_count - 1;
@@ -221,7 +222,7 @@ class LostShipmentsController extends Controller
                             $shipment_details->shipper_status_id = 18;
                             $shipment_details->save();
                             ShipmentsJourneyController::add($shipment_details->id,18,NULL,NULL,NULL,NULL,Auth::id());
-
+                            AdminCargoController::check_draft_shipments($shipment);
                         }
                     } else {
                         $shipment_details->shipper_status_id = 18;

@@ -10,6 +10,8 @@ class Permission
 {
     private $actions = [
         'admin' => [
+            'orders.shipper_recall' => 139,
+
             'dispute.index' => 1,
             'dispute.list' => 1,
             'dispute.create' => 2,
@@ -70,6 +72,8 @@ class Permission
 
             'cargo.pending.index' => 25,
             'cargo.pending.list' => 25,
+            'cargo.draft.index' => 26,
+            'cargo.draft.list' => 26,
             'cargo.create.index' => 26,
             'cargo.create.shipment_details' => 26,
             'cargo.create.consignment_details' => 26,
@@ -238,6 +242,12 @@ class Permission
             'finance.invoices_history.returned_shipments' => 122,
             'finance.invoices_history.adjusted_shipments' => 122,
 
+            'admin.month_closing.index' => 141,
+            'admin.month_closing.list' => 141,
+            'admin.month_closing.confirm' => 142,
+            'admin.month_closing.reattempt' => 143,
+            'admin.month_closing.add' => 144,
+
             'reports.pickup_note.index' => 64,
             'reports.pickup_note.list' => 64,
             'reports.pickup_note.bookings' => 64,
@@ -272,7 +282,9 @@ class Permission
             'reports.customer_sales.download' => 74,
             'reports.overall_sales.index' => 75,
             'reports.overall_sales.list' => 75,
-
+            'reports.sales_person_performance.index' => 138,
+            'reports.sales_person_performance.export_to_excel' => 138,
+            'reports.sales_person_performance.download' => 138,
 
             'packaging.index' => 76,
             'packaging.list' => 76,

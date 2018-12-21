@@ -193,6 +193,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('list', 'Admins\AdminDashboardController@orders_list')->name('list');
         Route::post('search','Admins\AdminDashboardController@statistics_search')->name('search');
         Route::post('shipment_charges','Admins\AdminDashboardController@get_shipment_charges')->name('charges');
+        Route::post('shipper_recall','Admins\AdminDashboardController@shipper_recall')->name('shipper_recall');
     });
     Route::get('/order/pending', 'Admins\AdminDashboardController@orderPending');
     Route::prefix('accounts')->name('accounts.')->group(function(){
@@ -205,6 +206,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('status/block','Admins\AdminDashboardController@UserStatusBlock')->name('status.block');
         Route::post('status/change','Admins\AdminDashboardController@UserStatusChange')->name('status.change');
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
+        Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
 
 
         //user profile
@@ -532,6 +534,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('shipments', 'Admins\AdminCargoController@history_shipments')->name('shipments');
             Route::post('print', 'Admins\AdminCargoController@history_cargo_print')->name('print');
         });
+
+        Route::prefix('draft')->name('draft.')->group(function () {
+            Route::get('', 'Admins\AdminCargoController@draft_index')->name('index');
+            Route::get('list', 'Admins\AdminCargoController@draft_list')->name('list');
+            Route::post('add', 'Admins\AdminCargoController@draft_add')->name('add');
+            Route::post('shipments', 'Admins\AdminCargoController@draft_shipments')->name('shipments');
+            Route::prefix('edit')->name('edit.')->group(function (){
+                Route::get('{draft}', 'Admins\AdminCargoController@edit_draft_index')->name('index');
+                Route::get('{draft}/list', 'Admins\AdminCargoController@edit_draft_list')->name('list');
+            });
+
+        });
+
     });
     Route::prefix('dispute')->name('dispute.')->group(function (){
        Route::get('','Admins\DisputeController@dispute_index')->name('index');
@@ -670,6 +685,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('month_closing')->name('month_closing.')->group(function (){
+        Route::get('','Admins\AdminMonthClosingController@month_closing_index')->name('index');
+        Route::get('list','Admins\AdminMonthClosingController@month_closing_list')->name('list');
+        Route::post('add','Admins\AdminMonthClosingController@add_shipment')->name('add');
+        Route::post('confirm','Admins\AdminMonthClosingController@return_confirm_shipment')->name('confirm');
+        Route::post('reattempt','Admins\AdminMonthClosingController@return_reattempt_shipment')->name('reattempt');
+    });
+
+
     Route::prefix('sameday')->name('sameday.')->group(function (){
         Route::get('','Admins\SamedayController@sameday_index')->name('index');
         Route::get('list','Admins\SamedayController@sameday_list')->name('list');
@@ -761,6 +785,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@overall_sales_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
 
+        });
+        Route::prefix('sales_person_performance')->name('sales_person_performance.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@sales_person_performance_index')->name('index');
+            Route::post('export_to_excel', 'Admins\AdminReportsController@sales_person_performance_export_to_excel')->name('export_to_excel');
+            Route::get('download', 'Admins\AdminReportsController@sales_person_performance_download')->name('download');
         });
 
     });

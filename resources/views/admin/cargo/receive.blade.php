@@ -88,7 +88,8 @@
 			var table = $('#datatable').DataTable({
 				dom: 'ltipr',
 				scrollX: true,
-				paging:false,
+                "autoWidth": false,
+                paging:false,
 				columns: [
 					{name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{name: 'tracking_number', class: 'align-middle tracking_number'},

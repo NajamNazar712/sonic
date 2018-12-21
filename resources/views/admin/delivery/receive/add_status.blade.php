@@ -256,7 +256,7 @@
             var note_id = $('#delivery_note').val();
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
-                scrollX: true, scrollY: '350px',
+                scrollX: true,
                 buttons: [
                         @if(!$delivery_note_status == 1) {
                     text: 'Delivered',
