@@ -541,7 +541,7 @@ class AdminCargoController extends Controller
       ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
       ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
       ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status')
-      ->whereIn('cargo_consignments.status_id', [1, 2, 4]);
+      ->whereIn('cargo_consignments.status_id', [1, 2, 4, 6, 7]);
 
       if (session('role_id') != 1) {
         $cargo_consignments = $cargo_consignments->where(function ($query) {
@@ -902,7 +902,7 @@ class AdminCargoController extends Controller
         $cargo_consignment = $cargo_consignment->first();
 
         if (session('role_id') == 1 || (in_array($cargo_consignment->junction_hub_1_id, session('hubs')) || in_array($cargo_consignment->junction_hub_2_id, session('hubs')))) {
-          if (in_array($cargo_consignment->status_id, [1, 2])) {
+          if (in_array($cargo_consignment->status_id, [1, 2, 6, 7])) {
             $details = array();
 
             $details['cargo_number'] = str_pad($cargo_consignment->id, 6, '0', STR_PAD_LEFT);
@@ -1058,7 +1058,7 @@ class AdminCargoController extends Controller
 
         if ($cargo_consignment) {
           if (session('role_id') == 1 || (in_array($cargo_consignment->destination_hub_id, session('hubs')))) {
-            if (in_array($cargo_consignment->status_id, [1, 2, 4])) {
+            if (in_array($cargo_consignment->status_id, [1, 2, 4, 6, 7])) {
               return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
             }
             else {
