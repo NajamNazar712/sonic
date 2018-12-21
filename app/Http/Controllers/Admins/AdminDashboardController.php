@@ -5306,7 +5306,7 @@ class AdminDashboardController extends Controller
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5323,7 +5323,7 @@ class AdminDashboardController extends Controller
                 return str_pad($user->id, 6, '0', STR_PAD_LEFT);
             })
             ->editColumn('rate_status',function ($users){
-                if($users['rate_status'] == 0){
+                if($users->rate_status == 0){
                     return "Approved";
                 }else{
                     return "Requested";
