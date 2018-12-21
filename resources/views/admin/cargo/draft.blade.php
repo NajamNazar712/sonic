@@ -178,7 +178,7 @@
         });
     });
     var route = '{!! route('admin.tracking.index') !!}';
-    $('body').on('click', 'tr td.shipments_count button', function() {
+    $('body').on('click', 'tr td.shipments_count_link button', function() {
         var id = parseInt($(this).parents('tr').attr('id'));
 
         $('#shipments_count .modal-body').html('');
