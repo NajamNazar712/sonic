@@ -12,7 +12,7 @@ class UpdateModuleMonthClosingTableSeeder extends Seeder
     public function run()
     {
         DB::table('modules')->insert(array(
-            array('id' =>15, 'name' => 'Month Closing'),
+            array('id' =>16, 'name' => 'Month Closing'),
         ));
     }
 }
