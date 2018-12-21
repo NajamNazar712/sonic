@@ -12,10 +12,10 @@ class UpdateModulePermissionForMonthClosingTableSeeder extends Seeder
     public function run()
     {
         DB::table('module_permissions')->insert(array(
-            array('id' => 141, 'name' => 'Month Closing - View', 'module_id' => 16),
-            array('id' => 142, 'name' => 'Month Closing - Confirm', 'module_id' => 16),
-            array('id' => 143, 'name' => 'Month Closing - Re-Attempt', 'module_id' => 16),
-            array('id' => 144, 'name' => 'Month Closing - Add', 'module_id' => 16),
+            array('id' => 141, 'name' => 'View', 'module_id' => 16),
+            array('id' => 142, 'name' => 'Confirm', 'module_id' => 16),
+            array('id' => 143, 'name' => 'Re-Attempt', 'module_id' => 16),
+            array('id' => 144, 'name' => 'Add', 'module_id' => 16),
         ));
     }
 }
