@@ -603,7 +603,7 @@ class AdminCargoController extends Controller
 
         $dropdown .= $print_button;
 
-        if (($cargo_consignment->status_id == 1) && (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($cargo_consignment->origin_id, session('hubs'))))) {
+        if (($cargo_consignment->status_id == 1) && (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($cargo_consignment->origin_hub->hub_id, session('hubs'))))) {
           $dropdown .= $add_forwarding_details_button;
         }
 
@@ -613,7 +613,7 @@ class AdminCargoController extends Controller
           $dropdown .= $launch_dispute_button;
         }
 
-        if (session('role_id') == 1 || (in_array(31, session('permissions')) && in_array($cargo_consignment->destination_id, session('hubs')))) {
+        if (session('role_id') == 1 || (in_array(31, session('permissions')) && in_array($cargo_consignment->destination_hub->hub_id, session('hubs')))) {
           $dropdown .= $receive_button;
         }
 
@@ -1044,7 +1044,7 @@ class AdminCargoController extends Controller
         $cargo_consignment = CargoConsignment::find($request->get('cargo_number'));
 
         if ($cargo_consignment) {
-          if (session('role_id') == 1 || (in_array($cargo_consignment->destination_hub_id, session('hubs')))) {
+          if (session('role_id') == 1 || (in_array($cargo_consignment->destination_hub->hub_id, session('hubs')))) {
             if (in_array($cargo_consignment->status_id, [1, 2, 4])) {
               return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
             }
