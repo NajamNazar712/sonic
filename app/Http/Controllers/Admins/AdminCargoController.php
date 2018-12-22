@@ -535,7 +535,7 @@ class AdminCargoController extends Controller
       ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
       ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
       ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
-      ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status')
+      ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
       ->whereIn('cargo_consignments.status_id', [1, 2, 4]);
 
       if (session('role_id') != 1) {
@@ -589,6 +589,7 @@ class AdminCargoController extends Controller
       })
 
       ->addColumn('action', function($cargo_consignment) {
+
         $print_button = '<button type="button" class="dropdown-item print"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-printer"></i></div><div class="col-9 offset-1">Print</div></button>';
         $add_forwarding_details_button = '<button type="button" class="dropdown-item add_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Update Forwarding Details</div></button>';
         $view_forwarding_details_button = '<button type="button" class="dropdown-item view_forwarding_details"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-file-text"></i></div><div class="col-9 offset-1">View Forwarding Details</div></button>';
@@ -603,7 +604,7 @@ class AdminCargoController extends Controller
 
         $dropdown .= $print_button;
 
-        if (($cargo_consignment->status_id == 1) && (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($cargo_consignment->origin_id, session('hubs'))))) {
+        if (($cargo_consignment->status_id == 1) && (session('role_id') == 1 || (in_array(28, session('permissions')) && in_array($cargo_consignment->origin_hub_id, session('hubs'))))) {
           $dropdown .= $add_forwarding_details_button;
         }
 
@@ -613,7 +614,7 @@ class AdminCargoController extends Controller
           $dropdown .= $launch_dispute_button;
         }
 
-        if (session('role_id') == 1 || (in_array(31, session('permissions')) && in_array($cargo_consignment->destination_id, session('hubs')))) {
+        if (session('role_id') == 1 || (in_array(31, session('permissions')) && in_array($cargo_consignment->destination_hub_id, session('hubs')))) {
           $dropdown .= $receive_button;
         }
 
@@ -1044,7 +1045,7 @@ class AdminCargoController extends Controller
         $cargo_consignment = CargoConsignment::find($request->get('cargo_number'));
 
         if ($cargo_consignment) {
-          if (session('role_id') == 1 || (in_array($cargo_consignment->destination_hub_id, session('hubs')))) {
+          if (session('role_id') == 1 || (in_array($cargo_consignment->destination_hub->hub_id, session('hubs')))) {
             if (in_array($cargo_consignment->status_id, [1, 2, 4])) {
               return redirect()->route('admin.cargo.receive.index')->with('cargo_consignment_id', $cargo_consignment->id);
             }
