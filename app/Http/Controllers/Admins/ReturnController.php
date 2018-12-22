@@ -550,7 +550,7 @@ class ReturnController extends Controller
         if($request->tracking != ''){
 //            $shipment_not_arrived = array(20,24,27,29,33,35,42,44,45,46);
 //            $shipment_arrived = array(22,24,27,29,30,33,35,44,45,46);
-            $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46);
+            $allowed_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48);
             $shipment = Shipment::where('tracking_number', $request->tracking)->whereIn('shipper_status_id',$allowed_statuses);
             $status = '';
             if($shipment->exists()) {
@@ -561,7 +561,7 @@ class ReturnController extends Controller
                 if(session('role_id') == 1 || in_array($destination_id, session('hubs'))){
                 $origin = $shipment->consignee_city->hub_id;//let's suppose consignee city is origin now
                 if(!$request->has('hub_id')){
-                    if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46)) {
+                    if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
                         $destination_city_id = $shipment->pickup_address->city_id;
                         $destination_city = City::find($destination_city_id);
                         if ($destination_city->id == $destination_city->hub_id) {
@@ -589,7 +589,7 @@ class ReturnController extends Controller
                         return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status]);
 
                     } else
-                        if ($destination_id != $origin && ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46)) {
+                        if ($destination_id != $origin && ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
                             $destination_city_id = $shipment->pickup_address->city_id;
                             $destination_city = City::find($destination_city_id);
                             if ($destination_city->id == $destination_city->hub_id) {
@@ -623,7 +623,7 @@ class ReturnController extends Controller
                         }
                 }else
                 if($request->has('hub_id') && ($destination_id == $request->hub_id)){
-                if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46)) {
+                if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
                     $destination_city_id = $shipment->pickup_address->city_id;
                     $destination_city = City::find($destination_city_id);
                     if ($destination_city->id == $destination_city->hub_id) {
@@ -651,7 +651,7 @@ class ReturnController extends Controller
                     return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status]);
 
                 } else
-                    if ($destination_id != $origin && ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46)) {
+                    if ($destination_id != $origin && ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
                         $destination_city_id = $shipment->pickup_address->city_id;
                         $destination_city = City::find($destination_city_id);
                         if ($destination_city->id == $destination_city->hub_id) {
