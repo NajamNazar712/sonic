@@ -411,7 +411,7 @@ class ReturnController extends Controller
         return view('admin.return.confirmed')->with(['shipment_status'=>$shipment_status,'shipping_mode'=>$shipping_mode,'service_type'=>$service_type]);
     }
     public function return_confirmed_list(Request $request){
-        $status_return = array(20,22,24,27,29,30,33,35,37,44,45,46);
+        $status_return = array(20,22,24,27,29,30,33,35,37,44,45,46,47,48);
         $shipments = Shipment::join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('user_shipping_infos AS usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
@@ -440,7 +440,7 @@ class ReturnController extends Controller
 
         $datatables = Datatables::of($shipments)
             ->addColumn('return_pending_for', function ($shipment) {
-                if (in_array($shipment->shipper_status_id, [22, 24, 27, 29, 33, 35, 44, 45, 46])) {
+                if (in_array($shipment->shipper_status_id, [22, 24, 27, 29, 33, 35, 44, 45, 46,47,48])) {
                     return 'Shipper';
                 }
                 else {
@@ -486,7 +486,7 @@ class ReturnController extends Controller
                 $keyword = strtolower($keyword);
 
                 if (strpos('shipper', $keyword) !== FALSE) {
-                    $query->whereIn('shipments.shipper_status_id', [22, 24, 27, 29, 33, 35, 44, 45, 46])
+                    $query->whereIn('shipments.shipper_status_id', [22, 24, 27, 29, 33, 35, 44, 45, 46,47,48])
                     ->orWhereRaw('`oc`.`hub_id` = `dc`.`hub_id`');
                 }
                 else if (strpos('cargo', $keyword) !== FALSE) {
