@@ -667,6 +667,12 @@ class AdminDashboardController extends Controller
         }
 
     }
+    public function rejectReasonSubmit(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+        $reject_reason = $request->rejected_reason;
+        User::where('id',$shipper_id)->update(['rejected_reason'=>$reject_reason, 'rate_status'=>2]);
+    }
     public function UserStatusBlock(Request $request){
         $user_id = $request->id;
         $reason = $request->reason;
@@ -866,7 +872,7 @@ class AdminDashboardController extends Controller
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
         }
-        elseif($user['rate_status']==1){
+        elseif($user['rate_status']>=1){
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
@@ -5306,7 +5312,7 @@ class AdminDashboardController extends Controller
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5325,8 +5331,11 @@ class AdminDashboardController extends Controller
             ->editColumn('rate_status',function ($users){
                 if($users->rate_status == 0){
                     return "Approved";
-                }else{
+                }elseif($users->rate_status == 1){
                     return "Requested";
+                }
+                else{
+                    return "Rejected";
                 }
             })
             ->filterColumn('users.id', function ($query, $keyword) {
@@ -5337,6 +5346,13 @@ class AdminDashboardController extends Controller
                     return "Enable";
                 }else{
                     return "Disable";
+                }
+            })
+            ->editColumn('rejected_reason',function ($users){
+                if($users->rejected_reason != null){
+                    return $users->rejected_reason;
+                }else{
+                    return "-";
                 }
             })
             ->filterColumn('status', function($query, $keyword) {

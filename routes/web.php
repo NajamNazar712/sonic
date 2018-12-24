@@ -207,6 +207,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('status/change','Admins\AdminDashboardController@UserStatusChange')->name('status.change');
         Route::put('status', 'Admins\AdminDashboardController@UserStatus')->name('status');
         Route::post('tag/submit','Admins\AdminDashboardController@tagSubmit')->name('tag.submit');
+        Route::post('reject/submit','Admins\AdminDashboardController@rejectReasonSubmit')->name('rejectreason.submit');
 
 
         //user profile
