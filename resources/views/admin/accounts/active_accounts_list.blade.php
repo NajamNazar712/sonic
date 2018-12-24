@@ -187,7 +187,7 @@
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
                 {data: 'updated_by', name: 'rabna.name', class: 'align-middle updated_by'},
                 {data: 'rate_status', name: 'rate_status', class: 'align-middle rate_status'},
-                {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rate_status'},
+                {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'approved_by', name: 'rabb.name', class: 'align-middle approved_by'},
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},

@@ -5435,7 +5435,7 @@ class AdminDashboardController extends Controller
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
 	                    ->where('spt.status','=',0);
 	            })
-            ->select(['users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5451,6 +5451,21 @@ class AdminDashboardController extends Controller
             })
             ->filterColumn('users.id', function ($query, $keyword) {
                 return $query->where('users.id', '=', $keyword);
+            })
+            ->editColumn('rejected_reason',function ($users){
+                if($users->rejected_reason != null){
+                    return $users->rejected_reason;
+                }else{
+                    return "-";
+                }
+            })
+            ->editColumn('rate_status',function ($users){
+                if($users->rate_status == 2) {
+                    return "Rejected";
+                }
+                else{
+                    return "-";
+                }
             })
             ->editColumn('status', function ($users) {
                 return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
