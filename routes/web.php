@@ -685,6 +685,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
     });
 
+    Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
+        Route::prefix('make')->name('make.')->group(function (){
+           Route::get('', 'Admins\AdminPettyCashController@make_petty_cash_statement_index')->name('index');
+        });
+        Route::prefix('statements')->name('statements.')->group(function (){
+           Route::get('', 'Admins\AdminPettyCashController@petty_cash_statement_index')->name('index');
+        });
+
+    });
+
     Route::prefix('month_closing')->name('month_closing.')->group(function (){
         Route::get('','Admins\AdminMonthClosingController@month_closing_index')->name('index');
         Route::get('list','Admins\AdminMonthClosingController@month_closing_list')->name('list');
