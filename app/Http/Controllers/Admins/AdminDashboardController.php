@@ -2371,8 +2371,9 @@ class AdminDashboardController extends Controller
                 }
                 //dd($weightAlready);
             }
+            User::where('id',$id)->update(['rate_status'=>1]);
             if($request->authorize == 1){
-                User::where('id',$id)->update(['status'=>2,'rates_authorized_by'=>Auth::id()]);
+                User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id()]);
                 return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
             }
 
@@ -5349,7 +5350,7 @@ class AdminDashboardController extends Controller
                 }
             })
             ->editColumn('rejected_reason',function ($users){
-                if($users->rejected_reason != null){
+                if($users->rejected_reason != null && $users->rate_status==2){
                     return $users->rejected_reason;
                 }else{
                     return "-";
@@ -5453,7 +5454,7 @@ class AdminDashboardController extends Controller
                 return $query->where('users.id', '=', $keyword);
             })
             ->editColumn('rejected_reason',function ($users){
-                if($users->rejected_reason != null){
+                if($users->rejected_reason != null && $users->rate_status==2){
                     return $users->rejected_reason;
                 }else{
                     return "-";
@@ -5508,7 +5509,7 @@ class AdminDashboardController extends Controller
                     $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
                 }
-                if($sale_check != null) {
+                if($sale_check != null && $result->status != 2) {
                     if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
                         $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
                     } else {
