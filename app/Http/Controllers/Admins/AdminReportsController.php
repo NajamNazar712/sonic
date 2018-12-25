@@ -401,6 +401,13 @@ class AdminReportsController extends Controller
             ->editColumn('pickup_note_no', function($pickup_note) {
                 return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($pickup_note->pickup_note_no, 6, '0', STR_PAD_LEFT) . '</span></button>';
             })
+            ->addColumn('aging', function($pickup_note) {
+                $assigned_date = Carbon::parse($pickup_note->assigned_date)->startOfDay();
+
+                $completed_date = Carbon::parse($pickup_note->completed_date)->startOfDay();
+
+                return $assigned_date->diffInDays($completed_date) . 'd';
+            })
             ->addColumn('bookings_link', function($pickup_notes) {
                 if ($pickup_notes->received != 0) {
                     return '<button class="btn btn-sm btn-outline-info align-middle">' . $pickup_notes->received . '</button>';
