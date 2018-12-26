@@ -31,6 +31,11 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
             ->select('petty_cash_statements.id as statement_id','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status');
+
+        if (session('role_id') != 1) {
+            $petty = $petty->whereIn('petty_cash_statements.hub_id', session('hubs'));
+        }
+
         $petty = Datatables::of($petty)
             ->addColumn('date',function($petty){
                 return Carbon::parse($petty->from)->toDateString().' - '.Carbon::parse($petty->to)->toDateString();
@@ -68,8 +73,12 @@ class AdminPettyCashController extends Controller
             ';
 
                 $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">View Statement</div></button>';
-                if($petty->status == 0 && session('role_id'))
-                $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+
+                if(session('role_id') == 1 || ($petty->status == 0 && session('role_id') == 10) || ($petty->status == 1 && session('role_id') == 3) || ($petty->status == 2 && session('role_id') == 7)){
+
+                    $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+
+                }
                 return $dropdown;
             })
             ->make(true);
