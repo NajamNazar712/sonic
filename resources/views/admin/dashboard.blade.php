@@ -329,15 +329,79 @@
                 scrollX: true, scrollY: '350px',
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons: [
+                @if (session('role_id') == 1 || in_array(139, session('permissions')))
+                {
+                    text: '<i class="la la-reply"></i> Shipper Recall',
+                    className: 'btn btn-primary shipper_recall',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                      swal({
+                        text: 'Are you sure, you want to move these Shipment(s) for Return?',
+                        icon: 'warning',
+                        buttons: {
+                          cancel: {
+                            text: 'No',
+                            value: null,
+                            visible: true,
+                            closeModal: true,
+                          },
+                          confirm: {
+                            text: 'Yes',
+                            value: true,
+                            visible: true,
+                            closeModal: true
+                          }
+                        },
+                        closeOnClickOutside: false,
+                        closeOnEsc: false,
+                        dangerMode: true
+                      }).then(function(confirm) {
+                        if (confirm) {
+                          $.ajax({
+                            url: '{!! route('admin.orders.shipper_recall') !!}',
+                            method: 'POST',
+                            data: {
+                              '_token': '{{ csrf_token() }}',
+                              'shipment_ids': selected_rows
+                            }
+                          })
+                          .done(function(data) {
+                            if (data.status == 0) {
+                              toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            }
+                            else {
+                              toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }
+
+                            table.button('.shipper_recall').disable();
+                            table.button('.print').disable();
+
+                            selected_rows = [];
+
+                            table.rows().deselect();
+
+                            table.draw('false');
+                          });
+                        }
+                      });
+                    }
+                },
+                @endif
                 {
                     text: '<i class="la la-print"></i> Print',
                     className: 'btn btn-primary print',
                     enabled: false,
                     action: function (e, dt, node, config) {
-                        table.button('.print').disable();
-                        print(selected_rows);
-                        table.rows().deselect();
-                        selected_rows = [];
+                      var rows = selected_rows.slice();
+
+                      table.button('.shipper_recall').disable();
+                      table.button('.print').disable();
+
+                      selected_rows = [];
+
+                      table.rows().deselect();
+
+                      print(rows);
                     }
                 },
                 {
@@ -361,6 +425,7 @@
                           selected_rows.push(id);
                         }
 
+                        table.button('.shipper_recall').enable();
                         table.button('.print').enable();
                       }
                     });
@@ -387,7 +452,8 @@
                         }
 
                         if (selected_rows.length == 0) {
-                            table.button('.print').disable();
+                          table.button('.shipper_recall').disable();
+                          table.button('.print').disable();
                         }
                       }
                     });
@@ -439,7 +505,7 @@
                     var info = table.page.info();
                     $('td:eq(1)', row).html(index + 1 + info.page * info.length);
 
-                    if (data.shipper_status_id === 1) {
+                    if (data.shipper_status_id === 1 || data.shipper_status_id === 2) {
                         $('td:eq(0)', row).addClass('select-checkbox');
 
                         if ($.inArray(data.shipment_id, selected_rows) !== -1) {
@@ -585,9 +651,11 @@
                 }
 
                 if (selected_rows.length > 0) {
+                    table.button('.shipper_recall').enable();
                     table.button('.print').enable();
                 }
                 else {
+                    table.button('.shipper_recall').disable();
                     table.button('.print').disable();
                 }
             });

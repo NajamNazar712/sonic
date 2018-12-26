@@ -107,6 +107,8 @@
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
+                        <th class="border-primary border-darken-1">Payment Number</th>
+                        <th class="border-primary border-darken-1">SDN Number</th>
                         <th class="border-primary border-darken-1">Service Type</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
@@ -125,10 +127,8 @@
                         <th class="border-primary border-darken-1">Return Charges</th>
                         <th class="border-primary border-darken-1">Replacement Charges</th>
                         <th class="border-primary border-darken-1">Try & Buy Charges</th>
-                        <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Estimated Charges</th>
-                        <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
                         <th class="border-primary border-darken-1">Delivered/Returned Date</th>
                     </tr>
@@ -311,6 +311,8 @@
                             head.push('Shipper');
                             head.push('Status');
                             head.push('Payment Status');
+                            head.push('Payment Number');
+                            head.push('SDN Number');
                             head.push('Service Type');
                             head.push('Arrival Date');
                             head.push('Origin');
@@ -329,10 +331,8 @@
                             head.push('Return Charges');
                             head.push('Replacement Charges');
                             head.push('Try & Buy Charges');
-                            head.push('Fuel Surcharge');
                             head.push('Total Charges');
                             head.push('Estimated Charges');
-                            head.push('GST');
                             head.push('Net Payable');
                             head.push('Delivered / Returned Date');
                             $.each(result.data, function(index, values) {
@@ -344,6 +344,8 @@
                                 row.push(values.shipper);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
+                                row.push(values.payment_id);
+                                row.push(values.sdn_id);
                                 row.push(values.service_type);
                                 row.push(values.arrival_date);
                                 row.push(values.origin);
@@ -362,10 +364,8 @@
                                 row.push(values.return_charges);
                                 row.push(values.replacement_charges);
                                 row.push(values.try_and_buy_charges);
-                                row.push(values.fuel_surcharge);
                                 row.push(values.p_total_charges);
                                 row.push(values.estimated_charges);
-                                row.push(values.p_gst);
                                 row.push(values.p_net_payable);
                                 row.push(values.delivered_or_returned);
 
@@ -406,7 +406,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[7, 'asc']],
+                order: [[9, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number_link' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number_link'},
@@ -414,6 +414,8 @@
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},
+                    { data:'payment_id' ,name: 'pd.id', class: 'align-middle payment_status'},
+                    { data:'sdn_id' ,name: 'sdn.id', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
@@ -432,10 +434,8 @@
                     { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
                     { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},
                     { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
-                    { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
-                    { data:'p_gst' ,name: 'pps.gst', class: 'align-middle gst'},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},
                     { data: 'delivered_or_returned' ,name: 'dr.created_at', class: 'align-middle delivered_or_returned'}
                 ],
