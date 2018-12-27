@@ -2842,14 +2842,14 @@
         <div class="modal-dialog modal-md" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h2 class="modal-title" id="">Write a reason to reject rates!</h2>
+                    <h4 class="modal-title" id="">Write a reason to reject rates!</h4>
                 </div>
                 <div class="modal-body">
                     <textarea id="reject_reason" onkeyup="textAreaAdjust(this)" style="width:100%;overflow:hidden"></textarea>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-danger" id="RejectRatesSubmit">Reject</button>
-                    <button type="button" class="btn btn-info" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn" data-dismiss="modal">No</button>
+                    <button type="button" class="btn btn-danger" id="RejectRatesSubmit">Yes</button>
                 </div>
             </div>
         </div>
