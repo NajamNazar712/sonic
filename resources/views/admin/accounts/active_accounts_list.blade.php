@@ -368,6 +368,7 @@
                         }
                         $('#saletag').val('').trigger('change');
                         $('#SalesTagModal').modal('hide');
+                        table.draw(true);
                     });
             }else{
                 var error = "Sales Person Not Selected!";
