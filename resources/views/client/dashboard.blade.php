@@ -230,7 +230,7 @@
                         selected_rows = [];
                       }
                     },{
-                    text: '<i class="la la-cancel"></i> Cancel Selected',
+                    text: '<i class="la la-cancel"></i> Cancel',
                     className: 'btn btn-danger cancel',
                     enabled: false,
                     action: function (e, dt, node, config) {
