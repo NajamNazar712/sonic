@@ -27,7 +27,9 @@ class AdminPettyCashController extends Controller
     public function make_petty_cash_statement_check_reference(Request $request){
         $reference = $request->reference_id;
         if(PettyCashStatement::where('reference_no',$reference)->exists()){
-            return response()->json(['status' => 1,'error' => 'Reference Number already exists']);
+            return 'true';
+        }else{
+            return 'false';
         }
     }
 

@@ -698,7 +698,6 @@
             $.validator.addMethod('maxsize', function(value, element, params) {
                 if ($(element).attr('type') === 'file') {
                     if (element.files && element.files.length) {
-                        console.log(element.files);
                         for (var c = 0; c < element.files.length; c++) {
                             if (element.files[c].size > params) {
                                 return false;

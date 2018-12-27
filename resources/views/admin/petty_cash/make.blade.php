@@ -113,18 +113,22 @@
                 width:'100%',
                 allowClear:true
             });
+            var old_date_limit = '{{ Carbon\Carbon::now()->subDays(2)->toDateString() }}';
+            var future_date_limit = '{{ Carbon\Carbon::now()->addDays(28)->toDateString() }}';
 
             $('#make_statement_form #select_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
+                min: new Date(old_date_limit),
+                max: new Date(future_date_limit),
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#make_statement_form #select_date_to').pickadate('picker').set('min', $('#make_statement_form #select_date_from').pickadate('picker').get('select'));
-                    }
+                    // if (context.select) {
+                    //     $('#make_statement_form #select_date_to').pickadate('picker').set('min', $('#make_statement_form #select_date_from').pickadate('picker').get('select'));
+                    // }
                 }
             });
             $('#make_statement_form #select_date_to').pickadate({
@@ -132,12 +136,14 @@
                 clear: '',
                 selectYears: true,
                 selectMonths: true,
+                min: new Date(old_date_limit),
+                max: new Date(future_date_limit),
                 formatSubmit: 'yyyy-mm-dd 23:59:59',
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
-                    if (context.select) {
-                        $('#make_statement_form #select_date_from').pickadate('picker').set('max', $('#make_statement_form #select_date_to').pickadate('picker').get('select'));
-                    }
+                    // if (context.select) {
+                    //     $('#make_statement_form #select_date_from').pickadate('picker').set('max', $('#make_statement_form #select_date_to').pickadate('picker').get('select'));
+                    // }
                 }
             });
 
@@ -154,7 +160,7 @@
                     }
                 }],
                 "autoWidth": false,
-                scrollX: true,
+                scrollX: true, scrollY:'350px',
                 paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -167,6 +173,7 @@
                     {name: 'reference_no', class: 'align-middle reference_no'},
                     {name: 'remarks', class: 'align-middle remarks'},
                 ],
+
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
 
@@ -189,24 +196,93 @@
                     form.submit();
                 }
             });
+            var result;
+            $.validator.addMethod("reference_no",
+                function(value, element) {
+                    if(value > 3) {
 
-            $('#reference_no').on('change',function () {
-                var reference_handle = $(this);
-                var reference = $(this).val();
-                $.ajax({
-                    url: '{!! route('admin.petty_cash.make.reference') !!}',
-                    method: 'POST',
-                    data: {
-                        'reference_id': reference,
-                        '_token': '{{ csrf_token() }}'
+                        $.ajax({
+                            type: "POST",
+                            url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
+                            data: {reference_id: value,'_token': '{!! csrf_token() !!}'},
+                            success: function (data) {
+                                console.log(data)
+                                if(data === 'true'){
+                                    result = false;
+                                }else{
+                                    result = true;
+                                }
+                            }
+                        });
+                        return result;
                     }
-                }).done(function (data) {
-                    if(data.status){
-                        reference_handle.val('');
-                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                },
+                "Statement Reference Number already exists."
+            );
+
+
+            function add_row() {
+                rows_count++;
+                console.log('Rows Counnt '+rows_count)
+                var heads_select = '<select class="form-control select2" name="head['+rows_count+']" ></select>';
+                var titles_select = '<select class="form-control select2" name="title['+rows_count+']" ></select>';
+                var hub_select = '<select class="form-control select2" disabled name="hub['+rows_count+']" ></select>';
+                var date_input = '<div class="form-group input-group"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" class="form-control pickadate bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
+                var heads = $.map({!! $heads !!}, function (obj) {
+                    obj.id = obj.id;
+                    obj.text = obj.name;
+                    return obj;
+                });
+
+                table.row.add([0, heads_select,titles_select,hub_select,date_input,0,0,0,0]).draw(true);
+                $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    data:heads,
+                    placeholder:'Select Account Head',
+                    allowClear:true
+                });
+                $('select[name="title['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    placeholder:'Select Account Title',
+                    allowClear:true
+                });
+                $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
+                    placeholder:'Select Hub',
+                    allowClear:true
+                });
+
+                $('input[name="date['+rows_count+']"]').pickadate({
+                    firstDay: 1,
+                    clear: '',
+                    selectYears: true,
+                    selectMonths: true,
+                    formatSubmit: 'yyyy-mm-dd 00:00:00',
+                    hiddenSuffix: '_formatted',
+                    onSet: function(context) {
+
                     }
-                })
-            })
+                });
+
+
+            }
+            add_row();
+
+
+        {{--$('#reference_no').on('change',function () {--}}
+                {{--var reference_handle = $(this);--}}
+                {{--var reference = $(this).val();--}}
+                {{--$.ajax({--}}
+                    {{--url: '{!! route('admin.petty_cash.make.reference') !!}',--}}
+                    {{--method: 'POST',--}}
+                    {{--data: {--}}
+                        {{--'reference_id': reference,--}}
+                        {{--'_token': '{{ csrf_token() }}'--}}
+                    {{--}--}}
+                {{--}).done(function (data) {--}}
+                    {{--if(data.status){--}}
+                        {{--reference_handle.val('');--}}
+                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                    {{--}--}}
+                {{--})--}}
+            {{--});--}}
         });
     </script>
 @endsection
