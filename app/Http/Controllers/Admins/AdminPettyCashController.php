@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\Admin\PettyCashAccountHead;
 use App\Http\Models\Admin\PettyCashStatement;
+use App\Http\Models\City;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -17,7 +19,20 @@ class AdminPettyCashController extends Controller
         $this->middleware('Permission');
     }
     public function make_petty_cash_statement_index(){
-        return view('admin.petty_cash.make');
+        $head = PettyCashAccountHead::select('id','name')->get();
+        $hubs = City::where('hub',1)->where('status',1)->select('id','name')->get();
+        return view('admin.petty_cash.make')->with(['heads' => $head,'hubs' => $hubs]);
+    }
+
+    public function make_petty_cash_statement_check_reference(Request $request){
+        $reference = $request->reference_id;
+        if(PettyCashStatement::where('reference_no',$reference)->exists()){
+            return response()->json(['status' => 1,'error' => 'Reference Number already exists']);
+        }
+    }
+
+    public function make_petty_cash_statement_submit(Request $request){
+        return $request;
     }
 
     public function petty_cash_statements_index(){

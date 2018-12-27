@@ -688,6 +688,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::prefix('petty_cash')->name('petty_cash.')->group(function() {
         Route::prefix('make')->name('make.')->group(function (){
            Route::get('', 'Admins\AdminPettyCashController@make_petty_cash_statement_index')->name('index');
+            Route::post('reference', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_reference')->name('reference');
+            Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
         });
         Route::prefix('statements')->name('statements.')->group(function (){
            Route::get('', 'Admins\AdminPettyCashController@petty_cash_statements_index')->name('index');
