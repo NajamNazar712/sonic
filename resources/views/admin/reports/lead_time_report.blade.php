@@ -55,6 +55,11 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <input type="text" class="form-control" name="search_shipper" id="search_shipper" placeholder="Search Shipper">
+                        </fieldset>
+                    </div>
 
                     <div class="col-4">
                         <div class="form-group input-group">
@@ -63,7 +68,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{Carbon\Carbon::now()->subDays(2)}}">
                         </div>
                     </div>
                     <div class="col-4">
@@ -73,7 +78,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
 
@@ -224,6 +229,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_shipper').inputmask({
+                placeholder:'Search Shipper',
+                width:'100%',
+                allowClear:true
+            });
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -272,6 +282,7 @@
                             'search_destination': $('#search_destination').val(),
                             'search_hub': $('#search_hub').val(),
                             'search_status': $('#search_status').val(),
+                            'search_shipper': $('#search_shipper').val(),
                             'search_from': $('input[name="from_date_formatted"]').val(),
                             'search_to': $('input[name="to_date_formatted"]').val()
                         },
@@ -391,12 +402,13 @@
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();
+                        d.search_shipper = $('#search_shipper').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[9, 'asc']],
+                order: [[10, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
@@ -442,29 +454,6 @@
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
-                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
-
-                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
-                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
-                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
-                    this.api().columns().every(function(column_id) {
-                        var column = this;
-                        var header = column.header();
-
-                        if ($(header).is('.serial_number') || $(header).is('.action')) {
-                            $(td).appendTo($(search));
-                        }
-                        else if ($(header).is('.shipper')){
-                            $(input).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td).after(icon);
-                        }
-                        else {
-                            $(td).appendTo($(search));
-                        }
-                    });
                 }
             });
 
