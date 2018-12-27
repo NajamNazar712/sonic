@@ -11,7 +11,7 @@
 
         <!-- Active Orders -->
           <div class="row">
-              <div class="col">
+              <div class="col-3">
                   <div class="card pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -28,7 +28,7 @@
                       </div>
                   </div>
               </div>
-              <div class="col">
+              <div class="col-3">
                   <div class="card bg-gradient-directional-primary pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -45,7 +45,7 @@
                       </div>
                   </div>
               </div>
-              <div class="col">
+              <div class="col-3">
                   <div class="card bg-gradient-directional-info pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -61,7 +61,7 @@
                           </div>
                       </div>
                   </div>
-              </div><div class="col">
+              </div><div class="col-3">
                   <div class="card bg-gradient-directional-success pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -77,7 +77,10 @@
                           </div>
                       </div>
                   </div>
-              </div><div class="col">
+              </div>
+          </div>
+              <div class="row justify-content-center">
+                  <div class="col-3">
                   <div class="card bg-gradient-directional-warning pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -94,7 +97,7 @@
                       </div>
                   </div>
               </div>
-              <div class="col">
+              <div class="col-3">
                   <div class="card bg-gradient-directional-inprocess pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -111,8 +114,8 @@
                       </div>
                   </div>
               </div>
-              <div class="col">
-                  <div class="card bg-gradient-directional-warning pull-up">
+              <div class="col-3">
+                  <div class="card bg-gradient-directional-red pull-up">
                       <div class="card-content">
                           <div class="card-body">
                               <div class="media d-flex">
@@ -121,7 +124,7 @@
                                   </div>
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['canceled']}}</h3>
-                                      <span>Canceled Shipment(s)</span>
+                                      <span>Cancelled Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
