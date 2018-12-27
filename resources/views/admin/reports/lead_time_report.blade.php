@@ -68,7 +68,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{Carbon\Carbon::now()->subDays(2)}}">
                         </div>
                     </div>
                     <div class="col-4">
@@ -78,7 +78,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
 
