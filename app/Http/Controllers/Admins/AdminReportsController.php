@@ -1162,6 +1162,9 @@ class AdminReportsController extends Controller
         if($tracking = $request->get('search_tracking_no')){
             $lead_time->where('shipments.tracking_number', '=', $tracking);
         }
+        if($shipper = $request->get('search_shipper')){
+            $lead_time->where('u.name', '=', $shipper);
+        }
         if($origin = $request->get('search_origin')){
             $lead_time->where('oc.id','=',$origin);
         }
