@@ -90,6 +90,7 @@ class AdminDashboardController extends Controller
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         $stats['total'] = Shipment::whereBetween('created_at',[$thirtyDays,$today]);
         $stats['booked'] = Shipment::where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['canceled'] = Shipment::where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->whereBetween('created_at',[$thirtyDays,$today]);
@@ -104,6 +105,12 @@ class AdminDashboardController extends Controller
                 });
             });
             $stats['booked'] = $stats['booked']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });$stats['canceled'] = $stats['canceled']->where(function($query) {
                 $query->whereHas('pickup_address.city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 })->orWhereHas('consignee_city', function ($sub_query) {
@@ -146,6 +153,7 @@ class AdminDashboardController extends Controller
 
         $stats['total'] = $stats['total']->count();
         $stats['booked'] = $stats['booked']->count();
+        $stats['canceled'] = $stats['canceled']->count();
         $stats['received'] = $stats['received']->count();
         $stats['delivered'] = $stats['delivered']->count();
         $stats['return'] = $stats['return']->count();
