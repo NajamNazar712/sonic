@@ -965,9 +965,10 @@ class AdminReportsController extends Controller
     public function lead_time_index(Request $request){
 //        $shippers = User::all(['id','name']);
         $cities = City::all(['id','name']);
+        $shipper = User::all(['id','name']);
         $hubs = City::select(['id','name'])->where('hub',1)->get();
         $statuses = ShipmentStatus::all(['id','name']);
-        return view('admin.reports.lead_time_report')->with(['cities'=>$cities,'statuses'=>$statuses,'hubs'=>$hubs]);
+        return view('admin.reports.lead_time_report')->with(['cities'=>$cities,'statuses'=>$statuses,'hubs'=>$hubs,'shipper'=>$shipper]);
     }
     public function lead_time_list(Request $request){
         $shipments = Shipment::join('users as u','u.id','=','shipments.user_id')
@@ -1163,7 +1164,7 @@ class AdminReportsController extends Controller
             $lead_time->where('shipments.tracking_number', '=', $tracking);
         }
         if($shipper = $request->get('search_shipper')){
-            $lead_time->where('u.name', '=', $shipper);
+            $lead_time->where('u.id', '=', $shipper);
         }
         if($origin = $request->get('search_origin')){
             $lead_time->where('oc.id','=',$origin);

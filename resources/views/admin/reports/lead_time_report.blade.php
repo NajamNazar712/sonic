@@ -57,7 +57,11 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_shipper" id="search_shipper" placeholder="Search Shipper">
+                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                @foreach($shipper as $shippers)
+                                    <option value="{{$shippers->id}}">{{$shippers->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
 
@@ -229,7 +233,7 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shipper').inputmask({
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipper',
                 width:'100%',
                 allowClear:true
