@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
 @section('title', 'Lead Time Report')
-
+<meta name="csrf-token" content="{{ csrf_token() }}">
 @section('content')
     <h1 class="mb-1">
-       Lead Time Report
+        Lead Time Report
     </h1>
 
     <div class="card">
@@ -88,6 +88,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
+                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -97,8 +98,15 @@
                         <th class="border-primary border-darken-1">Arrival Date(A)</th>
                         <th class="border-primary border-darken-1">Reached At Destination Date(B)</th>
                         <th class="border-primary border-darken-1">Transit TAT(A-B)</th>
+                        <th class="border-primary border-darken-1">First Delivery Note No</th>
                         <th class="border-primary border-darken-1">First Status</th>
                         <th class="border-primary border-darken-1">First Status Date(C)</th>
+                        <th class="border-primary border-darken-1">First Verification Status</th>
+                        <th class="border-primary border-darken-1">First Verification Date</th>
+                        <th class="border-primary border-darken-1">Last Status</th>
+                        <th class="border-primary border-darken-1">Last Status Date(C)</th>
+                        <th class="border-primary border-darken-1">Last Verification Status</th>
+                        <th class="border-primary border-darken-1">Last Verification Date</th>
                         <th class="border-primary border-darken-1">Attempt TAT(A-C)</th>
                         <th class="border-primary border-darken-1">Dispatch TAT(B-C)</th>
                         <th class="border-primary border-darken-1">Delivered Date(D)</th>
@@ -273,6 +281,7 @@
                             head.push('S.No');
                             head.push('Tracking .No');
                             head.push('Account No.');
+                            head.push('Vendor Name');
                             head.push('Shipper');
                             head.push('Origin');
                             head.push('Destination');
@@ -282,8 +291,15 @@
                             head.push('Arrival Date(A)');
                             head.push('Reached At Destination Date(B)');
                             head.push('Transit TAT(A-B)');
+                            head.push('First Delivery Note No');
                             head.push('First Status');
                             head.push('First Status Date(C)');
+                            head.push('First Verification Status');
+                            head.push('First Verification Date(C)');
+                            head.push('Last Status');
+                            head.push('Last Status Date(C)');
+                            head.push('First Verification Status');
+                            head.push('First Verification Date(C)');
                             head.push('Attempt TAT(A-C)');
                             head.push('Dispatch TAT(B-C)');
                             head.push('Delivered Date(D)');
@@ -304,6 +320,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
+                                row.push(values.vendor);
                                 row.push(values.shipper);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -313,8 +330,15 @@
                                 row.push(values.arrival_date);
                                 row.push(values.reached_at_destination);
                                 row.push(values.transit_tat);
+                                row.push(values.delivery_note_id);
                                 row.push(values.first_status);
                                 row.push(values.first_status_date);
+                                row.push(values.first_verification);
+                                row.push(values.verification_status_date);
+                                row.push(values.last_status);
+                                row.push(values.last_status_date);
+                                row.push(values.last_verification);
+                                row.push(values.last_verification_status_date);
                                 row.push(values.attempt_tat);
                                 row.push(values.dispatch_tat);
                                 row.push(values.delivered_date);
@@ -357,6 +381,10 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.lead_time.list') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
@@ -373,6 +401,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
+                    {data: 'vendor', name: 'cc.transport_mode_vendor_id', class: 'align-middle vendor'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
@@ -382,8 +411,15 @@
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date'},
                     {data: 'reached_at_destination', name: 'reached_at_destination', class: 'align-middle reached_at_destination'},
                     {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat', orderable: false, searchable: false},
+                    {data: 'delivery_note_id', name: 'dn.id', class: 'align-middle delivery_note_id', orderable: false, searchable: false},
                     {data: 'first_status', name: 'fs.name', class: 'align-middle first_status'},////
                     {data: 'first_status_date', name: 'first_status_date', class: 'align-middle first_status_date'},////
+                    {data: 'first_verification', name: 'fsj.verification ', class: 'align-middle first_verification', orderable: false, searchable: false},
+                    {data: 'verification_status_date', name: 'dn.status_verified_at', class: 'align-middle verification_status_date', orderable: false, searchable: false},
+                    {data: 'last_status', name: 'fss.name', class: 'align-middle last_status', orderable: false, searchable: false},
+                    {data: 'last_status_date', name: 'ffstatus.updated_at', class: 'align-middle last_status_date', orderable: false, searchable: false},
+                    {data: 'last_verification', name: 'lsj.verification ', class: 'align-middle first_verification', orderable: false, searchable: false},
+                    {data: 'last_verification_status_date', name: 'dnaa.status_verified_at', class: 'align-middle verification_status_date', orderable: false, searchable: false},
                     {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat', orderable: false, searchable: false},////
                     {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat', orderable: false, searchable: false},
                     {data: 'delivered_date', name: 'delivered_date', class: 'align-middle delivered_date'},
@@ -406,6 +442,29 @@
                 },
                 initComplete: function() {
                     this.api().table().columns.adjust();
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.serial_number') || $(header).is('.action')) {
+                            $(td).appendTo($(search));
+                        }
+                        else if ($(header).is('.shipper')){
+                            $(input).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td).after(icon);
+                        }
+                        else {
+                            $(td).appendTo($(search));
+                        }
+                    });
                 }
             });
 

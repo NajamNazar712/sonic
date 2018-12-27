@@ -22,7 +22,9 @@ use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\ShipmentStatus;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\ShippingMode;
+use App\Http\Models\TransportModeVendor;
 use Carbon\Carbon;
+use function foo\func;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -90,15 +92,15 @@ class AdminReportsController extends Controller
                     return $days;
                 }
             })
-        ->addColumn('aging_last_status',function ($shipments){
+            ->addColumn('aging_last_status',function ($shipments){
 
-            $days = Carbon::now()->diffInDays($shipments->last_status_date);
-            if($days == 0){
-                return "-";
-            }else{
-                return $days;
-            }
-        });
+                $days = Carbon::now()->diffInDays($shipments->last_status_date);
+                if($days == 0){
+                    return "-";
+                }else{
+                    return $days;
+                }
+            });
         if ($shipper = $request->get('search_shipper')) {
             $datatable->where('u.id', '=', $shipper);
         }
@@ -466,7 +468,7 @@ class AdminReportsController extends Controller
                 }
 
             }
-                return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
+            return ['status' => 0, 'success' => 'Booked Shipments', 'booked' => $bookings];
 
         }else{
             return ['status' => 0, 'success' => 'No Pickup requests found', 'booked' => FALSE];
@@ -988,8 +990,17 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipments_journey as fstatus', function ($join) {
                 $join->on('fstatus.shipment_id', '=', 'shipments.id')
-                    ->where('fstatus.id','>',
+                    ->where('fstatus.id','<',
                         DB::raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)'));
+            })->leftJoin('shipments_journey as ver', function ($join) {
+                $join->on('ver.shipment_id', '=', 'shipments.id')
+                    ->where('ver.id','<',
+                        DB::raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)'));
+            })
+            ->leftJoin('shipments_journey as ffstatus', function ($join) {
+                $join->on('ffstatus.shipment_id', '=', 'shipments.id')
+                    ->where('ffstatus.id','>',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)'));
             })
             ->leftJoin('shipments_journey as dd', function ($join) {
                 $join->on('dd.shipment_id', '=', 'shipments.id')
@@ -1026,9 +1037,48 @@ class AdminReportsController extends Controller
                     ->where('lj.created_at','=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id)'));
             })
+            ->leftJoin('delivery_note_shipments as dns', function ($join) {
+                $join->on('dns.shipment_id', '=', 'shipments.id')
+                    ->where('dns.delivery_note_id','=',
+                        DB::raw('(select min(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
+            })
             ->leftJoin('shipment_status as fs','fs.id','=','fstatus.shipper_status_id')
+            ->leftJoin('shipment_status as fss','fss.id','=','ffstatus.shipper_status_id')
             ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
-            ->select('shipments.id as Shipment_id','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status')
+            ->leftjoin('delivery_note_shipments as dnss', function ($join) {
+                $join->on('dnss.shipment_id', '=', 'shipments.id')
+                    ->where('dnss.delivery_note_id','=',
+                        DB::raw('(select min(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('delivery_notes as dn', function ($join) {
+                $join->on('dn.id', '=', 'dnss.delivery_note_id');
+            })
+            ->leftjoin('shipments_journey as fsj', function($join){
+                $join->on('fsj.shipment_id','=','shipments.id')
+                    ->where('fsj.created_at','=',
+                        DB::raw('(select min(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftjoin('shipments_journey as lsj', function($join){
+                $join->on('lsj.shipment_id','=','shipments.id')
+                    ->where('lsj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)')
+                    );
+            })
+            ->leftjoin('cargo_consignment_shipments as ccs', function($join){
+                $join->on('ccs.shipment_id','=','shipments.id')
+                    ->leftjoin('cargo_consignments as cc','cc.id','=','ccs.cargo_consignment_id');
+            })
+//            ->leftjoin('transport_mode_vendor as tmv','tmv.id','=','cc.transport_mode_vendor_id')
+            ->leftjoin('delivery_note_shipments as dnssaa', function ($join) {
+                $join->on('dnssaa.shipment_id', '=', 'shipments.id')
+                    ->where('dnssaa.delivery_note_id','=',
+                        DB::raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('delivery_notes as dnaa', function ($join) {
+                $join->on('dnaa.id', '=', 'dnssaa.delivery_note_id');
+            })
+            ->select('cc.transport_mode_vendor_id as vendor','fsj.verification as first_verification','lsj.verification as last_verification','dn.status_verified_at as verification_status_date', 'dnaa.status_verified_at as last_verification_status_date','dns.delivery_note_id as delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','ffstatus.updated_at as last_status_date','fss.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status')
             ->groupBy('shipments.id');
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -1037,9 +1087,42 @@ class AdminReportsController extends Controller
             ->editColumn('account_no', function ($shipments) {
                 return str_pad($shipments->account_no, 6, '0', STR_PAD_LEFT);
             })
+            ->editcolumn('vendor',function ($shipments){
+                if($shipments->vendor != null) {
+                    $name = TransportModeVendor::where('transport_mode_vendors.id', $shipments->vendor)->first();
+                    return $name->name;
+                }
+                else
+                {
+                    return "-";
+                }
+            })
+            ->editcolumn('first_verification', function ($shipments) {
+                if($shipments->first_verification == 1)
+                {
+                    return "Verified";
+                }
+                else
+                {
+                    return "Unverified";
+                }
+            })
+            ->editcolumn('last_verification', function ($shipments) {
+                if($shipments->last_verification == 1)
+                {
+                    return "Verified";
+                }
+                else
+                {
+                    return "Unverified";
+                }
+            })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->filterColumn('shipper', function ($query, $keyword) {
+                return $query->where('u.name', '=', $keyword);
             })
             ->addColumn('transit_tat',function ($shipments){
                 return ($shipments->arrival_date && $shipments->reached_at_destination)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->reached_at_destination) :'-';
@@ -1773,7 +1856,7 @@ class AdminReportsController extends Controller
         }
         $sales = '';
         if(session('department_id') == 7){
-           $sales = Admin::whereHas('role', function($query) {
+            $sales = Admin::whereHas('role', function($query) {
                 $query->where('department_id', '=', 7);
             })->select('id', 'name')->get();
         }
@@ -3087,7 +3170,7 @@ class AdminReportsController extends Controller
         }
 
         if($sales_person_filter != null){
-                $sales_person = Admin::where('id', $sales_person_filter)->get();
+            $sales_person = Admin::where('id', $sales_person_filter)->get();
 
         }else{
             if(session('role_id') == 1){
@@ -3127,9 +3210,9 @@ class AdminReportsController extends Controller
             foreach ($tagged_shippers as $shipper){
                 if($hub != null){
 
-                        $user = User::whereHas('city',function($query) use($hub){
-                            $query->where('hub_id',$hub);
-                        })->where('id', $shipper->user_id)->first();
+                    $user = User::whereHas('city',function($query) use($hub){
+                        $query->where('hub_id',$hub);
+                    })->where('id', $shipper->user_id)->first();
                 }else{
 
                     $user = User::find($shipper->user_id);
@@ -3200,9 +3283,9 @@ class AdminReportsController extends Controller
                     foreach ($sales_persons['pickups'][$key] as $id => $pickup){
 
 //                        foreach ($pickup as $n){
-                            $cellIndex = Coordinate::stringFromColumnIndex($pickup_col_index);
-                            $sheet->setCellValue($cellIndex.$pickup_index, $pickup);
-                            $pickup_col_index++;
+                        $cellIndex = Coordinate::stringFromColumnIndex($pickup_col_index);
+                        $sheet->setCellValue($cellIndex.$pickup_index, $pickup);
+                        $pickup_col_index++;
 //                            $pickup_index++;
 //                        }
 
