@@ -51,8 +51,8 @@
                         <th class="border-primary border-darken-1">Assigned Date</th>
                         <th class="border-primary border-darken-1">Total Collection</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Last Update</th>
-                        <th class="border-primary border-darken-1">Updated By</th>
+                        <th class="border-primary border-darken-1">Last Updated (Date)</th>
+                        <th class="border-primary border-darken-1">Last Updated By</th>
                         <th class="border-primary border-darken-1">Action</th>
                     </tr>
                     </thead>
@@ -171,8 +171,8 @@
                             head.push('Assigned Date');
                             head.push('Total COD');
                             head.push('Status');
-                            head.push('Last Update');
-                            head.push('Updated By');
+                            head.push('Last Updated (Date)');
+                            head.push('Last Updated By');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
