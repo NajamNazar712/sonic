@@ -2945,7 +2945,7 @@ class AdminReportsController extends Controller
             ->whereNotIn('shipments.shipper_status_id',[1,17]);
         if (!$request->get('search_date_from') && !$request->get('search_date_to')) {
             $now = Carbon::now();
-            $yesterday = Carbon::yesterday();
+            $yesterday = Carbon::now()->subDays(3);
             $sales = $sales->whereBetween('sj.created_at', [$yesterday,$now]);
         }
 

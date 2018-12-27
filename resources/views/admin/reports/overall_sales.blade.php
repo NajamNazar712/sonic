@@ -79,7 +79,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{Carbon\Carbon::yesterday()}}">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{Carbon\Carbon::now()->subDays(3)}}">
                         </div>
                     </div>
                     <div class="col-4 ">
