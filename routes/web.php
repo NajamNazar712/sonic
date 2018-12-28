@@ -689,12 +689,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('make')->name('make.')->group(function (){
            Route::get('', 'Admins\AdminPettyCashController@make_petty_cash_statement_index')->name('index');
             Route::post('reference', 'Admins\AdminPettyCashController@make_petty_cash_statement_check_reference')->name('reference');
+            Route::post('titles', 'Admins\AdminPettyCashController@make_petty_cash_statement_titles')->name('titles');
             Route::post('submit', 'Admins\AdminPettyCashController@make_petty_cash_statement_submit')->name('submit');
         });
         Route::prefix('statements')->name('statements.')->group(function (){
            Route::get('', 'Admins\AdminPettyCashController@petty_cash_statements_index')->name('index');
            Route::get('list', 'Admins\AdminPettyCashController@petty_cash_statements_list')->name('list');
            Route::post('approve', 'Admins\AdminPettyCashController@petty_cash_statements_approve')->name('approve');
+            Route::get('{id}/edit', 'Admins\AdminPettyCashController@edit_petty_cash_statement_index')->name('edit');
+            Route::get('{id}/edit/list', 'Admins\AdminPettyCashController@edit_petty_cash_statement_list')->name('edit.list');
+            Route::post('edit/approve', 'Admins\AdminPettyCashController@edit_petty_cash_statements_approve')->name('edit.approve');
         });
 
     });

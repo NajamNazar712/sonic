@@ -176,7 +176,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61, 120, 121, 122, 134, 136, 145, 146], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61, 120, 121, 122, 134, 136, 145, 146, 147], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Finance</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(57, session('permissions')))
@@ -233,7 +233,7 @@
                             </li>
                         @endif
 
-                        @if (session('role_id') == 1 || count(array_intersect([145, 146], session('permissions'))) !== 0)
+                        @if (session('role_id') == 1 || count(array_intersect([145, 146, 147], session('permissions'))) !== 0)
                             <li class=" nav-item"><a href="#"><span class="menu-title">Petty Cash</span></a>
                                 <ul class="menu-content">
                                     @if (session('role_id') == 1 || in_array(145, session('permissions')))

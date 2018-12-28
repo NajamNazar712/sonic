@@ -503,7 +503,6 @@
                 var status = statusSelection.val();
                 shipment_status[rowid] = status;
                 var reason = statusSelection.closest('td').next('td').find('.reasonDrop');
-
                 $.ajax({
                     url:'{!! route('admin.delivery.receive.reason') !!}',
                     type:'POST',
@@ -863,11 +862,10 @@
                 $('#item_unchecked').val(uncheckbox_count);
                 $('#delivery_note_trybuy').val(deliverynote_id);
                 if(checkbox_count > 0){
-
                     this.submit();
                 }else{
                         var error = "Select at-least one item!";
-                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
         });

@@ -1,22 +1,22 @@
 @extends('admin.layout.master')
-@section('title','Make Petty Cash Statement')
+@section('title','Edit Petty Cash Statement')
 
 @section('content')
     <h1 class="mb-1">
-        Make Petty Cash Statement
+        Edit Petty Cash Statement # {{$petty_statement_details->id}}
     </h1>
 
     <div class="card">
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="make_statement_form" action="{{route('admin.petty_cash.make.submit')}}" method="post">
+                <form id="edit_statement_form" action="{{route('admin.petty_cash.make.submit')}}" method="post">
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">
                     <div class="row">
                         <div class="col">
                             <fieldset class="form-group">
-                                <select name="select_statement_hub" id="select_statement_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required">
+                                <select name="select_statement_hub" id="select_statement_hub" class="form-control select2" disabled data-rule-required="true" data-msg-required="Hub is required">
                                     @foreach($hubs as $city)
                                         <option value="{{$city->id}}">{{$city->name}}</option>
                                     @endforeach
@@ -31,7 +31,7 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="select_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_from" placeholder="Date (From)" data-rule-required="true" data-msg-required="Date (From) is required">
+                                <input type="text" name="select_date_from" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_from" placeholder="Date (From)" data-rule-required="true" data-msg-required="Date (From) is required" data-value="{{$petty_statement_details->from}}">
                             </div>
                         </div>
                         <div class="col ">
@@ -42,37 +42,39 @@
                             </span>
                                 </div>
 
-                                <input type="text" name="select_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date (To) is required">
+                                <input type="text" name="select_date_to" disabled class="form-control pickadate bg-primary border-primary white rounded-right" id="select_date_to" placeholder="Date (To)" data-rule-required="true" data-msg-required="Date (To) is required" data-value="{{$petty_statement_details->to}}">
                             </div>
                         </div>
                         <div class="col">
                             <fieldset class="form-group">
-                                <input type="text" class="form-control reference_no" name="reference_no" id="reference_no" placeholder="Statement Reference No." data-rule-required="true" data-msg-required="Statement Reference No. is required">
+                                <input type="text" class="form-control reference_no" disabled name="reference_no" id="reference_no" placeholder="Statement Reference No." data-rule-required="true" data-msg-required="Statement Reference No. is required" value="{{$petty_statement_details->reference_no}}">
                             </fieldset>
                         </div>
                     </div>
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                    <thead>
-                    <tr role="row" class="bg-primary white">
+                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
 
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Account Head</th>
-                        <th class="border-primary border-darken-1">Account Title</th>
-                        <th class="border-primary border-darken-1">Hub</th>
-                        <th class="border-primary border-darken-1">Date</th>
-                        <th class="border-primary border-darken-1">Details of Expense</th>
-                        <th class="border-primary border-darken-1"> Amount </th>
-                        <th class="border-primary border-darken-1">Reference No.</th>
-                        <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Account Head</th>
+                            <th class="border-primary border-darken-1">Account Title</th>
+                            <th class="border-primary border-darken-1">Hub</th>
+                            <th class="border-primary border-darken-1">Date</th>
+                            <th class="border-primary border-darken-1">Details of Expense</th>
+                            <th class="border-primary border-darken-1"> Amount </th>
+                            <th class="border-primary border-darken-1">Reference No.</th>
+                            <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Status</th>
+                            <th class="border-primary border-darken-1"></th>
 
-                    </tr>
-                    </thead>
-                </table>
-                <div class="row justify-content-center">
-                    <div class="">
-                        <button id="statement_submit" type="submit"  class="btn btn-primary btn-block">Make Statement</button>
+                        </tr>
+                        </thead>
+                    </table>
+                    <div class="row justify-content-center">
+                        <div class="">
+                            <button id="statement_submit" type="submit"  class="btn btn-primary btn-block">Make Statement</button>
+                        </div>
                     </div>
-                </div>
                 </form>
             </div>
         </div>
@@ -120,10 +122,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#select_statement_hub').val('{!! $petty_statement_details->hub_id!!}').trigger('change');
             var old_date_limit = '{{ Carbon\Carbon::now()->subDays(2)->toDateString() }}';
             var future_date_limit = '{{ Carbon\Carbon::now()->addDays(28)->toDateString() }}';
 
-            $('#make_statement_form #select_date_from').pickadate({
+            $('#edit_statement_form #select_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -134,11 +137,11 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     // if (context.select) {
-                    //     $('#make_statement_form #select_date_to').pickadate('picker').set('min', $('#make_statement_form #select_date_from').pickadate('picker').get('select'));
+                    //     $('#edit_statement_form #select_date_to').pickadate('picker').set('min', $('#edit_statement_form #select_date_from').pickadate('picker').get('select'));
                     // }
                 }
             });
-            $('#make_statement_form #select_date_to').pickadate({
+            $('#edit_statement_form #select_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -149,7 +152,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     // if (context.select) {
-                    //     $('#make_statement_form #select_date_from').pickadate('picker').set('max', $('#make_statement_form #select_date_to').pickadate('picker').get('select'));
+                    //     $('#edit_statement_form #select_date_from').pickadate('picker').set('max', $('#edit_statement_form #select_date_to').pickadate('picker').get('select'));
                     // }
                 }
             });
@@ -159,26 +162,32 @@
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
-                    title: 'Add Row',
+                    title: 'Edit Statement',
                     className: 'btn btn-primary',
-                    text: '<i class="la la-plus"></i> Add Row',
+                    text: '<i class="la la-plus"></i> Edit Statement',
                     action:function (e) {
                         add_row();
                     }
                 }],
                 "autoWidth": false,
-                scrollX: true, scrollY:'500px',
+                scrollX: true, scrollY:'400px',
+                ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement_details->id]) }}',
+                processing: true,
+                serverSide: false,
+                rowId: 'statement_detail_id',
                 paging:false,
+                ordering: false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
-                    {name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
-                    {name: 'hub', class: 'align-middle hub custom-col-width form-group'},
-                    {name: 'date', class: 'align-middle date date-col-width form-group'},
-                    {name: 'details_of_expense', class: 'align-middle details_of_expense form-group'},
-                    {name: 'amount', class: 'align-middle expense_amount form-group'},
-                    {name: 'reference_no', class: 'align-middle reference_no form-group'},
-                    {name: 'remarks', class: 'align-middle remarks'},
+                    {data:'account_head' ,name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
+                    {data:'account_title' ,name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
+                    {data:'hub_name' ,name: 'h.name', class: 'align-middle hub_name custom-col-width form-group'},
+                    {data:'date' ,name: 'date', class: 'align-middle date date-col-width form-group'},
+                    {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense form-group'},
+                    {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount form-group'},
+                    {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no form-group'},
+                    {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
+                    {data:'action' ,name: 'action', class: 'align-middle action'}
                 ],
 
                 rowCallback: function(row, data, index) {
@@ -187,13 +196,64 @@
                     $('td:eq(0)', row).html(index + 1 + info.page * info.length);
 
                 },
-                initComplete: function() {
+                drawCallback: function (settings) {
 
+                    $(".head_select").select2({
+                        placeholder: "Select Account Head",
+                        width:'100%'
+                    });
+                    $(".title_select").select2({
+                        placeholder: "Select Account Title",
+                        width:'100%'
+                    });
+                    $(".hub_select").select2({
+                        placeholder: "Select Hub",
+                        width:'100%'
+                    });
+                    // $(".statusDrop").prepend('<option value="" selected="selected"></option>').select2({
+                    //     placeholder: "Select a Status",
+                    //     width:'100%'
+                    // });
+                    // var api = new $.fn.dataTable.Api( settings );
+                    // var data = api.rows( {page:'current'} ).data();
+                    // $.each(data,function (key,value) {
+                    //     if(shipment_status.length !== 0){
+                    //         $('select[name="status_drop['+value.shId+']"]').val(shipment_status[value.shId]).trigger('change');
+                    //     }
+                    //     if(shipment_reason.length !== 0){
+                    //         $('select[name="reason_drop['+value.shId+']"]').val(shipment_reason[value.shId]).trigger('change');
+                    //     }
+                    // });
+                },
+                initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
+
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.serial_number') || $(header).is('.status') || $(header).is('.date') || $(header).is('.hub_name') || $(header).is('.account_head') || $(header).is('.account_title') || $(header).is('.action')) {
+                            $(td).appendTo($(search));
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change keypress', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
                     this.api().table().columns.adjust();
                 }
             });
 
-            $('#make_statement_form').validate({
+            $('#edit_statement_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
@@ -303,7 +363,7 @@
                 });
 
             }
-            add_row();
+
 
             $('body').on('select2:select','.account_head .head_select',function () {
                 var rowid = parseInt($(this).parents('tr').attr('id'));
@@ -332,22 +392,54 @@
                 });
             });
 
-        {{--$('#reference_no').on('change',function () {--}}
-                {{--var reference_handle = $(this);--}}
-                {{--var reference = $(this).val();--}}
-                {{--$.ajax({--}}
-                    {{--url: '{!! route('admin.petty_cash.make.reference') !!}',--}}
-                    {{--method: 'POST',--}}
-                    {{--data: {--}}
-                        {{--'reference_id': reference,--}}
-                        {{--'_token': '{{ csrf_token() }}'--}}
-                    {{--}--}}
-                {{--}).done(function (data) {--}}
-                    {{--if(data.status){--}}
-                        {{--reference_handle.val('');--}}
-                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
-                    {{--}--}}
-                {{--})--}}
+            $('#edit_statement_form').on('keypress',function (e) {
+                if(e.which == 13) {
+                    e.preventDefault();
+                }
+            });
+
+            $('body').on('click','.action button.approve', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var status = parseInt($(this).parents('tr').attr('status'));
+                if(status == 0) {
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
+                        method: 'POST',
+                        data: {
+                            'detail_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status) {
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+            });
+
+            {{--$('#reference_no').on('change',function () {--}}
+            {{--var reference_handle = $(this);--}}
+            {{--var reference = $(this).val();--}}
+            {{--$.ajax({--}}
+            {{--url: '{!! route('admin.petty_cash.make.reference') !!}',--}}
+            {{--method: 'POST',--}}
+            {{--data: {--}}
+            {{--'reference_id': reference,--}}
+            {{--'_token': '{{ csrf_token() }}'--}}
+            {{--}--}}
+            {{--}).done(function (data) {--}}
+            {{--if(data.status){--}}
+            {{--reference_handle.val('');--}}
+            {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+            {{--}--}}
+            {{--})--}}
             {{--});--}}
         });
     </script>

@@ -24,6 +24,8 @@ class CreatePettyCashStatementDetailsTable extends Migration
             $table->double('amount');
             $table->integer('reference_no');
             $table->string('remarks')->nullable();
+            $table->integer('approved_by')->nullable();
+            $table->boolean('status')->default(0);
             $table->timestamps();
         });
     }
