@@ -5477,8 +5477,11 @@ class AdminDashboardController extends Controller
                 else if($users->rate_status == 1) {
                     return "Requested";
                 }
-                else{
-                    return "Approved";
+                else if($users->rate_status == 0 && $users->status==2){
+                    return "Authorized";
+                }
+                else if($users->rate_status == 0 && $users->status==1) {
+                    return "Requested";
                 }
             })
             ->editColumn('status', function ($users) {
