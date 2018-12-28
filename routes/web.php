@@ -44,6 +44,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
         Route::get('list','Shippers\ShipperDashboardController@orders_list')->name('list');
         Route::post('search','Shippers\ShipperDashboardController@statistics_search')->name('search');
         Route::post('cancel','Shippers\ShipperDashboardController@order_cancel')->name('cancel');
+        Route::post('cancel_all', 'Shippers\ShipperDashboardController@order_cancel_all')->name('cancel_all');
         Route::post('shipment_charges','Shippers\ShipperDashboardController@get_shipment_charges')->name('charges');
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
