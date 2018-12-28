@@ -681,6 +681,7 @@ class AdminDashboardController extends Controller
         $shipper_id = $request->shipper_id;
         $reject_reason = $request->rejected_reason;
         User::where('id',$shipper_id)->update(['rejected_reason'=>$reject_reason, 'rate_status'=>2]);
+        return ['success' => 'Rates has been rejected!'];
     }
     public function UserStatusBlock(Request $request){
         $user_id = $request->id;
@@ -866,7 +867,7 @@ class AdminDashboardController extends Controller
 
     public function editRatesView($id){
         $user = User::find($id);
-        if ($user['rate_status']>=0 && $user['status']!=3) {
+        if (($user['rate_status']>=0) && $user['status']==1) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
@@ -881,7 +882,7 @@ class AdminDashboardController extends Controller
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
         }
-        elseif($user['rate_status']>=1 && $user['status']==3){
+        elseif(($user['rate_status']>=1) && $user['status']==3){
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();

@@ -2948,7 +2948,7 @@
                     }
                 })
                     .done(function(data) {
-                            toastr.success(data.success, 'Rates has been rejected!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                         $('#RejectRatesModal').modal('hide');
                     });
             }else{
