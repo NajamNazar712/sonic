@@ -5465,8 +5465,11 @@ class AdminDashboardController extends Controller
                 if($users->rate_status == 2) {
                     return "Rejected";
                 }
+                else if($users->rate_status == 1) {
+                    return "Requested";
+                }
                 else{
-                    return "-";
+                    return "Approved";
                 }
             })
             ->editColumn('status', function ($users) {
