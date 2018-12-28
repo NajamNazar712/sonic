@@ -426,11 +426,11 @@
                     {data: 'delivery_note_id', name: 'dn.id', class: 'align-middle delivery_note_id', orderable: false, searchable: false},
                     {data: 'first_status', name: 'fs.name', class: 'align-middle first_status'},////
                     {data: 'first_status_date', name: 'first_status_date', class: 'align-middle first_status_date'},////
-                    {data: 'first_verification', name: 'fsj.verification ', class: 'align-middle first_verification', orderable: false, searchable: false},
+                    {data: 'first_verification', name: 'fsj.id ', class: 'align-middle first_verification', orderable: false, searchable: false},
                     {data: 'verification_status_date', name: 'dn.status_verified_at', class: 'align-middle verification_status_date', orderable: false, searchable: false},
                     {data: 'last_status', name: 'fss.name', class: 'align-middle last_status', orderable: false, searchable: false},
                     {data: 'last_status_date', name: 'ffstatus.updated_at', class: 'align-middle last_status_date', orderable: false, searchable: false},
-                    {data: 'last_verification', name: 'lsj.verification ', class: 'align-middle first_verification', orderable: false, searchable: false},
+                    {data: 'last_verification', name: 'lsj.id ', class: 'align-middle first_verification', orderable: false, searchable: false},
                     {data: 'last_verification_status_date', name: 'dnaa.status_verified_at', class: 'align-middle verification_status_date', orderable: false, searchable: false},
                     {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat', orderable: false, searchable: false},////
                     {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat', orderable: false, searchable: false},
