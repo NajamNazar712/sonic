@@ -9,6 +9,7 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\AdminLogs;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
@@ -5636,6 +5637,10 @@ class AdminDashboardController extends Controller
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
                 'ntn_no'=>$request->ntn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
                 'url'=>$request->url,'product_id'=>$request->product_id]);
+            AdminLogs::create([
+                'admin_id'=>Auth::id(),
+                'user_id'=>$user_id
+            ]);
         }
         else
         {
@@ -5667,7 +5672,10 @@ class AdminDashboardController extends Controller
 
         UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
             'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_mode'=>$request->payment_mode,'payment_cycle'=>$request->payment_cycle]);
-
+            AdminLogs::create([
+                'admin_id' => Auth::id(),
+                'user_id' => $user_id
+            ]);
         return redirect()->back()->with(['success'=>"Bank Information Successfully Updated"]);
     }
 
