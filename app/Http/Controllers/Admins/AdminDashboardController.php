@@ -5640,6 +5640,7 @@ class AdminDashboardController extends Controller
             AdminLogs::create([
                 'admin_id'=>Auth::id(),
                 'user_id'=>$user_id
+                
             ]);
         }
         else
