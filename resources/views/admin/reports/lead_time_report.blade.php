@@ -57,7 +57,11 @@
                     </div>
                     <div class="col-4">
                         <fieldset class="form-group">
-                            <input type="text" class="form-control" name="search_shipper" id="search_shipper" placeholder="Search Shipper">
+                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                @foreach($shipper as $shippers)
+                                    <option value="{{$shippers->id}}">{{$shippers->name}}</option>
+                                @endforeach
+                            </select>
                         </fieldset>
                     </div>
 
@@ -112,6 +116,7 @@
                         <th class="border-primary border-darken-1">Last Status Date(C)</th>
                         <th class="border-primary border-darken-1">Last Verification Status</th>
                         <th class="border-primary border-darken-1">Last Verification Date</th>
+                        <th class="border-primary border-darken-1">Junction Date</th>
                         <th class="border-primary border-darken-1">Attempt TAT(A-C)</th>
                         <th class="border-primary border-darken-1">Dispatch TAT(B-C)</th>
                         <th class="border-primary border-darken-1">Delivered Date(D)</th>
@@ -229,7 +234,7 @@
                 width:'100%',
                 allowClear:true
             });
-            $('#search_shipper').inputmask({
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
                 placeholder:'Search Shipper',
                 width:'100%',
                 allowClear:true
@@ -306,11 +311,12 @@
                             head.push('First Status');
                             head.push('First Status Date(C)');
                             head.push('First Verification Status');
-                            head.push('First Verification Date(C)');
+                            head.push('First Verification Date');
                             head.push('Last Status');
                             head.push('Last Status Date(C)');
-                            head.push('First Verification Status');
-                            head.push('First Verification Date(C)');
+                            head.push('Last Verification Status');
+                            head.push('Last Verification Date');
+                            head.push('junction Date');
                             head.push('Attempt TAT(A-C)');
                             head.push('Dispatch TAT(B-C)');
                             head.push('Delivered Date(D)');
@@ -350,6 +356,7 @@
                                 row.push(values.last_status_date);
                                 row.push(values.last_verification);
                                 row.push(values.last_verification_status_date);
+                                row.push(values.junction);
                                 row.push(values.attempt_tat);
                                 row.push(values.dispatch_tat);
                                 row.push(values.delivered_date);
@@ -432,6 +439,7 @@
                     {data: 'last_status_date', name: 'ffstatus.updated_at', class: 'align-middle last_status_date', orderable: false, searchable: false},
                     {data: 'last_verification', name: 'lsj.id ', class: 'align-middle first_verification', orderable: false, searchable: false},
                     {data: 'last_verification_status_date', name: 'dnaa.status_verified_at', class: 'align-middle verification_status_date', orderable: false, searchable: false},
+                    {data: 'junction', name: 'ccjr.created_at', class: 'align-middle junction', orderable: false, searchable: false},
                     {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat', orderable: false, searchable: false},////
                     {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat', orderable: false, searchable: false},
                     {data: 'delivered_date', name: 'delivered_date', class: 'align-middle delivered_date'},
