@@ -1074,16 +1074,14 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('shipments_journey as fsj', function($join){
                 $join->on('fsj.shipment_id','=','shipments.id')
-                    ->select(DB::raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
-                    ->whereNotIn('fsj.shipper_status_id',[1,2,3,4,5,6,14,16,17,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46]
-                    );
+                    ->where('fsj.id','=',
+                        DB::raw('(select min(id) from shipments_journey where shipments_journey.id = shipments.id)'));
             })
 //            ->leftjoin('shipments_journey as lss','lss.shipper_status_id','=',[7, 8, 9, 10, 11, 12, 15, 18])
             ->leftjoin('shipments_journey as lsj', function($join){
                 $join->on('lsj.shipment_id','=','shipments.id')
-                    ->select(DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'))
-                    ->whereNotIn('lsj.shipper_status_id',[1,2,3,4,5,6,14,16,17,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46]
-                    );
+                    ->where('lsj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.id = shipments.id)'));
             })
 //            ->leftjoin('shipments_journey as fsjjjj', function($join){
 //                $join('fsjjj.shipment_id','=','lsj.shipment_id')
