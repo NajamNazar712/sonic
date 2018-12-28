@@ -699,55 +699,67 @@ class ReturnController extends Controller
     public function return_create_note(Request $request)
     {
         $trackings = explode(',', $request->shipment_ids);
-        $count = count($trackings);
+
         $rider = $request->rider_id;
         $route = $request->route_id;
         $hub_id = $request->hub_id;
         $admin = Auth::id();
         //$errors_not_arrived = array();
-
+        $return_statuses = array(20,22,24,27,29,30,33,35,37,42,44,45,46,47,48);
+        $valid_shipments = array();
+        $shipments_count = 0;
         if(!empty($trackings)) {
-            $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider,'route_id'=>$route, 'shipments_count' => $count, 'admin_id' => $admin]);
-            if($note) {
-                foreach ($trackings as $tracking) {
+            foreach ($trackings as $shipment_id) {
+                $shipment_details = Shipment::find($shipment_id);
+                if ($shipment_details) {
+                    if (in_array($shipment_details->shipper_status_id, $return_statuses)) {
+                        $valid_shipments[] = $shipment_id;
+                        $shipments_count++;
+                    }
+                }
+            }
+            if ($shipments_count != 0) {
+
+            $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
+            if ($note) {
+                foreach ($valid_shipments as $tracking) {
                     $shipment = Shipment::where('id', $tracking);
-//                    $shipment = Shipment::where('tracking_number', $tracking)->first();
-//                    return $shipment->get();
-                    if ($shipment->exists()) {
+
                         $shipment = $shipment->first();
 
-                            if ($shipment->booking_type_id == 1) { //attempt failed and arrived at origin center
+                        if ($shipment->booking_type_id == 1) { //attempt failed and arrived at origin center
 
-                                ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
-                                $shipment->shipper_status_id = 23;
-                                $shipment->consignee_status_id = 23;
-                                $shipment->save();
-                                ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
-
-
-                            } else if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
-
-                                ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
-                                $shipment->shipper_status_id = 28;
-                                $shipment->consignee_status_id = 28;
-                                $shipment->save();
-                                ShipmentsJourneyController::add($shipment->id, 28, 28, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
+                            ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                            $shipment->shipper_status_id = 23;
+                            $shipment->consignee_status_id = 23;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment->id, 23, 23, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
 
 
-                            } else if ($shipment->booking_type_id == 3) {//attempt failed and arrived at origin center
+                        } else if ($shipment->booking_type_id == 2) {//attempt failed and arrived at origin center
 
-                                ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
-                                $shipment->shipper_status_id = 34;
-                                $shipment->consignee_status_id = 34;
-                                $shipment->save();
-                                ShipmentsJourneyController::add($shipment->id, 34, 34, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
+                            ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                            $shipment->shipper_status_id = 28;
+                            $shipment->consignee_status_id = 28;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment->id, 28, 28, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
 
 
-                            }
+                        } else if ($shipment->booking_type_id == 3) {//attempt failed and arrived at origin center
+
+                            ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
+                            $shipment->shipper_status_id = 34;
+                            $shipment->consignee_status_id = 34;
+                            $shipment->save();
+                            ShipmentsJourneyController::add($shipment->id, 34, 34, NULL, NULL, NULL, Auth::id(), $note->id, $rider);
+
+
                         }
+
 
                     }
                 }
+            }
                 return redirect()->back()->with(['success' => "Return note has been created with Return Note Number:" . $note->id,'print'=>$note->id]);
             }else{
 
