@@ -873,7 +873,7 @@ class AdminDashboardController extends Controller
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
         }
-        elseif(($user['rate_status']>=1) && $user['status']==3){
+        elseif(($user['rate_status']>=0) && $user['status']==3){
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
