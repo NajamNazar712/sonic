@@ -2827,7 +2827,7 @@
 
                         </form>
                         <div style="text-align:center;">
-                        @if ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions'))))
+                        @if (($shipper->rate_status ==0 && $shipper->status == 1 && (session('role_id') == 1 || in_array(8, session('permissions'))))|| ($shipper->rate_status ==1 && (session('role_id') == 1 || in_array(140, session('permissions')))))
                             <button id="accountRejectActiveSubmit" type="button" class="btn btn-outline-danger round btn-min-width mr-1 mb-1">Reject Rates</button>
                         @endif
                         </div>
