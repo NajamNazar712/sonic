@@ -1741,11 +1741,11 @@ class AdminCargoController extends Controller
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
                 $query->where(function ($sub_query) {
-                    $sub_query->whereIn('s.shipper_status_id', [20, 30, 36, 37])
+                    $sub_query->whereIn('shipments.shipper_status_id', [20, 30, 36, 37])
                         ->whereIn('dc.hub_id', session('hubs'));
                 })
                     ->orWhere(function ($sub_query) {
-                        $sub_query->whereIn('s.shipper_status_id', [2,49])
+                        $sub_query->whereIn('shipments.shipper_status_id', [2,49])
                             ->whereIn('oc.hub_id', session('hubs'));
                     });
             });
