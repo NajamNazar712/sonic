@@ -825,6 +825,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('shipment_cancellation_cut_off_days')->name('shipment_cancellation_cut_off_days.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@shipment_cancellation_cut_off_days_store')->name('store');
+            Route::get('', 'Admins\GlobalSettingsController@auto_account_disabled_days_index')->name('auto_index');
+            Route::post('', 'Admins\GlobalSettingsController@auto_account_disabled_days_store')->name('auto_store');
         });
     });
 });
