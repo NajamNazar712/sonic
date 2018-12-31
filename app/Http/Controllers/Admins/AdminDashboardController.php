@@ -4393,8 +4393,12 @@ class AdminDashboardController extends Controller
             'on_wa_spkg.*.numeric' => 'The overnight KG Range field must be numeric.',
             'on_wa_local_charges.*.required' => 'The overnight local charges field is required.',
             'on_wa_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
-            'on_wa_national_charges.*.required' => 'The overnight national charges field is required.',
-            'on_wa_national_charges.*.numeric' => 'The overnight national charges field must be numeric.',
+            'on_class_0_charges.*.numeric' => 'The overnight class A charges field must be numeric.',
+            'on_class_0_charges.*.required' => 'The overnight class A charges field is required.',
+            'on_class_1_charges.*.required' => 'The overnight class B charges field is required.',
+            'on_class_2_charges.*.required' => 'The overnight class C charges field is required.',
+            'on_class_3_charges.*.required' => 'The overnight class D charges field is required.',
+//            'on_class_0_charges.*.numeric' => 'The overnight national charges field must be numeric.',
             'on_replacement_charges.numeric' => 'The overnight replacement charges field must be numeric.',
             'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
             'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
@@ -4449,8 +4453,11 @@ class AdminDashboardController extends Controller
             'ol_wa_spkg.*.numeric' => 'The overland KG Range field must be numeric.',
             'ol_wa_local_charges.*.required' => 'The overland local charges field is required.',
             'ol_wa_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
-            'ol_wa_national_charges.*.required' => 'The overland national charges field is required.',
-            'ol_wa_national_charges.*.numeric' => 'The overland national charges field must be numeric.',
+            'ol_class_0_charges.*.required' => 'The overland class A charges field is required.',
+            'ol_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
+            'ol_class_1_charges.*.required' => 'The overland class B charges field is required.',
+            'ol_class_2_charges.*.required' => 'The overland class C charges field is required.',
+            'ol_class_3_charges.*.required' => 'The overland class D charges field is required.',
             'ol_replacement_charges.numeric' => 'The overland replacement charges field must be numeric.',
             'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
             'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
@@ -4505,8 +4512,11 @@ class AdminDashboardController extends Controller
             'detain_wa_spkg.*.numeric' => 'The detain KG Range field must be numeric.',
             'detain_wa_local_charges.*.required' => 'The detain local charges field is required.',
             'detain_wa_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
-            'detain_wa_national_charges.*.required' => 'The detain national charges field is required.',
-            'detain_wa_national_charges.*.numeric' => 'The detain national charges field must be numeric.',
+            'detain_class_0_charges.*.required' => 'The detain class A charges field is required.',
+            'detain_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
+            'detain_class_1_charges.*.required' => 'The detain class B charges field is required.',
+            'detain_class_2_charges.*.required' => 'The detain class C charges field is required.',
+            'detain_class_3_charges.*.required' => 'The detain class D charges field is required.',
             'detain_replacement_charges.numeric' => 'The detain replacement charges field must be numeric.',
             'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
             'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
@@ -4561,8 +4571,8 @@ class AdminDashboardController extends Controller
             'sameday_wa_spkg.*.numeric' => 'The sameday KG Range field must be numeric.',
             'sameday_wa_local_charges.*.required' => 'The sameday local charges field is required.',
             'sameday_wa_local_charges.*.numeric' => 'The sameday local charges field must be numeric.',
-            'sameday_wa_national_charges.*.required' => 'The sameday national charges field is required.',
-            'sameday_wa_national_charges.*.numeric' => 'The sameday national charges field must be numeric.',
+            'sameday_wa_class_0_charges.*.required' => 'The sameday class A charges field is required.',
+            'sameday_wa_class_0_charges.*.numeric' => 'The sameday class A charges field must be numeric.',
             'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
             'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
             'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
@@ -4621,7 +4631,10 @@ class AdminDashboardController extends Controller
                 'on_wa_range_up.*' => 'required|numeric|between:0,1000',
                 'on_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'on_wa_local_charges.*' => 'required|numeric',
-                'on_wa_national_charges.*' => 'required|numeric',
+                'on_class_0_charges.*' => 'required|numeric',
+                'on_class_1_charges.*' => 'required',
+                'on_class_2_charges.*' => 'required',
+                'on_class_3_charges.*' => 'required',
                 'on_wa_spkg.*'=>'numeric',
                 'on_replacement_charges'=>'required|numeric',
                 'on_tnb_charges'=>'required|numeric',
@@ -4653,7 +4666,10 @@ class AdminDashboardController extends Controller
                 'ol_wa_range_up.*' => 'required|numeric|between:0,1000',
                 'ol_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'ol_wa_local_charges.*' => 'required|numeric',
-                'ol_wa_national_charges.*' => 'required|numeric',
+                'ol_class_0_charges.*' => 'required|numeric',
+                'ol_class_1_charges.*' => 'required',
+                'ol_class_2_charges.*' => 'required',
+                'ol_class_3_charges.*' => 'required',
                 'ol_wa_spkg.*'=>'numeric',
                 'ol_replacement_charges'=>'required|numeric',
                 'ol_tnb_charges'=>'required|numeric',
@@ -4685,7 +4701,10 @@ class AdminDashboardController extends Controller
                 'detain_wa_range_up.*' => 'required|numeric|between:0,1000',
                 'detain_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'detain_wa_local_charges.*' => 'required|numeric',
-                'detain_wa_national_charges.*' => 'required|numeric',
+                'detain_class_0_charges.*' => 'required|numeric',
+                'detain_class_1_charges.*' => 'required',
+                'detain_class_2_charges.*' => 'required',
+                'detain_class_3_charges.*' => 'required',
                 'detain_wa_spkg.*'=>'numeric',
                 'detain_replacement_charges'=>'required|numeric',
                 'detain_tnb_charges'=>'required|numeric',
@@ -4717,7 +4736,7 @@ class AdminDashboardController extends Controller
                 'sameday_wa_range_up.*' => 'required|numeric|between:0,1000',
                 'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'sameday_wa_local_charges.*' => 'required|numeric',
-                'sameday_wa_national_charges.*' => 'required|numeric',
+                'sameday_class_0_charges.*' => 'required|numeric',
                 'sameday_wa_spkg.*'=>'numeric',
                 'sameday_replacement_charges'=>'required|numeric',
                 'sameday_tnb_charges'=>'required|numeric',
@@ -4798,7 +4817,10 @@ class AdminDashboardController extends Controller
                         'weight_addition' => $wa_switch[$index],
                         'spkg' => $wa_spkg[$index],
                         'local_or_6hr' => $request->on_wa_local_charges[$index],
-                        'national_or_sameday' => $request->on_wa_national_charges[$index]
+                        'national_charges_class_0' => $request->on_class_0_charges[$index],
+                        'national_charges_class_1' => $request->on_class_1_charges[$index],
+                        'national_charges_class_2' => $request->on_class_2_charges[$index],
+                        'national_charges_class_3' => $request->on_class_3_charges[$index]
                     ]);
 
                 }
@@ -4958,7 +4980,10 @@ class AdminDashboardController extends Controller
                         'weight_addition' => $wa_switch_overland[$index],
                         'spkg' => $wa_spkg_overland[$index],
                         'local_or_6hr' => $request->ol_wa_local_charges[$index],
-                        'national_or_sameday' => $request->ol_wa_national_charges[$index]
+                        'national_charges_class_0' => $request->ol_class_0_charges[$index],
+                        'national_charges_class_1' => $request->ol_class_1_charges[$index],
+                        'national_charges_class_2' => $request->ol_class_2_charges[$index],
+                        'national_charges_class_3' => $request->ol_class_3_charges[$index]
                     ]);
                 }
 
@@ -5117,7 +5142,10 @@ class AdminDashboardController extends Controller
                         'weight_addition' => $wa_switch_detain[$index],
                         'spkg' => $wa_spkg_detain[$index],
                         'local_or_6hr' => $request->detain_wa_local_charges[$index],
-                        'national_or_sameday' => $request->detain_wa_national_charges[$index]
+                        'national_charges_class_0' => $request->detain_class_0_charges[$index],
+                        'national_charges_class_1' => $request->detain_class_1_charges[$index],
+                        'national_charges_class_2' => $request->detain_class_2_charges[$index],
+                        'national_charges_class_3' => $request->detain_class_3_charges[$index]
                     ]);
                 }
 
@@ -5275,7 +5303,10 @@ class AdminDashboardController extends Controller
                         'weight_addition' => $wa_switch_sameday[$index],
                         'spkg' => $wa_spkg_sameday[$index],
                         'local_or_6hr' => $request->sameday_wa_local_charges[$index],
-                        'national_or_sameday' => $request->sameday_wa_national_charges[$index]
+                        'national_charges_class_0' => $request->sameday_class_0_charges[$index],
+                        'national_charges_class_1' => 0,
+                        'national_charges_class_2' => 0,
+                        'national_charges_class_3' => 0
                     ]);
                 }
 
@@ -5390,8 +5421,10 @@ class AdminDashboardController extends Controller
         }
         User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
 
+
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
+
     public function activeAccountListAjax(){
        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
            ->leftjoin('products as p','p.id','=','users.product_id')
