@@ -1054,12 +1054,9 @@ class AdminReportsController extends Controller
 //            ->leftjoin('shipment_status as sss','sss.id','=','lsj.shipper_status_id')
             ->leftjoin('cargo_consignment_shipments as ccs', function($join){
                 $join->on('ccs.shipment_id','=','shipments.id')
-                    ->leftjoin('cargo_consignments as cc','cc.id','=','ccs.cargo_consignment_id');
+                    ->leftjoin('cargo_consignments as cc','cc.id','=','ccs.cargo_consignment_id')
+                    ->leftjoin('cargo_consignment_junction_receivals as ccjr', 'ccjr.junction_id', '=', 'cc.junction_hub_1_id');
             })
-            ->leftjoin('cargo_consignment_shipments as ccsaa', function($join) {
-                $join->on('ccsaa.shipment_id', '=', 'shipments.id')
-                    ->leftjoin('cargo_consignment_junction_receivals as ccjr', 'ccjr.cargo_consignment_id', '=', 'ccsaa.id');
-                    })
 //            ->leftjoin('transport_mode_vendor as tmv','tmv.id','=','cc.transport_mode_vendor_id')
             ->leftjoin('delivery_note_shipments as dnssaa', function ($join) {
                 $join->on('dnssaa.shipment_id', '=', 'shipments.id')
