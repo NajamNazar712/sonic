@@ -128,7 +128,6 @@
                                                     <span  class="btn btn-danger rounded btn-sm-width mr-1 mb-1 on_weight_close"><i class="ft-x"></i></span>
                                                         @endif
                                                 </div>
-
                                             </div>
                                             @endforeach
                                         </div>{{--weight addition div--}}
@@ -485,7 +484,8 @@
                                 </div>
 
                             </div>
-                            <div id="overland" class="border-success no-border-top card hide" aria-expanded="false">
+                            <div id="overland"  class="border-success no-border-top card hide"
+                                 aria-expanded="false">
                                 <div class="card-content">
                                     <div class="card-body">
                                         <div class="weight-addition-overland">

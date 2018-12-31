@@ -885,6 +885,7 @@ class AdminDashboardController extends Controller
         return view('admin.accounts.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'shippingType'=>$bookingType,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel,'packagingCharges'=>$packaging,'discountCharges'=>$discount, 'rate_status'=>$rate_status]);
 
     }
+
     public function editRates(Request $request, $id){
         $user = User::find($id);
         if ($user['status']!=3) {
@@ -898,8 +899,11 @@ class AdminDashboardController extends Controller
                 'on_wa_spkg.*.numeric' => 'The overnight KG Range field must be numeric.',
                 'on_wa_local_charges.*.required' => 'The overnight local charges field is required.',
                 'on_wa_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
-                'on_wa_national_charges.*.required' => 'The overnight national charges field is required.',
-                'on_wa_national_charges.*.numeric' => 'The overnight national charges field must be numeric.',
+                'on_class_0_charges.*.numeric' => 'The overnight class A charges field must be numeric.',
+                'on_class_0_charges.*.required' => 'The overnight class A charges field is required.',
+                'on_class_1_charges.*.required' => 'The overnight class B charges field is required.',
+                'on_class_2_charges.*.required' => 'The overnight class C charges field is required.',
+                'on_class_3_charges.*.required' => 'The overnight class D charges field is required.',
                 'on_replacement_charges.numeric' => 'The overnight replacement charges field must be numeric.',
                 'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
                 'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
@@ -942,8 +946,8 @@ class AdminDashboardController extends Controller
 //            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
                 'on_discount_packaging_rate.required_if' => 'The overnight discount packaging field must be required',
 //            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
-                'on_discount_title.required_with'=>'The overnight discount title field is required',
-                'on_daterange.required_with'=>'The overnight discount date field is required',
+                'on_discount_title.required_with' => 'The overnight discount title field is required',
+                'on_daterange.required_with' => 'The overnight discount date field is required',
                 //overland starts
                 'ol_wa_range_up.*.required' => 'The overland range up field is required.',
                 'ol_wa_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
@@ -954,8 +958,11 @@ class AdminDashboardController extends Controller
                 'ol_wa_spkg.*.numeric' => 'The overland KG Range field must be numeric.',
                 'ol_wa_local_charges.*.required' => 'The overland local charges field is required.',
                 'ol_wa_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
-                'ol_wa_national_charges.*.required' => 'The overland national charges field is required.',
-                'ol_wa_national_charges.*.numeric' => 'The overland national charges field must be numeric.',
+                'ol_class_0_charges.*.required' => 'The overland class A charges field is required.',
+                'ol_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
+                'ol_class_1_charges.*.required' => 'The overland class B charges field is required.',
+                'ol_class_2_charges.*.required' => 'The overland class C charges field is required.',
+                'ol_class_3_charges.*.required' => 'The overland class D charges field is required.',
                 'ol_replacement_charges.numeric' => 'The overland replacement charges field must be numeric.',
                 'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
                 'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
@@ -998,8 +1005,8 @@ class AdminDashboardController extends Controller
 //            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
                 'ol_discount_packaging_rate.required_if' => 'The overland discount packaging field must be required',
 //            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
-                'ol_discount_title.required_with'=>'The overland discount title field is required',
-                'ol_daterange.required_with'=>'The overland discount date field is required',
+                'ol_discount_title.required_with' => 'The overland discount title field is required',
+                'ol_daterange.required_with' => 'The overland discount date field is required',
                 //overland end and detain starts
                 'detain_wa_range_up.*.required' => 'The detain range up field is required.',
                 'detain_wa_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
@@ -1010,8 +1017,11 @@ class AdminDashboardController extends Controller
                 'detain_wa_spkg.*.numeric' => 'The detain KG Range field must be numeric.',
                 'detain_wa_local_charges.*.required' => 'The detain local charges field is required.',
                 'detain_wa_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
-                'detain_wa_national_charges.*.required' => 'The detain national charges field is required.',
-                'detain_wa_national_charges.*.numeric' => 'The detain national charges field must be numeric.',
+                'detain_class_0_charges.*.required' => 'The detain class A charges field is required.',
+                'detain_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
+                'detain_class_1_charges.*.required' => 'The detain class B charges field is required.',
+                'detain_class_2_charges.*.required' => 'The detain class C charges field is required.',
+                'detain_class_3_charges.*.required' => 'The detain class D charges field is required.',
                 'detain_replacement_charges.numeric' => 'The detain replacement charges field must be numeric.',
                 'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
                 'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
@@ -1054,8 +1064,8 @@ class AdminDashboardController extends Controller
 //            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
                 'detain_discount_packaging_rate.required_if' => 'The detain discount packaging field must be required',
 //            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
-                'detain_discount_title.required_with'=>'The detain discount title field is required',
-                'detain_daterange.required_with'=>'The detain discount date field is required',
+                'detain_discount_title.required_with' => 'The detain discount title field is required',
+                'detain_daterange.required_with' => 'The detain discount date field is required',
                 //detain ends and sameday starts
                 'sameday_wa_range_up.*.required' => 'The sameday range up field is required.',
                 'sameday_wa_range_up.*.numeric' => 'The sameday range up field must be numeric or decimal.',
@@ -1066,8 +1076,8 @@ class AdminDashboardController extends Controller
                 'sameday_wa_spkg.*.numeric' => 'The sameday KG Range field must be numeric.',
                 'sameday_wa_local_charges.*.required' => 'The sameday local charges field is required.',
                 'sameday_wa_local_charges.*.numeric' => 'The sameday local charges field must be numeric.',
-                'sameday_wa_national_charges.*.required' => 'The sameday national charges field is required.',
-                'sameday_wa_national_charges.*.numeric' => 'The sameday national charges field must be numeric.',
+                'sameday_wa_class_0_charges.*.required' => 'The sameday class A charges field is required.',
+                'sameday_wa_class_0_charges.*.numeric' => 'The sameday class A charges field must be numeric.',
                 'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
                 'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
                 'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
@@ -1110,8 +1120,8 @@ class AdminDashboardController extends Controller
 //            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
                 'sameday_discount_packaging_rate.required_if' => 'The sameday discount packaging field must be required',
 //            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
-                'sameday_discount_title.required_with'=>'The sameday discount title field is required',
-                'sameday_daterange.required_with'=>'The sameday discount date field is required',
+                'sameday_discount_title.required_with' => 'The sameday discount title field is required',
+                'sameday_daterange.required_with' => 'The sameday discount date field is required',
                 //sameday ends
             ];
 
@@ -1121,131 +1131,140 @@ class AdminDashboardController extends Controller
             $detain_validations = array();
             $sameday_validations = array();
 
-            if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
+            if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
                     'on_wa_range_up.*' => 'required|numeric|between:0,1000',
                     'on_wa_range_down.*' => 'required|numeric|between:0,1000',
                     'on_wa_local_charges.*' => 'required|numeric',
-                    'on_wa_national_charges.*' => 'required|numeric',
-                    'on_wa_spkg.*'=>'numeric',
-                    'on_replacement_charges'=>'required|numeric',
-                    'on_tnb_charges'=>'required|numeric',
-                    'on_cash_range_up.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
-                    'on_cash_range_down.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
-                    'on_cash_charges.*'=>'required_if:on_cash_handling_switch,==,on',
-                    'on_ins_range_up.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
-                    'on_ins_range_down.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
-                    'on_ins_charges.*'=>'required_if:on_insurance_charges_switch,==,on',
-                    'on_return_local_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'on_return_national_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'overnight_fuel_surcharge'=>'required_if:overnight_fuel_switch,==,on|numeric',
-                    'on_flyer_sm'=>'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_md'=>'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_lg'=>'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_box'=>'required_if:on_packaging_switch,==,on|numeric',
-                    'on_discount_title'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                    'on_daterange'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                    'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on',
-                    'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on',
-                    'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on',
-                    'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on',
-                    'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on'
+                    'on_class_0_charges.*' => 'required|numeric',
+                    'on_class_1_charges.*' => 'required',
+                    'on_class_2_charges.*' => 'required',
+                    'on_class_3_charges.*' => 'required',
+                    'on_wa_spkg.*' => 'numeric',
+                    'on_replacement_charges' => 'required|numeric',
+                    'on_tnb_charges' => 'required|numeric',
+                    'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
+                    'on_cash_range_down.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
+                    'on_cash_charges.*' => 'required_if:on_cash_handling_switch,==,on',
+                    'on_ins_range_up.*' => 'required_if:on_insurance_charges_switch,==,on|numeric',
+                    'on_ins_range_down.*' => 'required_if:on_insurance_charges_switch,==,on|numeric',
+                    'on_ins_charges.*' => 'required_if:on_insurance_charges_switch,==,on',
+                    'on_return_local_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'on_return_national_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'overnight_fuel_surcharge' => 'required_if:overnight_fuel_switch,==,on|numeric',
+                    'on_flyer_sm' => 'required_if:on_packaging_switch,==,on|numeric',
+                    'on_flyer_md' => 'required_if:on_packaging_switch,==,on|numeric',
+                    'on_flyer_lg' => 'required_if:on_packaging_switch,==,on|numeric',
+                    'on_flyer_box' => 'required_if:on_packaging_switch,==,on|numeric',
+                    'on_discount_title' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
+                    'on_daterange' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
+                    'on_discount_weight_rate' => 'required_if:on_discount_weight_switch,==,on',
+                    'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
+                    'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
+                    'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
+                    'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on'
                 ];
             }
             //overland
-            if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
+            if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
                     'ol_wa_range_up.*' => 'required|numeric|between:0,1000',
                     'ol_wa_range_down.*' => 'required|numeric|between:0,1000',
                     'ol_wa_local_charges.*' => 'required|numeric',
-                    'ol_wa_national_charges.*' => 'required|numeric',
-                    'ol_wa_spkg.*'=>'numeric',
-                    'ol_replacement_charges'=>'required|numeric',
-                    'ol_tnb_charges'=>'required|numeric',
-                    'ol_cash_range_up.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
-                    'ol_cash_range_down.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
-                    'ol_cash_charges.*'=>'required_if:ol_cash_handling_switch,==,on',
-                    'ol_ins_range_up.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
-                    'ol_ins_range_down.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
-                    'ol_ins_charges.*'=>'required_if:ol_insurance_charges_switch,==,on',
-                    'ol_return_local_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_national_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'overland_fuel_surcharge'=>'required_if:overland_fuel_switch,==,on|numeric',
-                    'ol_flyer_sm'=>'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_md'=>'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_lg'=>'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_box'=>'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_discount_title'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                    'ol_daterange'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                    'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on',
-                    'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on',
-                    'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on',
-                    'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on',
-                    'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on',
+                    'ol_class_0_charges.*' => 'required|numeric',
+                    'ol_class_1_charges.*' => 'required',
+                    'ol_class_2_charges.*' => 'required',
+                    'ol_class_3_charges.*' => 'required',
+                    'ol_wa_spkg.*' => 'numeric',
+                    'ol_replacement_charges' => 'required|numeric',
+                    'ol_tnb_charges' => 'required|numeric',
+                    'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
+                    'ol_cash_range_down.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
+                    'ol_cash_charges.*' => 'required_if:ol_cash_handling_switch,==,on',
+                    'ol_ins_range_up.*' => 'required_if:ol_insurance_charges_switch,==,on|numeric',
+                    'ol_ins_range_down.*' => 'required_if:ol_insurance_charges_switch,==,on|numeric',
+                    'ol_ins_charges.*' => 'required_if:ol_insurance_charges_switch,==,on',
+                    'ol_return_local_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_national_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'overland_fuel_surcharge' => 'required_if:overland_fuel_switch,==,on|numeric',
+                    'ol_flyer_sm' => 'required_if:ol_packaging_switch,==,on|numeric',
+                    'ol_flyer_md' => 'required_if:ol_packaging_switch,==,on|numeric',
+                    'ol_flyer_lg' => 'required_if:ol_packaging_switch,==,on|numeric',
+                    'ol_flyer_box' => 'required_if:ol_packaging_switch,==,on|numeric',
+                    'ol_discount_title' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
+                    'ol_daterange' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
+                    'ol_discount_weight_rate' => 'required_if:ol_discount_weight_switch,==,on',
+                    'ol_discount_cash_rate' => 'required_if:ol_discount_cash_switch,==,on',
+                    'ol_discount_insurance_rate' => 'required_if:ol_discount_insurance_switch,==,on',
+                    'ol_discount_return_rate' => 'required_if:ol_discount_return_switch,==,on',
+                    'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
                 ];
             }
             //overland
-            if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
+            if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
                     'detain_wa_range_up.*' => 'required|numeric|between:0,1000',
                     'detain_wa_range_down.*' => 'required|numeric|between:0,1000',
                     'detain_wa_local_charges.*' => 'required|numeric',
-                    'detain_wa_national_charges.*' => 'required|numeric',
-                    'detain_wa_spkg.*'=>'numeric',
-                    'detain_replacement_charges'=>'required|numeric',
-                    'detain_tnb_charges'=>'required|numeric',
-                    'detain_cash_range_up.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
-                    'detain_cash_range_down.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
-                    'detain_cash_charges.*'=>'required_if:detain_cash_handling_switch,==,on',
-                    'detain_ins_range_up.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
-                    'detain_ins_range_down.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
-                    'detain_ins_charges.*'=>'required_if:detain_insurance_charges_switch,==,on',
-                    'detain_return_local_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_national_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_fuel_surcharge'=>'required_if:detain_fuel_switch,==,on|numeric',
-                    'detain_flyer_sm'=>'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_md'=>'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_lg'=>'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_box'=>'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_discount_title'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                    'detain_daterange'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                    'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on',
-                    'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on',
-                    'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on',
-                    'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on',
-                    'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on',
+                    'detain_class_0_charges.*' => 'required|numeric',
+                    'detain_class_1_charges.*' => 'required',
+                    'detain_class_2_charges.*' => 'required',
+                    'detain_class_3_charges.*' => 'required',
+                    'detain_wa_spkg.*' => 'numeric',
+                    'detain_replacement_charges' => 'required|numeric',
+                    'detain_tnb_charges' => 'required|numeric',
+                    'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
+                    'detain_cash_range_down.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
+                    'detain_cash_charges.*' => 'required_if:detain_cash_handling_switch,==,on',
+                    'detain_ins_range_up.*' => 'required_if:detain_insurance_charges_switch,==,on|numeric',
+                    'detain_ins_range_down.*' => 'required_if:detain_insurance_charges_switch,==,on|numeric',
+                    'detain_ins_charges.*' => 'required_if:detain_insurance_charges_switch,==,on',
+                    'detain_return_local_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_national_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_fuel_surcharge' => 'required_if:detain_fuel_switch,==,on|numeric',
+                    'detain_flyer_sm' => 'required_if:detain_packaging_switch,==,on|numeric',
+                    'detain_flyer_md' => 'required_if:detain_packaging_switch,==,on|numeric',
+                    'detain_flyer_lg' => 'required_if:detain_packaging_switch,==,on|numeric',
+                    'detain_flyer_box' => 'required_if:detain_packaging_switch,==,on|numeric',
+                    'detain_discount_title' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
+                    'detain_daterange' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
+                    'detain_discount_weight_rate' => 'required_if:detain_discount_weight_switch,==,on',
+                    'detain_discount_cash_rate' => 'required_if:detain_discount_cash_switch,==,on',
+                    'detain_discount_insurance_rate' => 'required_if:detain_discount_insurance_switch,==,on',
+                    'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
+                    'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
                 ];
             }
             //sameday
-            if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
+            if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
                     'sameday_wa_range_up.*' => 'required|numeric|between:0,1000',
                     'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
                     'sameday_wa_local_charges.*' => 'required|numeric',
-                    'sameday_wa_national_charges.*' => 'required|numeric',
-                    'sameday_wa_spkg.*'=>'numeric',
-                    'sameday_replacement_charges'=>'required|numeric',
-                    'sameday_tnb_charges'=>'required|numeric',
-                    'sameday_cash_range_up.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
-                    'sameday_cash_range_down.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
-                    'sameday_cash_charges.*'=>'required_if:sameday_cash_handling_switch,==,on',
-                    'sameday_ins_range_up.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
-                    'sameday_ins_range_down.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
-                    'sameday_ins_charges.*'=>'required_if:sameday_insurance_charges_switch,==,on',
-                    'sameday_return_local_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_national_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_fuel_surcharge'=>'required_if:sameday_fuel_switch,==,on|numeric',
-                    'sameday_flyer_sm'=>'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_md'=>'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_lg'=>'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_box'=>'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_discount_title'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                    'sameday_daterange'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                    'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on',
-                    'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on',
-                    'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on',
-                    'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on',
-                    'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on',
+                    'sameday_class_0_charges.*' => 'required|numeric',
+                    'sameday_wa_spkg.*' => 'numeric',
+                    'sameday_replacement_charges' => 'required|numeric',
+                    'sameday_tnb_charges' => 'required|numeric',
+                    'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
+                    'sameday_cash_range_down.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
+                    'sameday_cash_charges.*' => 'required_if:sameday_cash_handling_switch,==,on',
+                    'sameday_ins_range_up.*' => 'required_if:sameday_insurance_charges_switch,==,on|numeric',
+                    'sameday_ins_range_down.*' => 'required_if:sameday_insurance_charges_switch,==,on|numeric',
+                    'sameday_ins_charges.*' => 'required_if:sameday_insurance_charges_switch,==,on',
+                    'sameday_return_local_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_national_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_fuel_surcharge' => 'required_if:sameday_fuel_switch,==,on|numeric',
+                    'sameday_flyer_sm' => 'required_if:sameday_packaging_switch,==,on|numeric',
+                    'sameday_flyer_md' => 'required_if:sameday_packaging_switch,==,on|numeric',
+                    'sameday_flyer_lg' => 'required_if:sameday_packaging_switch,==,on|numeric',
+                    'sameday_flyer_box' => 'required_if:sameday_packaging_switch,==,on|numeric',
+                    'sameday_discount_title' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
+                    'sameday_daterange' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
+                    'sameday_discount_weight_rate' => 'required_if:sameday_discount_weight_switch,==,on',
+                    'sameday_discount_cash_rate' => 'required_if:sameday_discount_cash_switch,==,on',
+                    'sameday_discount_insurance_rate' => 'required_if:sameday_discount_insurance_switch,==,on',
+                    'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
+                    'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
                 ];
             }
 
@@ -1260,135 +1279,135 @@ class AdminDashboardController extends Controller
             }
 
 
-            if($request->on_rate_record != null){
-                RateStatus::where('id',$request->on_rate_record)
+            if ($request->on_rate_record != null) {
+                RateStatus::where('id', $request->on_rate_record)
                     ->update([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>1,
-                        'status'=> ($request->has('on_main_switch'))? 1:0,
-                        'cash_handling_charges'=> ($request->has('on_cash_handling_switch'))? 1:0,
-                        'insurance_charges'=> ($request->has('on_insurance_charges_switch'))? 1:0,
-                        'return_charges'=> ($request->has('on_return_switch'))? 1:0,
-                        'fuel_charges'=> ($request->has('overnight_fuel_switch'))? 1:0,
-                        'packaging_charges'=> ($request->has('on_packaging_switch'))? 1:0
+                        'user_id' => $id,
+                        'shipping_mode_id' => 1,
+                        'status' => ($request->has('on_main_switch')) ? 1 : 0,
+                        'cash_handling_charges' => ($request->has('on_cash_handling_switch')) ? 1 : 0,
+                        'insurance_charges' => ($request->has('on_insurance_charges_switch')) ? 1 : 0,
+                        'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
+                        'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
+                        'packaging_charges' => ($request->has('on_packaging_switch')) ? 1 : 0
                     ]);
-            }else{
+            } else {
                 RateStatus::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>1,
-                    'status'=> ($request->has('on_main_switch'))? 1:0,
-                    'cash_handling_charges'=> ($request->has('on_cash_handling_switch'))? 1:0,
-                    'insurance_charges'=> ($request->has('on_insurance_charges_switch'))? 1:0,
-                    'return_charges'=> ($request->has('on_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('overnight_fuel_switch'))? 1:0,
-                    'packaging_charges'=> ($request->has('on_packaging_switch'))? 1:0
+                    'user_id' => $id,
+                    'shipping_mode_id' => 1,
+                    'status' => ($request->has('on_main_switch')) ? 1 : 0,
+                    'cash_handling_charges' => ($request->has('on_cash_handling_switch')) ? 1 : 0,
+                    'insurance_charges' => ($request->has('on_insurance_charges_switch')) ? 1 : 0,
+                    'return_charges' => ($request->has('on_return_switch')) ? 1 : 0,
+                    'fuel_charges' => ($request->has('overnight_fuel_switch')) ? 1 : 0,
+                    'packaging_charges' => ($request->has('on_packaging_switch')) ? 1 : 0
                 ]);
             }
-            if($request->ol_rate_record != null){
-                RateStatus::where('id',$request->ol_rate_record)
+            if ($request->ol_rate_record != null) {
+                RateStatus::where('id', $request->ol_rate_record)
                     ->update([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>2,
-                        'status'=> ($request->has('ol_main_switch'))? 1:0,
-                        'cash_handling_charges'=> ($request->has('ol_cash_handling_switch'))? 1:0,
-                        'insurance_charges'=> ($request->has('ol_insurance_charges_switch'))? 1:0,
-                        'return_charges'=> ($request->has('ol_return_switch'))? 1:0,
-                        'fuel_charges'=> ($request->has('overland_fuel_switch'))? 1:0,
-                        'packaging_charges'=> ($request->has('ol_packaging_switch'))? 1:0
+                        'user_id' => $id,
+                        'shipping_mode_id' => 2,
+                        'status' => ($request->has('ol_main_switch')) ? 1 : 0,
+                        'cash_handling_charges' => ($request->has('ol_cash_handling_switch')) ? 1 : 0,
+                        'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
+                        'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
+                        'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
+                        'packaging_charges' => ($request->has('ol_packaging_switch')) ? 1 : 0
                     ]);
-            }else{
+            } else {
                 RateStatus::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>2,
-                    'status'=> ($request->has('ol_main_switch'))? 1:0,
-                    'cash_handling_charges'=> ($request->has('ol_cash_handling_switch'))? 1:0,
-                    'insurance_charges'=> ($request->has('ol_insurance_charges_switch'))? 1:0,
-                    'return_charges'=> ($request->has('ol_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('overland_fuel_switch'))? 1:0,
-                    'packaging_charges'=> ($request->has('ol_packaging_switch'))? 1:0
+                    'user_id' => $id,
+                    'shipping_mode_id' => 2,
+                    'status' => ($request->has('ol_main_switch')) ? 1 : 0,
+                    'cash_handling_charges' => ($request->has('ol_cash_handling_switch')) ? 1 : 0,
+                    'insurance_charges' => ($request->has('ol_insurance_charges_switch')) ? 1 : 0,
+                    'return_charges' => ($request->has('ol_return_switch')) ? 1 : 0,
+                    'fuel_charges' => ($request->has('overland_fuel_switch')) ? 1 : 0,
+                    'packaging_charges' => ($request->has('ol_packaging_switch')) ? 1 : 0
                 ]);
             }
-            if($request->det_rate_record != null){
-                RateStatus::where('id',$request->det_rate_record)
+            if ($request->det_rate_record != null) {
+                RateStatus::where('id', $request->det_rate_record)
                     ->update([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>3,
-                        'status'=> ($request->has('detain_main_switch'))? 1:0,
-                        'cash_handling_charges'=> ($request->has('detain_cash_handling_switch'))? 1:0,
-                        'insurance_charges'=> ($request->has('detain_insurance_charges_switch'))? 1:0,
-                        'return_charges'=> ($request->has('detain_return_switch'))? 1:0,
-                        'fuel_charges'=> ($request->has('detain_fuel_switch'))? 1:0,
-                        'packaging_charges'=> ($request->has('detain_packaging_switch'))? 1:0
+                        'user_id' => $id,
+                        'shipping_mode_id' => 3,
+                        'status' => ($request->has('detain_main_switch')) ? 1 : 0,
+                        'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
+                        'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
+                        'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
+                        'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
+                        'packaging_charges' => ($request->has('detain_packaging_switch')) ? 1 : 0
                     ]);
-            }else{
+            } else {
                 RateStatus::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>3,
-                    'status'=> ($request->has('detain_main_switch'))? 1:0,
-                    'cash_handling_charges'=> ($request->has('detain_cash_handling_switch'))? 1:0,
-                    'insurance_charges'=> ($request->has('detain_insurance_charges_switch'))? 1:0,
-                    'return_charges'=> ($request->has('detain_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('detain_fuel_switch'))? 1:0,
-                    'packaging_charges'=> ($request->has('detain_packaging_switch'))? 1:0
+                    'user_id' => $id,
+                    'shipping_mode_id' => 3,
+                    'status' => ($request->has('detain_main_switch')) ? 1 : 0,
+                    'cash_handling_charges' => ($request->has('detain_cash_handling_switch')) ? 1 : 0,
+                    'insurance_charges' => ($request->has('detain_insurance_charges_switch')) ? 1 : 0,
+                    'return_charges' => ($request->has('detain_return_switch')) ? 1 : 0,
+                    'fuel_charges' => ($request->has('detain_fuel_switch')) ? 1 : 0,
+                    'packaging_charges' => ($request->has('detain_packaging_switch')) ? 1 : 0
                 ]);
             }
-            if($request->same_rate_record != null){
-                RateStatus::where('id',$request->same_rate_record)
+            if ($request->same_rate_record != null) {
+                RateStatus::where('id', $request->same_rate_record)
                     ->update([
-                        'user_id'=>$id,
-                        'shipping_mode_id'=>4,
-                        'status'=> ($request->has('sameday_main_switch'))? 1:0,
-                        'cash_handling_charges'=> ($request->has('sameday_cash_handling_switch'))? 1:0,
-                        'insurance_charges'=> ($request->has('sameday_insurance_charges_switch'))? 1:0,
-                        'return_charges'=> ($request->has('sameday_return_switch'))? 1:0,
-                        'fuel_charges'=> ($request->has('sameday_fuel_switch'))? 1:0,
-                        'packaging_charges'=> ($request->has('sameday_packaging_switch'))? 1:0
+                        'user_id' => $id,
+                        'shipping_mode_id' => 4,
+                        'status' => ($request->has('sameday_main_switch')) ? 1 : 0,
+                        'cash_handling_charges' => ($request->has('sameday_cash_handling_switch')) ? 1 : 0,
+                        'insurance_charges' => ($request->has('sameday_insurance_charges_switch')) ? 1 : 0,
+                        'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
+                        'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
+                        'packaging_charges' => ($request->has('sameday_packaging_switch')) ? 1 : 0
                     ]);
-            }else{
+            } else {
                 RateStatus::create([
-                    'user_id'=>$id,
-                    'shipping_mode_id'=>4,
-                    'status'=> ($request->has('sameday_main_switch'))? 1:0,
-                    'cash_handling_charges'=> ($request->has('sameday_cash_handling_switch'))? 1:0,
-                    'insurance_charges'=> ($request->has('sameday_insurance_charges_switch'))? 1:0,
-                    'return_charges'=> ($request->has('sameday_return_switch'))? 1:0,
-                    'fuel_charges'=> ($request->has('sameday_fuel_switch'))? 1:0,
-                    'packaging_charges'=> ($request->has('sameday_packaging_switch'))? 1:0
+                    'user_id' => $id,
+                    'shipping_mode_id' => 4,
+                    'status' => ($request->has('sameday_main_switch')) ? 1 : 0,
+                    'cash_handling_charges' => ($request->has('sameday_cash_handling_switch')) ? 1 : 0,
+                    'insurance_charges' => ($request->has('sameday_insurance_charges_switch')) ? 1 : 0,
+                    'return_charges' => ($request->has('sameday_return_switch')) ? 1 : 0,
+                    'fuel_charges' => ($request->has('sameday_fuel_switch')) ? 1 : 0,
+                    'packaging_charges' => ($request->has('sameday_packaging_switch')) ? 1 : 0
                 ]);
             }
 
 
+            if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
+                $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 1])->get();
 
-            if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
-                $ONRateAlready = RateStatus::where(['user_id'=>$id,'shipping_mode_id'=>1])->get();
-
-                if(!$ONRateAlready->isEmpty()) {
+                if (!$ONRateAlready->isEmpty()) {
 
                     $wa_switch = array();
                     $wa_spkg = array();
-                    WeightCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->whereNotIn('id', $request->on_weight_record)->delete();
+                    WeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->whereNotIn('id', $request->on_weight_record)->delete();
                     foreach ($request->on_weight_record as $index => $on_weight_record) {
-                        if($request->has('on_wa_switch')) {
+                        if ($request->has('on_wa_switch')) {
                             if (array_key_exists($index, $request->on_wa_switch)) {
                                 $wa_switch[$index] = 1;
                             } else {
                                 $wa_switch[$index] = 0;
                             };
-                        }else{
+                        } else {
                             $wa_switch[$index] = 0;
                         }
-                        if($request->has('on_wa_spkg')) {
+                        if ($request->has('on_wa_spkg')) {
                             if (array_key_exists($index, $request->on_wa_spkg)) {
                                 $wa_spkg[$index] = $request->on_wa_spkg[$index];
                             } else {
                                 $wa_spkg[$index] = 0;
                             };
-                        }else{
+                        } else {
                             $wa_spkg[$index] = 0;
                         }
-                        if($request->on_weight_record[$index] != null){
+//                        return $request->on_class_0_charges[$index];
+                        if ($request->on_weight_record[$index] != null) {
 
-                            $weight_row = WeightCharge::where('id',$request->on_weight_record[$index])
+                            $weight_row = WeightCharge::where('id', $request->on_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
@@ -1397,10 +1416,13 @@ class AdminDashboardController extends Controller
                                     'weight_addition' => $wa_switch[$index],
                                     'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->on_wa_local_charges[$index],
-                                    'national_or_sameday' => $request->on_wa_national_charges[$index]
+                                    'national_charges_class_0' => $request->on_class_0_charges[$index],
+                                    'national_charges_class_1' => $request->on_class_1_charges[$index],
+                                    'national_charges_class_2' => $request->on_class_2_charges[$index],
+                                    'national_charges_class_3' => $request->on_class_3_charges[$index]
                                 ]);
                         }
-                        if($request->on_weight_record[$index] == null){
+                        if ($request->on_weight_record[$index] == null) {
                             WeightCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
@@ -1409,7 +1431,10 @@ class AdminDashboardController extends Controller
                                 'weight_addition' => $wa_switch[$index],
                                 'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->on_wa_local_charges[$index],
-                                'national_or_sameday' => $request->on_wa_national_charges[$index]
+                                'national_charges_class_0' => $request->on_class_0_charges[$index],
+                                'national_charges_class_1' => $request->on_class_1_charges[$index],
+                                'national_charges_class_2' => $request->on_class_2_charges[$index],
+                                'national_charges_class_3' => $request->on_class_3_charges[$index]
                             ]);
                         }
 
@@ -1417,54 +1442,54 @@ class AdminDashboardController extends Controller
                     }
 
                     //Replacement and Try and Buy charges
-                    if($request->on_booking_record != null){
-                        BookingTypeCharges::where(['id'=>$request->on_booking_record])->update([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>1,
-                            'replacement_charges'=>$request->on_replacement_charges,
-                            'try_and_buy_charges'=>$request->on_tnb_charges
+                    if ($request->on_booking_record != null) {
+                        BookingTypeCharges::where(['id' => $request->on_booking_record])->update([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'replacement_charges' => $request->on_replacement_charges,
+                            'try_and_buy_charges' => $request->on_tnb_charges
                         ]);
-                    }else{
+                    } else {
                         BookingTypeCharges::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>1,
-                            'replacement_charges'=>$request->on_replacement_charges,
-                            'try_and_buy_charges'=>$request->on_tnb_charges
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'replacement_charges' => $request->on_replacement_charges,
+                            'try_and_buy_charges' => $request->on_tnb_charges
                         ]);
                     }
 
 
                     //Cash handling Charges
-                    if($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on'){
-                        CashHandlingCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->whereNotIn('id', $request->on_cash_record)->delete();
+                    if ($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on') {
+                        CashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->whereNotIn('id', $request->on_cash_record)->delete();
 
-                        foreach ($request->on_cash_record as $index => $on_cash_record){
-                            if($request->on_cash_record[$index] != null){
-                                CashHandlingCharge::where(['id'=>$request->on_cash_record[$index]])->update([
-                                    'user_id'=>$id,
-                                    'shipping_mode_id'=>1,
-                                    'range_up'=> $request->on_cash_range_up[$index],
-                                    'range_down'=> $request->on_cash_range_down[$index],
-                                    'charges'=> $request->on_cash_charges[$index]
+                        foreach ($request->on_cash_record as $index => $on_cash_record) {
+                            if ($request->on_cash_record[$index] != null) {
+                                CashHandlingCharge::where(['id' => $request->on_cash_record[$index]])->update([
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 1,
+                                    'range_up' => $request->on_cash_range_up[$index],
+                                    'range_down' => $request->on_cash_range_down[$index],
+                                    'charges' => $request->on_cash_charges[$index]
                                 ]);
                             }
-                            if($request->on_cash_record[$index] == null){
+                            if ($request->on_cash_record[$index] == null) {
                                 CashHandlingCharge::create([
-                                    'user_id'=>$id,
-                                    'shipping_mode_id'=>1,
-                                    'range_up'=> $request->on_cash_range_up[$index],
-                                    'range_down'=> $request->on_cash_range_down[$index],
-                                    'charges'=> $request->on_cash_charges[$index]
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 1,
+                                    'range_up' => $request->on_cash_range_up[$index],
+                                    'range_down' => $request->on_cash_range_down[$index],
+                                    'charges' => $request->on_cash_charges[$index]
                                 ]);
                             }
                         }
                     }
                     //insurance charges
-                    if($request->has('on_insurance_charges_switch') && $request->on_insurance_charges_switch == 'on'){
-                        InsuranceCharge::where(['user_id'=>$id,'shipping_mode_id'=>1])->whereNotIn('id', $request->on_insurance_record)->delete();
-                        foreach ($request->on_insurance_record as $insurance => $on_insurance_record){
-                            if($request->on_insurance_record[$insurance] != null) {
-                                InsuranceCharge::where(['id'=>$request->on_insurance_record[$insurance]])->update([
+                    if ($request->has('on_insurance_charges_switch') && $request->on_insurance_charges_switch == 'on') {
+                        InsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 1])->whereNotIn('id', $request->on_insurance_record)->delete();
+                        foreach ($request->on_insurance_record as $insurance => $on_insurance_record) {
+                            if ($request->on_insurance_record[$insurance] != null) {
+                                InsuranceCharge::where(['id' => $request->on_insurance_record[$insurance]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
                                     'range_up' => $request->on_ins_range_up[$insurance],
@@ -1472,7 +1497,7 @@ class AdminDashboardController extends Controller
                                     'charges' => $request->on_ins_charges[$insurance]
                                 ]);
                             }
-                            if($request->on_insurance_record[$insurance] == null){
+                            if ($request->on_insurance_record[$insurance] == null) {
                                 InsuranceCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
@@ -1484,60 +1509,60 @@ class AdminDashboardController extends Controller
                         }
                     }
                     //Return Charges
-                    if($request->has('on_return_switch') && $request->on_return_switch == 'on'){
-                        if($request->on_return_record != null){
-                            ReturnCharge::where(['id'=>$request->on_return_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>1,
-                                'local'=> $request->on_return_local_charges,
-                                'national'=> $request->on_return_national_charges
+                    if ($request->has('on_return_switch') && $request->on_return_switch == 'on') {
+                        if ($request->on_return_record != null) {
+                            ReturnCharge::where(['id' => $request->on_return_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'local' => $request->on_return_local_charges,
+                                'national' => $request->on_return_national_charges
                             ]);
-                        }elseif ($request->on_return_record == null){
+                        } elseif ($request->on_return_record == null) {
                             ReturnCharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>1,
-                                'local'=> $request->on_return_local_charges,
-                                'national'=> $request->on_return_national_charges
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'local' => $request->on_return_local_charges,
+                                'national' => $request->on_return_national_charges
                             ]);
                         }
 
                     }
                     //Return Charges
-                    if($request->has('overnight_fuel_switch') && $request->overnight_fuel_switch == 'on'){
-                        if($request->on_fuel_record != null){
-                            FuelSurcharge::where(['id'=>$request->on_fuel_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>1,
-                                'fuel_surcharge'=> $request->overnight_fuel_surcharge
+                    if ($request->has('overnight_fuel_switch') && $request->overnight_fuel_switch == 'on') {
+                        if ($request->on_fuel_record != null) {
+                            FuelSurcharge::where(['id' => $request->on_fuel_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'fuel_surcharge' => $request->overnight_fuel_surcharge
                             ]);
-                        }elseif($request->on_fuel_record == null){
+                        } elseif ($request->on_fuel_record == null) {
                             FuelSurcharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>1,
-                                'fuel_surcharge'=> $request->overnight_fuel_surcharge
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'fuel_surcharge' => $request->overnight_fuel_surcharge
                             ]);
                         }
 
                     }
                     //Packaging Charges
-                    if($request->has('on_packaging_switch') && $request->on_packaging_switch == 'on'){
-                        if($request->on_packaging_record != null){
-                            PackagingCharge::where(['id'=>$request->on_packaging_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>1,
-                                'sm_flyer'=> $request->on_flyer_sm,
-                                'md_flyer'=> $request->on_flyer_md,
-                                'lg_flyer'=> $request->on_flyer_lg,
-                                'box_flyer'=> $request->on_flyer_box
+                    if ($request->has('on_packaging_switch') && $request->on_packaging_switch == 'on') {
+                        if ($request->on_packaging_record != null) {
+                            PackagingCharge::where(['id' => $request->on_packaging_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'sm_flyer' => $request->on_flyer_sm,
+                                'md_flyer' => $request->on_flyer_md,
+                                'lg_flyer' => $request->on_flyer_lg,
+                                'box_flyer' => $request->on_flyer_box
                             ]);
-                        }else{
+                        } else {
                             PackagingCharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>1,
-                                'sm_flyer'=> $request->on_flyer_sm,
-                                'md_flyer'=> $request->on_flyer_md,
-                                'lg_flyer'=> $request->on_flyer_lg,
-                                'box_flyer'=> $request->on_flyer_box
+                                'user_id' => $id,
+                                'shipping_mode_id' => 1,
+                                'sm_flyer' => $request->on_flyer_sm,
+                                'md_flyer' => $request->on_flyer_md,
+                                'lg_flyer' => $request->on_flyer_lg,
+                                'box_flyer' => $request->on_flyer_box
                             ]);
                         }
 
@@ -1548,37 +1573,37 @@ class AdminDashboardController extends Controller
                     $discount_return = 0;
                     $discount_packaging = 0;
 
-                    if($request->has('on_discount_weight_switch') && $request->on_discount_weight_switch == 'on'){
+                    if ($request->has('on_discount_weight_switch') && $request->on_discount_weight_switch == 'on') {
                         $discount_weight = $request->on_discount_weight_rate != null ? $request->on_discount_weight_rate : 0;
 //                    $discount_weight = $request->on_discount_weight_rate;
                     }
-                    if($request->has('on_discount_cash_switch') && $request->on_discount_cash_switch == 'on'){
+                    if ($request->has('on_discount_cash_switch') && $request->on_discount_cash_switch == 'on') {
                         $discount_cash = $request->on_discount_cash_rate != null ? $request->on_discount_cash_rate : 0;
                     }
-                    if($request->has('on_discount_insurance_switch') && $request->on_discount_insurance_switch == 'on'){
+                    if ($request->has('on_discount_insurance_switch') && $request->on_discount_insurance_switch == 'on') {
                         $discount_insurance = $request->on_discount_insurance_rate != null ? $request->on_discount_insurance_rate : 0;
                     }
-                    if($request->has('on_discount_return_switch') && $request->on_discount_return_switch == 'on'){
+                    if ($request->has('on_discount_return_switch') && $request->on_discount_return_switch == 'on') {
                         $discount_return = $request->on_discount_return_rate != null ? $request->on_discount_insurance_rate : 0;
                     }
-                    if($request->has('on_discount_packaging_switch') && $request->on_discount_packaging_switch == 'on'){
+                    if ($request->has('on_discount_packaging_switch') && $request->on_discount_packaging_switch == 'on') {
                         $discount_packaging = $request->on_discount_packaging_rate != null ? $request->on_discount_packaging_rate : 0;
                     }
-                    if($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0 || $discount_packaging != 0) {
+                    if ($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0 || $discount_packaging != 0) {
 
 
                         $date_str = $request->on_daterange;
                         $date_sep = explode(' - ', $date_str);
                         $date_to = explode('/', $date_sep[0]);
                         $date_from = explode('/', $date_sep[1]);
-                        $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
-                        $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+                        $to = Carbon::create($date_to[2], $date_to[0], $date_to[1], 0, 0, 0, 'UTC')->toDateTimeString();
+                        $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
-                        if($request->on_discount_record != null){
-                            DiscountCharge::where(['id'=>$request->on_discount_record])->update([
+                        if ($request->on_discount_record != null) {
+                            DiscountCharge::where(['id' => $request->on_discount_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
-                                'title'=> $request->on_discount_title,
+                                'title' => $request->on_discount_title,
                                 'weight' => $discount_weight,
                                 'cash' => $discount_cash,
                                 'insurance' => $discount_insurance,
@@ -1586,13 +1611,13 @@ class AdminDashboardController extends Controller
                                 'packaging' => $discount_packaging,
                                 'to' => $to,
                                 'from' => $from,
-                                'added_by'=>Auth::id()
+                                'added_by' => Auth::id()
                             ]);
-                        }elseif ($request->on_discount_record == null){
+                        } elseif ($request->on_discount_record == null) {
                             DiscountCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 1,
-                                'title'=> $request->on_discount_title,
+                                'title' => $request->on_discount_title,
                                 'weight' => $discount_weight,
                                 'cash' => $discount_cash,
                                 'insurance' => $discount_insurance,
@@ -1600,7 +1625,7 @@ class AdminDashboardController extends Controller
                                 'packaging' => $discount_packaging,
                                 'to' => $to,
                                 'from' => $from,
-                                'added_by'=>Auth::id()
+                                'added_by' => Auth::id()
                             ]);
                         }
 
@@ -1611,36 +1636,36 @@ class AdminDashboardController extends Controller
             }
 
             //overland
-            if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
-                $ONRateAlready = RateStatus::where(['user_id'=>$id,'shipping_mode_id'=>2])->get();
+            if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
+                $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 2])->get();
 
-                if(!$ONRateAlready->isEmpty()) {
+                if (!$ONRateAlready->isEmpty()) {
 
                     $wa_switch = array();
                     $wa_spkg = array();
-                    WeightCharge::where(['user_id'=>$id,'shipping_mode_id'=>2])->whereNotIn('id', $request->ol_weight_record)->delete();
+                    WeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->whereNotIn('id', $request->ol_weight_record)->delete();
                     foreach ($request->ol_weight_record as $index => $ol_weight_record) {
-                        if($request->has('ol_wa_switch')) {
+                        if ($request->has('ol_wa_switch')) {
                             if (array_key_exists($index, $request->ol_wa_switch)) {
                                 $wa_switch[$index] = 1;
                             } else {
                                 $wa_switch[$index] = 0;
                             };
-                        }else{
+                        } else {
                             $wa_switch[$index] = 0;
                         }
-                        if($request->has('ol_wa_spkg')) {
+                        if ($request->has('ol_wa_spkg')) {
                             if (array_key_exists($index, $request->ol_wa_spkg)) {
                                 $wa_spkg[$index] = $request->ol_wa_spkg[$index];
                             } else {
                                 $wa_spkg[$index] = 0;
                             };
-                        }else{
+                        } else {
                             $wa_spkg[$index] = 0;
                         }
-                        if($request->ol_weight_record[$index] != null){
+                        if ($request->ol_weight_record[$index] != null) {
 
-                            $weight_row = WeightCharge::where('id',$request->ol_weight_record[$index])
+                            $weight_row = WeightCharge::where('id', $request->ol_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
@@ -1649,10 +1674,13 @@ class AdminDashboardController extends Controller
                                     'weight_addition' => $wa_switch[$index],
                                     'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->ol_wa_local_charges[$index],
-                                    'national_or_sameday' => $request->ol_wa_national_charges[$index]
+                                    'national_charges_class_0' => $request->ol_class_0_charges[$index],
+                                    'national_charges_class_1' => $request->ol_class_1_charges[$index],
+                                    'national_charges_class_2' => $request->ol_class_2_charges[$index],
+                                    'national_charges_class_3' => $request->ol_class_3_charges[$index]
                                 ]);
                         }
-                        if($request->ol_weight_record[$index] == null){
+                        if ($request->ol_weight_record[$index] == null) {
                             WeightCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
@@ -1661,7 +1689,10 @@ class AdminDashboardController extends Controller
                                 'weight_addition' => $wa_switch[$index],
                                 'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->ol_wa_local_charges[$index],
-                                'national_or_sameday' => $request->ol_wa_national_charges[$index]
+                                'national_charges_class_0' => $request->ol_class_0_charges[$index],
+                                'national_charges_class_1' => $request->ol_class_1_charges[$index],
+                                'national_charges_class_2' => $request->ol_class_2_charges[$index],
+                                'national_charges_class_3' => $request->ol_class_3_charges[$index]
                             ]);
                         }
 
@@ -1669,54 +1700,54 @@ class AdminDashboardController extends Controller
                     }
 
                     //Replacement and Try and Buy charges
-                    if($request->ol_booking_record != null){
-                        BookingTypeCharges::where(['id'=>$request->ol_booking_record])->update([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>2,
-                            'replacement_charges'=>$request->ol_replacement_charges,
-                            'try_and_buy_charges'=>$request->ol_tnb_charges
+                    if ($request->ol_booking_record != null) {
+                        BookingTypeCharges::where(['id' => $request->ol_booking_record])->update([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'replacement_charges' => $request->ol_replacement_charges,
+                            'try_and_buy_charges' => $request->ol_tnb_charges
                         ]);
-                    }else{
+                    } else {
                         BookingTypeCharges::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>2,
-                            'replacement_charges'=>$request->ol_replacement_charges,
-                            'try_and_buy_charges'=>$request->ol_tnb_charges
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'replacement_charges' => $request->ol_replacement_charges,
+                            'try_and_buy_charges' => $request->ol_tnb_charges
                         ]);
                     }
 
 
                     //Cash handling Charges
-                    if($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on'){
-                        CashHandlingCharge::where(['user_id'=>$id,'shipping_mode_id'=>2])->whereNotIn('id', $request->ol_cash_record)->delete();
+                    if ($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on') {
+                        CashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->whereNotIn('id', $request->ol_cash_record)->delete();
 
-                        foreach ($request->ol_cash_record as $index => $ol_cash_record){
-                            if($request->ol_cash_record[$index] != null){
-                                CashHandlingCharge::where(['id'=>$request->ol_cash_record[$index]])->update([
-                                    'user_id'=>$id,
-                                    'shipping_mode_id'=>2,
-                                    'range_up'=> $request->ol_cash_range_up[$index],
-                                    'range_down'=> $request->ol_cash_range_down[$index],
-                                    'charges'=> $request->ol_cash_charges[$index]
+                        foreach ($request->ol_cash_record as $index => $ol_cash_record) {
+                            if ($request->ol_cash_record[$index] != null) {
+                                CashHandlingCharge::where(['id' => $request->ol_cash_record[$index]])->update([
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 2,
+                                    'range_up' => $request->ol_cash_range_up[$index],
+                                    'range_down' => $request->ol_cash_range_down[$index],
+                                    'charges' => $request->ol_cash_charges[$index]
                                 ]);
                             }
-                            if($request->ol_cash_record[$index] == null){
+                            if ($request->ol_cash_record[$index] == null) {
                                 CashHandlingCharge::create([
-                                    'user_id'=>$id,
-                                    'shipping_mode_id'=>2,
-                                    'range_up'=> $request->ol_cash_range_up[$index],
-                                    'range_down'=> $request->ol_cash_range_down[$index],
-                                    'charges'=> $request->ol_cash_charges[$index]
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 2,
+                                    'range_up' => $request->ol_cash_range_up[$index],
+                                    'range_down' => $request->ol_cash_range_down[$index],
+                                    'charges' => $request->ol_cash_charges[$index]
                                 ]);
                             }
                         }
                     }
                     //insurance charges
-                    if($request->has('ol_insurance_charges_switch') && $request->ol_insurance_charges_switch == 'on'){
-                        InsuranceCharge::where(['user_id'=>$id,'shipping_mode_id'=>2])->whereNotIn('id', $request->ol_insurance_record)->delete();
-                        foreach ($request->ol_insurance_record as $insurance => $ol_insurance_record){
-                            if($request->ol_insurance_record[$insurance] != null) {
-                                InsuranceCharge::where(['id'=>$request->ol_insurance_record[$insurance]])->update([
+                    if ($request->has('ol_insurance_charges_switch') && $request->ol_insurance_charges_switch == 'on') {
+                        InsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 2])->whereNotIn('id', $request->ol_insurance_record)->delete();
+                        foreach ($request->ol_insurance_record as $insurance => $ol_insurance_record) {
+                            if ($request->ol_insurance_record[$insurance] != null) {
+                                InsuranceCharge::where(['id' => $request->ol_insurance_record[$insurance]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
                                     'range_up' => $request->ol_ins_range_up[$insurance],
@@ -1724,7 +1755,7 @@ class AdminDashboardController extends Controller
                                     'charges' => $request->ol_ins_charges[$insurance]
                                 ]);
                             }
-                            if($request->ol_insurance_record[$insurance] == null){
+                            if ($request->ol_insurance_record[$insurance] == null) {
                                 InsuranceCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
@@ -1736,60 +1767,60 @@ class AdminDashboardController extends Controller
                         }
                     }
                     //Return Charges
-                    if($request->has('ol_return_switch') && $request->ol_return_switch == 'on'){
-                        if($request->ol_return_record != null){
-                            ReturnCharge::where(['id'=>$request->ol_return_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>2,
-                                'local'=> $request->ol_return_local_charges,
-                                'national'=> $request->ol_return_national_charges
+                    if ($request->has('ol_return_switch') && $request->ol_return_switch == 'on') {
+                        if ($request->ol_return_record != null) {
+                            ReturnCharge::where(['id' => $request->ol_return_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 2,
+                                'local' => $request->ol_return_local_charges,
+                                'national' => $request->ol_return_national_charges
                             ]);
-                        }elseif ($request->ol_return_record == null){
+                        } elseif ($request->ol_return_record == null) {
                             ReturnCharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>2,
-                                'local'=> $request->ol_return_local_charges,
-                                'national'=> $request->ol_return_national_charges
+                                'user_id' => $id,
+                                'shipping_mode_id' => 2,
+                                'local' => $request->ol_return_local_charges,
+                                'national' => $request->ol_return_national_charges
                             ]);
                         }
 
                     }
                     //Return Charges
-                    if($request->has('overland_fuel_switch') && $request->overland_fuel_switch == 'on'){
-                        if($request->ol_fuel_record != null){
-                            FuelSurcharge::where(['id'=>$request->ol_fuel_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>2,
-                                'fuel_surcharge'=> $request->overland_fuel_surcharge
+                    if ($request->has('overland_fuel_switch') && $request->overland_fuel_switch == 'on') {
+                        if ($request->ol_fuel_record != null) {
+                            FuelSurcharge::where(['id' => $request->ol_fuel_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 2,
+                                'fuel_surcharge' => $request->overland_fuel_surcharge
                             ]);
-                        }elseif($request->ol_fuel_record == null){
+                        } elseif ($request->ol_fuel_record == null) {
                             FuelSurcharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>2,
-                                'fuel_surcharge'=> $request->overland_fuel_surcharge
+                                'user_id' => $id,
+                                'shipping_mode_id' => 2,
+                                'fuel_surcharge' => $request->overland_fuel_surcharge
                             ]);
                         }
 
                     }
                     //Packaging Charges
-                    if($request->has('ol_packaging_switch') && $request->ol_packaging_switch == 'on'){
-                        if($request->ol_packaging_record != null){
-                            PackagingCharge::where(['id'=>$request->ol_packaging_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>2,
-                                'sm_flyer'=> $request->ol_flyer_sm,
-                                'md_flyer'=> $request->ol_flyer_md,
-                                'lg_flyer'=> $request->ol_flyer_lg,
-                                'box_flyer'=> $request->ol_flyer_box
+                    if ($request->has('ol_packaging_switch') && $request->ol_packaging_switch == 'on') {
+                        if ($request->ol_packaging_record != null) {
+                            PackagingCharge::where(['id' => $request->ol_packaging_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 2,
+                                'sm_flyer' => $request->ol_flyer_sm,
+                                'md_flyer' => $request->ol_flyer_md,
+                                'lg_flyer' => $request->ol_flyer_lg,
+                                'box_flyer' => $request->ol_flyer_box
                             ]);
-                        }else{
+                        } else {
                             PackagingCharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>2,
-                                'sm_flyer'=> $request->ol_flyer_sm,
-                                'md_flyer'=> $request->ol_flyer_md,
-                                'lg_flyer'=> $request->ol_flyer_lg,
-                                'box_flyer'=> $request->ol_flyer_box
+                                'user_id' => $id,
+                                'shipping_mode_id' => 2,
+                                'sm_flyer' => $request->ol_flyer_sm,
+                                'md_flyer' => $request->ol_flyer_md,
+                                'lg_flyer' => $request->ol_flyer_lg,
+                                'box_flyer' => $request->ol_flyer_box
                             ]);
                         }
 
@@ -1800,37 +1831,37 @@ class AdminDashboardController extends Controller
                     $discount_return = 0;
                     $discount_packaging = 0;
 
-                    if($request->has('ol_discount_weight_switch') && $request->ol_discount_weight_switch == 'on'){
+                    if ($request->has('ol_discount_weight_switch') && $request->ol_discount_weight_switch == 'on') {
                         $discount_weight = $request->ol_discount_weight_rate != null ? $request->ol_discount_weight_rate : 0;
 //                    $discount_weight = $request->ol_discount_weight_rate;
                     }
-                    if($request->has('ol_discount_cash_switch') && $request->ol_discount_cash_switch == 'on'){
+                    if ($request->has('ol_discount_cash_switch') && $request->ol_discount_cash_switch == 'on') {
                         $discount_cash = $request->ol_discount_cash_rate != null ? $request->ol_discount_cash_rate : 0;
                     }
-                    if($request->has('ol_discount_insurance_switch') && $request->ol_discount_insurance_switch == 'on'){
+                    if ($request->has('ol_discount_insurance_switch') && $request->ol_discount_insurance_switch == 'on') {
                         $discount_insurance = $request->ol_discount_insurance_rate != null ? $request->ol_discount_insurance_rate : 0;
                     }
-                    if($request->has('ol_discount_return_switch') && $request->ol_discount_return_switch == 'on'){
+                    if ($request->has('ol_discount_return_switch') && $request->ol_discount_return_switch == 'on') {
                         $discount_return = $request->ol_discount_return_rate != null ? $request->ol_discount_insurance_rate : 0;
                     }
-                    if($request->has('ol_discount_packaging_switch') && $request->ol_discount_packaging_switch == 'on'){
+                    if ($request->has('ol_discount_packaging_switch') && $request->ol_discount_packaging_switch == 'on') {
                         $discount_packaging = $request->ol_discount_packaging_rate != null ? $request->ol_discount_packaging_rate : 0;
                     }
-                    if($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0 || $discount_packaging != 0) {
+                    if ($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0 || $discount_packaging != 0) {
 
 
                         $date_str = $request->ol_daterange;
                         $date_sep = explode(' - ', $date_str);
                         $date_to = explode('/', $date_sep[0]);
                         $date_from = explode('/', $date_sep[1]);
-                        $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
-                        $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+                        $to = Carbon::create($date_to[2], $date_to[0], $date_to[1], 0, 0, 0, 'UTC')->toDateTimeString();
+                        $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
-                        if($request->ol_discount_record != null){
-                            DiscountCharge::where(['id'=>$request->ol_discount_record])->update([
+                        if ($request->ol_discount_record != null) {
+                            DiscountCharge::where(['id' => $request->ol_discount_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
-                                'title'=> $request->ol_discount_title,
+                                'title' => $request->ol_discount_title,
                                 'weight' => $discount_weight,
                                 'cash' => $discount_cash,
                                 'insurance' => $discount_insurance,
@@ -1838,13 +1869,13 @@ class AdminDashboardController extends Controller
                                 'packaging' => $discount_packaging,
                                 'to' => $to,
                                 'from' => $from,
-                                'added_by'=>Auth::id()
+                                'added_by' => Auth::id()
                             ]);
-                        }elseif ($request->ol_discount_record == null){
+                        } elseif ($request->ol_discount_record == null) {
                             DiscountCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 2,
-                                'title'=> $request->ol_discount_title,
+                                'title' => $request->ol_discount_title,
                                 'weight' => $discount_weight,
                                 'cash' => $discount_cash,
                                 'insurance' => $discount_insurance,
@@ -1852,7 +1883,7 @@ class AdminDashboardController extends Controller
                                 'packaging' => $discount_packaging,
                                 'to' => $to,
                                 'from' => $from,
-                                'added_by'=>Auth::id()
+                                'added_by' => Auth::id()
                             ]);
                         }
 
@@ -1863,36 +1894,36 @@ class AdminDashboardController extends Controller
             }
 
             //detain
-            if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
-                $ONRateAlready = RateStatus::where(['user_id'=>$id,'shipping_mode_id'=>3])->get();
+            if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
+                $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 3])->get();
 
-                if(!$ONRateAlready->isEmpty()) {
+                if (!$ONRateAlready->isEmpty()) {
 
                     $wa_switch = array();
                     $wa_spkg = array();
-                    WeightCharge::where(['user_id'=>$id,'shipping_mode_id'=>3])->whereNotIn('id', $request->detain_weight_record)->delete();
+                    WeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->whereNotIn('id', $request->detain_weight_record)->delete();
                     foreach ($request->detain_weight_record as $index => $detain_weight_record) {
-                        if($request->has('detain_wa_switch')) {
+                        if ($request->has('detain_wa_switch')) {
                             if (array_key_exists($index, $request->detain_wa_switch)) {
                                 $wa_switch[$index] = 1;
                             } else {
                                 $wa_switch[$index] = 0;
                             };
-                        }else{
+                        } else {
                             $wa_switch[$index] = 0;
                         }
-                        if($request->has('detain_wa_spkg')) {
+                        if ($request->has('detain_wa_spkg')) {
                             if (array_key_exists($index, $request->detain_wa_spkg)) {
                                 $wa_spkg[$index] = $request->detain_wa_spkg[$index];
                             } else {
                                 $wa_spkg[$index] = 0;
                             };
-                        }else{
+                        } else {
                             $wa_spkg[$index] = 0;
                         }
-                        if($request->detain_weight_record[$index] != null){
+                        if ($request->detain_weight_record[$index] != null) {
 
-                            $weight_row = WeightCharge::where('id',$request->detain_weight_record[$index])
+                            $weight_row = WeightCharge::where('id', $request->detain_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
@@ -1901,10 +1932,13 @@ class AdminDashboardController extends Controller
                                     'weight_addition' => $wa_switch[$index],
                                     'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->detain_wa_local_charges[$index],
-                                    'national_or_sameday' => $request->detain_wa_national_charges[$index]
+                                    'national_charges_class_0' => $request->detain_class_0_charges[$index],
+                                    'national_charges_class_1' => $request->detain_class_1_charges[$index],
+                                    'national_charges_class_2' => $request->detain_class_2_charges[$index],
+                                    'national_charges_class_3' => $request->detain_class_3_charges[$index]
                                 ]);
                         }
-                        if($request->detain_weight_record[$index] == null){
+                        if ($request->detain_weight_record[$index] == null) {
                             WeightCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
@@ -1913,7 +1947,10 @@ class AdminDashboardController extends Controller
                                 'weight_addition' => $wa_switch[$index],
                                 'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->detain_wa_local_charges[$index],
-                                'national_or_sameday' => $request->detain_wa_national_charges[$index]
+                                'national_charges_class_0' => $request->detain_class_0_charges[$index],
+                                'national_charges_class_1' => $request->detain_class_1_charges[$index],
+                                'national_charges_class_2' => $request->detain_class_2_charges[$index],
+                                'national_charges_class_3' => $request->detain_class_3_charges[$index]
                             ]);
                         }
 
@@ -1921,54 +1958,54 @@ class AdminDashboardController extends Controller
                     }
 
                     //Replacement and Try and Buy charges
-                    if($request->detain_booking_record != null){
-                        BookingTypeCharges::where(['id'=>$request->detain_booking_record])->update([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>3,
-                            'replacement_charges'=>$request->detain_replacement_charges,
-                            'try_and_buy_charges'=>$request->detain_tnb_charges
+                    if ($request->detain_booking_record != null) {
+                        BookingTypeCharges::where(['id' => $request->detain_booking_record])->update([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $request->detain_replacement_charges,
+                            'try_and_buy_charges' => $request->detain_tnb_charges
                         ]);
-                    }else{
+                    } else {
                         BookingTypeCharges::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>3,
-                            'replacement_charges'=>$request->detain_replacement_charges,
-                            'try_and_buy_charges'=>$request->detain_tnb_charges
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $request->detain_replacement_charges,
+                            'try_and_buy_charges' => $request->detain_tnb_charges
                         ]);
                     }
 
 
                     //Cash handling Charges
-                    if($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on'){
-                        CashHandlingCharge::where(['user_id'=>$id,'shipping_mode_id'=>3])->whereNotIn('id', $request->detain_cash_record)->delete();
+                    if ($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on') {
+                        CashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->whereNotIn('id', $request->detain_cash_record)->delete();
 
-                        foreach ($request->detain_cash_record as $index => $detain_cash_record){
-                            if($request->detain_cash_record[$index] != null){
-                                CashHandlingCharge::where(['id'=>$request->detain_cash_record[$index]])->update([
-                                    'user_id'=>$id,
-                                    'shipping_mode_id'=>3,
-                                    'range_up'=> $request->detain_cash_range_up[$index],
-                                    'range_down'=> $request->detain_cash_range_down[$index],
-                                    'charges'=> $request->detain_cash_charges[$index]
+                        foreach ($request->detain_cash_record as $index => $detain_cash_record) {
+                            if ($request->detain_cash_record[$index] != null) {
+                                CashHandlingCharge::where(['id' => $request->detain_cash_record[$index]])->update([
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 3,
+                                    'range_up' => $request->detain_cash_range_up[$index],
+                                    'range_down' => $request->detain_cash_range_down[$index],
+                                    'charges' => $request->detain_cash_charges[$index]
                                 ]);
                             }
-                            if($request->detain_cash_record[$index] == null){
+                            if ($request->detain_cash_record[$index] == null) {
                                 CashHandlingCharge::create([
-                                    'user_id'=>$id,
-                                    'shipping_mode_id'=>3,
-                                    'range_up'=> $request->detain_cash_range_up[$index],
-                                    'range_down'=> $request->detain_cash_range_down[$index],
-                                    'charges'=> $request->detain_cash_charges[$index]
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 3,
+                                    'range_up' => $request->detain_cash_range_up[$index],
+                                    'range_down' => $request->detain_cash_range_down[$index],
+                                    'charges' => $request->detain_cash_charges[$index]
                                 ]);
                             }
                         }
                     }
                     //insurance charges
-                    if($request->has('detain_insurance_charges_switch') && $request->detain_insurance_charges_switch == 'on'){
-                        InsuranceCharge::where(['user_id'=>$id,'shipping_mode_id'=>3])->whereNotIn('id', $request->detain_insurance_record)->delete();
-                        foreach ($request->detain_insurance_record as $insurance => $detain_insurance_record){
-                            if($request->detain_insurance_record[$insurance] != null) {
-                                InsuranceCharge::where(['id'=>$request->detain_insurance_record[$insurance]])->update([
+                    if ($request->has('detain_insurance_charges_switch') && $request->detain_insurance_charges_switch == 'on') {
+                        InsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 3])->whereNotIn('id', $request->detain_insurance_record)->delete();
+                        foreach ($request->detain_insurance_record as $insurance => $detain_insurance_record) {
+                            if ($request->detain_insurance_record[$insurance] != null) {
+                                InsuranceCharge::where(['id' => $request->detain_insurance_record[$insurance]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
                                     'range_up' => $request->detain_ins_range_up[$insurance],
@@ -1976,7 +2013,7 @@ class AdminDashboardController extends Controller
                                     'charges' => $request->detain_ins_charges[$insurance]
                                 ]);
                             }
-                            if($request->detain_insurance_record[$insurance] == null){
+                            if ($request->detain_insurance_record[$insurance] == null) {
                                 InsuranceCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
@@ -1988,60 +2025,60 @@ class AdminDashboardController extends Controller
                         }
                     }
                     //Return Charges
-                    if($request->has('detain_return_switch') && $request->detain_return_switch == 'on'){
-                        if($request->detain_return_record != null){
-                            ReturnCharge::where(['id'=>$request->detain_return_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>3,
-                                'local'=> $request->detain_return_local_charges,
-                                'national'=> $request->detain_return_national_charges
+                    if ($request->has('detain_return_switch') && $request->detain_return_switch == 'on') {
+                        if ($request->detain_return_record != null) {
+                            ReturnCharge::where(['id' => $request->detain_return_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 3,
+                                'local' => $request->detain_return_local_charges,
+                                'national' => $request->detain_return_national_charges
                             ]);
-                        }elseif ($request->detain_return_record == null){
+                        } elseif ($request->detain_return_record == null) {
                             ReturnCharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>3,
-                                'local'=> $request->detain_return_local_charges,
-                                'national'=> $request->detain_return_national_charges
+                                'user_id' => $id,
+                                'shipping_mode_id' => 3,
+                                'local' => $request->detain_return_local_charges,
+                                'national' => $request->detain_return_national_charges
                             ]);
                         }
 
                     }
                     //Return Charges
-                    if($request->has('detain_fuel_switch') && $request->detain_fuel_switch == 'on'){
-                        if($request->detain_fuel_record != null){
-                            FuelSurcharge::where(['id'=>$request->detain_fuel_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>3,
-                                'fuel_surcharge'=> $request->detain_fuel_surcharge
+                    if ($request->has('detain_fuel_switch') && $request->detain_fuel_switch == 'on') {
+                        if ($request->detain_fuel_record != null) {
+                            FuelSurcharge::where(['id' => $request->detain_fuel_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 3,
+                                'fuel_surcharge' => $request->detain_fuel_surcharge
                             ]);
-                        }elseif($request->detain_fuel_record == null){
+                        } elseif ($request->detain_fuel_record == null) {
                             FuelSurcharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>3,
-                                'fuel_surcharge'=> $request->detain_fuel_surcharge
+                                'user_id' => $id,
+                                'shipping_mode_id' => 3,
+                                'fuel_surcharge' => $request->detain_fuel_surcharge
                             ]);
                         }
 
                     }
                     //Packaging Charges
-                    if($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on'){
-                        if($request->detain_packaging_record != null){
-                            PackagingCharge::where(['id'=>$request->detain_packaging_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>3,
-                                'sm_flyer'=> $request->detain_flyer_sm,
-                                'md_flyer'=> $request->detain_flyer_md,
-                                'lg_flyer'=> $request->detain_flyer_lg,
-                                'box_flyer'=> $request->detain_flyer_box
+                    if ($request->has('detain_packaging_switch') && $request->detain_packaging_switch == 'on') {
+                        if ($request->detain_packaging_record != null) {
+                            PackagingCharge::where(['id' => $request->detain_packaging_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 3,
+                                'sm_flyer' => $request->detain_flyer_sm,
+                                'md_flyer' => $request->detain_flyer_md,
+                                'lg_flyer' => $request->detain_flyer_lg,
+                                'box_flyer' => $request->detain_flyer_box
                             ]);
-                        }else{
+                        } else {
                             PackagingCharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>3,
-                                'sm_flyer'=> $request->detain_flyer_sm,
-                                'md_flyer'=> $request->detain_flyer_md,
-                                'lg_flyer'=> $request->detain_flyer_lg,
-                                'box_flyer'=> $request->detain_flyer_box
+                                'user_id' => $id,
+                                'shipping_mode_id' => 3,
+                                'sm_flyer' => $request->detain_flyer_sm,
+                                'md_flyer' => $request->detain_flyer_md,
+                                'lg_flyer' => $request->detain_flyer_lg,
+                                'box_flyer' => $request->detain_flyer_box
                             ]);
                         }
 
@@ -2052,37 +2089,37 @@ class AdminDashboardController extends Controller
                     $discount_return = 0;
                     $discount_packaging = 0;
 
-                    if($request->has('detain_discount_weight_switch') && $request->detain_discount_weight_switch == 'on'){
+                    if ($request->has('detain_discount_weight_switch') && $request->detain_discount_weight_switch == 'on') {
                         $discount_weight = $request->detain_discount_weight_rate != null ? $request->detain_discount_weight_rate : 0;
 //                    $discount_weight = $request->detain_discount_weight_rate;
                     }
-                    if($request->has('detain_discount_cash_switch') && $request->detain_discount_cash_switch == 'on'){
+                    if ($request->has('detain_discount_cash_switch') && $request->detain_discount_cash_switch == 'on') {
                         $discount_cash = $request->detain_discount_cash_rate != null ? $request->detain_discount_cash_rate : 0;
                     }
-                    if($request->has('detain_discount_insurance_switch') && $request->detain_discount_insurance_switch == 'on'){
+                    if ($request->has('detain_discount_insurance_switch') && $request->detain_discount_insurance_switch == 'on') {
                         $discount_insurance = $request->detain_discount_insurance_rate != null ? $request->detain_discount_insurance_rate : 0;
                     }
-                    if($request->has('detain_discount_return_switch') && $request->detain_discount_return_switch == 'on'){
+                    if ($request->has('detain_discount_return_switch') && $request->detain_discount_return_switch == 'on') {
                         $discount_return = $request->detain_discount_return_rate != null ? $request->detain_discount_insurance_rate : 0;
                     }
-                    if($request->has('detain_discount_packaging_switch') && $request->detain_discount_packaging_switch == 'on'){
+                    if ($request->has('detain_discount_packaging_switch') && $request->detain_discount_packaging_switch == 'on') {
                         $discount_packaging = $request->detain_discount_packaging_rate != null ? $request->detain_discount_packaging_rate : 0;
                     }
-                    if($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0 || $discount_packaging != 0) {
+                    if ($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0 || $discount_packaging != 0) {
 
 
                         $date_str = $request->detain_daterange;
                         $date_sep = explode(' - ', $date_str);
                         $date_to = explode('/', $date_sep[0]);
                         $date_from = explode('/', $date_sep[1]);
-                        $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
-                        $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+                        $to = Carbon::create($date_to[2], $date_to[0], $date_to[1], 0, 0, 0, 'UTC')->toDateTimeString();
+                        $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
-                        if($request->detain_discount_record != null){
-                            DiscountCharge::where(['id'=>$request->detain_discount_record])->update([
+                        if ($request->detain_discount_record != null) {
+                            DiscountCharge::where(['id' => $request->detain_discount_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
-                                'title'=> $request->detain_discount_title,
+                                'title' => $request->detain_discount_title,
                                 'weight' => $discount_weight,
                                 'cash' => $discount_cash,
                                 'insurance' => $discount_insurance,
@@ -2090,13 +2127,13 @@ class AdminDashboardController extends Controller
                                 'packaging' => $discount_packaging,
                                 'to' => $to,
                                 'from' => $from,
-                                'added_by'=>Auth::id()
+                                'added_by' => Auth::id()
                             ]);
-                        }elseif ($request->detain_discount_record == null){
+                        } elseif ($request->detain_discount_record == null) {
                             DiscountCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 3,
-                                'title'=> $request->detain_discount_title,
+                                'title' => $request->detain_discount_title,
                                 'weight' => $discount_weight,
                                 'cash' => $discount_cash,
                                 'insurance' => $discount_insurance,
@@ -2104,7 +2141,7 @@ class AdminDashboardController extends Controller
                                 'packaging' => $discount_packaging,
                                 'to' => $to,
                                 'from' => $from,
-                                'added_by'=>Auth::id()
+                                'added_by' => Auth::id()
                             ]);
                         }
 
@@ -2115,36 +2152,36 @@ class AdminDashboardController extends Controller
             }
 
             //sameday
-            if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
-                $ONRateAlready = RateStatus::where(['user_id'=>$id,'shipping_mode_id'=>4])->get();
+            if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
+                $ONRateAlready = RateStatus::where(['user_id' => $id, 'shipping_mode_id' => 4])->get();
 
-                if(!$ONRateAlready->isEmpty()) {
+                if (!$ONRateAlready->isEmpty()) {
 
                     $wa_switch = array();
                     $wa_spkg = array();
-                    WeightCharge::where(['user_id'=>$id,'shipping_mode_id'=>4])->whereNotIn('id', $request->sameday_weight_record)->delete();
+                    WeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->whereNotIn('id', $request->sameday_weight_record)->delete();
                     foreach ($request->sameday_weight_record as $index => $sameday_weight_record) {
-                        if($request->has('sameday_wa_switch')) {
+                        if ($request->has('sameday_wa_switch')) {
                             if (array_key_exists($index, $request->sameday_wa_switch)) {
                                 $wa_switch[$index] = 1;
                             } else {
                                 $wa_switch[$index] = 0;
                             };
-                        }else{
+                        } else {
                             $wa_switch[$index] = 0;
                         }
-                        if($request->has('sameday_wa_spkg')) {
+                        if ($request->has('sameday_wa_spkg')) {
                             if (array_key_exists($index, $request->sameday_wa_spkg)) {
                                 $wa_spkg[$index] = $request->sameday_wa_spkg[$index];
                             } else {
                                 $wa_spkg[$index] = 0;
                             };
-                        }else{
+                        } else {
                             $wa_spkg[$index] = 0;
                         }
-                        if($request->sameday_weight_record[$index] != null){
+                        if ($request->sameday_weight_record[$index] != null) {
 
-                            $weight_row = WeightCharge::where('id',$request->sameday_weight_record[$index])
+                            $weight_row = WeightCharge::where('id', $request->sameday_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 4,
@@ -2153,10 +2190,13 @@ class AdminDashboardController extends Controller
                                     'weight_addition' => $wa_switch[$index],
                                     'spkg' => $wa_spkg[$index],
                                     'local_or_6hr' => $request->sameday_wa_local_charges[$index],
-                                    'national_or_sameday' => $request->sameday_wa_national_charges[$index]
+                                    'national_charges_class_0' => $request->sameday_class_0_charges[$index],
+                                    'national_charges_class_1' => 0,
+                                    'national_charges_class_2' => 0,
+                                    'national_charges_class_3' => 0
                                 ]);
                         }
-                        if($request->sameday_weight_record[$index] == null){
+                        if ($request->sameday_weight_record[$index] == null) {
                             WeightCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
@@ -2165,7 +2205,10 @@ class AdminDashboardController extends Controller
                                 'weight_addition' => $wa_switch[$index],
                                 'spkg' => $wa_spkg[$index],
                                 'local_or_6hr' => $request->sameday_wa_local_charges[$index],
-                                'national_or_sameday' => $request->sameday_wa_national_charges[$index]
+                                'national_charges_class_0' => $request->sameday_class_0_charges[$index],
+                                'national_charges_class_1' => 0,
+                                'national_charges_class_2' => 0,
+                                'national_charges_class_3' => 0
                             ]);
                         }
 
@@ -2173,54 +2216,54 @@ class AdminDashboardController extends Controller
                     }
 
                     //Replacement and Try and Buy charges
-                    if($request->sameday_booking_record != null){
-                        BookingTypeCharges::where(['id'=>$request->sameday_booking_record])->update([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>4,
-                            'replacement_charges'=>$request->sameday_replacement_charges,
-                            'try_and_buy_charges'=>$request->sameday_tnb_charges
+                    if ($request->sameday_booking_record != null) {
+                        BookingTypeCharges::where(['id' => $request->sameday_booking_record])->update([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'replacement_charges' => $request->sameday_replacement_charges,
+                            'try_and_buy_charges' => $request->sameday_tnb_charges
                         ]);
-                    }else{
+                    } else {
                         BookingTypeCharges::create([
-                            'user_id'=>$id,
-                            'shipping_mode_id'=>4,
-                            'replacement_charges'=>$request->sameday_replacement_charges,
-                            'try_and_buy_charges'=>$request->sameday_tnb_charges
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'replacement_charges' => $request->sameday_replacement_charges,
+                            'try_and_buy_charges' => $request->sameday_tnb_charges
                         ]);
                     }
 
 
                     //Cash handling Charges
-                    if($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on'){
-                        CashHandlingCharge::where(['user_id'=>$id,'shipping_mode_id'=>4])->whereNotIn('id', $request->sameday_cash_record)->delete();
+                    if ($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on') {
+                        CashHandlingCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->whereNotIn('id', $request->sameday_cash_record)->delete();
 
-                        foreach ($request->sameday_cash_record as $index => $sameday_cash_record){
-                            if($request->sameday_cash_record[$index] != null){
-                                CashHandlingCharge::where(['id'=>$request->sameday_cash_record[$index]])->update([
-                                    'user_id'=>$id,
-                                    'shipping_mode_id'=>4,
-                                    'range_up'=> $request->sameday_cash_range_up[$index],
-                                    'range_down'=> $request->sameday_cash_range_down[$index],
-                                    'charges'=> $request->sameday_cash_charges[$index]
+                        foreach ($request->sameday_cash_record as $index => $sameday_cash_record) {
+                            if ($request->sameday_cash_record[$index] != null) {
+                                CashHandlingCharge::where(['id' => $request->sameday_cash_record[$index]])->update([
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 4,
+                                    'range_up' => $request->sameday_cash_range_up[$index],
+                                    'range_down' => $request->sameday_cash_range_down[$index],
+                                    'charges' => $request->sameday_cash_charges[$index]
                                 ]);
                             }
-                            if($request->sameday_cash_record[$index] == null){
+                            if ($request->sameday_cash_record[$index] == null) {
                                 CashHandlingCharge::create([
-                                    'user_id'=>$id,
-                                    'shipping_mode_id'=>4,
-                                    'range_up'=> $request->sameday_cash_range_up[$index],
-                                    'range_down'=> $request->sameday_cash_range_down[$index],
-                                    'charges'=> $request->sameday_cash_charges[$index]
+                                    'user_id' => $id,
+                                    'shipping_mode_id' => 4,
+                                    'range_up' => $request->sameday_cash_range_up[$index],
+                                    'range_down' => $request->sameday_cash_range_down[$index],
+                                    'charges' => $request->sameday_cash_charges[$index]
                                 ]);
                             }
                         }
                     }
                     //insurance charges
-                    if($request->has('sameday_insurance_charges_switch') && $request->sameday_insurance_charges_switch == 'on'){
-                        InsuranceCharge::where(['user_id'=>$id,'shipping_mode_id'=>4])->whereNotIn('id', $request->sameday_insurance_record)->delete();
-                        foreach ($request->sameday_insurance_record as $insurance => $sameday_insurance_record){
-                            if($request->sameday_insurance_record[$insurance] != null) {
-                                InsuranceCharge::where(['id'=>$request->sameday_insurance_record[$insurance]])->update([
+                    if ($request->has('sameday_insurance_charges_switch') && $request->sameday_insurance_charges_switch == 'on') {
+                        InsuranceCharge::where(['user_id' => $id, 'shipping_mode_id' => 4])->whereNotIn('id', $request->sameday_insurance_record)->delete();
+                        foreach ($request->sameday_insurance_record as $insurance => $sameday_insurance_record) {
+                            if ($request->sameday_insurance_record[$insurance] != null) {
+                                InsuranceCharge::where(['id' => $request->sameday_insurance_record[$insurance]])->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 4,
                                     'range_up' => $request->sameday_ins_range_up[$insurance],
@@ -2228,7 +2271,7 @@ class AdminDashboardController extends Controller
                                     'charges' => $request->sameday_ins_charges[$insurance]
                                 ]);
                             }
-                            if($request->sameday_insurance_record[$insurance] == null){
+                            if ($request->sameday_insurance_record[$insurance] == null) {
                                 InsuranceCharge::create([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 4,
@@ -2240,60 +2283,60 @@ class AdminDashboardController extends Controller
                         }
                     }
                     //Return Charges
-                    if($request->has('sameday_return_switch') && $request->sameday_return_switch == 'on'){
-                        if($request->sameday_return_record != null){
-                            ReturnCharge::where(['id'=>$request->sameday_return_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>4,
-                                'local'=> $request->sameday_return_local_charges,
-                                'national'=> $request->sameday_return_national_charges
+                    if ($request->has('sameday_return_switch') && $request->sameday_return_switch == 'on') {
+                        if ($request->sameday_return_record != null) {
+                            ReturnCharge::where(['id' => $request->sameday_return_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 4,
+                                'local' => $request->sameday_return_local_charges,
+                                'national' => $request->sameday_return_national_charges
                             ]);
-                        }elseif ($request->sameday_return_record == null){
+                        } elseif ($request->sameday_return_record == null) {
                             ReturnCharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>4,
-                                'local'=> $request->sameday_return_local_charges,
-                                'national'=> $request->sameday_return_national_charges
+                                'user_id' => $id,
+                                'shipping_mode_id' => 4,
+                                'local' => $request->sameday_return_local_charges,
+                                'national' => $request->sameday_return_national_charges
                             ]);
                         }
 
                     }
                     //Return Charges
-                    if($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on'){
-                        if($request->sameday_fuel_record != null){
-                            FuelSurcharge::where(['id'=>$request->sameday_fuel_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>4,
-                                'fuel_surcharge'=> $request->sameday_fuel_surcharge
+                    if ($request->has('sameday_fuel_switch') && $request->sameday_fuel_switch == 'on') {
+                        if ($request->sameday_fuel_record != null) {
+                            FuelSurcharge::where(['id' => $request->sameday_fuel_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 4,
+                                'fuel_surcharge' => $request->sameday_fuel_surcharge
                             ]);
-                        }elseif($request->sameday_fuel_record == null){
+                        } elseif ($request->sameday_fuel_record == null) {
                             FuelSurcharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>4,
-                                'fuel_surcharge'=> $request->sameday_fuel_surcharge
+                                'user_id' => $id,
+                                'shipping_mode_id' => 4,
+                                'fuel_surcharge' => $request->sameday_fuel_surcharge
                             ]);
                         }
 
                     }
                     //Packaging Charges
-                    if($request->has('sameday_packaging_switch') && $request->sameday_packaging_switch == 'on'){
-                        if($request->sameday_packaging_record != null){
-                            PackagingCharge::where(['id'=>$request->sameday_packaging_record])->update([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>4,
-                                'sm_flyer'=> $request->sameday_flyer_sm,
-                                'md_flyer'=> $request->sameday_flyer_md,
-                                'lg_flyer'=> $request->sameday_flyer_lg,
-                                'box_flyer'=> $request->sameday_flyer_box
+                    if ($request->has('sameday_packaging_switch') && $request->sameday_packaging_switch == 'on') {
+                        if ($request->sameday_packaging_record != null) {
+                            PackagingCharge::where(['id' => $request->sameday_packaging_record])->update([
+                                'user_id' => $id,
+                                'shipping_mode_id' => 4,
+                                'sm_flyer' => $request->sameday_flyer_sm,
+                                'md_flyer' => $request->sameday_flyer_md,
+                                'lg_flyer' => $request->sameday_flyer_lg,
+                                'box_flyer' => $request->sameday_flyer_box
                             ]);
-                        }else{
+                        } else {
                             PackagingCharge::create([
-                                'user_id'=>$id,
-                                'shipping_mode_id'=>4,
-                                'sm_flyer'=> $request->sameday_flyer_sm,
-                                'md_flyer'=> $request->sameday_flyer_md,
-                                'lg_flyer'=> $request->sameday_flyer_lg,
-                                'box_flyer'=> $request->sameday_flyer_box
+                                'user_id' => $id,
+                                'shipping_mode_id' => 4,
+                                'sm_flyer' => $request->sameday_flyer_sm,
+                                'md_flyer' => $request->sameday_flyer_md,
+                                'lg_flyer' => $request->sameday_flyer_lg,
+                                'box_flyer' => $request->sameday_flyer_box
                             ]);
                         }
 
@@ -2304,37 +2347,37 @@ class AdminDashboardController extends Controller
                     $discount_return = 0;
                     $discount_packaging = 0;
 
-                    if($request->has('sameday_discount_weight_switch') && $request->sameday_discount_weight_switch == 'on'){
+                    if ($request->has('sameday_discount_weight_switch') && $request->sameday_discount_weight_switch == 'on') {
                         $discount_weight = $request->sameday_discount_weight_rate != null ? $request->sameday_discount_weight_rate : 0;
 //                    $discount_weight = $request->sameday_discount_weight_rate;
                     }
-                    if($request->has('sameday_discount_cash_switch') && $request->sameday_discount_cash_switch == 'on'){
+                    if ($request->has('sameday_discount_cash_switch') && $request->sameday_discount_cash_switch == 'on') {
                         $discount_cash = $request->sameday_discount_cash_rate != null ? $request->sameday_discount_cash_rate : 0;
                     }
-                    if($request->has('sameday_discount_insurance_switch') && $request->sameday_discount_insurance_switch == 'on'){
+                    if ($request->has('sameday_discount_insurance_switch') && $request->sameday_discount_insurance_switch == 'on') {
                         $discount_insurance = $request->sameday_discount_insurance_rate != null ? $request->sameday_discount_insurance_rate : 0;
                     }
-                    if($request->has('sameday_discount_return_switch') && $request->sameday_discount_return_switch == 'on'){
+                    if ($request->has('sameday_discount_return_switch') && $request->sameday_discount_return_switch == 'on') {
                         $discount_return = $request->sameday_discount_return_rate != null ? $request->sameday_discount_insurance_rate : 0;
                     }
-                    if($request->has('sameday_discount_packaging_switch') && $request->sameday_discount_packaging_switch == 'on'){
+                    if ($request->has('sameday_discount_packaging_switch') && $request->sameday_discount_packaging_switch == 'on') {
                         $discount_packaging = $request->sameday_discount_packaging_rate != null ? $request->sameday_discount_packaging_rate : 0;
                     }
-                    if($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0 || $discount_packaging != 0) {
+                    if ($discount_weight != 0 || $discount_cash != 0 || $discount_insurance != 0 || $discount_return != 0 || $discount_packaging != 0) {
 
 
                         $date_str = $request->sameday_daterange;
                         $date_sep = explode(' - ', $date_str);
                         $date_to = explode('/', $date_sep[0]);
                         $date_from = explode('/', $date_sep[1]);
-                        $to = Carbon::create($date_to[2],$date_to[0],$date_to[1],0,0,0,'UTC')->toDateTimeString();
-                        $from = Carbon::create($date_from[2],$date_from[0],$date_from[1],0,0,0,'UTC')->toDateTimeString();
+                        $to = Carbon::create($date_to[2], $date_to[0], $date_to[1], 0, 0, 0, 'UTC')->toDateTimeString();
+                        $from = Carbon::create($date_from[2], $date_from[0], $date_from[1], 0, 0, 0, 'UTC')->toDateTimeString();
 
-                        if($request->sameday_discount_record != null){
-                            DiscountCharge::where(['id'=>$request->sameday_discount_record])->update([
+                        if ($request->sameday_discount_record != null) {
+                            DiscountCharge::where(['id' => $request->sameday_discount_record])->update([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
-                                'title'=> $request->sameday_discount_title,
+                                'title' => $request->sameday_discount_title,
                                 'weight' => $discount_weight,
                                 'cash' => $discount_cash,
                                 'insurance' => $discount_insurance,
@@ -2342,13 +2385,13 @@ class AdminDashboardController extends Controller
                                 'packaging' => $discount_packaging,
                                 'to' => $to,
                                 'from' => $from,
-                                'added_by'=>Auth::id()
+                                'added_by' => Auth::id()
                             ]);
-                        }elseif ($request->sameday_discount_record == null){
+                        } elseif ($request->sameday_discount_record == null) {
                             DiscountCharge::create([
                                 'user_id' => $id,
                                 'shipping_mode_id' => 4,
-                                'title'=> $request->sameday_discount_title,
+                                'title' => $request->sameday_discount_title,
                                 'weight' => $discount_weight,
                                 'cash' => $discount_cash,
                                 'insurance' => $discount_insurance,
@@ -2356,7 +2399,7 @@ class AdminDashboardController extends Controller
                                 'packaging' => $discount_packaging,
                                 'to' => $to,
                                 'from' => $from,
-                                'added_by'=>Auth::id()
+                                'added_by' => Auth::id()
                             ]);
                         }
 
@@ -2365,12 +2408,12 @@ class AdminDashboardController extends Controller
                 }
                 //dd($weightAlready);
             }
-            if($request->authorize == 1){
-                User::where('id',$id)->update(['status'=>2,'rates_authorized_by'=>Auth::id()]);
-                return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
+            if ($request->authorize == 1) {
+                User::where('id', $id)->update(['status' => 2,'rate_status' => 0, 'rates_authorized_by' => Auth::id()]);
+                return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
             }
 
-            return redirect()->back()->with('success','All Rates are updated');
+            return redirect()->back()->with('success', 'All Rates are updated');
         }
 
         if ($user['status'] == 3) {
@@ -2384,8 +2427,12 @@ class AdminDashboardController extends Controller
                 'on_wa_spkg.*.numeric' => 'The overnight KG Range field must be numeric.',
                 'on_wa_local_charges.*.required' => 'The overnight local charges field is required.',
                 'on_wa_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
-                'on_wa_national_charges.*.required' => 'The overnight national charges field is required.',
-                'on_wa_national_charges.*.numeric' => 'The overnight national charges field must be numeric.',
+                'on_class_0_charges.*.numeric' => 'The overnight class A charges field must be numeric.',
+                'on_class_0_charges.*.required' => 'The overnight class A charges field is required.',
+                'on_class_1_charges.*.required' => 'The overnight class B charges field is required.',
+                'on_class_2_charges.*.required' => 'The overnight class C charges field is required.',
+                'on_class_3_charges.*.required' => 'The overnight class D charges field is required.',
+//            'on_class_0_charges.*.numeric' => 'The overnight national charges field must be numeric.',
                 'on_replacement_charges.numeric' => 'The overnight replacement charges field must be numeric.',
                 'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
                 'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
@@ -2428,8 +2475,8 @@ class AdminDashboardController extends Controller
 //            'on_discount_return_rate.numeric' => 'The overnight discount return field must be numeric',
                 'on_discount_packaging_rate.required_if' => 'The overnight discount packaging field must be required',
 //            'on_discount_packaging_rate.numeric' => 'The overnight discount packaging field must be numeric',
-                'on_discount_title.required_with'=>'The overnight discount title field is required',
-                'on_daterange.required_with'=>'The overnight discount date field is required',
+                'on_discount_title.required_with' => 'The overnight discount title field is required',
+                'on_daterange.required_with' => 'The overnight discount date field is required',
                 //overland starts
                 'ol_wa_range_up.*.required' => 'The overland range up field is required.',
                 'ol_wa_range_up.*.numeric' => 'The overland range up field must be numeric or decimal.',
@@ -2440,8 +2487,11 @@ class AdminDashboardController extends Controller
                 'ol_wa_spkg.*.numeric' => 'The overland KG Range field must be numeric.',
                 'ol_wa_local_charges.*.required' => 'The overland local charges field is required.',
                 'ol_wa_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
-                'ol_wa_national_charges.*.required' => 'The overland national charges field is required.',
-                'ol_wa_national_charges.*.numeric' => 'The overland national charges field must be numeric.',
+                'ol_class_0_charges.*.required' => 'The overland class A charges field is required.',
+                'ol_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
+                'ol_class_1_charges.*.required' => 'The overland class B charges field is required.',
+                'ol_class_2_charges.*.required' => 'The overland class C charges field is required.',
+                'ol_class_3_charges.*.required' => 'The overland class D charges field is required.',
                 'ol_replacement_charges.numeric' => 'The overland replacement charges field must be numeric.',
                 'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
                 'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
@@ -2484,8 +2534,8 @@ class AdminDashboardController extends Controller
 //            'ol_discount_return_rate.numeric' => 'The overland discount return field must be numeric',
                 'ol_discount_packaging_rate.required_if' => 'The overland discount packaging field must be required',
 //            'ol_discount_packaging_rate.numeric' => 'The overland discount packaging field must be numeric',
-                'ol_discount_title.required_with'=>'The overland discount title field is required',
-                'ol_daterange.required_with'=>'The overland discount date field is required',
+                'ol_discount_title.required_with' => 'The overland discount title field is required',
+                'ol_daterange.required_with' => 'The overland discount date field is required',
                 //overland end and detain starts
                 'detain_wa_range_up.*.required' => 'The detain range up field is required.',
                 'detain_wa_range_up.*.numeric' => 'The detain range up field must be numeric or decimal.',
@@ -2496,8 +2546,11 @@ class AdminDashboardController extends Controller
                 'detain_wa_spkg.*.numeric' => 'The detain KG Range field must be numeric.',
                 'detain_wa_local_charges.*.required' => 'The detain local charges field is required.',
                 'detain_wa_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
-                'detain_wa_national_charges.*.required' => 'The detain national charges field is required.',
-                'detain_wa_national_charges.*.numeric' => 'The detain national charges field must be numeric.',
+                'detain_class_0_charges.*.required' => 'The detain class A charges field is required.',
+                'detain_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
+                'detain_class_1_charges.*.required' => 'The detain class B charges field is required.',
+                'detain_class_2_charges.*.required' => 'The detain class C charges field is required.',
+                'detain_class_3_charges.*.required' => 'The detain class D charges field is required.',
                 'detain_replacement_charges.numeric' => 'The detain replacement charges field must be numeric.',
                 'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
                 'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
@@ -2540,8 +2593,8 @@ class AdminDashboardController extends Controller
 //            'detain_discount_return_rate.numeric' => 'The detain discount return field must be numeric',
                 'detain_discount_packaging_rate.required_if' => 'The detain discount packaging field must be required',
 //            'detain_discount_packaging_rate.numeric' => 'The detain discount packaging field must be numeric',
-                'detain_discount_title.required_with'=>'The detain discount title field is required',
-                'detain_daterange.required_with'=>'The detain discount date field is required',
+                'detain_discount_title.required_with' => 'The detain discount title field is required',
+                'detain_daterange.required_with' => 'The detain discount date field is required',
                 //detain ends and sameday starts
                 'sameday_wa_range_up.*.required' => 'The sameday range up field is required.',
                 'sameday_wa_range_up.*.numeric' => 'The sameday range up field must be numeric or decimal.',
@@ -2552,8 +2605,8 @@ class AdminDashboardController extends Controller
                 'sameday_wa_spkg.*.numeric' => 'The sameday KG Range field must be numeric.',
                 'sameday_wa_local_charges.*.required' => 'The sameday local charges field is required.',
                 'sameday_wa_local_charges.*.numeric' => 'The sameday local charges field must be numeric.',
-                'sameday_wa_national_charges.*.required' => 'The sameday national charges field is required.',
-                'sameday_wa_national_charges.*.numeric' => 'The sameday national charges field must be numeric.',
+                'sameday_wa_class_0_charges.*.required' => 'The sameday class A charges field is required.',
+                'sameday_wa_class_0_charges.*.numeric' => 'The sameday class A charges field must be numeric.',
                 'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
                 'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
                 'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
@@ -2596,8 +2649,8 @@ class AdminDashboardController extends Controller
 //            'sameday_discount_return_rate.numeric' => 'The sameday discount return field must be numeric',
                 'sameday_discount_packaging_rate.required_if' => 'The sameday discount packaging field must be required',
 //            'sameday_discount_packaging_rate.numeric' => 'The sameday discount packaging field must be numeric',
-                'sameday_discount_title.required_with'=>'The sameday discount title field is required',
-                'sameday_daterange.required_with'=>'The sameday discount date field is required',
+                'sameday_discount_title.required_with' => 'The sameday discount title field is required',
+                'sameday_daterange.required_with' => 'The sameday discount date field is required',
                 //sameday ends
             ];
 
@@ -2607,131 +2660,140 @@ class AdminDashboardController extends Controller
             $detain_validations = array();
             $sameday_validations = array();
 
-            if($request->has('on_main_switch') && $request->on_main_switch == 'on'){
+            if ($request->has('on_main_switch') && $request->on_main_switch == 'on') {
                 $on_validations = [
                     'on_wa_range_up.*' => 'required|numeric|between:0,1000',
                     'on_wa_range_down.*' => 'required|numeric|between:0,1000',
                     'on_wa_local_charges.*' => 'required|numeric',
-                    'on_wa_national_charges.*' => 'required|numeric',
-                    'on_wa_spkg.*'=>'numeric',
-                    'on_replacement_charges'=>'required|numeric',
-                    'on_tnb_charges'=>'required|numeric',
-                    'on_cash_range_up.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
-                    'on_cash_range_down.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
-                    'on_cash_charges.*'=>'required_if:on_cash_handling_switch,==,on',
-                    'on_ins_range_up.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
-                    'on_ins_range_down.*'=>'required_if:on_insurance_charges_switch,==,on|numeric',
-                    'on_ins_charges.*'=>'required_if:on_insurance_charges_switch,==,on',
-                    'on_return_local_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'on_return_national_charges.*'=>'required_if:on_return_switch,==,on|numeric',
-                    'overnight_fuel_surcharge'=>'required_if:overnight_fuel_switch,==,on|numeric',
-                    'on_flyer_sm'=>'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_md'=>'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_lg'=>'required_if:on_packaging_switch,==,on|numeric',
-                    'on_flyer_box'=>'required_if:on_packaging_switch,==,on|numeric',
-                    'on_discount_title'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                    'on_daterange'=>'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
-                    'on_discount_weight_rate'=>'required_if:on_discount_weight_switch,==,on',
-                    'on_discount_cash_rate'=>'required_if:on_discount_cash_switch,==,on',
-                    'on_discount_insurance_rate'=>'required_if:on_discount_insurance_switch,==,on',
-                    'on_discount_return_rate'=>'required_if:on_discount_return_switch,==,on',
-                    'on_discount_packaging_rate'=>'required_if:on_discount_packaging_switch,==,on'
+                    'on_class_0_charges.*' => 'required|numeric',
+                    'on_class_1_charges.*' => 'required',
+                    'on_class_2_charges.*' => 'required',
+                    'on_class_3_charges.*' => 'required',
+                    'on_wa_spkg.*' => 'numeric',
+                    'on_replacement_charges' => 'required|numeric',
+                    'on_tnb_charges' => 'required|numeric',
+                    'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
+                    'on_cash_range_down.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
+                    'on_cash_charges.*' => 'required_if:on_cash_handling_switch,==,on',
+                    'on_ins_range_up.*' => 'required_if:on_insurance_charges_switch,==,on|numeric',
+                    'on_ins_range_down.*' => 'required_if:on_insurance_charges_switch,==,on|numeric',
+                    'on_ins_charges.*' => 'required_if:on_insurance_charges_switch,==,on',
+                    'on_return_local_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'on_return_national_charges.*' => 'required_if:on_return_switch,==,on|numeric',
+                    'overnight_fuel_surcharge' => 'required_if:overnight_fuel_switch,==,on|numeric',
+                    'on_flyer_sm' => 'required_if:on_packaging_switch,==,on|numeric',
+                    'on_flyer_md' => 'required_if:on_packaging_switch,==,on|numeric',
+                    'on_flyer_lg' => 'required_if:on_packaging_switch,==,on|numeric',
+                    'on_flyer_box' => 'required_if:on_packaging_switch,==,on|numeric',
+                    'on_discount_title' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
+                    'on_daterange' => 'required_with:on_discount_weight_rate,on_discount_cash_rate,on_discount_insurance_rate,on_discount_return_rate,on_discount_packaging_rate',
+                    'on_discount_weight_rate' => 'required_if:on_discount_weight_switch,==,on',
+                    'on_discount_cash_rate' => 'required_if:on_discount_cash_switch,==,on',
+                    'on_discount_insurance_rate' => 'required_if:on_discount_insurance_switch,==,on',
+                    'on_discount_return_rate' => 'required_if:on_discount_return_switch,==,on',
+                    'on_discount_packaging_rate' => 'required_if:on_discount_packaging_switch,==,on'
                 ];
             }
             //overland
-            if($request->has('ol_main_switch') && $request->ol_main_switch == 'on'){
+            if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
                 $ol_validations = [
                     'ol_wa_range_up.*' => 'required|numeric|between:0,1000',
                     'ol_wa_range_down.*' => 'required|numeric|between:0,1000',
                     'ol_wa_local_charges.*' => 'required|numeric',
-                    'ol_wa_national_charges.*' => 'required|numeric',
-                    'ol_wa_spkg.*'=>'numeric',
-                    'ol_replacement_charges'=>'required|numeric',
-                    'ol_tnb_charges'=>'required|numeric',
-                    'ol_cash_range_up.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
-                    'ol_cash_range_down.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
-                    'ol_cash_charges.*'=>'required_if:ol_cash_handling_switch,==,on',
-                    'ol_ins_range_up.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
-                    'ol_ins_range_down.*'=>'required_if:ol_insurance_charges_switch,==,on|numeric',
-                    'ol_ins_charges.*'=>'required_if:ol_insurance_charges_switch,==,on',
-                    'ol_return_local_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'ol_return_national_charges.*'=>'required_if:ol_return_switch,==,on|numeric',
-                    'overland_fuel_surcharge'=>'required_if:overland_fuel_switch,==,on|numeric',
-                    'ol_flyer_sm'=>'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_md'=>'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_lg'=>'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_flyer_box'=>'required_if:ol_packaging_switch,==,on|numeric',
-                    'ol_discount_title'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                    'ol_daterange'=>'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
-                    'ol_discount_weight_rate'=>'required_if:ol_discount_weight_switch,==,on',
-                    'ol_discount_cash_rate'=>'required_if:ol_discount_cash_switch,==,on',
-                    'ol_discount_insurance_rate'=>'required_if:ol_discount_insurance_switch,==,on',
-                    'ol_discount_return_rate'=>'required_if:ol_discount_return_switch,==,on',
-                    'ol_discount_packaging_rate'=>'required_if:ol_discount_packaging_switch,==,on',
+                    'ol_class_0_charges.*' => 'required|numeric',
+                    'ol_class_1_charges.*' => 'required',
+                    'ol_class_2_charges.*' => 'required',
+                    'ol_class_3_charges.*' => 'required',
+                    'ol_wa_spkg.*' => 'numeric',
+                    'ol_replacement_charges' => 'required|numeric',
+                    'ol_tnb_charges' => 'required|numeric',
+                    'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
+                    'ol_cash_range_down.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
+                    'ol_cash_charges.*' => 'required_if:ol_cash_handling_switch,==,on',
+                    'ol_ins_range_up.*' => 'required_if:ol_insurance_charges_switch,==,on|numeric',
+                    'ol_ins_range_down.*' => 'required_if:ol_insurance_charges_switch,==,on|numeric',
+                    'ol_ins_charges.*' => 'required_if:ol_insurance_charges_switch,==,on',
+                    'ol_return_local_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'ol_return_national_charges.*' => 'required_if:ol_return_switch,==,on|numeric',
+                    'overland_fuel_surcharge' => 'required_if:overland_fuel_switch,==,on|numeric',
+                    'ol_flyer_sm' => 'required_if:ol_packaging_switch,==,on|numeric',
+                    'ol_flyer_md' => 'required_if:ol_packaging_switch,==,on|numeric',
+                    'ol_flyer_lg' => 'required_if:ol_packaging_switch,==,on|numeric',
+                    'ol_flyer_box' => 'required_if:ol_packaging_switch,==,on|numeric',
+                    'ol_discount_title' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
+                    'ol_daterange' => 'required_with:ol_discount_weight_rate,ol_discount_cash_rate,ol_discount_insurance_rate,ol_discount_return_rate,ol_discount_packaging_rate',
+                    'ol_discount_weight_rate' => 'required_if:ol_discount_weight_switch,==,on',
+                    'ol_discount_cash_rate' => 'required_if:ol_discount_cash_switch,==,on',
+                    'ol_discount_insurance_rate' => 'required_if:ol_discount_insurance_switch,==,on',
+                    'ol_discount_return_rate' => 'required_if:ol_discount_return_switch,==,on',
+                    'ol_discount_packaging_rate' => 'required_if:ol_discount_packaging_switch,==,on',
                 ];
             }
             //overland
-            if($request->has('detain_main_switch') && $request->detain_main_switch == 'on'){
+            if ($request->has('detain_main_switch') && $request->detain_main_switch == 'on') {
                 $detain_validations = [
                     'detain_wa_range_up.*' => 'required|numeric|between:0,1000',
                     'detain_wa_range_down.*' => 'required|numeric|between:0,1000',
                     'detain_wa_local_charges.*' => 'required|numeric',
-                    'detain_wa_national_charges.*' => 'required|numeric',
-                    'detain_wa_spkg.*'=>'numeric',
-                    'detain_replacement_charges'=>'required|numeric',
-                    'detain_tnb_charges'=>'required|numeric',
-                    'detain_cash_range_up.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
-                    'detain_cash_range_down.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
-                    'detain_cash_charges.*'=>'required_if:detain_cash_handling_switch,==,on',
-                    'detain_ins_range_up.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
-                    'detain_ins_range_down.*'=>'required_if:detain_insurance_charges_switch,==,on|numeric',
-                    'detain_ins_charges.*'=>'required_if:detain_insurance_charges_switch,==,on',
-                    'detain_return_local_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_return_national_charges.*'=>'required_if:detain_return_switch,==,on|numeric',
-                    'detain_fuel_surcharge'=>'required_if:detain_fuel_switch,==,on|numeric',
-                    'detain_flyer_sm'=>'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_md'=>'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_lg'=>'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_flyer_box'=>'required_if:detain_packaging_switch,==,on|numeric',
-                    'detain_discount_title'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                    'detain_daterange'=>'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
-                    'detain_discount_weight_rate'=>'required_if:detain_discount_weight_switch,==,on',
-                    'detain_discount_cash_rate'=>'required_if:detain_discount_cash_switch,==,on',
-                    'detain_discount_insurance_rate'=>'required_if:detain_discount_insurance_switch,==,on',
-                    'detain_discount_return_rate'=>'required_if:detain_discount_return_switch,==,on',
-                    'detain_discount_packaging_rate'=>'required_if:detain_discount_packaging_switch,==,on',
+                    'detain_class_0_charges.*' => 'required|numeric',
+                    'detain_class_1_charges.*' => 'required',
+                    'detain_class_2_charges.*' => 'required',
+                    'detain_class_3_charges.*' => 'required',
+                    'detain_wa_spkg.*' => 'numeric',
+                    'detain_replacement_charges' => 'required|numeric',
+                    'detain_tnb_charges' => 'required|numeric',
+                    'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
+                    'detain_cash_range_down.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
+                    'detain_cash_charges.*' => 'required_if:detain_cash_handling_switch,==,on',
+                    'detain_ins_range_up.*' => 'required_if:detain_insurance_charges_switch,==,on|numeric',
+                    'detain_ins_range_down.*' => 'required_if:detain_insurance_charges_switch,==,on|numeric',
+                    'detain_ins_charges.*' => 'required_if:detain_insurance_charges_switch,==,on',
+                    'detain_return_local_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_return_national_charges.*' => 'required_if:detain_return_switch,==,on|numeric',
+                    'detain_fuel_surcharge' => 'required_if:detain_fuel_switch,==,on|numeric',
+                    'detain_flyer_sm' => 'required_if:detain_packaging_switch,==,on|numeric',
+                    'detain_flyer_md' => 'required_if:detain_packaging_switch,==,on|numeric',
+                    'detain_flyer_lg' => 'required_if:detain_packaging_switch,==,on|numeric',
+                    'detain_flyer_box' => 'required_if:detain_packaging_switch,==,on|numeric',
+                    'detain_discount_title' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
+                    'detain_daterange' => 'required_with:detain_discount_weight_rate,detain_discount_cash_rate,detain_discount_insurance_rate,detain_discount_return_rate,detain_discount_packaging_rate',
+                    'detain_discount_weight_rate' => 'required_if:detain_discount_weight_switch,==,on',
+                    'detain_discount_cash_rate' => 'required_if:detain_discount_cash_switch,==,on',
+                    'detain_discount_insurance_rate' => 'required_if:detain_discount_insurance_switch,==,on',
+                    'detain_discount_return_rate' => 'required_if:detain_discount_return_switch,==,on',
+                    'detain_discount_packaging_rate' => 'required_if:detain_discount_packaging_switch,==,on',
                 ];
             }
             //sameday
-            if($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on'){
+            if ($request->has('sameday_main_switch') && $request->sameday_main_switch == 'on') {
                 $sameday_validations = [
                     'sameday_wa_range_up.*' => 'required|numeric|between:0,1000',
                     'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
                     'sameday_wa_local_charges.*' => 'required|numeric',
-                    'sameday_wa_national_charges.*' => 'required|numeric',
-                    'sameday_wa_spkg.*'=>'numeric',
-                    'sameday_replacement_charges'=>'required|numeric',
-                    'sameday_tnb_charges'=>'required|numeric',
-                    'sameday_cash_range_up.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
-                    'sameday_cash_range_down.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
-                    'sameday_cash_charges.*'=>'required_if:sameday_cash_handling_switch,==,on',
-                    'sameday_ins_range_up.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
-                    'sameday_ins_range_down.*'=>'required_if:sameday_insurance_charges_switch,==,on|numeric',
-                    'sameday_ins_charges.*'=>'required_if:sameday_insurance_charges_switch,==,on',
-                    'sameday_return_local_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_return_national_charges.*'=>'required_if:sameday_return_switch,==,on|numeric',
-                    'sameday_fuel_surcharge'=>'required_if:sameday_fuel_switch,==,on|numeric',
-                    'sameday_flyer_sm'=>'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_md'=>'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_lg'=>'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_flyer_box'=>'required_if:sameday_packaging_switch,==,on|numeric',
-                    'sameday_discount_title'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                    'sameday_daterange'=>'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
-                    'sameday_discount_weight_rate'=>'required_if:sameday_discount_weight_switch,==,on',
-                    'sameday_discount_cash_rate'=>'required_if:sameday_discount_cash_switch,==,on',
-                    'sameday_discount_insurance_rate'=>'required_if:sameday_discount_insurance_switch,==,on',
-                    'sameday_discount_return_rate'=>'required_if:sameday_discount_return_switch,==,on',
-                    'sameday_discount_packaging_rate'=>'required_if:sameday_discount_packaging_switch,==,on',
+                    'sameday_class_0_charges.*' => 'required|numeric',
+                    'sameday_wa_spkg.*' => 'numeric',
+                    'sameday_replacement_charges' => 'required|numeric',
+                    'sameday_tnb_charges' => 'required|numeric',
+                    'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
+                    'sameday_cash_range_down.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
+                    'sameday_cash_charges.*' => 'required_if:sameday_cash_handling_switch,==,on',
+                    'sameday_ins_range_up.*' => 'required_if:sameday_insurance_charges_switch,==,on|numeric',
+                    'sameday_ins_range_down.*' => 'required_if:sameday_insurance_charges_switch,==,on|numeric',
+                    'sameday_ins_charges.*' => 'required_if:sameday_insurance_charges_switch,==,on',
+                    'sameday_return_local_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_return_national_charges.*' => 'required_if:sameday_return_switch,==,on|numeric',
+                    'sameday_fuel_surcharge' => 'required_if:sameday_fuel_switch,==,on|numeric',
+                    'sameday_flyer_sm' => 'required_if:sameday_packaging_switch,==,on|numeric',
+                    'sameday_flyer_md' => 'required_if:sameday_packaging_switch,==,on|numeric',
+                    'sameday_flyer_lg' => 'required_if:sameday_packaging_switch,==,on|numeric',
+                    'sameday_flyer_box' => 'required_if:sameday_packaging_switch,==,on|numeric',
+                    'sameday_discount_title' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
+                    'sameday_daterange' => 'required_with:sameday_discount_weight_rate,sameday_discount_cash_rate,sameday_discount_insurance_rate,sameday_discount_return_rate,sameday_discount_packaging_rate',
+                    'sameday_discount_weight_rate' => 'required_if:sameday_discount_weight_switch,==,on',
+                    'sameday_discount_cash_rate' => 'required_if:sameday_discount_cash_switch,==,on',
+                    'sameday_discount_insurance_rate' => 'required_if:sameday_discount_insurance_switch,==,on',
+                    'sameday_discount_return_rate' => 'required_if:sameday_discount_return_switch,==,on',
+                    'sameday_discount_packaging_rate' => 'required_if:sameday_discount_packaging_switch,==,on',
                 ];
             }
 
@@ -2790,7 +2852,6 @@ class AdminDashboardController extends Controller
                         } else {
                             $wa_spkg[$index] = 0;
                         }
-
                         PendingWeightCharge::create([
                             'user_id' => $id,
                             'shipping_mode_id' => 1,
@@ -2799,7 +2860,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $wa_switch[$index],
                             'spkg' => $wa_spkg[$index],
                             'local_or_6hr' => $request->on_wa_local_charges[$index],
-                            'national_or_sameday' => $request->on_wa_national_charges[$index]
+                            'national_charges_class_0' => $request->on_class_0_charges[$index],
+                            'national_charges_class_1' => $request->on_class_1_charges[$index],
+                            'national_charges_class_2' => $request->on_class_2_charges[$index],
+                            'national_charges_class_3' => $request->on_class_3_charges[$index]
                         ]);
 
                     }
@@ -2959,7 +3023,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $wa_switch_overland[$index],
                             'spkg' => $wa_spkg_overland[$index],
                             'local_or_6hr' => $request->ol_wa_local_charges[$index],
-                            'national_or_sameday' => $request->ol_wa_national_charges[$index]
+                            'national_charges_class_0' => $request->ol_class_0_charges[$index],
+                            'national_charges_class_1' => $request->ol_class_1_charges[$index],
+                            'national_charges_class_2' => $request->ol_class_2_charges[$index],
+                            'national_charges_class_3' => $request->ol_class_3_charges[$index]
                         ]);
                     }
 
@@ -3118,7 +3185,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $wa_switch_detain[$index],
                             'spkg' => $wa_spkg_detain[$index],
                             'local_or_6hr' => $request->detain_wa_local_charges[$index],
-                            'national_or_sameday' => $request->detain_wa_national_charges[$index]
+                            'national_charges_class_0' => $request->detain_class_0_charges[$index],
+                            'national_charges_class_1' => $request->detain_class_1_charges[$index],
+                            'national_charges_class_2' => $request->detain_class_2_charges[$index],
+                            'national_charges_class_3' => $request->detain_class_3_charges[$index]
                         ]);
                     }
 
@@ -3276,7 +3346,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $wa_switch_sameday[$index],
                             'spkg' => $wa_spkg_sameday[$index],
                             'local_or_6hr' => $request->sameday_wa_local_charges[$index],
-                            'national_or_sameday' => $request->sameday_wa_national_charges[$index]
+                            'national_charges_class_0' => $request->sameday_class_0_charges[$index],
+                            'national_charges_class_1' => 0,
+                            'national_charges_class_2' => 0,
+                            'national_charges_class_3' => 0
                         ]);
                     }
 
@@ -3453,7 +3526,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $weight['weight_addition'],
                             'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
-                            'national_or_sameday' => $weight['national_or_sameday']
+                            'national_charges_class_0' => $weight['national_charges_class_0'],
+                            'national_charges_class_1' => $weight['national_charges_class_1'],
+                            'national_charges_class_2' => $weight['national_charges_class_2'],
+                            'national_charges_class_3' => $weight['national_charges_class_3'],
                         ]);
                     }
                 }
@@ -3465,8 +3541,12 @@ class AdminDashboardController extends Controller
                             'range_up' => $weight['range_up'],
                             'range_down' => $weight['range_down'],
                             'weight_addition' => $weight['weight_addition'],
+                            'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
-                            'national_or_sameday' => $weight['national_or_sameday']
+                            'national_charges_class_0' => $weight['national_charges_class_0'],
+                            'national_charges_class_1' => $weight['national_charges_class_1'],
+                            'national_charges_class_2' => $weight['national_charges_class_2'],
+                            'national_charges_class_3' => $weight['national_charges_class_3'],
                         ]);
                     }
                 }
@@ -3480,7 +3560,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $weight['weight_addition'],
                             'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
-                            'national_or_sameday' => $weight['national_or_sameday']
+                            'national_charges_class_0' => $weight['national_charges_class_0'],
+                            'national_charges_class_1' => $weight['national_charges_class_1'],
+                            'national_charges_class_2' => $weight['national_charges_class_2'],
+                            'national_charges_class_3' => $weight['national_charges_class_3'],
                         ]);
                     }
                 }
@@ -3494,7 +3577,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $weight['weight_addition'],
                             'spkg' => $weight['spkg'],
                             'local_or_6hr' => $weight['local_or_6hr'],
-                            'national_or_sameday' => $weight['national_or_sameday']
+                            'national_charges_class_0' => $weight['national_charges_class_0'],
+                            'national_charges_class_1' => $weight['national_charges_class_1'],
+                            'national_charges_class_2' => $weight['national_charges_class_2'],
+                            'national_charges_class_3' => $weight['national_charges_class_3'],
                         ]);
                     }
                 }
@@ -3896,7 +3982,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $pendingweight['weight_addition'],
                             'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
-                            'national_or_sameday' => $pendingweight['national_or_sameday']
+                            'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingweight['national_charges_class_3'],
                         ]);
                     }
                 }
@@ -3910,7 +3999,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $pendingweight['weight_addition'],
                             'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
-                            'national_or_sameday' => $pendingweight['national_or_sameday']
+                            'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingweight['national_charges_class_3'],
                         ]);
                     }
                 }
@@ -3924,7 +4016,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $pendingweight['weight_addition'],
                             'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
-                            'national_or_sameday' => $pendingweight['national_or_sameday']
+                            'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingweight['national_charges_class_3'],
                         ]);
                     }
                 }
@@ -3938,7 +4033,10 @@ class AdminDashboardController extends Controller
                             'weight_addition' => $pendingweight['weight_addition'],
                             'spkg' => $pendingweight['spkg'],
                             'local_or_6hr' => $pendingweight['local_or_6hr'],
-                            'national_or_sameday' => $pendingweight['national_or_sameday']
+                            'national_charges_class_0' => $pendingweight['national_charges_class_0'],
+                            'national_charges_class_1' => $pendingweight['national_charges_class_1'],
+                            'national_charges_class_2' => $pendingweight['national_charges_class_2'],
+                            'national_charges_class_3' => $pendingweight['national_charges_class_3'],
                         ]);
                     }
                 }
@@ -4295,8 +4393,12 @@ class AdminDashboardController extends Controller
             'on_wa_spkg.*.numeric' => 'The overnight KG Range field must be numeric.',
             'on_wa_local_charges.*.required' => 'The overnight local charges field is required.',
             'on_wa_local_charges.*.numeric' => 'The overnight local charges field must be numeric.',
-            'on_wa_national_charges.*.required' => 'The overnight national charges field is required.',
-            'on_wa_national_charges.*.numeric' => 'The overnight national charges field must be numeric.',
+            'on_class_0_charges.*.numeric' => 'The overnight class A charges field must be numeric.',
+            'on_class_0_charges.*.required' => 'The overnight class A charges field is required.',
+            'on_class_1_charges.*.required' => 'The overnight class B charges field is required.',
+            'on_class_2_charges.*.required' => 'The overnight class C charges field is required.',
+            'on_class_3_charges.*.required' => 'The overnight class D charges field is required.',
+//            'on_class_0_charges.*.numeric' => 'The overnight national charges field must be numeric.',
             'on_replacement_charges.numeric' => 'The overnight replacement charges field must be numeric.',
             'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
             'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
@@ -4351,8 +4453,11 @@ class AdminDashboardController extends Controller
             'ol_wa_spkg.*.numeric' => 'The overland KG Range field must be numeric.',
             'ol_wa_local_charges.*.required' => 'The overland local charges field is required.',
             'ol_wa_local_charges.*.numeric' => 'The overland local charges field must be numeric.',
-            'ol_wa_national_charges.*.required' => 'The overland national charges field is required.',
-            'ol_wa_national_charges.*.numeric' => 'The overland national charges field must be numeric.',
+            'ol_class_0_charges.*.required' => 'The overland class A charges field is required.',
+            'ol_class_0_charges.*.numeric' => 'The overland class A charges field must be numeric.',
+            'ol_class_1_charges.*.required' => 'The overland class B charges field is required.',
+            'ol_class_2_charges.*.required' => 'The overland class C charges field is required.',
+            'ol_class_3_charges.*.required' => 'The overland class D charges field is required.',
             'ol_replacement_charges.numeric' => 'The overland replacement charges field must be numeric.',
             'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
             'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
@@ -4407,8 +4512,11 @@ class AdminDashboardController extends Controller
             'detain_wa_spkg.*.numeric' => 'The detain KG Range field must be numeric.',
             'detain_wa_local_charges.*.required' => 'The detain local charges field is required.',
             'detain_wa_local_charges.*.numeric' => 'The detain local charges field must be numeric.',
-            'detain_wa_national_charges.*.required' => 'The detain national charges field is required.',
-            'detain_wa_national_charges.*.numeric' => 'The detain national charges field must be numeric.',
+            'detain_class_0_charges.*.required' => 'The detain class A charges field is required.',
+            'detain_class_0_charges.*.numeric' => 'The detain class A charges field must be numeric.',
+            'detain_class_1_charges.*.required' => 'The detain class B charges field is required.',
+            'detain_class_2_charges.*.required' => 'The detain class C charges field is required.',
+            'detain_class_3_charges.*.required' => 'The detain class D charges field is required.',
             'detain_replacement_charges.numeric' => 'The detain replacement charges field must be numeric.',
             'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
             'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
@@ -4463,8 +4571,8 @@ class AdminDashboardController extends Controller
             'sameday_wa_spkg.*.numeric' => 'The sameday KG Range field must be numeric.',
             'sameday_wa_local_charges.*.required' => 'The sameday local charges field is required.',
             'sameday_wa_local_charges.*.numeric' => 'The sameday local charges field must be numeric.',
-            'sameday_wa_national_charges.*.required' => 'The sameday national charges field is required.',
-            'sameday_wa_national_charges.*.numeric' => 'The sameday national charges field must be numeric.',
+            'sameday_wa_class_0_charges.*.required' => 'The sameday class A charges field is required.',
+            'sameday_wa_class_0_charges.*.numeric' => 'The sameday class A charges field must be numeric.',
             'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
             'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
             'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
@@ -4523,7 +4631,10 @@ class AdminDashboardController extends Controller
                 'on_wa_range_up.*' => 'required|numeric|between:0,1000',
                 'on_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'on_wa_local_charges.*' => 'required|numeric',
-                'on_wa_national_charges.*' => 'required|numeric',
+                'on_class_0_charges.*' => 'required|numeric',
+                'on_class_1_charges.*' => 'required',
+                'on_class_2_charges.*' => 'required',
+                'on_class_3_charges.*' => 'required',
                 'on_wa_spkg.*'=>'numeric',
                 'on_replacement_charges'=>'required|numeric',
                 'on_tnb_charges'=>'required|numeric',
@@ -4555,7 +4666,10 @@ class AdminDashboardController extends Controller
                 'ol_wa_range_up.*' => 'required|numeric|between:0,1000',
                 'ol_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'ol_wa_local_charges.*' => 'required|numeric',
-                'ol_wa_national_charges.*' => 'required|numeric',
+                'ol_class_0_charges.*' => 'required|numeric',
+                'ol_class_1_charges.*' => 'required',
+                'ol_class_2_charges.*' => 'required',
+                'ol_class_3_charges.*' => 'required',
                 'ol_wa_spkg.*'=>'numeric',
                 'ol_replacement_charges'=>'required|numeric',
                 'ol_tnb_charges'=>'required|numeric',
@@ -4587,7 +4701,10 @@ class AdminDashboardController extends Controller
                 'detain_wa_range_up.*' => 'required|numeric|between:0,1000',
                 'detain_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'detain_wa_local_charges.*' => 'required|numeric',
-                'detain_wa_national_charges.*' => 'required|numeric',
+                'detain_class_0_charges.*' => 'required|numeric',
+                'detain_class_1_charges.*' => 'required',
+                'detain_class_2_charges.*' => 'required',
+                'detain_class_3_charges.*' => 'required',
                 'detain_wa_spkg.*'=>'numeric',
                 'detain_replacement_charges'=>'required|numeric',
                 'detain_tnb_charges'=>'required|numeric',
@@ -4619,7 +4736,7 @@ class AdminDashboardController extends Controller
                 'sameday_wa_range_up.*' => 'required|numeric|between:0,1000',
                 'sameday_wa_range_down.*' => 'required|numeric|between:0,1000',
                 'sameday_wa_local_charges.*' => 'required|numeric',
-                'sameday_wa_national_charges.*' => 'required|numeric',
+                'sameday_class_0_charges.*' => 'required|numeric',
                 'sameday_wa_spkg.*'=>'numeric',
                 'sameday_replacement_charges'=>'required|numeric',
                 'sameday_tnb_charges'=>'required|numeric',
@@ -4700,7 +4817,10 @@ class AdminDashboardController extends Controller
                         'weight_addition' => $wa_switch[$index],
                         'spkg' => $wa_spkg[$index],
                         'local_or_6hr' => $request->on_wa_local_charges[$index],
-                        'national_or_sameday' => $request->on_wa_national_charges[$index]
+                        'national_charges_class_0' => $request->on_class_0_charges[$index],
+                        'national_charges_class_1' => $request->on_class_1_charges[$index],
+                        'national_charges_class_2' => $request->on_class_2_charges[$index],
+                        'national_charges_class_3' => $request->on_class_3_charges[$index]
                     ]);
 
                 }
@@ -4860,7 +4980,10 @@ class AdminDashboardController extends Controller
                         'weight_addition' => $wa_switch_overland[$index],
                         'spkg' => $wa_spkg_overland[$index],
                         'local_or_6hr' => $request->ol_wa_local_charges[$index],
-                        'national_or_sameday' => $request->ol_wa_national_charges[$index]
+                        'national_charges_class_0' => $request->ol_class_0_charges[$index],
+                        'national_charges_class_1' => $request->ol_class_1_charges[$index],
+                        'national_charges_class_2' => $request->ol_class_2_charges[$index],
+                        'national_charges_class_3' => $request->ol_class_3_charges[$index]
                     ]);
                 }
 
@@ -5019,7 +5142,10 @@ class AdminDashboardController extends Controller
                         'weight_addition' => $wa_switch_detain[$index],
                         'spkg' => $wa_spkg_detain[$index],
                         'local_or_6hr' => $request->detain_wa_local_charges[$index],
-                        'national_or_sameday' => $request->detain_wa_national_charges[$index]
+                        'national_charges_class_0' => $request->detain_class_0_charges[$index],
+                        'national_charges_class_1' => $request->detain_class_1_charges[$index],
+                        'national_charges_class_2' => $request->detain_class_2_charges[$index],
+                        'national_charges_class_3' => $request->detain_class_3_charges[$index]
                     ]);
                 }
 
@@ -5177,7 +5303,10 @@ class AdminDashboardController extends Controller
                         'weight_addition' => $wa_switch_sameday[$index],
                         'spkg' => $wa_spkg_sameday[$index],
                         'local_or_6hr' => $request->sameday_wa_local_charges[$index],
-                        'national_or_sameday' => $request->sameday_wa_national_charges[$index]
+                        'national_charges_class_0' => $request->sameday_class_0_charges[$index],
+                        'national_charges_class_1' => 0,
+                        'national_charges_class_2' => 0,
+                        'national_charges_class_3' => 0
                     ]);
                 }
 
@@ -5292,8 +5421,10 @@ class AdminDashboardController extends Controller
         }
         User::where('id',$id)->update(['status'=>1,'rates_added_by'=>Auth::id()]);
 
+
         return redirect(route('admin.accounts.pending'))->with('success','All Rates are added');
     }
+
     public function activeAccountListAjax(){
        $users = User::join('cities', 'users.city_id', '=', 'cities.id')
            ->leftjoin('products as p','p.id','=','users.product_id')
