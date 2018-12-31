@@ -187,6 +187,7 @@
                     {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount form-group'},
                     {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no form-group'},
                     {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
+                    {data:'status' ,name: 'status', class: 'align-middle status'},
                     {data:'action' ,name: 'action', class: 'align-middle action'}
                 ],
 
