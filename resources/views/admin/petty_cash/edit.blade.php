@@ -187,7 +187,7 @@
                     {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount form-group'},
                     {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no form-group'},
                     {data:'remarks' ,name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
-                    {data:'status' ,name: 'status', class: 'align-middle status'},
+                    {data:'status' ,name: 'petty_cash_statement_details.status', class: 'align-middle status'},
                     {data:'action' ,name: 'action', class: 'align-middle action'}
                 ],
 
@@ -232,7 +232,11 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-
+                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Pending</option>' +
+                        '<option value="1">Rejected</option>' +
+                        '<option value="2">Approved</option>' +
+                        '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -400,9 +404,10 @@
             });
 
             $('body').on('click','.action button.approve', function () {
+                var current = $(this);
                 var id = parseInt($(this).parents('tr').attr('id'));
                 var status = parseInt($(this).parents('tr').attr('status'));
-                if(status == 0) {
+                if(status == 0 || status == 1) {
                     $.ajax({
                         url: '{!! route('admin.petty_cash.statements.edit.approve') !!}',
                         method: 'POST',
@@ -413,7 +418,8 @@
                     }).done(function (data) {
                         if (data.status) {
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
+                            current.parents('td').prev('td').text('Approved');
+                            current.parents('tr').attr('status',2);
                         }
                         else{
                             toastr.error(data.error, 'Error!', {
@@ -421,6 +427,46 @@
                                 containerId: 'toast-top-center'
                             });
                         }
+                    });
+                }else{
+                    var error = 'Current Petty Cash Statement Detail already Approved!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
+                    });
+                }
+            });
+            $('body').on('click','.action button.reject', function () {
+                var current = $(this);
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var status = parseInt($(this).parents('tr').attr('status'));
+                if(status == 0 || status == 2) {
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.statements.edit.reject') !!}',
+                        method: 'POST',
+                        data: {
+                            'detail_id': id,
+                            '_token': '{{ csrf_token() }}'
+                        }
+                    }).done(function (data) {
+                        if (data.status) {
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                            current.parents('td').prev('td').text('Rejected');
+                            current.parents('tr').attr('status',1);
+                        }
+                        else{
+                            toastr.error(data.error, 'Error!', {
+                                positionClass: 'toast-top-center',
+                                containerId: 'toast-top-center'
+                            });
+                        }
+                    });
+                }
+                else{
+                    var error = 'Current Petty Cash Statement Detail already rejected!';
+                    toastr.error(error, 'Error!', {
+                        positionClass: 'toast-top-center',
+                        containerId: 'toast-top-center'
                     });
                 }
             });
