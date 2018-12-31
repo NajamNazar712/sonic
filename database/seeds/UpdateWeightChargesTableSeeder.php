@@ -36,9 +36,9 @@ class UpdateWeightChargesTableSeeder extends Seeder
         $charges = \App\Http\Models\WeightCharge::whereIn('user_id', $not_change_shipper_ids)->get();
 
         foreach($charges as $charge) {
-            $charge->national_charges_class_1 = '0';
-            $charge->national_charges_class_2 = '0';
-            $charge->national_charges_class_3 = '0';
+            $charge->national_charges_class_1 = '0%';
+            $charge->national_charges_class_2 = '0%';
+            $charge->national_charges_class_3 = '0%';
 
             $charge->save();
         }
