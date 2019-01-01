@@ -15,7 +15,8 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         '\App\Console\Commands\ReturnConfirmationPendingEmail',
         '\App\Console\Commands\ReturnConfirmEmail',
-        '\App\Console\Commands\ShipmentReAttemptEmail'
+        '\App\Console\Commands\ShipmentReAttemptEmail',
+        '\App\Console\Commands\AutoDisableShipperAccount'
     ];
 
     /**
@@ -30,6 +31,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
         $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
+        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
     }
 
     /**

@@ -368,6 +368,9 @@
                     @if (session('role_id') == 1 || in_array(116, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.settings.shipment_cancellation_cut_off_days.index')}}">Shipment Cancellation Cut-Off Days</a></li>
                     @endif
+                        @if (session('role_id') == 1 || in_array(116, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.settings.auto_account_disabled_days.auto_index')}}">Auto Account Disabled Days</a></li>
+                        @endif
                 </ul>
             </li>
             @endif
