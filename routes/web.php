@@ -700,8 +700,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('{id}/edit/list', 'Admins\AdminPettyCashController@edit_petty_cash_statement_list')->name('edit.list');
             Route::post('edit/approve', 'Admins\AdminPettyCashController@edit_petty_cash_statements_approve')->name('edit.approve');
             Route::post('edit/reject', 'Admins\AdminPettyCashController@edit_petty_cash_statements_reject')->name('edit.reject');
+            Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
         });
-
+        Route::prefix('approved')->name('approved.')->group(function (){
+            Route::get('', 'Admins\AdminPettyCashController@approved_petty_cash_statements_index')->name('index');
+            Route::get('list', 'Admins\AdminPettyCashController@approved_petty_cash_statements_list')->name('list');
+            Route::post('paid', 'Admins\AdminPettyCashController@approved_petty_cash_statements_paid')->name('paid');
+            Route::post('adjusted', 'Admins\AdminPettyCashController@approved_petty_cash_statements_adjusted')->name('adjusted');
+        });
     });
 
     Route::prefix('month_closing')->name('month_closing.')->group(function (){

@@ -243,6 +243,9 @@
                                     @if (session('role_id') == 1 || in_array(146, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.petty_cash.statements.index') }}">Statements</a></li>
                                     @endif
+                                    @if (session('role_id') == 1 || in_array(147, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.petty_cash.approved.index') }}">Approved</a></li>
+                                    @endif
                                 </ul>
                             </li>
                         @endif

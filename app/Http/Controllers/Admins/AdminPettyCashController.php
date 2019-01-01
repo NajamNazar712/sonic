@@ -56,7 +56,7 @@ class AdminPettyCashController extends Controller
         $petty_cash->created_by = Auth::id();
         $petty_cash->save();
         foreach ($selected_ids as $selected_id) {
-            $hubId = "hub".$selected_id;
+            $hubId = "hub.$selected_id";
             $petty_detail = new PettyCashStatementDetail();
             $petty_detail->petty_cash_statement_id = $petty_cash->id;
             $petty_detail->account_head_id = $request->head[$selected_id];
@@ -102,7 +102,7 @@ class AdminPettyCashController extends Controller
                         }
                         $drops .= '<option value="' . $status->id . '" ' . $selected . '>' . $status->name . '</option>';
                     }
-                    $select = '<select class="form-control form-control-sm select2 head_select" disabled name="head[' . $petty_details->statement_detail_id . ']" >' . $drops . '</select>';
+                    $select = '<select class="form-control form-control-sm select2 head_select" disabled name="head[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Account Head is required">' . $drops . '</select>';
                     return $select;
 
             })
@@ -119,7 +119,7 @@ class AdminPettyCashController extends Controller
                         }
                         $drops .= '<option value="' . $status->id . '" ' . $selected . '>' . $status->name . '</option>';
                     }
-                    $select = '<select class="form-control form-control-sm select2 title_select" disabled name="title[' . $petty_details->statement_detail_id . ']" >' . $drops . '</select>';
+                    $select = '<select class="form-control form-control-sm select2 title_select" disabled name="title[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Account Title is required">' . $drops . '</select>';
                     return $select;
 
             })
@@ -136,7 +136,7 @@ class AdminPettyCashController extends Controller
                         }
                         $drops .= '<option value="' . $hub->id . '" ' . $selected . '>' . $hub->name . '</option>';
                     }
-                    $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" >' . $drops . '</select>';
+                    $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
                     return $select;
                 }else{
                     $hubs = City::where('hub',1)->where('status',1)->select('id','name')->get();
@@ -146,7 +146,7 @@ class AdminPettyCashController extends Controller
                         $drops .= '<option value="" selected></option>';
                         $drops .= '<option value="' . $hub->id . '">' . $hub->name . '</option>';
                     }
-                    $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" >' . $drops . '</select>';
+                    $select = '<select class="form-control form-control-sm select2 hub_select" disabled name="hub[' . $petty_details->statement_detail_id . ']" data-rule-required="true" data-msg-required="Hub is required">' . $drops . '</select>';
                     return $select;
                 }
 
@@ -155,15 +155,15 @@ class AdminPettyCashController extends Controller
                 return Carbon::parse($petty_details->date)->toDateString();
             })
             ->editColumn('expense_details', function ($petty_details){
-                $expense = '<input class="form-control" disabled value="' .$petty_details->expense_details. '" name="expense['.$petty_details->statement_detail_id.']">';
+                $expense = '<input class="form-control" disabled value="' .$petty_details->expense_details. '" name="expense['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Expense Detail is required">';
                 return $expense;
             })
             ->editColumn('amount', function ($petty_details){
-                $amount = '<input class="form-control" disabled value="' .$petty_details->amount. '" name="amount['.$petty_details->statement_detail_id.']">';
+                $amount = '<input class="form-control" disabled value="' .$petty_details->amount. '" name="amount['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Amount is required">';
                 return $amount;
             })
             ->editColumn('reference_no', function ($petty_details){
-                $reference = '<input class="form-control" disabled value="' .$petty_details->reference_no. '" name="reference['.$petty_details->statement_detail_id.']">';
+                $reference = '<input class="form-control" disabled value="' .$petty_details->reference_no. '" name="reference['.$petty_details->statement_detail_id.']" data-rule-required="true" data-msg-required="Reference No. is required">';
                 return $reference;
             })
             ->editColumn('remarks', function ($petty_details){
@@ -181,20 +181,18 @@ class AdminPettyCashController extends Controller
                 }
             })
             ->addColumn('action',function ($petty){
-
+                $dropdown = '';
+                if(session('role_id') == 1 || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-
-//                if(session('role_id') == 1 || ($petty->status == 0 && session('role_id') == 10) || ($petty->status == 1 && session('role_id') == 3) || ($petty->status == 2 && session('role_id') == 7)){
-
                     $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Approve</div></button>';
                     $dropdown .= '<button type="button" class="dropdown-item reject" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Reject</div></button>';
 
-//                }
+                }
                 return $dropdown;
             })
             ->make(true);
@@ -210,7 +208,8 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
-            ->select('petty_cash_statements.id as statement_id','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status');
+            ->select('petty_cash_statements.id as statement_id','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status')
+        ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
             $petty = $petty->whereIn('petty_cash_statements.hub_id', session('hubs'));
@@ -255,7 +254,7 @@ class AdminPettyCashController extends Controller
 
                 $dropdown .= '<a href="'.$route.'" class="dropdown-item" ><i class="ft-plus-circle"></i> View Statement</a>';
 
-                if(session('role_id') == 1 || ($petty->status == 0 && session('role_id') == 10) || ($petty->status == 1 && session('role_id') == 3) || ($petty->status == 2 && session('role_id') == 7)){
+                if(session('role_id') == 1 || ($petty->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20) || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
 
                     $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
 
@@ -317,6 +316,7 @@ class AdminPettyCashController extends Controller
         }
 
     }
+
     public function edit_petty_cash_statements_reject(Request $request){
         $id = $request->detail_id;
         if($id){
@@ -339,5 +339,147 @@ class AdminPettyCashController extends Controller
             return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Detail ID not found!']);
         }
 
+    }
+
+    public function edit_petty_cash_statements_submit(Request $request){
+//        return $request;
+        $selected_ids = explode(',', $request->input('selected_rows'));
+        $statement_id = $request->petty_statement_id;
+        $petty_cash = PettyCashStatement::find($statement_id);
+        if($petty_cash){
+            foreach ($selected_ids as $selected_id) {
+                $hubId = "hub.$selected_id";
+                $petty_detail = PettyCashStatementDetail::where('petty_cash_statement_id',$petty_cash->id)->where('id',$selected_id)->first();
+
+                if(session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)){
+                    $petty_detail->account_head_id = $request->head[$selected_id];
+                    $petty_detail->account_title_id = $request->title[$selected_id];
+                    $petty_detail->hub_id = ($request->has($hubId) ? $request->hub[$selected_id] : null);
+
+                }
+
+                $petty_detail->expense_details = $request->expense[$selected_id];
+                $petty_detail->amount = $request->amount[$selected_id];
+                $petty_detail->reference_no = $request->reference[$selected_id];
+                $petty_detail->remarks = $request->remarks[$selected_id];
+                $petty_detail->save();
+            }
+            return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Updated!']);
+        }
+        else{
+            return redirect()->back()->with(['status' => 0, 'error' => 'Petty Cash Statement With This ID Not Found!']);
+        }
+
+    }
+
+    public function approved_petty_cash_statements_index(){
+        return view('admin.petty_cash.approved');
+    }
+
+    public function approved_petty_cash_statements_list(Request $request){
+        $petty = PettyCashStatement::join('cities as h','h.id','=', 'petty_cash_statements.hub_id')
+            ->join('admins as cb','cb.id','=', 'petty_cash_statements.created_by')
+            ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
+            ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
+            ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
+            ->select('petty_cash_statements.id as statement_id','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status')
+            ->whereIn('petty_cash_statements.status',[3,4,5]);
+
+        if (session('role_id') != 1) {
+            $petty = $petty->whereIn('petty_cash_statements.hub_id', session('hubs'));
+        }
+
+        $petty = Datatables::of($petty)
+            ->addColumn('date',function($petty){
+                return Carbon::parse($petty->from)->toDateString().' - '.Carbon::parse($petty->to)->toDateString();
+            })
+            ->filterColumn('date',function ($query,$keyword){
+                if ($keyword != '') {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('petty_cash_statements.from', 'like', '%' . $keyword . '%')
+                            ->orWhere('petty_cash_statements.to', 'like', '%' . $keyword . '%');
+                    });
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->editColumn('status',function ($petty){
+                $status = '';
+                if($petty->status == 3){
+                    $status = 'Finance Approved';
+                }else if($petty->status == 4){
+                    $status = 'Paid';
+
+                }else if($petty->status == 5){
+                    $status = 'Reverted';
+                }
+                return $status;
+            })
+            ->addColumn('action',function ($petty){
+                $dropdown = '';
+                if(session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)){
+
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                    $dropdown .= '<button type="button" class="dropdown-item paid" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Paid</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item adjusted" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Adjusted</div></button>';
+
+                }
+                return $dropdown;
+            })
+            ->make(true);
+        return $petty;
+    }
+
+    public function approved_petty_cash_statements_paid(Request $request){
+        $id = $request->statement_id;
+        if($id){
+            $petty_details = PettyCashStatement::find($id);
+            if($petty_details){
+                if($petty_details->status == 3){
+                    $petty_details->status = 4;
+                    $petty_details->save();
+                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Successfully Paid!']);
+                }else if($petty_details->status == 4){
+                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Already Paid!']);
+                }else if($petty_details->status == 5){
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Is Adjust!']);
+                }
+
+            }else{
+                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement not found!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Petty Cash Statement ID not found!']);
+        }
+    }
+    public function approved_petty_cash_statements_adjusted(Request $request){
+        $id = $request->statement_id;
+        if($id){
+            $petty_details = PettyCashStatement::find($id);
+            if($petty_details){
+                if($petty_details->status == 3){
+                    $petty_details->status = 5;
+                    $petty_details->save();
+                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Successfully Adjust!']);
+                }else if($petty_details->status == 5){
+                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Already Adjust!']);
+                }else if($petty_details->status == 4){
+                    return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Is Paid!']);
+                }
+
+            }else{
+                return response()->json(['status' => 0, 'error' => 'Petty Cash Statement not found!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Petty Cash Statement ID not found!']);
+        }
     }
 }

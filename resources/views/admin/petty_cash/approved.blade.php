@@ -1,9 +1,9 @@
 @extends('admin.layout.master')
-@section('title','Petty Cash Statements')
+@section('title','Approved Petty Cash Statements')
 
 @section('content')
     <h1 class="mb-1">
-        Petty Cash Statements
+        Approved Petty Cash Statements
     </h1>
 
     <div class="card">
@@ -62,7 +62,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.petty_cash.statements.list') }}',
+                        url: '{{ route('admin.petty_cash.approved.list') }}',
                         data: {
                             'page': 'all',
                         },
@@ -117,7 +117,7 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     extend: 'excel',
-                    title: 'Petty Cash Statements',
+                    title: 'Approved Petty Cash Statements',
                     className: 'btn btn-primary',
                     text: '<i class="la la-file-excel-o"></i> Excel',
                 }],
@@ -127,7 +127,7 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.petty_cash.statements.list') }}',
+                ajax: '{{ route('admin.petty_cash.approved.list') }}',
                 rowId: 'statement_id',
                 order: [2, 'asc'],
                 columns: [
@@ -161,10 +161,9 @@
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Created</option>' +
-                        '<option value="1">Station Approved</option>' +
-                        '<option value="2">Operation Approved</option>' +
                         '<option value="3">Finance Approved</option>' +
+                        '<option value="4">Paid</option>' +
+                        '<option value="5">Adjusted</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
@@ -199,11 +198,34 @@
                     this.api().table().columns.adjust();
                 }
             });
-            $('body').on('click','button.approve',function () {
+            $('body').on('click','button.paid',function () {
                 var id = $(this).parents('tr').attr('id');
                 if(id){
                     $.ajax({
-                        url: '{!! route('admin.petty_cash.statements.approve') !!}',
+                        url: '{!! route('admin.petty_cash.approved.paid') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'statement_id': id
+                        }
+                    }).done(function(data){
+                        if(data.status){
+                            table.draw(true);
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }
+                    });
+                }else{
+                    var error = 'Statement ID Not Found, Please Try again!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
+
+            $('body').on('click','button.adjusted',function () {
+                var id = $(this).parents('tr').attr('id');
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.petty_cash.approved.adjusted') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',

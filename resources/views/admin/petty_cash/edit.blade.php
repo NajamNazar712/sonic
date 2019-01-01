@@ -10,9 +10,11 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <form id="edit_statement_form" action="{{route('admin.petty_cash.make.submit')}}" method="post">
+                <form id="edit_statement_form" action="{{route('admin.petty_cash.statements.edit.submit')}}" method="post">
+                    @method('PUT')
                     @csrf
                     <input type="hidden" name="selected_rows" id="selected_rows">
+                    <input type="hidden" name="petty_statement_id" id="petty_statement_id" value="{{$petty_statement_details->id}}">
                     <div class="row">
                         <div class="col">
                             <fieldset class="form-group">
@@ -72,7 +74,7 @@
                     </table>
                     <div class="row justify-content-center">
                         <div class="">
-                            <button id="statement_submit" type="submit"  class="btn btn-primary btn-block">Make Statement</button>
+                            <button id="statement_submit" type="submit"  class="btn btn-primary btn-block">Update Details</button>
                         </div>
                     </div>
                 </form>
@@ -161,16 +163,29 @@
             var rows_count = 0;
             var table = $('#datatable').DataTable({
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
+                @if(($petty_statement_details->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty_statement_details->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20))
+
                 buttons:[{
-                    title: 'Edit Statement',
+                    title: 'Edit Details',
                     className: 'btn btn-primary',
-                    text: '<i class="la la-plus"></i> Edit Statement',
+                    text: '<i class="la la-plus"></i> Edit Details',
                     action:function (e) {
-                        add_row();
+                        edit_ops();
                     }
                 }],
+                @endif
+                @if(session('role_id') == 1 || ($petty_statement_details->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
+                buttons:[{
+                    title: 'Edit Details',
+                    className: 'btn btn-primary',
+                    text: '<i class="la la-plus"></i> Edit Details',
+                    action:function (e) {
+                        edit_finance();
+                    }
+                }],
+                @endif
                 "autoWidth": false,
-                scrollX: true, scrollY:'400px',
+                scrollX: true, scrollY:'200px',
                 ajax: '{{ route('admin.petty_cash.statements.edit.list',['id'=>$petty_statement_details->id]) }}',
                 processing: true,
                 serverSide: false,
@@ -182,7 +197,7 @@
                     {data:'account_head' ,name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
                     {data:'account_title' ,name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
                     {data:'hub_name' ,name: 'h.name', class: 'align-middle hub_name custom-col-width form-group'},
-                    {data:'date' ,name: 'date', class: 'align-middle date date-col-width form-group'},
+                    {data:'date' ,name: 'date', class: 'align-middle date form-group'},
                     {data:'expense_details' ,name: 'petty_cash_statement_details.expense_details', class: 'align-middle details_of_expense form-group'},
                     {data:'amount' ,name: 'petty_cash_statement_details.amount', class: 'align-middle expense_amount form-group'},
                     {data:'reference_no' ,name: 'petty_cash_statement_details.reference_no', class: 'align-middle reference_no form-group'},
@@ -232,11 +247,11 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
-                        '<option value="0">Pending</option>' +
-                        '<option value="1">Rejected</option>' +
-                        '<option value="2">Approved</option>' +
-                        '</select>';
+                    // var status_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                    //     '<option value="0">Pending</option>' +
+                    //     '<option value="1">Rejected</option>' +
+                    //     '<option value="2">Approved</option>' +
+                    //     '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;
                         var header = column.header();
@@ -377,6 +392,8 @@
                 var title = selected_head.closest('td').next('td').find('.title_select');
                 if(head == 1){
                     selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",false);
+                }else{
+                    selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",true);
                 }
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.titles') !!}',
@@ -471,6 +488,40 @@
                 }
             });
 
+            function edit_ops(){
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    var id = parseInt(row.id());
+                    if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
+                        $(row.node()).find('td.details_of_expense input').attr('disabled',false);
+                        $(row.node()).find('td.expense_amount input').attr('disabled',false);
+                        $(row.node()).find('td.reference_no input').attr('disabled',false);
+                        $(row.node()).find('td.remarks input').attr('disabled',false);
+                        selected_rows.push(id);
+                    }
+
+                });
+            }
+
+            function edit_finance() {
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    var id = parseInt(row.id());
+                    if($(row.node()).attr('status') == 0 || $(row.node()).attr('status') == 2){
+                        $(row.node()).find('td.account_head select').attr('disabled',false);
+                        $(row.node()).find('td.account_title select').attr('disabled',false);
+                        if($(row.node()).find('td.account_head select').val() == 1){
+                            $(row.node()).find('td.hub_name select').attr('disabled',false);
+                        }
+                        $(row.node()).find('td.details_of_expense input').attr('disabled',false);
+                        $(row.node()).find('td.expense_amount input').attr('disabled',false);
+                        $(row.node()).find('td.reference_no input').attr('disabled',false);
+                        $(row.node()).find('td.remarks input').attr('disabled',false);
+                        selected_rows.push(id);
+                    }
+
+                });
+            }
             {{--$('#reference_no').on('change',function () {--}}
             {{--var reference_handle = $(this);--}}
             {{--var reference = $(this).val();--}}
