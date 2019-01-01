@@ -116,7 +116,7 @@
                         head.push('Rates Added By');
                         head.push('Rates Updated By');
                         head.push('Rates Status');
-                        head.push('Remarks');
+                        head.push('Rates Status Remarks');
                         head.push('Rates Approved By');
                         head.push('Account Activated By');
                         head.push('Account Activation Date');

@@ -115,7 +115,7 @@
                         head.push('Status');
                         head.push('Sales Person Tagged');
                         head.push('Rate Status');
-                        head.push('Remarks');
+                        head.push('Rates Status Remarks');
                         head.push('Rates Added By');
                         head.push('Rates Approved By');
                         $.each(result.data, function(index, values) {
