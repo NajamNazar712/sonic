@@ -2,24 +2,24 @@
 
 namespace App\Console\Commands;
 
-use App\Http\Controllers\Admins\ShipmentActiveAccountController;
+use App\Http\Controllers\Admins\ShipperAccountController;
 use Illuminate\Console\Command;
 
-class AutoDisableAccount extends Command
+class AutoDisableShipperAccount extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'user:disable';
+    protected $signature = 'shipper:disable';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Accounts Auto Disable';
+    protected $description = 'Shipper Accounts Auto Disable';
 
     /**
      * Create a new command instance.
@@ -39,6 +39,6 @@ class AutoDisableAccount extends Command
     public function handle()
     {
         //
-        ShipmentActiveAccountController::disable();
+        ShipperAccountController::disable();
     }
 }
