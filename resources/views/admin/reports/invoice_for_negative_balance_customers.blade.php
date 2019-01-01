@@ -107,7 +107,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        ajax: '{{ route('admin.reports.negative_balance_customers.list') }}',
+                        url: '{{ route('admin.reports.negative_balance_customers.list') }}',
                         data: {
                             'page': 'all'
                         },
@@ -124,13 +124,12 @@
                                 row = [];
 
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
                                 row.push(values.account_no);
-                                row.push(values.shipper);
-                                row.push(values.current_status);
-                                row.push(values.payment_status);
-                                row.push(values.payment_id);
-
+                                row.push(values.name);
+                                row.push(values.phone);
+                                row.push(values.amount);
+                                row.push(values.charges);
+                                row.push(values.payable);
                                 body.push(row);
                             });
                         },
@@ -155,15 +154,15 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                url: '{{ route('admin.reports.negative_balance_customers.list') }}',
+                ajax: '{{ route('admin.reports.negative_balance_customers.list') }}',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle text-center account_no'},
                     { data:'name' ,name: 'u.name', class: 'align-middle shipper'},
                     { data:'phone' ,name: 'u.phone', class: 'align-middle name'},
-                    { data:'amount' ,name: 'pps.amount', class: 'align-middle amount'},
-                    { data:'charges' ,name: 'pps.charges', class: 'align-middle charges'},
-                    { data:'payable' ,name: 'pps.payable', class: 'align-middle payable'}
+                    { data:'amount' ,name: 'pending_payment_shipments.amount', class: 'align-middle amount'},
+                    { data:'charges' ,name: 'pending_payment_shipments.charges', class: 'align-middle charges'},
+                    { data:'payable' ,name: 'pending_payment_shipments.payable', class: 'align-middle payable'}
 
                 ],
                 rowCallback: function(row, data, index) {
