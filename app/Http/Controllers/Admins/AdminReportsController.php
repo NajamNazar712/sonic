@@ -3336,4 +3336,20 @@ class AdminReportsController extends Controller
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
         return Response::download($file, 'sales_person_performance.xlsx',$headers);
     }
+
+    public function negative_balance_customers_index()
+    {
+        return view('admin.reports.invoice_for_negative_balance_customers');
+
+    }
+    public function negative_balance_customers_list(request $request)
+    {
+        $negative = Shipment::leftjoin('users as u','u.id','=','shipments.id')
+            ->leftjoin('pending_payment_shipments as pps','pps.shipment_id','=','shipments.id')
+        ->select('u.id as account_no','u.name as name','u.phone as phone','pps.amount as amount','pps.charges as charges','pps.payable as payable');
+        $datatable = Datatables::of($negative);
+        return $datatable->make(true);
+
+    }
+
 }
