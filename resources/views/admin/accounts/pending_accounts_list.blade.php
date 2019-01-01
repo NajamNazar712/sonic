@@ -33,7 +33,7 @@
                                         <th class="border-primary border-darken-1">Status</th>
                                         <th class="border-primary border-darken-1">Sales Person Tagged</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
-                                        <th class="border-primary border-darken-1">Remarks</th>
+                                        <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rates Added By</th>
                                         <th class="border-primary border-darken-1">Rates Approved By</th>
                                         <th class="border-primary border-darken-1">Action</th>
