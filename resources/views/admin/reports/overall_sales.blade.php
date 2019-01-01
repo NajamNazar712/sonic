@@ -79,7 +79,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)">
+                            <input type="text" name="search_date_from" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_from" placeholder="Date (From)" data-value="{{Carbon\Carbon::now()->subDays(3)}}">
                         </div>
                     </div>
                     <div class="col-4 ">
@@ -90,7 +90,7 @@
                             </span>
                             </div>
 
-                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)">
+                            <input type="text" name="search_date_to" class="form-control pickadate bg-primary border-primary white rounded-right" id="search_date_to" placeholder="Date (To)" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
 
                     </div>
@@ -258,7 +258,8 @@
                 onSet: function(context) {
                 }
             });
-            $('#search_date_from').pickadate({
+
+            var from_date = $('#search_date_from').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -271,7 +272,8 @@
                     }
                 }
             });
-            $('#search_date_to').pickadate({
+
+            var to_date = $('#search_date_to').pickadate({
                 firstDay: 1,
                 clear: '',
                 selectYears: true,
@@ -284,7 +286,6 @@
                     }
                 }
             });
-
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
