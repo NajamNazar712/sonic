@@ -13,6 +13,7 @@ use App\Http\Models\Admin\StationDepositNote;
 use App\Http\Models\CargoConsignment;
 use App\Http\Models\CargoConsignmentShipment;
 use App\Http\Models\City;
+use App\Http\Models\PendingPaymentShipment;
 use App\Http\Models\PickupNote;
 use App\Http\Models\PickupRequest;
 use App\Http\Models\PickupRequestAssignedShipment;
@@ -3338,4 +3339,24 @@ class AdminReportsController extends Controller
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
         return Response::download($file, 'sales_person_performance.xlsx',$headers);
     }
+
+    public function negative_balance_customers_index()
+    {
+        return view('admin.reports.invoice_for_negative_balance_customers');
+
+    }
+    public function negative_balance_customers_list(request $request)
+    {
+        $negative = PendingPaymentShipment::leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
+            ->leftjoin('users as u','u.id','=','s.user_id')
+        ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges','pending_payment_shipments.payable as payable')
+        ->where('payable','<',0);
+        $datatable = Datatables::of($negative)
+            ->addColumn('account_no', function ($user) {
+                return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
+            });
+        return $datatable->make(true);
+
+    }
+
 }

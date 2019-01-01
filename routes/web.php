@@ -788,6 +788,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
 
         });
+        Route::prefix('negative_balance_customers')->name('negative_balance_customers.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@negative_balance_customers_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@negative_balance_customers_list')->name('list');
+
+        });
         Route::prefix('sales_person_performance')->name('sales_person_performance.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@sales_person_performance_index')->name('index');
             Route::post('export_to_excel', 'Admins\AdminReportsController@sales_person_performance_export_to_excel')->name('export_to_excel');
