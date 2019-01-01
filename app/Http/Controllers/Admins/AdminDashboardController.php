@@ -722,6 +722,7 @@ class AdminDashboardController extends Controller
             if($status == 'enable'){
                 if($user->status == 4){
                     $user->status = 3;
+                    $user->disable_remarks = null;
                     $user->save();
                     return response()->json(['status'=>1,'success'=>"User is now enabled!"]);
                 }else{
@@ -5323,7 +5324,7 @@ class AdminDashboardController extends Controller
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5347,6 +5348,13 @@ class AdminDashboardController extends Controller
                 }
                 else{
                     return "Rejected";
+                }
+            })->editColumn('disable_remarks',function ($users){
+                if($users->disable_remarks != null){
+                    return $users->disable_remarks;
+                }
+                else{
+                    return "-";
                 }
             })
             ->filterColumn('users.id', function ($query, $keyword) {
