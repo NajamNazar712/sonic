@@ -27,7 +27,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="creation_date" class="form-control bg-primary border-primary white rounded-right" id="creation_date" placeholder="Transit Date" data-value="">
+                            <input type="text" name="creation_date" class="form-control bg-primary border-primary white rounded-right" id="creation_date" placeholder="Creation Date" data-value="">
                         </div>
 
                     </div>
