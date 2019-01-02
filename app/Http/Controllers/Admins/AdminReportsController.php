@@ -990,11 +990,7 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipments_journey as fstatus', function ($join) {
                 $join->on('fstatus.shipment_id', '=', 'shipments.id')
-                    ->where('fstatus.id','<',
-                        DB::raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)'));
-            })->leftJoin('shipments_journey as ver', function ($join) {
-                $join->on('ver.shipment_id', '=', 'shipments.id')
-                    ->where('ver.id','<',
+                    ->where('fstatus.id','>',
                         DB::raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)'));
             })
             ->leftJoin('shipments_journey as dd', function ($join) {
@@ -1069,12 +1065,12 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('shipments_journey as fsjv',function($join) {
                 $join->on('fsjv.reference_1_id', '=', 'fdnsv.delivery_note_id')
-                ->where('fsjv.id','=', DB::raw('(select min(id) from shipments_journey where shipments_journey.reference_1_id = fdnsv.delivery_note_id and shipments_journey.shipper_status_id > 5)'));
+                ->where('fsjv.id','=', DB::raw('(select min(id) from shipments_journey where shipments_journey.reference_1_id = fdnsv.delivery_note_id and shipments_journey.shipper_status_id > 5 and shipments_journey.verification = 1)'));
             })
             ->leftjoin('shipment_status as fssv','fssv.id','=','fsjv.shipper_status_id')
             ->leftjoin('shipments_journey as lsjv',function($join) {
                 $join->on('lsjv.reference_1_id', '=', 'ldnsv.delivery_note_id')
-                    ->where('lsjv.id','=', DB::raw('(select max(id) from shipments_journey where shipments_journey.reference_1_id = ldnsv.delivery_note_id)'));
+                    ->where('lsjv.id','=', DB::raw('(select max(id) from shipments_journey  where shipments_journey.reference_1_id = ldnsv.delivery_note_id and shipments_journey.verification = 1)'));
             })
             ->leftjoin('shipment_status as lssv','lssv.id','=','lsjv.shipper_status_id')
             ->select('ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','fs.name as first_status','lsjv.created_at as last_status_date','lssv.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status')
