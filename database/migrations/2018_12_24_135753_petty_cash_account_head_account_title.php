@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateUsersTableRejectRemarks extends Migration
+class PettyCashAccountHeadAccountTitle extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class UpdateUsersTableRejectRemarks extends Migration
      */
     public function up()
     {
-        //
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('rejected_reason')->nullable();
+        Schema::create('petty_cash_account_head_account_title', function (Blueprint $table) {
+            $table->integer('petty_cash_account_head_id');
+            $table->integer('petty_cash_account_title_id');
         });
     }
 
@@ -26,9 +26,6 @@ class UpdateUsersTableRejectRemarks extends Migration
      */
     public function down()
     {
-        //
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('rejected_reason');
-        });
+        Schema::dropIfExists('petty_cash_account_head_account_title');
     }
 }

@@ -242,6 +242,10 @@ class Permission
             'finance.invoices_history.returned_shipments' => 122,
             'finance.invoices_history.adjusted_shipments' => 122,
 
+            'admin.petty_cash.make.index' => 145,
+            'admin.petty_cash.statements.index' => 146,
+            'admin.petty_cash.approved.index' => 147,
+
             'admin.month_closing.index' => 141,
             'admin.month_closing.list' => 141,
             'admin.month_closing.confirm' => 142,

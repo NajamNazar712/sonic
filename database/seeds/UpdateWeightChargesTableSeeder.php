@@ -21,7 +21,7 @@ class UpdateWeightChargesTableSeeder extends Seeder
             $charge->save();
         }
 
-        $not_change_shipper_ids = [1274, 459, 1159, 167, 117, 438, 233, 238, 341, 890, 446, 971, 1269, 1001, 273, 343, 309, 1101, 1133, 442, 405, 1239, 1197, 1264, 593, 994, 1245, 375, 616];
+        $not_change_shipper_ids = [343, 1101, 1001, 1269, 1159, 167, 1133, 1271, 375, 468, 1197, 273, 405, 309, 917, 1274, 395, 1027, 442, 415, 1239, 117, 459, 994, 233, 1151, 616, 428, 1182, 967, 971, 341, 238, 486, 602, 852, 868, 1236, 987, 267, 1264, 1152, 890, 580, 566, 258, 1275, 254, 260, 1234, 222];
 
         $charges = \App\Http\Models\WeightCharge::whereNotIn('user_id', $not_change_shipper_ids)->get();
 
@@ -36,9 +36,9 @@ class UpdateWeightChargesTableSeeder extends Seeder
         $charges = \App\Http\Models\WeightCharge::whereIn('user_id', $not_change_shipper_ids)->get();
 
         foreach($charges as $charge) {
-            $charge->national_charges_class_1 = '0';
-            $charge->national_charges_class_2 = '0';
-            $charge->national_charges_class_3 = '0';
+            $charge->national_charges_class_1 = '0%';
+            $charge->national_charges_class_2 = '0%';
+            $charge->national_charges_class_3 = '0%';
 
             $charge->save();
         }
