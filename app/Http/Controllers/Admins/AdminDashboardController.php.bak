@@ -2425,10 +2425,16 @@ class AdminDashboardController extends Controller
                 }
                 //dd($weightAlready);
             }
+<<<<<<< HEAD
             User::where('id',$id)->update(['rate_status'=>1]);
             if($request->authorize == 1){
                 User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id()]);
                 return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
+=======
+            if ($request->authorize == 1) {
+                User::where('id', $id)->update(['status' => 2,'rate_status' => 0, 'rates_authorized_by' => Auth::id()]);
+                return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
+>>>>>>> production
             }
 
             return redirect()->back()->with('success', 'All Rates are updated');
