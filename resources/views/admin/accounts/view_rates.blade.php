@@ -56,16 +56,25 @@
                                                 <div class="col text-center">
                                                     <label class="card-title">Weight Addition</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-2 text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Local Charges</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">National Charges</label>
+                                                    <label class="card-title">National Charges Class A</label>
                                                 </div>
-                                                <div class="col"></div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class B</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class C</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class D</label>
+                                                </div>
+                                                <div class="col-1"></div>
                                             </div>
                                             @if(isset($weight[1]))
                                             @foreach($weight[1] as $index => $onweight)
@@ -88,7 +97,7 @@
                                                             <input type="checkbox" id="OvernightSwitch{{$index}}" class="switchery weightAdditionOvernight" data-color="success" data-size="sm" name="on_wa_switch[{{$index}}]" {{ ($onweight->weight_addition == 1) ? 'checked' : '' }}  disabled/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -104,10 +113,25 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_or_sameday}}" name="on_wa_national_charges[{{$index}}]" disabled>
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_0}}" name="on_class_0_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col">
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_1}}" name="on_class_0_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_2}}" name="on_class_0_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$onweight->national_charges_class_3}}" name="on_class_0_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-1">
 
                                                     </div>
                                                 </div>
@@ -148,12 +172,25 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="on_wa_national_charges[0]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="on_class_0_charges[0]">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col">
-
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="" disabled>
+                                                        </fieldset>
                                                     </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_class_0_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="on_class_0_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-1"></div>
                                                 </div>
                                                 @endif
                                         </div>{{--weight addition div--}}
@@ -737,16 +774,25 @@
                                                 <div class="col text-center">
                                                     <label class="card-title">Weight Addition</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-2 text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Local Charges</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">National Charges</label>
+                                                    <label class="card-title">National Charges Class A</label>
                                                 </div>
-                                                <div class="col"></div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class B</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class C</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class D</label>
+                                                </div>
+                                                <div class="col-1"></div>
                                             </div>
                                             @if(isset($weight[2]))
                                             @foreach($weight[2] as $index => $olweight)
@@ -769,7 +815,7 @@
                                                             <input type="checkbox" id="OverlandSwitch{{$index}}" class="switchery weightAdditionOverland" data-color="success" data-size="sm" name="ol_wa_switch[{{$index}}]" {{ ($olweight->weight_addition == 1) ? 'checked' : '' }} disabled/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -785,10 +831,25 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_or_sameday}}" name="ol_wa_national_charges[{{$index}}]" disabled>
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_0}}" name="ol_wa_national_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col">
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_1}}" name="ol_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_2}}" name="ol_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$olweight->national_charges_class_3}}" name="ol_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-1">
                                                         @if($index>0)
 
                                                         @endif
@@ -831,7 +892,22 @@
                                                     </div>
                                                     <div class="col text-center">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="ol_wa_national_charges[0]">
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="">
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="" disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col text-center">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="" name="" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col"></div>
@@ -1418,16 +1494,25 @@
                                                 <div class="col text-center">
                                                     <label class="card-title">Weight Addition</label>
                                                 </div>
-                                                <div class="col text-center">
+                                                <div class="col-2 text-center">
                                                     <label class="card-title">KG Range</label>
                                                 </div>
                                                 <div class="col text-center">
                                                     <label class="card-title">Local Charges</label>
                                                 </div>
                                                 <div class="col text-center">
-                                                    <label class="card-title">National Charges</label>
+                                                    <label class="card-title">National Charges Class A</label>
                                                 </div>
-                                                <div class="col"></div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class B</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class C</label>
+                                                </div>
+                                                <div class="col text-center">
+                                                    <label class="card-title">National Charges Class D</label>
+                                                </div>
+                                                <div class="col-1"></div>
                                             </div>
                                             @if(isset($weight[3]))
                                             @foreach($weight[3] as $index => $detweight)
@@ -1450,7 +1535,7 @@
                                                             <input type="checkbox" id="DetainSwitch{{$index}}" class="switchery weightAdditionDetain" data-color="success" data-size="sm" name="detain_wa_switch[{{$index}}]" {{ ($detweight->weight_addition == 1) ? 'checked' : '' }} disabled/>
                                                         </div>
                                                     </div>
-                                                    <div class="col text-center">
+                                                    <div class="col-2 text-center">
 
                                                         <fieldset style="padding-top: 5px;">
                                                             <div class="input-group input-group-sm form-group">
@@ -1466,12 +1551,23 @@
                                                     </div>
                                                     <div class="col">
                                                         <fieldset class="form-group">
-                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_or_sameday}}" name="detain_wa_national_charges[{{$index}}]" disabled>
+                                                            <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_0}}" name="detain_wa_national_charges[{{$index}}]" disabled>
                                                         </fieldset>
                                                     </div>
                                                     <div class="col">
-
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_1}}" name="detain_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div><div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_2}}" name="detain_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
+                                                    </div><div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value="{{$detweight->national_charges_class_3}}" name="detain_wa_national_charges[{{$index}}]" disabled>
+                                                        </fieldset>
                                                     </div>
+                                                    <div class="col-1">
 
                                                 </div>{{--Row--}}
                                             @endforeach
@@ -1514,7 +1610,20 @@
                                                             <input type="text" class="form-control amount" data-rule-required="true" data-msg-required="This field is required" value="" name="detain_wa_national_charges[0]">
                                                         </fieldset>
                                                     </div>
-                                                    <div class="col"></div>
+                                                    <div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required" value=""  disabled>
+                                                        </fieldset>
+                                                    </div><div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  disabled>
+                                                        </fieldset>
+                                                    </div><div class="col">
+                                                        <fieldset class="form-group">
+                                                            <input type="text" class="form-control dec-percent" data-rule-required="true" data-msg-required="This field is required"  disabled>
+                                                        </fieldset>
+                                                    </div>
+                                                    <div class="col-1">
 
                                                 </div>{{--Row--}}
                                                 @endif
