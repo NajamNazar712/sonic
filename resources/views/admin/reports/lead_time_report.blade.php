@@ -109,11 +109,12 @@
                         <th class="border-primary border-darken-1">Transit TAT(A-B)</th>
                         <th class="border-primary border-darken-1">Junction Date</th>
                         <th class="border-primary border-darken-1">First Delivery Note No</th>
-                        <th class="border-primary border-darken-1">First Status</th>
+                        <th class="border-primary border-darken-1">First Update Status</th>
                         <th class="border-primary border-darken-1">First Status Date(C)</th>
                         <th class="border-primary border-darken-1">First Verification Status</th>
                         <th class="border-primary border-darken-1">First Verification Date</th>
-                        <th class="border-primary border-darken-1">Last Status</th>
+                        <th class="border-primary border-darken-1">Last Delivery Note No</th>
+                        <th class="border-primary border-darken-1">Last Update Status</th>
                         <th class="border-primary border-darken-1">Last Status Date(C)</th>
                         <th class="border-primary border-darken-1">Last Verification Status</th>
                         <th class="border-primary border-darken-1">Last Verification Date</th>
@@ -313,6 +314,7 @@
                             head.push('First Status Date(C)');
                             head.push('First Verification Status');
                             head.push('First Verification Date');
+                            head.push('Last Delivery Note No');
                             head.push('Last Status');
                             head.push('Last Status Date(C)');
                             head.push('Last Verification Status');
@@ -348,11 +350,12 @@
                                 row.push(values.reached_at_destination);
                                 row.push(values.transit_tat);
                                 row.push(values.junction);
-                                row.push(values.delivery_note_id);
+                                row.push(values.first_delivery_note_id);
                                 row.push(values.first_status);
                                 row.push(values.first_status_date);
                                 row.push(values.first_verification);
                                 row.push(values.verification_status_date);
+                                row.push(values.last_delivery_note_id);
                                 row.push(values.last_status);
                                 row.push(values.last_status_date);
                                 row.push(values.last_verification);
@@ -431,13 +434,14 @@
                     {data: 'reached_at_destination', name: 'reached_at_destination', class: 'align-middle reached_at_destination'},
                     {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat', orderable: false, searchable: false},
                     {data: 'junction', name: 'ccjr.created_at', class: 'align-middle junction', orderable: false, searchable: false},
-                    {data: 'delivery_note_id', name: 'dn.id', class: 'align-middle delivery_note_id', orderable: false, searchable: false},
+                    {data: 'first_delivery_note_id', name: 'dn.id', class: 'align-middle first_delivery_note_id', orderable: false, searchable: false},
                     {data: 'first_status', name: 'fs.name', class: 'align-middle first_status'},////
                     {data: 'first_status_date', name: 'first_status_date', class: 'align-middle first_status_date'},////
                     {data: 'first_verification', name: 'lssv.name', class: 'align-middle first_verification', orderable: false, searchable: false},
                     {data: 'verification_status_date', name: 'fsjv.created_at', class: 'align-middle verification_status_date', orderable: false, searchable: false},
-                    {data: 'last_status', name: 'fss.name', class: 'align-middle last_status', orderable: false, searchable: false},
-                    {data: 'last_status_date', name: 'ffstatus.updated_at', class: 'align-middle last_status_date', orderable: false, searchable: false},
+                    {data: 'last_delivery_note_id', name: 'dnss.id', class: 'align-middle last_delivery_note_id', orderable: false, searchable: false},
+                    {data: 'last_status', name: 'ls.name', class: 'align-middle last_status', orderable: false, searchable: false},
+                    {data: 'last_status_date', name: 'lstatus.created_at', class: 'align-middle last_status_date', orderable: false, searchable: false},
                     {data: 'last_verification', name: 'lssv.name ', class: 'align-middle first_verification', orderable: false, searchable: false},
                     {data: 'last_verification_status_date', name: 'lsjv.created_at', class: 'align-middle verification_status_date', orderable: false, searchable: false},
                     {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat', orderable: false, searchable: false},////
