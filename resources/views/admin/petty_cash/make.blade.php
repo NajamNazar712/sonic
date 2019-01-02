@@ -91,6 +91,9 @@
         .custom-col-width{
             min-width: 150px;
         }
+        .custom-hub-col-width{
+            min-width: 100px;
+        }
         .date-col-width{
             min-width: 200px;
         }
@@ -179,7 +182,7 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {name: 'account_head', class: 'align-middle account_head custom-col-width form-group'},
                     {name: 'account_title', class: 'align-middle account_title custom-col-width form-group'},
-                    {name: 'hub', class: 'align-middle hub custom-col-width form-group'},
+                    {name: 'hub', class: 'align-middle hub custom-hub-col-width form-group'},
                     {name: 'date', class: 'align-middle date date-col-width form-group'},
                     {name: 'details_of_expense', class: 'align-middle details_of_expense form-group'},
                     {name: 'amount', class: 'align-middle expense_amount form-group'},
@@ -252,10 +255,10 @@
                 var hub_select = '<select class="form-control hub_select select2" disabled name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
                 var date_input = '<div class="form-group input-group mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
 
-                var expense_detail_input = '<input class="form-control" name="expense['+rows_count+']" placeholder="Enter Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">';
-                var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Enter Amount"  data-rule-required="true" data-msg-required="Amount is required">';
-                var reference_input = '<input class="form-control reference_row" name="reference['+rows_count+']" placeholder="Enter Reference No" data-rule-required="true" data-msg-required="Reference No. is required">';
-                var remarks_input = '<input class="form-control" name="remarks['+rows_count+']" placeholder="Enter Remarks">';
+                var expense_detail_input = '<input class="form-control" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">';
+                var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Amount is required">';
+                var reference_input = '<input class="form-control reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Reference No. is required">';
+                var remarks_input = '<input class="form-control" name="remarks['+rows_count+']" placeholder="Remarks">';
                 var heads = $.map({!! $heads !!}, function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.name;
@@ -321,6 +324,8 @@
                 var title = selected_head.closest('td').next('td').find('.title_select');
                 if(head == 1){
                     selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",false);
+                }else{
+                    selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",true);
                 }
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.titles') !!}',
