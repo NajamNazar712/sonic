@@ -180,6 +180,7 @@
             var shipment_ids = [];
             var table = $('#datatable').DataTable({
                 dom: 'ltipr',
+                "autoWidth": false,
                 scrollX: true,
                 paging:false,
                 columns: [

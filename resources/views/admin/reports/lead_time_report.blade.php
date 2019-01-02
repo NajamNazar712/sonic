@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
 @section('title', 'Lead Time Report')
-
+<meta name="csrf-token" content="{{ csrf_token() }}">
 @section('content')
     <h1 class="mb-1">
-       Lead Time Report
+        Lead Time Report
     </h1>
 
     <div class="card">
@@ -55,6 +55,15 @@
                             </select>
                         </fieldset>
                     </div>
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_shipper" id="search_shipper" class="form-control select2">
+                                @foreach($shipper as $shippers)
+                                    <option value="{{$shippers->id}}">{{$shippers->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
 
                     <div class="col-4">
                         <div class="form-group input-group">
@@ -63,7 +72,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="">
+                            <input type="text" name="from_date" class="form-control bg-primary border-primary white rounded-right" id="from_date" placeholder="Date From" data-value="{{Carbon\Carbon::now()->subDays(2)}}">
                         </div>
                     </div>
                     <div class="col-4">
@@ -73,7 +82,7 @@
                                 <span class="la la-calendar-o"></span>
                             </span>
                             </div>
-                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="">
+                            <input type="text" name="to_date" class="form-control bg-primary border-primary white rounded-right" id="to_date" placeholder="Date To" data-value="{{ Carbon\Carbon::today() }}">
                         </div>
                     </div>
 
@@ -88,6 +97,7 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
+                        <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -97,8 +107,16 @@
                         <th class="border-primary border-darken-1">Arrival Date(A)</th>
                         <th class="border-primary border-darken-1">Reached At Destination Date(B)</th>
                         <th class="border-primary border-darken-1">Transit TAT(A-B)</th>
+                        <th class="border-primary border-darken-1">Junction Date</th>
+                        <th class="border-primary border-darken-1">First Delivery Note No</th>
                         <th class="border-primary border-darken-1">First Status</th>
                         <th class="border-primary border-darken-1">First Status Date(C)</th>
+                        <th class="border-primary border-darken-1">First Verification Status</th>
+                        <th class="border-primary border-darken-1">First Verification Date</th>
+                        <th class="border-primary border-darken-1">Last Status</th>
+                        <th class="border-primary border-darken-1">Last Status Date(C)</th>
+                        <th class="border-primary border-darken-1">Last Verification Status</th>
+                        <th class="border-primary border-darken-1">Last Verification Date</th>
                         <th class="border-primary border-darken-1">Attempt TAT(A-C)</th>
                         <th class="border-primary border-darken-1">Dispatch TAT(B-C)</th>
                         <th class="border-primary border-darken-1">Delivered Date(D)</th>
@@ -216,6 +234,11 @@
                 width:'100%',
                 allowClear:true
             });
+            $('#search_shipper').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Shipper',
+                width:'100%',
+                allowClear:true
+            });
             var from_max = '{{ Carbon\Carbon::now() }}';
             var to_max = '{{ Carbon\Carbon::now() }}';
             var from_date = $('#from_date').pickadate({
@@ -264,6 +287,7 @@
                             'search_destination': $('#search_destination').val(),
                             'search_hub': $('#search_hub').val(),
                             'search_status': $('#search_status').val(),
+                            'search_shipper': $('#search_shipper').val(),
                             'search_from': $('input[name="from_date_formatted"]').val(),
                             'search_to': $('input[name="to_date_formatted"]').val()
                         },
@@ -273,6 +297,7 @@
                             head.push('S.No');
                             head.push('Tracking .No');
                             head.push('Account No.');
+                            head.push('Vendor Name');
                             head.push('Shipper');
                             head.push('Origin');
                             head.push('Destination');
@@ -282,8 +307,16 @@
                             head.push('Arrival Date(A)');
                             head.push('Reached At Destination Date(B)');
                             head.push('Transit TAT(A-B)');
+                            head.push('junction Date');
+                            head.push('First Delivery Note No');
                             head.push('First Status');
                             head.push('First Status Date(C)');
+                            head.push('First Verification Status');
+                            head.push('First Verification Date');
+                            head.push('Last Status');
+                            head.push('Last Status Date(C)');
+                            head.push('Last Verification Status');
+                            head.push('Last Verification Date');
                             head.push('Attempt TAT(A-C)');
                             head.push('Dispatch TAT(B-C)');
                             head.push('Delivered Date(D)');
@@ -304,6 +337,7 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
+                                row.push(values.vendor);
                                 row.push(values.shipper);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -313,8 +347,16 @@
                                 row.push(values.arrival_date);
                                 row.push(values.reached_at_destination);
                                 row.push(values.transit_tat);
+                                row.push(values.junction);
+                                row.push(values.delivery_note_id);
                                 row.push(values.first_status);
                                 row.push(values.first_status_date);
+                                row.push(values.first_verification);
+                                row.push(values.verification_status_date);
+                                row.push(values.last_status);
+                                row.push(values.last_status_date);
+                                row.push(values.last_verification);
+                                row.push(values.last_verification_status_date);
                                 row.push(values.attempt_tat);
                                 row.push(values.dispatch_tat);
                                 row.push(values.delivered_date);
@@ -357,22 +399,28 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.lead_time.list') }}',
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.search_tracking_no = $('#search_tracking_no').val();
                         d.search_origin = $('#search_origin').val();
                         d.search_destination = $('#search_destination').val();
                         d.search_hub = $('#search_hub').val();
                         d.search_status = $('#search_status').val();
+                        d.search_shipper = $('#search_shipper').val();
                         d.search_from = $('input[name="from_date_formatted"]').val();
                         d.search_to = $('input[name="to_date_formatted"]').val();
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[9, 'asc']],
+                order: [[10, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
+                    {data: 'vendor', name: 'cc.transport_mode_vendor_id', class: 'align-middle vendor'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
@@ -382,8 +430,16 @@
                     {data: 'arrival_date', name: 'arrival_date', class: 'align-middle arrival_date'},
                     {data: 'reached_at_destination', name: 'reached_at_destination', class: 'align-middle reached_at_destination'},
                     {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat', orderable: false, searchable: false},
+                    {data: 'junction', name: 'ccjr.created_at', class: 'align-middle junction', orderable: false, searchable: false},
+                    {data: 'delivery_note_id', name: 'dn.id', class: 'align-middle delivery_note_id', orderable: false, searchable: false},
                     {data: 'first_status', name: 'fs.name', class: 'align-middle first_status'},////
                     {data: 'first_status_date', name: 'first_status_date', class: 'align-middle first_status_date'},////
+                    {data: 'first_verification', name: 'lssv.name', class: 'align-middle first_verification', orderable: false, searchable: false},
+                    {data: 'verification_status_date', name: 'fsjv.created_at', class: 'align-middle verification_status_date', orderable: false, searchable: false},
+                    {data: 'last_status', name: 'fss.name', class: 'align-middle last_status', orderable: false, searchable: false},
+                    {data: 'last_status_date', name: 'ffstatus.updated_at', class: 'align-middle last_status_date', orderable: false, searchable: false},
+                    {data: 'last_verification', name: 'lssv.name ', class: 'align-middle first_verification', orderable: false, searchable: false},
+                    {data: 'last_verification_status_date', name: 'lsjv.created_at', class: 'align-middle verification_status_date', orderable: false, searchable: false},
                     {data: 'attempt_tat', name: 'attempt_tat', class: 'align-middle attempt_tat', orderable: false, searchable: false},////
                     {data: 'dispatch_tat', name: 'dispatch_tat', class: 'align-middle dispatch_tat', orderable: false, searchable: false},
                     {data: 'delivered_date', name: 'delivered_date', class: 'align-middle delivered_date'},

@@ -35,9 +35,11 @@
                                         <th class="border-primary border-darken-1">Rate Added By</th>
                                         <th class="border-primary border-darken-1">Rate Updated By</th>
                                         <th class="border-primary border-darken-1">Rate Status</th>
+                                        <th class="border-primary border-darken-1">Rate Status Remarks</th>
                                         <th class="border-primary border-darken-1">Rate Approved By</th>
                                         <th class="border-primary border-darken-1">Account Activated By</th>
                                         <th class="border-primary border-darken-1">Account Activation Date</th>
+                                        <th class="border-primary border-darken-1">Account Disable Remarks</th>
                                         <th class="border-primary border-darken-1">Action</th>
                                     </tr>
                                 </thead>
@@ -114,9 +116,11 @@
                         head.push('Rates Added By');
                         head.push('Rates Updated By');
                         head.push('Rates Status');
+                        head.push('Rates Status Remarks');
                         head.push('Rates Approved By');
                         head.push('Account Activated By');
                         head.push('Account Activation Date');
+                        head.push('Account Disable Remarks');
                         $.each(result.data, function(index, values) {
                             row = [];
 
@@ -136,9 +140,11 @@
                             row.push(values.added_by);
                             row.push(values.updated_by);
                             row.push(values.rate_status);
+                            row.push(values.rejected_reason);
                             row.push(values.approved_by);
                             row.push(values.account_activated_by);
                             row.push(values.activated_date);
+                            row.push(values.disable_remarks);
 
                             body.push(row);
                         });
@@ -184,9 +190,11 @@
                 {data: 'added_by', name: 'rab.name', class: 'align-middle added_by'},
                 {data: 'updated_by', name: 'rabna.name', class: 'align-middle updated_by'},
                 {data: 'rate_status', name: 'rate_status', class: 'align-middle rate_status'},
+                {data: 'rejected_reason', name: 'users.rejected_reason', class: 'align-middle rejected_reason'},
                 {data: 'approved_by', name: 'rabb.name', class: 'align-middle approved_by'},
                 {data: 'account_activated_by', name: 'rabba.name', class: 'align-middle account_activated_by'},
                 {data: 'activated_date', name: 'users.activated_at', class: 'align-middle activated_date'},
+                {data: 'disable_remarks', name: 'users.disable_remarks', class: 'align-middle disable_remarks', orderable: false, searchable: false},
                 {data: 'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
             ],
            rowCallback: function(row, data, index) {
@@ -209,7 +217,7 @@
                     var column = this;
                     var header = column.header();
 
-                    if ($(header).is('.action')  || $(header).is('.serial_number')) {
+                    if ($(header).is('.action')  || $(header).is('.serial_number') || $(header).is('.disable_remarks')) {
                         $(td).appendTo($(search));
                     }else if($(header).is('.status')){
                         $(drop_select).appendTo($(search))
@@ -368,6 +376,7 @@
                         }
                         $('#saletag').val('').trigger('change');
                         $('#SalesTagModal').modal('hide');
+                        table.draw(true);
                     });
             }else{
                 var error = "Sales Person Not Selected!";
