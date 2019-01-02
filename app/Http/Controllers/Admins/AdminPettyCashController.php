@@ -23,8 +23,13 @@ class AdminPettyCashController extends Controller
     }
     public function make_petty_cash_statement_index(){
         $head = PettyCashAccountHead::select('id','name')->get();
+        if(session('role_id') == 1){
+            $hub_cities = City::where('hub',1)->where('status',1)->select('id','name')->get();
+        }else{
+            $hub_cities = City::where('hub',1)->where('status',1)->whereIn('id',session('hubs'))->select('id','name')->get();
+        }
         $hubs = City::where('hub',1)->where('status',1)->select('id','name')->get();
-        return view('admin.petty_cash.make')->with(['heads' => $head,'hubs' => $hubs]);
+        return view('admin.petty_cash.make')->with(['heads' => $head,'hubs' => $hubs,'hub_cities' => $hub_cities]);
     }
 
     public function make_petty_cash_statement_check_reference(Request $request){
@@ -199,7 +204,12 @@ class AdminPettyCashController extends Controller
     }
 
     public function petty_cash_statements_index(){
-        return view('admin.petty_cash.statements');
+        if(session('role_id') == 1){
+            $hubs = City::where('hub',1)->where('status',1)->get();
+        }else{
+            $hubs = City::where('hub',1)->where('status',1)->whereIn('id',session('hubs'))->get();
+        }
+        return view('admin.petty_cash.statements')->with(['hubs'=> $hubs]);
     }
 
     public function petty_cash_statements_list(Request $request){

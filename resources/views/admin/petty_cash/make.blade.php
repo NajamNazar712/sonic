@@ -17,7 +17,7 @@
                         <div class="col">
                             <fieldset class="form-group">
                                 <select name="select_statement_hub" id="select_statement_hub" class="form-control select2" data-rule-required="true" data-msg-required="Hub is required">
-                                    @foreach($hubs as $city)
+                                    @foreach($hub_cities as $city)
                                         <option value="{{$city->id}}">{{$city->name}}</option>
                                     @endforeach
                                 </select>
@@ -94,6 +94,12 @@
         .date-col-width{
             min-width: 200px;
         }
+        td .picker__day {
+            padding: 1px;
+        }
+        .date .picker td {
+            border: transparent;
+        }
     </style>
 @endsection
 
@@ -167,7 +173,7 @@
                     }
                 }],
                 "autoWidth": false,
-                scrollX: true, scrollY:'500px',
+                scrollX: true, scrollY:'300px',
                 paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -234,6 +240,9 @@
                 "Statement Reference Number already exists."
             );
 
+            $('body').on('change','#datatable tr td.details_of_expense input,#datatable tr td.remarks input',function() {
+                $(this).val($(this).val().trim());
+            });
 
             function add_row() {
                 rows_count++;
@@ -244,8 +253,8 @@
                 var date_input = '<div class="form-group input-group mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
 
                 var expense_detail_input = '<input class="form-control" name="expense['+rows_count+']" placeholder="Enter Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">';
-                var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Enter Amount">';
-                var reference_input = '<input class="form-control reference_row" name="reference['+rows_count+']" placeholder="Enter Reference No" data-rule-required="true" data-msg-required="Amount is required">';
+                var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Enter Amount"  data-rule-required="true" data-msg-required="Amount is required">';
+                var reference_input = '<input class="form-control reference_row" name="reference['+rows_count+']" placeholder="Enter Reference No" data-rule-required="true" data-msg-required="Reference No. is required">';
                 var remarks_input = '<input class="form-control" name="remarks['+rows_count+']" placeholder="Enter Remarks">';
                 var heads = $.map({!! $heads !!}, function (obj) {
                     obj.id = obj.id;
