@@ -697,11 +697,11 @@
 
                 // Add legend
                 legend: {
-                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)']
+                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)','Canceled Shipment(s)']
                 },
 
                 // Add custom colors
-                color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a'],
+                color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a','#FF0000'],
 
                 // Hirozontal axis
                 xAxis: [{
@@ -744,6 +744,11 @@
                         name: 'In Process Shipment(s)',
                         type: 'line',
                         data: @json($graph['pending'])
+                    },
+                    {
+                        name: 'Canceled Shipment(s)',
+                        type: 'line',
+                        data: @json($graph['canceled'])
                     }
                 ]
             };
@@ -787,9 +792,9 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)']
+                                data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)', 'Canceled Shipment(s)']
                             },
-                            color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a'],
+                            color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a','#FF0000'],
 
                             xAxis: [{
                                 type: 'category',
@@ -828,6 +833,11 @@
                                     name: 'In Process Shipment(s)',
                                     type: 'line',
                                     data: data.graph['pending']
+                                },
+                                {
+                                    name: 'Canceled Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['canceled']
                                 }
                             ]
                         };
