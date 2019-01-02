@@ -270,9 +270,14 @@ class AdminPettyCashController extends Controller
 
                 }
                 return $dropdown;
-            })
-            ->make(true);
-        return $petty;
+            });
+        if ($hub = $request->get('search_hub')) {
+            $petty->where('h.id', '=', $hub);
+        }
+        if ($search_date = $request->get('search_creation_date')) {
+            $petty->whereDate('petty_cash_statements.created_at', $search_date);
+        }
+        return $petty->make(true);
     }
 
     public function petty_cash_statements_approve(Request $request){
