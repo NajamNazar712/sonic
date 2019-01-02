@@ -3020,7 +3020,7 @@ class AdminFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . (($payment_mode == 'IBFT') ? number_format($shipment->weight_charges) : '0') . '</td>
+                              <td>' . (($payment_mode == 'IBFT' && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
                               <td>' . (($payment_mode == 'IBFT' && $done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
                               <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable) : '0') . '</td>
                             </tr>
