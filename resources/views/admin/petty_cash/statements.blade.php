@@ -10,17 +10,17 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                <div class="row mb-2 justify-content-center">
-                    <div class="col">
-                        <fieldset class="form-group">
-                            <select name="search_hub" id="search_hub" class="form-control select2">
-                                @foreach($hubs as $city)
-                                    <option value="{{$city->id}}">{{$city->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                </div>
+                {{--<div class="row mb-2 justify-content-center">--}}
+                    {{--<div class="col">--}}
+                        {{--<fieldset class="form-group">--}}
+                            {{--<select name="search_hub" id="search_hub" class="form-control select2">--}}
+                                {{--@foreach($hubs as $city)--}}
+                                    {{--<option value="{{$city->id}}">{{$city->name}}</option>--}}
+                                {{--@endforeach--}}
+                            {{--</select>--}}
+                        {{--</fieldset>--}}
+                    {{--</div>--}}
+                {{--</div>--}}
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -139,7 +139,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.petty_cash.statements.list') }}',
                 rowId: 'statement_id',
-                order: [2, 'asc'],
+                order: [1, 'asc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'statement_id', name: 'petty_cash_statements.id', class: 'align-middle statement_id'},

@@ -129,7 +129,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.petty_cash.approved.list') }}',
                 rowId: 'statement_id',
-                order: [2, 'asc'],
+                order: [1, 'asc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'statement_id', name: 'petty_cash_statements.id', class: 'align-middle statement_id'},
