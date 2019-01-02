@@ -93,8 +93,8 @@ class AdminDashboardController extends Controller
         $stats['canceled'] = Shipment::where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49])->whereBetween('created_at',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
             $stats['total'] = Shipment::where(function($query) {
@@ -168,7 +168,7 @@ class AdminDashboardController extends Controller
 
             $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
             $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[2,3,4]);
-            $canceled = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',17);
+            $canceled = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',17);
             $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
             $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19]);
             $return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46]);
