@@ -176,7 +176,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61, 120, 121, 122, 134, 136], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61, 120, 121, 122, 134, 136, 145, 146, 147], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Finance</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(57, session('permissions')))
@@ -232,9 +232,28 @@
                                 </ul>
                             </li>
                         @endif
+
+                        @if (session('role_id') == 1 || count(array_intersect([145, 146, 147], session('permissions'))) !== 0)
+                            <li class=" nav-item"><a href="#"><span class="menu-title">Petty Cash</span></a>
+                                <ul class="menu-content">
+                                    @if (session('role_id') == 1 || in_array(145, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.petty_cash.make.index') }}">Make</a></li>
+                                    @endif
+
+                                    @if (session('role_id') == 1 || in_array(146, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.petty_cash.statements.index') }}">Statements</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(147, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.petty_cash.approved.index') }}">Approved</a></li>
+                                    @endif
+                                </ul>
+                            </li>
+                        @endif
                     </ul>
                 </li>
             @endif
+
+
 
             @if (session('role_id') == 1 || in_array(141, session('permissions')))
                 <li class=" nav-item"><a href={{ route('admin.month_closing.index') }}><span class="menu-title">Month Closing</span></a>
