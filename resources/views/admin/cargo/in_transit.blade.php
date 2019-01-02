@@ -434,37 +434,20 @@
 						text: 'Update at Link',
 						className: 'btn btn-primary receive_at_link',
 						action: function (e, dt, node, config) {
-							$.ajax({
-								url: '{!! route('admin.cargo.in_transit.junctions') !!}',
-								method: 'POST',
-								data: {
-									'_token': '{{ csrf_token() }}'
-								}
-							})
-							.done(function(data) {
-								$('#receive_at_link #scan_seal_number_form .seal_number').val('');
+							$('#receive_at_link #scan_seal_number_form .seal_number').val('');
 
-								receive_at_link_table.clear().draw();
+							receive_at_link_table.clear().draw();
 
-								cargo_consignment_ids = [];
+							cargo_consignment_ids = [];
 
-								$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', true);
+							$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', true);
 
-								if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
-									$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
-								}
+							if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
+								$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
+							}
 
-								$.each(data, function(index, junction) {
-									$('#receive_at_link #receive_at_link_form .junction').append('<option value="' + junction.id + '">' + junction.name + '</option>');
-								});
+							$('#receive_at_link #receive_at_link_form .junction').hide();
 
-								$('#receive_at_link #receive_at_link_form .junction').prepend('<option value="" selected="selected"></option>').select2({
-									width: '150px',
-									placeholder: 'Junction*'
-								}).bind('change', function() {
-									$(this).valid();
-								});
-							});
 
 							$('#receive_at_link').modal('show');
 						}
@@ -661,7 +644,6 @@
 			@if (session('role_id') == 1 || in_array(30, session('permissions')))
 				var receive_at_link_table = $('#receive_at_link_datatable').DataTable({
 					dom: 'tr',
-					scrollX: true,
                     "autoWidth": false,
                     paging: false,
 					columns: [
@@ -818,6 +800,33 @@
 									receive_at_link_table.draw(false);
 
 									cargo_consignment_ids.push(data.details.cargo_number);
+
+									$.ajax({
+										url: '{!! route('admin.cargo.in_transit.junctions') !!}',
+										method: 'POST',
+										data: {
+											'_token': '{{ csrf_token() }}',
+											'ids': cargo_consignment_ids
+										}
+									})
+									.done(function(data) {
+										if ($('#receive_at_link #receive_at_link_form .junction').hasClass('select2-hidden-accessible')) {
+											$('#receive_at_link #receive_at_link_form .junction').html('').select2('destroy');
+										}
+
+										$('#receive_at_link #receive_at_link_form .junction').show();
+
+										$.each(data, function(index, junction) {
+											$('#receive_at_link #receive_at_link_form .junction').append('<option value="' + junction.id + '">' + junction.name + '</option>');
+										});
+
+										$('#receive_at_link #receive_at_link_form .junction').prepend('<option value="" selected="selected"></option>').select2({
+											width: '150px',
+											placeholder: 'Junction*'
+										}).bind('change', function() {
+											$(this).valid();
+										});
+									});
 
 									$('#receive_at_link #receive_at_link_form button.confirm').prop('disabled', false);
 

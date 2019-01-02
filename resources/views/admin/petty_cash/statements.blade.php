@@ -10,17 +10,31 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
-                {{--<div class="row mb-2 justify-content-center">--}}
-                    {{--<div class="col">--}}
-                        {{--<fieldset class="form-group">--}}
-                            {{--<select name="search_hub" id="search_hub" class="form-control select2">--}}
-                                {{--@foreach($hubs as $city)--}}
-                                    {{--<option value="{{$city->id}}">{{$city->name}}</option>--}}
-                                {{--@endforeach--}}
-                            {{--</select>--}}
-                        {{--</fieldset>--}}
-                    {{--</div>--}}
-                {{--</div>--}}
+                <div class="row mb-2 justify-content-center">
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="search_hub" id="search_hub" class="form-control select2">
+                                @foreach($hubs as $city)
+                                    <option value="{{$city->id}}">{{$city->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group ">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+                            <input type="text" name="creation_date" class="form-control bg-primary border-primary white rounded-right" id="creation_date" placeholder="Creation Date" data-value="">
+                        </div>
+
+                    </div>
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
+                    </div>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -55,6 +69,8 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
 @endsection
 
@@ -64,9 +80,32 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var search_hub = $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Hub',
+                width:'100%',
+                allowClear:true
+            });
+            var creation_date = $('#creation_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#transit_date_root').css('top','40px');
+                }
+            });
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -137,7 +176,14 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.petty_cash.statements.list') }}',
+                {{--ajax: '{{ route('admin.petty_cash.statements.list') }}',--}}
+                ajax: {
+                    url: '{{ route('admin.petty_cash.statements.list') }}',
+                    data: function (d) {
+                        d.search_hub = $('#search_hub').val();
+                        d.search_creation_date = $('input[name="creation_date_formatted"]').val();
+                    }
+                },
                 rowId: 'statement_id',
                 order: [1, 'asc'],
                 columns: [
