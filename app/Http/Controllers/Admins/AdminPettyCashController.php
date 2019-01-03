@@ -35,9 +35,9 @@ class AdminPettyCashController extends Controller
     public function make_petty_cash_statement_check_reference(Request $request){
         $reference = $request->reference_id;
         if(PettyCashStatement::where('reference_no',$reference)->exists()){
-            return 'true';
+            return "true";
         }else{
-            return 'false';
+            return "false";
         }
     }
 
@@ -249,8 +249,6 @@ class AdminPettyCashController extends Controller
                     $status = 'Station Approved';
                 }else if($petty->status == 2){
                     $status = 'Operation Approved';
-                }else if($petty->status == 3){
-                    $status = 'Finance Approved';
                 }
                 return $status;
             })
@@ -262,11 +260,11 @@ class AdminPettyCashController extends Controller
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
 
-                $dropdown .= '<a href="'.$route.'" class="dropdown-item" ><i class="ft-plus-circle"></i> View Statement</a>';
+                $dropdown .= '<a href="'.$route.'" class="dropdown-item" ><i class="ft-eye"></i> View Details</a>';
 
                 if(session('role_id') == 1 || ($petty->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20) || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
 
-                    $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Approve</div></button>';
+                    $dropdown .= '<button type="button" class="dropdown-item approve" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div>Approve</button>';
 
                 }
                 return $dropdown;
@@ -341,7 +339,7 @@ class AdminPettyCashController extends Controller
                     $petty_details->status = 1;
                     $petty_details->updated_by = Auth::id();
                     $petty_details->save();
-                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Rejected!']);
                 }else if($petty_details->status == 1){
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details Already Rejected!']);
                 }
@@ -428,21 +426,24 @@ class AdminPettyCashController extends Controller
                     $status = 'Paid';
 
                 }else if($petty->status == 5){
-                    $status = 'Reverted';
+                    $status = 'Adjusted';
                 }
                 return $status;
             })
             ->addColumn('action',function ($petty){
                 $dropdown = '';
                 if(session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)){
-
+                    if($petty->status == 3){
                     $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                 <div class="dropdown-menu dropdown-menu-sm">
             ';
-                    $dropdown .= '<button type="button" class="dropdown-item paid" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Paid</div></button>';
-                    $dropdown .= '<button type="button" class="dropdown-item adjusted" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Adjusted</div></button>';
+
+                        $dropdown .= '<button type="button" class="dropdown-item paid" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Paid</div></button>';
+
+                        $dropdown .= '<button type="button" class="dropdown-item adjusted" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-clipboard"></i></div><div class="col-9 offset-1">Adjusted</div></button>';
+                    }
 
                 }
                 return $dropdown;

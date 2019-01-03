@@ -162,9 +162,8 @@
             var selected_rows = [];
             var rows_count = 0;
             var table = $('#datatable').DataTable({
-                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 @if(($petty_statement_details->status == 0 && (session('role_id') == 9) || session('role_id') == 10) || ($petty_statement_details->status == 1 && (session('role_id') == 3) || session('role_id') == 8 || session('role_id') == 20))
-
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     title: 'Edit Details',
                     className: 'btn btn-primary',
@@ -173,8 +172,8 @@
                         edit_ops();
                     }
                 }],
-                @endif
-                @if(session('role_id') == 1 || ($petty_statement_details->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
+                @elseif(session('role_id') == 1 || ($petty_statement_details->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)))
+                dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
                     title: 'Edit Details',
                     className: 'btn btn-primary',
@@ -183,6 +182,8 @@
                         edit_finance();
                     }
                 }],
+                @else
+                dom: 'ltipr',
                 @endif
                 "autoWidth": false,
                 scrollX: true, scrollY:'200px',
