@@ -697,7 +697,7 @@
 
                 // Add legend
                 legend: {
-                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)','Canceled Shipment(s)']
+                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)','Cancelled Shipment(s)']
                 },
 
                 // Add custom colors
@@ -746,9 +746,9 @@
                         data: @json($graph['pending'])
                     },
                     {
-                        name: 'Canceled Shipment(s)',
+                        name: 'Cancelled Shipment(s)',
                         type: 'line',
-                        data: @json($graph['canceled'])
+                        data: @json($graph['cancelled'])
                     }
                 ]
             };
@@ -792,7 +792,7 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)', 'Canceled Shipment(s)']
+                                data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)', 'Cancelled Shipment(s)']
                             },
                             color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a','#FF0000'],
 
@@ -835,9 +835,9 @@
                                     data: data.graph['pending']
                                 },
                                 {
-                                    name: 'Canceled Shipment(s)',
+                                    name: 'Cancelled Shipment(s)',
                                     type: 'line',
-                                    data: data.graph['canceled']
+                                    data: data.graph['cancelled']
                                 }
                             ]
                         };
