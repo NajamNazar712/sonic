@@ -43,7 +43,7 @@
                         <th class="border-primary border-darken-1">Statement No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
-                        <th class="border-primary border-darken-1">Date(From - To)</th>
+                        <th class="border-primary border-darken-1">Date (From - To)</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Station Approved By</th>
@@ -98,7 +98,7 @@
                 formatSubmit: 'yyyy-mm-dd 00:00:00',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
-                    $('#transit_date_root').css('top','40px');
+                    $('#creation_date_root').css('top','40px');
                 }
             });
             $('#search_filter_btn').on('click',function () {
@@ -119,7 +119,7 @@
                             head.push('Statement No.');
                             head.push('Hub');
                             head.push('Statement Reference No.');
-                            head.push('Date');
+                            head.push('Date (From - To)');
                             head.push('Created By');
                             head.push('Created At');
                             head.push('Station Approved By');
