@@ -176,7 +176,8 @@
                     }
                 }],
                 "autoWidth": false,
-                scrollX: true, scrollY:'300px',
+                scrollX: true, scrollY:'270px',
+                ordering:false,
                 paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
