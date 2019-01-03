@@ -161,7 +161,8 @@
                         '_token': '{{ csrf_token() }}',
                         'date': search_date,
                         'city': city,
-                        'sales_person': sales
+                        'sales_person': sales,
+                        'sales_tagging':1
                     }
                 }).done(function (data) {
                     // window.open("",'_black');

@@ -860,5 +860,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@auto_account_disabled_days_index')->name('auto_index');
             Route::post('', 'Admins\GlobalSettingsController@auto_account_disabled_days_store')->name('auto_store');
         });
+        Route::prefix('daily_pickup_sales_cron')->name('daily_pickup_sales_cron.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@daily_pickup_sales_cron_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@daily_pickup_sales_cron_store')->name('store');
+        });
+
     });
 });
