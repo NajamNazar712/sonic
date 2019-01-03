@@ -35,9 +35,9 @@ class AdminPettyCashController extends Controller
     public function make_petty_cash_statement_check_reference(Request $request){
         $reference = $request->reference_id;
         if(PettyCashStatement::where('reference_no',$reference)->exists()){
-            return 'true';
+            return "true";
         }else{
-            return 'false';
+            return "false";
         }
     }
 
@@ -339,7 +339,7 @@ class AdminPettyCashController extends Controller
                     $petty_details->status = 1;
                     $petty_details->updated_by = Auth::id();
                     $petty_details->save();
-                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Approved!']);
+                    return response()->json(['status' => 1, 'success' => 'Petty Cash Statement Detail Successfully Rejected!']);
                 }else if($petty_details->status == 1){
                     return response()->json(['status' => 0, 'error' => 'Petty Cash Statement Details Already Rejected!']);
                 }
