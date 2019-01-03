@@ -31,11 +31,12 @@
 
               <a class="dropdown-toggle nav-link d-inline-flex align-middle dropdown-user-link" href="#" data-toggle="dropdown">
                 <span class="d-inline-block align-middle">
+                    <div class="text-bold-700 border-bottom-white text-right">{{ ucfirst(Auth::user()->name )}}</div>
+
                     @if (session('user_type') == 1)
-                      <div class="text-bold-700">{{ucfirst(Auth::user()->name)}}</div>
+                      <div class="border-top-white text-right">{{ str_pad(Auth::id(), 6, '0', STR_PAD_LEFT) }}</div>
                     @else
-                      <div class="text-bold-700 border-bottom-white text-right">{{ucfirst(Auth::user()->name)}}</div>
-                      <div class="border-top-white text-right">{{Auth::user()->shipper->name}}</div>
+                      <div class="border-top-white text-right">{{ Auth::user()->shipper->name }} ({{ str_pad(Auth::id(), 6, '0', STR_PAD_LEFT) }})</div>
                     @endif
                 </span>
 
