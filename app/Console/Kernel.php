@@ -31,7 +31,7 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:returnconfirmationpending')->dailyAt('10:00')->runInBackground();
         $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
         $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
-        $schedule->command('email:dailypickupsalescron')->dailyAt('08:00')->runInBackground();
+        $schedule->command('email:dailypickupsalescron')->dailyAt('12:00')->runInBackground();
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
         $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
     }
