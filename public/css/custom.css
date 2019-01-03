@@ -225,6 +225,19 @@ p.comment {
 	border-bottom: 1px solid #5587b4;
 }
 
+.camera_view {
+	text-align: center;
+}
+
+.camera_view canvas, .camera_view video {
+	width: 480px;
+	height: 360px;
+}
+
+.camera_view canvas.drawingBuffer, .camera_view video.drawingBuffer {
+  margin-left: -480px;
+}
+
 @media (max-width: 991.98px) {
 	.dataTables_wrapper table {
 		overflow-x: initial;
