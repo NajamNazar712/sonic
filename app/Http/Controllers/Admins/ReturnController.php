@@ -75,7 +75,7 @@ class ReturnController extends Controller
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
         }
 
-        return Datatables::of($shipments)
+        $datatable = Datatables::of($shipments)
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -168,8 +168,11 @@ class ReturnController extends Controller
                 else {
                     return '';
                 }
-            })
-            ->make(true);
+            });
+            if ($tracking_numbers = $request->get('tracking_numbers')) {
+                $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+            }
+            return $datatable->make(true);
     }
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
 
