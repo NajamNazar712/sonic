@@ -38,7 +38,7 @@ class Kernel extends ConsoleKernel
         $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
 
         if ($settings->exists()) {
-            $settings = $settings->get();
+            $settings = $settings->first();
 
             $time = $settings->setting_value . ':00';
 
