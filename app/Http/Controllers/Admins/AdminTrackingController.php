@@ -66,6 +66,7 @@ class AdminTrackingController extends Controller
     				$details['order_information']['items'][] = $item_details;
     			}
 
+                $details['order_information']['order_id'] = $shipment->order_id;
     			$details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                 $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
                 $details['order_information']['amount'] = $shipment->amount;
