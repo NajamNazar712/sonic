@@ -176,7 +176,8 @@
                     }
                 }],
                 "autoWidth": false,
-                scrollX: true, scrollY:'300px',
+                scrollX: true, scrollY:'270px',
+                ordering:false,
                 paging:false,
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -209,13 +210,7 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-                    // table.rows().nodes().each(function(index) {
-                    //     var row = table.row(index);
-                    //     console.log(row.id())
-                    //     var id = parseInt(row.id());
-                    //         // selected_rows.push(parseInt(row.id()));
-                    //     console.log(id)
-                    // });
+                    
                     $('#selected_rows').val(selected_rows);
                     form.submit();
                 }
@@ -223,21 +218,24 @@
             var result;
             $.validator.addMethod("reference_no",
                 function(value, element) {
+                    result = false;
                     if(value > 3) {
-
                         $.ajax({
                             type: "POST",
+                            async: false,
                             url: '{!! route('admin.petty_cash.make.reference') !!}', // script to validate in server side
                             data: {reference_id: value,'_token': '{!! csrf_token() !!}'},
                             success: function (data) {
-                                if(data === 'true'){
-                                    result = false;
-                                }else{
+                                if(data === "false"){
                                     result = true;
+                                }else{
+                                    result = false;
                                 }
+
                             }
                         });
-                        return result;
+
+                       return result;
                     }
                 },
                 "Statement Reference Number already exists."

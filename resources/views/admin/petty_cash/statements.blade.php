@@ -11,7 +11,7 @@
             <div class="card-body">
                 @include('admin.inc.messages')
                 <div class="row mb-2 justify-content-center">
-                    <div class="col">
+                    <div class="col-4">
                         <fieldset class="form-group">
                             <select name="search_hub" id="search_hub" class="form-control select2">
                                 @foreach($hubs as $city)
@@ -19,6 +19,20 @@
                                 @endforeach
                             </select>
                         </fieldset>
+                    </div>
+                    <div class="col-4">
+                        <div class="form-group input-group ">
+                            <div class="input-group-prepend">
+                            <span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
+                                <span class="la la-calendar-o"></span>
+                            </span>
+                            </div>
+                            <input type="text" name="creation_date" class="form-control bg-primary border-primary white rounded-right" id="creation_date" placeholder="Creation Date" data-value="">
+                        </div>
+
+                    </div>
+                    <div class="col-2">
+                        <button type="button" id="search_filter_btn" class="mr-1 mb-1 btn btn-outline-primary btn-min-width"><i class="la la-search"></i> Search</button>
                     </div>
                 </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
@@ -29,15 +43,13 @@
                         <th class="border-primary border-darken-1">Statement No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
-                        <th class="border-primary border-darken-1">Date</th>
+                        <th class="border-primary border-darken-1">Date (From - To)</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Station Approved By</th>
                         <th class="border-primary border-darken-1">Station Approved At</th>
                         <th class="border-primary border-darken-1">Operation Approved By</th>
                         <th class="border-primary border-darken-1">Operation Approved At</th>
-                        <th class="border-primary border-darken-1">Finance Approved By</th>
-                        <th class="border-primary border-darken-1">Finance Approved At</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1"></th>
 
@@ -55,6 +67,8 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 
 @endsection
 
@@ -64,9 +78,32 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
+            var search_hub = $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Hub',
+                width:'100%',
+                allowClear:true
+            });
+            var creation_date = $('#creation_date').pickadate({
+                firstDay: 1,
+                clear: 'Clear',
+                format:'dd mmmm, yyyy',
+                selectYears: true,
+                selectMonths: true,
+                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                hiddenSuffix: '_formatted',
+                onOpen: function() {
+                    $('#creation_date_root').css('top','40px');
+                }
+            });
+            $('#search_filter_btn').on('click',function () {
+                table.draw();
+            });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
                     body = [];
@@ -82,15 +119,13 @@
                             head.push('Statement No.');
                             head.push('Hub');
                             head.push('Statement Reference No.');
-                            head.push('Date');
+                            head.push('Date (From - To)');
                             head.push('Created By');
                             head.push('Created At');
                             head.push('Station Approved By');
                             head.push('Station Approved At');
                             head.push('Operation Approved By');
                             head.push('Operation Approved At');
-                            head.push('Finance Approved By');
-                            head.push('Finance Approved At');
                             head.push('Status');
 
 
@@ -109,8 +144,6 @@
                                 row.push(values.station_approved_at);
                                 row.push(values.operation_approved_by);
                                 row.push(values.operation_approved_at);
-                                row.push(values.finance_approved_by);
-                                row.push(values.finance_approved_at);
                                 row.push(values.status);
 
                                 body.push(row);
@@ -137,23 +170,28 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.petty_cash.statements.list') }}',
+                {{--ajax: '{{ route('admin.petty_cash.statements.list') }}',--}}
+                ajax: {
+                    url: '{{ route('admin.petty_cash.statements.list') }}',
+                    data: function (d) {
+                        d.search_hub = $('#search_hub').val();
+                        d.search_creation_date = $('input[name="creation_date_formatted"]').val();
+                    }
+                },
                 rowId: 'statement_id',
-                order: [2, 'asc'],
+                order: [1, 'asc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'statement_id', name: 'petty_cash_statements.id', class: 'align-middle statement_id'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
                     {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
-                    {data: 'date', name: 'date', class: 'align-middle date'},
+                    {data: 'date', name: 'date', class: 'align-middle date', orderable:false},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
                     {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
                     {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
                     {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},
                     {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
-                    {data: 'finance_approved_by', name: 'fab.name', class: 'align-middle finance_approved_by'},
-                    {data: 'finance_approved_at', name: 'petty_cash_statements.finance_approved_at', class: 'align-middle finance_approved_at'},
                     {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
@@ -174,7 +212,6 @@
                         '<option value="0">Created</option>' +
                         '<option value="1">Station Approved</option>' +
                         '<option value="2">Operation Approved</option>' +
-                        '<option value="3">Finance Approved</option>' +
                         '</select>';
                     this.api().columns().every(function(column_id) {
                         var column = this;

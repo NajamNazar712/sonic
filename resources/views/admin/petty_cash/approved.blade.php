@@ -19,7 +19,7 @@
                         <th class="border-primary border-darken-1">Statement No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
-                        <th class="border-primary border-darken-1">Date</th>
+                        <th class="border-primary border-darken-1">Date (From - To)</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Station Approved By</th>
@@ -45,7 +45,11 @@
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
-
+    <style type="text/css">
+        #datatable td.date{
+            min-width:110px;
+        }
+    </style>
 @endsection
 
 @section('js')
@@ -72,7 +76,7 @@
                             head.push('Statement No.');
                             head.push('Hub');
                             head.push('Statement Reference No.');
-                            head.push('Date');
+                            head.push('Date (From - To)');
                             head.push('Created By');
                             head.push('Created At');
                             head.push('Station Approved By');
@@ -129,13 +133,13 @@
                 serverSide: true,
                 ajax: '{{ route('admin.petty_cash.approved.list') }}',
                 rowId: 'statement_id',
-                order: [2, 'asc'],
+                order: [1, 'asc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'statement_id', name: 'petty_cash_statements.id', class: 'align-middle statement_id'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
                     {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
-                    {data: 'date', name: 'date', class: 'align-middle date'},
+                    {data: 'date', name: 'date', class: 'align-middle date', orderable:false},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
                     {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},

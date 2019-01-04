@@ -81,6 +81,7 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
                         <th class="border-primary border-darken-1">Shipper</th>
+                        <th class="border-primary border-darken-1">Order ID</th>
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Service Type</th>
@@ -253,6 +254,7 @@
                             head.push('Tracking No.');
                             head.push('Account No.');
                             head.push('Shipper');
+                            head.push('Order ID');
                             head.push('Status');
                             head.push('Payment Status');
                             head.push('Service Type');
@@ -271,6 +273,7 @@
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
                                 row.push(values.shipper);
+                                row.push(values.order_id);
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
@@ -317,12 +320,13 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[7, 'asc']],
+                order: [[8, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
                     { data:'account_no' ,name: 'u.id', class: 'align-middle account_no'},
                     { data:'shipper' ,name: 'u.name', class: 'align-middle shipper'},
+                    { data:'order_id' ,name: 'shipments.order_id', class: 'align-middle order_id'},
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
