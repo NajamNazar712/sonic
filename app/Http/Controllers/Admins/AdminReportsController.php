@@ -1861,6 +1861,7 @@ class AdminReportsController extends Controller
         $date_from = Carbon::createFromFormat("Y-m-d H:i:s",$date)->format('Y-m-d 08:00A');
         $next_day = Carbon::parse($date)->addDay(1);
         $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 07:59A');
+        $only_date = Carbon::parse($date)->toDateString();
         $hubs = array();
         $city = array();
         if($sales_tagging == TRUE) {
@@ -1897,7 +1898,7 @@ class AdminReportsController extends Controller
             $details = array();
             $details_shipper = array();
 
-            $details[] = ['S. No.','Origin '.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
+            $details[] = ['S. No.','Origin '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
 
 
             $serial_number_hubs = 1;
@@ -2089,7 +2090,7 @@ class AdminReportsController extends Controller
                             ->where('shipper_status_id', 2);
                     })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                 }
-                if($booked > 0){
+                if($booked > 0 || $received > 0){
 
                     $row = array();
                     $avg_revenue = ($received != 0)? $revenue_wo_gst/$received:0;
@@ -2115,7 +2116,7 @@ class AdminReportsController extends Controller
 
 
 
-        $details_shipper[] = ['S. No.','DSR '.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
+        $details_shipper[] = ['S. No.','DSR '.$only_date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
         $serial_number_shippers = 1;
 
         if($sales_tagging == TRUE){
