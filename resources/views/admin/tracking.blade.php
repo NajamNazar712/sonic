@@ -250,9 +250,11 @@
 							shipment += '</tr>';
 
 							shipment += '<tr>';
-							shipment += '<td><strong>Instructions</strong></td>';
-							shipment += '<td colspan="5">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
-							shipment += '</tr>';
+                            shipment += '<td><strong>Order ID</strong></td>';
+                            shipment += '<td>' + ((details.order_information.order_id) ? details.order_information.order_id : '-') + '</td>';
+                            shipment += '<td><strong>Instructions</strong></td>';
+                            shipment += '<td colspan="3">' + ((details.order_information.instructions) ? details.order_information.instructions : '-') + '</td>';
+                            shipment += '</tr>';
 
 							shipment += '</tbody>';
 							shipment += '</table>';

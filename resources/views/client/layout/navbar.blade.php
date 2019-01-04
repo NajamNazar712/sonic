@@ -36,7 +36,7 @@
                     @if (session('user_type') == 1)
                       <div class="border-top-white text-right">{{ str_pad(Auth::id(), 6, '0', STR_PAD_LEFT) }}</div>
                     @else
-                      <div class="border-top-white text-right">{{ Auth::user()->shipper->name }} ({{ str_pad(Auth::id(), 6, '0', STR_PAD_LEFT) }})</div>
+                      <div class="border-top-white text-right">{{ Auth::user()->shipper->name }} ({{ str_pad(Auth::user()->shipper->id, 6, '0', STR_PAD_LEFT) }})</div>
                     @endif
                 </span>
 
