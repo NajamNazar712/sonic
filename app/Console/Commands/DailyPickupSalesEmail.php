@@ -40,7 +40,7 @@ class DailyPickupSalesEmail extends Command
      */
     public function handle()
     {
-        $date = Carbon::create('2018','12','21')->format('Y-m-d');
+        $date = Carbon::now()->format('Y-m-d');
         $response = AdminReportsController::daily_pickup_sales_report_create(NULL, $date . ' 00:00:00', NULL, FALSE);
         NotificationsController::send(26,$date,$response);
         $this->info('Done');
