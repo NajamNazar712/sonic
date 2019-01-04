@@ -35,9 +35,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
         $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
 
-        $settings = GlobalSettings::where('type','daily_pickup_sales_cron_time');
+        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
 
-        if ($settings->exists) {
+        if ($settings->exists()) {
             $settings = $settings->get();
 
             $time = $settings->setting_value . ':00';
