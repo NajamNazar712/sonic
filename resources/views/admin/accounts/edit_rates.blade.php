@@ -3069,12 +3069,12 @@
                     .done(function(data) {
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                         $('#RejectRatesModal').modal('hide');
+                        window.setTimeout(function () {window.location.reload()}, 3000);
                     });
             }else{
                 var error = "You have not selected any reason!";
                 toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
             }
-            window.setTimeout(function(){window.location.reload()}, 3000);
         });
         $('#accountActiveSubmit').on('click',function(){
             $('#authorize').val(1);
