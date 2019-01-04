@@ -1846,10 +1846,12 @@ class AdminReportsController extends Controller
     }
 
     public function daily_pickup_sales_export_to_excel(Request $request){
-          $response = self::daily_pickup_sales_report_create($request->city,$request->date,$request->sales_person,$request->sales_tagging);
-            if($response){
-                return response()->json(['success'=>1]);
-            }
+         $response = self::daily_pickup_sales_report_create($request->city,$request->date,$request->sales_person,$request->sales_tagging);
+
+         if($response['status']){
+             return $response;
+         }
+
     }
 
     static public function daily_pickup_sales_report_create($search_city = NULL, $date,$sales_person = NULL,$sales_tagging = FALSE){
@@ -1859,42 +1861,37 @@ class AdminReportsController extends Controller
         $date_to = Carbon::createFromFormat("Y-m-d H:i:s",$next_day)->format('Y-m-d 07:59A');
         $hubs = array();
         $city = array();
-        if($sales_tagging == TRUE){
+        if($sales_tagging == TRUE) {
 
-            if($search_city != null){
-
-                $search_city_hub = City::find($search_city);
-                $search_city_hub = $search_city_hub->id;
-
-            }else{
-                $search_city_hub = '';
-            }
-
-            if(session('role_id') == 1){
-                if($search_city != null){
+            if (session('role_id') == 1) {
+                if ($search_city != null) {
 
                     $city = City::find($search_city);
                     $search_city_hub = $city->id;
                     $city['id'] = $city->id;
                     $city['name'] = $city->name;
                     $hubs[] = $city;
-                }else{
+                } else {
                     $search_city_hub = '';
-                    $hubs = City::where('pickup',1)->select('id','name')->get();
+                    $hubs = City::where('pickup', 1)->select('id', 'name')->get();
                 }
-            }else{
-                if($search_city != null){
+            } else {
+                if ($search_city != null) {
 
                     $city = City::find($search_city);
                     $search_city_hub = $city->id;
                     $city['id'] = $city->id;
                     $city['name'] = $city->name;
                     $hubs[] = $city;
-                }else{
+                } else {
                     $search_city_hub = '';
-                    $hubs = City::whereIn('hub_id', session('hubs'))->where('pickup',1)->select('id','name')->get();
+                    $hubs = City::whereIn('hub_id', session('hubs'))->where('pickup', 1)->select('id', 'name')->get();
                 }
             }
+        }else{
+            $search_city_hub = '';
+            $hubs = City::where('pickup', 1)->select('id', 'name')->get();
+        }
             $details = array();
             $details_shipper = array();
 
@@ -2090,29 +2087,31 @@ class AdminReportsController extends Controller
                             ->where('shipper_status_id', 2);
                     })->sum(DB::raw('IFNULL(weight_charges,0) + IFNULL(cash_handling_charges,0) + IFNULL(insurance_charges,0) + IFNULL(return_charges,0) + IFNULL(fuel_surcharge,0) + IFNULL(replacement_charges,0) + IFNULL(try_and_buy_charges,0)'));
                 }
+                if($booked > 0){
 
-                $row = array();
-                $avg_revenue = ($received != 0)? $revenue_wo_gst/$received:0;
-                $avg_cash_collection = ($received != 0)? $cod_collection/$received:0;
-                $rev_on_cash_collection = (($avg_cash_collection != 0)? $avg_revenue/$avg_cash_collection:0)*100;
-                $row[] = $serial_number_hubs;
-                $row[] = $hub->name;
-                $row[] = $booked;
-                $row[] = $received;
-                $row[] = $revenue_wo_gst;
-                $row[] = $cod_collection;
-                $row[] = $actual_weight;
-                $row[] = $chargeable_weight;
-                $row[] = $avg_revenue;
-                $row[] = $avg_cash_collection;
-                $row[] =   $rev_on_cash_collection;
-                $details[] = $row;
+                    $row = array();
+                    $avg_revenue = ($received != 0)? $revenue_wo_gst/$received:0;
+                    $avg_cash_collection = ($received != 0)? $cod_collection/$received:0;
+                    $rev_on_cash_collection = (($avg_cash_collection != 0)? $avg_revenue/$avg_cash_collection:0)*100;
+                    $row[] = $serial_number_hubs;
+                    $row[] = $hub->name;
+                    $row[] = $booked;
+                    $row[] = $received;
+                    $row[] = $revenue_wo_gst;
+                    $row[] = $cod_collection;
+                    $row[] = $actual_weight;
+                    $row[] = $chargeable_weight;
+                    $row[] = $avg_revenue;
+                    $row[] = $avg_cash_collection;
+                    $row[] =   $rev_on_cash_collection;
+                    $details[] = $row;
 
-                $serial_number_hubs++;
+                    $serial_number_hubs++;
+                }
 
             }
 
-        }
+
 
         $details_shipper[] = ['S. No.','DSR '.$date, 'No. of Parcels Booked','No of Parcels Received','Revenue without GST','Collection Amount','Actual Weight','Chargeable Weight','Avg/Parcel Revenue','Avg. Amount Collection','% Rev. on Amount Collection'];
         $serial_number_shippers = 1;
@@ -2310,33 +2309,41 @@ class AdminReportsController extends Controller
         $sheet->setTitle('Daily Pickup Sales Report');
 //         $sheet->setCellValue('A1','S. No.');
 //         $sheet->fromArray($shipper_details);
-
         $writer = new Xlsx($spreadsheet);
 
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="daily_pickup_sales_report.xlsx"');
         header('Cache-Control: max-age=0');
-
-//         $writer->save('php://output');
+        $date_file_name = Carbon::parse($date)->format('Y_m_d');
+        $time_string = Carbon::now()->toTimeString();
+        $time_string = Carbon::parse($time_string)->format('h_i_s');
+        $city_name = '';
+        $file_name_without_path = '';
+        if($search_city != null){
+            $city_name = $city['name'];
+        }
         if($sales_tagging == TRUE){
-
-            $file_name = "reports/daily_pickup_sales_report".Auth::id()."xlsx";
+            $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
+            $file_name = public_path() .'/'.$file_name_without_path ;
         }
         else{
-            $date_file_name = Carbon::parse($date)->format('Y-m-d');
-            $file_name = "reports/daily_pickup_sales_report".$date_file_name."xlsx";
+            $file_name_without_path = "reports/daily_pickup_sales_report_".$date_file_name.'_'.$city_name.$time_string.".xlsx";
+            $file_name = public_path() . "/reports/daily_pickup_sales_report_".$date_file_name.'_'.$time_string.".xlsx";
         }
-        $writer->save("$file_name");
-        $response = 1;
-        return $response;
-    }
+        $writer->save($file_name);
 
-    public function daily_pickup_sales_download(Request $request){
-        $file_name = "/reports/daily_pickup_sales_report".Auth::id()."xlsx";
-        $file = public_path().$file_name;
-        $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
-        return Response::download($file, 'daily_pickup_sales_report.xlsx',$headers);
+        if($sales_tagging == TRUE){
+            return ['status' => 1, 'file_name' => $file_name_without_path];
+        }else{
+            return url('/').'/'.$file_name_without_path;
+        }
     }
+//    public function daily_pickup_sales_download(Request $request){
+////        $file_name = "/reports/daily_pickup_sales_report_".Auth::id().".xlsx";
+//        $file = $request->file;
+//        $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
+//        return Response::download($file, 'daily_pickup_sales_report.xlsx',$headers);
+//    }
 
     public function customer_sales_index(Request $request){
         if (session('role_id') == 1){
@@ -2558,12 +2565,12 @@ class AdminReportsController extends Controller
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="customer_sales_report.xlsx"');
         header('Cache-Control: max-age=0');
-        $file_name = "reports/customer_sales_report".Auth::id()."xlsx";
+        $file_name = "reports/customer_sales_report".Auth::id().".xlsx";
         $writer->save("$file_name");
         return response()->json(['success'=>1,'file'=>'customer_sales_report.xlsx']);
     }
     public function customer_sales_download(Request $request){
-        $file_name = "/reports/customer_sales_report".Auth::id()."xlsx";
+        $file_name = "/reports/customer_sales_report".Auth::id().".xlsx";
 
         $file = public_path().$file_name;
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
@@ -3131,13 +3138,13 @@ class AdminReportsController extends Controller
         header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         header('Content-Disposition: attachment;filename="customer_retention_report.xlsx"');
         header('Cache-Control: max-age=0');
-        $file_name = "reports/customer_retention_report".Auth::id()."xlsx";
+        $file_name = "reports/customer_retention_report".Auth::id().".xlsx";
         $writer->save("$file_name");
         return response()->json(['success'=>1,'file'=>'customer_retention_report.xlsx']);
 
     }
     public function customer_retention_download(Request $request){
-        $file_name = "/reports/customer_retention_report".Auth::id()."xlsx";
+        $file_name = "/reports/customer_retention_report".Auth::id().".xlsx";
         $file = public_path().$file_name;
         $headers = array('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',);
         return Response::download($file, 'customer_retention_report.xlsx',$headers);

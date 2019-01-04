@@ -165,13 +165,27 @@
                         'sales_tagging':1
                     }
                 }).done(function (data) {
-                    // window.open("",'_black');
-                    if(data.success == 1){
-                            window.open("{!! route('admin.reports.daily_pickup_sales.download') !!}",'_black');
-                        }
-                });
+                    if(data.status === 1) {
+
+                        var route = '{!! url('/') !!}' + '/' + data.file_name;
+
+                        window.open(route, '_black');
+
+                        {{--$.ajax({--}}
+                            {{--url: '{!! route('admin.reports.daily_pickup_sales.download') !!}',--}}
+                            {{--method: 'post',--}}
+                            {{--data: {--}}
+                                {{--'_token': '{{ csrf_token() }}',--}}
+                                {{--'file': data.file_name,--}}
+                            {{--}--}}
+                        {{--}).done(function (data) {--}}
+
+                        {{--});--}}
+                    }
             });
         });
+    });
+
 
     </script>
 @endsection

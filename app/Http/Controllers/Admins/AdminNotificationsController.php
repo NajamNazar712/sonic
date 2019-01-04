@@ -211,6 +211,9 @@ class AdminNotificationsController extends Controller
         else if ($id == 25) {
              $details['fields'] = ['hub', 'service_type', 'pickup_address', 'pickup_city', 'consignee_name', 'consignee_phone_number_1', 'consignee_phone_number_2', 'consignee_email', 'consignee_address', 'consignee_city', 'order_id', 'shipping_mode', 'status', 'status_reason', 'status_date', 'tracking_number'];
         }
+        else if ($id == 26) {
+            $details['fields'] = ['date', 'link'];
+        }
 
         return $details;
     }

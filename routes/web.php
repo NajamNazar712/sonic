@@ -789,7 +789,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('daily_pickup_sales')->name('daily_pickup_sales.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@daily_pickup_sales_index')->name('index');
             Route::post('export_to_excel', 'Admins\AdminReportsController@daily_pickup_sales_export_to_excel')->name('export_to_excel');
-            Route::get('download', 'Admins\AdminReportsController@daily_pickup_sales_download')->name('download');
+            Route::post('download', 'Admins\AdminReportsController@daily_pickup_sales_download')->name('download');
         });
         Route::prefix('customer_sales')->name('customer_sales.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@customer_sales_index')->name('index');

@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Http\Controllers\Admins\AdminReportsController;
+use App\Http\Controllers\NotificationsController;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 
@@ -13,14 +14,14 @@ class DailyPickupSalesEmail extends Command
      *
      * @var string
      */
-    protected $signature = 'email:dailypickupsalescron';
+    protected $signature = 'email:dailypickupsalesreport';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Daily Pickup & Sales Report';
+    protected $description = 'Send Daily Pickup & Sales Report Email';
 
     /**
      * Create a new command instance.
@@ -39,7 +40,9 @@ class DailyPickupSalesEmail extends Command
      */
     public function handle()
     {
-        $date = Carbon::now();
-        AdminReportsController::daily_pickup_sales_report_create(NULL,$date,NULL,NULL);
+        $date = Carbon::now()->format('Y-m-d');
+        $response = AdminReportsController::daily_pickup_sales_report_create(NULL, $date . ' 00:00:00', NULL, FALSE);
+        NotificationsController::send(26,$date,$response);
+        $this->info('Done');
     }
 }
