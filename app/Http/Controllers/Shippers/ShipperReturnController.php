@@ -58,7 +58,7 @@ class ShipperReturnController extends Controller
 
         return Datatables::of($shipments)
             ->editColumn('tracking_number',function ($shipments){
-                $route = route('admin.tracking.index');
+                $route = route('cod.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('consignee_phone',function ($shipper){
@@ -125,8 +125,6 @@ class ShipperReturnController extends Controller
     }
 
     public function return_marked_single_status(Request $request){
-        $admin = Auth::id();
-
             $parcel = Shipment::find($request->shipment_id);
             if($parcel){
             if (!$parcel->packaging_material_request) {
