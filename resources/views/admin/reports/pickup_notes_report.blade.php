@@ -106,6 +106,7 @@
                         <th class="border-primary border-darken-1">Assigned By</th>
                         <th class="border-primary border-darken-1">Completed By</th>
                         <th class="border-primary border-darken-1">Completed Date</th>
+                        <th class="border-primary border-darken-1">Aging (Assigned To Completed)</th>
                     </tr>
                     </thead>
                 </table>
@@ -296,6 +297,7 @@
                             head.push('Assigned By');
                             head.push('Completed By');
                             head.push('Completed Date');
+                            head.push('Aging (Assigned To Completed)');
                             $.each(result.data, function(index, values) {
                                 row = [];
 
@@ -309,6 +311,7 @@
                                 row.push(values.assigned_by);
                                 row.push(values.completed_by);
                                 row.push(values.completed_date);
+                                row.push(values.aging);
 
                                 body.push(row);
                             });
@@ -361,7 +364,8 @@
                     {data: 'assigned_date', name: 'pickup_notes.created_at', class: 'align-middle assigned_date'},
                     {data: 'assigned_by', name: 'ab.name', class: 'align-middle assigned_by'},
                     {data: 'completed_by', name: 'up.name', class: 'align-middle completed_by'},
-                    {data: 'completed_date', name: 'pickup_notes.updated_at', class: 'align-middle completed_date'}
+                    {data: 'completed_date', name: 'pickup_notes.updated_at', class: 'align-middle completed_date'},
+                    {data: 'aging', name: 'aging', class: 'align-middle aging', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();

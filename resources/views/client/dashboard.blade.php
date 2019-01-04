@@ -195,6 +195,25 @@
                         }
                     });
             }
+            function cancel(selected_rows) {
+                $.ajax({
+                    url: '{!! route('cod.orders.cancel_all') !!}',
+                    method: 'POST',
+                    data: {
+                        'ids[]': selected_rows,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function (data) {
+                        if(data.status === 1){
+                            table.draw('false');
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                        }else{
+                            toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        }
+                    });
+            }
             var selected_rows = [];
             var table = $('#datatable').DataTable({
                 scrollX: true, scrollY: '350px',
@@ -205,11 +224,23 @@
                     enabled: false,
                     action: function (e, dt, node, config) {
                         table.button(0).disable();
+                        table.button(1).disable();
                         print(selected_rows);
                         table.rows().deselect();
                         selected_rows = [];
                       }
-                    }, {
+                    },{
+                    text: '<i class="la la-cancel"></i> Cancel',
+                    className: 'btn btn-danger cancel',
+                    enabled: false,
+                    action: function (e, dt, node, config) {
+                        table.button(0).disable();
+                        table.button(1).disable();
+                        cancel(selected_rows);
+                        table.rows().deselect();
+                        selected_rows = [];
+                    }
+                } ,{
                       extend: 'selectAll',
                       text: 'Select All',
                       className: 'select_all',
@@ -231,10 +262,11 @@
                             }
 
                             table.button('.print').enable();
+                              table.button('.cancel').enable();
                           }
                         });
                       }
-                    }, {
+                    },{
                       extend: 'selectNone',
                       text: 'Select None',
                       className: 'select_none',
@@ -257,12 +289,14 @@
 
                             if (selected_rows.length == 0) {
                                 table.button('.print').disable();
+                                table.button('.cancel').disable();
                             }
                           }
                         });
                       }
                     }
                 ],
+
                 select: {
                     info: false,
                     style: 'multi',
@@ -477,9 +511,11 @@
 
                 if (selected_rows.length > 0) {
                     table.button(0).enable();
+                    table.button(1).enable();
                 }
                 else {
                     table.button(0).disable();
+                    table.button(1).disable();
                 }
             });
 

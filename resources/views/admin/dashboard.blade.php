@@ -11,7 +11,7 @@
 
         <!-- Active Orders -->
           <div class="row">
-              <div class="col">
+              <div class="col-3">
                   <div class="card pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -28,7 +28,7 @@
                       </div>
                   </div>
               </div>
-              <div class="col">
+              <div class="col-3">
                   <div class="card bg-gradient-directional-primary pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -45,7 +45,7 @@
                       </div>
                   </div>
               </div>
-              <div class="col">
+              <div class="col-3">
                   <div class="card bg-gradient-directional-info pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -61,7 +61,7 @@
                           </div>
                       </div>
                   </div>
-              </div><div class="col">
+              </div><div class="col-3">
                   <div class="card bg-gradient-directional-success pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -77,7 +77,10 @@
                           </div>
                       </div>
                   </div>
-              </div><div class="col">
+              </div>
+          </div>
+              <div class="row justify-content-center">
+                  <div class="col-3">
                   <div class="card bg-gradient-directional-warning pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -94,7 +97,7 @@
                       </div>
                   </div>
               </div>
-              <div class="col">
+              <div class="col-3">
                   <div class="card bg-gradient-directional-inprocess pull-up">
                       <div class="card-content">
                           <div class="card-body">
@@ -105,6 +108,23 @@
                                   <div class="media-body text-white text-right">
                                       <h3 class="text-white">{{$stats['pending']}}</h3>
                                       <span>In Process Shipment(s)</span>
+                                  </div>
+                              </div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+              <div class="col-3">
+                  <div class="card bg-gradient-directional-red pull-up">
+                      <div class="card-content">
+                          <div class="card-body">
+                              <div class="media d-flex">
+                                  <div class="align-self-center">
+                                      <i class="icon-close text-white font-large-2 float-left"></i>
+                                  </div>
+                                  <div class="media-body text-white text-right">
+                                      <h3 class="text-white">{{$stats['canceled']}}</h3>
+                                      <span>Cancelled Shipment(s)</span>
                                   </div>
                               </div>
                           </div>
@@ -677,11 +697,11 @@
 
                 // Add legend
                 legend: {
-                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)']
+                    data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)','Cancelled Shipment(s)']
                 },
 
                 // Add custom colors
-                color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a'],
+                color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a','#FF0000'],
 
                 // Hirozontal axis
                 xAxis: [{
@@ -724,6 +744,11 @@
                         name: 'In Process Shipment(s)',
                         type: 'line',
                         data: @json($graph['pending'])
+                    },
+                    {
+                        name: 'Cancelled Shipment(s)',
+                        type: 'line',
+                        data: @json($graph['cancelled'])
                     }
                 ]
             };
@@ -767,9 +792,9 @@
                                 trigger: 'axis'
                             },
                             legend: {
-                                data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)']
+                                data: ['Pending Shipment(s)', 'Received Shipment(s)', 'Delivered Shipment(s)', 'Returned Shipment(s)', 'In Process Shipment(s)', 'Cancelled Shipment(s)']
                             },
-                            color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a'],
+                            color: ['#535BE2', '#168DEE', '#69DEB4', '#FF7E39', '#d6a42a','#FF0000'],
 
                             xAxis: [{
                                 type: 'category',
@@ -808,6 +833,11 @@
                                     name: 'In Process Shipment(s)',
                                     type: 'line',
                                     data: data.graph['pending']
+                                },
+                                {
+                                    name: 'Cancelled Shipment(s)',
+                                    type: 'line',
+                                    data: data.graph['cancelled']
                                 }
                             ]
                         };

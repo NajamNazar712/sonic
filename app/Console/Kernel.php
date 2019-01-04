@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Http\Models\Admin\GlobalSettings;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
@@ -15,7 +16,9 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         '\App\Console\Commands\ReturnConfirmationPendingEmail',
         '\App\Console\Commands\ReturnConfirmEmail',
-        '\App\Console\Commands\ShipmentReAttemptEmail'
+        '\App\Console\Commands\ShipmentReAttemptEmail',
+        '\App\Console\Commands\AutoDisableShipperAccount',
+        '\App\Console\Commands\DailyPickupSalesEmail'
     ];
 
     /**
@@ -30,6 +33,17 @@ class Kernel extends ConsoleKernel
         $schedule->command('email:returnconfirm')->dailyAt('15:00')->runInBackground();
         $schedule->command('email:shipmentreattempt')->dailyAt('08:00')->runInBackground();
         $schedule->command('shipment:cancel')->dailyAt('00:00')->runInBackground();
+        $schedule->command('shipper:disable')->dailyAt('00:00')->runInBackground();
+
+        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $time = $settings->setting_value . ':00';
+
+            $schedule->command('email:dailypickupsalesreport')->dailyAt($time)->runInBackground();
+        }
     }
 
     /**

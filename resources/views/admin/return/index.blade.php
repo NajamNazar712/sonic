@@ -10,7 +10,17 @@
         <div class="card-content" aria-expanded="true">
             <div class="card-body">
                 @include('admin.inc.messages')
+                <div class="col">
+                    <form id="track_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+                        <div class="form-group">
+                            <input type="text" name="tracking_numbers" class="tracking_numbers" placeholder="Tracking Number(s)*" data-tags-input-name="tracking_number" data-rule-required="true" data-msg-required="Tracking Number is required">
+                        </div>
 
+                        <div class="form-group ml-1">
+                            <button type="submit" class="btn btn-primary">Search</button>
+                        </div>
+                    </form>
+                </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -88,6 +98,7 @@
 
 @section('css')
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/selectize.bootstrap4.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/extensions/toastr.css')}}">
 
     <style>
@@ -136,6 +147,9 @@
             width: auto !important;
             text-align: left;
         }
+        .selectize-control {
+            width: 300px !important;
+        }
     </style>
 @endsection
 
@@ -143,6 +157,8 @@
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/select/selectize.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -463,7 +479,12 @@
                 pagingType: 'full_numbers',
                 processing: true,
                 serverSide: true,
-                ajax: '{{ route('admin.return.list') }}',
+                ajax: {
+                    url: '{{ route('admin.return.list') }}',
+                    data: function (d) {
+                        d.tracking_numbers = $('#track_form .tracking_numbers').val();
+                    }
+                },
                 rowId: 'shId',
                 order: [[19, 'asc'], [18, 'asc']],
                 columns: [
@@ -698,7 +719,6 @@
             $.validator.addMethod('maxsize', function(value, element, params) {
                 if ($(element).attr('type') === 'file') {
                     if (element.files && element.files.length) {
-                        console.log(element.files);
                         for (var c = 0; c < element.files.length; c++) {
                             if (element.files[c].size > params) {
                                 return false;
@@ -734,7 +754,44 @@
                     form.submit();
                 }
             });
+            var select = $('#track_form .tracking_numbers').selectize({
+                placeholder: 'Tracking Number(s)*',
+                delimiter: ',',
+                createOnBlur: true,
+                persist: false,
+                plugins: ['remove_button'],
+                onDropdownOpen: function(dropdown) {
+                    dropdown.remove();
+                },
+                onType: function(str) {
+                    var regex = /^[0-9,]+$/;
 
+                    if (!regex.test(str)) {
+                        select[0].selectize.setTextboxValue('');
+                    }
+                },
+                create: function(input) {
+                    if (input.length >= 12 && Math.floor(input) == input && $.isNumeric(input)) {
+                        return {
+                            value: input,
+                            text: input
+                        }
+                    }
+                    else {
+                        return false;
+                    }
+                }
+            });
+
+            $('#track_form').bind('submit',function (e) {
+                e.preventDefault();
+                var tracking_numbers = $('#track_form .tracking_numbers').val();
+
+                if (tracking_numbers != '') {
+                    table.draw();
+                }
+
+            });
         });
     </script>
 @endsection

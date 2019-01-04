@@ -887,7 +887,21 @@ class AdminCargoController extends Controller
     }
 
     public function in_transit_junctions(Request $request) {
-      $cities = City::select(['id', 'name'])->where('hub', 1)->where('status', 1);
+      $city_ids = array();
+
+      $cargo_consignments = CargoConsignment::whereIn('id', $request->ids)->get();
+
+      foreach ($cargo_consignments as $cargo_consignment) {
+        if ($cargo_consignment->origin_hub_id != $cargo_consignment->junction_hub_1_id && $cargo_consignment->destination_hub_id != $cargo_consignment->junction_hub_1_id && !in_array($cargo_consignment->junction_hub_1_id, $city_ids)) {
+          $city_ids[] = $cargo_consignment->junction_hub_1_id;
+        }
+
+        if ($cargo_consignment->junction_hub_2_id && $cargo_consignment->origin_hub_id != $cargo_consignment->junction_hub_2_id && $cargo_consignment->destination_hub_id != $cargo_consignment->junction_hub_2_id && !in_array($cargo_consignment->junction_hub_2_id, $city_ids)) {
+          $city_ids[] = $cargo_consignment->junction_hub_2_id;
+        }
+      }
+
+      $cities = City::select(['id', 'name'])->whereIn('id', $city_ids);
 
       if (session('role_id') != 1) {
         $cities = $cities->whereIn('id', session('hubs'));

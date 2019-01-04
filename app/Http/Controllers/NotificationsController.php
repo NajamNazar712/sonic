@@ -2293,6 +2293,47 @@ class NotificationsController extends Controller
               }
             }
           }
+          else if ($id == 26) {
+              if (strpos($subject, '[date]') !== FALSE) {
+                  $subject = str_replace('[date]', $reference_1_id, $subject);
+              }
+
+              if (strpos($body, '[date]') !== FALSE) {
+                  $body = str_replace('[date]', $reference_1_id, $body);
+              }
+
+              $link = '<a href="' . $reference_2_id . '" target="_blank">Report</a>';
+
+              if (strpos($subject, '[link]') !== FALSE) {
+                  $subject = str_replace('[link]', $link, $subject);
+              }
+
+              if (strpos($body, '[link]') !== FALSE) {
+                  $body = str_replace('[link]', $link, $body);
+              }
+
+              $to = array();
+
+              $admins = Admin::whereIn('role_id', [2, 3, 4, 6])->where('status', 1);
+
+              if ($admins->exists()) {
+                  $to = array_merge($to, $admins->pluck('email')->toArray());
+              }
+
+              $admins = Admin::join('admin_roles', 'admins.role_id', '=', 'admin_roles.id')->where('admin_roles.department_id', 7);
+
+              if ($admins->exists()) {
+                  $to = array_merge($to, $admins->pluck('admins.email')->toArray());
+              }
+
+              $ceo = Admin::find(8);
+
+              if ($ceo) {
+                  $to[] = $ceo->email;
+              }
+
+              self::email($subject, $body, $to);
+          }
         }
       }
     }
