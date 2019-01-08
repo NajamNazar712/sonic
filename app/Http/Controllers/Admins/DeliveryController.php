@@ -190,7 +190,7 @@ class DeliveryController extends Controller
                 $shipment = $shipment->first();
                 $admin_hub = City::find($shipment->consignee_city->hub_id)->id;
                 if(session('role_id') == 1 || in_array($admin_hub, session('hubs'))){
-                $old_delivery_note_id = DeliveryNoteShipment::where('shipment_id', $shipment->id)->orderBy('delivery_note_id', 'desc');
+                $old_delivery_note_id = DeliveryNoteShipment::join('delivery_notes','delivery_notes.id', '=' ,'delivery_note_shipments.delivery_note_id')->where('delivery_note_shipments.shipment_id', $shipment->id)->where('delivery_notes.status', '!=', 4)->orderBy('delivery_note_id', 'desc');
                 if ($old_delivery_note_id->exists()) {
                     $old_delivery_note_id = $old_delivery_note_id->first();
                     $delivery_note_rider = DeliveryNote::where('id', $old_delivery_note_id->delivery_note_id)->first();
