@@ -377,6 +377,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
             Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
+            Route::post('add/status/all','Admins\DeliveryController@receive_delivery_status_submit_all')->name('add.status.all');
             Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
             Route::post('reason','Admins\DeliveryController@receive_delivery_reason')->name('reason');
             Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
