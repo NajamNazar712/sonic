@@ -46,6 +46,7 @@ class GlobalSettingsController extends Controller
         return view('admin.settings.shipment_cancellation_cut_off_days')->with('settings', $settings);
     }
 
+
     public function shipment_cancellation_cut_off_days_store(Request $request) {
         $settings = GlobalSettings::where('type', 'shipment_cancellation_cut_off_days')->first();
 
@@ -55,4 +56,34 @@ class GlobalSettingsController extends Controller
 
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+    public function auto_account_disabled_days_index() {
+        $settings = GlobalSettings::where('type', 'auto_account_disabled_days')->first();
+
+        return view('admin.settings.auto_account_disabled_days')->with('settings', $settings);
+    }
+    public function auto_account_disabled_days_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'auto_account_disabled_days')->first();
+
+        $settings->setting_value = $request->auto_account_disabled_days;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function daily_pickup_sales_cron_index(){
+        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time')->first();
+
+        return view('admin.settings.daily_pickup_sales_cron_time')->with('settings', $settings);
+    }
+    public function daily_pickup_sales_cron_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'daily_pickup_sales_cron_time')->first();
+
+        $settings->setting_value = $request->daily_pickup_sales_cron_time;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
 }

@@ -205,6 +205,35 @@ class ShipperDashboardController extends Controller
             }
         }
     }
+    public function order_cancel_all(Request $request)
+    {
+
+        foreach ($request->ids as $id) {
+            $shipment_id = Shipment::find($id);
+            if ($shipment_id) {
+                $shipment = Shipment::where('id', $shipment_id->id)->where('user_id', session('user_id'));
+                if ($shipment->exists()) {
+                    $shipment = $shipment->first();
+
+                    if ($shipment->shipper_status_id == 1) {
+                        $shipment->shipper_status_id = 17;
+                        $shipment->consignee_status_id = 17;
+                        $shipment->save();
+
+                        AdminPickupsController::cancel($shipment_id->id);
+
+                        ShipmentsJourneyController::add($shipment_id->id, 17, 17, NULL, NULL, session('user_id'), NULL);
+
+                    } else {
+                        return response()->json(['status' => 0, 'error' => 'Shipment\'s Status has already been changed']);
+                    }
+                } else {
+                    return  response()->json(['status' => 0, 'error' => 'Shipment not found']);
+                }
+            }
+        }
+        return response()->json(['status' => 1, 'success' => 'Shipment has been cancelled successfully']);
+    }
     public function get_shipment_charges(Request $request){
         $shipment_id = $request->shipment_id;
         $shipment = Shipment::find($shipment_id);

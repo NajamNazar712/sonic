@@ -9,6 +9,7 @@ use App\Http\Controllers\Admins\ShipmentChargesController;
 use App\Http\Controllers\Admins\AdminFinanceController;
 use App\Http\Models\Admin\AdminHub;
 use App\Http\Models\Admin\SalePersonTag;
+use App\Http\Models\AdminLogs;
 use App\Http\Models\CityDelivery;
 use App\Http\Models\BanksList;
 use App\Http\Models\Rates\HistoryBookingTypeCharges;
@@ -90,10 +91,11 @@ class AdminDashboardController extends Controller
         $thirtyDays = Carbon::now()->subDays(29)->startOfDay();
         $stats['total'] = Shipment::whereBetween('created_at',[$thirtyDays,$today]);
         $stats['booked'] = Shipment::where('shipper_status_id',1)->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['canceled'] = Shipment::where('shipper_status_id',17)->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['received'] = Shipment::whereIn('shipper_status_id',[2,3,4])->whereBetween('created_at',[$thirtyDays,$today]);
         $stats['delivered'] = Shipment::whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46])->whereBetween('created_at',[$thirtyDays,$today]);
-        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['return'] = Shipment::whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46,50])->whereBetween('created_at',[$thirtyDays,$today]);
+        $stats['pending'] = Shipment::whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19,49])->whereBetween('created_at',[$thirtyDays,$today]);
 
         if (session('role_id') != 1) {
             $stats['total'] = Shipment::where(function($query) {
@@ -104,6 +106,12 @@ class AdminDashboardController extends Controller
                 });
             });
             $stats['booked'] = $stats['booked']->where(function($query) {
+                $query->whereHas('pickup_address.city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                })->orWhereHas('consignee_city', function ($sub_query) {
+                    $sub_query->whereIn('hub_id', session('hubs'));
+                });
+            });$stats['canceled'] = $stats['canceled']->where(function($query) {
                 $query->whereHas('pickup_address.city', function ($sub_query) {
                     $sub_query->whereIn('hub_id', session('hubs'));
                 })->orWhereHas('consignee_city', function ($sub_query) {
@@ -146,6 +154,7 @@ class AdminDashboardController extends Controller
 
         $stats['total'] = $stats['total']->count();
         $stats['booked'] = $stats['booked']->count();
+        $stats['canceled'] = $stats['canceled']->count();
         $stats['received'] = $stats['received']->count();
         $stats['delivered'] = $stats['delivered']->count();
         $stats['return'] = $stats['return']->count();
@@ -160,6 +169,7 @@ class AdminDashboardController extends Controller
 
             $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
             $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[2,3,4]);
+            $cancelled = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',17);
             $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[14,16, 30, 36,37,39,40,41,47]);
             $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[5,6,7,8,9,10,11,12,13,15,18,19]);
             $return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id',[20,21,22,23,24,25,26,27,28,29,31,32,33,34,35,38,42,43,44,45,46]);
@@ -174,6 +184,13 @@ class AdminDashboardController extends Controller
                 });
 
                 $received = $received->where(function($query) {
+                    $query->whereHas('pickup_address.city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    })->orWhereHas('consignee_city', function ($sub_query) {
+                        $sub_query->whereIn('hub_id', session('hubs'));
+                    });
+                });
+                $cancelled = $cancelled->where(function($query) {
                     $query->whereHas('pickup_address.city', function ($sub_query) {
                         $sub_query->whereIn('hub_id', session('hubs'));
                     })->orWhereHas('consignee_city', function ($sub_query) {
@@ -208,6 +225,7 @@ class AdminDashboardController extends Controller
 
             $graph['booked'][] = $booked->count();
             $graph['received'][] = $received->count();
+            $graph['cancelled'][] = $cancelled->count();
             $graph['delivered'][] = $delivered->count();
             $graph['pending'][] = $pending->count();
             $graph['return'][] = $return->count();
@@ -243,6 +261,7 @@ class AdminDashboardController extends Controller
 
                     $booked = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination, 'shipper_status_id' => 1]);
                     $received = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
+                    $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', 17);
                     $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
                     $pending = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                     $return = Shipment::whereDate('created_at', $comparison_date)->where(['user_id' => $shipper, 'consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
@@ -263,6 +282,13 @@ class AdminDashboardController extends Controller
                                 $sub_query->whereIn('hub_id', session('hubs'));
                             });
                         });
+                        $canceled = $canceled->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
 
                         $delivered = $delivered->where(function($query) {
                             $query->whereHas('pickup_address.city', function ($sub_query) {
@@ -291,6 +317,7 @@ class AdminDashboardController extends Controller
 
                     $graph['booked'][] = $booked->count();
                     $graph['received'][] = $received->count();
+                    $graph['canceled'][] = $canceled->count();
                     $graph['delivered'][] = $delivered->count();
                     $graph['pending'][] = $pending->count();
                     $graph['return'][] = $return->count();
@@ -302,6 +329,7 @@ class AdminDashboardController extends Controller
 
                     $booked = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->where('shipper_status_id',1);
                     $received = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [2, 3, 4]);
+                    $canceled = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', 17);
                     $delivered = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
                     $pending = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                     $return = Shipment::whereDate('created_at', $comparison_date)->where('user_id', $shipper)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
@@ -322,6 +350,13 @@ class AdminDashboardController extends Controller
                                 $sub_query->whereIn('hub_id', session('hubs'));
                             });
                         });
+                        $canceled = $canceled->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
 
                         $delivered = $delivered->where(function($query) {
                             $query->whereHas('pickup_address.city', function ($sub_query) {
@@ -350,6 +385,7 @@ class AdminDashboardController extends Controller
 
                     $graph['booked'][] = $booked->count();
                     $graph['received'][] = $received->count();
+                    $graph['canceled'][] = $canceled->count();
                     $graph['delivered'][] = $delivered->count();
                     $graph['pending'][] = $pending->count();
                     $graph['return'][] = $return->count();
@@ -361,6 +397,7 @@ class AdminDashboardController extends Controller
 
                     $booked = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->where('shipper_status_id',1);
                     $received = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [2, 3, 4]);
+                    $canceled = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', 17);
                     $delivered = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
                     $pending = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                     $return = Shipment::whereDate('created_at', $comparison_date)->where(['consignee_city_id' => $destination])->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
@@ -381,6 +418,13 @@ class AdminDashboardController extends Controller
                                 $sub_query->whereIn('hub_id', session('hubs'));
                             });
                         });
+                        $canceled = $canceled->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
 
                         $delivered = $delivered->where(function($query) {
                             $query->whereHas('pickup_address.city', function ($sub_query) {
@@ -409,6 +453,7 @@ class AdminDashboardController extends Controller
 
                     $graph['booked'][] = $booked->count();
                     $graph['received'][] = $received->count();
+                    $graph['canceled'][] = $canceled->count();
                     $graph['delivered'][] = $delivered->count();
                     $graph['pending'][] = $pending->count();
                     $graph['return'][] = $return->count();
@@ -420,6 +465,7 @@ class AdminDashboardController extends Controller
 
                     $booked = Shipment::whereDate('created_at', $comparison_date)->where('shipper_status_id',1);
                     $received = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [2, 3, 4]);
+                    $canceled = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', 17);
                     $delivered = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [14, 16, 30, 36, 37, 39, 40, 41, 47]);
                     $pending = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [5, 6, 7, 8, 9, 10, 11, 12, 13, 15, 18, 19]);
                     $return = Shipment::whereDate('created_at', $comparison_date)->whereIn('shipper_status_id', [20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 38, 42, 43, 44, 45, 46]);
@@ -440,6 +486,13 @@ class AdminDashboardController extends Controller
                                 $sub_query->whereIn('hub_id', session('hubs'));
                             });
                         });
+                        $canceled = $canceled->where(function($query) {
+                            $query->whereHas('pickup_address.city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            })->orWhereHas('consignee_city', function ($sub_query) {
+                                $sub_query->whereIn('hub_id', session('hubs'));
+                            });
+                        });
 
                         $delivered = $delivered->where(function($query) {
                             $query->whereHas('pickup_address.city', function ($sub_query) {
@@ -468,6 +521,7 @@ class AdminDashboardController extends Controller
 
                     $graph['booked'][] = $booked->count();
                     $graph['received'][] = $received->count();
+                    $graph['canceled'][] = $received->count();
                     $graph['delivered'][] = $delivered->count();
                     $graph['pending'][] = $pending->count();
                     $graph['return'][] = $return->count();
@@ -667,6 +721,13 @@ class AdminDashboardController extends Controller
         }
 
     }
+    public function rejectReasonSubmit(Request $request)
+    {
+        $shipper_id = $request->shipper_id;
+        $reject_reason = $request->rejected_reason;
+        User::where('id',$shipper_id)->update(['rejected_reason'=>$reject_reason, 'rate_status'=>2]);
+        return ['success' => 'Rates has been rejected!'];
+    }
     public function UserStatusBlock(Request $request){
         $user_id = $request->id;
         $reason = $request->reason;
@@ -706,6 +767,7 @@ class AdminDashboardController extends Controller
             if($status == 'enable'){
                 if($user->status == 4){
                     $user->status = 3;
+                    $user->disable_remarks = null;
                     $user->save();
                     return response()->json(['status'=>1,'success'=>"User is now enabled!"]);
                 }else{
@@ -851,7 +913,7 @@ class AdminDashboardController extends Controller
 
     public function editRatesView($id){
         $user = User::find($id);
-        if ($user['rate_status']==0) {
+        if ((($user['rate_status']>=0) && $user['status']==1)||(($user['rate_status']==0) && $user['status']==3)) {
             $switches = RateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
@@ -866,7 +928,7 @@ class AdminDashboardController extends Controller
             $discount = DiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $rate_status = $user['rate_status'];
         }
-        elseif($user['rate_status']==1){
+        elseif(($user['rate_status']>=1) && $user['status']==3){
             $switches = PendingRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
 //        return $switches;
 //        var_dump(empty($switches));exit();
@@ -2408,9 +2470,10 @@ class AdminDashboardController extends Controller
                 }
                 //dd($weightAlready);
             }
-            if ($request->authorize == 1) {
-                User::where('id', $id)->update(['status' => 2,'rate_status' => 0, 'rates_authorized_by' => Auth::id()]);
-                return redirect(route('admin.accounts.pending'))->with('success', 'User is now authorized.');
+            User::where('id',$id)->update(['rate_status'=>1]);
+            if($request->authorize == 1){
+                User::where('id',$id)->update(['rate_status'=>0,'status'=>2,'rates_authorized_by'=>Auth::id()]);
+                return redirect(route('admin.accounts.pending'))->with('success','User is now authorized.');
             }
 
             return redirect()->back()->with('success', 'All Rates are updated');
@@ -5437,7 +5500,7 @@ class AdminDashboardController extends Controller
                    ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
                    ->where('spt.status','=',0);
            })
-           ->select(['users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
+           ->select(['users.disable_remarks as disable_remarks','users.rejected_reason as rejected_reason','users.rate_status as rate_status','users.id','ad.name as admin_tag_id', 'users.name','cities.name as city' ,'users.poc','users.phone','users.address', 'users.email','p.product_name as product_type','rab.name as added_by','rabna.name as updated_by','users.created_at','rabb.name as approved_by','rabba.name as account_activated_by','users.activated_at as activated_date','users.status'])->whereIn('users.status',[3,4])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5456,8 +5519,18 @@ class AdminDashboardController extends Controller
             ->editColumn('rate_status',function ($users){
                 if($users->rate_status == 0){
                     return "Approved";
-                }else{
+                }elseif($users->rate_status == 1){
                     return "Requested";
+                }
+                else{
+                    return "Rejected";
+                }
+            })->editColumn('disable_remarks',function ($users){
+                if($users->disable_remarks != null){
+                    return $users->disable_remarks;
+                }
+                else{
+                    return "-";
                 }
             })
             ->filterColumn('users.id', function ($query, $keyword) {
@@ -5468,6 +5541,13 @@ class AdminDashboardController extends Controller
                     return "Enable";
                 }else{
                     return "Disable";
+                }
+            })
+            ->editColumn('rejected_reason',function ($users){
+                if($users->rejected_reason != null && $users->rate_status==2){
+                    return $users->rejected_reason;
+                }else{
+                    return "-";
                 }
             })
             ->filterColumn('status', function($query, $keyword) {
@@ -5550,7 +5630,7 @@ class AdminDashboardController extends Controller
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
 	                    ->where('spt.status','=',0);
 	            })
-            ->select(['users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
+            ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
             $users = $users->whereIn('cities.hub_id', session('hubs'));
@@ -5566,6 +5646,27 @@ class AdminDashboardController extends Controller
             })
             ->filterColumn('users.id', function ($query, $keyword) {
                 return $query->where('users.id', '=', $keyword);
+            })
+            ->editColumn('rejected_reason',function ($users){
+                if($users->rejected_reason != null && $users->rate_status==2){
+                    return $users->rejected_reason;
+                }else{
+                    return "-";
+                }
+            })
+            ->editColumn('rate_status',function ($users){
+                if($users->rate_status == 2) {
+                    return "Rejected";
+                }
+                else if($users->rate_status == 1) {
+                    return "Requested";
+                }
+                else if($users->rate_status == 0 && $users->status==2){
+                    return "Authorized";
+                }
+                else if($users->rate_status == 0 && $users->status==1) {
+                    return "Requested";
+                }
             })
             ->editColumn('status', function ($users) {
                 return $users->status == 0? 'Request Received': ($users->status == 1? 'Rates Added' : ($users->status == 2? 'Pending for Activation':''));
@@ -5608,9 +5709,11 @@ class AdminDashboardController extends Controller
                     $dropdown .= '<button type="button" class="dropdown-item active_account" rel="activate" data-target-id="' . $result->id . '"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Activate Account</div></button>';
 
                 }
-                if($sale_check != null) {
+                if($sale_check != null && $result->status != 2) {
                     if (RateStatus::where('user_id', $result->id)->exists() && (session('role_id') == 1 || in_array(7, session('permissions')))) {
-                        $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                        if($result->status != 2) {
+                            $dropdown .= '<button onclick="window.open(\'' . route('admin.edit.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Edit Rates</div></button>';
+                        }
                     } else {
                         if (session('role_id') == 1 || in_array(6, session('permissions'))) {
                             $dropdown .= '<button onclick="window.open(\'' . route('admin.add.rates', ['id' => $result->id]) . '\', \'_tab\')" type="button" class="dropdown-item"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Add Rates</div></button>';
@@ -5727,6 +5830,11 @@ class AdminDashboardController extends Controller
             User::where('id',$user_id)->update(['name'=>$request->name,'poc'=>$request->poc,'email'=>$request->email,'address'=>$request->address,'phone'=>$request->phone,'phone2'=>$request->phone2,'cnic'=>$request->cnic,
                 'ntn_no'=>$request->ntn_no,'updated_by_type'=>1,'updated_by_id'=>Auth::id(),'city_id'=>$request->city_id,
                 'url'=>$request->url,'product_id'=>$request->product_id]);
+            AdminLogs::create([
+                'admin_id'=>Auth::id(),
+                'user_id'=>$user_id
+                
+            ]);
         }
         else
         {
@@ -5758,7 +5866,10 @@ class AdminDashboardController extends Controller
 
         UserBankInfo::where('user_id',$user_id)->update(['bank_branch'=>$request->bank_branch,'bank_name'=>$request->bank_name,'account_no'=>$request->account_no,
             'account_title'=>$request->account_title,'iban'=>$request->iban,'city_id'=>$request->bank_city,'payment_mode'=>$request->payment_mode,'payment_cycle'=>$request->payment_cycle]);
-
+            AdminLogs::create([
+                'admin_id' => Auth::id(),
+                'user_id' => $user_id
+            ]);
         return redirect()->back()->with(['success'=>"Bank Information Successfully Updated"]);
     }
 

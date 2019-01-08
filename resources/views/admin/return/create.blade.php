@@ -18,6 +18,12 @@
                             <input type="text" class="form-control" placeholder="Scan Tracking Number" id="scan_tracking">
                         </fieldset>
                     </div>
+
+                    <div class="col-1">
+                        <a href="#" id="camera_scan_initiate">
+                            <i class="ft-camera h1"></i>
+                        </a>
+                    </div>
                 </div>
                 </form>
                 <div class="row mb-2 justify-content-center">
@@ -77,6 +83,23 @@
 
                     </div>
                 </form>
+
+                <div class="modal fade" id="camera_scan" role="dialog" aria-labelledby="camera_scan_title" aria-hidden="true">
+                    <div class="modal-dialog modal-lg" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title" id="camera_scan_title">Camera Scan</h4>
+
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">×</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div id="camera_view" class="camera_view"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -140,8 +163,9 @@
 
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
-    {{--    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>--}}
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
         $(document).ready(function () {
@@ -383,9 +407,25 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
                 }
+            });
 
+            $('#camera_scan_initiate').bind('click', function() {
+                $('#camera_scan').modal('show');
 
+                camera_scanning_start('#camera_view');
+            });
+
+            $('#camera_scan').on('hidden.bs.modal', function (e) {
+                camera_scanning_stop();
             });
         });
+
+        function camera_scan_detected(tracking_number) {
+            $('#camera_scan').modal('hide');
+
+            $('#scan_tracking').val(tracking_number);
+
+            $('#return_note_form').trigger('submit');
+        }
     </script>
 @endsection
