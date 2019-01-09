@@ -122,6 +122,7 @@
                         <th class="border-primary border-darken-1">Shipping Mode</th>
                         <th class="border-primary border-darken-1">Cargo Type</th>
                         <th class="border-primary border-darken-1">Shipments Weight</th>
+                        <th class="border-primary border-darken-1">Chargeable Weight</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Vendor Weight</th>
                         <th class="border-primary border-darken-1">Transitted By</th>
@@ -358,6 +359,7 @@
                             head.push('Shipping Mode');
                             head.push('Cargo Type');
                             head.push('Shipments Weight');
+                            head.push('Chargeable Weight');
                             head.push('Actual Weight');
                             head.push('Vendor Weight');
                             head.push('Transitted By');
@@ -376,6 +378,7 @@
                                 row.push(values.shipping_mode);
                                 row.push(values.cargo_type);
                                 row.push(values.shipments_weight);
+                                row.push(values.chargeable_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.vendor_weight);
                                 row.push(values.transit_by);
@@ -435,6 +438,7 @@
                     {data: 'shipping_mode', name: 'sm.mode', class: 'align-middle shipping_mode'},
                     {data: 'cargo_type', name: 'cargo_consignments.type', class: 'align-middle cargo_type'},
                     {data: 'shipments_weight', name: 'cargo_consignments.shipments_weight', class: 'align-middle shipments_weight'},
+                    {data: 'chargeable_weight', name: 'cargo_consignments.chargeable_weight', class: 'align-middle chargeable_weight', orderable: false, searchable: false},
                     {data: 'actual_weight', name: 'cargo_consignments.actual_weight', class: 'align-middle actual_weight'},
                     {data: 'vendor_weight', name: 'cargo_consignments.vendor_weight', class: 'align-middle vendor_weight'},
                     {data: 'transit_by', name: 'si.name', class: 'align-middle transit_by'},

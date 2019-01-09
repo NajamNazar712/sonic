@@ -71,6 +71,7 @@
 										<th class="border-primary border-darken-1">Vendor</th>
 										<th class="border-primary border-darken-1">Builty No.</th>
 										<th class="border-primary border-darken-1">Shipments Weight</th>
+										<th class="border-primary border-darken-1">Chargeable Weight</th>
 										<th class="border-primary border-darken-1">Actual Weight</th>
 										<th class="border-primary border-darken-1">Vendor Weight</th>
 										<th class="border-primary border-darken-1">Transit Datetime</th>
@@ -396,6 +397,7 @@
                             head.push('Vendor');
                             head.push('Builty No.');
                             head.push('Shipments Weight');
+                            head.push('Chargeable Weight');
                             head.push('Actual Weight');
                             head.push('Vendor Weight');
                             head.push('Transit Datetime');
@@ -419,6 +421,7 @@
                                 row.push(values.vendor);
                                 row.push(values.builty_number);
                                 row.push(values.shipments_weight);
+                                row.push(values.chargeable_weight);
                                 row.push(values.actual_weight);
                                 row.push(values.vendor_weight);
                                 row.push(values.transit_at);
@@ -504,6 +507,7 @@
 					{data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
 					{data: 'builty_number', name: 'cargo_consignments.builty_number', class: 'align-middle builty_number'},
 					{data: 'shipments_weight', name: 'cargo_consignments.shipments_weight', class: 'align-middle shipments_weight'},
+					{data: 'chargeable_weight', name: 'cargo_consignments.chargeable_weight', class: 'align-middle chargeable_weight', orderable: false, searchable: false},
 					{data: 'actual_weight', name: 'cargo_consignments.actual_weight', class: 'align-middle actual_weight'},
 					{data: 'vendor_weight', name: 'cargo_consignments.vendor_weight', class: 'align-middle vendor_weight'},
 					{data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
