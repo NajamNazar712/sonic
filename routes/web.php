@@ -812,7 +812,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('overall_sales')->name('overall_sales.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@overall_sales_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
 
         });
         Route::prefix('negative_balance_customers')->name('negative_balance_customers.')->group(function (){
