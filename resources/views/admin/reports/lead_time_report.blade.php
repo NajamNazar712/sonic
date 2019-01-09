@@ -281,6 +281,10 @@
                     body = [];
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.lead_time.list') }}',
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: {
                             'page': 'all',
                             'search_tracking_no': $('#search_tracking_no').val(),
