@@ -394,7 +394,9 @@
                     @if (session('role_id') == 1 || in_array(116, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.auto_account_disabled_days.auto_index')}}">Auto Account Disabled Days</a></li>
                     @endif
-
+                        @if (session('role_id') == 1 || in_array(116, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.settings.non_service_area.index')}}">Non Service Area</a></li>
+                        @endif
                     @if (session('role_id') == 1 || in_array(116, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.daily_pickup_sales_cron.index')}}">Daily Pickup & Sales Cron Time</a></li>
                     @endif

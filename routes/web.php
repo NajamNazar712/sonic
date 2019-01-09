@@ -52,6 +52,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
             Route::post('shipping_modes', 'Shippers\ShipperShipmentBookController@shipping_modes')->name('shipping_modes');
             Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
+            Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
 
             Route::prefix('excel')->name('excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
@@ -864,6 +865,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('daily_pickup_sales_cron')->name('daily_pickup_sales_cron.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@daily_pickup_sales_cron_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@daily_pickup_sales_cron_store')->name('store');
+        });
+        Route::prefix('non_service_area')->name('non_service_area.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@non_service_area_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@non_service_area_store')->name('store');
         });
 
     });

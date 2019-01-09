@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
+use App\Http\Models\Admin\NonServiceArea;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -69,6 +70,22 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+    public function non_service_area_index() {
+    return view('admin.settings.non_service_area');
+    }
+
+    public function non_service_area_store(Request $request) {
+        $nsa = NonServiceArea::where('name',$request->non_service_area)->first();
+        if($nsa['name'] == $request->non_service_area)
+        {
+            return redirect()->back()->with('error', 'Non Service Area Is Already Updated!');
+        }
+        else
+        {
+            $create=NonServiceArea::create(['name' => $request->non_service_area]);
+            return redirect()->back()->with('success', 'Non Service Area Updated!');
+        }
     }
 
     public function daily_pickup_sales_cron_index(){
