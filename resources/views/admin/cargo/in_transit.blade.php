@@ -493,7 +493,7 @@
 					}
 				},
 				rowId: 'id',
-				order: [[14, 'desc']],
+				order: [[15, 'desc']],
 				columns: [
 					{data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
 					{data: 'id_padded_link', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
