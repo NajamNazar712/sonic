@@ -494,7 +494,8 @@
                             $.each(data, function(index, shipment) {
                                 details += '<tr>';
 
-                                details += '<td class="align-middle text-center">' + shipment.tracking_number + '</td>';
+                                details += '<td class="align-middle text-center"><u><a href=' + route + '?tracking_number=' + shipment.tracking_number + ' target="_blank">' + shipment.tracking_number + '</a></u></td>';
+
                                 details += '<td class="align-middle text-center">' + shipment.estimated_weight + '</td>';
                                 details += '<td class="align-middle text-center">' + shipment.actual_weight + '</td>';
                                 details += '<td class="align-middle text-center">' + shipment.chargeable_weight + '</td>';

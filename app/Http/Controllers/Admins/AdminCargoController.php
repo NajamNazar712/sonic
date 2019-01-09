@@ -1366,7 +1366,14 @@ class AdminCargoController extends Controller
         foreach ($cargo_consignments_shipments as $cargo_consignments_shipment) {
             $shipment = $cargo_consignments_shipment->shipment;
 
-            $tracking_numbers[] = $shipment->tracking_number;
+            $tracking_number = array();
+
+            $tracking_number['tracking_number'] = $shipment->tracking_number;
+            $tracking_number['estimated_weight'] = $shipment->estimated_weight;
+            $tracking_number['actual_weight'] = $shipment->actual_weight;
+            $tracking_number['chargeable_weight'] = ($shipment->chargeable_weight) ? $shipment->chargeable_weight : '';
+
+            $tracking_numbers[] = $tracking_number;
         }
 
         return $tracking_numbers;

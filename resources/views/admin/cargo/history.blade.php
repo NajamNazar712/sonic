@@ -368,13 +368,32 @@
                 })
                     .done(function(data) {
                         if (data) {
-                            var tracking_numbers = '';
+                            var details = '<table class="table table-sm table-bordered"><tbody>';
 
-                            $.each(data, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                            details += '<tr>';
+
+                            details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Shipment</strong></td>';
+                            details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Estimated Weight</strong></td>';
+                            details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td>';
+                            details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Chargeable Weight</strong></td>';
+
+                            details += '</tr>';
+
+                            $.each(data, function(index, shipment) {
+                                details += '<tr>';
+
+                                details += '<td class="align-middle text-center"><u><a href=' + route + '?tracking_number=' + shipment.tracking_number + ' target="_blank">' + shipment.tracking_number + '</a></u></td>';
+
+                                details += '<td class="align-middle text-center">' + shipment.estimated_weight + '</td>';
+                                details += '<td class="align-middle text-center">' + shipment.actual_weight + '</td>';
+                                details += '<td class="align-middle text-center">' + shipment.chargeable_weight + '</td>';
+
+                                details += '</tr>';
                             });
 
-                            $('#shipments .modal-body').html(tracking_numbers);
+                            details += '</tbody></table>';
+
+                            $('#shipments .modal-body').html(details);
 
                             $('#shipments').modal('show');
                         }
