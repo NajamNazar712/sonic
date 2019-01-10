@@ -896,7 +896,16 @@
 								});
 					}
 					else {
-						
+						swal({
+							title: 'Please Wait!',
+							text: 'Your shipment is being booked!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+
+						form.submit();
 					}
 				}
 			});
