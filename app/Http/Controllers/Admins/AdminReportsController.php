@@ -987,13 +987,13 @@ class AdminReportsController extends Controller
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipments_journey as radd', function ($join) {
                 $join->on('radd.shipment_id', '=', 'shipments.id')
-                    ->where('radd.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)'));
+                    ->where('radd.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 4)'));
             })
             ->leftJoin('shipments_journey as fstatus', function ($join) {
                 $join->on('fstatus.shipment_id', '=', 'shipments.id')
@@ -1007,38 +1007,38 @@ class AdminReportsController extends Controller
             })
             ->leftJoin('shipments_journey as dd', function ($join) {
                 $join->on('dd.shipment_id', '=', 'shipments.id')
-                    ->where('dd.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,16,30,36) )'));
+                    ->where('dd.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,16,30,36) )'));
             })
             ->leftJoin('shipments_journey as rc', function ($join) {
                 $join->on('rc.shipment_id', '=', 'shipments.id')
-                    ->where('rc.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,42))'));
+                    ->where('rc.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(20,42))'));
             })
             ->leftJoin('shipments_journey as rrad', function ($join) {
                 $join->on('rrad.shipment_id', '=', 'shipments.id')
-                    ->where('rrad.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 22)'));
+                    ->where('rrad.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 22)'));
             })
             ->leftJoin('shipments_journey as rds', function ($join) {
                 $join->on('rds.shipment_id', '=', 'shipments.id')
-                    ->where('rds.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(24,25,29,31,35,38))'));
+                    ->where('rds.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(24,25,29,31,35,38))'));
             })
             ->leftJoin('shipments_journey as pd', function ($join) {
                 $join->on('pd.shipment_id', '=', 'shipments.id')
-                    ->where('pd.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(39,40,41,43))'));
+                    ->where('pd.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(39,40,41,43))'));
             })
             ->leftJoin('shipments_journey as ret_or_del', function ($join) {
                 $join->on('ret_or_del.shipment_id', '=', 'shipments.id')
-                    ->where('ret_or_del.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37,42))'));
+                    ->where('ret_or_del.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id In(14,20,30,36,37,42))'));
             })
             ->leftJoin('shipments_journey as lj', function ($join) {
                 $join->on('lj.shipment_id', '=', 'shipments.id')
-                    ->where('lj.created_at','=',
-                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id)'));
+                    ->where('lj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id)'));
             })
             ->leftJoin('delivery_note_shipments as dns', function ($join) {
                 $join->on('dns.shipment_id', '=', 'shipments.id')
