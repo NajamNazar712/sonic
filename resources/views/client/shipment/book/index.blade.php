@@ -865,8 +865,8 @@
 					var present = [];
 					for(k=0;k<strArray.length;k++) {
 						for (i = 0; i < check.length; i++) {
-							if(JSON.stringify(strArray[k])=== JSON.stringify(check[i])){
-								present.push(check[i]);
+							if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
+								present.push(strArray[k]);
 							}
 						}
 					}
@@ -894,6 +894,18 @@
 										);
 										form.submit();
 								});
+					}
+					else {
+						swal({
+							title: 'Please Wait!',
+							text: 'Your shipment is being booked!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
+
+						form.submit();
 					}
 				}
 			});
