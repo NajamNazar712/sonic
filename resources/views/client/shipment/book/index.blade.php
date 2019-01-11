@@ -875,7 +875,7 @@
 					if(present.length > 0){
 						swal({
 							title: 'Warning',
-							text: 'Non Service Area: ' + present,
+							text: 'Potential Non Service Area: ' + present,
 							icon: 'info',
 							buttons:{
 							confirm: {
@@ -887,11 +887,15 @@
 							closeOnClickOutside: false,
 							closeOnEsc: false
 						}).then(function() {
-										swal(
-												'Please Wait!',
-												'Your shipment is being booked!',
-												'info'
-										);
+										swal({
+											title: 'Please Wait!',
+											text: 'Your shipment is being booked!',
+											icon: 'info',
+											buttons: false,
+											closeOnClickOutside: false,
+											closeOnEsc: false
+										});
+
 										form.submit();
 								});
 					}
