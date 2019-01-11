@@ -36,6 +36,17 @@
 {{--<script src="{{asset('app-assets/js/scripts/pickers/dateTime/pick-a-datetime.js')}}" type="text/javascript"></script>--}}
 <script src="{{asset('app-assets/vendors/js/tables/datatable/datatables.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/js/scripts/tables/datatables/datatable-basic.js')}}" type="text/javascript"></script>
+
+@if (isset($ticker))
+	<script src="{{asset('app-assets/vendors/js/marquee3000/marquee3k.js')}}" type="text/javascript"></script>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			Marquee3k.init();
+		});
+	</script>
+@endif
+
 <script src="{{asset('js/app.js')}}" type="text/javascript"></script>
 <!-- END PAGE LEVEL JS-->
 

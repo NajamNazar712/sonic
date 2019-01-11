@@ -871,5 +871,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@non_service_area_store')->name('store');
         });
 
+        Route::prefix('ticker')->name('ticker.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@ticker_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
+        });
+
     });
 });
