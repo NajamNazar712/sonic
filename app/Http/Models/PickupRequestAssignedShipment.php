@@ -40,4 +40,8 @@ class PickupRequestAssignedShipment extends Model
 	public function pickup_request() {
 		return $this->belongsTo('App\Http\Models\PickupRequest');
 	}
+
+	public function shipment() {
+		return $this->belongsTo('App\Http\Models\Shipment');
+	}
 }
