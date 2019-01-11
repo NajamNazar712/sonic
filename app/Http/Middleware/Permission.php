@@ -353,6 +353,9 @@ class Permission
             'settings.shipment_cancellation_cut_off_days.index' => 116,
             'settings.shipment_cancellation_cut_off_days.store' => 116,
 
+            'settings.daily_pickup_sales_cron.index' => 151,
+            'settings.daily_pickup_sales_cron.store' => 151,
+
             'settings.ticker.index' => 152,
             'settings.ticker.store' => 152,
 
