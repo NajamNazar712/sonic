@@ -103,4 +103,69 @@ class GlobalSettingsController extends Controller
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 
+
+    public function ticker_index() {
+        $admin_ticker = NULL;
+        $shipper_ticker = NULL;
+
+        $settings = GlobalSettings::where('type', 'admin_ticker');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $ticker = $settings->text;
+
+            if (!empty($ticker)) {
+                $admin_ticker = $ticker;
+            }
+        }
+
+        $settings = GlobalSettings::where('type', 'shipper_ticker');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+
+            $ticker = $settings->text;
+
+            if (!empty($ticker)) {
+                $shipper_ticker = $ticker;
+            }
+        }
+
+        return view('admin.settings.ticker')->with(['admin_ticker' => $admin_ticker, 'shipper_ticker' => $shipper_ticker]);
+    }
+
+    public function ticker_store(Request $request) {
+        $settings = GlobalSettings::where('type', 'admin_ticker');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'admin_ticker';
+        }
+
+        $settings->text = $request->admin_ticker;
+
+        $settings->save();
+
+        $settings = GlobalSettings::where('type', 'shipper_ticker');
+
+        if ($settings->exists()) {
+            $settings = $settings->first();
+        }
+        else {
+            $settings = new GlobalSettings();
+
+            $settings->type = 'shipper_ticker';
+        }
+
+        $settings->text = $request->shipper_ticker;
+
+        $settings->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }

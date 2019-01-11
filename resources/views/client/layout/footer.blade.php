@@ -12,4 +12,14 @@
   <script src="{{asset('app-assets/js/core/app.js')}}" type="text/javascript"></script>
   <!-- END MODERN JS-->
 
+@if (isset($ticker))
+  <script src="{{asset('app-assets/vendors/js/marquee3000/marquee3k.js')}}" type="text/javascript"></script>
+
+  <script type="text/javascript">
+    $(document).ready(function() {
+      Marquee3k.init();
+    });
+  </script>
+@endif
+
   @yield('js')
