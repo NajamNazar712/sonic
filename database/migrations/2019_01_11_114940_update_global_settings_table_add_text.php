@@ -14,7 +14,7 @@ class UpdateGlobalSettingsTableAddText extends Migration
     public function up()
     {
          Schema::table('global_settings', function (Blueprint $table) {
-            $table->text('text')->after('type');
+            $table->text('text')->after('type')->default('');
         });
     }
 
