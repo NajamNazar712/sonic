@@ -147,7 +147,7 @@ class GlobalSettingsController extends Controller
             $settings->type = 'admin_ticker';
         }
 
-        $settings->text = $request->admin_ticker;
+        $settings->text = ($request->admin_ticker) ? $request->admin_ticker : '';
 
         $settings->save();
 
@@ -162,7 +162,7 @@ class GlobalSettingsController extends Controller
             $settings->type = 'shipper_ticker';
         }
 
-        $settings->text = $request->shipper_ticker;
+        $settings->text = ($request->shipper_ticker) ? $request->shipper_ticker : '';
 
         $settings->save();
 
