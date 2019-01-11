@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Shippers;
 
+use App\Http\Models\Admin\NonServiceArea;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Admins\AdminPickupsController;
@@ -87,7 +88,6 @@ class ShipperShipmentBookController extends Controller
       $shipment->payment_mode_id = $payment_mode_id;
       $shipment->shipper_status_id = 1;
       $shipment->consignee_status_id = 1;
-
       $shipment->save();
 
       $shipment_id = $shipment->id;
@@ -98,6 +98,22 @@ class ShipperShipmentBookController extends Controller
 
       return $shipment_id;
     }
+//    public function check(request $request)
+//    {
+//        $checks = NonServiceArea::orderBy('name')->get();
+//        $check_values = preg_split("/[ ,]+/", $request->consignee_address);
+//        $present_values = array();
+//
+//        foreach ($checks as $check) {
+//            foreach ($check_values as $check_value) {
+//                if($check['name'] == $check_value) {//Smaller Case
+//                    $present_values[] = $check_value;
+//                    return ['status' => 1, 'success' => 'Non Service Area', 'nsa' => $present_values];
+//                }
+//            }
+//        }
+//        return ['status' => 0, 'success' => 'Non Service Area', 'nsa' => $present_values];
+//    }
 
     static public function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
       $shipment = Shipment::find($shipment_id);
@@ -139,8 +155,10 @@ class ShipperShipmentBookController extends Controller
       $products = Product::orderBy('product_name')->get();
       $shipping_mode_same_day_timings = ShippingModeSameDayTiming::all();
       $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+      $check = NonServiceArea::pluck('name')->toArray();
 
-      return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities]);
+
+      return view('client.shipment.book.index')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check]);
     }
 
     public function shipping_modes(Request $request) {
@@ -373,7 +391,6 @@ class ShipperShipmentBookController extends Controller
             else {
               $print = FALSE;
             }
-
             return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
           }
           else {
@@ -918,6 +935,9 @@ class ShipperShipmentBookController extends Controller
                 $errors['Row #' . $row_id][] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
               }
 
+              if (!$consignee_city->zone_id) {
+                $errors['Row #' . $row_id][] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
+              }
               if (!$consignee_city->zone_id) {
                 $errors['Row #' . $row_id][] = 'Consignee City: ' . $consignee_city->name . ' is deactivated';
               }

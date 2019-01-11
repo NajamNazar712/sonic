@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 use App\Http\Controllers\ShipmentsJourneyController;
+use App\Http\Controllers\ShipmentsPickupJourneyController;
 use App\Http\Controllers\NotificationsController;
 use App\Http\Controllers\Admins\ShipmentChargesController;
 
@@ -100,6 +101,8 @@ class AdminPickupsController extends Controller
         $pickup_request->save();
       }
 
+      ShipmentsPickupJourneyController::add($shipment_id, 1, NULL, $pickup_request->id);
+
       $pickup_request_assigned_shipment = PickupRequestAssignedShipment::where('shipment_id', $shipment_id);
 
       if (!$pickup_request_assigned_shipment->exists()) {
@@ -138,6 +141,8 @@ class AdminPickupsController extends Controller
         }
 
         $pickup_request->save();
+
+        ShipmentsPickupJourneyController::add($shipment_id, 6, NULL, $pickup_request->id);
 
         $pickup_request_assigned_shipment->delete();
 
@@ -418,6 +423,20 @@ class AdminPickupsController extends Controller
         $pickup_note_request->pickup_request_id = $pickup_request_id;
 
         $pickup_note_request->save();
+
+        $pickup_request = PickupRequest::find($pickup_request_id);
+
+        $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
+
+        if ($assigned_shipments) {
+          foreach ($assigned_shipments as $assigned_shipment) {
+            $shipment = $assigned_shipment->shipment;
+
+            if ($shipment->shipper_status_id == 1) {
+              ShipmentsPickupJourneyController::add($shipment->id, 2, Auth::id(), $pickup_note_id, $rider_id);
+            }
+          }
+        }
       }
 
       return ['status' => 0, 'success' => 'Pickup Request(s) has been Assigned to the Rider'];
@@ -440,6 +459,18 @@ class AdminPickupsController extends Controller
         $pickup_request->status = 3;
 
         $pickup_request->save();
+
+        $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
+
+        if ($assigned_shipments) {
+          foreach ($assigned_shipments as $assigned_shipment) {
+            $shipment = $assigned_shipment->shipment;
+
+            if ($shipment->shipper_status_id == 1) {
+              ShipmentsPickupJourneyController::add($shipment->id, 6, Auth::id(), $pickup_request->id);
+            }
+          }
+        }
       }
 
       return ['status' => 0, 'success' => 'Pickup Request(s) has been Cancelled'];
@@ -454,6 +485,18 @@ class AdminPickupsController extends Controller
         $pickup_request->status = 3;
 
         $pickup_request->save();
+
+        $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
+
+        if ($assigned_shipments) {
+          foreach ($assigned_shipments as $assigned_shipment) {
+            $shipment = $assigned_shipment->shipment;
+
+            if ($shipment->shipper_status_id == 1) {
+              ShipmentsPickupJourneyController::add($shipment->id, 6, Auth::id(), $pickup_request->id);
+            }
+          }
+        }
 
         return ['status' => 0, 'success' => 'Pickup Request has been Cancelled'];
       }
@@ -612,10 +655,20 @@ class AdminPickupsController extends Controller
 
           $pickup_request->save();
 
-          foreach ($pickup_request->pickup_request_assigned_shipments as $pickup_request_assigned_shipment) {
-            $pickup_request_assigned_shipment->status = 1;
+          $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
 
-            $pickup_request_assigned_shipment->save();
+          if ($assigned_shipments) {
+            foreach ($assigned_shipments as $assigned_shipment) {
+              $assigned_shipment->status = 1;
+
+              $assigned_shipment->save();
+
+              $shipment = $assigned_shipment->shipment;
+
+              if ($shipment->shipper_status_id == 1) {
+                ShipmentsPickupJourneyController::add($shipment->id, 7, Auth::id(), $pickup_note_id);
+              }
+            }
           }
         }
 
@@ -724,6 +777,22 @@ class AdminPickupsController extends Controller
           $pickup_note->updated_by = Auth::id();
 
           $pickup_note->save();
+
+          foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
+            $pickup_request = $pickup_note_request->pickup_request;
+
+            $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
+
+            if ($assigned_shipments) {
+              foreach ($assigned_shipments as $assigned_shipment) {
+                $shipment = $assigned_shipment->shipment;
+
+                if ($shipment->shipper_status_id == 1) {
+                  ShipmentsPickupJourneyController::add($shipment->id, 3, Auth::id(), $pickup_note->id);
+                }
+              }
+            }
+          }
         }
 
         $rider = Rider::find($pickup_note->rider_id);
@@ -834,6 +903,22 @@ class AdminPickupsController extends Controller
       $pickup_note->updated_by = Auth::id();
 
       $pickup_note->save();
+
+      foreach ($pickup_note->pickup_note_requests as $pickup_note_request) {
+        $pickup_request = $pickup_note_request->pickup_request;
+
+        $assigned_shipments = $pickup_request->pickup_request_assigned_shipments;
+
+        if ($assigned_shipments) {
+          foreach ($assigned_shipments as $assigned_shipment) {
+            $shipment = $assigned_shipment->shipment;
+
+            if ($shipment->shipper_status_id == 1) {
+              ShipmentsPickupJourneyController::add($shipment->id, 3, Auth::id(), $pickup_note->id);
+            }
+          }
+        }
+      }
 
       NotificationsController::send(22, $pickup_note->id);
 
@@ -1417,6 +1502,10 @@ class AdminPickupsController extends Controller
         }
       }
 
+      foreach ($shipment_ids as $shipment_id) {
+        ShipmentsPickupJourneyController::add($shipment_id, 4, Auth::id(), $pickup_note);
+      }
+
       NotificationsController::send(4, $request->pickup_receive_pickup_note_id, $shipment_ids);
 
       return redirect()->route('admin.pickups.receive.summary.index')->with('pickup_receive_pickup_note_id', $request->pickup_receive_pickup_note_id);
@@ -1709,6 +1798,15 @@ class AdminPickupsController extends Controller
         foreach ($pickup_request->pickup_request_assigned_shipments as $pickup_request_assigned_shipment) {
           if ($pickup_request_assigned_shipment->status < 2) {
             $this->generate($pickup_request_assigned_shipment->shipment_id);
+          }
+        }
+
+        $received_shipments = $pickup_request->pickup_request_received_shipments;
+
+        if ($received_shipments) {
+          foreach ($received_shipments as $received_shipment) {
+            $shipment = $received_shipment->shipment;
+            ShipmentsPickupJourneyController::add($shipment->id, 5, Auth::id(), $pickup_note->id);
           }
         }
 

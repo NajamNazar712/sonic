@@ -104,7 +104,7 @@
 										</div>
 
 										<div class="form-group">
-											<textarea name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
+											<textarea id="consignee_address" name="consignee_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
 										</div>
 
 										<div class="form-group">
@@ -380,7 +380,10 @@
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
 	<script>
+
+
 		$(document).ready(function() {
+
 			@if (session('print'))
 				$.ajax({
 					url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
@@ -844,7 +847,7 @@
 			}).bind('change', function() {
 				$(this).valid();
 			});
-
+			var check = @json($check);
 			$('#booking_form').validate({
 				errorClass: 'danger',
 				successClass: 'success',
@@ -855,18 +858,55 @@
 					error.addClass('w-100').appendTo(element.parent('.form-group'));
 				},
 				submitHandler: function(form) {
+
 					$(form).find('button[type=submit]').attr('disabled', 'disabled');
+					var consignee_address = $('#consignee_address').val();
+					var strArray = consignee_address.split(/[ ,]+/);
+					var present = [];
+					for(k=0;k<strArray.length;k++) {
+						for (i = 0; i < check.length; i++) {
+							if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
+								present.push(strArray[k]);
+							}
+						}
+					}
+					// console.log(present.length);
+					// console.log(present);
+					if(present.length > 0){
+						swal({
+							title: 'Warning',
+							text: 'Non Service Area: ' + present,
+							icon: 'info',
+							buttons:{
+							confirm: {
+									text: 'Ok',
+									value: false,
+									visible: true,
+									closeModal: true
+						}},
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						}).then(function() {
+										swal(
+												'Please Wait!',
+												'Your shipment is being booked!',
+												'info'
+										);
+										form.submit();
+								});
+					}
+					else {
+						swal({
+							title: 'Please Wait!',
+							text: 'Your shipment is being booked!',
+							icon: 'info',
+							buttons: false,
+							closeOnClickOutside: false,
+							closeOnEsc: false
+						});
 
-					swal({
-						title: 'Please Wait!',
-						text: 'Your shipment is being booked!',
-						icon: 'info',
-						buttons: false,
-						closeOnClickOutside: false,
-						closeOnEsc: false
-					});
-
-					form.submit();
+						form.submit();
+					}
 				}
 			});
 

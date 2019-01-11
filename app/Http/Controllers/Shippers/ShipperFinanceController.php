@@ -540,17 +540,29 @@ class ShipperFinanceController extends Controller
 
         $details = array();
 
-        $details[] = ['S. No.', 'Tracking No.', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Actual Weight', 'Amount', 'Charges', 'GST', 'Payable'];
+        $details[] = ['S. No.', 'Tracking No.', 'Booking Date', 'Type', 'Order ID', 'Consignee Name', 'Consignee Phone', 'Destination', 'Service Type', 'Weight (kg)', 'Collection Amount (PKR)', 'Weight Charges (PKR)', 'Cash Handling Charges (PKR)', 'Adjustments (PKR)'];
 
         $serial_number = 1;
 
         foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
             $shipment = $done_payment_shipment->shipment;
 
+            if ($done_payment_shipment->type == 0) {
+                $type = 'Delivered';
+            }
+            else if ($done_payment_shipment->type == 1) {
+                $type = 'Returned';
+            }
+            else {
+                $type = 'Adjusted';
+            }
+
             $row = array();
 
             $row[] = $serial_number;
             $row[] = $shipment->tracking_number;
+            $row[] = $shipment->created_at;
+            $row[] = $type;
             $row[] = $shipment->order_id;
             $row[] = $shipment->consignee_name;
             $row[] = $shipment->consignee_phone_number_1;
@@ -558,9 +570,9 @@ class ShipperFinanceController extends Controller
             $row[] = $shipment->booking_type->booking_type;
             $row[] = $shipment->actual_weight;
             $row[] = $done_payment_shipment->amount;
-            $row[] = $done_payment_shipment->charges;
-            $row[] = $done_payment_shipment->gst;
-            $row[] = $done_payment_shipment->payable;
+            $row[] = (($done_payment_shipment->type != 2) ? $shipment->weight_charges : 0);
+            $row[] = (($done_payment_shipment->type == 0) ? $shipment->cash_handling_charges : 0);
+            $row[] = (($done_payment_shipment->type == 2) ? $done_payment_shipment->payable : 0);
 
             $details[] = $row;
 
@@ -570,10 +582,10 @@ class ShipperFinanceController extends Controller
         $spreadsheet = new Spreadsheet();
 
         $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
-        $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode('#,##0');
-        $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode('#,##0');
         $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode('#,##0');
+        $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode('#,##0');
 
         $spreadsheet->getActiveSheet()->fromArray($details);
 

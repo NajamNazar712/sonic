@@ -52,6 +52,7 @@ Route::prefix('cod')->name('cod.')->group(function () {
             Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
             Route::post('shipping_modes', 'Shippers\ShipperShipmentBookController@shipping_modes')->name('shipping_modes');
             Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
+            Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
 
             Route::prefix('excel')->name('excel_')->group(function () {
                 Route::get('', 'Shippers\ShipperShipmentBookController@excel_index')->name('index');
@@ -377,6 +378,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('print','Admins\DeliveryController@received_print')->name('print');
             Route::get('{id}/status','Admins\DeliveryController@receive_delivery_status_view')->name('status');
             Route::post('add/status','Admins\DeliveryController@receive_delivery_status_submit')->name('add.status');
+            Route::post('add/status/all','Admins\DeliveryController@receive_delivery_status_submit_all')->name('add.status.all');
             Route::get('{id}/add/list','Admins\DeliveryController@receive_delivery_status_list')->name('add.list');
             Route::post('reason','Admins\DeliveryController@receive_delivery_reason')->name('reason');
             Route::post('delivered','Admins\DeliveryController@receive_delivery_status_delivered')->name('delivered');
@@ -810,7 +812,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('overall_sales')->name('overall_sales.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@overall_sales_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
+            Route::post('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
 
         });
         Route::prefix('negative_balance_customers')->name('negative_balance_customers.')->group(function (){
@@ -863,6 +865,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('daily_pickup_sales_cron')->name('daily_pickup_sales_cron.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@daily_pickup_sales_cron_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@daily_pickup_sales_cron_store')->name('store');
+        });
+        Route::prefix('non_service_area')->name('non_service_area.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@non_service_area_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@non_service_area_store')->name('store');
+        });
+
+        Route::prefix('ticker')->name('ticker.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@ticker_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
         });
 
     });

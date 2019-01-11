@@ -118,6 +118,8 @@
                         <th class="border-primary border-darken-1">Zone</th>
                         <th class="border-primary border-darken-1">Class</th>
                         <th class="border-primary border-darken-1">Shipping Mode</th>
+                        <th class="border-primary border-darken-1">Category</th>
+                        <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Actual Weight</th>
                         <th class="border-primary border-darken-1">Chargeable Weight</th>
@@ -125,9 +127,11 @@
                         <th class="border-primary border-darken-1">Cash Handling Charges</th>
                         <th class="border-primary border-darken-1">Insurance Charges</th>
                         <th class="border-primary border-darken-1">Packaging Charges</th>
+                        <th class="border-primary border-darken-1">Fuel Surcharge</th>
                         <th class="border-primary border-darken-1">Return Charges</th>
                         <th class="border-primary border-darken-1">Replacement Charges</th>
                         <th class="border-primary border-darken-1">Try & Buy Charges</th>
+                        <th class="border-primary border-darken-1">GST</th>
                         <th class="border-primary border-darken-1">Total Charges</th>
                         <th class="border-primary border-darken-1">Estimated Charges</th>
                         <th class="border-primary border-darken-1">Net Payable</th>
@@ -293,6 +297,10 @@
 
                     var jsonResult = $.ajax({
                         url: '{{ route('admin.reports.overall_sales.list') }}',
+                        method:'post',
+                        headers: {
+                            'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                        },
                         data: {
                             'page': 'all',
                             'search_tracking': $('#search_tracking_no').val(),
@@ -324,6 +332,8 @@
                             head.push('Zone');
                             head.push('Class');
                             head.push('Shipping Mode');
+                            head.push('Category');
+                            head.push('Description');
                             head.push('Collection Amount');
                             head.push('Actual Weight');
                             head.push('Chargeable Weight');
@@ -331,9 +341,11 @@
                             head.push('Cash Handling Charges');
                             head.push('Insurance Charges');
                             head.push('Packaging Charges');
+                            head.push('Fuel Surcharge');
                             head.push('Return Charges');
                             head.push('Replacement Charges');
                             head.push('Try & Buy Charges');
+                            head.push('GST');
                             head.push('Total Charges');
                             head.push('Estimated Charges');
                             head.push('Net Payable');
@@ -358,6 +370,8 @@
                                 row.push(values.zone);
                                 row.push(values.class);
                                 row.push(values.shipping_mode);
+                                row.push(values.category);
+                                row.push(values.description);
                                 row.push(values.p_collection_amount);
                                 row.push(values.actual_weight);
                                 row.push(values.chargeable_weight);
@@ -365,9 +379,11 @@
                                 row.push(values.cash_handling_charges);
                                 row.push(values.insurance_charges);
                                 row.push(values.packaging_material_charges);
+                                row.push(values.fuel_surcharge);
                                 row.push(values.return_charges);
                                 row.push(values.replacement_charges);
                                 row.push(values.try_and_buy_charges);
+                                row.push(values.p_gst);
                                 row.push(values.p_total_charges);
                                 row.push(values.estimated_charges);
                                 row.push(values.p_net_payable);
@@ -399,6 +415,10 @@
                 serverSide: true,
                 ajax:{
                     url: '{{ route('admin.reports.overall_sales.list') }}',
+                    method:'post',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
                     data: function (d) {
                         d.search_tracking = $('#search_tracking_no').val();
                         d.search_shipper = $('#search_shipper').val();
@@ -429,6 +449,8 @@
                     { data:'zone' ,name: 'z.name', class: 'align-middle zone'},
                     { data:'class' ,name: 'zcc.class', class: 'align-middle class'},
                     { data:'shipping_mode' ,name: 'sm.mode', class: 'align-middle shipping_mode'},
+                    { data:'category' ,name: 'p.product_name', class: 'align-middle category'},
+                    { data:'description' ,name: 'si.description', class: 'align-middle description'},
                     { data:'p_collection_amount' ,name: 'pps.amount', class: 'align-middle collection_amount'},
                     { data:'actual_weight' ,name: 'shipments.actual_weight', class: 'align-middle actual_weight'},
                     { data:'chargeable_weight' ,name: 'shipments.chargeable_weight', class: 'align-middle chargeable_weight'},
@@ -436,9 +458,11 @@
                     { data:'cash_handling_charges' ,name: 'shipments.cash_handling_charges', class: 'align-middle cash_handling_charges'},
                     { data:'insurance_charges' ,name: 'shipments.insurance_charges', class: 'align-middle insurance_charges'},
                     { data:'packaging_material_charges' ,name: 'shipments.packaging_material_charges', class: 'align-middle packaging_material_charges'},
+                    { data:'fuel_surcharge' ,name: 'shipments.fuel_surcharge', class: 'align-middle fuel_surcharge'},
                     { data:'return_charges' ,name: 'shipments.return_charges', class: 'align-middle return_charges'},
                     { data:'replacement_charges' ,name: 'shipments.replacement_charges', class: 'align-middle replacement_charges'},
                     { data:'try_and_buy_charges' ,name: 'shipments.try_and_buy_charges', class: 'align-middle try_and_buy_charges'},
+                    { data:'p_gst' ,name: 'pps.p_gst', class: 'align-middle p_gst'},
                     { data:'p_total_charges' ,name: 'pps.charges', class: 'align-middle total_charges'},
                     { data:'estimated_charges' ,name: 'estimated_charges', class: 'align-middle estimated_charges',sortable:false},
                     { data: 'p_net_payable' ,name: 'pps.payable', class: 'align-middle net_payable'},

@@ -32,6 +32,10 @@
                                     <th class="border-primary border-darken-1">Cargo Type</th>
                                     <th class="border-primary border-darken-1">Vendor</th>
                                     <th class="border-primary border-darken-1">Builty No.</th>
+                                    <th class="border-primary border-darken-1">Shipments Weight</th>
+                                    <th class="border-primary border-darken-1">Chargeable Weight</th>
+                                    <th class="border-primary border-darken-1">Actual Weight</th>
+                                    <th class="border-primary border-darken-1">Vendor Weight</th>
                                     <th class="border-primary border-darken-1">Transit Datetime</th>
                                     <th class="border-primary border-darken-1">Transitted By</th>
                                     <th class="border-primary border-darken-1">Status</th>
@@ -142,6 +146,10 @@
                             head.push('Cargo Type');
                             head.push('Vendor');
                             head.push('Builty No.');
+                            head.push('Shipments Weight');
+                            head.push('Chargeable Weight');
+                            head.push('Actual Weight');
+                            head.push('Vendor Weight');
                             head.push('Transit Datetime');
                             head.push('Transitted By');
                             head.push('Status');
@@ -164,6 +172,10 @@
                                 row.push(values.cargo_type);
                                 row.push(values.vendor);
                                 row.push(values.builty_number);
+                                row.push(values.shipments_weight);
+                                row.push(values.chargeable_weight);
+                                row.push(values.actual_weight);
+                                row.push(values.vendor_weight);
                                 row.push(values.transit_at);
                                 row.push(values.transitted_by);
                                 row.push(values.status);
@@ -196,7 +208,7 @@
                 serverSide: true,
                 ajax: '{{ route('admin.cargo.history.list') }}',
                 rowId: 'id',
-                order: [[11, 'desc']],
+                order: [[16, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data: 'id_padded_link', name: 'cargo_consignments.id', class: 'align-middle cargo_number'},
@@ -210,6 +222,10 @@
                     {data: 'cargo_type', name: 'cargo_consignments.type', class: 'align-middle cargo_type'},
                     {data: 'vendor', name: 'tmv.id', class: 'align-middle vendor'},
                     {data: 'builty_number', name: 'cargo_consignments.builty_number', class: 'align-middle builty_number'},
+                    {data: 'shipments_weight', name: 'cargo_consignments.shipments_weight', class: 'align-middle shipments_weight'},
+                    {data: 'chargeable_weight', name: 'cargo_consignments.chargeable_weight', class: 'align-middle chargeable_weight', orderable: false, searchable: false},
+                    {data: 'actual_weight', name: 'cargo_consignments.actual_weight', class: 'align-middle actual_weight'},
+                    {data: 'vendor_weight', name: 'cargo_consignments.vendor_weight', class: 'align-middle vendor_weight'},
                     {data: 'transit_at', name: 'cargo_consignments.created_at', class: 'align-middle transit_at'},
                     {data: 'transitted_by', name: 'a.name', class: 'align-middle transitted_by'},
                     {data: 'status', name: 'status', class: 'align-middle status'},
@@ -356,13 +372,32 @@
                 })
                     .done(function(data) {
                         if (data) {
-                            var tracking_numbers = '';
+                            var details = '<table class="table table-sm table-bordered"><tbody>';
 
-                            $.each(data, function(index, tracking_number) {
-                                tracking_numbers += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                            details += '<tr>';
+
+                            details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Shipment</strong></td>';
+                            details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Estimated Weight</strong></td>';
+                            details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Actual Weight</strong></td>';
+                            details += '<td class="border-primary border-darken-1 align-middle text-center"><strong>Chargeable Weight</strong></td>';
+
+                            details += '</tr>';
+
+                            $.each(data, function(index, shipment) {
+                                details += '<tr>';
+
+                                details += '<td class="align-middle text-center"><u><a href=' + route + '?tracking_number=' + shipment.tracking_number + ' target="_blank">' + shipment.tracking_number + '</a></u></td>';
+
+                                details += '<td class="align-middle text-center">' + shipment.estimated_weight + '</td>';
+                                details += '<td class="align-middle text-center">' + shipment.actual_weight + '</td>';
+                                details += '<td class="align-middle text-center">' + shipment.chargeable_weight + '</td>';
+
+                                details += '</tr>';
                             });
 
-                            $('#shipments .modal-body').html(tracking_numbers);
+                            details += '</tbody></table>';
+
+                            $('#shipments .modal-body').html(details);
 
                             $('#shipments').modal('show');
                         }

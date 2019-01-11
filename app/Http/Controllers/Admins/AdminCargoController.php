@@ -540,7 +540,7 @@ class AdminCargoController extends Controller
       ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
       ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
       ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
-      ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
+      ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status', 'oh.hub_id as origin_hub_id', 'dh.hub_id as destination_hub_id')
       ->whereIn('cargo_consignments.status_id', [1, 2, 4, 6, 7]);
 
       if (session('role_id') != 1) {
@@ -1305,7 +1305,7 @@ class AdminCargoController extends Controller
             ->leftjoin('cities as jh2', 'cargo_consignments.junction_hub_2_id', '=', 'jh2.id')
             ->join('transport_modes as tm', 'cargo_consignments.transport_mode_id', '=', 'tm.id')
             ->join('transport_mode_vendors as tmv', 'cargo_consignments.transport_mode_vendor_id', '=', 'tmv.id')
-            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status','cargo_consignments.type as cargo_type','ri.name as received_by','cargo_consignments.updated_at as received_at');
+            ->select('cargo_consignments.id', 'cargo_consignments.status_id', 'oh.id as origin_id', 'oh.name as origin', 'dh.id as destination_id', 'dh.name as destination', 'cargo_consignments.shipments', 'sm.mode as shipping_mode', 'jh1.name as junction_1', 'jh2.name as junction_2', 'tm.name as transport_mode', 'tmv.name as vendor', 'cargo_consignments.builty_number', 'cargo_consignments.shipments_weight', DB::raw('(SELECT SUM(`s`.`chargeable_weight`) FROM `shipments` AS `s` INNER JOIN `cargo_consignment_shipments` AS `css` ON `s`.`id` = `css`.`shipment_id` WHERE `css`.`cargo_consignment_id` = `cargo_consignments`.`id`) AS `chargeable_weight`'), 'cargo_consignments.actual_weight', 'cargo_consignments.vendor_weight', 'cargo_consignments.created_at as transit_at', 'a.name as transitted_by', 'ccs.name as status','cargo_consignments.type as cargo_type','ri.name as received_by','cargo_consignments.updated_at as received_at');
 
         if (session('role_id') != 1) {
             $cargo_consignments = $cargo_consignments->where(function ($query) {
@@ -1366,7 +1366,14 @@ class AdminCargoController extends Controller
         foreach ($cargo_consignments_shipments as $cargo_consignments_shipment) {
             $shipment = $cargo_consignments_shipment->shipment;
 
-            $tracking_numbers[] = $shipment->tracking_number;
+            $tracking_number = array();
+
+            $tracking_number['tracking_number'] = $shipment->tracking_number;
+            $tracking_number['estimated_weight'] = $shipment->estimated_weight;
+            $tracking_number['actual_weight'] = $shipment->actual_weight;
+            $tracking_number['chargeable_weight'] = ($shipment->chargeable_weight) ? $shipment->chargeable_weight : '';
+
+            $tracking_numbers[] = $tracking_number;
         }
 
         return $tracking_numbers;
