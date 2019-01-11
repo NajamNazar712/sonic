@@ -399,7 +399,7 @@
                         <li><a class="menu-item" href="{{route('admin.settings.non_service_area.index')}}">Non Service Area</a></li>
                     @endif
 
-                    @if (session('role_id') == 1 || in_array(116, session('permissions')))
+                    @if (session('role_id') == 1 || in_array(151, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.daily_pickup_sales_cron.index')}}">Daily Pickup & Sales Cron Time</a></li>
                     @endif
 
