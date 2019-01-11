@@ -135,7 +135,7 @@ class AdminTrackingController extends Controller
                             $journey_details['status'] .= ' (' . str_pad($journey->reference_1_id, 6, '0', STR_PAD_LEFT);
 
                             if ($journey->reference_2_id) {
-                                if ($journey->status_id == 3) {
+                                if ($journey->status_id == 2) {
                                     $rider = Rider::find($journey->reference_2_id);
 
                                     $journey_details['status'] .= ' | <button class="btn btn-sm btn-outline-info align-middle rider_information" data-id="' . $rider->id . '">' . $rider->name . '</button>';
