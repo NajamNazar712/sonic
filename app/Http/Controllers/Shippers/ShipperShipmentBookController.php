@@ -1112,10 +1112,28 @@ class ShipperShipmentBookController extends Controller
                 }
                 else {
                     $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                    $booking_types = BookingType::where('id', '!=', 3)->pluck('booking_type','id');
+                    $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
+                        $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
+                    })->where('user_id', session('user_id'))->where('hidden', 0)->where('status', 1)->pluck('id');
+                    $products = Product::pluck('product_name','id');
+
+                    $user_shipping_modes = RateStatus::where('user_id', session('user_id'))->where('status', 1)->pluck('shipping_mode_id')->toArray();
+
+                    $shipping_modes = ShippingMode::whereIn('id', $user_shipping_modes)->pluck('mode','id');
+
+                    if (in_array(4, $user_shipping_modes)) {
+                        $shipping_mode_same_day_timings = ShippingModeSameDayTiming::pluck('timing','id');
+                    }
+                    else {
+                        $shipping_mode_same_day_timings = NULL;
+                    }
+
+                    $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->pluck('mode','id');
                     foreach ($cities as $city){
                         $city_name[$city->name]=$city->name;
                     }
-                    return view('client.shipment.book.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name]);
+                    return view('client.shipment.book.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name,'booking_types' => $booking_types, 'pickup_addresses' => $pickup_addresses, 'products' => $products, 'shipping_modes' => $shipping_modes, 'shipping_mode_same_day_timings' => $shipping_mode_same_day_timings, 'payment_modes' => $payment_modes]);
                 }
             }
             else {
