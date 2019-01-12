@@ -98,23 +98,6 @@ class ShipperShipmentBookController extends Controller
 
         return $shipment_id;
     }
-//    public function check(request $request)
-//    {
-//        $checks = NonServiceArea::orderBy('name')->get();
-//        $check_values = preg_split("/[ ,]+/", $request->consignee_address);
-//        $present_values = array();
-//
-//        foreach ($checks as $check) {
-//            foreach ($check_values as $check_value) {
-//                if($check['name'] == $check_value) {//Smaller Case
-//                    $present_values[] = $check_value;
-//                    return ['status' => 1, 'success' => 'Non Service Area', 'nsa' => $present_values];
-//                }
-//            }
-//        }
-//        return ['status' => 0, 'success' => 'Non Service Area', 'nsa' => $present_values];
-//    }
-
     static public function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
         $shipment = Shipment::find($shipment_id);
 
@@ -754,9 +737,7 @@ class ShipperShipmentBookController extends Controller
 
     public function excel_store(Request $request) {
         $user_id = session('user_id');
-        dd($request->all());
-var_dump($request->all());
-exit();
+//        dd($request->all('form'));
         $names = [
             'service_type_id' => 'Service Type ID',
             'pickup_address_id' => 'Pickup Address ID',
@@ -850,32 +831,50 @@ exit();
         ];
 
         $fields = [0 => 'service_type_id', 1 => 'pickup_address_id', 2 => 'information_display', 3 => 'consignee_city_name', 4 => 'consignee_name', 5 => 'consignee_address', 6 => 'consignee_phone_number_1', 7 => 'consignee_phone_number_2', 8 => 'consignee_email_address', 9 => 'order_id', 10 => 'item_product_type_id', 11 => 'item_description', 12 => 'item_quantity', 13 => 'item_insurance', 14 => 'item_price', 15 => 'replacement_item_product_type_id', 16 => 'replacement_item_description', 17 => 'replacement_item_quantity', 18 => 'pickup_date', 19 => 'special_instructions', 20 => 'estimated_weight', 21 => 'shipping_mode_id', 22 => 'same_day_timing_id', 23 => 'amount', 24 => 'payment_mode_id'];
+//        $form= $request->shipments;
+//        dd($form);
+        if($file = $request->file('shipments')) {
 
-        $file = $request->file('shipments');
+            $spreadsheet = IOFactory::createReaderForFile($file);
+            $spreadsheet->setReadDataOnly(true);
+            $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
 
-        $spreadsheet = IOFactory::createReaderForFile($file);
-        $spreadsheet->setReadDataOnly(true);
-        $spreadsheet = $spreadsheet->load($file)->getActiveSheet()->toArray();
+            $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID'];
+        }
+        if (!isset($spreadsheet) || $spreadsheet[0] == $header) {
+            if (isset($spreadsheet) && $spreadsheet[0] == $header) {
+                unset($spreadsheet[0]);
+            }
 
-        $header = ['Service Type ID', 'Pickup Address ID', 'Show Information on Air Waybill', 'Consignee City Name', 'Consignee Name', 'Consignee Address', 'Consignee Phone Number 1 (03000000000)', 'Consignee Phone Number 2 (03000000000)', 'Consignee Email Address', 'Order ID', 'Item Product Type ID', 'Item Description', 'Item Quantity', 'Item Insurance', 'Product Value', 'Replacement Item Product Type ID', 'Replacement Item Description', 'Replacement Item Quantity', 'Pickup Date (YYYY-MM-DD)', 'Special Instructions', 'Estimated Weight (kg)', 'Mode of Shipment ID', 'Same Day Timing ID', 'Collection Amount', 'Mode of Payment ID'];
-
-        if ($spreadsheet[0] == $header) {
-            unset($spreadsheet[0]);
-
-            if (!empty($spreadsheet)) {
+            if (!isset($spreadsheet) || !empty($spreadsheet)) {
                 $rows = array();
 
-                foreach ($spreadsheet as $spreadsheet_row) {
-                    $row = array();
+                if (isset($spreadsheet)) {
+                    foreach ($spreadsheet as $spreadsheet_row) {
+                        $row = array();
 
-                    foreach ($spreadsheet_row as $key => $value) {
-                        $row[$fields[$key]] = $value;
+                        foreach ($spreadsheet_row as $key => $value) {
+                            $row[$fields[$key]] = $value;
+                        }
+
+                        $rows[] = $row;
                     }
 
-                    $rows[] = $row;
+                    unset($spreadsheet);
                 }
+                else
+                {
+                    $forms=$request->all();
 
-                unset($spreadsheet);
+                    $forms = $forms['form'];
+                    foreach($forms as $form) {
+                        $row = array();
+                        foreach ($form as $key=>$value){
+                            $row[$key] = $value;
+                        }
+                        $rows[] = $row;
+                    }
+                }
 
                 $errors = array();
                 $order_ids = array();
@@ -1112,8 +1111,11 @@ exit();
                     return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Booked with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
                 }
                 else {
-
-                    return view('client.shipment.book.errors')->with(['data' => $rows,'errors' => $errors]);
+                    $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                    foreach ($cities as $city){
+                        $city_name[$city->name]=$city->name;
+                    }
+                    return view('client.shipment.book.errors')->with(['data' => $rows,'errors' => $errors, 'cities' => $city_name]);
                 }
             }
             else {
