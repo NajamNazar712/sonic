@@ -70,7 +70,7 @@
                                     <td>{!! Form::text('form[' . $no . '][information_display]', $ro['information_display'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['consignee_city_name']))
-                                    <td>{!! Form::select('form[' . $no . '][consignee_city_name]',$cities ,null,['class' => 'form-control is-invalid','placeholder' => '']) !!}<font color="red">{{$errors[$no]['consignee_city_name']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][consignee_city_name]',$cities ,null,['class' => 'form-control is-invalid','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['consignee_city_name']}}</font></td>
                                     @else
                                     <td>{!! Form::text('form[' . $no . '][consignee_city_name]', $ro['consignee_city_name'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -115,7 +115,7 @@
                                     <td>{!! Form::textarea('form[' . $no . '][item_description]', $ro['item_description'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20,'readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['item_quantity']))
-                                    <td>{!! Form::text('form[' . $no . '][item_quantity]', $ro['item_quantity'],['class' => 'form-control is-invalid','style'=>'width:40px']) !!}<font color="red">{{$errors[$no]['item_quantity']}}</font></td>
+                                    <td>{!! Form::text('form[' . $no . '][item_quantity]', $ro['item_quantity'],['class' => 'form-control is-invalid','style'=>'width:auto']) !!}<font color="red">{{$errors[$no]['item_quantity']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][item_quantity]', $ro['item_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -145,9 +145,9 @@
                                     <td>{!! Form::text('form[' . $no . '][replacement_item_quantity]', $ro['replacement_item_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['pickup_date']))
-                                    <td>{!! Form::date('form[' . $no . '][pickup_date]', $ro['pickup_date'],['class' => 'form-control pickadate bg-primary border-primary white rounded-right','id' => 'pickup_date','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['pickup_date']}}</font></td>
+                                    <td>{!! Form::date('form[' . $no . '][pickup_date]',null,['class' => 'form-control','id' => 'datepicker']) !!}<font color="red">{{$errors[$no]['pickup_date']}}</font></td>
                                 @else
-                                    <td>{!! Form::date('form[' . $no . '][pickup_date]', $ro['pickup_date'],['class' => 'form-control','style'=>'width:auto','readonly' => 'readonly']) !!}</td>
+                                    <td>{!! Form::text('form[' . $no . '][pickup_date]', $ro['pickup_date'],['class' => 'form-control','style'=>'width:auto','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['special_instructions']))
                                     <td>{!! Form::textarea('form[' . $no . '][special_instructions]', $ro['special_instructions'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['special_instructions']}}</font></td>
@@ -185,7 +185,7 @@
                             </tbody>
                         </table>
                                 </div>
-                            <div align="center">
+                            <div align="center" style="margin-top: 2%">
                                 {!! Form::button('Submit', array('class' => 'btn btn-success submit', 'type' => 'submit', 'style'=>'width:10%'))!!}
                             </div>
                             {!!Form::close()!!}
@@ -196,36 +196,26 @@
             </div>
         </div>
     @endsection
-    @section('css')
-        <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/modal/sweetalert.css')}}">
-        <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
-        <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
+@section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/switch.min.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
 @endsection
 
 @section('js')
-    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/forms/validation/additional-methods.min.js')}}" type="text/javascript"></script>
-    <script src="{{asset('app-assets/vendors/js/extensions/sweetalert.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/repeater/jquery.repeater.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script>
-        $(document).ready(function() {
-            $('#pickup_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                min: '{{ Carbon\Carbon::now() }}',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function () {
-                    $('#pickup_date_root').css('top', '-350px');
-                },
-                onSet: function (context) {
-                    $('#pickup_date').valid();
-                }
-            });
+        $('.datepicker').pickadate({
+            closeOnSelect: false,
+            closeOnClear: false
         });
         </script>
 @endsection
