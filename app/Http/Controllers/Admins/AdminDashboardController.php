@@ -549,7 +549,8 @@ class AdminDashboardController extends Controller
             ->leftjoin('shipment_items as si','si.shipment_id','=','shipments.id')
             ->leftjoin('products as p','p.id','=','si.product_type_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason'])
+            ->leftjoin('shipments_journey as sj', 'sj.shipment_id', '=', 'shipments.id')
+            ->select(['sj.remarks as cancellation_remarks','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason'])
             ->groupBy('shipments.id');
 
         if (session('role_id') != 1) {
@@ -571,6 +572,14 @@ class AdminDashboardController extends Controller
             })
             ->editColumn('phone',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
+            })
+            ->editColumn('cancellation_remarks',function ($shipments){
+                if($shipments->cancellation_remarks == null){
+                    return '-';
+                }
+                else{
+                    return $shipments->cancellation_remarks;
+                }
             })
             ->filterColumn('phone', function ($query, $keyword) {
                 $keyword = strtolower($keyword);

@@ -44,6 +44,7 @@
                                 <th class="border-primary border-darken-1">Product Type</th>
                                 <th class="border-primary border-darken-1">Booking Date</th>
                                 <th class="border-primary border-darken-1">Instructions</th>
+                                <th class="border-primary border-darken-1">Cancellation Remarks</th>
                                 <th class="border-primary border-darken-1"></th>
                             </tr>
                           </thead>
@@ -334,6 +335,7 @@
                     {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
+                    {data: 'cancellation_remarks', name: 'shipments_journey.remarks', class: 'align-middle cancellation_remarks'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
