@@ -55,7 +55,7 @@
                             <tr>
                             <td >{!! $no=$no+1!!}</td>
                                 @if(isset($errors[$no]['service_type_id']))
-                                    <td>{!! Form::select('form[' . $no . '][service_type_id]',$booking_types,null, ['class' => 'form-control is-invalid','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['service_type_id']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][service_type_id]',$booking_types,null, ['class' => 'form-control is-invalid select2','id'=>'service_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['service_type_id']}}</font></td>
                                     @else
                                     <td>{!! Form::text('form[' . $no . '][service_type_id]', $ro['service_type_id'], ['class' => 'form-control ','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -65,12 +65,12 @@
                                     <td>{!! Form::text('form[' . $no . '][pickup_address_id]', $ro['pickup_address_id'], ['class' => 'form-control','style'=>'width:80px', 'readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['information_display']))
-                                    <td>{!! Form::select('form[' . $no . '][information_display]',['no'=>'no','yes'=>'yes'],null, ['class' => 'form-control is-invalid','placeholder' => '']) !!}<font color="red">{{$errors[$no]['information_display']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][information_display]',['no'=>'no','yes'=>'yes'],null, ['class' => 'form-control is-invalid select2','id'=>'information_display','placeholder' => '']) !!}<font color="red">{{$errors[$no]['information_display']}}</font></td>
                                     @else
                                     <td>{!! Form::text('form[' . $no . '][information_display]', $ro['information_display'], ['class' => 'form-control','style'=>'width:60px', 'readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['consignee_city_name']))
-                                    <td>{!! Form::select('form[' . $no . '][consignee_city_name]',$cities ,null,['class' => 'form-control is-invalid','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['consignee_city_name']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][consignee_city_name]',$cities ,null,['class' => 'form-control is-invalid select2','id'=>'consignee_city_name','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['consignee_city_name']}}</font></td>
                                     @else
                                     <td>{!! Form::text('form[' . $no . '][consignee_city_name]', $ro['consignee_city_name'],['class' => 'form-control','style'=>'width:144px', 'readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -105,7 +105,7 @@
                                     <td>{!! Form::text('form[' . $no . '][order_id]', $ro['order_id'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['item_product_type_id']))
-                                    <td>{!! Form::select('form[' . $no . '][item_product_type_id]',$products,null,['class' => 'form-control is-invalid','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][item_product_type_id]',$products,null,['class' => 'form-control is-invalid select2','id'=>'item_product_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_product_type_id']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][item_product_type_id]', $ro['item_product_type_id'],['class' => 'form-control','style'=>'width:144px','readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -120,7 +120,7 @@
                                     <td>{!! Form::text('form[' . $no . '][item_quantity]', $ro['item_quantity'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['item_insurance']))
-                                    <td>{!! Form::select('form[' . $no . '][item_insurance]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][item_insurance]',['no'=>'no','yes'=>'yes'],null,['class' => 'form-control is-invalid select2','id'=>'item_insurance','style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['item_insurance']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][item_insurance]', $ro['item_insurance'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -130,7 +130,7 @@
                                     <td>{!! Form::text('form[' . $no . '][item_price]', $ro['item_price'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['replacement_item_product_type_id']))
-                                    <td>{!! Form::select('form[' . $no . '][replacement_item_product_type_id]', $products,null,['class' => 'form-control is-invalid','placeholder' => '']) !!}<font color="red">{{$errors[$no]['replacement_item_product_type_id']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][replacement_item_product_type_id]', $products,null,['class' => 'form-control is-invalid select2','id'=>'replacement_item_product_type_id','placeholder' => '']) !!}<font color="red">{{$errors[$no]['replacement_item_product_type_id']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][replacement_item_product_type_id]', $ro['replacement_item_product_type_id'],['class' => 'form-control','style'=>'width:60px','readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -160,12 +160,12 @@
                                     <td>{!! Form::text('form[' . $no . '][estimated_weight]', $ro['estimated_weight'],['class' => 'form-control','style'=>'width:80px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['shipping_mode_id']))
-                                    <td>{!! Form::select('form[' . $no . '][shipping_mode_id]',$shipping_modes,null,['class' => 'form-control is-invalid','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['shipping_mode_id']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][shipping_mode_id]',$shipping_modes,null,['class' => 'form-control is-invalid select2','id'=>'shipping_mode_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['shipping_mode_id']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][shipping_mode_id]', $ro['shipping_mode_id'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['same_day_timing_id']))
-                                    <td>{!! Form::select('form[' . $no . '][same_day_timing_id]',$shipping_mode_same_day_timings,null,['class' => 'form-control is-invalid', 'style'=>'width:100px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['same_day_timing_id']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][same_day_timing_id]',$shipping_mode_same_day_timings,null,['class' => 'form-control is-invalid select2','id'=>'same_day_timing_id', 'style'=>'width:100px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['same_day_timing_id']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][same_day_timing_id]', $ro['same_day_timing_id'],['class' => 'form-control', 'style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -175,7 +175,7 @@
                                     <td>{!! Form::text('form[' . $no . '][amount]', $ro['amount'],['class' => 'form-control','style'=>'width:100px','readonly' => 'readonly']) !!}</td>
                                 @endif
                                 @if(isset($errors[$no]['payment_mode_id']))
-                                    <td>{!! Form::select('form[' . $no . '][payment_mode_id]', $payment_modes,null,['class' => 'form-control is-invalid', 'style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['payment_mode_id']}}</font></td>
+                                    <td>{!! Form::select('form[' . $no . '][payment_mode_id]', $payment_modes,null,['class' => 'form-control is-invalid select2','id'=>'payment_mode_id', 'style'=>'width:80px','placeholder' => '']) !!}<font color="red">{{$errors[$no]['payment_mode_id']}}</font></td>
                                 @else
                                     <td>{!! Form::text('form[' . $no . '][payment_mode_id]', $ro['payment_mode_id'],['class' => 'form-control','style'=>'width:40px','readonly' => 'readonly']) !!}</td>
                                 @endif
@@ -197,6 +197,7 @@
         </div>
     @endsection
 @section('css')
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/selects/select2.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/toggle/bootstrap-switch.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/forms/switch.min.css')}}">
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/spinner/jquery.bootstrap-touchspin.css')}}">
@@ -205,6 +206,7 @@
 @endsection
 
 @section('js')
+    <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/spinner/jquery.bootstrap-touchspin.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
@@ -213,9 +215,47 @@
     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
     <script>
+        $(document).ready(function() {
         $('.datepicker').pickadate({
             closeOnSelect: false,
             closeOnClear: false
+        });
+        $('#service_type_id').select2({
+            width: '100%',
+            placeholder: 'Service Type'
+        });
+        $('#information_display').select2({
+            width: '100%',
+            placeholder: 'Air Waybill'
+        });
+        $('#consignee_city_name').select2({
+            width: '100%',
+            placeholder: 'City Name'
+        });
+        $('#item_product_type_id').select2({
+            width: '100%',
+            placeholder: 'Product Type'
+        });
+        $('#item_insurance').select2({
+            width: '100%',
+            placeholder: 'Insurance'
+        });
+        $('#replacement_item_product_type_id').select2({
+            width: '100%',
+            placeholder: 'Product Type'
+        });
+        $('#shipping_mode_id').select2({
+            width: '100%',
+            placeholder: 'Shipping Mode'
+        });
+        $('#same_day_timing_id').select2({
+            width: '100%',
+            placeholder: 'Same Day Timing'
+        });
+        $('#payment_mode_id').select2({
+            width: '100%',
+            placeholder: 'Payment Mode'
+        });
         });
         </script>
 @endsection
