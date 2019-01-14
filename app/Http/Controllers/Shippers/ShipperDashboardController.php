@@ -198,11 +198,12 @@ class ShipperDashboardController extends Controller
                 if ($shipment->shipper_status_id == 1) {
                     $shipment->shipper_status_id = 17;
                     $shipment->consignee_status_id = 17;
+                    $shipment->consignee_status_id = 17;
                     $shipment->save();
 
                     AdminPickupsController::cancel($shipment_id);
 
-                    ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, NULL, session('user_id'), NULL);
+                    ShipmentsJourneyController::add($shipment_id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);
 
                     return response()->json(['status'=>1,'success'=>'Shipment has been cancelled successfully']);
                 }
@@ -231,7 +232,7 @@ class ShipperDashboardController extends Controller
 
                         AdminPickupsController::cancel($shipment_id->id);
 
-                        ShipmentsJourneyController::add($shipment_id->id, 17, 17, NULL, NULL, session('user_id'), NULL);
+                        ShipmentsJourneyController::add($shipment_id->id, 17, 17, NULL, 'Cancelled by Shipper', session('user_id'), NULL);
 
                     } else {
                         return response()->json(['status' => 0, 'error' => 'Shipment\'s Status has already been changed']);
