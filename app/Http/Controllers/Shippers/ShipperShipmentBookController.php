@@ -802,8 +802,8 @@ class ShipperShipmentBookController extends Controller
         'consignee_city_name' => ['required', 'string', 'between:1,100', 'exists:cities,name'],
         'consignee_name' => ['required', 'between:1,100'],
         'consignee_address' => ['required', 'between:1,190'],
-        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{11}$/'],
-        'consignee_phone_number_2' => ['nullable', 'regex:/[0-9]{11}$/'],
+        'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        'consignee_phone_number_2' => ['nullable', 'regex:/^[0][0-9]{10}$/'],
         'consignee_email_address' => ['nullable', 'email', 'between:0,100'],
         'order_id' => ['nullable', 'between:0,100', Rule::unique('shipments')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);
