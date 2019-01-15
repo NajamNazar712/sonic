@@ -159,8 +159,8 @@
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_no' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_no'},
-                    { data:'delivery_note_link' ,name: 'delivery_notes.id', class: 'align-middle delivery_note_link'},
-                    { data:'status' ,name: 'dns.status', class: 'align-middle status'},
+                    { data:'delivery_note_id' ,name: 'delivery_notes.id', class: 'align-middle delivery_note_id'},
+                    { data:'status' ,name: 'ss.name', class: 'align-middle status'},
                     { data:'status_updated_by' ,name: 'delivery_notes.updated_by', class: 'align-middle status_updated_by'},
                     { data:'status_updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle status_updated_at'},
                     { data:'call_verification_status' ,name: 'dns.call_verification', class: 'align-middle call_verification_status'}
@@ -176,39 +176,6 @@
             });
             $('#search_filter_btn').on('click',function () {
                 table.draw();
-            });
-            function print(id) {
-                $.ajax({
-                    url: '{!! route('admin.reports.call_verification.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
-                        }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
-                        }
-                    });
-            }
-            $('#datatable tbody').on('click', 'tr td.delivery_note_link button.print', function() {
-                var delivery_note_id = parseInt($(this).parents('tr').attr('id'));
-
-                print(delivery_note_id);
             });
 
         });

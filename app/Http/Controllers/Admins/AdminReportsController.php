@@ -3618,7 +3618,8 @@ class AdminReportsController extends Controller
         $call_verification_report = DeliveryNote::leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('admins as ad','ad.id','=','delivery_notes.updated_by')
-            ->select('s.tracking_number as tracking_no','delivery_notes.id as delivery_note_id','dns.status as status','ad.name as status_updated_by','delivery_notes.updated_at as status_updated_at','dns.call_verification as call_verification_status');
+            ->leftjoin('shipment_status as ss','ss.id','=','dns.status')
+            ->select('s.tracking_number as tracking_no','delivery_notes.id as delivery_note_id','ss.name as status','ad.name as status_updated_by','delivery_notes.updated_at as status_updated_at','dns.call_verification as call_verification_status');
         $datatable = Datatables::of($call_verification_report)
             ->editcolumn('call_verification_status', function ($data){
                 if($data->call_verification_status==0){
@@ -3631,16 +3632,10 @@ class AdminReportsController extends Controller
             ->editColumn('delivery_note_id', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
-            ->editColumn('delivery_note_link', function ($deliveries) {
-                return '<button class="btn btn-sm btn-outline-info align-middle print"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT) . '</span></button>';
-            })
             ->editColumn('tracking_no', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_no' class='tracking' target='_blank'>$shipments->tracking_no</a></u>";
             });
-//            ->addColumn('account_no', function ($user) {
-//                return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
-//            });
         return $datatable->make(true);
 
     }
