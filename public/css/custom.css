@@ -238,6 +238,20 @@ p.comment {
   margin-left: -480px;
 }
 
+.marquee3k {
+	margin: 0 15px;
+	padding: 5px 0;
+	overflow: hidden;
+	border-left: 1px solid rgba(107, 111, 130, 0.075);
+	border-right: 1px solid rgba(107, 111, 130, 0.075);
+	border-radius: 0.35rem;
+}
+
+.marquee3k__copy {
+    margin: 0 5px;
+    box-sizing: border-box;
+}
+
 @media (max-width: 991.98px) {
 	.dataTables_wrapper table {
 		overflow-x: initial;
