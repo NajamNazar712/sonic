@@ -1,6 +1,6 @@
 @extends('admin.layout.master')
 
-@section('title', 'Daily Pickup & Sales Cron Time')
+@section('title', 'Non Service Area')
 
 @section('content')
     <div class="app-content content">
@@ -9,7 +9,7 @@
             </div>
             <div class="content-body">
                 <h1 class="mb-1">
-                    Daily Pickup & Sales Cron Time
+                    Non Service Area
                 </h1>
 
                 <div class="card">
@@ -19,16 +19,11 @@
 
                             <div class="row justify-content-center">
                                 <div class="col-5 col-sm-4 col-md-3 col-lg-2">
-                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.daily_pickup_sales_cron.store') }}" novalidate="novalidate">
+                                    <form id="settings_form" class="form-horizontal text-center" method="POST" action="{{ route('admin.settings.non_service_area.store') }}" novalidate="novalidate">
                                         {{ csrf_field() }}
 
                                         <div class="form-group">
-                                            <div class="input-group">
-                                            <input type="text" name="daily_pickup_sales_cron_time" class="form-control daily_pickup_sales_cron_time" placeholder="Daily Pickup Sales Cron Time*" data-rule-required="true" data-msg-required="Daily Pickup Sales Cron Time is required" value="{{ $settings->setting_value }}" data-rule-min="0" data-msg-min="Daily Pickup Sales Cron Time can not be less than 1" data-rule-max="23" data-msg-min="Daily Pickup Sales Cron Time can not be more than 23">
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">hrs</span>
-                                            </div>
-                                            </div>
+                                            <input type="text" name="non_service_area" class="form-control non_service_area" placeholder="Non Service Area*" data-rule-required="true" data-msg-required="Non Service Area is required" value="">
                                         </div>
 
                                         <button type="submit" class="btn btn-primary">Update</button>
@@ -53,17 +48,12 @@
 
     <script>
         $(document).ready(function() {
-            $('#settings_form input.daily_pickup_sales_cron_time').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false
-            });
 
             $('#settings_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
                 errorPlacement: function(error, element) {
-                    error.addClass('w-100').appendTo(element.parents('.form-group'));
+                    error.addClass('w-100').appendTo(element.parent('.form-group'));
                 }
             });
         });

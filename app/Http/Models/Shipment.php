@@ -47,6 +47,10 @@ class Shipment extends Model
 	    return $this->hasMany('App\Http\Models\ShipmentsPaymentJourney')->orderBy('id', 'DESC');
     }
 
+    public function shipment_pickup_journey(){
+	    return $this->hasMany('App\Http\Models\ShipmentsPickupJourney')->orderBy('id', 'DESC');
+    }
+
     public function status_shipper() {
     	return $this->belongsTo('App\Http\Models\ShipmentStatus', 'shipper_status_id', 'id');
     }

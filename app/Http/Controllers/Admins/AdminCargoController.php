@@ -503,7 +503,7 @@ class AdminCargoController extends Controller
 
         ShipmentsJourneyController::add($shipment_id, $shipper_status_id, $consignee_status_id, NULL, NULL, NULL, Auth::id(), $cargo_consignment->id, $cargo_consignment->builty_number);
 
-        self::check_draft_shipments($shipment_id);
+        self::check_draft_shipments($shipment_id,null);
 
         NotificationsController::send(5, $id, $shipment_id);
 
@@ -1758,7 +1758,7 @@ class AdminCargoController extends Controller
             ->join('cities as oc','oc.id', '=', 'drc.origin_id')
             ->join('cities as dc','dc.id', '=', 'drc.destination_id')
             ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
-            ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'oc.name as origin','dc.name as destination', 'shipments.amount')->where('drc.id', $draft);
+            ->select('shipments.id as shipment_id','shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.order_id', 'bt.booking_type as service_type', 'oc.name as origin','dc.name as destination', 'shipments.amount')->where('drc.id', $draft);
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
                 $query->where(function ($sub_query) {
@@ -1771,12 +1771,22 @@ class AdminCargoController extends Controller
                     });
             });
         }
-       return Datatables::of($shipments)->make(true);
+       return Datatables::of($shipments)
+           ->addColumn('action',function ($shipments){
+               $dropdown = '<a href="javascript:void(0);" class="btn btn-icon btn-danger cargo_remove"><i class="la la-close"></i></a>';
+                return $dropdown;
+
+           })
+           ->make(true);
 
     }
 
-    static public function check_draft_shipments($shipment_id){
-        $drafts = DraftCargoShipment::where('shipment_id', $shipment_id);
+    static public function check_draft_shipments($shipment_id,$draft_id = null){
+        if($draft_id != null){
+            $drafts = DraftCargoShipment::where('shipment_id', $shipment_id)->where('draft_cargo_id','!=',$draft_id);
+        }else{
+            $drafts = DraftCargoShipment::where('shipment_id', $shipment_id);
+        }
         if($drafts->exists()){
             $drafts = $drafts->get();
 
@@ -1788,8 +1798,46 @@ class AdminCargoController extends Controller
                 if($draft_details->shipments_count == 0){
                     $draft_details->delete();
                 }
-                DraftCargoShipment::where('shipment_id', $shipment_id)->delete();
+                DraftCargoShipment::where('shipment_id', $shipment_id)->where('draft_cargo_id',$draft->draft_cargo_id)->delete();
             }
         }
+    }
+    public function draft_update(Request $request){
+        $shipment_ids = $request->shipment_ids;
+
+        $draft_cargo_id = $request->draft_cargo_id;
+        $shipment_count = 0;
+        $new_array = array();
+        $purged_array = array();
+        foreach ($shipment_ids as $shipments){
+            $shipment_details = Shipment::find($shipments);
+            if($shipment_details){
+                $purged_array[] = $shipments;
+                self::check_draft_shipments($shipments,$draft_cargo_id);
+                $draft_shipments = DraftCargoShipment::where('draft_cargo_id',$draft_cargo_id)->where('shipment_id', $shipments);
+
+                if(!$draft_shipments->exists()){
+                            $new_array[] = $shipments;
+
+                }
+                $shipment_count++;
+            }
+        }
+
+        DraftCargoShipment::where('draft_cargo_id',$draft_cargo_id)->whereNotIn('shipment_id',$purged_array)->delete();
+        $draft = DraftCargo::find($draft_cargo_id);
+        $draft->shipments_count = $shipment_count;
+        $draft->added_by = Auth::id();
+        $draft->save();
+        if(!empty($new_array)){
+            foreach ($new_array as $shipment_id){
+                $draft_shipments = new DraftCargoShipment();
+                $draft_shipments->draft_cargo_id = $draft_cargo_id;
+                $draft_shipments->shipment_id = $shipment_id;
+                $draft_shipments->save();
+            }
+        }
+
+        return response()->json(['status' => 1, 'success' => 'Shipments Added to Draft # '.$draft_cargo_id]);
     }
 }

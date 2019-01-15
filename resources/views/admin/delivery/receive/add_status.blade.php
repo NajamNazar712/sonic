@@ -16,6 +16,24 @@
                 <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
                 <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
+
+                <div class="row justify-content-center">
+                    <div class="col-4">
+                        <fieldset class="form-group">
+                            <select name="select_all_status" id="select_all_status" class="form-control select2">
+                                @foreach($shipment_statuses as $status)
+                                    <option value="{{$status->id}}">{{$status->name}}</option>
+                                @endforeach
+                            </select>
+                        </fieldset>
+                    </div>
+                    @if(!$delivery_note_status == 1)
+                    <div class="col-3">
+                        <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i> Bulk Update </button>
+                    </div>
+                        @endif
+                </div>
+
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -240,6 +258,11 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
+            $('#select_all_status').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Selected Status Update',
+                width:'100%',
+                allowClear:true
+            });
             $('.decimal').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -258,78 +281,80 @@
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 scrollX: true,
                 buttons: [
-                        @if(!$delivery_note_status == 1) {
-                    text: 'Delivered',
-                    className: 'btn btn-primary delivered',
-                    enabled: false,
-                    action: function (e, dt, node, config) {
-                        if(selected_rows !== ''){
-                        swal({
-                            title: 'Are You Sure?',
-                            text: 'Select Yes to mark shipments as Delivered!',
-                            icon: 'warning',
-                            buttons: {
-                                cancel: {
-                                    text: 'No',
-                                    value: null,
-                                    visible: true,
-                                    closeModal: true,
-                                },
-                                confirm: {
-                                    text: 'Yes',
-                                    value: true,
-                                    visible: true,
-                                    closeModal: true
-                                }
-                            },
-                            closeOnClickOutside: false,
-                            closeOnEsc: false,
-                            dangerMode: true
-                        }).then(function (confirm) {
-                            if (confirm) {
+                        @if(!$delivery_note_status == 1)
+                    {{--{--}}
+                    {{--text: 'Delivered',--}}
+                    {{--className: 'btn btn-primary delivered',--}}
+                    {{--enabled: false,--}}
+                    {{--action: function (e, dt, node, config) {--}}
+                        {{--if(selected_rows !== ''){--}}
+                        {{--swal({--}}
+                            {{--title: 'Are You Sure?',--}}
+                            {{--text: 'Select Yes to mark shipments as Delivered!',--}}
+                            {{--icon: 'warning',--}}
+                            {{--buttons: {--}}
+                                {{--cancel: {--}}
+                                    {{--text: 'No',--}}
+                                    {{--value: null,--}}
+                                    {{--visible: true,--}}
+                                    {{--closeModal: true,--}}
+                                {{--},--}}
+                                {{--confirm: {--}}
+                                    {{--text: 'Yes',--}}
+                                    {{--value: true,--}}
+                                    {{--visible: true,--}}
+                                    {{--closeModal: true--}}
+                                {{--}--}}
+                            {{--},--}}
+                            {{--closeOnClickOutside: false,--}}
+                            {{--closeOnEsc: false,--}}
+                            {{--dangerMode: true--}}
+                        {{--}).then(function (confirm) {--}}
+                            {{--if (confirm) {--}}
 
-                                table.rows().nodes().each(function(index) {
-                                    var row = table.row(index);
-                                    if ($(row.node()).hasClass('selected')) {
-                                        var id = parseInt(row.id());
-                                        var remarks = $(row.node()).find('td.remarks input').val();
-                                        shipment_remarks[id] = remarks;
-                                    }
-                                });
+                                {{--table.rows().nodes().each(function(index) {--}}
+                                    {{--var row = table.row(index);--}}
+                                    {{--if ($(row.node()).hasClass('selected')) {--}}
+                                        {{--var id = parseInt(row.id());--}}
+                                        {{--var remarks = $(row.node()).find('td.remarks input').val();--}}
+                                        {{--shipment_remarks[id] = remarks;--}}
+                                    {{--}--}}
+                                {{--});--}}
 
-                                $.ajax({
-                                    url: '{!! route('admin.delivery.receive.delivered') !!}',
-                                    method: 'POST',
-                                    data: {
-                                        'shipment_ids': selected_rows,
-                                        'delivery_note_id': note_id,
-                                        '_token': '{{ csrf_token() }}',
-                                        'remark': shipment_remarks
-                                    }
-                                }).done(function (data) {
-                                    if(data.status === 0){
+                                {{--$.ajax({--}}
+                                    {{--url: '{!! route('admin.delivery.receive.delivered') !!}',--}}
+                                    {{--method: 'POST',--}}
+                                    {{--data: {--}}
+                                        {{--'shipment_ids': selected_rows,--}}
+                                        {{--'delivery_note_id': note_id,--}}
+                                        {{--'_token': '{{ csrf_token() }}',--}}
+                                        {{--'remark': shipment_remarks--}}
+                                    {{--}--}}
+                                {{--}).done(function (data) {--}}
+                                    {{--if(data.status === 0){--}}
 
-                                        toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                        {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
 
-                                    }else{
-                                        toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                                    {{--}else{--}}
+                                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                                    }
-                                    location.reload();
+                                    {{--}--}}
+                                    {{--location.reload();--}}
 
-                                });
-                            }
-                        });
+                                {{--});--}}
+                            {{--}--}}
+                        {{--});--}}
 
 
-                        }else{
-                            var error = "Something went wrong please refresh page and try again!";
-                            toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                        {{--}else{--}}
+                            {{--var error = "Something went wrong please refresh page and try again!";--}}
+                            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                        }
-                    }
+                        {{--}--}}
+                    {{--}--}}
 
-                }, {
+                {{--}, --}}
+                    {
                     extend: 'selectAll',
                     text: 'Select All',
                     className: 'select_all',
@@ -351,6 +376,7 @@
                                 }
 
                                 table.button('.delivered').enable();
+                                $('#submit_selected_status').attr('disabled', false);
                             }
                         });
                     }
@@ -375,11 +401,12 @@
                                 selected_rows.splice(index, 1);
                             }
 
-                            if (selected_rows.length == 0) {
-                                table.button('.delivered').disable();
-                            }
                           }
                         });
+                        if (selected_rows.length == 0) {
+                            table.button('.delivered').disable();
+                        }
+                        $('#submit_selected_status').attr('disabled', true);
                     }
                 }
                 @endif
@@ -485,10 +512,12 @@
 
                 if (selected_rows.length > 0) {
                     table.button('.delivered').enable();
+                    $('#submit_selected_status').attr('disabled', false);
                     // table.button(1).enable();
                 }
                 else {
                     table.button('.delivered').disable();
+                    $('#submit_selected_status').attr('disabled', true);
                     // table.button(1).disable();
                 }
             });
@@ -867,6 +896,58 @@
                         var error = "Select at-least one item!";
                         toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
+            });
+
+            var shipment_remarks_obj = {};
+            $('#submit_selected_status').on('click', function () {
+               var select_all_status = $('#select_all_status').val();
+               var delivery_note = $('#delivery_note').val();
+               if(selected_rows.length > 0){
+                   if(select_all_status != ''){
+
+                       table.rows().nodes().each(function(index) {
+                           var row = table.row(index);
+                           if ($(row.node()).hasClass('selected')) {
+                               var id = parseInt(row.id());
+                               var remarks = $(row.node()).find('td.remarks input').val();
+                               shipment_remarks_obj[id] = remarks;
+
+                           }
+                       });
+
+                       $.ajax({
+                           url: '{!! route('admin.delivery.receive.add.status.all') !!}',
+                           method: 'POST',
+                           data: {
+                               'shipment_ids': selected_rows,
+                               'selected_status': select_all_status,
+                               'delivery_note_id': delivery_note,
+                               'remarks': shipment_remarks_obj,
+                               '_token': '{{ csrf_token() }}',
+                           }
+                       }).done(function (data) {
+                           if(data.status === 1){
+
+                               toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+
+                           }else{
+                               toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+
+                           }
+                           location.reload();
+
+                       });
+                   }
+                   else{
+                       var error = "Please Select A Status!";
+                       toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                   }
+               }
+               else{
+                   var error = "Select at-least one shipment!";
+                   toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+               }
+
             });
         });
     </script>
