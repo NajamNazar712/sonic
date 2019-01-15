@@ -1,10 +1,10 @@
 @extends('admin.layout.master')
 
-@section('title', 'Call Verification')
+@section('title', 'Call Verification Report')
 
 @section('content')
     <h1 class="mb-1">
-        Call Verification
+        Call Verification Report
     </h1>
 
     <div class="card">
@@ -144,7 +144,7 @@
                 buttons: [
                     {
                         extend: 'excelHtml5',
-                        title: 'Call Verification',
+                        title: 'Call Verification Report',
                         text:'<i class="la la-file-excel-o"></i> Excel',
                     },
                 ],
@@ -155,6 +155,7 @@
                 processing: true,
                 serverSide: true,
                 ajax: '{{ route('admin.reports.call_verification.list') }}',
+                order: [[5, 'desc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_no' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_no'},
