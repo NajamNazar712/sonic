@@ -107,7 +107,7 @@
                     body = [];
 
                     var jsonResult = $.ajax({
-                        url: '{{ route('admin.reports.negative_balance_customers.list') }}',
+                        url: '{{ route('admin.reports.call_verification.list') }}',
                         data: {
                             'page': 'all'
                         },
@@ -122,9 +122,8 @@
                             head.push('Call Verification Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
-
                                 row.push(index + 1);
-                                row.push(values.tracking_no);
+                                row.push(values.tracking_number);
                                 row.push(values.delivery_note_id);
                                 row.push(values.status);
                                 row.push(values.status_updated_by);

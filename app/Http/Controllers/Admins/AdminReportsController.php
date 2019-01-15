@@ -3619,7 +3619,7 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
             ->leftjoin('admins as ad','ad.id','=','delivery_notes.updated_by')
             ->leftjoin('shipment_status as ss','ss.id','=','dns.status')
-            ->select('s.tracking_number as tracking_no','delivery_notes.id as delivery_note_id','ss.name as status','ad.name as status_updated_by','delivery_notes.updated_at as status_updated_at','dns.call_verification as call_verification_status');
+            ->select('s.tracking_number as tracking_no','s.tracking_number as tracking_number','delivery_notes.id as delivery_note_id','ss.name as status','ad.name as status_updated_by','delivery_notes.updated_at as status_updated_at','dns.call_verification as call_verification_status');
         $datatable = Datatables::of($call_verification_report)
             ->editcolumn('call_verification_status', function ($data){
                 if($data->call_verification_status==0){
