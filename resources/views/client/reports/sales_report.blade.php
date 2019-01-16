@@ -210,10 +210,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        var old_date_formatted = $('input[name="search_date_from_formatted"]').val();
-                        var contractMoment = moment(old_date_formatted);
-                        var current = moment(contractMoment).add(29, 'days');
-                        to_date.pickadate('picker').set({'select': current.toDate()},{muted: true});
+                        $('#search_form #search_date_to').pickadate('picker').set('min', $('#search_form #search_date_from').pickadate('picker').get('select'));
                     }
                 }
             });
@@ -226,10 +223,7 @@
                 hiddenSuffix: '_formatted',
                 onSet: function(context) {
                     if (context.select) {
-                        var current_date_formatted = $('input[name="search_date_to_formatted"]').val();
-                        var currentMoment = moment(current_date_formatted);
-                        var currentDate = moment(currentMoment).subtract(29, 'days');
-                        from_date.pickadate('picker').set({'select': currentDate.toDate()},{muted: true});
+                        $('#search_form #search_date_from').pickadate('picker').set('max', $('#search_form #search_date_to').pickadate('picker').get('select'));
                     }
                 }
             });
