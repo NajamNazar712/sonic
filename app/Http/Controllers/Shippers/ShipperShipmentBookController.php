@@ -1111,7 +1111,7 @@ class ShipperShipmentBookController extends Controller
                     return redirect()->back()->with(['success' => 'Total ' . count($rows) . ' Shipment(s) Booked with Tracking Number(s):' . PHP_EOL . $tracking_numbers]);
                 }
                 else {
-                    $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+                    $cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
                     $booking_types = BookingType::where('id', '!=', 3)->pluck('booking_type','id');
                     $pickup_addresses = UserShippingInfo::whereHas('city', function ($query) {
                         $query->where('pickup', 1)->where('status', 1)->whereNotNull('zone_id');
