@@ -53,7 +53,11 @@
                             @endphp
                             @foreach($data as $ro)
                             <tr>
-                            <td >{!! $no=$no+1!!}</td>
+                                @if(isset($errors[$no+1]))
+                            <td><h4 style="color: red">{!! $no=$no+1!!}</h4><font color="red">{{ 'Error(s) in this row' }}</font></td>
+                                    @else
+                                    <td>{!! $no=$no+1!!}</td>
+                                @endif
                                 @if(isset($errors[$no]['service_type_id']))
                                     <td>{!! Form::select('form[' . $no . '][service_type_id]',$booking_types,null, ['class' => 'form-control is-invalid select2','id'=>'service_type_id','style'=>'width:auto','placeholder' => '']) !!}<font color="red">{{$errors[$no]['service_type_id']}}</font></td>
                                     @else
