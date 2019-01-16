@@ -824,7 +824,6 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('call_verification')->name('call_verification.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@call_verification_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@call_verification_list')->name('list');
-            Route::post('print','Admins\AdminReportsController@call_verification_print')->name('print');
 
         });
         Route::prefix('sales_person_performance')->name('sales_person_performance.')->group(function (){
