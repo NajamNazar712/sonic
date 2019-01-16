@@ -79,7 +79,7 @@
                                     @else
                                     <td>{!! Form::text('form[' . $no . '][consignee_name]', $ro['consignee_name'],['class' => 'form-control','style'=>'width:auto', 'readonly' => 'readonly']) !!}</td>
                                 @endif
-                                @if(isset($errors[$no]['Address']))
+                                @if(isset($errors[$no]['consignee_address']))
                                     <td>{!! Form::textarea('form[' . $no . '][consignee_address]', $ro['consignee_address'],['class' => 'form-control is-invalid','style'=>'width:auto','rows' => 4,'cols' => 20]) !!}<font color="red">{{$errors[$no]['consignee_address']}}</font></td>
                                     @else
                                     <td>{!! Form::textarea('form[' . $no . '][consignee_address]', $ro['consignee_address'],['class' => 'form-control','style'=>'width:auto','rows' => 4,'cols' => 20, 'readonly' => 'readonly']) !!}</td>
