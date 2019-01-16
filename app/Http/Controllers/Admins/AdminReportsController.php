@@ -3633,7 +3633,7 @@ class AdminReportsController extends Controller
             ->leftjoin('shipments_journey as sj', function($join){
                 $join->on('sj.shipment_id', '=', 'dns.shipment_id')
                     ->where('sj.id','=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = dns.shipment_id and shipments_journey.reference_1_id = dns.delivery_note_id and shipments_journey.verification = 1)'));
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = dns.shipment_id and shipments_journey.reference_1_id = dns.delivery_note_id)'));
             })
             ->leftjoin('shipment_status as ss','ss.id','=','sj.shipper_status_id')
             ->select('sj.shipper_status_id as shipper_status_id','s.id as ship_id','s.tracking_number as tracking_no','s.tracking_number as tracking_number','delivery_notes.id as delivery_note_id','ss.name as status','ad.name as status_verified_by','delivery_notes.status_verified_at as status_verified_at','dns.call_verification as call_verification_status');
