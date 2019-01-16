@@ -16,8 +16,9 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
-
+                            <input type="hidden" id="draft_cargo_id" value="{{$draft->id}}">
                             <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
+
                                 <div class="form-group">
                                     <input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
 
@@ -46,6 +47,7 @@
                                     <th class="border-primary border-darken-1">Service Type</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Amount</th>
+                                    <th class="border-primary border-darken-1"></th>
                                 </tr>
                                 </thead>
                             </table>
@@ -223,13 +225,15 @@
                 ajax: '{{ route('admin.cargo.draft.edit.list', ['draft' => $draft['id']]) }}',
                 processing: true,
                 serverSide: false,
+                rowId:'shipment_id',
                 columns: [
                     {name: 'serial_number', orderable: false, searchable: false, class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number', name: 'tracking_number', class: 'align-middle tracking_number'},
                     {data:'order_id', name: 'order_id', class: 'align-middle order_id'},
                     {data:'service_type', name: 'service_type', class: 'align-middle service_type'},
                     {data:'destination', name: 'destination', class: 'align-middle destination'},
-                    {data:'amount', name: 'amount', class: 'align-middle amount'}
+                    {data:'amount', name: 'amount', class: 'align-middle amount'},
+                    {data:'action', name: 'action', class: 'align-middle action', orderable: false, searchable: false}
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
@@ -302,7 +306,8 @@
                                     if (index === -1) {
                                         rows_count++;
                                         // table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount]).draw(false);
-                                        var data_row = '<tr role="row" class="even"><td class="align-middle serial_number sorting_1">'+rows_count+'</td><td class=" align-middle tracking_number">'+data.details.tracking_number+'</td><td class=" align-middle order_id">'+order_id+'</td><td class=" align-middle service_type">'+data.details.service_type+'</td><td class=" align-middle destination">'+data.details.destination+'</td><td class=" align-middle amount">'+data.details.amount+'</td></tr>';
+
+                                        var data_row = '<tr id="'+data.details.id+'" role="row" class="even"><td class="align-middle serial_number sorting_1">'+rows_count+'</td><td class=" align-middle tracking_number">'+data.details.tracking_number+'</td><td class=" align-middle order_id">'+order_id+'</td><td class=" align-middle service_type">'+data.details.service_type+'</td><td class=" align-middle destination">'+data.details.destination+'</td><td class=" align-middle amount">'+data.details.amount+'</td><td><a href="javascript:void(0);" class="btn btn-icon btn-danger cargo_remove"><i class="la la-close"></i></a></td></tr>';
                                         $('#datatable tbody').append(data_row);
                                         // table.draw(true);
 
@@ -332,6 +337,15 @@
 
                                         $('#cargo_consignment_confirm').prop('disabled', false);
                                         $('#add_draft_cargo').prop('disabled', false);
+
+                                        table.rows().nodes().each(function(index) {
+                                            var row = table.row(index);
+                                            var handle = $(row.node()).find('td.action a.cargo_remove');
+                                            if (handle.attr("display",'none')) {
+                                                handle.css('display', '');
+                                            }
+                                        });
+
 
                                         toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                                     }
@@ -519,13 +533,15 @@
             //Draft
             var route = '{!! route('admin.cargo.draft.index') !!}';
             $('#add_draft_cargo').on('click', function () {
+                var draft_cargo = $('#draft_cargo_id').val();
                 if(shipment_ids.length > 0){
 
                     $.ajax({
-                        url: '{!! route('admin.cargo.draft.add') !!}',
+                        url: '{!! route('admin.cargo.draft.edit.update') !!}',
                         method: 'POST',
                         data: {
                             'shipment_ids': shipment_ids,
+                            'draft_cargo_id':draft_cargo,
                             'cargo_type': cargo_type,
                             'hub_id' : hub_id,
                             'shipping_mode_id': shipping_mode_id,
@@ -555,6 +571,52 @@
             $('#camera_scan').on('hidden.bs.modal', function (e) {
                 camera_scanning_stop();
             });
+
+            $('body').on('click','.cargo_remove',function () {
+
+                var shipment_id = parseInt($(this).parents('tr').attr('id'));
+
+                var index = $.inArray(shipment_id, shipment_ids);
+                if(index !== -1){
+                    shipment_ids.splice(index,1);
+                    $(this).parents('tr').remove();
+                    if(shipment_ids.length == 0){
+                        $('#information .scanned').html(shipment_ids.length);
+
+                        hub_id = 0;
+                        cargo_type = 0;
+                        shipping_mode_id = 0;
+
+
+                        $('#information .hub').text('None');
+
+                        $('#information .total').text(0);
+
+
+                        $('#information .shipping_mode').text('None');
+
+
+                        $('#add_shipment_form button.add').prop('disabled', false);
+
+                        $('#cargo_consignment_confirm').prop('disabled', false);
+
+                    }else{
+                        if(shipment_ids.length == 1){
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+                                var handle = $(row.node()).find('td.action a.cargo_remove');
+                                handle.css('display','none');
+                            });
+
+                        }
+                        $('#information .scanned').html(shipment_ids.length);
+
+                    }
+                }
+
+
+            });
+
         });
 
         function camera_scan_detected(tracking_number) {

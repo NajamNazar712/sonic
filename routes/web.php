@@ -547,6 +547,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::prefix('edit')->name('edit.')->group(function (){
                 Route::get('{draft}', 'Admins\AdminCargoController@edit_draft_index')->name('index');
                 Route::get('{draft}/list', 'Admins\AdminCargoController@edit_draft_list')->name('list');
+                Route::post('update', 'Admins\AdminCargoController@draft_update')->name('update');
             });
 
         });
