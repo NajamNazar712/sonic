@@ -85,6 +85,8 @@
                         <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Payment Status</th>
                         <th class="border-primary border-darken-1">Service Type</th>
+                        <th class="border-primary border-darken-1">Product Category</th>
+                        <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Arrival Date</th>
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
@@ -258,6 +260,8 @@
                             head.push('Status');
                             head.push('Payment Status');
                             head.push('Service Type');
+                            head.push('Product Category');
+                            head.push('Description');
                             head.push('Arrival Date');
                             head.push('Origin');
                             head.push('Destination');
@@ -277,6 +281,8 @@
                                 row.push(values.current_status);
                                 row.push(values.payment_status);
                                 row.push(values.service_type);
+                                row.push(values.product_name);
+                                row.push(values.description);
                                 row.push(values.arrival_date);
                                 row.push(values.origin);
                                 row.push(values.destination);
@@ -320,7 +326,7 @@
                         d.search_date_to = $('input[name="search_date_to_formatted"]').val();
                     }
                 },
-                order: [[8, 'asc']],
+                order: [[10, 'asc']],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     { data:'tracking_number' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -330,6 +336,8 @@
                     { data:'current_status' ,name: 'ss.name', class: 'align-middle current_status'},
                     { data:'payment_status' ,name: 'ss.name', class: 'align-middle payment_status'},
                     { data:'service_type' ,name: 'bt.booking_type', class: 'align-middle service_type'},
+                    { data:'product_name', name: 'p.product_name', class: 'align-middle product_name'},
+                    { data:'description', name: 'si.description', class: 'align-middle description'},
                     { data:'arrival_date' ,name: 'sj.created_at', class: 'align-middle arrival_date'},
                     { data:'origin' ,name: 'oc.name', class: 'align-middle origin'},
                     { data:'destination' ,name: 'dc.name', class: 'align-middle destination'},

@@ -303,7 +303,7 @@
                                         rider_info_ids[index] = 0;
                                     }
                                 }
-                                console.log(rider_info_ids)
+
 
                             });
                             table.button('.select_all_rider_informations').enable();

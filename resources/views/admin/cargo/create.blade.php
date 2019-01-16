@@ -46,6 +46,7 @@
 										<th class="border-primary border-darken-1">Service Type</th>
 										<th class="border-primary border-darken-1">Destination</th>
 										<th class="border-primary border-darken-1">Amount</th>
+										<th class="border-primary border-darken-1"></th>
 									</tr>
 								</thead>
 							</table>
@@ -227,7 +228,8 @@
 					{name: 'order_id', class: 'align-middle order_id'},
 					{name: 'service_type', class: 'align-middle service_type'},
 					{name: 'destination', class: 'align-middle destination'},
-					{name: 'amount', class: 'align-middle amount'}
+					{name: 'amount', class: 'align-middle amount'},
+					{name: 'action', class: 'align-middle action',orderable: false, searchable: false}
 				],
 				rowCallback: function(row, data, index) {
 					var info = table.page.info();
@@ -277,7 +279,9 @@
 								var index = $.inArray(id, shipment_ids);
 
 								if (index === -1) {
-									table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount]);
+                                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger cargo_remove"><i class="la la-close"></i></a>';
+
+                                    table.row.add([0, data.details.tracking_number, data.details.order_id, data.details.service_type, data.details.destination, data.details.amount,remove]).node().id = data.details.id;
 									table.draw(false);
 
 									shipment_ids.push(data.details.id);
@@ -528,6 +532,41 @@
             $('#camera_scan').on('hidden.bs.modal', function (e) {
                 camera_scanning_stop();
             });
+
+            $('body').on('click','.cargo_remove',function () {
+                var shipment_id = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(shipment_id, shipment_ids);
+                if(index !== -1){
+                    shipment_ids.splice(index,1);
+                    table.row( $(this).parents('tr') ).remove().draw();
+                    if(shipment_ids.length == 0){
+                        $('#information .scanned').html(shipment_ids.length);
+
+                        hub_id = 0;
+                        cargo_type = 0;
+                        shipping_mode_id = 0;
+
+
+                        $('#information .hub').text('None');
+
+                        $('#information .total').text(0);
+
+
+                        $('#information .shipping_mode').text('None');
+
+
+                        $('#add_shipment_form button.add').prop('disabled', false);
+
+                        $('#cargo_consignment_confirm').prop('disabled', false);
+
+                    }else{
+                        $('#information .scanned').html(shipment_ids.length);
+
+                    }
+				}
+
+
+            });
 		});
 
 		function camera_scan_detected(tracking_number) {
@@ -537,5 +576,7 @@
 
             $('#add_shipment_form').trigger('submit');
         }
+
+
 	</script>
 @endsection
