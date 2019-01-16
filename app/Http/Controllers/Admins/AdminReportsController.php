@@ -1052,6 +1052,11 @@ class AdminReportsController extends Controller
                     ->where('dns.delivery_note_id','=',
                         DB::raw('(select min(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = shipments.id)'));
             })
+            ->leftJoin('shipments_journey as fatstatus', function ($join) {
+                $join->on('fatstatus.shipment_id', '=', 'shipments.id')
+                    ->where('fatstatus.id','=',
+                        DB::raw('(select min(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 5)'));
+            })
             ->leftJoin('shipment_status as fs','fs.id','=','fstatus.shipper_status_id')
             ->leftJoin('shipment_status as ls','ls.id','=','lstatus.shipper_status_id')
             ->leftJoin('shipment_status as rdss','rdss.id','=','rds.shipper_status_id')
@@ -1093,7 +1098,7 @@ class AdminReportsController extends Controller
                     ->where('lsjv.id','=', DB::raw('(select max(id) from shipments_journey  where shipments_journey.reference_1_id = ldnsv.delivery_note_id and shipments_journey.verification = 1)'));
             })
             ->leftjoin('shipment_status as lssv','lssv.id','=','lsjv.shipper_status_id')
-            ->select('ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status')
+            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status')
             ->groupBy('shipments.id');
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
