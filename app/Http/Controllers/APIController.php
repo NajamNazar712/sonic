@@ -752,19 +752,101 @@ class APIController extends Controller
         $done_payment_shipments = $shipment->done_payment_shipments;
 
         if (!$done_payment_shipments->isEmpty()) {
+          $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->where('verification', 1)->latest()->first();
+
+          if ($shipment_journey) {
+            $current_status_id = $shipment_journey->shipper_status_id;
+          }
+          else {
+            $current_status_id = $shipment->shipper_status_id;
+          }
+
+          $charges = array();
+
+          if ($shipment->packaging_material_request) {
+            $charges['packaging_material_charges'] = $shipment->packaging_material_charges;
+          }
+          else if (in_array($current_status_id, [14, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 45, 46])) {
+            if ($shipment->weight_charges) {
+              $charges['weight_charges'] = $shipment->weight_charges;
+            }
+
+            if ($shipment->cash_handling_charges) {
+              $charges['cash_handling_charges'] = $shipment->cash_handling_charges;
+            }
+
+            if ($shipment->insurance_charges) {
+              $charges['insurance_charges'] = $shipment->insurance_charges;
+            }
+
+            if ($shipment->fuel_surcharge) {
+              $charges['fuel_surcharge'] = $shipment->fuel_surcharge;
+            }
+
+            if ($shipment->replacement_charges) {
+              $charges['replacement_charges'] = $shipment->replacement_charges;
+            }
+
+            if ($shipment->try_and_buy_charges) {
+              $charges['try_and_buy_charges'] = $shipment->try_and_buy_charges;
+            }
+          }
+          else if (in_array($current_status_id, [20, 21, 22, 23, 24, 25, 44])) {
+            if ($shipment->weight_charges) {
+              $charges['weight_charges'] = $shipment->weight_charges;
+            }
+
+            if ($shipment->insurance_charges) {
+              $charges['insurance_charges'] = $shipment->insurance_charges;
+            }
+
+            if ($shipment->fuel_surcharge) {
+              $charges['fuel_surcharge'] = $shipment->fuel_surcharge;
+            }
+
+            if ($shipment->return_charges) {
+              $charges['return_charges'] = $shipment->return_charges;
+            }
+          }
+          else {
+            if ($shipment->weight_charges) {
+              $charges['weight_charges'] = $shipment->weight_charges;
+            }
+
+            if ($shipment->insurance_charges) {
+              $charges['insurance_charges'] = $shipment->insurance_charges;
+            }
+
+            if ($shipment->fuel_surcharge) {
+              $charges['fuel_surcharge'] = $shipment->fuel_surcharge;
+            }
+          }
+
+          $current_payment_status = NULL;
+
+          $shipment_payment_journey = $shipment->shipment_payment_journey;
+
+          if (!$shipment_payment_journey->isEmpty()) {
+            $current_payment_status = $shipment_payment_journey->first()->status->name;
+          }
+
           $payments = array();
 
           foreach ($done_payment_shipments as $done_payment_shipment) {
             $payment = array();
 
             $payment['id'] = $done_payment_shipment->done_payment_id;
+            $payment['datetime'] = $done_payment_shipment->updated_at;
             $payment['type'] = $done_payment_shipment->type;
+            $payment['amount'] = $done_payment_shipment->amount;
+            $payment['charges'] = $done_payment_shipment->charges;
+            $payment['gst'] = $done_payment_shipment->gst;
             $payment['payable'] = $done_payment_shipment->payable;
 
             $payments[] = $payment;
           }
 
-          return response()->json(['status' => 0, 'message' => 'Payment(s) of Shipment #' . $tracking_number, 'payments' => $payments]);
+          return response()->json(['status' => 0, 'message' => 'Payment(s) of Shipment #' . $tracking_number, 'charges' => $charges, 'current_payment_status' => $current_payment_status, 'payments' => $payments]);
         }
         else {
           return response()->json(['status' => 1, 'message' => 'No Payments']);
