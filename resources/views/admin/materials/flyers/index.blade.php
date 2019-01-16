@@ -264,7 +264,7 @@
                 'allowPlus': false,
                 'rightAlign': false,
                 'min': 0,
-                'max': 10000
+                'max': 1000000
             });
             jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
                 if ( this.context.length ) {
