@@ -18,8 +18,8 @@
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Delivery Note No.</th>
                         <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Status Updated By</th>
-                        <th class="border-primary border-darken-1">Status Updated At</th>
+                        <th class="border-primary border-darken-1">Status Verified By</th>
+                        <th class="border-primary border-darken-1">Status Verified At</th>
                         <th class="border-primary border-darken-1">Call Verification Status</th>
                     </tr>
                     </thead>
@@ -117,8 +117,8 @@
                             head.push('Tracking No.');
                             head.push('Delivery Note No.');
                             head.push('Status');
-                            head.push('Status Updated By');
-                            head.push('Status Updated At');
+                            head.push('Status Verified By');
+                            head.push('Status Verified At');
                             head.push('Call Verification Status');
                             $.each(result.data, function(index, values) {
                                 row = [];
@@ -126,8 +126,8 @@
                                 row.push(values.tracking_number);
                                 row.push(values.delivery_note_id);
                                 row.push(values.status);
-                                row.push(values.status_updated_by);
-                                row.push(values.status_updated_at);
+                                row.push(values.status_verified_by);
+                                row.push(values.status_verified_at);
                                 row.push(values.call_verification_status);
                                 body.push(row);
                             });
@@ -161,8 +161,8 @@
                     { data:'tracking_no' ,name: 'shipments.tracking_number', class: 'align-middle text-center tracking_no'},
                     { data:'delivery_note_id' ,name: 'delivery_notes.id', class: 'align-middle delivery_note_id'},
                     { data:'status' ,name: 'ss.name', class: 'align-middle status'},
-                    { data:'status_updated_by' ,name: 'delivery_notes.updated_by', class: 'align-middle status_updated_by'},
-                    { data:'status_updated_at' ,name: 'delivery_notes.updated_at', class: 'align-middle status_updated_at'},
+                    { data:'status_verified_by' ,name: 'ad.name', class: 'align-middle status_verified_by'},
+                    { data:'status_verified_at' ,name: 'delivery_notes.updated_at', class: 'align-middle status_verified_at'},
                     { data:'call_verification_status' ,name: 'dns.call_verification', class: 'align-middle call_verification_status'}
 
                 ],
