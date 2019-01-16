@@ -138,7 +138,7 @@ class APIController extends Controller
 
       $rules = [
         'person_of_contact' => ['required', 'between:1,190'],
-        'phone_number' => ['required', 'regex:/[0-9]{11}$/'],
+        'phone_number' => ['required', 'regex:/^[0][0-9]{10}$/'],
         'email_address' => ['required', 'email'],
         'address' => ['required', 'between:1,190'],
         'city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id']
@@ -201,8 +201,8 @@ class APIController extends Controller
         'consignee_city_id' => ['required', 'integer', 'digits_between:1,10', 'exists:cities,id'],
         'consignee_name' => ['required', 'between:1,100'],
         'consignee_address' => ['required', 'between:1,190'],
-        'consignee_phone_number_1' => ['required', 'regex:/[0-9]{11}$/'],
-        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/[0-9]{11}$/'],
+        'consignee_phone_number_1' => ['required', 'regex:/^[0][0-9]{10}$/'],
+        'consignee_phone_number_2' => ['nullable', 'filled', 'regex:/^[0][0-9]{10}$/'],
         'consignee_email_address' => ['nullable', 'filled', 'email'],
         'order_id' => ['nullable', 'filled', Rule::unique('shipments')->where(function($query) use($user_id) {
           $query->where('user_id', $user_id);

@@ -52,6 +52,8 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
+                        <th class="border-primary border-darken-1">Product Category</th>
+                        <th class="border-primary border-darken-1">Description</th>
                         <th class="border-primary border-darken-1">Aging</th>
                     </tr>
                     </thead>
@@ -139,6 +141,8 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Amount');
+                            head.push('Product Category');
+                            head.push('Description');
                             head.push('Aging');
                             $.each(result.data, function(index, values) {
                                 row = [];
