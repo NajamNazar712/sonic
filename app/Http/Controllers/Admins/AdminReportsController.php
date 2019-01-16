@@ -69,7 +69,12 @@ class AdminReportsController extends Controller
                     ->where('journey.created_at', '=',
                         DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
-            ->select(['shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name'])
+            ->leftjoin('shipment_items as si', function ($join) {
+                $join->on('si.shipment_id', '=', 'shipments.id')
+                    ->where('si.type','=',0);
+            })
+            ->leftjoin('products as p','p.id','=','si.product_type_id')
+            ->select(['p.product_name as product_type','si.description as description','shipments.id as shId','shipments.tracking_number','shipments.tracking_number as tracking_number_link','u.name as shipper','ss.name as history_status','bt.booking_type as service_type','sj.created_at as arrival','oc.name as origin','dc.name as destination','h.name as hub','shipments.amount','journey.created_at as last_status_date','shipments.consignee_name as name'])
             ->whereNotIn('shipments.shipper_status_id',[1,14,16,17,25,31,36,38,39,40,41,43,47]);
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -3606,6 +3611,42 @@ class AdminReportsController extends Controller
         $datatable = Datatables::of($negative)
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
+            });
+        return $datatable->make(true);
+
+    }
+    public function call_verification_index()
+    {
+        return view('admin.reports.call_verification_report');
+
+    }
+    public function call_verification_list(request $request)
+    {
+        $call_verification_report = DeliveryNote::leftjoin('delivery_note_shipments as dns', 'dns.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('shipments as s', 's.id', '=', 'dns.shipment_id')
+            ->leftjoin('admins as ad','ad.id','=','delivery_notes.verified_by')
+            ->leftjoin('shipments_journey as sj', function($join){
+                $join->on('sj.shipment_id', '=', 'dns.shipment_id')
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = dns.shipment_id and shipments_journey.reference_1_id = dns.delivery_note_id and shipments_journey.verification = 1)'));
+            })
+            ->leftjoin('shipment_status as ss','ss.id','=','sj.shipper_status_id')
+            ->select('sj.shipper_status_id as shipper_status_id','s.id as ship_id','s.tracking_number as tracking_no','s.tracking_number as tracking_number','delivery_notes.id as delivery_note_id','ss.name as status','ad.name as status_verified_by','delivery_notes.status_verified_at as status_verified_at','dns.call_verification as call_verification_status');
+        $datatable = Datatables::of($call_verification_report)
+            ->editcolumn('call_verification_status', function ($data){
+                if($data->call_verification_status==0){
+                    return 'Not Ticked';
+                }
+                else{
+                    return 'Ticked';
+                }
+            })
+            ->editColumn('delivery_note_id', function ($deliveries) {
+                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('tracking_no', function ($shipments) {
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_no' class='tracking' target='_blank'>$shipments->tracking_no</a></u>";
             });
         return $datatable->make(true);
 
