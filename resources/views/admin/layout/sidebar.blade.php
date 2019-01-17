@@ -383,7 +383,7 @@
                 <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><span class="menu-title">Notifications</span></a></li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([104, 116, 149, 150, 151, 152], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([104, 116, 149, 150, 151, 152,154], session('permissions'))) !== 0)
             <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
                 <ul class="menu-content">
                     @if (session('role_id') == 1 || in_array(104, session('permissions')))
@@ -408,6 +408,10 @@
 
                     @if (session('role_id') == 1 || in_array(152, session('permissions')))
                             <li><a class="menu-item" href="{{route('admin.settings.ticker.index')}}">Ticker</a></li>
+                    @endif
+
+                    @if (session('role_id') == 1 || in_array(154, session('permissions')))
+                            <li><a class="menu-item" href="{{route('admin.settings.walk_in.index')}}">Walk-In</a></li>
                     @endif
                 </ul>
             </li>

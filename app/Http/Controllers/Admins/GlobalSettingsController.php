@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -166,6 +167,42 @@ class GlobalSettingsController extends Controller
 
         $settings->save();
 
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
+    public function walk_in_index(){
+        $walk_in_hub_ol=WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->first();
+        $walk_in_hub_on=WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->first();
+        $walk_in_hub_dn=WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->first();
+        $walk_in_door_ol=WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->first();
+        $walk_in_door_on=WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->first();
+        $walk_in_door_dn=WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->first();
+        return view('admin.settings.walk_in')->with(['walk_in_hub_ol' => $walk_in_hub_ol, 'walk_in_hub_on' => $walk_in_hub_on, 'walk_in_hub_dn' => $walk_in_hub_dn, 'walk_in_door_ol' => $walk_in_door_ol, 'walk_in_door_on' => $walk_in_door_on, 'walk_in_door_dn' => $walk_in_door_dn]);
+    }
+    public function walk_in_store(Request $request){
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 2])->update([
+            'actual_weight' => $request->walk_in_hub_ol_a,
+            'chargeable_weight' => $request->walk_in_hub_ol_c,
+        ]);
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 2])->update([
+            'actual_weight' => $request->walk_in_hub_on_a,
+            'chargeable_weight' => $request->walk_in_hub_on_c,
+        ]);
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 2])->update([
+            'actual_weight' => $request->walk_in_hub_dn_a,
+            'chargeable_weight' => $request->walk_in_hub_dn_c,
+        ]);
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 1, 'delivery_type_id' => 1])->update([
+            'actual_weight' => $request->walk_in_hub_ol_a,
+            'chargeable_weight' => $request->walk_in_hub_ol_c,
+        ]);
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 2, 'delivery_type_id' => 1])->update([
+            'actual_weight' => $request->walk_in_hub_on_a,
+            'chargeable_weight' => $request->walk_in_hub_on_c,
+        ]);
+        WalkInStandardWeightCharge::where(['shipping_mode_id' => 3, 'delivery_type_id' => 1])->update([
+            'actual_weight' => $request->walk_in_hub_dn_a,
+            'chargeable_weight' => $request->walk_in_hub_dn_c,
+        ]);
         return redirect()->back()->with('success', 'Settings Updated!');
     }
 }
