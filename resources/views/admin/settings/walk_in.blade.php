@@ -30,17 +30,17 @@
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">KG</span>
                                                         </div>
-                                                    <input type="text" name="walk_in_hub_ol_c" class="form-control walk_in_hub_ol_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_ol->chargeable_weight }}" style="margin-left: 40px" data-min=60>
+                                                    <input type="text" name="walk_in_hub_ol_c" class="form-control walk_in_hub_ol_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_ol->chargeable_weight }}" style="margin-left: 40px">
                                                     </div>
                                                 </div>
                                             <div style="width: 450px; float: right;">
                                                 <h4 class="form-section mb-2 text-center" style="text-align: left">Doorstep</h4>
                                                 <div class="input-group form-group">
-                                                    <input type="text" name="walk_in_door_ol_a" class="form-control walk_in_door_ol_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_ol->actual_weight }}" data-min=2>
+                                                    <input type="text" name="walk_in_door_ol_a" class="form-control walk_in_door_ol_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_ol->actual_weight }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">KG</span>
                                                     </div>
-                                                    <input type="text" name="walk_in_door_ol_c" class="form-control walk_in_door_ol_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_ol->chargeable_weight }}" style="margin-left: 40px" data-min=70>
+                                                    <input type="text" name="walk_in_door_ol_c" class="form-control walk_in_door_ol_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_ol->chargeable_weight }}" style="margin-left: 40px">
                                                 </div>
                                             </div>
 
@@ -48,21 +48,21 @@
                                             <div style="width: 450px; float: left; margin-left: 20px;">
                                                 <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
                                                 <div class="input-group form-group">
-                                                    <input type="text" name="walk_in_hub_on_a" class="form-control walk_in_hub_on_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_on->actual_weight }}" data-min=5>
+                                                    <input type="text" name="walk_in_hub_on_a" class="form-control walk_in_hub_on_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_on->actual_weight }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">KG</span>
                                                     </div>
-                                                    <input type="text" name="walk_in_hub_on_c" class="form-control walk_in_hub_on_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_on->chargeable_weight }}" style="margin-left: 40px" data-min=20>
+                                                    <input type="text" name="walk_in_hub_on_c" class="form-control walk_in_hub_on_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_on->chargeable_weight }}" style="margin-left: 40px">
                                                 </div>
                                             </div>
                                             <div style="width: 450px; float: right;">
                                                 <h4 class="form-section mb-2 text-center" style="text-align: left">Doorstep</h4>
                                                 <div class="input-group form-group">
-                                                    <input type="text" name="walk_in_door_on_a" class="form-control walk_in_door_on_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_on->actual_weight }}" data-min=5>
+                                                    <input type="text" name="walk_in_door_on_a" class="form-control walk_in_door_on_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_on->actual_weight }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">KG</span>
                                                     </div>
-                                                    <input type="text" name="walk_in_door_on_c" class="form-control walk_in_door_on_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_on->chargeable_weight }}" style="margin-left: 40px" data-min=30>
+                                                    <input type="text" name="walk_in_door_on_c" class="form-control walk_in_door_on_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_on->chargeable_weight }}" style="margin-left: 40px">
                                                 </div>
                                             </div>
 
@@ -70,21 +70,21 @@
                                             <div style="width: 450px; float: left; margin-left: 20px;">
                                                 <h4 class="form-section mb-2 text-center" style="text-align: left">Hub to Hub</h4>
                                                 <div class="input-group form-group">
-                                                    <input type="text" name="walk_in_hub_dn_a" class="form-control walk_in_hub_dn_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_dn->actual_weight }}" data-min=10>
+                                                    <input type="text" name="walk_in_hub_dn_a" class="form-control walk_in_hub_dn_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_hub_dn->actual_weight }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">KG</span>
                                                     </div>
-                                                    <input type="text" name="walk_in_hub_dn_c" class="form-control walk_in_hub_dn_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_dn->chargeable_weight }}" style="margin-left: 40px" data-min=30>
+                                                    <input type="text" name="walk_in_hub_dn_c" class="form-control walk_in_hub_dn_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_hub_dn->chargeable_weight }}" style="margin-left: 40px">
                                                 </div>
                                             </div>
                                             <div style="width: 450px; float: right;">
                                                 <h4 class="form-section mb-2 text-center"  style="text-align: left">Doorstep</h4>
                                                 <div class="input-group form-group">
-                                                    <input type="text" name="walk_in_door_dn_a" class="form-control walk_in_door_ol_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_dn->actual_weight }}" data-min=10>
+                                                    <input type="text" name="walk_in_door_dn_a" class="form-control walk_in_door_ol_a" placeholder="Actual Weight" required data-rule-required="true" data-msg-required="Actual Weight is required" value="{{ $walk_in_door_dn->actual_weight }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">KG</span>
                                                     </div>
-                                                    <input type="text" name="walk_in_door_dn_c" class="form-control walk_in_door_ol_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_dn->chargeable_weight }}" style="margin-left: 40px" data-min=40>
+                                                    <input type="text" name="walk_in_door_dn_c" class="form-control walk_in_door_ol_c" placeholder="Charges Per kg" required data-rule-required="true" data-msg-required="Charges Per kg is required" value="{{ $walk_in_door_dn->chargeable_weight }}" style="margin-left: 40px">
                                                 </div>
                                             </div>
                                         <div style="margin-top: 200px">
