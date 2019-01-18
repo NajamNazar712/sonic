@@ -1,6 +1,6 @@
 @extends('client.layout.master')
 
-@section('title', 'Book a Shipment(Walk-In)')
+@section('title', 'Book a Shipment')
 
 @section('content')
     <div class="app-content content">
@@ -8,6 +8,7 @@
             <div class="content-header row">
             </div>
             <div class="content-body">
+                <h1 class="mb-1">Book a Shipment (Walk-In)</h1>
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
@@ -16,20 +17,13 @@
                             <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
-                                <input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ $booking_types }}">
+                                <input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ $booking_types['id'] }}">
 
                                 <div class="row">
                                     <div class="col col_custom">
-                                        <h4 class="form-section mb-2 text-center">Shipper Information</h4>
-                                        <div class="form-group">
-                                            <select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
-                                                <option value="0">New</option>
+                                        <h4 class="form-section mb-2 text-center">Pickup Information</h4>
 
-                                                @php ($default_pickup_address = FALSE)
-                                            </select>
-                                        </div>
-
-                                        <div id="new_pickup_address" class="d-none">
+                                        <div id="new_pickup_address">
                                             <div class="form-group">
                                                 <textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
                                             </div>
@@ -123,82 +117,6 @@
                                             <div class="form-group input-group">
                                                 <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quantity is required">
                                             </div>
-
-                                            <div class="form-group text-center p-1 border border-light rounded">
-                                                <label class="d-block">Insurance</label>
-                                                <input type="checkbox" name="insurance" class="switch hidden insurance">
-                                            </div>
-
-                                            <div class="form-group input-group d-none">
-                                                <div class="input-group-prepend">
-                                                    <span class="input-group-text">Rs</span>
-                                                </div>
-
-                                                <input type="text" name="item_price" class="form-control rounded-right price" placeholder="Product Value*" data-rule-required="true" data-msg-required="Product Value is required">
-                                            </div>
-                                        </div>
-
-                                        <div id="try_and_buy" class="d-none">
-                                            <div class="repeater mb-1">
-                                                <div data-repeater-list="try_and_buy">
-                                                    <div class="product mb-1" data-repeater-item>
-                                                        <div class="d-flex justify-content-between align-items-center bg-dark border border-dark rounded-top">
-                                                            <h4 class="m-1 white">Product #<span>1</span></h4>
-                                                            <button data-repeater-delete type="button" class="btn btn-icon btn-danger btn-sm mr-1"><i class="ft-x"></i></button>
-                                                        </div>
-
-                                                        <div class="pt-1 pl-1 pr-1 border border-light rounded-bottom">
-                                                            <div class="form-group">
-                                                                <select name="product_type" class="select2" data-rule-required="true" data-msg-required="Product Type is required">
-                                                                    @foreach($products as $product)
-                                                                        <option value="{{ $product->id }}">{{ $product->product_name }}</option>
-                                                                    @endforeach
-                                                                </select>
-                                                            </div>
-
-                                                            <div class="form-group">
-                                                                <textarea name="item_description" class="form-control" placeholder="Item Description*" data-rule-required="true" data-msg-required="Item Description is required" data-rule-maxlength="250" data-msg-maxlength="Item Description can be maximum 250 characters"></textarea>
-                                                            </div>
-
-                                                            <div class="form-group input-group">
-                                                                <input type="text" name="item_quantity" class="form-control text-center quantity" placeholder="Item Quantity*" data-rule-required="true" data-msg-required="Item Quanity is required">
-                                                            </div>
-
-                                                            <div class="form-group input-group">
-                                                                <div class="input-group-prepend">
-                                                                    <span class="input-group-text">Rs</span>
-                                                                </div>
-
-                                                                <input type="text" name="item_price" class="form-control rounded-right price" placeholder="Product Value*" data-rule-required="true" data-msg-required="Product Value is required">
-                                                            </div>
-
-                                                            <div class="form-group text-center p-1 border border-light rounded">
-                                                                <label class="d-block">Insurance</label>
-                                                                <input type="checkbox" name="insurance" class="switch hidden insurance">
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-
-                                                <div class="form-group text-right">
-                                                    <button data-repeater-create type="button" class="btn btn-block btn-primary">Add</button>
-                                                </div>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_quantity">Total Quantity: <span>0</span></p>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <p class="border-bottom border-light text-center font-medium-1 text-bold-600" id="total_price">Total Product(s) Value: Rs <span>0</span></p>
-                                            </div>
-
-                                            <div class="form-group">
-                                                <div class="form-group text-center p-1 border border-light rounded">
-                                                    <label class="d-block">Type of Package</label>
-                                                    <input type="checkbox" name="package_type" class="switch hidden package_type" id="package_type" checked="checked" data-off-label="Partial" data-on-label="Complete">
-                                                </div>
-                                            </div>
                                         </div>
 
                                         <div class="form-group input-group">
@@ -219,32 +137,47 @@
                                     <div class="col col_custom">
                                         <h4 class="form-section mb-2 text-center">Shipping Information</h4>
 
-                                        <div class="form-group input-group mb-0">
-                                            <input type="text" name="estimated_weight" class="form-control weight" placeholder="Estimated Weight*" data-rule-required="true" data-msg-required="Estimated Weight is required">
+                                        <div class="form-group">
+                                            <select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Mode of Shipping is required">
+                                                @foreach($shipping_mode as $shipping)
+                                                    <option value="{{ $shipping->id }}">{{ $shipping->mode }}</option>
+                                                @endforeach
+                                            </select>
+                                        </div>
 
-                                            <div class="input-group-append">
-                                                <span class="input-group-text">kg</span>
+                                        <div class="form-group">
+                                            <div class="form-group input-group mb-0">
+                                                <input type="text" name="actual_weight" class="form-control weight" placeholder="Total Actual Weight*" data-rule-required="true" data-msg-required="Total Actual Weight is required">
+
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text">kg</span>
+                                                </div>
                                             </div>
                                         </div>
 
-                                        <h6 class="form-text mb-1 text-justify text-muted text-italic">*Charges will be subjected to the Final Weight measured at the time of Shipment Arrival.</h6>
+                                        <div class="form-group">
+                                            <input type="text" name="charges_per_kg" class="form-control charges_per_kg" placeholder="Charges Per kg*" data-rule-required="true" data-msg-required="Charges Per kg is required">
+                                        </div>
 
                                         <div class="form-group">
-                                            <select name="shipping_mode" class="select2" id="shipping_mode" data-rule-required="true" data-msg-required="Mode of Shipping is required">
-                                            </select>
+                                            <input type="text" name="total_charges" class="form-control total_charges" placeholder="Total Charges" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" placeholder="Fuel Surcharge" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <input type="text" name="gst" class="form-control gst" placeholder="GST" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <input type="text" name="total_receivable" class="form-control total_receivable" placeholder="Total Receivable" readonly="readonly">
                                         </div>
                                     </div>
 
                                     <div class="col col_custom">
                                         <h4 class="form-section mb-2 text-center">Payment Information</h4>
-
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text">Rs</span>
-                                            </div>
-
-                                            <input type="text" name="amount" class="form-control rounded-right amount" placeholder="Collection Amount*" data-rule-required="true" data-msg-required="Collection Amount is required">
-                                        </div>
 
                                         <div class="form-group">
                                             <select name="payment_mode" class="select2" id="payment_mode" data-rule-required="true" data-msg-required="Mode of Payment is required">
@@ -269,35 +202,6 @@
                     </div>
                 </div>
 
-                <div class="modal fade" id="select_service_type" role="dialog" aria-labelledby="select_service_type_title" aria-hidden="true">
-                    <div class="modal-dialog modal-sm" role="document">
-                        <div class="modal-content">
-                            <form class="form-horizontal">
-                                {{ csrf_field() }}
-
-                                <div class="modal-header">
-                                    <h4 class="modal-title" id="select_service_type_title">Select Service Type</h4>
-                                </div>
-                                <div class="modal-body">
-                                    <div class="control-group">
-                                        <div class="controls">
-                                            <select name="service_type" class="select2" id="service_type">
-                                                @foreach($booking_types as $booking_type)
-                                                    <option value="{{ $booking_type->id }}">{{ $booking_type->booking_type }}</option>
-                                                @endforeach
-                                            </select>
-
-                                            <label id="service_type-error" class="danger d-none">Service Type is required.</label>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="modal-footer">
-                                    <button type="submit" class="btn btn-primary mx-auto">Select</button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>
@@ -366,174 +270,15 @@
                 if ($('#pickup_address').val() == 0) {
                     var pickup_city_id = $('#new_pickup_city').val();
                 }
-                else {
-                    var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
-                }
 
                 consignee_city_id = $('#consignee_city').val();
-
-                if (consignee_city_id) {
-                    $.ajax({
-                        url: '{!! route('cod.shipment.book.shipping_modes') !!}',
-                        method: 'POST',
-                        data: {
-                            '_token': '{{ csrf_token() }}',
-                            'service_type_id': service_type,
-                            'pickup_city_id': pickup_city_id,
-                            'consignee_city_id': consignee_city_id
-                        }
-                    })
-                        .done(function(data) {
-                            $('#shipping_mode').html('').select2('destroy');
-
-                            if (data.status == 0) {
-                                $.each(data.shipping_modes, function (index, shipping_mode) {
-                                    $('#shipping_mode').append('<option value="' + shipping_mode['id'] + '">' + shipping_mode['mode'] + '</option>');
-                                });
-
-                                present = true;
-                            }
-                            else {
-                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-
-                                present = false;
-                            }
-
-                            $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
-                                width: '100%',
-                                placeholder: 'Mode of Shipping*'
-                            }).bind('change', function() {
-                                if ($(this).hasClass('danger')) {
-                                    $(this).valid();
-                                }
-
-                                if (this.value == 4) {
-                                    $('#shipping_same-day').removeClass('d-none');
-                                }
-                                else {
-                                    $('#shipping_same-day').addClass('d-none');
-                                }
-                            });
-
-                            if (present) {
-                                $('#shipping_mode').prop('disabled', false);
-                            }
-                            else {
-                                $('#shipping_mode').prop('disabled', true);
-                            }
-                        });
-                }
             }
 
-            $('#select_service_type').modal({
-                backdrop: 'static',
-                keyboard: false,
-                show: false
-            });
-
-            $('#select_service_type form #service_type').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Service Type*'
-            });
-
-            var service_type = '';
-
-            @if (!Session::has('service_type_id'))
-            $('#select_service_type').modal('show');
-            @else
-                service_type = '{{ Session::get('service_type_id') }}';
-
-            if (service_type == 2) {
-                $('#replacement').removeClass('d-none');
-            }
-            if (service_type == 3) {
-                $('#regular').addClass('d-none');
-                $('#try_and_buy').removeClass('d-none');
-            }
-
-            $('#select_service_type form #service_type').val(service_type).trigger('change');
-            @endif
-
-            $('#select_service_type form').bind('submit', function(e) {
-                e.preventDefault();
-
-                var selected = $('#select_service_type form #service_type').find(':selected');
-
-                service_type = selected.val();
-
-                if (service_type !== '' && service_type !== undefined && service_type !== null) {
-                    $('#select_service_type form #service_type-error').addClass('d-none');
-
-                    if (service_type == 1) {
-                        $('#regular').removeClass('d-none');
-                        $('#replacement').addClass('d-none');
-                        $('#try_and_buy').addClass('d-none');
-                    }
-                    else if (service_type == 2) {
-                        $('#regular').removeClass('d-none');
-                        $('#replacement').removeClass('d-none');
-                        $('#try_and_buy').addClass('d-none');
-                    }
-                    else if (service_type == 3) {
-                        $('#regular').addClass('d-none');
-                        $('#replacement').addClass('d-none');
-                        $('#try_and_buy').removeClass('d-none');
-                    }
-
-                    $('#booking_form #selected_service_type').val(service_type);
-
-                    $('#selected_service_type_name').html('(' + selected.html() + ')');
-
-                    $('#select_service_type').modal('hide');
-
-                    shipping_modes();
-                }
-                else {
-                    $('#select_service_type form #service_type-error').removeClass('d-none');
-                }
-            });
-
-
-            @if (!$default_pickup_address)
-            $('#pickup_address').prepend('<option value="" selected="selected"></option>');
-            @endif
-
-            $('#pickup_address').select2({
-                width: '100%',
-                placeholder: 'Pickup Address*'
-            }).bind('change', function() {
-                $(this).valid();
-
-                shipping_modes();
-
-                if (this.value == 0) {
-                    $('#new_pickup_address').removeClass('d-none');
-                }
-                else {
-                    $('#new_pickup_address').addClass('d-none');
-                }
-
-                var pickup_city = $(this).find(':selected').data('city-id');
-                var consignee_city = $('#consignee_city').val();
-
-                shipping_mode_same_day(pickup_city, consignee_city);
-            });
 
             $('#new_pickup_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'City*'
-            }).bind('change', function() {
-                $(this).valid();
-
-                shipping_modes();
-
-                var pickup_city = $(this).val();
-                var consignee_city = $('#consignee_city').val();
-
-                shipping_mode_same_day(pickup_city, consignee_city);
             });
-
-            $('#information_display').checkboxpicker();
 
             $('#delivery_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
@@ -543,21 +288,6 @@
             $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'City*'
-            }).bind('change', function() {
-                $(this).valid();
-
-                shipping_modes();
-
-                if ($('#pickup_address').val() == 0) {
-                    var pickup_city = $('#new_pickup_city').val();
-                }
-                else {
-                    var pickup_city = $('#pickup_address').find(':selected').data('city-id');
-                }
-
-                var consignee_city = $(this).val();
-
-                shipping_mode_same_day(pickup_city, consignee_city);
             });
 
             $('#product_type').prepend('<option value="" selected="selected"></option>').select2({
@@ -566,23 +296,6 @@
             }).bind('change', function() {
                 $(this).valid();
             });
-
-            $('#regular .insurance').checkboxpicker().bind('change', function() {
-                var parent = $(this).parent('.form-group').next('.form-group');
-
-                if (this.checked) {
-                    parent.removeClass('d-none');
-                }
-                else {
-                    parent.addClass('d-none');
-
-                    parent.children('#item_price-error').remove();
-                }
-            });
-
-            $('#try_and_buy .insurance').checkboxpicker();
-
-            $('#package_type').checkboxpicker();
 
             $('#pickup_date').pickadate({
                 firstDay: 1,
@@ -600,143 +313,16 @@
                 }
             });
 
-            $('#replacement_product_type').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Product Type*'
-            }).bind('change', function() {
-                $(this).valid();
-            });
-
-            $('#try_and_buy .select2').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Product Type*'
-            }).bind('change', function() {
-                $(this).valid();
-            });
-
-            $('#try_and_buy .repeater').repeater({
-                isFirstItemUndeletable: true,
-                show: function() {
-                    $(this).find('.select2-container--default').remove();
-
-                    $(this).find('.select2').prepend('<option value="" selected="selected"></option>').select2({
-                        width: '100%',
-                        placeholder: 'Product Type*'
-                    }).bind('change', function() {
-                        $(this).valid();
-                    });
-
-                    $(this).slideDown();
-
-                    $('html, body').animate({
-                        scrollTop: ($(this).offset().top - $('.header-navbar').height())
-                    }, 1000);
-
-                    $(this).find('.quantity').TouchSpin({
-                        min: 1,
-                        max: 1000,
-                        buttondown_class: 'btn btn-primary rounded-left',
-                        buttonup_class: 'btn btn-primary rounded-right',
-                        buttondown_txt: '<i class="ft-minus"></i>',
-                        buttonup_txt: '<i class="ft-plus"></i>'
-                    }).bind('input change', function() {
-                        if ($(this).hasClass('danger')) {
-                            $(this).valid();
-                        }
-
-                        if (service_type == 3) {
-                            try_and_buy_total_quantity();
-                        }
-                    });
-
-                    $('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
-
-                    $(this).find('.price').inputmask({
-                        'alias': 'integer',
-                        'allowMinus': false,
-                        'allowPlus': false,
-                        'groupSeparator': ',',
-                        'autoGroup': true,
-                        'min': 1,
-                        'max': 100000
-                    }).bind('input change', function() {
-                        if (service_type == 3) {
-                            try_and_buy_total_price();
-                        }
-                    });
-
-                    var insurance = $(this).find('.insurance');
-
-                    insurance.parent('.form-group').children('.btn-group').remove();
-
-                    insurance.checkboxpicker();
-
-                    try_and_buy_product_numbering();
-                },
-                hide: function(delete_element) {
-                    var id = $(this).children('div').children('h4').children('span').html();
-
-                    swal({
-                        title: 'Are you sure?',
-                        text: 'You want to delete Product #' + id + '?',
-                        icon: 'warning',
-                        buttons: {
-                            cancel: {
-                                text: 'Close',
-                                value: null,
-                                visible: true,
-                                closeModal: true,
-                            },
-                            confirm: {
-                                text: 'Delete',
-                                value: true,
-                                visible: true,
-                                closeModal: true
-                            }
-                        },
-                        closeOnClickOutside: false,
-                        closeOnEsc: false,
-                        dangerMode: true
-                    }).then(function(confirm) {
-                        if (confirm) {
-                            $(this).slideUp(delete_element);
-
-                            try_and_buy_product_numbering();
-                        }
-                    });
-                }
-            });
-
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Mode of Shipping*',
-                disabled: true,
-            }).bind('change', function() {
-                if ($(this).hasClass('danger')) {
-                    $(this).valid();
-                }
-
-                if (this.value == 4) {
-                    $('#shipping_same-day').removeClass('d-none');
-                }
-                else {
-                    $('#shipping_same-day').addClass('d-none');
-                }
-            });
-
-            $('#same-day_timing').prepend('<option value="" selected="selected"></option>').select2({
-                width: '100%',
-                placeholder: 'Same-day Timing*'
-            }).bind('change', function() {
-                $(this).valid();
+                placeholder: 'Mode of Shipping*'
             });
 
             $('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Mode of Payment*'
-            }).bind('change', function() {
-                $(this).valid();
-            });
+            })
+
             var check = @json($check);
             $('#booking_form').validate({
                 errorClass: 'danger',

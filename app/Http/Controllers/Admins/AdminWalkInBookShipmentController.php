@@ -37,16 +37,17 @@ class AdminWalkInBookShipmentController extends Controller
 {
     //
     public function index() {
-        $booking_types = BookingType::where('id', '=', 4)->get();
+        $booking_types = BookingType::select('id')->where('id', '=', 4)->first();
         $user = User::with('shipping.city')->find(session('user_id'));
         $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
+        $shipping_mode = ShippingMode::where('id','!=', 4)->get();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
-        $payment_modes = PaymentMode::whereNotIn('id', [2, 3])->get();
+        $payment_modes = PaymentMode::whereIn('id', [4,1])->get();
         $check = NonServiceArea::pluck('name')->toArray();
 
 
-        return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'user' => $user, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check]);
+        return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user' => $user, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities, 'check' => $check]);
     }
 }
