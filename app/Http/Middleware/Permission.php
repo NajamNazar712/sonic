@@ -369,8 +369,8 @@ class Permission
             'settings.ticker.index' => 152,
             'settings.ticker.store' => 152,
 
-            'settings.walk_in.index' => 153,
-            'settings.walk_in.store' => 153,
+            'settings.walk_in.index' => 154,
+            'settings.walk_in.store' => 154,
 
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
