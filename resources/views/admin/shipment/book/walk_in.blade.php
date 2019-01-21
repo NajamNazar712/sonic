@@ -1,4 +1,4 @@
-@extends('client.layout.master')
+@extends('admin.layout.master')
 
 @section('title', 'Book a Shipment')
 
@@ -8,20 +8,23 @@
             <div class="content-header row">
             </div>
             <div class="content-body">
+                {{--@php--}}
+                {{--dd($fuel_surcharge[0]['shipping_mode_id']);--}}
+                {{--@endphp--}}
                 <h1 class="mb-1">Book a Shipment (Walk-In)</h1>
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
-                            @include('client.inc.messages')
+                            @include('admin.inc.messages')
 
-                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('cod.shipment.book.store') }}" novalidate="novalidate">
+                            <form id="booking_form" class="form-horizontal" method="POST" action="{{ route('admin.shipment.book.store') }}" novalidate="novalidate">
                                 {{ csrf_field() }}
 
                                 <input type="hidden" name="selected_service_type" id="selected_service_type" value="{{ $booking_types['id'] }}">
 
                                 <div class="row">
                                     <div class="col col_custom">
-                                        <h4 class="form-section mb-2 text-center">Pickup Information</h4>
+                                        <h4 class="form-section mb-2 text-center">Sender Information</h4>
 
                                         <div id="new_pickup_address">
                                             <div class="form-group">
@@ -147,7 +150,7 @@
 
                                         <div class="form-group">
                                             <div class="form-group input-group mb-0">
-                                                <input type="text" name="actual_weight" class="form-control weight" placeholder="Total Actual Weight*" data-rule-required="true" data-msg-required="Total Actual Weight is required">
+                                                <input type="text" name="actual_weight" class="form-control weight" id="actual_weight" placeholder="Total Actual Weight*" data-rule-required="true" data-msg-required="Total Actual Weight is required">
 
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">kg</span>
@@ -156,23 +159,23 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <input type="text" name="charges_per_kg" class="form-control charges_per_kg" placeholder="Charges Per kg*" data-rule-required="true" data-msg-required="Charges Per kg is required">
+                                            <input type="text" name="charges_per_kg" class="form-control charges_per_kg" id="charges_per_kg" placeholder="Charges Per kg*" data-rule-required="true" data-msg-required="Charges Per kg is required">
                                         </div>
 
                                         <div class="form-group">
-                                            <input type="text" name="total_charges" class="form-control total_charges" placeholder="Total Charges" readonly="readonly">
+                                            <input type="text" name="total_charges" class="form-control total_charges" id="total_charges" placeholder="Total Charges" readonly="readonly">
                                         </div>
 
                                         <div class="form-group">
-                                            <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" placeholder="Fuel Surcharge" readonly="readonly">
+                                            <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" id="fuel_surcharge" placeholder="Fuel Surcharge" readonly="readonly">
                                         </div>
 
                                         <div class="form-group">
-                                            <input type="text" name="gst" class="form-control gst" placeholder="GST" readonly="readonly">
+                                            <input type="text" name="gst" class="form-control gst" id="gst" placeholder="GST" readonly="readonly">
                                         </div>
 
                                         <div class="form-group">
-                                            <input type="text" name="total_receivable" class="form-control total_receivable" placeholder="Total Receivable" readonly="readonly">
+                                            <input type="text" name="total_receivable" class="form-control total_receivable" id="total_receivable" placeholder="Total Receivable" readonly="readonly">
                                         </div>
                                     </div>
 
@@ -233,12 +236,41 @@
 
     <script>
 
-
         $(document).ready(function() {
+            $('#actual_weight, #charges_per_kg, #shipping_mode, #new_pickup_city').change(function(){
+                var actual_weight = parseFloat($('#actual_weight').val()) || 0;
+                var charges_per_kg = parseFloat($('#charges_per_kg').val()) || 0;
+
+                $('#total_charges').val(actual_weight * charges_per_kg);
+                $.ajax({
+                    url:'{!! route('admin.shipment.book.add_fuel_surcharge_gst_total') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'shipping_mode_id': $('#shipping_mode').val(),
+                        'city_id': $('#new_pickup_city').val(),
+                        'total_c': $('#total_charges').val()
+                    }
+                }).done(function (data) {
+
+                        $('#fuel_surcharge').val(data.fuel);
+                        $('#gst').val(data.gst);
+                        $('#total_receivable').val(data.receivable);
+                });
+            });
+
+            $('#delivery_type, #consignee_city').change(function () {
+                if($('#delivery_type').val() == 2){
+                    $('#consignee_address').prop('disabled', true);
+                }
+                else{
+                    $('#consignee_address').prop('disabled', false);
+                }
+            });
 
             @if (session('print'))
             $.ajax({
-                url: '{!! route('cod.shipment.book.print_air_waybill') !!}',
+                url: '{!! route('admin.shipment.book.print_air_waybill') !!}',
                 method: 'POST',
                 data: {
                     '_token': '{{ csrf_token() }}',
@@ -321,9 +353,8 @@
             $('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Mode of Payment*'
-            })
+            });
 
-            var check = @json($check);
             $('#booking_form').validate({
                 errorClass: 'danger',
                 successClass: 'success',
@@ -334,59 +365,18 @@
                     error.addClass('w-100').appendTo(element.parent('.form-group'));
                 },
                 submitHandler: function(form) {
-
                     $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                    var consignee_address = $('#consignee_address').val();
-                    var strArray = consignee_address.split(/[ ,]+/);
-                    var present = [];
-                    for(k=0;k<strArray.length;k++) {
-                        for (i = 0; i < check.length; i++) {
-                            if(JSON.stringify(strArray[k]).toLowerCase()=== JSON.stringify(check[i]).toLowerCase()){
-                                present.push(strArray[k]);
-                            }
-                        }
-                    }
-                    // console.log(present.length);
-                    // console.log(present);
-                    if(present.length > 0){
-                        swal({
-                            title: 'Warning',
-                            text: 'Potential Non Service Area: ' + present,
-                            icon: 'info',
-                            buttons:{
-                                confirm: {
-                                    text: 'Ok',
-                                    value: false,
-                                    visible: true,
-                                    closeModal: true
-                                }},
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        }).then(function() {
-                            swal({
-                                title: 'Please Wait!',
-                                text: 'Your shipment is being booked!',
-                                icon: 'info',
-                                buttons: false,
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
 
-                            form.submit();
-                        });
-                    }
-                    else {
-                        swal({
-                            title: 'Please Wait!',
-                            text: 'Your shipment is being booked!',
-                            icon: 'info',
-                            buttons: false,
-                            closeOnClickOutside: false,
-                            closeOnEsc: false
-                        });
+                    swal({
+                        title: 'Please Wait!',
+                        text: 'Your shipment is being booked!',
+                        icon: 'info',
+                        buttons: false,
+                        closeOnClickOutside: false,
+                        closeOnEsc: false
+                    });
 
-                        form.submit();
-                    }
+                    form.submit();
                 }
             });
 
@@ -406,10 +396,6 @@
                 if ($(this).hasClass('danger')) {
                     $(this).valid();
                 }
-
-                if (service_type == 3) {
-                    try_and_buy_total_quantity();
-                }
             });
 
             $('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
@@ -422,12 +408,7 @@
                 'autoGroup': true,
                 'min': 1,
                 'max': 100000
-            }).bind('input change', function() {
-                if (service_type == 3) {
-                    try_and_buy_total_price();
-                }
             });
-
             $('.weight').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -437,7 +418,7 @@
                 'max': 1000
             });
 
-            $('.amount').inputmask({
+            $('.total_receivable').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
@@ -446,5 +427,6 @@
                 'max': 1000000
             });
         });
+
     </script>
 @endsection
