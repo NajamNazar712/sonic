@@ -49,6 +49,7 @@ class AdminPettyCashController extends Controller
         return response()->json(['status' => 1, 'titles'=>$titles]);
     }
     public function make_petty_cash_statement_submit(Request $request){
+        $total_amount = 0;
         if(PettyCashStatement::where('reference_no',$request->reference_no)->exists()){
             return ['status' => 0, 'error' => 'Reference No. not Unique'];
         }
@@ -61,6 +62,7 @@ class AdminPettyCashController extends Controller
         $petty_cash->created_by = Auth::id();
         $petty_cash->save();
         foreach ($selected_ids as $selected_id) {
+            $total_amount += $request->amount[$selected_id];
             $hubId = "hub.$selected_id";
             $petty_detail = new PettyCashStatementDetail();
             $petty_detail->petty_cash_statement_id = $petty_cash->id;
@@ -74,6 +76,7 @@ class AdminPettyCashController extends Controller
             $petty_detail->remarks = $request->remarks[$selected_id];
             $petty_detail->save();
         }
+        PettyCashStatement::where('id' , $petty_cash->id)->update(['total_amount' => $total_amount]);
         return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Created']);
     }
 
