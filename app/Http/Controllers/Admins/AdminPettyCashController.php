@@ -364,15 +364,18 @@ class AdminPettyCashController extends Controller
         $selected_ids = explode(',', $request->input('selected_rows'));
         $statement_id = $request->petty_statement_id;
         $petty_cash = PettyCashStatement::find($statement_id);
+        $total_amount = 0;
         if($petty_cash){
             foreach ($selected_ids as $selected_id) {
-                $hubId = "hub.$selected_id";
+//                $hubId = "hub.$selected_id";
+                $total_amount += $request->amount[$selected_id];
                 $petty_detail = PettyCashStatementDetail::where('petty_cash_statement_id',$petty_cash->id)->where('id',$selected_id)->first();
 
                 if(session('role_id') == 1 || (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14)){
                     $petty_detail->account_head_id = $request->head[$selected_id];
                     $petty_detail->account_title_id = $request->title[$selected_id];
-                    $petty_detail->hub_id = ($request->has($hubId) ? $request->hub[$selected_id] : null);
+                    $petty_detail->hub_id = $request->hub[$selected_id];
+//                    $petty_detail->hub_id = ($request->has($hubId) ? $request->hub[$selected_id] : null);
 
                 }
 
@@ -382,6 +385,8 @@ class AdminPettyCashController extends Controller
                 $petty_detail->remarks = $request->remarks[$selected_id];
                 $petty_detail->save();
             }
+            $petty_cash->total_amount = $total_amount;
+            $petty_cash->save();
             return redirect()->back()->with(['status' => 1, 'success' => 'Petty Cash Statement Successfully Updated!']);
         }
         else{

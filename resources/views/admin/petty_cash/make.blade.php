@@ -69,6 +69,7 @@
                         <th class="border-primary border-darken-1"> Amount </th>
                         <th class="border-primary border-darken-1">Reference No.</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1"></th>
 
                     </tr>
                     </thead>
@@ -198,6 +199,7 @@
                     {name: 'amount', class: 'align-middle expense_amount form-group'},
                     {name: 'reference_no', class: 'align-middle reference_no form-group'},
                     {name: 'remarks', class: 'align-middle remarks'},
+                    {name: 'action', class: 'align-middle action'},
                 ],
 
                 rowCallback: function(row, data, index) {
@@ -266,6 +268,13 @@
                 var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Amount is required">';
                 var reference_input = '<input class="form-control reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Reference No. is required">';
                 var remarks_input = '<input class="form-control" name="remarks['+rows_count+']" placeholder="Remarks">';
+                if(rows_count == 1){
+                    var remove = '';
+                }else{
+                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                }
+
                 var heads = $.map({!! $heads !!}, function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.name;
@@ -277,7 +286,7 @@
                     return obj;
                 });
 
-                table.row.add([0, heads_select,titles_select,hub_select,date_input,expense_detail_input,amount_input,reference_input,remarks_input]).node().id = rows_count;
+                table.row.add([0, heads_select,titles_select,hub_select,date_input,expense_detail_input,amount_input,reference_input,remarks_input,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -366,6 +375,31 @@
                 $('#statements_total_amount').text(total_amount);
             });
 
+            $('body').on('click', '.remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, selected_rows);
+
+                if (index !== -1) {
+                    selected_rows.splice(index, 1);
+                }
+
+                table.row( $(this).parents('tr') ).remove().draw();
+                calculate_amount();
+
+            });
+            function calculate_amount() {
+                var total_amount = 0;
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    if($(row.node()).find('td.expense_amount input').val() != ''){
+
+                        total_amount += parseInt($(row.node()).find('td.expense_amount input').val());
+                    }
+
+
+                });
+                $('#statements_total_amount').text(total_amount);
+            }
         {{--$('#reference_no').on('change',function () {--}}
                 {{--var reference_handle = $(this);--}}
                 {{--var reference = $(this).val();--}}
