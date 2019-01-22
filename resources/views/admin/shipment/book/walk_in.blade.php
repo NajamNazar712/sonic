@@ -8,9 +8,6 @@
             <div class="content-header row">
             </div>
             <div class="content-body">
-                {{--@php--}}
-                {{--dd($fuel_surcharge[0]['shipping_mode_id']);--}}
-                {{--@endphp--}}
                 <h1 class="mb-1">Book a Shipment (Walk-In)</h1>
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
@@ -26,7 +23,25 @@
                                     <div class="col col_custom">
                                         <h4 class="form-section mb-2 text-center">Sender Information</h4>
 
-                                        <div id="new_pickup_address">
+                                        <div class="form-group">
+                                            <select name="pickup_address" class="select2" id="pickup_address" data-rule-required="true" data-msg-required="Pickup Address is required">
+                                                <option value="0">New</option>
+
+                                                @php ($default_pickup_address = FALSE)
+
+                                                @foreach($user as $shipping_information)
+                                                    @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+                                                            @php ($default_pickup_address = TRUE)
+
+                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['pickup_address'] }}</option>
+                                                        @else
+                                                            <option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['pickup_address'] }}}}</option>
+                                                        @endif
+                                                @endforeach
+                                            </select>
+                                        </div>
+
+                                        <div id="new_pickup_address" class="d-none">
                                             <div class="form-group">
                                                 <textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
                                             </div>
@@ -36,7 +51,7 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <input type="text" name="new_pickup_phone_number_1" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
+                                                <input type="text" name="new_pickup_phone_number" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                                             </div>
 
                                             <div class="form-group">
@@ -118,16 +133,6 @@
                                             </div>
                                         </div>
 
-                                        <div class="form-group input-group">
-                                            <div class="input-group-prepend">
-												<span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left">
-													<span class="la la-calendar-o"></span>
-												</span>
-                                            </div>
-
-                                            <input type="text" name="pickup_date" class="form-control pickadate bg-primary border-primary white rounded-right" id="pickup_date" placeholder="Pickup Date*" data-rule-required="true" data-msg-required="Pickup Date is required">
-                                        </div>
-
                                         <div class="form-group">
                                             <textarea name="special_instructions" class="form-control" placeholder="Special Instructions" data-rule-maxlength="190" data-msg-maxlength="Special Instructions can be maximum 190 characters"></textarea>
                                         </div>
@@ -191,8 +196,8 @@
                                 <div class="row mt-2">
                                     <div class="col">
                                         <div class="form-group text-center">
-                                            <button type="submit" name="book" class="btn btn-primary" value="Book">Book</button>
-                                            <button type="submit" name="book_and_print" class="btn btn-primary ml-1" value="Book & Print">Book &amp; Print</button>
+                                            <button type="submit" name="book" id="sub_book" class="btn btn-primary" value="Book">Book</button>
+                                            <button type="submit" name="book_and_print" id="sub_book_print" class="btn btn-primary ml-1" value="Book & Print">Book &amp; Print</button>
                                         </div>
                                     </div>
                                 </div>
@@ -236,6 +241,12 @@
             $('#actual_weight, #charges_per_kg, #shipping_mode, #new_pickup_city').change(function(){
                 var actual_weight = parseFloat($('#actual_weight').val()) || 0;
                 var charges_per_kg = parseFloat($('#charges_per_kg').val()) || 0;
+                if ($('#pickup_address').val() == 0) {
+                    var pickup_city_id = $('#new_pickup_city').val();
+                }
+                else{
+                    var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
+                }
 
                 $('#total_charges').val(actual_weight * charges_per_kg);
                 $.ajax({
@@ -244,7 +255,7 @@
                     data: {
                         '_token': '{{ csrf_token() }}',
                         'shipping_mode_id': $('#shipping_mode').val(),
-                        'city_id': $('#new_pickup_city').val(),
+                        'city_id': pickup_city_id,
                         'total_c': $('#total_charges').val()
                     }
                 }).done(function (data) {
@@ -252,6 +263,42 @@
                         $('#fuel_surcharge').val(data.fuel);
                         $('#gst').val(data.gst);
                         $('#total_receivable').val(data.receivable);
+                });
+            });
+
+            $('#actual_weight, #charges_per_kg').change(function(){
+
+                $.ajax({
+                    url:'{!! route('admin.shipment.book.check_standard_weight') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'actual_weight': $('#actual_weight').val(),
+                        'charges_per_kg': $('#charges_per_kg').val(),
+                        'delivery_type': $('#delivery_type').val(),
+                        'shipping_mode': $('#shipping_mode').val()
+                    }
+                }).done(function (data) {
+                        if(data.status === 1){
+                            $('#span').remove();
+                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                            $('#actual_weight').parent('div').append(span);
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+
+                        }
+                        if(data.status === 0) {
+                            $('#span').remove();
+                            var span = '<span id="span" style="color: red">'+data.error+'</span>';
+                            $('#charges_per_kg').parent('div').append(span);
+                            $('#sub_book').prop('disabled', true);
+                            $('#sub_book_print').prop('disabled', true);
+                        }
+                    if(data.status === 2) {
+                        $('#span').remove();
+                        $('#sub_book').prop('disabled', false);
+                        $('#sub_book_print').prop('disabled', false);
+                    }
                 });
             });
 
@@ -270,7 +317,7 @@
                 method: 'POST',
                 data: {
                     '_token': '{{ csrf_token() }}',
-                    'ids[]': '{{ session('print') }}',
+                    'ids': '{{ session('print') }}',
                     'twice': true
                 }
             })
@@ -325,20 +372,43 @@
                 $(this).valid();
             });
 
-            $('#pickup_date').pickadate({
-                firstDay: 1,
-                clear: '',
-                min: '{{ Carbon\Carbon::now() }}',
-                selectYears: true,
-                selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
-                hiddenSuffix: '_formatted',
-                onOpen: function() {
-                    $('#pickup_date_root').css('top', '-350px');
-                },
-                onSet: function(context) {
-                    $('#pickup_date').valid();
+            @if (!$default_pickup_address)
+            $('#pickup_address').prepend('<option value="" selected="selected"></option>');
+            @endif
+
+            $('#pickup_address').select2({
+                width: '100%',
+                placeholder: 'Pickup Address*'
+            }).bind('change', function() {
+                $(this).valid();
+
+                shipping_modes();
+
+                if (this.value == 0) {
+                    $('#new_pickup_address').removeClass('d-none');
                 }
+                else {
+                    $('#new_pickup_address').addClass('d-none');
+                }
+
+                var pickup_city = $(this).find(':selected').data('city-id');
+                var consignee_city = $('#consignee_city').val();
+
+                shipping_mode_same_day(pickup_city, consignee_city);
+            });
+
+            $('#new_pickup_city').prepend('<option value="" selected="selected"></option>').select2({
+                width: '100%',
+                placeholder: 'City*'
+            }).bind('change', function() {
+                $(this).valid();
+
+                shipping_modes();
+
+                var pickup_city = $(this).val();
+                var consignee_city = $('#consignee_city').val();
+
+                shipping_mode_same_day(pickup_city, consignee_city);
             });
 
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({

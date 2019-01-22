@@ -131,7 +131,7 @@ class ShipperShipmentBookController extends Controller
     }
 
     public function index() {
-        $booking_types = BookingType::where('id', '!=', 3)->get();
+        $booking_types = BookingType::whereNotIn('id', [4, 3])->get();
         $user = User::with('shipping.city')->find(session('user_id'));
         $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
