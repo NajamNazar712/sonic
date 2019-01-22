@@ -40,10 +40,6 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <input type="text" name="new_pickup_phone_number_2" class="form-control phone_number" placeholder="Phone Number 2">
-                                            </div>
-
-                                            <div class="form-group">
                                                 <input type="email" name="new_pickup_email_address" class="form-control" placeholder="Email Address*" data-rule-required="true" data-msg-required="Email Address is required">
                                             </div>
 
@@ -61,7 +57,7 @@
                                         <h4 class="form-section mb-2 text-center">Consignee Information</h4>
 
                                         <div class="form-group">
-                                            <select name="Delivery_type" class="form-control select2" id="delivery_type" data-rule-required="true" data-msg-required="Delivery Type is required">
+                                            <select name="delivery_type" class="form-control select2" id="delivery_type" data-rule-required="true" data-msg-required="Delivery Type is required">
                                                 @foreach($delivery_type as $delivery)
                                                     <option value="{{ $delivery->id }}">{{ $delivery->delivery_type }}</option>
                                                 @endforeach
