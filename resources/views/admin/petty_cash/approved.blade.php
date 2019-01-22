@@ -20,6 +20,7 @@
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
                         <th class="border-primary border-darken-1">Date (From - To)</th>
+                        <th class="border-primary border-darken-1">Amount</th>
                         <th class="border-primary border-darken-1">Created By</th>
                         <th class="border-primary border-darken-1">Created At</th>
                         <th class="border-primary border-darken-1">Station Approved By</th>
@@ -77,6 +78,7 @@
                             head.push('Hub');
                             head.push('Statement Reference No.');
                             head.push('Date (From - To)');
+                            head.push('Amount');
                             head.push('Created By');
                             head.push('Created At');
                             head.push('Station Approved By');
@@ -97,6 +99,7 @@
                                 row.push(values.hub_name);
                                 row.push(values.reference_no);
                                 row.push(values.date);
+                                row.push(values.total_amount);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
                                 row.push(values.station_approved_by);
@@ -140,6 +143,7 @@
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
                     {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
                     {data: 'date', name: 'date', class: 'align-middle date', orderable:false},
+                    {data: 'total_amount', name: 'petty_cash_statements.total_amount', class: 'align-middle total_amount'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
                     {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
                     {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
