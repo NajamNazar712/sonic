@@ -36,7 +36,7 @@
                                             </div>
 
                                             <div class="form-group">
-                                                <input type="text" name="new_pickup_phone_number_1" class="form-control phone_number" placeholder="Phone Number 1*" data-rule-required="true" data-msg-required="Phone Number is required">
+                                                <input type="text" name="new_pickup_phone_number_1" class="form-control phone_number" placeholder="Phone Number*" data-rule-required="true" data-msg-required="Phone Number is required">
                                             </div>
 
                                             <div class="form-group">
