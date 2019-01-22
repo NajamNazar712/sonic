@@ -17,7 +17,7 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
-							<div class="hide" id="camera_scan">
+							<div id="camera_scan" class="d-none">
 			                    <div id="camera_view" class="camera_view"></div>
 			                </div>
 
@@ -363,13 +363,13 @@
 			});
 
 			$('#camera_scan_initiate').bind('click', function() {
-				if ($('#camera_scan').hasClass('hide')) {
-	                $('#camera_scan').removeClass('hide');
+				if ($('#camera_scan').hasClass('d-none')) {
+	                $('#camera_scan').removeClass('d-none');
 
 	                camera_scanning_start('#camera_view');
             	}
             	else {
-            		$('#camera_scan').addClass('hide');
+            		$('#camera_scan').addClass('d-none');
 
             		camera_scanning_stop();
             	}
