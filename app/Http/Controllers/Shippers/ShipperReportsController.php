@@ -71,7 +71,7 @@ class ShipperReportsController extends Controller
     }
     public function sales_index(){
         $cities = City::all('id','name');
-        $statuses = ShipmentStatus::whereNotIn('id',[1,7,17,18])->get();
+        $statuses = ShipmentStatus::whereNotIn('id',[1,17,18])->get();
         return view('client.reports.sales_report')->with(['cities'=>$cities,'statuses'=>$statuses]);
     }
     public function sales_list(Request $request){
@@ -103,7 +103,7 @@ class ShipperReportsController extends Controller
                 })
                 ->leftjoin('products as p','p.id','=','si.product_type_id')
                 ->select('p.product_name as product_name','si.description as description','shipments.tracking_number','shipments.order_id as order_id','u.id as account_no','u.name as shipper','ss.name as current_status','bt.booking_type as service_type','sj.created_at as arrival_date','oc.name as origin','dc.name as destination','shipments.amount as s_collection_amount','sps.name as payment_status','pps.amount as p_collection_amount','shipments.actual_weight','shipments.weight_charges','shipments.cash_handling_charges','dps.amount as d_collection_amount')
-                ->whereNotIn('shipments.shipper_status_id',[1,7,17,18])
+                ->whereNotIn('shipments.shipper_status_id',[1,17,18])
                 ->where('u.id', session('user_id'));
 
             $datatable = Datatables::of($sales)
