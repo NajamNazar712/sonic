@@ -83,6 +83,7 @@ class AdminWalkInBookShipmentController extends Controller
         $shipment->same_day_timing_id = $same_day_timing_id;
 
         $shipment->actual_weight = $actual_weight;
+        $shipment->estimated_weight = $actual_weight;
         $shipment->chargeable_weight = $charges_per_kg;
         $shipment->gst = $gst;
         $shipment->fuel_surcharge = $fuel_surcharge;
@@ -169,8 +170,9 @@ class AdminWalkInBookShipmentController extends Controller
 
                             if ($request->input('pickup_address') == 0) {
                                 $pickup_city_id = $request->input('new_pickup_city');
-
-                                $pickup_address_id = $this->add_pickup_address($user_id, $request->input('new_pickup_address'), $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
+                                $new_pickup_address = City::select('name')->where('id',$pickup_city_id)->first();
+                                $pickup_address = 'TRAX Office ' . $new_pickup_address['name'];
+                                $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address, $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
                             }
                             else {
                                 $pickup_address_id = $request->input('pickup_address');
@@ -422,7 +424,6 @@ class AdminWalkInBookShipmentController extends Controller
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
         $user_id = $check_id['setting_value'];
             $shipment = Shipment::where('id',$request->ids)->first();
-
             if ($user_id == $shipment->user_id) {
                 $table_start = '
                       <table class="table table-sm table-bordered border twice">
@@ -435,10 +436,9 @@ class AdminWalkInBookShipmentController extends Controller
                             </td>
 
                             <td class="color primary border twice-left"><strong>Serivce</strong></td>
-                    $table_start  .= 
+                            ';
+                    $table_start  .= '
                             <td><strong>' . $shipment->booking_type->booking_type . '</strong></td>
-
-                $table_start  .= 
                             <td class="color primary"><strong>Datetime</strong></td>
                             <td>' . $shipment->created_at->format('Y-m-d H:i:s') . '</td>
                           </tr>
@@ -463,7 +463,7 @@ class AdminWalkInBookShipmentController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Name</strong></td>
-                            <td colspan="3" class="border twice-right">' . $shipment->user->name . '</td>
+                            <td colspan="3" class="border twice-right">' . $shipment->user->name . ' '. $shipment->pickup_address->poc .'</td>
                             <td class="color secondary border twice-left"><strong>Name</strong></td>
                             <td colspan="3">' . $shipment->consignee_name . '</td>
                           </tr>

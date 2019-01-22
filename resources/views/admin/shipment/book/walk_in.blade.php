@@ -33,7 +33,7 @@
                                                     @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
                                                             @php ($default_pickup_address = TRUE)
 
-                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['pickup_address'] }}</option>
+                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}:{{ $shipping_information['phone']}}:{{ $shipping_information['pickup_address'] }}</option>
                                                         @else
                                                             <option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['pickup_address'] }}}}</option>
                                                         @endif
@@ -42,9 +42,6 @@
                                         </div>
 
                                         <div id="new_pickup_address" class="d-none">
-                                            <div class="form-group">
-                                                <textarea name="new_pickup_address" class="form-control" placeholder="Address*" data-rule-required="true" data-msg-required="Address is required" data-rule-maxlength="190" data-msg-maxlength="Address can be maximum 190 characters"></textarea>
-                                            </div>
 
                                             <div class="form-group">
                                                 <input type="text" name="new_pickup_person_of_contact" class="form-control" placeholder="Person of Contact*" data-rule-required="true" data-msg-required="Person of Contact is required" data-rule-maxlength="100" data-msg-maxlength="Person of Contact can be maximum 100 characters">
