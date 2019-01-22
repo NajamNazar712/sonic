@@ -51,6 +51,11 @@
                             </fieldset>
                         </div>
                     </div>
+                    <div class="row text-center">
+                        <div class="col">
+                            <b class="total_amount_span"> Total Amount : <span id="statements_total_amount">0</span></b>
+                        </div>
+                    </div>
                 <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
                     <thead>
                     <tr role="row" class="bg-primary white">
@@ -58,12 +63,13 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Account Head</th>
                         <th class="border-primary border-darken-1">Account Title</th>
-                        <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">City / Location</th>
                         <th class="border-primary border-darken-1">Date</th>
                         <th class="border-primary border-darken-1">Details of Expense</th>
                         <th class="border-primary border-darken-1"> Amount </th>
                         <th class="border-primary border-darken-1">Reference No.</th>
                         <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1"></th>
 
                     </tr>
                     </thead>
@@ -102,6 +108,10 @@
         }
         .date .picker td {
             border: transparent;
+        }
+        .total_amount_span{
+            font-size: 24px;
+            color: #64a0d2;
         }
     </style>
 @endsection
@@ -189,6 +199,7 @@
                     {name: 'amount', class: 'align-middle expense_amount form-group'},
                     {name: 'reference_no', class: 'align-middle reference_no form-group'},
                     {name: 'remarks', class: 'align-middle remarks'},
+                    {name: 'action', class: 'align-middle action'},
                 ],
 
                 rowCallback: function(row, data, index) {
@@ -250,25 +261,32 @@
                 selected_rows.push(rows_count);
                 var heads_select = '<select class="form-control select2 head_select" name="head['+rows_count+']" data-rule-required="true" data-msg-required="Account Head is required"></select>';
                 var titles_select = '<select class="form-control select2 title_select" name="title['+rows_count+']" data-rule-required="true" data-msg-required="Account Title is required"></select>';
-                var hub_select = '<select class="form-control hub_select select2" disabled name="hub['+rows_count+']" data-rule-required="true" data-msg-required="Hub is required"></select>';
+                var hub_select = '<select class="form-control hub_select select2" name="hub['+rows_count+']" data-rule-required="true" data-msg-required="City is required"></select>';
                 var date_input = '<div class="form-group input-group mb-0"><div class="input-group-prepend"><span class="input-group-text bg-primary bg-darken-2 border-primary white rounded-left"><span class="la la-calendar-o"></span></span></div><input type="text" name="date['+rows_count+']" class="form-control pickadate-short-string bg-primary border-primary white rounded-right" placeholder="Date" data-rule-required="true" data-msg-required="Date (From) is required"></div>';
 
                 var expense_detail_input = '<input class="form-control" name="expense['+rows_count+']" placeholder="Expense Details" data-rule-required="true" data-msg-required="Expense Detail is required">';
                 var amount_input = '<input class="form-control amount" name="amount['+rows_count+']" placeholder="Amount"  data-rule-required="true" data-msg-required="Amount is required">';
                 var reference_input = '<input class="form-control reference_row" name="reference['+rows_count+']" placeholder="Reference No" data-rule-required="true" data-msg-required="Reference No. is required">';
                 var remarks_input = '<input class="form-control" name="remarks['+rows_count+']" placeholder="Remarks">';
+                if(rows_count == 1){
+                    var remove = '';
+                }else{
+                    var remove = '<a href="javascript:void(0);" class="btn btn-icon btn-danger remove_row"><i class="la la-close"></i></a>';
+
+                }
+
                 var heads = $.map({!! $heads !!}, function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.name;
                     return obj;
                 });
-                var hubs_select = $.map({!! $hubs !!}, function (obj) {
+                var hubs_select = $.map({!! $cities !!}, function (obj) {
                     obj.id = obj.id;
                     obj.text = obj.name;
                     return obj;
                 });
 
-                table.row.add([0, heads_select,titles_select,hub_select,date_input,expense_detail_input,amount_input,reference_input,remarks_input]).node().id = rows_count;
+                table.row.add([0, heads_select,titles_select,hub_select,date_input,expense_detail_input,amount_input,reference_input,remarks_input,remove]).node().id = rows_count;
                 table.draw(true);
                 $('select[name="head['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data:heads,
@@ -281,7 +299,7 @@
                 });
                 $('select[name="hub['+rows_count+']"]').prepend('<option value="" selected="selected"></option>').select2({
                     data: hubs_select,
-                    placeholder:'Select Hub',
+                    placeholder:'Select a City',
                     allowClear:true
                 });
                 $('.reference_row').inputmask({
@@ -320,11 +338,11 @@
                 var selected_head = $(this).find(':selected');
                 var head = parseInt(selected_head.val());
                 var title = selected_head.closest('td').next('td').find('.title_select');
-                if(head == 1){
-                    selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",false);
-                }else{
-                    selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",true);
-                }
+                // if(head == 1){
+                //     selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",false);
+                // }else{
+                //     selected_head.closest('td').next('td').next('td').find('.hub_select').prop("disabled",true);
+                // }
                 $.ajax({
                     url:'{!! route('admin.petty_cash.make.titles') !!}',
                     type:'POST',
@@ -343,7 +361,45 @@
                     }
                 });
             });
+            $('body').on('change','td.expense_amount input', function () {
+                var total_amount = 0;
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    if($(row.node()).find('td.expense_amount input').val() != ''){
 
+                        total_amount += parseInt($(row.node()).find('td.expense_amount input').val());
+                    }
+
+
+                });
+                $('#statements_total_amount').text(total_amount);
+            });
+
+            $('body').on('click', '.remove_row',function () {
+                var rid = parseInt($(this).parents('tr').attr('id'));
+                var index = $.inArray(rid, selected_rows);
+
+                if (index !== -1) {
+                    selected_rows.splice(index, 1);
+                }
+
+                table.row( $(this).parents('tr') ).remove().draw();
+                calculate_amount();
+
+            });
+            function calculate_amount() {
+                var total_amount = 0;
+                table.rows().nodes().each(function(index) {
+                    var row = table.row(index);
+                    if($(row.node()).find('td.expense_amount input').val() != ''){
+
+                        total_amount += parseInt($(row.node()).find('td.expense_amount input').val());
+                    }
+
+
+                });
+                $('#statements_total_amount').text(total_amount);
+            }
         {{--$('#reference_no').on('change',function () {--}}
                 {{--var reference_handle = $(this);--}}
                 {{--var reference = $(this).val();--}}
