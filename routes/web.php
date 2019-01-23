@@ -883,5 +883,12 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
         });
 
+        Route::prefix('petty_cash')->name('petty_cash.')->group(function (){
+           Route::prefix('heads')->name('heads.')->group(function (){
+              Route::get('', 'Admins\GlobalSettingsController@petty_cash_heads_index')->name('index');
+              Route::get('list', 'Admins\GlobalSettingsController@petty_cash_heads_list')->name('list');
+
+           });
+        });
     });
 });

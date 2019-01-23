@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\PettyCashAccountHead;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Yajra\Datatables\Datatables;
 
 class GlobalSettingsController extends Controller
 {
@@ -167,5 +169,16 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function petty_cash_heads_index(){
+        return view('admin.settings.petty_cash.account_head');
+    }
+    public function petty_cash_heads_list(Request $request){
+        $heads = PettyCashAccountHead::select('id','name');
+        return Datatables::of($heads)
+//            ->addColumn('')
+        
+        ->make(true);
     }
 }
