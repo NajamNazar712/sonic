@@ -177,7 +177,18 @@ class GlobalSettingsController extends Controller
     public function petty_cash_heads_list(Request $request){
         $heads = PettyCashAccountHead::select('id','name');
         return Datatables::of($heads)
-//            ->addColumn('')
+            ->addColumn('action', function ($heads){
+
+                        $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+
+                        $dropdown .= '<button type="button" class="dropdown-item paid" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                return $dropdown;
+            })
         
         ->make(true);
     }
