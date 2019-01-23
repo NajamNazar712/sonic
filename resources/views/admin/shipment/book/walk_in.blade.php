@@ -159,18 +159,22 @@
                                         </div>
 
                                         <div class="form-group">
+                                            <label>Total Charges:</label>
                                             <input type="text" name="total_charges" class="form-control total_charges" id="total_charges" placeholder="Total Charges" readonly="readonly">
                                         </div>
 
                                         <div class="form-group">
+                                            <label>Fuel Surcharge:</label>
                                             <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" id="fuel_surcharge" placeholder="Fuel Surcharge" readonly="readonly">
                                         </div>
 
                                         <div class="form-group">
+                                            <label>GST:</label>
                                             <input type="text" name="gst" class="form-control gst" id="gst" placeholder="GST" readonly="readonly">
                                         </div>
 
                                         <div class="form-group">
+                                            <label>Total Receivable:</label>
                                             <input type="text" name="total_receivable" class="form-control total_receivable" id="total_receivable" placeholder="Total Receivable" readonly="readonly">
                                         </div>
                                     </div>
