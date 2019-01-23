@@ -23,6 +23,7 @@ use App\Http\Models\Rates\HistoryReturnCharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\PendingRateStatus;
 use App\Http\Models\Rates\RateHistory;
+use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Support\Facades\DB;
@@ -553,7 +554,7 @@ class AdminDashboardController extends Controller
             })
             ->leftjoin('products as p','p.id','=','si.product_type_id')
             ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-            ->select(['shipments_journey.remarks as cancellation_remarks', 'si.description as product_description','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason'])            ->groupBy('shipments.id');
+            ->select(['shipments_journey.remarks as cancellation_remarks', 'si.description as product_description','shipments.id as shipment_id','shipments.tracking_number as tracking_number','shipments.tracking_number as tracking','shipments.order_id','u.id as account_no','u.name as shipper','bt.booking_type as service_type','ss.name as status','oc.name as origin','dc.name as destination','shipments.consignee_name','shipments.consignee_phone_number_1 as phone1','shipments.consignee_phone_number_2 as phone2','shipments.consignee_address','shipments.amount','p.product_name as product_type','shipments.created_at as booking_date','shipments.special_instructions as instructions','shipments.shipper_status_id', 'sps.name as payment_status','ssr.name as reason', 'shipments.pickup_address_id as pai'])            ->groupBy('shipments.id');
 
         if (session('role_id') != 1) {
             $shipments = $shipments->where(function ($query) {
@@ -568,6 +569,26 @@ class AdminDashboardController extends Controller
             })
 			->editColumn('account_no', function ($shipment) {
                 return str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if($shipment->shipper == 'Walk-In'){
+                    $name = UserShippingInfo::select('poc')->where('id',$shipment->pai)->first();
+                    $poc = $shipment->shipper .' ('. $name['poc'] . ')';
+                    return $poc;
+                }
+                else{
+                    return $shipment->shipper;
+                }
+            })
+            ->editColumn('status', function ($shipment) {
+                if($shipment->shipper == 'Walk-In'){
+                    $status_name = ShipmentsJourney::select('shipper_status_id')->where(['shipment_id' => $shipment->shipment_id, 'shipper_status_id' => 2])->first();
+                    $poc = $shipment->shipper .' ('. $name['poc'] . ')';
+                    return $poc;
+                }
+                else{
+                    return $shipment->shipper;
+                }
             })
             ->filterColumn('u.id', function ($query, $keyword) {
                 return $query->where('u.id', '=', $keyword);
