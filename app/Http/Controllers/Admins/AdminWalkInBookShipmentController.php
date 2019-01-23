@@ -91,7 +91,7 @@ class AdminWalkInBookShipmentController extends Controller
         $shipment->received_amount = $r_amount;
         $shipment->payment_mode_id = $payment_mode_id;
         $shipment->shipper_status_id = 2;
-        $shipment->consignee_status_id = 1;
+        $shipment->consignee_status_id = 2;
         $shipment->save();
 
         $shipment_id = $shipment->id;
@@ -99,6 +99,7 @@ class AdminWalkInBookShipmentController extends Controller
         AdminPickupsController::generate($shipment_id);
 
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
+        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, $user_id, NULL);
 
         return $shipment_id;
     }

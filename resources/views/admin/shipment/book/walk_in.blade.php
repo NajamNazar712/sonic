@@ -235,6 +235,10 @@
     <script>
 
         $(document).ready(function() {
+            $('#shipping_mode').change(function(){
+               $('#actual_weight').val(0);
+                $('#charges_per_kg').val(0);
+            });
             $('#actual_weight, #charges_per_kg, #shipping_mode, #new_pickup_city').change(function(){
                 var actual_weight = parseFloat($('#actual_weight').val()) || 0;
                 var charges_per_kg = parseFloat($('#charges_per_kg').val()) || 0;
@@ -256,7 +260,6 @@
                         'total_c': $('#total_charges').val()
                     }
                 }).done(function (data) {
-
                         $('#fuel_surcharge').val(data.fuel);
                         $('#gst').val(data.gst);
                         $('#total_receivable').val(data.receivable);
