@@ -525,7 +525,7 @@ class AdminPettyCashController extends Controller
 
                     <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
 
-                    <title>Statement Details</title>
+                    <title>Petty Cash Statement</title>
 
                     <style>
                       @page {
@@ -637,7 +637,7 @@ class AdminPettyCashController extends Controller
                         <tbody>
                           <tr>
                             <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
-                            <td class="text-center align-middle color primary"><strong>Statement Details</strong></td>
+                            <td class="text-center align-middle color primary"><strong>Petty Cash Statement</strong></td>
                             <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
                           </tr>
                           <tr>
@@ -653,8 +653,12 @@ class AdminPettyCashController extends Controller
                             <td>' . $petty_cash_statement->hub->name . '</td>
                           </tr>
                           <tr>
+                            <td class="color secondary"><strong>Reference No.</strong></td>
+                            <td>' . $petty_cash_statement->reference_no . '</td>
+                          </tr>
+                          <tr>
                             <td class="color secondary"><strong>Period</strong></td>
-                            <td>' . Carbon::parse($petty_cash_statement->from)->toDateString() . ' - ' . Carbon::parse($petty_cash_statement->to)->toDateString(). '</td>
+                            <td>' . Carbon::parse($petty_cash_statement->from)->toDateString() . ' -- ' . Carbon::parse($petty_cash_statement->to)->toDateString(). '</td>
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Total Amount</strong></td>

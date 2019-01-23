@@ -62,18 +62,20 @@
                     <thead>
                     <tr role="row" class="bg-primary white">
                         <th class="border-primary border-darken-1">S. No.</th>
+                        <th class="border-primary border-darken-1">Entry Date</th>
+                        <th class="border-primary border-darken-1">Head Of Account</th>
+                        <th class="border-primary border-darken-1">Title Of Account</th>
+                        <th class="border-primary border-darken-1">Entry City</th>
+                        <th class="border-primary border-darken-1">Expense Details</th>
+                        <th class="border-primary border-darken-1">Entry Amount</th>
+                        <th class="border-primary border-darken-1">Reference No.</th>
+                        <th class="border-primary border-darken-1">Remarks</th>
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1">Statement No.</th>
                         <th class="border-primary border-darken-1">Hub</th>
                         <th class="border-primary border-darken-1">Statement Reference No.</th>
-                        <th class="border-primary border-darken-1">Date (From - To)</th>
-                        <th class="border-primary border-darken-1">Amount</th>
-                        <th class="border-primary border-darken-1">Created By</th>
-                        <th class="border-primary border-darken-1">Created At</th>
-                        <th class="border-primary border-darken-1">Station Approved By</th>
-                        <th class="border-primary border-darken-1">Station Approved At</th>
-                        <th class="border-primary border-darken-1">Operation Approved By</th>
-                        <th class="border-primary border-darken-1">Operation Approved At</th>
-                        <th class="border-primary border-darken-1">Status</th>
+                        <th class="border-primary border-darken-1">Statement Created At</th>
+                        <th class="border-primary border-darken-1">Statement Created By</th>
                     </tr>
                     </thead>
                 </table>
@@ -267,22 +269,25 @@
 
                     }
                 },
-                order: [[1, 'asc']],
+                order: [[10, 'asc']],
                 rowId:'statement_id',
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},
+                    {data: 'entry_date', name: 'petty_cash_statement_details.date', class: 'align-middle entry_date'},
+                    {data: 'account_head', name: 'pch.name', class: 'align-middle account_head'},
+                    {data: 'account_title', name: 'pct.name', class: 'align-middle account_title'},
+                    {data: 'entry_city', name: 'dc.name', class: 'align-middle entry_city'},
+                    {data: 'expense_details', name: 'petty_cash_statement_details.expense_details', class: 'align-middle expense_details'},
+                    {data: 'amount', name: 'petty_cash_statement_details.amount', class: 'align-middle amount'},
+                    {data: 'entry_reference_no', name: 'petty_cash_statement_details.reference_no', class: 'align-middle entry_reference_no'},
+                    {data: 'remarks', name: 'petty_cash_statement_details.remarks', class: 'align-middle remarks'},
+                    {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'},
+                    {data: 'statement_link', name: 'pcs.id', class: 'align-middle statement_link'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
-                    {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
-                    {data: 'date', name: 'date', class: 'align-middle date', orderable:false},
-                    {data: 'total_amount', name: 'petty_cash_statements.total_amount', class: 'align-middle total_amount'},
+                    {data: 'statement_reference_no', name: 'pcs.reference_no', class: 'align-middle statement_reference_no'},
                     {data: 'created_by', name: 'cb.name', class: 'align-middle created_by'},
-                    {data: 'created_at', name: 'petty_cash_statements.created_at', class: 'align-middle created_at'},
-                    {data: 'station_approved_by', name: 'sab.name', class: 'align-middle station_approved_by'},
-                    {data: 'station_approved_at', name: 'petty_cash_statements.station_approved_at', class: 'align-middle station_approved_at'},
-                    {data: 'operation_approved_by', name: 'oab.name', class: 'align-middle operation_approved_by'},
-                    {data: 'operation_approved_at', name: 'petty_cash_statements.operation_approved_at', class: 'align-middle operation_approved_at'},
-                    {data: 'status', name: 'petty_cash_statements.status', class: 'align-middle status'}
+                    {data: 'created_at', name: 'pcs.created_at', class: 'align-middle created_at'},
+
                 ],
                 rowCallback: function(row, data, index) {
                     var info = table.page.info();
