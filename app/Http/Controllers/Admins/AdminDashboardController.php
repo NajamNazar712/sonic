@@ -582,12 +582,12 @@ class AdminDashboardController extends Controller
             })
             ->editColumn('status', function ($shipment) {
                 if($shipment->shipper == 'Walk-In'){
-                    $status_name = ShipmentsJourney::select('shipper_status_id')->where(['shipment_id' => $shipment->shipment_id, 'shipper_status_id' => 2])->first();
-                    $poc = $shipment->shipper .' ('. $name['poc'] . ')';
-                    return $poc;
+                    $status_id = ShipmentsJourney::select('shipper_status_id')->where(['shipment_id' => $shipment->shipment_id, 'shipper_status_id' => 2])->first();
+                    $status_name = ShipmentStatus::select('name')->where('id',$status_id['shipper_status_id'])->first();
+                    return $status_name['name'];
                 }
                 else{
-                    return $shipment->shipper;
+                    return $shipment->status;
                 }
             })
             ->filterColumn('u.id', function ($query, $keyword) {
