@@ -203,37 +203,40 @@
                         success: function (result) {
                             head = [];
                             head.push('S.No');
+                            head.push('Entry Date');
+                            head.push('Head Of Account');
+                            head.push('Title Of Account');
+                            head.push('Entry City');
+                            head.push('Expense Details');
+                            head.push('Entry Amount');
+                            head.push('Reference No.');
+                            head.push('Remarks');
+                            head.push('Status');
                             head.push('Statement No.');
                             head.push('Hub');
                             head.push('Statement Reference No.');
-                            head.push('Date (From - To)');
-                            head.push('Total Amount');
-                            head.push('Created By');
-                            head.push('Created At');
-                            head.push('Station Approved By');
-                            head.push('Station Approved At');
-                            head.push('Operation Approved By');
-                            head.push('Operation Approved At');
-                            head.push('Status');
-
+                            head.push('Statement Created At');
+                            head.push('Statement Created By');
 
                             $.each(result.data, function(index, values) {
                                 row = [];
 
 
                                 row.push(index + 1);
+                                row.push(values.entry_date);
+                                row.push(values.account_head);
+                                row.push(values.account_title);
+                                row.push(values.entry_city);
+                                row.push(values.expense_details);
+                                row.push(values.amount);
+                                row.push(values.entry_reference_no);
+                                row.push(values.remarks);
+                                row.push(values.status);
                                 row.push(values.statement_id);
                                 row.push(values.hub_name);
-                                row.push(values.reference_no);
-                                row.push(values.date);
-                                row.push(values.total_amount);
+                                row.push(values.statement_reference_no);
                                 row.push(values.created_by);
                                 row.push(values.created_at);
-                                row.push(values.station_approved_by);
-                                row.push(values.station_approved_at);
-                                row.push(values.operation_approved_by);
-                                row.push(values.operation_approved_at);
-                                row.push(values.status);
 
                                 body.push(row);
                             });
