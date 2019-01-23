@@ -407,7 +407,6 @@
                 var pickup_city = $(this).val();
                 var consignee_city = $('#consignee_city').val();
 
-                shipping_mode_same_day(pickup_city, consignee_city);
             });
 
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
