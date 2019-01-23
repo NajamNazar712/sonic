@@ -98,8 +98,9 @@ class AdminWalkInBookShipmentController extends Controller
 
         AdminPickupsController::generate($shipment_id);
 
-        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
         ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, $user_id, NULL);
+
+        ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
 
         return $shipment_id;
     }
