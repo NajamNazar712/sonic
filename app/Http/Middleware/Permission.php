@@ -290,6 +290,9 @@ class Permission
             'reports.sales_person_performance.export_to_excel' => 138,
             'reports.sales_person_performance.download' => 138,
 
+            'reports.petty_cash.index' => 156,
+            'reports.petty_cash.list' => 156,
+
             'packaging.index' => 76,
             'packaging.list' => 76,
             'packaging.add.submit' => 77,

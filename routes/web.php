@@ -700,12 +700,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('statements')->name('statements.')->group(function (){
            Route::get('', 'Admins\AdminPettyCashController@petty_cash_statements_index')->name('index');
            Route::get('list', 'Admins\AdminPettyCashController@petty_cash_statements_list')->name('list');
-           Route::post('approve', 'Admins\AdminPettyCashController@petty_cash_statements_approve')->name('approve');
+            Route::post('print', 'Admins\AdminPettyCashController@statement_print')->name('print');
+            Route::post('approve', 'Admins\AdminPettyCashController@petty_cash_statements_approve')->name('approve');
             Route::get('{id}/edit', 'Admins\AdminPettyCashController@edit_petty_cash_statement_index')->name('edit');
             Route::get('{id}/edit/list', 'Admins\AdminPettyCashController@edit_petty_cash_statement_list')->name('edit.list');
             Route::post('edit/approve', 'Admins\AdminPettyCashController@edit_petty_cash_statements_approve')->name('edit.approve');
             Route::post('edit/reject', 'Admins\AdminPettyCashController@edit_petty_cash_statements_reject')->name('edit.reject');
             Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
+
         });
         Route::prefix('approved')->name('approved.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@approved_petty_cash_statements_index')->name('index');
@@ -815,6 +817,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\AdminReportsController@overall_sales_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
 
+        });
+        Route::prefix('petty_cash')->name('petty_cash.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@petty_cash_statements_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@petty_cash_statements_list')->name('list');
         });
         Route::prefix('negative_balance_customers')->name('negative_balance_customers.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@negative_balance_customers_index')->name('index');

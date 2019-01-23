@@ -6,6 +6,9 @@ use App\Http\Models\Admin\Admin;
 use App\Http\Models\Admin\DeliveryNote;
 use App\Http\Models\Admin\DeliveryNoteShipment;
 use App\Http\Models\Admin\DeliveryNoteStationDepositNote;
+use App\Http\Models\Admin\PettyCashAccountHead;
+use App\Http\Models\Admin\PettyCashAccountTitle;
+use App\Http\Models\Admin\PettyCashStatement;
 use App\Http\Models\Admin\ReturnNote;
 use App\Http\Models\Admin\ReturnNoteShipment;
 use App\Http\Models\Admin\SalePersonTag;
@@ -3597,7 +3600,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.invoice_for_negative_balance_customers');
 
     }
-    public function negative_balance_customers_list(request $request)
+    public function negative_balance_customers_list(Request $request)
     {
         $negative = PendingPaymentShipment::leftjoin('shipments as s','s.id','=','pending_payment_shipments.shipment_id')
             ->leftjoin('users as u','u.id','=','s.user_id')
@@ -3611,4 +3614,58 @@ class AdminReportsController extends Controller
 
     }
 
+    public function petty_cash_statements_index(){
+        $hubs = City::where('hub',1)->select('id','name')->get();
+        $heads = PettyCashAccountHead::select('id', 'name')->get();
+        $titles = PettyCashAccountTitle::select('id', 'name')->get();
+        return view('admin.reports.petty_cash_statement')->with(['hubs' => $hubs, 'heads' => $heads, 'titles' => $titles]);
+    }
+
+    public function petty_cash_statements_list(Request $request){
+        $petty = PettyCashStatement::join('cities as h','h.id','=', 'petty_cash_statements.hub_id')
+            ->join('admins as cb','cb.id','=', 'petty_cash_statements.created_by')
+            ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
+            ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
+            ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
+            ->select('petty_cash_statements.id as statement_id','petty_cash_statements.id as statement_link','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status','petty_cash_statements.total_amount');
+//            ->where('petty_cash_statements.status','<',3);
+
+        if (session('role_id') != 1) {
+            $petty = $petty->whereIn('petty_cash_statements.hub_id', session('hubs'));
+        }
+
+        $petty = Datatables::of($petty)
+            ->editColumn('statement_link', function ($petty){
+                return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
+            })
+            ->addColumn('date',function($petty){
+                return Carbon::parse($petty->from)->toDateString().' - '.Carbon::parse($petty->to)->toDateString();
+            })
+            ->editColumn('status',function ($petty){
+                $status = '';
+                if($petty->status == 0){
+                    $status = 'Created';
+                }else if($petty->status == 1){
+                    $status = 'Station Approved';
+                }else if($petty->status == 2){
+                    $status = 'Operation Approved';
+                }
+                return $status;
+            });
+        if ($hub = $request->get('search_hub')) {
+            $petty->where('h.id', '=', $hub);
+        }
+        if ($search_date = $request->get('search_date_created')) {
+            $petty->whereDate('petty_cash_statements.created_at', $search_date);
+        }
+        if($head = $request->get('search_head')){
+            $petty->join('petty_cash_statement_details as psd','psd.petty_cash_statement_id','=','petty_cash_statements.id')
+                ->where('psd.account_head_id','=',$head);
+        }
+        if($title = $request->get('search_title')){
+            $petty->join('petty_cash_statement_details as psd','psd.petty_cash_statement_id','=','petty_cash_statements.id')
+                ->where('psd.account_title_id','=',$title);
+        }
+        return $petty->make(true);
+    }
 }

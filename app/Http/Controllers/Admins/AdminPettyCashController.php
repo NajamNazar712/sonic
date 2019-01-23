@@ -223,7 +223,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
-            ->select('petty_cash_statements.id as statement_id','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status','petty_cash_statements.total_amount')
+            ->select('petty_cash_statements.id as statement_id','petty_cash_statements.id as statement_link','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status','petty_cash_statements.total_amount')
         ->where('petty_cash_statements.status','<',3);
 
         if (session('role_id') != 1) {
@@ -231,6 +231,9 @@ class AdminPettyCashController extends Controller
         }
 
         $petty = Datatables::of($petty)
+            ->editColumn('statement_link', function ($petty){
+                return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
+            })
             ->addColumn('date',function($petty){
                 return Carbon::parse($petty->from)->toDateString().' - '.Carbon::parse($petty->to)->toDateString();
             })
@@ -507,5 +510,181 @@ class AdminPettyCashController extends Controller
         else{
             return response()->json(['status' => 0, 'error' => 'Petty Cash Statement ID not found!']);
         }
+    }
+
+    public function statement_print(Request $request){
+        $statement_id = $request->id;
+        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
+
+        $html = '
+                <!doctype html>
+                <html lang="en">
+                  <head>
+                    <meta charset="utf-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
+
+                    <title>Statement Details</title>
+
+                    <style>
+                      @page {
+                        size: A4 portrait;
+                      }
+
+                      * {
+                        -webkit-print-color-adjust: exact !important;
+                        color-adjust: exact !important;
+                      }
+
+                      body {
+                        background: none !important;
+                        color: #09262e !important;
+                        font-size: 0.9rem !important;
+                      }
+
+                      hr {
+                        border-top: 1px dashed #000000;
+                      }
+
+                      table.table-bordered {
+                        page-break-inside: avoid;
+                      }
+
+                      table.table-bordered tbody tr td {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      .color.primary {
+                        background: #c8c8c8 !important;
+                      }
+
+                      .color.secondary {
+                        background: #ebebeb !important;
+                      }
+
+                      .border {
+                        border: 1px solid #09262e !important;
+                      }
+
+                      td.replacement span {
+                        width: 22px;
+                      }
+
+                      td.replacement span img {
+                        display: block;
+                        width: 100%;
+                        margin: auto;
+                        background: #c8c8c8;
+                        border-radius: 25px;
+                      }
+                    </style>
+                  </head>
+                  <body>
+                    <div>
+      ';
+        $petty_cash_statement = PettyCashStatement::where('id', $statement_id);
+        if ($petty_cash_statement->exists()) {
+            $total_statements = 0;
+            $statement_details = PettyCashStatementDetail::where('petty_cash_statement_id', $statement_id)->get();
+
+            $petty_statement_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="color primary"><strong>S. No.</strong></td>
+                            <td class="color primary"><strong>Creation Date</strong></td>
+                            <td class="color primary"><strong>Chart of Account</strong></td>
+                            <td class="color primary"><strong>Account Title</strong></td>
+                            <td class="color primary"><strong>Details</strong></td>
+                            <td class="color primary"><strong>Location</strong></td>
+                            <td class="color primary"><strong>Reference No.</strong></td>
+                            <td class="color primary"><strong>Amount</strong></td>
+                            <td class="color primary"><strong>Remarks</strong></td>
+                          </tr>
+        ';
+
+
+            foreach ($statement_details as $detail) {
+                $total_statements++;
+
+
+                $shipment_details_row_start = '
+                          <tr>
+                            <td>' . $total_statements . '</td>
+                            <td>' . Carbon::parse($detail->date)->toDateString() . '</td>
+                            <td>' . $detail->heads->name . '</td>
+                            <td>' . $detail->titles->name . '</td>
+                            <td>' . $detail->expense_details . '</td>
+                            <td>' . $detail->location->name . '</td>
+                            <td>' . $detail->reference_no . '</td>
+                            <td>Rs ' . number_format($detail->amount) . '</td>
+                            <td>' . $detail->remarks . '</td>
+                ';
+
+                $shipment_details_row_start .= '
+                          </tr>
+                ';
+                $petty_statement_details .= $shipment_details_row_start;
+            }
+            $petty_statement_details .= '
+                        </tbody>
+                      </table>
+        ';
+            $petty_cash_statement = $petty_cash_statement->first();
+            $main_details = '
+                      <table class="table table-sm table-bordered border">
+                        <tbody>
+                          <tr>
+                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
+                            <td class="text-center align-middle color primary"><strong>Statement Details</strong></td>
+                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Statement ID</strong></td>
+                            <td>' . $petty_cash_statement->id . '</td>
+                            <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
+                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
+                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
+                            </td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Hub</strong></td>
+                            <td>' . $petty_cash_statement->hub->name . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Period</strong></td>
+                            <td>' . Carbon::parse($petty_cash_statement->from)->toDateString() . ' - ' . Carbon::parse($petty_cash_statement->to)->toDateString(). '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Amount</strong></td>
+                            <td>' . $petty_cash_statement->total_amount . '</td>
+                          </tr>
+                          <tr>
+                            <td class="color secondary"><strong>Total Statement Details</strong></td>
+                            <td>' . $total_statements . '</td>
+                          </tr>
+                        </tbody>
+                      </table>
+        ';
+            $html .= $main_details;
+            $html .= $petty_statement_details;
+
+        }
+
+
+        $html .= '
+                    </div>
+
+                    <script>
+                      window.onload = function() {
+                        window.print();
+                      }
+                    </script>
+                  </body>
+                </html>
+      ';
+
+        return $html;
     }
 }
