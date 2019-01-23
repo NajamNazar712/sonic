@@ -236,8 +236,8 @@
 
         $(document).ready(function() {
             $('#shipping_mode').change(function(){
-               $('#actual_weight').val(0);
-                $('#charges_per_kg').val(0);
+               $('#actual_weight').val(null);
+                $('#charges_per_kg').val(null);
             });
             $('#actual_weight, #charges_per_kg, #shipping_mode, #new_pickup_city').change(function(){
                 var actual_weight = parseFloat($('#actual_weight').val()) || 0;
