@@ -33,9 +33,7 @@
                                                     @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
                                                             @php ($default_pickup_address = TRUE)
 
-                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }}:{{ $shipping_information['phone']}}:{{ $shipping_information['pickup_address'] }}</option>
-                                                        @else
-                                                            <option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['pickup_address'] }}}}</option>
+                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }} : {{ $shipping_information['phone']}} : {{ $shipping_information['pickup_address'] }}</option>
                                                         @endif
                                                 @endforeach
                                             </select>
@@ -378,10 +376,11 @@
 
             $('#pickup_address').select2({
                 width: '100%',
-                placeholder: 'Pickup Address*'
+                placeholder: 'Pickup Address*',
+                closeOnSelect: true
             }).bind('change', function() {
                 $(this).valid();
-
+                console.log('gggg')
                 shipping_modes();
 
                 if (this.value == 0) {
@@ -394,7 +393,7 @@
                 var pickup_city = $(this).find(':selected').data('city-id');
                 var consignee_city = $('#consignee_city').val();
 
-                shipping_mode_same_day(pickup_city, consignee_city);
+                // shipping_mode_same_day(pickup_city, consignee_city);
             });
 
             $('#new_pickup_city').prepend('<option value="" selected="selected"></option>').select2({
