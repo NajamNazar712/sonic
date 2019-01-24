@@ -102,7 +102,7 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
-            var selected_rows = [];
+
             var table = $('#datatable').DataTable({
                 @if (session('role_id') == 1 || in_array(159, session('permissions')))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
@@ -117,10 +117,12 @@
                 @else
                 dom: 'ltipr',
                 @endif
-                paging:false,
-                bInfo:false,
                 processing: true,
                 serverSide: true,
+                scrollX: true,
+                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
+                pageLength: 50,
+                pagingType: 'full_numbers',
                 ajax: '{{ route('admin.settings.petty_cash.heads.list') }}',
                 rowId: 'id',
                 order: [1, 'asc'],
@@ -138,7 +140,43 @@
 
                 },
                 initComplete: function() {
+                    var search = $('<tr role="row" class="bg-primary bg-lighten-1 search"></tr>').appendTo(this.api().table().header());
 
+                    var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
+                    var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
+                    var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
+                    var drop_select = '<select name="status_select" id="status_select" class="select2 form-control">' +
+                        '<option value="0">Inactive</option>' +
+                        '<option value="1">Active</option>' +
+                        '</select>';
+                    this.api().columns().every(function(column_id) {
+                        var column = this;
+                        var header = column.header();
+
+                        if ($(header).is('.action') || $(header).is('.serial_number')) {
+                            $(td).appendTo($(search));
+                        }else if($(header).is('.status')){
+                            $(drop_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }
+                        else {
+                            var current = $(input).appendTo($(search)).on('change', function() {
+                                column.search($(this).val(), false, false, true).draw();
+                            }).wrap(td).after(icon);
+
+                            if (column.search()) {
+                                current.val(column.search());
+                            }
+                        }
+                    });
+                    $("#status_select").prepend('<option value="" selected></option>').select2({
+                        placeholder: "Search Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
                     this.api().table().columns.adjust();
                 }
             });
