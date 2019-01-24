@@ -1183,25 +1183,23 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_walk_in_shipments_list(Request $request){
-        $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
-            ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
+        $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
             ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
             ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
-            ->join('users as u', 's.user_id', '=', 'u.id')
-            ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
             ->leftjoin('shipments_journey as sj', function($join) {
-                $join->on('sj.shipment_id', '=', 's.id')
-                    ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = s.id)'));
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftjoin('shipments_journey as sjd', function($join) {
-                $join->on('sjd.shipment_id', '=', 's.id')
-                    ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
+                $join->on('sjd.shipment_id', '=', 'shipments.id')
+                    ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id AND shipper_status_id IN (14, 16, 30, 36))'));
             })
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
-            ->leftjoin('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
             ->leftjoin('admins as a', 'dn.updated_by', '=', 'a.id')
-            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','s.amount as charges')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','s.amount as charges')
             ->whereIn('delivery_note_shipments.status', [4, 5, 6])->where('s.booking_type_id',4);
 
         if (session('role_id') != 1) {
