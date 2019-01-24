@@ -312,7 +312,7 @@ class GlobalSettingsController extends Controller
                     }
                     if ($heads->status == 1) {
                         if(session('role_id') == 1 || in_array(166, session('permissions'))) {
-                            $dropdown .= '<button type="button" class="dropdown-item inactive" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">Inactive</div></button>';
+                            $dropdown .= '<button type="button" class="dropdown-item inactive" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Inactive</div></button>';
                         }else{
                             $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">No Action</div></button>';
                         }

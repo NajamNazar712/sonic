@@ -41,7 +41,6 @@
                 <div class="modal-body  text-center">
                     <div class="row mb-2 justify-content-center">
                         <div class="col-12 form-group">
-                            <label for="heads">Head Of Account</label>
                             <select name="heads[]" id="head_select" class="form-control select2" multiple="multiple">
                                 @foreach($heads as $head)
                                     <option value="{{$head->id}}">{{$head->name}}</option>
@@ -78,7 +77,6 @@
                 <div class="modal-body  text-center">
                     <div class="row mb-2 justify-content-center">
                         <div class="col-12 form-group">
-                            <label for="heads">Head Of Account</label>
                             <select name="edit_heads[]" id="edit_head_select" class="form-control select2" multiple="multiple">
                                 @foreach($heads as $head)
                                     <option value="{{$head->id}}">{{$head->name}}</option>
@@ -116,12 +114,12 @@
         $(document).ready(function () {
 
             $('#head_select').select2({
-                placeholder:'Select Account Head',
+                placeholder:'Account Head',
                 width:'100%',
                 allowClear:true
             });
             $('#edit_head_select').select2({
-                placeholder:'Select Account Head',
+                placeholder:'Account Head',
                 width:'100%',
                 allowClear:true
             });
@@ -135,7 +133,7 @@
                 buttons:[{
                     title: 'Add',
                     className: 'btn btn-primary mb-1',
-                    text: '<i class="la la-plus"></i> Add',
+                    text: '<i class="la la-plus"></i> Add Title',
                     action:function (e) {
                         $('#AccountTitleModal').modal('show');
                     }

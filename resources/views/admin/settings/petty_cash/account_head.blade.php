@@ -109,7 +109,7 @@
                 buttons:[{
                     title: 'Add',
                     className: 'btn btn-primary mb-1',
-                    text: '<i class="la la-plus"></i> Add',
+                    text: '<i class="la la-plus"></i> Add Head',
                     action:function (e) {
                         $('#AccountHeadModal').modal('show');
                     }
