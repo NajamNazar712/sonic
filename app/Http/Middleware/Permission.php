@@ -362,6 +362,20 @@ class Permission
             'settings.ticker.index' => 152,
             'settings.ticker.store' => 152,
 
+            'settings.petty_cash.heads.index' => 157,
+            'settings.petty_cash.heads.list' => 157,
+            'settings.petty_cash.heads.add' => 159,
+            'settings.petty_cash.heads.edit' => 160,
+            'settings.petty_cash.heads.active' => 161,
+            'settings.petty_cash.heads.inactive' => 162,
+
+            'settings.petty_cash.titles.index' => 158,
+            'settings.petty_cash.titles.list' => 158,
+            'settings.petty_cash.titles.add' => 163,
+            'settings.petty_cash.titles.edit' => 164,
+            'settings.petty_cash.titles.active' => 165,
+            'settings.petty_cash.titles.inactive' => 166,
+
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
             'cancelled_shipments.revert' => 118

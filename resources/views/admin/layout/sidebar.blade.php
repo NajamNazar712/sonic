@@ -414,7 +414,10 @@
                         <li><a class="menu-item" href="#">Petty Cash</a>
                             <ul class="menu-content">
                                 @if (session('role_id') == 1 || in_array(157, session('permissions')))
-                                    <li><a class="menu-item" href="{{route('admin.settings.petty_cash.heads.index')}}">heads</a></li>
+                                    <li><a class="menu-item" href="{{route('admin.settings.petty_cash.heads.index')}}">Heads</a></li>
+                                @endif
+                                @if (session('role_id') == 1 || in_array(158, session('permissions')))
+                                        <li><a class="menu-item" href="{{route('admin.settings.petty_cash.titles.index')}}">Titles</a></li>
                                 @endif
                             </ul>
                         </li>

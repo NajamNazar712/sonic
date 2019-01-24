@@ -22,7 +22,7 @@ class AdminPettyCashController extends Controller
         $this->middleware('Permission');
     }
     public function make_petty_cash_statement_index(){
-        $head = PettyCashAccountHead::select('id','name')->get();
+        $head = PettyCashAccountHead::where('status',1)->select('id','name')->get();
         if(session('role_id') == 1){
             $hub_cities = City::where('hub',1)->where('status',1)->select('id','name')->get();
         }else{
@@ -43,7 +43,7 @@ class AdminPettyCashController extends Controller
 
     public function make_petty_cash_statement_titles(Request $request){
         $account_head = $request->account_head;
-        $title_ids = PettyCashAccountHeadAccountTitle::where('petty_cash_account_head_id',$account_head)->select('petty_cash_account_title_id')->get();
+        $title_ids = PettyCashAccountHeadAccountTitle::where('petty_cash_account_head_id',$account_head)->join('petty_cash_account_titles as pct','pct.id','=', 'petty_cash_account_head_account_title.petty_cash_account_title_id')->where('pct.status',1)->select('petty_cash_account_title_id')->get();
 
         $titles = PettyCashAccountTitle::whereIn('id',$title_ids)->select('id','name')->get();
         return response()->json(['status' => 1, 'titles'=>$titles]);

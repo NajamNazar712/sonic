@@ -887,7 +887,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
            Route::prefix('heads')->name('heads.')->group(function (){
               Route::get('', 'Admins\GlobalSettingsController@petty_cash_heads_index')->name('index');
               Route::get('list', 'Admins\GlobalSettingsController@petty_cash_heads_list')->name('list');
-
+              Route::post('add', 'Admins\GlobalSettingsController@petty_cash_heads_add')->name('add');
+              Route::post('edit', 'Admins\GlobalSettingsController@petty_cash_heads_edit')->name('edit');
+              Route::post('active', 'Admins\GlobalSettingsController@petty_cash_heads_active')->name('active');
+              Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_heads_inactive')->name('inactive');
+           });
+           Route::prefix('titles')->name('titles.')->group(function (){
+              Route::get('', 'Admins\GlobalSettingsController@petty_cash_titles_index')->name('index');
+              Route::get('list', 'Admins\GlobalSettingsController@petty_cash_titles_list')->name('list');
+              Route::post('add', 'Admins\GlobalSettingsController@petty_cash_titles_add')->name('add');
+              Route::post('info', 'Admins\GlobalSettingsController@petty_cash_titles_info')->name('info');
+              Route::post('edit', 'Admins\GlobalSettingsController@petty_cash_titles_edit')->name('edit');
+              Route::post('active', 'Admins\GlobalSettingsController@petty_cash_titles_active')->name('active');
+              Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_titles_inactive')->name('inactive');
            });
         });
     });

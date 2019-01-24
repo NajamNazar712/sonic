@@ -17,6 +17,7 @@
 
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Heads</th>
+                        <th class="border-primary border-darken-1">Status</th>
                         <th class="border-primary border-darken-1"></th>
 
                     </tr>
@@ -27,6 +28,61 @@
         </div>
     </div>
 
+    <div class="modal fade text-left" id="AccountHeadModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="AccountHeadModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Add Head Of Account</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body  text-center">
+                        <div class="row mb-2 justify-content-center">
+                            <div class="col-12 form-group">
+                                <input name="account_head" id="account_head" class="form-control account_head" placeholder="Enter Head of Account">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-12">
+                                <button id="addHead" type="button" class="btn btn-primary btn-block">Add</button>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{--edit--}}
+    <div class="modal fade text-left" id="EditAccountHeadModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="EditAccountHeadModal"
+         aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary white">
+                    <h4 class="modal-title white">Edit Head Of Account</h4>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <input type="hidden" id="edit_account_head_id">
+                <div class="modal-body  text-center">
+                        <div class="row mb-2 justify-content-center">
+                            <div class="col-12 form-group">
+                                <input name="edit_account_head" id="edit_account_head" class="form-control edit_account_head" placeholder="Enter Head of Account">
+                            </div>
+                        </div>
+                        <div class="row justify-content-center">
+                            <div class="col-12">
+                                <button id="editHead" type="button" class="btn btn-primary btn-block">Edit</button>
+                            </div>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
 
 @endsection
 
@@ -46,82 +102,32 @@
             $('#search_filter_btn').on('click',function () {
                 table.draw();
             });
-            jQuery.fn.DataTable.Api.register( 'buttons.exportData()', function ( options ) {
-                if ( this.context.length ) {
-                    body = [];
-
-                    var jsonResult = $.ajax({
-                        url: '{{ route('admin.petty_cash.statements.list') }}',
-                        data: {
-                            'page': 'all',
-                        },
-                        success: function (result) {
-                            head = [];
-                            head.push('S.No');
-                            head.push('Statement No.');
-                            head.push('Hub');
-                            head.push('Statement Reference No.');
-                            head.push('Date (From - To)');
-                            head.push('Total Amount');
-                            head.push('Created By');
-                            head.push('Created At');
-                            head.push('Station Approved By');
-                            head.push('Station Approved At');
-                            head.push('Operation Approved By');
-                            head.push('Operation Approved At');
-                            head.push('Status');
-
-
-                            $.each(result.data, function(index, values) {
-                                row = [];
-
-
-                                row.push(index + 1);
-                                row.push(values.statement_id);
-                                row.push(values.hub_name);
-                                row.push(values.reference_no);
-                                row.push(values.date);
-                                row.push(values.total_amount);
-                                row.push(values.created_by);
-                                row.push(values.created_at);
-                                row.push(values.station_approved_by);
-                                row.push(values.station_approved_at);
-                                row.push(values.operation_approved_by);
-                                row.push(values.operation_approved_at);
-                                row.push(values.status);
-
-                                body.push(row);
-                            });
-                        },
-                        async: false
-                    });
-
-                    return {body: body, header: head};
-                }
-            } );
             var selected_rows = [];
             var table = $('#datatable').DataTable({
+                @if (session('role_id') == 1 || in_array(159, session('permissions')))
                 dom: '<"d-inline-block"l><"pull-right"B>tipr',
                 buttons:[{
-                    extend: 'excel',
-                    title: 'Petty Cash Statements',
-                    className: 'btn btn-primary',
-                    text: '<i class="la la-file-excel-o"></i> Excel',
-                },
-                ],
-                scrollX: true, scrollY: '350px',
-                lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
-                pageLength: 50,
-                pagingType: 'full_numbers',
+                    title: 'Add',
+                    className: 'btn btn-primary mb-1',
+                    text: '<i class="la la-plus"></i> Add',
+                    action:function (e) {
+                        $('#AccountHeadModal').modal('show');
+                    }
+                }],
+                @else
+                dom: 'ltipr',
+                @endif
+                paging:false,
+                bInfo:false,
                 processing: true,
                 serverSide: true,
-                {{--ajax: '{{ route('admin.petty_cash.statements.list') }}',--}}
                 ajax: '{{ route('admin.settings.petty_cash.heads.list') }}',
                 rowId: 'id',
                 order: [1, 'asc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'name', name: 'name', class: 'align-middle name'},
+                    {data: 'status', name: 'status', class: 'align-middle status'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
@@ -136,63 +142,119 @@
                     this.api().table().columns.adjust();
                 }
             });
-            $('body').on('click','button.approve',function () {
-                var id = $(this).parents('tr').attr('id');
+            $('body').on('click','#datatable button.edit',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                var account_head = $(this).parents('tr').find('td.name').text();
+                if(id){
+                    $('#edit_account_head_id').val(id);
+                    $('#EditAccountHeadModal').modal('show');
+                    $('#edit_account_head').val(account_head);
+                }else{
+                    var error = 'Head ID Not Found, Please Try again!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
+            $('body').on('change','#AccountHeadModal #account_head,#EditAccountHeadModal #edit_account_head',function() {
+                $(this).val($(this).val().trim());
+            });
+            $('body').on('click','#addHead', function () {
+               var head = $('#account_head').val();
+               if(head != ''){
+                   $.ajax({
+                       url: '{!! route('admin.settings.petty_cash.heads.add') !!}',
+                       method: 'POST',
+                       data: {
+                           '_token': '{{ csrf_token() }}',
+                           'head': head
+                       }
+                   }).done(function(data){
+                       if(data.status){
+                           table.draw(true);
+                           toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                        $('#account_head').val('');
+                        $('#AccountHeadModal').modal('hide');
+                       }else{
+                           toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                       }
+                   });
+
+               }else{
+                   var error = 'Head of Account is empty!';
+                   toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+               }
+            });
+            $('body').on('click','#editHead', function () {
+               var head = $('#edit_account_head').val();
+               var id = parseInt($('#edit_account_head_id').val());
+                if(head != '' && id != ''){
+                   $.ajax({
+                       url: '{!! route('admin.settings.petty_cash.heads.edit') !!}',
+                       method: 'POST',
+                       data: {
+                           '_token': '{{ csrf_token() }}',
+                           'head_id': id,
+                           'account_head':head
+                       }
+                   }).done(function(data){
+                       if(data.status){
+                           table.draw(true);
+                           toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                           $('#edit_account_head').val('');
+                           $('#EditAccountHeadModal').modal('hide');
+                       }
+                   });
+
+               }else{
+                   var error = 'Head of Account is empty!';
+                   toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+               }
+            });
+
+            $('body').on('click','#datatable button.enable', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
                 if(id){
                     $.ajax({
-                        url: '{!! route('admin.petty_cash.statements.approve') !!}',
+                        url: '{!! route('admin.settings.petty_cash.heads.active') !!}',
                         method: 'POST',
                         data: {
                             '_token': '{{ csrf_token() }}',
-                            'statement_id': id
+                            'head_id': id
                         }
                     }).done(function(data){
                         if(data.status){
                             table.draw(true);
                             toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
-
                         }
                     });
+
                 }else{
-                    var error = 'Statement ID Not Found, Please Try again!';
+                    var error = 'Head of Account ID Not Found!';
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
-            $('body').on('click','#datatable td.statement_link button', function () {
-                var statement_id = parseInt($(this).parents('tr').attr('id'));
-                if(statement_id){
-                    printStatement(statement_id);
-                }
-            });
 
-            function printStatement(id) {
-                $.ajax({
-                    url: '{!! route('admin.petty_cash.statements.print') !!}',
-                    method: 'POST',
-                    data: {
-                        'id': id,
-                        '_token': '{{ csrf_token() }}'
-                    }
-                })
-                    .done(function(data) {
-                        var tab = window.open('', '_blank');
-
-                        if(!tab) {
-                            swal({
-                                title: 'Popup Blocker Enabled!',
-                                text: 'Please add this site to your exception list.',
-                                icon: 'error',
-                                closeOnClickOutside: false,
-                                closeOnEsc: false
-                            });
+            $('body').on('click','#datatable button.inactive', function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                if(id){
+                    $.ajax({
+                        url: '{!! route('admin.settings.petty_cash.heads.inactive') !!}',
+                        method: 'POST',
+                        data: {
+                            '_token': '{{ csrf_token() }}',
+                            'head_id': id
                         }
-                        else {
-                            tab.document.write(data);
-                            tab.document.close();
-                            tab.focus();
+                    }).done(function(data){
+                        if(data.status){
+                            table.draw(true);
+                            toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
                         }
                     });
-            }
+
+                }else{
+                    var error = 'Head of Account ID Not Found!';
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
+            });
         });
     </script>
 @endsection

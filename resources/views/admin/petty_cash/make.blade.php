@@ -185,7 +185,7 @@
                         add_row();
                     }
                 }],
-                "autoWidth": false,
+                autoWidth: false,
                 scrollX: true, scrollY:'270px',
                 ordering:false,
                 paging:false,
