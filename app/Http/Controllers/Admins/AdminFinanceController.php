@@ -1177,6 +1177,14 @@ class AdminFinanceController extends Controller
         }
     }
 
+    public function outstanding_walk_in_shipments_index(){
+
+    }
+
+    public function outstanding_walk_in_shipments_list(){
+
+    }
+
     static public function replacement_collected_adjust_in_payment($shipment_id){
         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6]);
         if ($delivery_note_shipment->exists()) {
