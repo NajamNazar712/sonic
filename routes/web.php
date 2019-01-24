@@ -626,6 +626,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
             Route::post('dncc/print', 'Admins\AdminFinanceController@outstanding_shipments_dncc_print')->name('dncc.print');
             Route::post('sdn/print', 'Admins\AdminFinanceController@outstanding_shipments_sdn_print')->name('sdn.print');
+            Route::get('', 'Admins\AdminFinanceController@outstanding_walkin_shipments_index')->name('walkin_index');
+            Route::get('list', 'Admins\AdminFinanceController@outstanding_walkin_shipments_list')->name('walkin_list');
 
         });
 
