@@ -25,7 +25,11 @@
                                     <th class="border-primary border-darken-1">Address</th>
                                     <th class="border-primary border-darken-1">Destination</th>
                                     <th class="border-primary border-darken-1">Hub</th>
-                                    <th class="border-primary border-darken-1">Charges</th>
+                                    <th class="border-primary border-darken-1">Weight Charges</th>
+                                    <th class="border-primary border-darken-1">Fuel Surcharge</th>
+                                    <th class="border-primary border-darken-1">Return Charges</th>
+                                    <th class="border-primary border-darken-1">GST</th>
+                                    <th class="border-primary border-darken-1">Total Charges</th>
                                     <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Status Updated Datetime</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
@@ -78,7 +82,11 @@
                             head.push('Address');
                             head.push('Destination');
                             head.push('Hub');
-                            head.push('Charges');
+                            head.push('Weight Charges');
+                            head.push('Fuel Surcharge');
+                            head.push('Return Charges');
+                            head.push('GST');
+                            head.push('Total Charges');
                             head.push('Status');
                             head.push('Status Updated Datetime');
                             head.push('Updated By');
@@ -96,6 +104,10 @@
                                 row.push(values.address);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.weight_charges);
+                                row.push(values.fuel_surcharge);
+                                row.push(values.return_charges);
+                                row.push(values.gst);
                                 row.push(values.charges);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
@@ -138,6 +150,10 @@
                     {data:'address', name: 'shipments.consignee_address', class: 'align-middle text-center address'},
                     {data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
                     {data:'hub', name: 'hc.name', class: 'align-middle text-center hub'},
+                    {data:'weight_charges', name: 'shipments.weight_charges', class: 'align-middle text-center weight_charges'},
+                    {data:'fuel_surcharge', name: 'shipments.fuel_surcharge', class: 'align-middle text-center fuel_surcharge'},
+                    {data:'return_charges', name: 'shipments.return_charges', class: 'align-middle text-center return_charges'},
+                    {data:'gst', name: 'shipments.gst', class: 'align-middle text-center gst'},
                     {data:'charges', name: 'shipments.amount', class: 'align-middle text-center charges'},
                     {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
