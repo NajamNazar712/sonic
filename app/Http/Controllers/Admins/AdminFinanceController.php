@@ -1178,13 +1178,112 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_walk_in_shipments_index(){
-
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        return view('admin.finance.outstanding_walk_in_shipments')->with('shipment_status',$shipment_status);
     }
 
-    public function outstanding_walk_in_shipments_list(){
+    public function outstanding_walk_in_shipments_list(Request $request){
+        $shipments = DeliveryNoteShipment::join('shipments as s', 'delivery_note_shipments.shipment_id', '=', 's.id')
+            ->join('user_shipping_infos as usi', 's.pickup_address_id', '=', 'usi.id')
+            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
+            ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
+            ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
+            ->join('users as u', 's.user_id', '=', 'u.id')
+            ->join('booking_types as bt', 's.booking_type_id', '=', 'bt.id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 's.id')
+                    ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = s.id)'));
+            })
+            ->leftjoin('shipments_journey as sjd', function($join) {
+                $join->on('sjd.shipment_id', '=', 's.id')
+                    ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = s.id AND shipper_status_id IN (14, 16, 30, 36))'));
+            })
+            ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('delivery_notes as dn', 'delivery_note_shipments.delivery_note_id', '=', 'dn.id')
+            ->leftjoin('admins as a', 'dn.updated_by', '=', 'a.id')
+            ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','s.amount as charges')
+            ->whereIn('delivery_note_shipments.status', [4, 5, 6])->where('s.booking_type_id',4);
 
+        if (session('role_id') != 1) {
+            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
+        }
+
+        $datatables = Datatables::of($shipments)
+//            ->editColumn('shipper', function ($shipment) {
+//                if ($shipment->booking_type_id == 4) {
+//                    return $shipment->shipper .' (' . $shipment->poc . ')';
+//                }
+//                else {
+//                    return $shipment->shipper;
+//                }
+//            })
+//            ->filterColumn('u.name', function ($query, $keyword) {
+//                $query->where(function ($sub_query) use ($keyword) {
+//                    $sub_query->where('shipments.booking_type_id', '!=', 4)
+//                        ->where('u.name', 'like', '%' . $keyword . '%');
+//                })
+//                    ->orWhere(function ($sub_query) use ($keyword) {
+//                        $sub_query->where('shipments.booking_type_id', '=', 4)
+//                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+//                    });
+//            })
+//            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('aging', function($shipment) {
+                $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
+
+                $now = Carbon::now()->startOfDay();
+
+                return $updated_at->diffInDays($now) . 'd';
+            })
+            ->addColumn('action', function($shipment) {
+                $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
+
+                if (session('role_id') == 1 || count(array_intersect([55, 56], session('permissions'))) !== 0) {
+                    $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                    if (session('role_id') == 1 || in_array(55, session('permissions'))) {
+                        $dropdown .= $resolve_button;
+                    }
+
+                    $dropdown .= '
+                    </div>
+                  </div>
+                ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            });
+
+        return $datatables->make(true);
     }
 
+    public function outstanding_walk_in_shipments_resolved(Request $request){
+        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6]);
+
+        if ($delivery_note_shipment->exists()) {
+            $delivery_note_shipment = $delivery_note_shipment->first();
+
+            $delivery_note_shipment->status = 7;
+
+            $delivery_note_shipment->save();
+
+            return ['status' => 0, 'success' => 'Shipment has been marked Resolved'];
+        }
+        else {
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+        }
+    }
     static public function replacement_collected_adjust_in_payment($shipment_id){
         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6]);
         if ($delivery_note_shipment->exists()) {
