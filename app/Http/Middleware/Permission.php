@@ -241,6 +241,9 @@ class Permission
             'finance.invoices_history.delivered_shipments' => 122,
             'finance.invoices_history.returned_shipments' => 122,
             'finance.invoices_history.adjusted_shipments' => 122,
+            'finance.outstanding_shipments.walk_in_index' => 167,
+            'finance.outstanding_shipments.walk_in_list' => 167,
+            'finance.outstanding_shipments.walk_in_resolved' => 168,
 
             'admin.petty_cash.make.index' => 145,
             'admin.petty_cash.statements.index' => 146,

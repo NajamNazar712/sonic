@@ -186,7 +186,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61, 120, 121, 122, 134, 136, 145, 146, 147], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([52, 54, 57, 59, 61, 120, 121, 122, 134, 136, 145, 146, 147, 167], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Finance</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(57, session('permissions')))
@@ -210,6 +210,9 @@
 
                                     @if (session('role_id') == 1 || in_array(54, session('permissions')))
                                         <li><a class="menu-item" href="{{ route('admin.finance.outstanding_shipments.index') }}">Shipments</a></li>
+                                    @endif
+                                    @if (session('role_id') == 1 || in_array(167, session('permissions')))
+                                        <li><a class="menu-item" href="{{ route('admin.finance.outstanding_shipments.walk_in_index') }}">Walk-In Shipments</a></li>
                                     @endif
                                 </ul>
                             </li>

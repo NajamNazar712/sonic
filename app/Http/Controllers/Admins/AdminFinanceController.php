@@ -1177,6 +1177,87 @@ class AdminFinanceController extends Controller
         }
     }
 
+    public function outstanding_walk_in_shipments_index(){
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        return view('admin.finance.outstanding_walk_in_shipments')->with('shipment_status',$shipment_status);
+    }
+
+    public function outstanding_walk_in_shipments_list(Request $request){
+        $shipments = Shipment::join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('shipments_journey as sjd', function($join) {
+                $join->on('sjd.shipment_id', '=', 'shipments.id')
+                    ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id AND shipper_status_id IN (14, 16, 30, 36))'));
+            })
+            ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','shipments.amount as charges','shipments.walk_in_status as status_walk_in', 'shipments.charges_mode_id as charges_mode', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges')
+            ->where('shipments.booking_type_id',4);
+
+
+        $datatables = Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->addColumn('aging', function($shipment) {
+                $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
+
+                $now = Carbon::now()->startOfDay();
+
+                return $updated_at->diffInDays($now) . 'd';
+            })
+            ->addColumn('action', function($shipment) {
+                $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
+
+                if ((($shipment->charges_mode == 2 && ($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 25) && $shipment->status_walk_in == 0) || ($shipment->charges_mode == 1 && $shipment->status_walk_in == 0)) && (session('role_id') == 1 || count(array_intersect([168], session('permissions')))) !== 0) {
+                    $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                    if (session('role_id') == 1 || in_array(168, session('permissions'))) {
+                        $dropdown .= $resolve_button;
+                    }
+
+                    $dropdown .= '
+                    </div>
+                  </div>
+                ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            });
+
+        return $datatables->make(true);
+    }
+
+    public function outstanding_walk_in_shipments_resolved(Request $request){
+        $shipment = Shipment::where('id', $request->id)->where('walk_in_status',0);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            $shipment->walk_in_status = 1;
+
+            $shipment->save();
+
+            return ['status' => 0, 'success' => 'Shipment has been marked Resolved'];
+        }
+        else {
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+        }
+    }
     static public function replacement_collected_adjust_in_payment($shipment_id){
         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6]);
         if ($delivery_note_shipment->exists()) {
