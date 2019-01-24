@@ -1197,7 +1197,7 @@ class AdminFinanceController extends Controller
             })
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','shipments.amount as charges','shipments.walk_in_status as status_walk_in', 'shipments.charges_mode_id as charges_mode', 'sj.shipper_status_id as shipper_status_id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','shipments.amount as charges','shipments.walk_in_status as status_walk_in', 'shipments.charges_mode_id as charges_mode', 'sj.shipper_status_id as shipper_status_id')
             ->where('shipments.booking_type_id',4);
 
 

@@ -91,7 +91,7 @@
                             $.each(result.data, function(index, values) {
                                 row = [];
                                 row.push(index + 1);
-                                row.push(values.tracking_number);
+                                row.push(values.tracking_no);
                                 row.push(values.consignee);
                                 row.push(values.address);
                                 row.push(values.destination);
@@ -117,7 +117,7 @@
                 buttons: [
                     {
                         extend: 'excel',
-                        title: 'Outstanding Shipments',
+                        title: 'Outstanding Walk-in Shipments',
                         className: 'btn btn-primary',
                         text: '<i class="la la-file-excel-o"></i> Excel',
                     }],
@@ -133,15 +133,15 @@
                 rowId: 'id',
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
-                    {data:'tracking_number', name: 's.tracking_number', class: 'align-middle text-center tracking_number'},
-                    {data:'consignee', name: 's.consignee_name', class: 'align-middle text-center consignee'},
-                    {data:'address', name: 's.consignee_address', class: 'align-middle text-center address'},
+                    {data:'tracking_number', name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
+                    {data:'consignee', name: 'shipments.consignee_name', class: 'align-middle text-center consignee'},
+                    {data:'address', name: 'shipments.consignee_address', class: 'align-middle text-center address'},
                     {data:'destination', name: 'dc.name', class: 'align-middle text-center destination'},
                     {data:'hub', name: 'hc.name', class: 'align-middle text-center hub'},
-                    {data:'charges', name: 's.amount', class: 'align-middle text-center charges'},
+                    {data:'charges', name: 'shipments.amount', class: 'align-middle text-center charges'},
                     {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
-                    {data:'updated_by', name: 'dn.updated_by', class: 'align-middle text-center updated_by'},
+                    {data:'updated_by', name: 'a.name', class: 'align-middle text-center updated_by'},
                     {data:'arrival_date', name: 'sjd.created_at', class: 'align-middle text-center arrival_date'},
                     {data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
