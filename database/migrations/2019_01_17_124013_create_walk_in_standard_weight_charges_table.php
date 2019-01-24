@@ -19,6 +19,8 @@ class CreateWalkInStandardWeightChargesTable extends Migration
             $table->integer('delivery_type_id');
             $table->integer('actual_weight');
             $table->integer('chargeable_weight');
+            $table->integer('local');
+            $table->integer('national');
         });
     }
 

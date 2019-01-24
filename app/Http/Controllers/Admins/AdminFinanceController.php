@@ -594,7 +594,7 @@ class AdminFinanceController extends Controller
         })
         ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
         ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-        ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at')
+        ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc')
         ->whereIn('delivery_note_shipments.status', [4, 5, 6]);
 
         if (session('role_id') != 1) {
@@ -610,6 +610,25 @@ class AdminFinanceController extends Controller
                     return $shipments->sdn;
                 },
             ])
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('s.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->editColumn('tracking_number',function ($shipments){
             $route = route('admin.tracking.index');
             return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -2058,7 +2077,9 @@ class AdminFinanceController extends Controller
         ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
         ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
         ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
-        ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle')
+        ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
+        ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+        ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc')
         ->groupBy('pending_payments.id');
 
         if (session('role_id') != 1) {
@@ -2069,6 +2090,25 @@ class AdminFinanceController extends Controller
         ->addColumn('total_deductable', function($pending_payments) {
             return number_format($pending_payments->total_charges + $pending_payments->total_gst);
         })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('s.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->editColumn('delivered_shipments', function($pending_payment) {
             if ($pending_payment->delivered_shipments != 0) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->delivered_shipments . '</button>';
@@ -2586,8 +2626,10 @@ class AdminFinanceController extends Controller
         ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
         ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
         ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
+        ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
+        ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
         ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-        ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
+        ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 's.booking_type_id', 'usi.poc')
         ->groupBy('done_payments.id');
 
         if (session('role_id') != 1) {
@@ -2604,6 +2646,25 @@ class AdminFinanceController extends Controller
         ->editColumn('payment_id', function($done_payment) {
             return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
         })
+        ->editColumn('shipper', function ($shipment) {
+            if ($shipment->booking_type_id == 4) {
+                return $shipment->shipper .' (' . $shipment->poc . ')';
+            }
+            else {
+                return $shipment->shipper;
+            }
+        })
+        ->filterColumn('u.name', function ($query, $keyword) {
+            $query->where(function ($sub_query) use ($keyword) {
+                $sub_query->where('s.booking_type_id', '!=', 4)
+                    ->where('u.name', 'like', '%' . $keyword . '%');
+            })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '=', 4)
+                        ->where('usi.poc', 'like', '%' . $keyword . '%');
+                });
+        })
+            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->addColumn('total_deductable', function($done_payment) {
             return number_format($done_payment->total_charges + $done_payment->total_gst);
         })
@@ -3287,8 +3348,9 @@ class AdminFinanceController extends Controller
         ->join('cities as c', 'u.city_id', '=', 'c.id')
         ->join('user_bank_infos as ubi', 's.user_id', '=', 'ubi.user_id')
         ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
+        ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
         ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
-        ->select('pending_invoice_shipments.id', 'u.name as shipper', 's.tracking_number', 's.tracking_number as tracking_number_link', 'pending_invoice_shipments.type', 'pending_invoice_shipments.created_at', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_invoice_shipments.charges', 'pending_invoice_shipments.gst', 'pending_invoice_shipments.invoice_amount', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city');
+        ->select('pending_invoice_shipments.id', 'u.name as shipper', 's.tracking_number', 's.tracking_number as tracking_number_link', 'pending_invoice_shipments.type', 'pending_invoice_shipments.created_at', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_invoice_shipments.charges', 'pending_invoice_shipments.gst', 'pending_invoice_shipments.invoice_amount', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 's.booking_type_id', 'usi.poc');
 
         if ($request->shipper && $request->from_date && $request->to_date) {
             $pending_invoice_shipments = $pending_invoice_shipments->where('s.user_id', $request->shipper)
@@ -3303,6 +3365,24 @@ class AdminFinanceController extends Controller
             ->editColumn('tracking_number_link', function ($pending_invoice_shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$pending_invoice_shipments->tracking_number' class='tracking' target='_blank'>$pending_invoice_shipments->tracking_number</a></u>";
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('s.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
             })
         ->editColumn('type', function($pending_invoice_shipment) {
             if ($pending_invoice_shipment->type == 0) {
@@ -3811,7 +3891,10 @@ class AdminFinanceController extends Controller
 
     public function invoices_history_list(Request $request) {
         $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
-        ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'invoices.total_shipments', 'invoices.total_delivered_shipments', 'invoices.total_returned_shipments', 'invoices.total_adjusted_shipments', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.billing_period_from_date', 'invoices.billing_period_to_date', 'invoices.due_date');
+            ->leftjoin('invoice_shipments as is','is.invoice_id', '=', 'invoices.id')
+            ->leftjoin('shipments as s','s.id', '=', 'is.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+        ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'invoices.total_shipments', 'invoices.total_delivered_shipments', 'invoices.total_returned_shipments', 'invoices.total_adjusted_shipments', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.billing_period_from_date', 'invoices.billing_period_to_date', 'invoices.due_date', 's.booking_type_id', 'usi.poc');
 
         $datatables = Datatables::of($invoices)
         ->addColumn('id_padded', function($invoice) {
@@ -3828,6 +3911,25 @@ class AdminFinanceController extends Controller
                 return 0;
             }
         })
+        ->editColumn('shipper', function ($shipment) {
+            if ($shipment->booking_type_id == 4) {
+                return $shipment->shipper .' (' . $shipment->poc . ')';
+            }
+            else {
+                return $shipment->shipper;
+            }
+        })
+        ->filterColumn('u.name', function ($query, $keyword) {
+            $query->where(function ($sub_query) use ($keyword) {
+                $sub_query->where('s.booking_type_id', '!=', 4)
+                    ->where('u.name', 'like', '%' . $keyword . '%');
+            })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '=', 4)
+                        ->where('usi.poc', 'like', '%' . $keyword . '%');
+                });
+        })
+        ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->editColumn('total_returned_shipments', function($invoice) {
             if ($invoice->total_returned_shipments != 0) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->total_returned_shipments . '</button>';
