@@ -152,8 +152,9 @@ class AdminWalkInBookShipmentController extends Controller
         return $tracking_number;
     }
 
-    public function walk_in_store(Request $request){
+    public function walk_in_store(Request $request) {
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
+
         $user_id = $check_id['setting_value'];
             if (BookingType::where('id', '!=', 3)->where('id', $request->input('selected_service_type'))->exists()) {
                 if ($request->filled('order_id')) {
@@ -290,10 +291,6 @@ class AdminWalkInBookShipmentController extends Controller
                             $print = FALSE;
                         }
                         return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
-
-//                        else{
-//                            return redirect()->back()->withInput($request->input())->with('error', 'On selected Shipping Mode and Delivery Type Actual weight must be greater then '. $check['actual_weight'] .' , Charges per KG must be greater then '. $check['chargeable_weight'] .'.');
-//                        }
                     }
                     else {
                         return redirect()->back()->with('error', 'Order ID must be Unique');
