@@ -50,7 +50,7 @@ class AdminPettyCashController extends Controller
     }
     public function make_petty_cash_statement_submit(Request $request){
         $total_amount = 0;
-        if(PettyCashStatement::where('reference_no',$request->reference_no)->exists()){
+        if(PettyCashStatement::where('reference_no','=',$request->reference_no)->exists()){
             return ['status' => 0, 'error' => 'Reference No. not Unique'];
         }
         $selected_ids = explode(',', $request->input('selected_rows'));
