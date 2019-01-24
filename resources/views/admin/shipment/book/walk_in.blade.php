@@ -157,6 +157,10 @@
                                         <div class="form-group">
                                             <input type="text" name="charges_per_kg" class="form-control charges_per_kg" id="charges_per_kg" placeholder="Charges Per KG*" data-rule-required="true" data-msg-required="Charges Per KG is required">
                                         </div>
+                                    </div>
+
+                                    <div class="col col_custom">
+                                        <h4 class="form-section mb-2 text-center">Charges Information</h4>
 
                                         <div class="form-group">
                                             <label>Fuel Surcharge:</label>
@@ -177,15 +181,11 @@
                                             <label>Total Receivable:</label>
                                             <input type="text" name="total_receivable" class="form-control total_receivable" id="total_receivable" placeholder="Total Receivable" readonly="readonly">
                                         </div>
-                                    </div>
-
-                                    <div class="col col_custom">
-                                        <h4 class="form-section mb-2 text-center">Payment Information</h4>
 
                                         <div class="form-group">
-                                            <select name="payment_mode" class="select2" id="payment_mode" data-rule-required="true" data-msg-required="Mode of Payment is required">
-                                                @foreach($payment_modes as $payment_mode)
-                                                    <option value="{{ $payment_mode->id }}">{{ $payment_mode->mode }}</option>
+                                            <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Mode of Payment is required">
+                                                @foreach($charges_modes as $charges_mode)
+                                                    <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -433,9 +433,9 @@
                 $('#span').remove();
             });
 
-            $('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
+            $('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Mode of Payment*'
+                placeholder: 'Collect Charges*'
             }).bind('change', function() {
                 if ($(this).hasClass('danger')) {
                     $(this).valid();

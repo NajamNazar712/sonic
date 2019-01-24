@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateShipmentsTableGst extends Migration
+class UpdateShipmentTableWalkInStatusAndUpdtedBy extends Migration
 {
     /**
      * Run the migrations.
@@ -15,7 +15,9 @@ class UpdateShipmentsTableGst extends Migration
     {
         //
         Schema::table('shipments', function (Blueprint $table) {
-            $table->decimal('gst')->nullable();
+            $table->integer('walk_in_delivery_type_id')->nullable();
+            $table->integer('walk_in_status')->default(0)->nullable();
+            $table->integer('charges_mode_id')->nullable();
         });
     }
 
@@ -28,7 +30,9 @@ class UpdateShipmentsTableGst extends Migration
     {
         //
         Schema::table('shipments', function (Blueprint $table) {
-            $table->dropColumn('gst');
+            $table->dropColumn('walk_in_delivery_type');
+            $table->dropColumn('walk_in_status');
+            $table->dropColumn('charges_mode_id');
         });
     }
 }

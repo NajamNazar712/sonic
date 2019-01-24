@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UpdateShipmentsTableGst extends Migration
+class CreateChargesModeTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class UpdateShipmentsTableGst extends Migration
      */
     public function up()
     {
-        //
-        Schema::table('shipments', function (Blueprint $table) {
-            $table->decimal('gst')->nullable();
+        Schema::create('charges_modes', function (Blueprint $table) {
+            $table->integer('id');
+            $table->string('charges_mode');
         });
     }
 
@@ -26,9 +26,6 @@ class UpdateShipmentsTableGst extends Migration
      */
     public function down()
     {
-        //
-        Schema::table('shipments', function (Blueprint $table) {
-            $table->dropColumn('gst');
-        });
+        Schema::dropIfExists('charges_mode');
     }
 }
