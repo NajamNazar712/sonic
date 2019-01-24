@@ -1197,7 +1197,7 @@ class AdminFinanceController extends Controller
             })
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','shipments.amount as charges','shipments.walk_in_status as status_walk_in')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','shipments.amount as charges','shipments.walk_in_status as status_walk_in', 'shipments.charges_mode_id as charges_mode', 'sj.shipper_status_id as shipper_status_id')
             ->where('shipments.booking_type_id',4);
 
 
@@ -1216,14 +1216,14 @@ class AdminFinanceController extends Controller
             ->addColumn('action', function($shipment) {
                 $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
 
-                if (session('role_id') == 1 || count(array_intersect([55, 56], session('permissions'))) !== 0) {
+                if ((($shipment->charges_mode == 2 && ($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 25) && $shipment->status_walk_in == 0) || ($shipment->charges_mode == 1 && $shipment->status_walk_in == 0)) && (session('role_id') == 1 || count(array_intersect([168], session('permissions')))) !== 0) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
                     <div class="dropdown-menu dropdown-menu-sm">
                 ';
 
-                    if (session('role_id') == 1 || in_array(55, session('permissions'))) {
+                    if (session('role_id') == 1 || in_array(168, session('permissions'))) {
                         $dropdown .= $resolve_button;
                     }
 
