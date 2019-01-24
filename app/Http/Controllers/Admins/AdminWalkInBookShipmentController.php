@@ -33,8 +33,8 @@ use Illuminate\Validation\Rule;
 
 class AdminWalkInBookShipmentController extends Controller
 {
-    private function unique_order_id($user_id,$order_id) {
-        return !(Shipment::where('user_id',$user_id )->where('order_id', $order_id)->exists());
+    private function unique_order_id($user_id, $order_id) {
+        return !(Shipment::where('user_id', $user_id)->where('order_id', $order_id)->exists());
     }
 
     private function set_service_type($service_type_id) {
@@ -98,9 +98,9 @@ class AdminWalkInBookShipmentController extends Controller
 
         AdminPickupsController::generate($shipment_id);
 
-        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, $user_id, NULL);
-
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
+
+        ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, $user_id, NULL);
 
         return $shipment_id;
     }
@@ -152,8 +152,9 @@ class AdminWalkInBookShipmentController extends Controller
         return $tracking_number;
     }
 
-    public function walk_in_store(Request $request){
+    public function walk_in_store(Request $request) {
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
+
         $user_id = $check_id['setting_value'];
             if (BookingType::where('id', '!=', 3)->where('id', $request->input('selected_service_type'))->exists()) {
                 if ($request->filled('order_id')) {
@@ -290,10 +291,6 @@ class AdminWalkInBookShipmentController extends Controller
                             $print = FALSE;
                         }
                         return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
-
-//                        else{
-//                            return redirect()->back()->withInput($request->input())->with('error', 'On selected Shipping Mode and Delivery Type Actual weight must be greater then '. $check['actual_weight'] .' , Charges per KG must be greater then '. $check['chargeable_weight'] .'.');
-//                        }
                     }
                     else {
                         return redirect()->back()->with('error', 'Order ID must be Unique');
@@ -328,7 +325,25 @@ class AdminWalkInBookShipmentController extends Controller
         $zone = Zone::where('id',$city['zone_id'])->first();
         $gst = $zone['gst']*($request->total_c + $fuel_surcharge);
         $receivable = $fuel_surcharge + $request->total_c + $gst;
+
+        $gst = ROUND($gst, 0, PHP_ROUND_HALF_DOWN);
+        $fuel_surcharge = ROUND($fuel_surcharge, 0, PHP_ROUND_HALF_DOWN);
+        $receivable = ROUND($receivable, 0, PHP_ROUND_HALF_DOWN);
+
         return response()->json(['gst'=>$gst, 'fuel'=>$fuel_surcharge, 'receivable'=>$receivable]);
+    }
+
+    public function order_id(Request $request) {
+        $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
+
+        $user_id = $check_id['setting_value'];
+
+        if ($request->filled('order_id')) {
+            return json_encode($this->unique_order_id($user_id, $request->input('order_id')));
+        }
+        else {
+            return 'false';
+        }
     }
 
     public function print_air_waybill(Request $request) {

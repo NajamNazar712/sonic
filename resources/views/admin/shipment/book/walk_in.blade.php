@@ -107,7 +107,7 @@
                                         <h4 class="form-section mb-2 text-center">Order Information</h4>
 
                                         <div class="form-group">
-                                            <input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('cod.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
+                                            <input name="order_id" class="form-control" placeholder="Order ID" data-rule-remote="{{ route('admin.shipment.book.order_id') }}" data-msg-remote="Order ID must be unique" data-rule-maxlength="100" data-msg-maxlength="Order ID can be maximum 100 characters">
                                         </div>
 
                                         <div id="regular">
@@ -155,17 +155,17 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <input type="text" name="charges_per_kg" class="form-control charges_per_kg" id="charges_per_kg" placeholder="Charges Per kg*" data-rule-required="true" data-msg-required="Charges Per kg is required">
-                                        </div>
-
-                                        <div class="form-group">
-                                            <label>Total Charges:</label>
-                                            <input type="text" name="total_charges" class="form-control total_charges" id="total_charges" placeholder="Total Charges" readonly="readonly">
+                                            <input type="text" name="charges_per_kg" class="form-control charges_per_kg" id="charges_per_kg" placeholder="Charges Per KG*" data-rule-required="true" data-msg-required="Charges Per KG is required">
                                         </div>
 
                                         <div class="form-group">
                                             <label>Fuel Surcharge:</label>
                                             <input type="text" name="fuel_surcharge" class="form-control fuel_surcharge" id="fuel_surcharge" placeholder="Fuel Surcharge" readonly="readonly">
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>Total Charges:</label>
+                                            <input type="text" name="total_charges" class="form-control total_charges" id="total_charges" placeholder="Total Charges" readonly="readonly">
                                         </div>
 
                                         <div class="form-group">
@@ -237,10 +237,6 @@
     <script>
 
         $(document).ready(function() {
-            $('#shipping_mode').change(function(){
-               $('#actual_weight').val(null);
-                $('#charges_per_kg').val(null);
-            });
             $('#actual_weight, #charges_per_kg, #shipping_mode, #new_pickup_city').change(function(){
                 var actual_weight = parseFloat($('#actual_weight').val()) || 0;
                 var charges_per_kg = parseFloat($('#charges_per_kg').val()) || 0;
@@ -355,16 +351,28 @@
             $('#new_pickup_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'City*'
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
             });
 
             $('#delivery_type').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Delivery Type*'
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
             });
 
             $('#consignee_city').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'City*'
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
             });
 
             $('#product_type').prepend('<option value="" selected="selected"></option>').select2({
@@ -375,7 +383,7 @@
             });
 
             @if (!$default_pickup_address)
-            $('#pickup_address').prepend('<option value="" selected="selected"></option>');
+                $('#pickup_address').prepend('<option value="" selected="selected"></option>');
             @endif
 
             $('#pickup_address').select2({
@@ -384,7 +392,7 @@
                 closeOnSelect: true
             }).bind('change', function() {
                 $(this).valid();
-                console.log('gggg')
+
                 shipping_modes();
 
                 if (this.value == 0) {
@@ -396,8 +404,6 @@
 
                 var pickup_city = $(this).find(':selected').data('city-id');
                 var consignee_city = $('#consignee_city').val();
-
-                // shipping_mode_same_day(pickup_city, consignee_city);
             });
 
             $('#new_pickup_city').prepend('<option value="" selected="selected"></option>').select2({
@@ -416,11 +422,24 @@
             $('#shipping_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Mode of Shipping*'
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
+
+                $('#actual_weight').val(null);
+                $('#charges_per_kg').val(null);
+
+                $('#span').remove();
             });
 
             $('#payment_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
                 placeholder: 'Mode of Payment*'
+            }).bind('change', function() {
+                if ($(this).hasClass('danger')) {
+                    $(this).valid();
+                }
             });
 
             $('#booking_form').validate({
@@ -477,6 +496,7 @@
                 'min': 1,
                 'max': 100000
             });
+
             $('.weight').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -486,7 +506,7 @@
                 'max': 1000
             });
 
-            $('.total_receivable').inputmask({
+            $('.charges_per_kg').inputmask({
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
@@ -495,6 +515,5 @@
                 'max': 1000000
             });
         });
-
     </script>
 @endsection
