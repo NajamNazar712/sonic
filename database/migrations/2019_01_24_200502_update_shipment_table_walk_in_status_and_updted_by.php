@@ -15,7 +15,9 @@ class UpdateShipmentTableWalkInStatusAndUpdtedBy extends Migration
     {
         //
         Schema::table('shipments', function (Blueprint $table) {
-            $table->integer('walk_in_status')->default(0);
+            $table->integer('walk_in_delivery_type_id')->nullable();
+            $table->integer('walk_in_status')->default(0)->nullable();
+            $table->integer('charges_mode_id')->nullable();
         });
     }
 
@@ -28,7 +30,9 @@ class UpdateShipmentTableWalkInStatusAndUpdtedBy extends Migration
     {
         //
         Schema::table('shipments', function (Blueprint $table) {
-            $table->dropColumn('gst');
+            $table->dropColumn('walk_in_delivery_type');
+            $table->dropColumn('walk_in_status');
+            $table->dropColumn('charges_mode_id');
         });
     }
 }

@@ -5,6 +5,7 @@ namespace App\Http\controllers\Admins;
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
+use App\Http\Models\ChargesModes;
 use App\Http\Models\DeliveryType;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
@@ -59,7 +60,7 @@ class AdminWalkInBookShipmentController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $fuel_surcharge, $actual_weight, $gst, $charges_per_kg, $r_amount) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $charges_per_kg, $r_amount, $delivery_type, $charges_mode_id) {
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -89,7 +90,9 @@ class AdminWalkInBookShipmentController extends Controller
         $shipment->fuel_surcharge = $fuel_surcharge;
         $shipment->amount = $amount;
         $shipment->received_amount = $r_amount;
-        $shipment->payment_mode_id = $payment_mode_id;
+        $shipment->payment_mode_id = 1;
+        $shipment->walk_in_delivery_type = $delivery_type;
+        $shipment->charges_mode_id = $charges_mode_id;
         $shipment->shipper_status_id = 2;
         $shipment->consignee_status_id = 2;
         $shipment->save();
@@ -134,10 +137,10 @@ class AdminWalkInBookShipmentController extends Controller
         $products = Product::orderBy('product_name')->get();
         $shipping_mode = ShippingMode::where('id','!=', 4)->get();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
-        $payment_modes = PaymentMode::whereIn('id', [4,1])->get();
+        $charges_modes = ChargesModes::get();
 
 
-        return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user' => $users, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'payment_modes' => $payment_modes,'consignee_cities' => $consignee_cities]);
+        return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user' => $users, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities]);
     }
 
     static public function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
@@ -258,11 +261,11 @@ class AdminWalkInBookShipmentController extends Controller
                         else{
                             $r_amount = NULL;
                         }
-
+                        $charges_mode_id = $request->charges_mode;
+                        $delivery_type = $request->delivery_type;
                         $amount = str_replace(',', '', $request->input('total_receivable'));
-                        $payment_mode_id = $request->input('payment_mode');
 
-                        $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $payment_mode_id, $fuel_surcharge, $actual_weight, $gst, $charges_per_kg, $r_amount);
+                        $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $charges_per_kg, $r_amount, $delivery_type, $charges_mode_id);
 
                         $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
 
