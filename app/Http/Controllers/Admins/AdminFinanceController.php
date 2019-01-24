@@ -1183,9 +1183,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_walk_in_shipments_list(Request $request){
-        $shipments = Shipment::join('user_shipping_infos as usi', 'shipments.pickup_address_id', '=', 'usi.id')
-            ->join('cities as oc', 'usi.city_id', '=', 'oc.id')
-            ->join('cities as dc', 's.consignee_city_id', '=', 'dc.id')
+        $shipments = Shipment::join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
             ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
             ->join('users as u', 'shipments.user_id', '=', 'u.id')
             ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
@@ -1198,34 +1196,12 @@ class AdminFinanceController extends Controller
                     ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id AND shipper_status_id IN (14, 16, 30, 36))'));
             })
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
-            ->leftjoin('admins as a', 'dn.updated_by', '=', 'a.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','s.amount as charges')
-            ->whereIn('delivery_note_shipments.status', [4, 5, 6])->where('s.booking_type_id',4);
+            ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','shipments.amount as charges','shipments.walk_in_status as status_walk_in')
+            ->where('shipments.booking_type_id',4);
 
-        if (session('role_id') != 1) {
-            $shipments = $shipments->whereIn('oc.hub_id', session('hubs'));
-        }
 
         $datatables = Datatables::of($shipments)
-//            ->editColumn('shipper', function ($shipment) {
-//                if ($shipment->booking_type_id == 4) {
-//                    return $shipment->shipper .' (' . $shipment->poc . ')';
-//                }
-//                else {
-//                    return $shipment->shipper;
-//                }
-//            })
-//            ->filterColumn('u.name', function ($query, $keyword) {
-//                $query->where(function ($sub_query) use ($keyword) {
-//                    $sub_query->where('shipments.booking_type_id', '!=', 4)
-//                        ->where('u.name', 'like', '%' . $keyword . '%');
-//                })
-//                    ->orWhere(function ($sub_query) use ($keyword) {
-//                        $sub_query->where('shipments.booking_type_id', '=', 4)
-//                            ->where('usi.poc', 'like', '%' . $keyword . '%');
-//                    });
-//            })
-//            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -1267,14 +1243,14 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_walk_in_shipments_resolved(Request $request){
-        $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6]);
+        $shipment = Shipment::where('id', $request->id)->where('walk_in_status',0);
 
-        if ($delivery_note_shipment->exists()) {
-            $delivery_note_shipment = $delivery_note_shipment->first();
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
 
-            $delivery_note_shipment->status = 7;
+            $shipment->walk_in_status = 1;
 
-            $delivery_note_shipment->save();
+            $shipment->save();
 
             return ['status' => 0, 'success' => 'Shipment has been marked Resolved'];
         }
