@@ -51,16 +51,18 @@ class ShipmentsJourneyController extends Controller
         }
       }
       else if (in_array($shipper_status_id, [5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 18, 28, 29, 30, 34, 35, 36, 37, 45, 46])) {
-        $delivery_note = DeliveryNote::find($shipment_journey->reference_1_id);
+        if ($shipment_journey->reference_1_id) {
+          $delivery_note = DeliveryNote::find($shipment_journey->reference_1_id);
 
-        if ($delivery_note) {
-          $shipment_journey->city_id = $delivery_note->hub_id;
-        }
-        else if ($shipper_status_id == 13) {
-          $shipment = Shipment::find($shipment_id);
+          if ($delivery_note) {
+            $shipment_journey->city_id = $delivery_note->hub_id;
+          }
+          else if ($shipper_status_id == 13) {
+            $shipment = Shipment::find($shipment_id);
 
-          if ($shipment) {
-            $shipment_journey->city_id = $shipment->consignee_city_id;
+            if ($shipment) {
+              $shipment_journey->city_id = $shipment->consignee_city_id;
+            }
           }
         }
       }

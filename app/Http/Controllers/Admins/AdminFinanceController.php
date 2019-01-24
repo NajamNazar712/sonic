@@ -2613,6 +2613,45 @@ class AdminFinanceController extends Controller
         return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
     }
 
+    static public function done_payment($shipment_id, $type) {
+        $shipment = Shipment::find($shipment_id);
+
+        $done_payment = new DonePayment();
+
+        $done_payment->user_id = $shipment->user_id;
+        $done_payment->total_shipments = 1;
+
+        if ($type == 0) {
+            $done_payment->delivered_shipments = 1;
+        }
+        else {
+            $done_payment->returned_shipments = 1;
+        }
+
+        $done_payment->status = 1;
+
+        $done_payment->save();
+
+        $done_payment_shipment = new DonePaymentShipment();
+
+        $done_payment_shipment->done_payment_id = $done_payment->id;
+        $done_payment_shipment->shipment_id = $shipment_id;
+        $done_payment_shipment->type = $type;
+        $done_payment_shipment->amount = 0;
+        $done_payment_shipment->charges = ($shipment->amount - $shipment->gst);
+        $done_payment_shipment->gst = $shipment->gst;
+        $done_payment_shipment->payable = $shipment->amount;
+
+        $done_payment_shipment->save();
+
+        $shipment->payment_status_id = 7;
+
+        $shipment->save();
+
+        ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id());
+        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id());
+    }
+
     public function done_payments_index() {
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();

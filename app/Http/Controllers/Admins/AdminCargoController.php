@@ -1232,8 +1232,14 @@ class AdminCargoController extends Controller
         $consignee_status_id = NULL;
 
         if ($cargo_consignment->type == 1) {
-          $shipper_status_id = 4;
-          $consignee_status_id = 4;
+          if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
+              $shipper_status_id = 15;
+              $consignee_status_id = 15;
+          }
+          else {
+            $shipper_status_id = 4;
+            $consignee_status_id = 4;
+          }
         }
         else {
           if ($shipment->booking_type_id == 1) {
@@ -1249,14 +1255,8 @@ class AdminCargoController extends Controller
             $consignee_status_id = 33;
           }
           else if ($shipment->booking_type_id == 4) {
-            if (TRUE) {
-              $shipper_status_id = 22;
-              $consignee_status_id = 22;
-            }
-            else {
-              $shipper_status_id = 15;
-              $consignee_status_id = 15;
-            }
+            $shipper_status_id = 22;
+            $consignee_status_id = 22;
           }
           else {
             $shipper_status_id = 22;

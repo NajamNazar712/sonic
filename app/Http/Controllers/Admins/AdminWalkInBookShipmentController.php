@@ -38,13 +38,6 @@ class AdminWalkInBookShipmentController extends Controller
         return !(Shipment::where('user_id', $user_id)->where('order_id', $order_id)->exists());
     }
 
-    private function set_service_type($service_type_id) {
-        $service_type = BookingType::find($service_type_id);
-
-        session(['service_type_id' => $service_type->id]);
-        session(['service_type_name' => $service_type->booking_type]);
-    }
-
     static public function add_pickup_address($user_id, $address, $person_of_contact, $phone_number, $email_address, $city_id) {
         $user_shipping_info = new UserShippingInfo();
 
@@ -60,7 +53,7 @@ class AdminWalkInBookShipmentController extends Controller
         return $user_shipping_info->id;
     }
 
-    static public function book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $charges_per_kg, $r_amount, $delivery_type, $charges_mode_id) {
+    static public function book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id) {
         $shipment = new Shipment();
 
         $shipment->user_id = $user_id;
@@ -85,25 +78,40 @@ class AdminWalkInBookShipmentController extends Controller
 
         $shipment->actual_weight = $actual_weight;
         $shipment->estimated_weight = $actual_weight;
-        $shipment->chargeable_weight = $charges_per_kg;
-        $shipment->gst = $gst;
+        $shipment->chargeable_weight = $actual_weight;
+        $shipment->weight_charges = $weight_charges;
         $shipment->fuel_surcharge = $fuel_surcharge;
+        $shipment->gst = $gst;
         $shipment->amount = $amount;
         $shipment->received_amount = $r_amount;
         $shipment->payment_mode_id = 1;
-        $shipment->walk_in_delivery_type = $delivery_type;
+        $shipment->walk_in_delivery_type_id = $delivery_type;
         $shipment->charges_mode_id = $charges_mode_id;
-        $shipment->shipper_status_id = 2;
-        $shipment->consignee_status_id = 2;
+
+        $self_collection = FALSE;
+
+        if ($delivery_type == 2 && City::find($pickup_city_id)->hub_id == City::find($consignee_city_id)->hub_id) {
+            $shipment->shipper_status_id = 15;
+            $shipment->consignee_status_id = 15;
+
+            $self_collection = TRUE;
+        }
+        else {
+            $shipment->shipper_status_id = 2;
+            $shipment->consignee_status_id = 2;
+        }
+
         $shipment->save();
 
         $shipment_id = $shipment->id;
 
-        AdminPickupsController::generate($shipment_id);
-
         ShipmentsJourneyController::add($shipment_id, 1, 1, NULL, NULL, $user_id, NULL);
 
         ShipmentsJourneyController::add($shipment_id, 2, 2, NULL, NULL, $user_id, NULL);
+
+        if ($self_collection) {
+            ShipmentsJourneyController::add($shipment_id, 15, 15, NULL, NULL, $user_id, NULL);
+        }
 
         return $shipment_id;
     }
@@ -131,7 +139,7 @@ class AdminWalkInBookShipmentController extends Controller
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
         $user_id = $check_id['setting_value'];
         $booking_types = BookingType::select('id')->where('id', '=', 4)->first();
-        $users = UserShippingInfo::where('user_id',$user_id)->get();
+        $user_shipping_infos = UserShippingInfo::where('user_id', $user_id)->get();
         $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
         $products = Product::orderBy('product_name')->get();
@@ -140,7 +148,7 @@ class AdminWalkInBookShipmentController extends Controller
         $charges_modes = ChargesModes::get();
 
 
-        return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user' => $users, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities]);
+        return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities]);
     }
 
     static public function generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id) {
@@ -159,181 +167,193 @@ class AdminWalkInBookShipmentController extends Controller
         $check_id = GlobalSettings::select('setting_value')->where('type',"Walk-In")->first();
 
         $user_id = $check_id['setting_value'];
-            if (BookingType::where('id', '!=', 3)->where('id', $request->input('selected_service_type'))->exists()) {
-                if ($request->filled('order_id')) {
-                    $valid = $this->unique_order_id($user_id,$request->input('order_id'));
-                }
-                else {
-                    $valid = TRUE;
-                }
 
-                if (!empty($request->input('shipping_mode'))) {
-                    if ($valid) {
+        if (BookingType::where('id', '!=', 3)->where('id', $request->input('selected_service_type'))->exists()) {
+            if ($request->filled('order_id')) {
+                $valid = $this->unique_order_id($user_id,$request->input('order_id'));
+            }
+            else {
+                $valid = TRUE;
+            }
 
-                        $service_type_id = $request->input('selected_service_type');
+            if (!empty($request->input('shipping_mode'))) {
+                if ($valid) {
 
-                        $this->set_service_type($service_type_id);
+                    $service_type_id = $request->input('selected_service_type');
 
-                            if ($request->input('pickup_address') == 0) {
-                                $pickup_city_id = $request->input('new_pickup_city');
-                                $new_pickup_address = City::select('name')->where('id',$pickup_city_id)->first();
-                                $pickup_address = 'TRAX Office ' . $new_pickup_address['name'];
-                                $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address, $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
-                            }
-                            else {
-                                $pickup_address_id = $request->input('pickup_address');
-
-                                $user_shipping_info = UserShippingInfo::find($pickup_address_id);
-
-                                $pickup_city_id = $user_shipping_info->city_id;
-                            }
-
-                        if ($request->filled('information_display')) {
-                            $information_display = TRUE;
+                        if ($request->input('pickup_address') == 0) {
+                            $pickup_city_id = $request->input('new_pickup_city');
+                            $new_pickup_address = City::select('name')->where('id',$pickup_city_id)->first();
+                            $pickup_address = 'TRAX Office ' . $new_pickup_address['name'];
+                            $pickup_address_id = $this->add_pickup_address($user_id, $pickup_address, $request->input('new_pickup_person_of_contact'), $request->input('new_pickup_phone_number'), $request->input('new_pickup_email_address'), $pickup_city_id);
                         }
                         else {
-                            $information_display = FALSE;
-                        }
-                            if(isset($request->consignee_address)) {
-                                $address = $request->input('consignee_address');
-                            }
-                            else{
-                                $city_check = City::select('name')->where('id',$request->input('consignee_city'))->first();
-                                $address = 'TRAX Office ' . $city_check['name'];
-                            }
-                        $consignee_city_id = $request->input('consignee_city');
-                        $consignee_name = $request->input('consignee_name');
-                        $consignee_address = $address;
-                        $consignee_phone_number_1 = $request->input('consignee_phone_number_1');
+                            $pickup_address_id = $request->input('pickup_address');
 
-                        if ($request->filled('consignee_phone_number_2')) {
-                            $consignee_phone_number_2 = $request->input('consignee_phone_number_2');
-                        }
-                        else {
-                            $consignee_phone_number_2 = NULL;
+                            $user_shipping_info = UserShippingInfo::find($pickup_address_id);
+
+                            $pickup_city_id = $user_shipping_info->city_id;
                         }
 
-                        if ($request->filled('consignee_email_address')) {
-                            $consignee_email_address = $request->input('consignee_email_address');
-                        }
-                        else {
-                            $consignee_email_address = NULL;
-                        }
+                        $information_display = TRUE;
 
-                        if ($request->filled('order_id')) {
-                            $order_id = $request->input('order_id');
-                        }
-                        else {
-                            $order_id = NULL;
-                        }
-
-                        if ($request->filled('package_type')) {
-                            $package_type = TRUE;
-                        }
-                        else {
-                            $package_type = FALSE;
-                        }
-
-                        $pickup_date = Carbon::now();
-
-                        if ($request->filled('special_instructions')) {
-                            $special_instructions = $request->input('special_instructions');
-                        }
-                        else {
-                            $special_instructions = NULL;
-                        }
-
-                        $shipping_mode_id = $request->input('shipping_mode');
-
-                        if ($request->input('shipping_mode') == 4) {
-                            $same_day_timing_id = $request->input('same-day_timing');
-                        }
-                        else {
-                            $same_day_timing_id = NULL;
-                        }
-                        $fuel_surcharge = $request->fuel_surcharge;
-                        $actual_weight = $request->actual_weight;
-                        $gst = $request->gst;
-                        $charges_per_kg = $request->charges_per_kg;
-                        if($request->payment_mode == 4) {
-                            $r_amount = $amount = str_replace(',', '', $request->input('total_receivable'));
+                        if(isset($request->consignee_address)) {
+                            $address = $request->input('consignee_address');
                         }
                         else{
-                            $r_amount = NULL;
+                            $city_check = City::select('name')->where('id',$request->input('consignee_city'))->first();
+                            $address = 'TRAX Office ' . $city_check['name'];
                         }
-                        $charges_mode_id = $request->charges_mode;
-                        $delivery_type = $request->delivery_type;
-                        $amount = str_replace(',', '', $request->input('total_receivable'));
+                    $consignee_city_id = $request->input('consignee_city');
+                    $consignee_name = $request->input('consignee_name');
+                    $consignee_address = $address;
+                    $consignee_phone_number_1 = $request->input('consignee_phone_number_1');
 
-                        $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $charges_per_kg, $r_amount, $delivery_type, $charges_mode_id);
-
-                        $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
-
-                            $product_type_id = $request->input('product_type');
-
-                            if ($request->filled('item_description')) {
-                                $item_description = $request->input('item_description');
-                            }
-                            else {
-                                $item_description = NULL;
-                            }
-
-                            $item_quantity = $request->input('item_quantity');
-
-                            $type = 0;
-
-                            $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $type);
-
-
-                        NotificationsController::send(2, $shipment_id);
-
-                        if ($request->filled('book_and_print')) {
-                            $print = $shipment_id;
-                        }
-                        else {
-                            $print = FALSE;
-                        }
-                        return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
+                    if ($request->filled('consignee_phone_number_2')) {
+                        $consignee_phone_number_2 = $request->input('consignee_phone_number_2');
                     }
                     else {
-                        return redirect()->back()->with('error', 'Order ID must be Unique');
+                        $consignee_phone_number_2 = NULL;
                     }
+
+                    if ($request->filled('consignee_email_address')) {
+                        $consignee_email_address = $request->input('consignee_email_address');
+                    }
+                    else {
+                        $consignee_email_address = NULL;
+                    }
+
+                    if ($request->filled('order_id')) {
+                        $order_id = $request->input('order_id');
+                    }
+                    else {
+                        $order_id = NULL;
+                    }
+
+                    if ($request->filled('package_type')) {
+                        $package_type = TRUE;
+                    }
+                    else {
+                        $package_type = FALSE;
+                    }
+
+                    $pickup_date = Carbon::now();
+
+                    if ($request->filled('special_instructions')) {
+                        $special_instructions = $request->input('special_instructions');
+                    }
+                    else {
+                        $special_instructions = NULL;
+                    }
+
+                    $shipping_mode_id = $request->input('shipping_mode');
+
+                    if ($request->input('shipping_mode') == 4) {
+                        $same_day_timing_id = $request->input('same-day_timing');
+                    }
+                    else {
+                        $same_day_timing_id = NULL;
+                    }
+
+                    $actual_weight = $request->actual_weight;
+                    $charges_per_kg = $request->charges_per_kg;
+
+                    $charges_mode_id = $request->charges_mode;
+                    $delivery_type = $request->delivery_type;
+
+                    $weight_charges = ROUND(($actual_weight * $charges_per_kg), 0, PHP_ROUND_HALF_DOWN);
+
+                    $fuel = StandardFuelSurcharge::where('shipping_mode_id',$shipping_mode_id)->first();
+                    $fuel_surcharge = ROUND(($fuel['fuel_surcharge']/100)*($weight_charges), 0, PHP_ROUND_HALF_DOWN);
+
+                    $city = City::where('id',$pickup_city_id)->first();
+                    $zone = Zone::where('id',$city['zone_id'])->first();
+                    $gst = ROUND(($zone['gst']*($weight_charges + $fuel_surcharge)), 0, PHP_ROUND_HALF_DOWN);
+
+                    $total_charges = ROUND(($weight_charges + $fuel_surcharge), 0, PHP_ROUND_HALF_DOWN);
+
+                    $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+                    $amount = $receivable;
+
+                    if($request->charges_mode == 1) {
+                        $r_amount = $amount;
+                    }
+                    else{
+                        $r_amount = NULL;
+                    }
+
+                    $shipment_id = $this->book($user_id, $service_type_id, $pickup_address_id, $pickup_city_id, $information_display, $consignee_city_id, $consignee_name, $consignee_address, $consignee_phone_number_1, $consignee_phone_number_2, $consignee_email_address, $order_id, $package_type, $pickup_date, $special_instructions, $shipping_mode_id, $same_day_timing_id, $amount, $fuel_surcharge, $actual_weight, $gst, $weight_charges, $r_amount, $delivery_type, $charges_mode_id);
+
+                    $tracking_number = $this->generate_tracking_number($shipment_id, $pickup_city_id, $consignee_city_id);
+
+                        $product_type_id = $request->input('product_type');
+
+                        if ($request->filled('item_description')) {
+                            $item_description = $request->input('item_description');
+                        }
+                        else {
+                            $item_description = NULL;
+                        }
+
+                        $item_quantity = $request->input('item_quantity');
+
+                        $type = 0;
+
+                        $this->add_item($shipment_id, $product_type_id, $item_description, $item_quantity, $type);
+
+
+                    NotificationsController::send(2, $shipment_id);
+
+                    if ($request->filled('book_and_print')) {
+                        $print = $shipment_id;
+                    }
+                    else {
+                        $print = FALSE;
+                    }
+                    return redirect()->back()->with(['success' => 'Shipment Booked with Tracking Number: ' . $tracking_number, 'print' => $print]);
                 }
                 else {
-                    return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
+                    return redirect()->back()->with('error', 'Order ID must be Unique');
                 }
             }
             else {
-                return redirect()->back()->with('error', 'Invalid Service Type Selected');
+                return redirect()->back()->with('error', 'Shipping Mode needs to be Selected');
             }
         }
+        else {
+            return redirect()->back()->with('error', 'Invalid Service Type Selected');
+        }
+    }
 
-        public function check_standard_weight(Request $request){
-            $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
-            if($request->actual_weight < $check['actual_weight']){
-                return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to '. $check['actual_weight']]);
-            }
-            elseif ($request->charges_per_kg < $check['chargeable_weight']){
-                return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to '. $check['chargeable_weight']]);
-            }
-            else {
-                return response()->json(['status' => 2, 'error' => '']);
-            }
+    public function check_standard_weight(Request $request){
+        $check = WalkInStandardWeightCharge::where(['shipping_mode_id' => $request->shipping_mode, 'delivery_type_id' => $request->delivery_type])->first();
+        if($request->actual_weight < $check['actual_weight']){
+            return response()->json(['status' => 1, 'error' => 'Actual Weight must be greater then or equal to '. $check['actual_weight']]);
         }
+        elseif ($request->charges_per_kg < $check['chargeable_weight']){
+            return response()->json(['status' => 0, 'error' => 'Charges per kg must be greater then or equal to '. $check['chargeable_weight']]);
+        }
+        else {
+            return response()->json(['status' => 2, 'error' => '']);
+        }
+    }
 
     public function add_fuel_surcharge_gst_total(Request $request){
+        $weight_charges = ROUND($request->weight_charges, 0, PHP_ROUND_HALF_DOWN);
+
         $fuel = StandardFuelSurcharge::where('shipping_mode_id',$request->shipping_mode_id)->first();
-        $fuel_surcharge = ($fuel['fuel_surcharge']/100)*($request->total_c);
+        $fuel_surcharge = ROUND(($fuel['fuel_surcharge']/100)*($weight_charges), 0, PHP_ROUND_HALF_DOWN);
+
         $city = City::where('id',$request->city_id)->first();
         $zone = Zone::where('id',$city['zone_id'])->first();
-        $gst = $zone['gst']*($request->total_c + $fuel_surcharge);
-        $receivable = $fuel_surcharge + $request->total_c + $gst;
+        $gst = ROUND(($zone['gst']*($weight_charges + $fuel_surcharge)), 0, PHP_ROUND_HALF_DOWN);
 
-        $gst = ROUND($gst, 0, PHP_ROUND_HALF_DOWN);
-        $fuel_surcharge = ROUND($fuel_surcharge, 0, PHP_ROUND_HALF_DOWN);
-        $receivable = ROUND($receivable, 0, PHP_ROUND_HALF_DOWN);
+        $total_charges = ROUND(($weight_charges + $fuel_surcharge), 0, PHP_ROUND_HALF_DOWN);
 
-        return response()->json(['gst'=>$gst, 'fuel'=>$fuel_surcharge, 'receivable'=>$receivable]);
+        $receivable = ROUND(($fuel_surcharge + $weight_charges + $gst), 0, PHP_ROUND_HALF_DOWN);
+
+        return response()->json(['gst'=>$gst, 'fuel'=>$fuel_surcharge, 'total_charges' => $total_charges, 'receivable'=>$receivable]);
     }
 
     public function order_id(Request $request) {
@@ -483,7 +503,7 @@ class AdminWalkInBookShipmentController extends Controller
                           </tr>
                           <tr>
                             <td class="color secondary"><strong>Name</strong></td>
-                            <td colspan="3" class="border twice-right">' . $shipment->user->name . ' '. $shipment->pickup_address->poc .'</td>
+                            <td colspan="3" class="border twice-right">' . $shipment->user->name . ' (' . $shipment->pickup_address->poc . ')</td>
                             <td class="color secondary border twice-left"><strong>Name</strong></td>
                             <td colspan="3">' . $shipment->consignee_name . '</td>
                           </tr>
@@ -510,12 +530,25 @@ class AdminWalkInBookShipmentController extends Controller
                             <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->estimated_weight . ' kg</strong></td>
                           </tr>
                           <tr>
-                            <td class="color primary border twice-top twice-bottom twice-left"><strong>Payment Mode</strong></td>
-                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->payment_mode->mode . '</strong></td>
+                            <td class="color primary border twice-top twice-bottom twice-left"><strong>Charges Mode</strong></td>
+                            <td class="border twice-top twice-bottom twice-left"><strong>' . $shipment->charges_mode->charges_mode . '</strong></td>
                           </tr>
                           <tr>
                             <td class="align-middle color primary border twice-top twice-bottom twice-left"><strong>Collection Amount</strong></td>
+                ';
+
+                if ($shipment->charges_mode_id == 1) {
+                    $table_end .= '
+                            <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs 0</strong></td>
+                    ';
+                }
+                else {
+                    $table_end .= '
                             <td class="align-middle border twice-top twice-bottom twice-left"><strong>Rs ' . number_format($shipment->amount) . '</strong></td>
+                    ';
+                }
+
+                $table_end .= '
                           </tr>
                           <tr>
                             <td colspan="8" class="text-center border twice-top"><em>Kindly do not give any addtional charges to the Rider/Courier. If shipment is found in torn or damaged condition, please do not receive.</em></td>

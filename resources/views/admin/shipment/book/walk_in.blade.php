@@ -29,12 +29,16 @@
 
                                                 @php ($default_pickup_address = FALSE)
 
-                                                @foreach($user as $shipping_information)
+                                                @foreach($user_shipping_infos as $shipping_information)
                                                     @if ($shipping_information['hidden'] == 0 && $shipping_information['status'] == 1)
+                                                        @if ($shipping_information['default_address'] == 1)
                                                             @php ($default_pickup_address = TRUE)
 
-                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }} : {{ $shipping_information['phone']}} : {{ $shipping_information['pickup_address'] }}</option>
+                                                            <option value="{{ $shipping_information['id'] }}" selected="selected" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }} - {{ $shipping_information['phone']}}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
+                                                        @else
+                                                            <option value="{{ $shipping_information['id'] }}" data-city-id="{{ $shipping_information['city']['id'] }}">{{ $shipping_information['poc'] }} - {{ $shipping_information['phone']}}: {{ $shipping_information['pickup_address'] }}, {{ $shipping_information['city']['name'] }}</option>
                                                         @endif
+                                                    @endif
                                                 @endforeach
                                             </select>
                                         </div>
@@ -183,7 +187,7 @@
                                         </div>
 
                                         <div class="form-group">
-                                            <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Mode of Payment is required">
+                                            <select name="charges_mode" class="select2" id="charges_mode" data-rule-required="true" data-msg-required="Charges Mode is required">
                                                 @foreach($charges_modes as $charges_mode)
                                                     <option value="{{ $charges_mode->id }}">{{ $charges_mode->charges_mode }}</option>
                                                 @endforeach
@@ -247,7 +251,6 @@
                     var pickup_city_id = $('#pickup_address').find(':selected').data('city-id');
                 }
 
-                $('#total_charges').val(actual_weight * charges_per_kg);
                 $.ajax({
                     url:'{!! route('admin.shipment.book.add_fuel_surcharge_gst_total') !!}',
                     method: 'POST',
@@ -255,10 +258,11 @@
                         '_token': '{{ csrf_token() }}',
                         'shipping_mode_id': $('#shipping_mode').val(),
                         'city_id': pickup_city_id,
-                        'total_c': $('#total_charges').val()
+                        'weight_charges': (actual_weight * charges_per_kg)
                     }
                 }).done(function (data) {
                         $('#fuel_surcharge').val(data.fuel);
+                        $('#total_charges').val(data.total_charges);
                         $('#gst').val(data.gst);
                         $('#total_receivable').val(data.receivable);
                 });
@@ -389,7 +393,6 @@
             $('#pickup_address').select2({
                 width: '100%',
                 placeholder: 'Pickup Address*',
-                closeOnSelect: true
             }).bind('change', function() {
                 $(this).valid();
 
@@ -429,13 +432,17 @@
 
                 $('#actual_weight').val(null);
                 $('#charges_per_kg').val(null);
+                $('#fuel_surcharge').val(null);
+                $('#total_charges').val(null);
+                $('#gst').val(null);
+                $('#total_receivable').val(null);
 
                 $('#span').remove();
             });
 
             $('#charges_mode').prepend('<option value="" selected="selected"></option>').select2({
                 width: '100%',
-                placeholder: 'Collect Charges*'
+                placeholder: 'Charges Mode*'
             }).bind('change', function() {
                 if ($(this).hasClass('danger')) {
                     $(this).valid();
@@ -487,16 +494,6 @@
 
             $('.bootstrap-touchspin-down, .bootstrap-touchspin-up').attr('tabindex', -1);
 
-            $('.price').inputmask({
-                'alias': 'integer',
-                'allowMinus': false,
-                'allowPlus': false,
-                'groupSeparator': ',',
-                'autoGroup': true,
-                'min': 1,
-                'max': 100000
-            });
-
             $('.weight').inputmask({
                 'alias': 'decimal',
                 'allowMinus': false,
@@ -510,8 +507,6 @@
                 'alias': 'integer',
                 'allowMinus': false,
                 'allowPlus': false,
-                'groupSeparator': ',',
-                'autoGroup': true,
                 'max': 1000000
             });
         });
