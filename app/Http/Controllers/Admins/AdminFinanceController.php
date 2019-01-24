@@ -620,11 +620,11 @@ class AdminFinanceController extends Controller
             })
             ->filterColumn('u.name', function ($query, $keyword) {
                 $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '!=', 4)
+                    $sub_query->where('s.booking_type_id', '!=', 4)
                         ->where('u.name', 'like', '%' . $keyword . '%');
                 })
                     ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.booking_type_id', '=', 4)
+                        $sub_query->where('s.booking_type_id', '=', 4)
                             ->where('usi.poc', 'like', '%' . $keyword . '%');
                     });
             })
@@ -2100,11 +2100,11 @@ class AdminFinanceController extends Controller
             })
             ->filterColumn('u.name', function ($query, $keyword) {
                 $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '!=', 4)
+                    $sub_query->where('s.booking_type_id', '!=', 4)
                         ->where('u.name', 'like', '%' . $keyword . '%');
                 })
                     ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.booking_type_id', '=', 4)
+                        $sub_query->where('s.booking_type_id', '=', 4)
                             ->where('usi.poc', 'like', '%' . $keyword . '%');
                     });
             })
@@ -2656,11 +2656,11 @@ class AdminFinanceController extends Controller
         })
         ->filterColumn('u.name', function ($query, $keyword) {
             $query->where(function ($sub_query) use ($keyword) {
-                $sub_query->where('shipments.booking_type_id', '!=', 4)
+                $sub_query->where('s.booking_type_id', '!=', 4)
                     ->where('u.name', 'like', '%' . $keyword . '%');
             })
                 ->orWhere(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '=', 4)
+                    $sub_query->where('s.booking_type_id', '=', 4)
                         ->where('usi.poc', 'like', '%' . $keyword . '%');
                 });
         })
@@ -3376,11 +3376,11 @@ class AdminFinanceController extends Controller
             })
             ->filterColumn('u.name', function ($query, $keyword) {
                 $query->where(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '!=', 4)
+                    $sub_query->where('s.booking_type_id', '!=', 4)
                         ->where('u.name', 'like', '%' . $keyword . '%');
                 })
                     ->orWhere(function ($sub_query) use ($keyword) {
-                        $sub_query->where('shipments.booking_type_id', '=', 4)
+                        $sub_query->where('s.booking_type_id', '=', 4)
                             ->where('usi.poc', 'like', '%' . $keyword . '%');
                     });
             })
@@ -3921,11 +3921,11 @@ class AdminFinanceController extends Controller
         })
         ->filterColumn('u.name', function ($query, $keyword) {
             $query->where(function ($sub_query) use ($keyword) {
-                $sub_query->where('shipments.booking_type_id', '!=', 4)
+                $sub_query->where('s.booking_type_id', '!=', 4)
                     ->where('u.name', 'like', '%' . $keyword . '%');
             })
                 ->orWhere(function ($sub_query) use ($keyword) {
-                    $sub_query->where('shipments.booking_type_id', '=', 4)
+                    $sub_query->where('s.booking_type_id', '=', 4)
                         ->where('usi.poc', 'like', '%' . $keyword . '%');
                 });
         })

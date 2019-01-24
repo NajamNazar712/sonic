@@ -978,7 +978,7 @@ class ReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'shipments.booking_type_id', 'usi.poc'])
             ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
@@ -988,6 +988,24 @@ class ReturnController extends Controller
         return Datatables::of($deliveries)
             ->addColumn('shipment_id_padded', function ($deliveries) {
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
             })
             ->addColumn('status', function ($deliveries) {
                 $delivered_array = array(25,31,38);
