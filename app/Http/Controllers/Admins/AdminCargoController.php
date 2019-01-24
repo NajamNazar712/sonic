@@ -1244,9 +1244,23 @@ class AdminCargoController extends Controller
             $shipper_status_id = 27;
             $consignee_status_id = 27;
           }
-          else {
+          else if ($shipment->booking_type_id == 3) {
             $shipper_status_id = 33;
             $consignee_status_id = 33;
+          }
+          else if ($shipment->booking_type_id == 4) {
+            if (TRUE) {
+              $shipper_status_id = 22;
+              $consignee_status_id = 22;
+            }
+            else {
+              $shipper_status_id = 15;
+              $consignee_status_id = 15;
+            }
+          }
+          else {
+            $shipper_status_id = 22;
+            $consignee_status_id = 22;
           }
         }
 
