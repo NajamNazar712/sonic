@@ -791,7 +791,7 @@ class ReturnController extends Controller
 
                         $shipment = $shipment->first();
 
-                        if ($shipment->booking_type_id == 1) { //attempt failed and arrived at origin center
+                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) { //attempt failed and arrived at origin center
 
                             ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
                             $shipment->shipper_status_id = 23;
