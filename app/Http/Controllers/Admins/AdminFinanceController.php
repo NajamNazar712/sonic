@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\ChargesModes;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
@@ -747,7 +748,9 @@ class AdminFinanceController extends Controller
 
     public function outstanding_walk_in_shipments_index(){
         $shipment_status = ShipmentStatus::select('id','name')->get();
-        return view('admin.finance.outstanding_walk_in_shipments')->with('shipment_status',$shipment_status);
+        $charges_mode_name = ChargesModes::select('id','charges_mode')->get();
+        $status = [['id' => 0, 'text' => 'Pending Charges Collection'], ['id' => 1, 'text' => 'Resolved'], ['id' => 2, 'text' => 'Pending Return Charges Collection']];
+        return view('admin.finance.outstanding_walk_in_shipments')->with(['shipment_status' => $shipment_status, 'status' => json_encode($status), 'charges_mode_name' => $charges_mode_name]);
     }
 
     public function outstanding_walk_in_shipments_list(Request $request){
@@ -776,12 +779,14 @@ class AdminFinanceController extends Controller
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
             ->editColumn('walk_in_status', function ($shipments) {
-                if($shipments->walk_in_status == 0){
-                    return 'Unresolved';
+                if($shipments->walk_in_status == 0) {
+                    return 'Pending Charges Collection';
                 }
-                else
-                {
+                else if($shipments->walk_in_status == 1) {
                     return 'Resolved';
+                }
+                else {
+                    return 'Pending Return Charges Collection';
                 }
             })
             ->addColumn('aging', function($shipment) {

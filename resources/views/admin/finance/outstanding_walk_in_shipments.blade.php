@@ -11,7 +11,6 @@
                 <h1 class="mb-1">
                     Outstanding Walk-In Shipments
                 </h1>
-
                 <div class="card">
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
@@ -113,7 +112,7 @@
                                 row.push(values.return_charges);
                                 row.push(values.gst);
                                 row.push(values.charges);
-                                row.push(values.charges_modes);
+                                row.push(values.charges_mode);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
                                 row.push(values.updated_by);
@@ -162,7 +161,7 @@
                     {data:'return_charges', name: 'shipments.return_charges', class: 'align-middle text-center return_charges'},
                     {data:'gst', name: 'shipments.gst', class: 'align-middle text-center gst'},
                     {data:'charges', name: 'shipments.amount', class: 'align-middle text-center charges'},
-                    {data:'charges_modes', name: 'cm.charges_mode', class: 'align-middle text-center charges_mode'},
+                    {data:'charges_modes', name: 'cm.id', class: 'align-middle text-center charges_modes'},
                     {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
                     {data:'updated_by', name: 'a.name', class: 'align-middle text-center updated_by'},
@@ -182,7 +181,8 @@
                     var td = '<td style="padding:5px;" class="border-primary border-lighten-2"><fieldset class="form-group m-0 position-relative has-icon-right"></fieldset></td>';
                     var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
                     var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
-                    var service_drop_select = '<select name="service_select" id="service_select" class="select2 form-control"></select>';
+                    var status_walk_in_select = '<select name="status_walk_in_select" id="status_walk_in_select" class="select2 form-control"></select>';
+                    var charges_mode = '<select name="charges_mode" id="charges_mode" class="select2 form-control"></select>';
                     var status_select = '<select name="status_select" id="status_select" class="select2 form-control"></select>';
 
                     this.api().columns().every(function(column_id) {
@@ -198,6 +198,16 @@
                                 } ).wrap(td);
                         }else if($(header).is('.status')){
                             $(status_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.walk_in_status')){
+                            $(status_walk_in_select).appendTo($(search))
+                                .on( 'change', function () {
+                                    column.search($(this).val(), false, false, true).draw();
+                                } ).wrap(td);
+                        }else if($(header).is('.charges_modes')){
+                            $(charges_mode).appendTo($(search))
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
@@ -219,12 +229,38 @@
                     });
                     var data = $.map({!! $shipment_status !!}, function (obj) {
                         obj.text = obj.name;
-
                         return obj;
                     });
 
                     $("#status_select").prepend('<option value="" selected></option>').select2({
                         data:data,
+                        placeholder: "Select Status",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+                    var data2 = $.map({!! $charges_mode_name !!}, function (obj) {
+                        obj.id = obj.id;
+                        return obj;
+                    });
+                    var data2 = $.map({!! $charges_mode_name !!}, function (obj) {
+                        obj.text = obj.charges_mode;
+
+                        return obj;
+                    });
+
+                    $("#charges_mode").prepend('<option value="" selected></option>').select2({
+                        data:data2,
+                        placeholder: "Charges Modes",
+                        width:'100%',
+                        containerCssClass: 'select-xs',
+                        dropdownCssClass: 'form-control-sm p-0'
+                    });
+
+
+                    $("#status_walk_in_select").prepend('<option value="" selected></option>').select2({
+                        data:{!! $status !!},
                         placeholder: "Select Status",
                         width:'100%',
                         containerCssClass: 'select-xs',
