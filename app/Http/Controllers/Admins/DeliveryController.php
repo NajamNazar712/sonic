@@ -1012,9 +1012,9 @@ class DeliveryController extends Controller
 
             $delivered_status = array(14, 30, 36, 37);
             $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
-            $filtered_shipments = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->where('charges_mode_id', '!=', 1)->get();
-            $dncc_amount = $filtered_shipments->sum('received_amount');
-            $count = count($filtered_shipments);
+            $filtered_shipments = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status);
+            $dncc_amount = $filtered_shipments->where('charges_mode_id', '!=', 1)->sum('received_amount');
+            $count = $filtered_shipments->count();
 
             $delivery_note_data->delivered_shipments = $count;
             $delivery_note_data->received_cod_amount = $dncc_amount;
@@ -1150,9 +1150,9 @@ class DeliveryController extends Controller
                 $pending_status = 1;
             }
             $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
-            $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status)->where('charges_mode_id', '!=', 1)->get();
-            $dncc_amount = $filtered_shipments->sum('received_amount');
-            $count = count($filtered_shipments);
+            $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status);
+            $dncc_amount = $filtered_shipments->where('charges_mode_id', '!=', 1)->sum('received_amount');
+            $count = $filtered_shipments->count();
             DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>$pending_status,'delivered_shipments'=>$count,'received_cod_amount'=>$dncc_amount,'updated_by'=>Auth::id(),'last_updated_at'=>Carbon::now(),'status_updated_at' => Carbon::now()]);
             return ['status' => 0, 'success' => 'Shipments status Delivered updated!'];
         } else {
