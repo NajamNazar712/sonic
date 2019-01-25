@@ -165,7 +165,7 @@
                     {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
                     {data:'updated_by', name: 'a.name', class: 'align-middle text-center updated_by'},
-                    {data:'arrival_date', name: 'sjd.created_at', class: 'align-middle text-center arrival_date'},
+                    {data:'created_at', name: 'shipments.created_at', class: 'align-middle text-center created_at'},
                     {data:'walk_in_status', name: 'shipments.walk_in_status', class: 'align-middle text-center walk_in_status'},
                     {data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
