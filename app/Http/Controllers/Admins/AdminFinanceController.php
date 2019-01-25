@@ -619,6 +619,14 @@ class AdminFinanceController extends Controller
                     return $shipment->shipper;
                 }
             })
+            ->filterColumn('ss.id', function ($query, $keyword){
+                if ($keyword != '') {
+                    $query->where('ss.id', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->filterColumn('u.name', function ($query, $keyword) {
                 $query->where(function ($sub_query) use ($keyword) {
                     $sub_query->where('s.booking_type_id', '!=', 4)
@@ -763,7 +771,7 @@ class AdminFinanceController extends Controller
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftjoin('charges_modes as cm', 'shipments.charges_mode_id', '=', 'cm.id')
-            ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
             ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount as charges', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status')
             ->where('shipments.booking_type_id',4);
@@ -791,6 +799,14 @@ class AdminFinanceController extends Controller
                 $now = Carbon::now()->startOfDay();
 
                 return $updated_at->diffInDays($now) . 'd';
+            })
+            ->filterColumn('ss.id', function ($query, $keyword){
+                if ($keyword != '') {
+                    $query->where('ss.id', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
             })
             ->addColumn('action', function($shipment) {
                 $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
