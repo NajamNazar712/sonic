@@ -713,6 +713,8 @@ class DeliveryController extends Controller
                     $shipment_details_row_start .= '
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                     ';
+
+                    $total_cod_amount += $shipment->amount;
                 }
                 else {
                     $shipment_details_row_start .= '
@@ -741,7 +743,6 @@ class DeliveryController extends Controller
                           </tr>
                 ';
 
-                $total_cod_amount += $shipment->amount;
                 $shipment_details .= $shipment_details_row_start;
             }
             $shipment_details .= '
@@ -1012,9 +1013,16 @@ class DeliveryController extends Controller
 
             $delivered_status = array(14, 30, 36, 37);
             $delivered_shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
-            $filtered_shipments = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status);
-            $dncc_amount = $filtered_shipments->where('charges_mode_id', '!=', 1)->sum('received_amount');
-            $count = $filtered_shipments->count();
+            $dncc_amount = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '!=', 4);
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '=', 4)
+                    ->where('charges_mode_id', '=', 2);
+                });
+            })->sum('received_amount');
+            $count = Shipment::whereIn('id', $delivered_shipment_ids)->whereIn('shipper_status_id', $delivered_status)->count();
 
             $delivery_note_data->delivered_shipments = $count;
             $delivery_note_data->received_cod_amount = $dncc_amount;
@@ -1150,9 +1158,17 @@ class DeliveryController extends Controller
                 $pending_status = 1;
             }
             $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
-            $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status);
-            $dncc_amount = $filtered_shipments->where('charges_mode_id', '!=', 1)->sum('received_amount');
-            $count = $filtered_shipments->count();
+            $dncc_amount = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status)->where(function ($query) {
+                $query->where(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '!=', 4);
+                })
+                ->orWhere(function ($sub_query) {
+                    $sub_query->where('booking_type_id', '=', 4)
+                    ->where('charges_mode_id', '=', 2);
+                });
+            })->sum('received_amount');
+            $count = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $delivered_status)->count();
+
             DeliveryNote::where('id',$request->delivery_note_id)->update(['pending_status'=>$pending_status,'delivered_shipments'=>$count,'received_cod_amount'=>$dncc_amount,'updated_by'=>Auth::id(),'last_updated_at'=>Carbon::now(),'status_updated_at' => Carbon::now()]);
             return ['status' => 0, 'success' => 'Shipments status Delivered updated!'];
         } else {
@@ -1473,10 +1489,20 @@ class DeliveryController extends Controller
                                             if ($verification == 1) {
                                                 NotificationsController::send(15, 0, $shipment);
                                                 NotificationsController::send(16, 0, $shipment);
-                                                ShipmentChargesController::return($shipment);
 
                                                 if ($parcel->booking_type_id != 4) {
+                                                    ShipmentChargesController::return($shipment);
+
                                                     AdminFinanceController::add_payment($shipment, 1);
+                                                }
+                                                else {
+                                                    ShipmentChargesController::walk_in_return($shipment);
+
+                                                    $parcel->walk_in_status = 2;
+
+                                                    $parcel->save();
+
+                                                    AdminFinanceController::done_payment($shipment, 1);
                                                 }
                                             }
 
@@ -1621,9 +1647,16 @@ class DeliveryController extends Controller
                 }
                 $dncc_status = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38);
                 $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
-                $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status);
-                $dncc_amount = $filtered_shipments->where('charges_mode_id', '!=', 1)->sum('received_amount');
-                $delivered_shipments = $filtered_shipments->count();
+                $dncc_amount = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->where(function ($query) {
+                    $query->where(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '!=', 4);
+                    })
+                    ->orWhere(function ($sub_query) {
+                        $sub_query->where('booking_type_id', '=', 4)
+                        ->where('charges_mode_id', '=', 2);
+                    });
+                })->sum('received_amount');
+                $delivered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->count();
 
                 DeliveryNote::where('id', $delivery_note_id)->update(['delivered_shipments' => $delivered_shipments, 'verified_by' => Auth::id(), 'received_cod_amount' => $dncc_amount, 'status' => 1,'last_updated_at'=>$current_time,'status_verified_at'=>$current_time]);
 

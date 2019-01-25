@@ -212,9 +212,20 @@ class ReturnController extends Controller
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
 
-                    ShipmentChargesController::return($shipment);
+                    if ($parcel->booking_type_id != 4) {
+                        ShipmentChargesController::return($shipment);
 
-                    AdminFinanceController::add_payment($shipment, 1);
+                        AdminFinanceController::add_payment($shipment, 1);
+                    }
+                    else {
+                        ShipmentChargesController::walk_in_return($shipment);
+
+                        $parcel->walk_in_status = 2;
+
+                        $parcel->save();
+
+                        AdminFinanceController::done_payment($shipment, 1);
+                    }
                 }
                 else {
                     $remarks = ($request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
@@ -263,9 +274,20 @@ class ReturnController extends Controller
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
 
-                ShipmentChargesController::return($request->shipment_id);
+                if ($parcel->booking_type_id != 4) {
+                    ShipmentChargesController::return($request->shipment_id);
 
-                AdminFinanceController::add_payment($request->shipment_id, 1);
+                    AdminFinanceController::add_payment($request->shipment_id, 1);
+                }
+                else {
+                    ShipmentChargesController::walk_in_return($request->shipment_id);
+
+                    $parcel->walk_in_status = 2;
+
+                    $parcel->save();
+
+                    AdminFinanceController::done_payment($request->shipment_id, 1);
+                }
             }
             else {
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
@@ -540,7 +562,7 @@ class ReturnController extends Controller
                 }
             })
             ->addColumn('action', function($shipment) {
-                if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
+                if (($shipment->booking_type_id != 4) && ($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
                     $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
 
                     $dropdown = '
@@ -769,7 +791,7 @@ class ReturnController extends Controller
 
                         $shipment = $shipment->first();
 
-                        if ($shipment->booking_type_id == 1) { //attempt failed and arrived at origin center
+                        if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) { //attempt failed and arrived at origin center
 
                             ReturnNoteShipment::create(['return_note_id' => $note->id, 'shipment_id' => $tracking]);
                             $shipment->shipper_status_id = 23;
@@ -978,7 +1000,7 @@ class ReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'shipments.booking_type_id', 'usi.poc'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges'])
             ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
@@ -1012,7 +1034,7 @@ class ReturnController extends Controller
                 if(in_array($deliveries->shipper_status_id,$delivered_array)){
                     return $deliveries->current_status_name;
                 }else{
-                    if($deliveries->booking_type_id == 1){
+                    if($deliveries->booking_type_id == 1 || $deliveries->booking_type_id == 4){
                         $where = array(24,47,48);
                     }else if($deliveries->booking_type_id == 2){
                         $where = array(29,47,48);
@@ -1048,6 +1070,19 @@ class ReturnController extends Controller
                     return $reason;
                 }
 
+            })
+            ->addColumn('charges', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    if ($shipment->charges_mode_id == 1) {
+                        return $shipment->return_charges;
+                    }
+                    else {
+                        return $shipment->amount;
+                    }
+                }
+                else {
+                    return '';
+                }
             })
             ->addColumn('action',function($deliveries){
                 $delivered_array = array(25,31,38);
@@ -1120,7 +1155,7 @@ class ReturnController extends Controller
         if(!empty($request->shipment_ids)){
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id',$shipment)->first();
-                if($parcel->booking_type_id == 1){
+                if($parcel->booking_type_id == 1 || $parcel->booking_type_id == 4){
                     ShipmentsJourneyController::add($shipment, 25, 25, NULL, NULL, NULL, Auth::id(),$request->return_note_id);
 
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
@@ -1229,6 +1264,7 @@ class ReturnController extends Controller
                             <td class="color primary"><strong>Contact Person Phone</strong></td>
                             <td class="color primary"><strong>Client Address</strong></td>
                             <td class="color primary"><strong>No. of Items</strong></td>
+                            <td class="color primary"><strong>Collection Charges</strong></td>
                             <td class="color primary" style="width:200px;"><strong>Sign</strong></td>
                           </tr>
         ';
@@ -1245,6 +1281,27 @@ class ReturnController extends Controller
                             <td>' . $shipment->pickup_address->phone . '</td>
                             <td>' . $shipment->pickup_address->pickup_address . '</td>
                             <td>' . $shipment->items->sum('quantity') . '</td>
+                ';
+
+                if ($shipment->booking_type_id != 4) {
+                    $shipment_details_row_start .= '
+                            <td></td>
+                    ';
+                }
+                else {
+                    if ($shipment->charges_mode_id == 1) {
+                        $shipment_details_row_start .= '
+                            <td>' . $shipment->return_charges . '</td>
+                        ';
+                    }
+                    else {
+                        $shipment_details_row_start .= '
+                            <td>' . $shipment->amount . '</td>
+                        ';
+                    }
+                }
+
+                $shipment_details_row_start .= '
                             <td></td>
 
                           </tr>
