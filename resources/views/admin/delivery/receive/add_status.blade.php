@@ -13,71 +13,72 @@
                 @include('admin.inc.messages')
                 <form id="status_update_form" action="{{route('admin.delivery.receive.add.status')}}" method="post">
                     @csrf
-                <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
-                <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
+                    <input type="hidden" value="{{$delivery_note_id}}" id="delivery_note" name="delivery_note_id">
+                    <input type="hidden" value="{{$shipments_count}}" id="shipments_count" name="shipments_count">
                     <input type="hidden" name="shipment_ids" id="shipment_ids">
 
-                <div class="row justify-content-center">
-                    <div class="col-4">
-                        <fieldset class="form-group">
-                            <select name="select_all_status" id="select_all_status" class="form-control select2">
-                                @foreach($shipment_statuses as $status)
-                                    <option value="{{$status->id}}">{{$status->name}}</option>
-                                @endforeach
-                            </select>
-                        </fieldset>
-                    </div>
-                    @if(!$delivery_note_status == 1)
-                    <div class="col-3">
-                        <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i> Bulk Update </button>
-                    </div>
+                    <div class="row justify-content-center">
+                        <div class="col-4">
+                            <fieldset class="form-group">
+                                <select name="select_all_status" id="select_all_status" class="form-control select2">
+                                    @foreach($shipment_statuses as $status)
+                                        <option value="{{$status->id}}">{{$status->name}}</option>
+                                    @endforeach
+                                </select>
+                            </fieldset>
+                        </div>
+                        @if(!$delivery_note_status == 1)
+                            <div class="col-3">
+                                <button type="button" id="submit_selected_status" disabled class="mr-1 mb-1 btn btn-primary btn-min-width"><i class="la la-list-alt"></i> Bulk Update </button>
+                            </div>
                         @endif
-                </div>
+                    </div>
 
-                <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
-                    <thead>
-                    <tr role="row" class="bg-primary white">
-                        <th class="border-primary border-darken-1"></th>
-                        <th class="border-primary border-darken-1">S. No.</th>
-                        <th class="border-primary border-darken-1">Shipment ID</th>
-                        <th class="border-primary border-darken-1">Tracking No.</th>
-                        <th class="border-primary border-darken-1">Consignee</th>
-                        <th class="border-primary border-darken-1">Collection Amount</th>
-                        <th class="border-primary border-darken-1">Status</th>
-                        <th class="border-primary border-darken-1">Reason</th>
-                        <th class="border-primary border-darken-1">Remarks</th>
-                        <th class="border-primary border-darken-1">Address</th>
-                        <th class="border-primary border-darken-1">Destination</th>
-                        <th class="border-primary border-darken-1">Shipper</th>
-                        <th class="border-primary border-darken-1">Current Status</th>
-                        <th class="border-primary border-darken-1">Service Type</th>
-                        <th class="border-primary border-darken-1">Clear</th>
-                    </tr>
-                    </thead>
-                </table>
-                <div class="row justify-content-center">
-                    @if($delivery_note_status == 0)
-                    <div class="mr-1">
-                        <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
-                    </div>
-                    @endif
-                    @if($delivery_note_status == 1)
-                        <div class="mr-1">
-                            <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
-                        </div>
-                        @else
-                        @if($undelivered_printed == 1)
-                        <div class="mr-1">
-                            <button id="printTempDNCC" type="button" class="btn btn-warning btn-block">Print Temporary DNCC</button>
-                        </div>
-                            @endif
-                    @endif
-                        @if($shipment_update == 1)
-                    <div class="mr-1 ml-1">
-                        <button id="printUndeliveredDNCC" type="button" class="btn btn-warning btn-block">Print Undelivered Performa</button>
-                    </div>
+                    <table class="table table-bordered datatable" id="datatable" style="z-index: 3;">
+                        <thead>
+                        <tr role="row" class="bg-primary white">
+                            <th class="border-primary border-darken-1"></th>
+                            <th class="border-primary border-darken-1">S. No.</th>
+                            <th class="border-primary border-darken-1">Shipment ID</th>
+                            <th class="border-primary border-darken-1">Tracking No.</th>
+                            <th class="border-primary border-darken-1">Consignee</th>
+                            <th class="border-primary border-darken-1">Collection Amount</th>
+                            <th class="border-primary border-darken-1">Status</th>
+                            <th class="border-primary border-darken-1">Reason</th>
+                            <th class="border-primary border-darken-1">Remarks</th>
+                            <th class="border-primary border-darken-1">Address</th>
+                            <th class="border-primary border-darken-1">Destination</th>
+                            <th class="border-primary border-darken-1">Shipper</th>
+                            <th class="border-primary border-darken-1">Current Status</th>
+                            <th class="border-primary border-darken-1">Service Type</th>
+                            <th class="border-primary border-darken-1">Attempts Count</th>
+                            <th class="border-primary border-darken-1">Clear</th>
+                        </tr>
+                        </thead>
+                    </table>
+                    <div class="row justify-content-center">
+                        @if($delivery_note_status == 0)
+                            <div class="mr-1">
+                                <button id="statusSubmit" type="submit" disabled class="btn btn-primary btn-block">Update Status</button>
+                            </div>
                         @endif
-                </div>
+                        @if($delivery_note_status == 1)
+                            <div class="mr-1">
+                                <button id="printDNCC" type="button" class="btn btn-warning btn-block">Print DNCC</button>
+                            </div>
+                        @else
+                            @if($undelivered_printed == 1)
+                                <div class="mr-1">
+                                    <button id="printTempDNCC" type="button" class="btn btn-warning btn-block">Print Temporary DNCC</button>
+                                </div>
+                            @endif
+                        @endif
+                        @if($shipment_update == 1)
+                            <div class="mr-1 ml-1">
+                                <button id="printUndeliveredDNCC" type="button" class="btn btn-warning btn-block">Print Undelivered Performa</button>
+                            </div>
+                        @endif
+                    </div>
                 </form>
             </div>
         </div>
@@ -92,33 +93,33 @@
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Update Replacement Shipment Weight</h4>
                     {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-                        {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--<span aria-hidden="true">&times;</span>--}}
                     {{--</button>--}}
                 </div>
                 <div class="modal-body  text-center">
                     <form id="replacement_form" action="{{route('admin.delivery.receive.replacements.submit')}}" method="post">
-                    <table class="table table-bordered datatable" id="replacementtable" style="z-index: 3;">
-                        <thead>
-                        @csrf
-                        @method('PUT')
-                        <tr role="row" class="bg-primary white">
-                            <th class="border-primary border-darken-1">S. No.</th>
-                            <th class="border-primary border-darken-1">Tracking No.</th>
-                            <th class="border-primary border-darken-1">Service Type</th>
-                            <th class="border-primary border-darken-1">Weight Of Shipment</th>
+                        <table class="table table-bordered datatable" id="replacementtable" style="z-index: 3;">
+                            <thead>
+                            @csrf
+                            @method('PUT')
+                            <tr role="row" class="bg-primary white">
+                                <th class="border-primary border-darken-1">S. No.</th>
+                                <th class="border-primary border-darken-1">Tracking No.</th>
+                                <th class="border-primary border-darken-1">Service Type</th>
+                                <th class="border-primary border-darken-1">Weight Of Shipment</th>
 
-                        </tr>
-                        </thead>
-                    </table>
+                            </tr>
+                            </thead>
+                        </table>
 
                         <input type="hidden" name="shipment_id_list" id="shipment_id_list">
                         <input type="hidden" name="delivery_note_id" value="{{$delivery_note_id}}">
 
-                    <div class="row justify-content-center">
-                        <div class="col-3">
-                            <button id="ReplacementUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                        <div class="row justify-content-center">
+                            <div class="col-3">
+                                <button id="ReplacementUpdate" type="submit" class="btn btn-primary btn-block">Update</button>
+                            </div>
                         </div>
-                    </div>
                     </form>
                 </div>
             </div>
@@ -133,7 +134,7 @@
                 <div class="modal-header bg-primary white">
                     <h4 class="modal-title white">Update Try &amp; Buy Delivery</h4>
                     {{--<button type="button" class="close" data-dismiss="modal" aria-label="Close">--}}
-                        {{--<span aria-hidden="true">&times;</span>--}}
+                    {{--<span aria-hidden="true">&times;</span>--}}
                     {{--</button>--}}
                 </div>
                 <div class="modal-body  text-center">
@@ -253,7 +254,7 @@
 @section('js')
     <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('/app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
-     <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
     <script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
 
     <script type="text/javascript">
@@ -282,134 +283,134 @@
                 scrollX: true,
                 buttons: [
                         @if(!$delivery_note_status == 1)
-                    {{--{--}}
-                    {{--text: 'Delivered',--}}
-                    {{--className: 'btn btn-primary delivered',--}}
-                    {{--enabled: false,--}}
-                    {{--action: function (e, dt, node, config) {--}}
+                        {{--{--}}
+                        {{--text: 'Delivered',--}}
+                        {{--className: 'btn btn-primary delivered',--}}
+                        {{--enabled: false,--}}
+                        {{--action: function (e, dt, node, config) {--}}
                         {{--if(selected_rows !== ''){--}}
                         {{--swal({--}}
-                            {{--title: 'Are You Sure?',--}}
-                            {{--text: 'Select Yes to mark shipments as Delivered!',--}}
-                            {{--icon: 'warning',--}}
-                            {{--buttons: {--}}
-                                {{--cancel: {--}}
-                                    {{--text: 'No',--}}
-                                    {{--value: null,--}}
-                                    {{--visible: true,--}}
-                                    {{--closeModal: true,--}}
-                                {{--},--}}
-                                {{--confirm: {--}}
-                                    {{--text: 'Yes',--}}
-                                    {{--value: true,--}}
-                                    {{--visible: true,--}}
-                                    {{--closeModal: true--}}
-                                {{--}--}}
-                            {{--},--}}
-                            {{--closeOnClickOutside: false,--}}
-                            {{--closeOnEsc: false,--}}
-                            {{--dangerMode: true--}}
+                        {{--title: 'Are You Sure?',--}}
+                        {{--text: 'Select Yes to mark shipments as Delivered!',--}}
+                        {{--icon: 'warning',--}}
+                        {{--buttons: {--}}
+                        {{--cancel: {--}}
+                        {{--text: 'No',--}}
+                        {{--value: null,--}}
+                        {{--visible: true,--}}
+                        {{--closeModal: true,--}}
+                        {{--},--}}
+                        {{--confirm: {--}}
+                        {{--text: 'Yes',--}}
+                        {{--value: true,--}}
+                        {{--visible: true,--}}
+                        {{--closeModal: true--}}
+                        {{--}--}}
+                        {{--},--}}
+                        {{--closeOnClickOutside: false,--}}
+                        {{--closeOnEsc: false,--}}
+                        {{--dangerMode: true--}}
                         {{--}).then(function (confirm) {--}}
-                            {{--if (confirm) {--}}
+                        {{--if (confirm) {--}}
 
-                                {{--table.rows().nodes().each(function(index) {--}}
-                                    {{--var row = table.row(index);--}}
-                                    {{--if ($(row.node()).hasClass('selected')) {--}}
-                                        {{--var id = parseInt(row.id());--}}
-                                        {{--var remarks = $(row.node()).find('td.remarks input').val();--}}
-                                        {{--shipment_remarks[id] = remarks;--}}
-                                    {{--}--}}
-                                {{--});--}}
+                        {{--table.rows().nodes().each(function(index) {--}}
+                        {{--var row = table.row(index);--}}
+                        {{--if ($(row.node()).hasClass('selected')) {--}}
+                        {{--var id = parseInt(row.id());--}}
+                        {{--var remarks = $(row.node()).find('td.remarks input').val();--}}
+                        {{--shipment_remarks[id] = remarks;--}}
+                        {{--}--}}
+                        {{--});--}}
 
-                                {{--$.ajax({--}}
-                                    {{--url: '{!! route('admin.delivery.receive.delivered') !!}',--}}
-                                    {{--method: 'POST',--}}
-                                    {{--data: {--}}
-                                        {{--'shipment_ids': selected_rows,--}}
-                                        {{--'delivery_note_id': note_id,--}}
-                                        {{--'_token': '{{ csrf_token() }}',--}}
-                                        {{--'remark': shipment_remarks--}}
-                                    {{--}--}}
-                                {{--}).done(function (data) {--}}
-                                    {{--if(data.status === 0){--}}
+                        {{--$.ajax({--}}
+                        {{--url: '{!! route('admin.delivery.receive.delivered') !!}',--}}
+                        {{--method: 'POST',--}}
+                        {{--data: {--}}
+                        {{--'shipment_ids': selected_rows,--}}
+                        {{--'delivery_note_id': note_id,--}}
+                        {{--'_token': '{{ csrf_token() }}',--}}
+                        {{--'remark': shipment_remarks--}}
+                        {{--}--}}
+                        {{--}).done(function (data) {--}}
+                        {{--if(data.status === 0){--}}
 
-                                        {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
+                        {{--toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});--}}
 
-                                    {{--}else{--}}
-                                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                        {{--}else{--}}
+                        {{--toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
-                                    {{--}--}}
-                                    {{--location.reload();--}}
+                        {{--}--}}
+                        {{--location.reload();--}}
 
-                                {{--});--}}
-                            {{--}--}}
+                        {{--});--}}
+                        {{--}--}}
                         {{--});--}}
 
 
                         {{--}else{--}}
-                            {{--var error = "Something went wrong please refresh page and try again!";--}}
-                            {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
+                        {{--var error = "Something went wrong please refresh page and try again!";--}}
+                        {{--toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});--}}
 
                         {{--}--}}
-                    {{--}--}}
+                        {{--}--}}
 
-                {{--}, --}}
+                        {{--}, --}}
                     {
-                    extend: 'selectAll',
-                    text: 'Select All',
-                    className: 'select_all',
-                    action : function(e) {
-                        e.preventDefault();
+                        extend: 'selectAll',
+                        text: 'Select All',
+                        className: 'select_all',
+                        action : function(e) {
+                            e.preventDefault();
 
-                        table.rows().nodes().each(function(index) {
-                            var row = table.row(index);
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
 
-                            if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                                row.select();
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.select();
 
-                                id = parseInt(row.id());
+                                    id = parseInt(row.id());
 
-                                var index = $.inArray(id, selected_rows);
+                                    var index = $.inArray(id, selected_rows);
 
-                                if (index === -1) {
-                                    selected_rows.push(id);
+                                    if (index === -1) {
+                                        selected_rows.push(id);
+                                    }
+
+                                    table.button('.delivered').enable();
+                                    $('#submit_selected_status').attr('disabled', false);
                                 }
-
-                                table.button('.delivered').enable();
-                                $('#submit_selected_status').attr('disabled', false);
-                            }
-                        });
-                    }
-                }, {
-                    extend: 'selectNone',
-                    text: 'Select None',
-                    className: 'select_none',
-                    action : function(e) {
-                        e.preventDefault();
-
-                        table.rows().nodes().each(function(index) {
-                          var row = table.row(index);
-
-                          if ($(row.node().firstChild).hasClass('select-checkbox')) {
-                            row.deselect();
-
-                            id = parseInt(row.id());
-
-                            var index = $.inArray(id, selected_rows);
-
-                            if (index !== -1) {
-                                selected_rows.splice(index, 1);
-                            }
-
-                          }
-                        });
-                        if (selected_rows.length == 0) {
-                            table.button('.delivered').disable();
+                            });
                         }
-                        $('#submit_selected_status').attr('disabled', true);
+                    }, {
+                        extend: 'selectNone',
+                        text: 'Select None',
+                        className: 'select_none',
+                        action : function(e) {
+                            e.preventDefault();
+
+                            table.rows().nodes().each(function(index) {
+                                var row = table.row(index);
+
+                                if ($(row.node().firstChild).hasClass('select-checkbox')) {
+                                    row.deselect();
+
+                                    id = parseInt(row.id());
+
+                                    var index = $.inArray(id, selected_rows);
+
+                                    if (index !== -1) {
+                                        selected_rows.splice(index, 1);
+                                    }
+
+                                }
+                            });
+                            if (selected_rows.length == 0) {
+                                table.button('.delivered').disable();
+                            }
+                            $('#submit_selected_status').attr('disabled', true);
+                        }
                     }
-                }
-                @endif
+                    @endif
                 ],
                 select: {
                     info: false,
@@ -439,6 +440,7 @@
                     {data:'shipper',name: 'shipper', class: 'align-middle shipper'},
                     {data:'current_status',name: 'current_status', class: 'align-middle current_status'},
                     {data:'service_type',name: 'service_type', class: 'align-middle service_type'},
+                    {data:'attempts' ,name: 'shipments.id', class: 'align-middle attempts'},
                     {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
@@ -562,11 +564,11 @@
             });
             $('body').on('click','.clear',function () {
                 // console.log();
-               var status = $(this).parents().closest('tr').find('.statusDrop');
-               var reason = $(this).parents().closest('tr').find('.reasonDrop');
-               status.val('').trigger("change");
-               reason.val('').trigger("change");
-               $('.remarks input').val('');
+                var status = $(this).parents().closest('tr').find('.statusDrop');
+                var reason = $(this).parents().closest('tr').find('.reasonDrop');
+                status.val('').trigger("change");
+                reason.val('').trigger("change");
+                $('.remarks input').val('');
                 // $('.reasonDrop').val('').trigger("change");
             });
             $('#status_update_form').on('keypress',function (e) {
@@ -757,7 +759,7 @@
 
 
                         } else if (data.status == 0) {
-                            
+
                         }
                     }
                     shipments_count = shipments_count-1;
@@ -872,8 +874,8 @@
                 },
                 submitHandler: function(form) {
                     $('#shipment_id_list').val(shipment_id_list);
-                        $(form).find('button[type=submit]').attr('disabled', 'disabled');
-                        form.submit();
+                    $(form).find('button[type=submit]').attr('disabled', 'disabled');
+                    form.submit();
 
                 }
             });
@@ -893,60 +895,60 @@
                 if(checkbox_count > 0){
                     this.submit();
                 }else{
-                        var error = "Select at-least one item!";
-                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    var error = "Select at-least one item!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
 
             var shipment_remarks_obj = {};
             $('#submit_selected_status').on('click', function () {
-               var select_all_status = $('#select_all_status').val();
-               var delivery_note = $('#delivery_note').val();
-               if(selected_rows.length > 0){
-                   if(select_all_status != ''){
+                var select_all_status = $('#select_all_status').val();
+                var delivery_note = $('#delivery_note').val();
+                if(selected_rows.length > 0){
+                    if(select_all_status != ''){
 
-                       table.rows().nodes().each(function(index) {
-                           var row = table.row(index);
-                           if ($(row.node()).hasClass('selected')) {
-                               var id = parseInt(row.id());
-                               var remarks = $(row.node()).find('td.remarks input').val();
-                               shipment_remarks_obj[id] = remarks;
+                        table.rows().nodes().each(function(index) {
+                            var row = table.row(index);
+                            if ($(row.node()).hasClass('selected')) {
+                                var id = parseInt(row.id());
+                                var remarks = $(row.node()).find('td.remarks input').val();
+                                shipment_remarks_obj[id] = remarks;
 
-                           }
-                       });
+                            }
+                        });
 
-                       $.ajax({
-                           url: '{!! route('admin.delivery.receive.add.status.all') !!}',
-                           method: 'POST',
-                           data: {
-                               'shipment_ids': selected_rows,
-                               'selected_status': select_all_status,
-                               'delivery_note_id': delivery_note,
-                               'remarks': shipment_remarks_obj,
-                               '_token': '{{ csrf_token() }}',
-                           }
-                       }).done(function (data) {
-                           if(data.status === 1){
+                        $.ajax({
+                            url: '{!! route('admin.delivery.receive.add.status.all') !!}',
+                            method: 'POST',
+                            data: {
+                                'shipment_ids': selected_rows,
+                                'selected_status': select_all_status,
+                                'delivery_note_id': delivery_note,
+                                'remarks': shipment_remarks_obj,
+                                '_token': '{{ csrf_token() }}',
+                            }
+                        }).done(function (data) {
+                            if(data.status === 1){
 
-                               toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
+                                toastr.success(data.success, 'Success!', {positionClass: 'toast-bottom-center', containerId: 'toast-bottom-center'});
 
-                           }else{
-                               toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                            }else{
+                                toastr.error(data.error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
 
-                           }
-                           location.reload();
+                            }
+                            location.reload();
 
-                       });
-                   }
-                   else{
-                       var error = "Please Select A Status!";
-                       toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-                   }
-               }
-               else{
-                   var error = "Select at-least one shipment!";
-                   toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
-               }
+                        });
+                    }
+                    else{
+                        var error = "Please Select A Status!";
+                        toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                    }
+                }
+                else{
+                    var error = "Select at-least one shipment!";
+                    toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
+                }
 
             });
         });

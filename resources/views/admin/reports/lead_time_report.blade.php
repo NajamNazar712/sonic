@@ -109,6 +109,7 @@
                         <th class="border-primary border-darken-1">Transit TAT(A-B)</th>
                         <th class="border-primary border-darken-1">Junction Date</th>
                         <th class="border-primary border-darken-1">First Delivery Note No</th>
+                        <th class="border-primary border-darken-1">First Attempt Date</th>
                         <th class="border-primary border-darken-1">First Update Status</th>
                         <th class="border-primary border-darken-1">First Status Date(C)</th>
                         <th class="border-primary border-darken-1">First Verification Status</th>
@@ -314,6 +315,7 @@
                             head.push('Transit TAT(A-B)');
                             head.push('junction Date');
                             head.push('First Delivery Note No');
+                            head.push('First Attempt Date');
                             head.push('First Status');
                             head.push('First Status Date(C)');
                             head.push('First Verification Status');
@@ -355,6 +357,7 @@
                                 row.push(values.transit_tat);
                                 row.push(values.junction);
                                 row.push(values.first_delivery_note_id);
+                                row.push(values.first_attempt);
                                 row.push(values.first_status);
                                 row.push(values.first_status_date);
                                 row.push(values.first_verification);
@@ -439,6 +442,7 @@
                     {data: 'transit_tat', name: 'transit_tat', class: 'align-middle transit_tat', orderable: false, searchable: false},
                     {data: 'junction', name: 'ccjr.created_at', class: 'align-middle junction', orderable: false, searchable: false},
                     {data: 'first_delivery_note_id', name: 'dn.id', class: 'align-middle first_delivery_note_id', orderable: false, searchable: false},
+                    {data: 'first_attempt', name: 'fatstatus.created_at', class: 'align-middle first_attempt', orderable: false, searchable: false},
                     {data: 'first_status', name: 'fs.name', class: 'align-middle first_status'},////
                     {data: 'first_status_date', name: 'first_status_date', class: 'align-middle first_status_date'},////
                     {data: 'first_verification', name: 'lssv.name', class: 'align-middle first_verification', orderable: false, searchable: false},

@@ -249,6 +249,8 @@ class ShipperFinanceController extends Controller
 
       $shipper_bank = $shipper->bank;
 
+      $payment_mode = $shipper_bank->payment_mode;
+
       $html = '
                 <!doctype html>
                 <html lang="en">
@@ -365,6 +367,7 @@ class ShipperFinanceController extends Controller
       $total_fuel_surcharge = 0;
       $total_gst = 0;
       $total_charges = 0;
+      $total_adjustments = 0;
       $total_payable = 0;
 
       foreach ($done_payment->done_payment_shipments as $done_payment_shipment) {
@@ -391,35 +394,53 @@ class ShipperFinanceController extends Controller
                               <td>' . $shipment->booking_type->booking_type . '</td>
                               <td>' . $shipment->actual_weight . '</td>
                               <td>' . number_format($done_payment_shipment->amount) . '</td>
-                              <td>' . number_format($shipment->weight_charges) . '</td>
-                              <td>' . (($done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '') . '</td>
+                              <td>' . (($payment_mode == 'IBFT' && $done_payment_shipment->type != 2) ? number_format($shipment->weight_charges) : '0') . '</td>
+                              <td>' . (($payment_mode == 'IBFT' && $done_payment_shipment->type == 0) ? number_format($shipment->cash_handling_charges) : '0') . '</td>
+                              <td>' . (($done_payment_shipment->type == 2) ? number_format($done_payment_shipment->payable) : '0') . '</td>
                             </tr>
             ';
 
             $serial_number++;
 
-            if ($done_payment_shipment->type == 0) {
-                $total_collection_amount += $done_payment_shipment->amount;
-                $total_cash_handling_charges += $shipment->cash_handling_charges;
-                $total_replacement_charges += $shipment->replacement_charges;
-                // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
-            }
-            else {
-                $total_return_charges += $shipment->return_charges;
-            }
+            if ($payment_mode == 'IBFT') {
+              if ($done_payment_shipment->type != 2) {
+                  if ($done_payment_shipment->type == 0) {
+                      $total_collection_amount += $done_payment_shipment->amount;
+                      $total_cash_handling_charges += $shipment->cash_handling_charges;
+                      $total_replacement_charges += $shipment->replacement_charges;
+                      // $total_try_and_buy_charges += $shipment->try_and_buy_charges;
+                  }
+                  else {
+                      $total_return_charges += $shipment->return_charges;
+                  }
 
-            $total_weight_charges += $shipment->weight_charges;
+                  $total_weight_charges += $shipment->weight_charges;
 
-            if ($shipment->packaging_material_request) {
-                $total_packaging_material_charges += $shipment->packaging_material_charges;
-            }
+                  if ($shipment->packaging_material_request) {
+                      $total_packaging_material_charges += $shipment->packaging_material_charges;
+                  }
 
-            $total_insurance_charges += $shipment->insurance_charges;
-            $total_fuel_surcharge += $shipment->fuel_surcharge;
+                  $total_insurance_charges += $shipment->insurance_charges;
+                  $total_fuel_surcharge += $shipment->fuel_surcharge;
+              }
+              else {
+                  $total_adjustments += $done_payment_shipment->payable;
+              }
 
-            $total_gst += $done_payment_shipment->gst;
-            $total_charges += $done_payment_shipment->charges;
-            $total_payable += $done_payment_shipment->payable;
+              $total_gst += $done_payment_shipment->gst;
+              $total_charges += $done_payment_shipment->charges;
+              $total_payable += $done_payment_shipment->payable;
+          }
+          else {
+              if ($done_payment_shipment->type == 0) {
+                  $total_collection_amount += $done_payment_shipment->amount;
+              }
+              else if ($done_payment_shipment->type == 2) {
+                  $total_adjustments += $done_payment_shipment->payable;
+              }
+
+              $total_payable += $done_payment_shipment->payable;
+          }
       }
 
       $shipment_details .= '
@@ -429,6 +450,7 @@ class ShipperFinanceController extends Controller
                                 <td class="color secondary"><strong>' . number_format($total_collection_amount) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_weight_charges) . '</strong></td>
                                 <td class="color secondary"><strong>' . number_format($total_cash_handling_charges) . '</strong></td>
+                                <td class="color secondary"><strong>' . number_format($total_adjustments) . '</strong></td>
                             </tr>
       ';
 
@@ -458,6 +480,7 @@ class ShipperFinanceController extends Controller
                               <td class="color primary"><strong>Collection Amount (PKR)</strong></td>
                               <td class="color primary"><strong>Weight Charges (PKR)</strong></td>
                               <td class="color primary"><strong>Cash Handling Charges (PKR)</strong></td>
+                              <td class="color primary"><strong>Adjustments (PKR)</strong></td>
                             </tr>
       ';
 
@@ -511,8 +534,12 @@ class ShipperFinanceController extends Controller
                                         <td>' . number_format($total_packaging_material_charges) . '</td>
                                     </tr>
                                     <tr>
+                                        <td class="color secondary"><strong>Total Adjustments</strong></td>
+                                        <td>' . number_format($total_adjustments) . '</td>
+                                    </tr>
+                                    <tr>
                                         <td class="color primary"><strong>Overall Charges</strong></td>
-                                        <td class="color secondary"><strong>' . number_format($total_charges + $total_gst) . '</strong></td>
+                                        <td class="color secondary"><strong>' . number_format($total_charges + $total_gst - $total_adjustments) . '</strong></td>
                                     </tr>
                                   </tbody>
                                 </table>

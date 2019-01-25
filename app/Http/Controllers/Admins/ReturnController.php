@@ -50,17 +50,18 @@ class ReturnController extends Controller
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                ->where('shipments_journey.created_at','=',
-                    DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                    ->where('shipments_journey.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
             })
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where('sj.created_at','=',
-                    DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                    ->where('sj.created_at','=',
+                        DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipments_journey as sret', function ($join) {
                 $join->on('sret.shipment_id', '=', 'shipments.id')
-                ->where('sret.shipper_status_id','=',13);
+                    ->where('sret.shipper_status_id','=',13)
+                    ->where('sret.verification','=',1);
 //                    ->where('sret.id','=',
 //                        DB::raw('(select id from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 13)'));
             })
@@ -151,11 +152,11 @@ class ReturnController extends Controller
                             <div class='dropdown-menu open-left arrow'>";
 
                     if (session('role_id') == 1 || in_array(45, session('permissions'))) {
-                      $dropdown .= $confirm_button;
+                        $dropdown .= $confirm_button;
                     }
 
                     if (session('role_id') == 1 || in_array(46, session('permissions'))) {
-                      $dropdown .= $re_attempt_button;
+                        $dropdown .= $re_attempt_button;
                     }
 
                     $dropdown .= "
@@ -169,10 +170,10 @@ class ReturnController extends Controller
                     return '';
                 }
             });
-            if ($tracking_numbers = $request->get('tracking_numbers')) {
-                $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
-            }
-            return $datatable->make(true);
+        if ($tracking_numbers = $request->get('tracking_numbers')) {
+            $datatable->whereIn('shipments.tracking_number', explode(',', $tracking_numbers));
+        }
+        return $datatable->make(true);
     }
     public function return_confirm_status(Request $request){ //update to status 20 for confirm and 13 for re-attempt
 
@@ -425,13 +426,13 @@ class ReturnController extends Controller
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
             ->leftJoin('shipments_journey', function ($join) {
                 $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                ->where('shipments_journey.id','=',
-                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)'));
+                    ->where('shipments_journey.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id order by shipments_journey.created_at desc limit 1)'));
             })
             ->leftJoin('shipments_journey as sj', function ($join) {
                 $join->on('sj.shipment_id', '=', 'shipments.id')
-                ->where('sj.id','=',
-                    DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                    ->where('sj.id','=',
+                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
             })
             ->leftJoin('shipment_status_reason as ssr','ssr.id','=','shipments_journey.status_reason_id')
             ->select('shipments.id as shipment_id','shipments.id as shId', 'shipments.shipper_status_id', 'shipments.tracking_number as tracking_number', 'shipments.tracking_number as tracking','u.name as shipper', 'oc.hub_id as origin_hub_id', 'oc.name as origin', 'dc.hub_id as destination_hub_id', 'dc.name as destination','shipments.order_id','h.name as hub','shipments.consignee_name','shipments.consignee_phone_number_1 as phone','shipments.consignee_address','shipments.amount','sm.mode','bt.booking_type as service_type','ss.name as status','ssr.name as reason','shipments_journey.remarks as remarks','shipments_journey.created_at as status_date','shipments_journey.created_at as last_status_date','sj.created_at as arrival')
@@ -490,11 +491,11 @@ class ReturnController extends Controller
 
                 if (strpos('shipper', $keyword) !== FALSE) {
                     $query->whereIn('shipments.shipper_status_id', [22, 24, 27, 29, 33, 35, 44, 45, 46,47,48])
-                    ->orWhereRaw('`oc`.`hub_id` = `dc`.`hub_id`');
+                        ->orWhereRaw('`oc`.`hub_id` = `dc`.`hub_id`');
                 }
                 else if (strpos('cargo', $keyword) !== FALSE) {
                     $query->whereIn('shipments.shipper_status_id', [20, 30, 37])
-                    ->whereRaw('`oc`.`hub_id` != `dc`.`hub_id`');
+                        ->whereRaw('`oc`.`hub_id` != `dc`.`hub_id`');
                 }
                 else {
                     $query->whereRaw('false');
@@ -524,9 +525,9 @@ class ReturnController extends Controller
                 }
             });
 
-           return $datatables->make(true);
+        return $datatables->make(true);
     }
-  public function return_create_index(){
+    public function return_create_index(){
         $riders = Rider::where('status', 1);
 
         if (session('role_id') != 1) {
@@ -562,37 +563,9 @@ class ReturnController extends Controller
                 $destination_id = City::where('id', $destination_id)->select('hub_id')->first();
                 $destination_id = $destination_id->hub_id;//first it was origin now for return its destination
                 if(session('role_id') == 1 || in_array($destination_id, session('hubs'))){
-                $origin = $shipment->consignee_city->hub_id;//let's suppose consignee city is origin now
-                if(!$request->has('hub_id')){
-                    if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
-                        $destination_city_id = $shipment->pickup_address->city_id;
-                        $destination_city = City::find($destination_city_id);
-                        if ($destination_city->id == $destination_city->hub_id) {
-                            $destination = $destination_city->name;
-                            $hub = $destination_city->id;
-                        } else {
-                            $hubid = $destination_city->hub_id;
-                            $destinationHub = City::find($hubid);
-                            $destination = $destinationHub->name;
-                            $hub = $destinationHub->id;
-                        }
-                        $service = $shipment->booking_type->booking_type;
-                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
-                        if ($shipment_journey->exists()) {
-                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
-//                            $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
-                            $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
-                            if ($status_id != '') {
-                                $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
-                                $status = $status_name->name;
-                            } else {
-                                $status = ' - ';
-                            }
-                        }
-                        return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status]);
-
-                    } else
-                        if ($destination_id != $origin && ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
+                    $origin = $shipment->consignee_city->hub_id;//let's suppose consignee city is origin now
+                    if(!$request->has('hub_id')){
+                        if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
                             $destination_city_id = $shipment->pickup_address->city_id;
                             $destination_city = City::find($destination_city_id);
                             if ($destination_city->id == $destination_city->hub_id) {
@@ -604,7 +577,6 @@ class ReturnController extends Controller
                                 $destination = $destinationHub->name;
                                 $hub = $destinationHub->id;
                             }
-
                             $service = $shipment->booking_type->booking_type;
                             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
                             if ($shipment_journey->exists()) {
@@ -620,75 +592,104 @@ class ReturnController extends Controller
                             }
                             return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status]);
 
-                        } else {
-                            return ['status' => 1, 'error' => 'Return Shipment not arrived at origin center yet.'];
+                        } else
+                            if ($destination_id != $origin && ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
+                                $destination_city_id = $shipment->pickup_address->city_id;
+                                $destination_city = City::find($destination_city_id);
+                                if ($destination_city->id == $destination_city->hub_id) {
+                                    $destination = $destination_city->name;
+                                    $hub = $destination_city->id;
+                                } else {
+                                    $hubid = $destination_city->hub_id;
+                                    $destinationHub = City::find($hubid);
+                                    $destination = $destinationHub->name;
+                                    $hub = $destinationHub->id;
+                                }
 
-                        }
-                }else
-                if($request->has('hub_id') && ($destination_id == $request->hub_id)){
-                if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
-                    $destination_city_id = $shipment->pickup_address->city_id;
-                    $destination_city = City::find($destination_city_id);
-                    if ($destination_city->id == $destination_city->hub_id) {
-                        $destination = $destination_city->name;
-                        $hub = $destination_city->id;
-                    } else {
-                        $hubid = $destination_city->hub_id;
-                        $destinationHub = City::find($hubid);
-                        $destination = $destinationHub->name;
-                        $hub = $destinationHub->id;
-                    }
-                    $service = $shipment->booking_type->booking_type;
-                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
-                    if ($shipment_journey->exists()) {
-                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+                                $service = $shipment->booking_type->booking_type;
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                                if ($shipment_journey->exists()) {
+                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
 //                            $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
-                        $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
-                        if ($status_id != '') {
-                            $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
-                            $status = $status_name->name;
-                        } else {
-                            $status = ' - ';
-                        }
-                    }
-                    return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status]);
+                                    $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                    if ($status_id != '') {
+                                        $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                        $status = $status_name->name;
+                                    } else {
+                                        $status = ' - ';
+                                    }
+                                }
+                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status]);
 
-                } else
-                    if ($destination_id != $origin && ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
-                        $destination_city_id = $shipment->pickup_address->city_id;
-                        $destination_city = City::find($destination_city_id);
-                        if ($destination_city->id == $destination_city->hub_id) {
-                            $destination = $destination_city->name;
-                            $hub = $destination_city->id;
-                        } else {
-                            $hubid = $destination_city->hub_id;
-                            $destinationHub = City::find($hubid);
-                            $destination = $destinationHub->name;
-                            $hub = $destinationHub->id;
-                        }
-
-                        $service = $shipment->booking_type->booking_type;
-                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
-                        if ($shipment_journey->exists()) {
-                            $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
-//                            $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
-                            $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
-                            if ($status_id != '') {
-                                $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
-                                $status = $status_name->name;
                             } else {
-                                $status = ' - ';
+                                return ['status' => 1, 'error' => 'Return Shipment not arrived at origin center yet.'];
+
                             }
+                    }else
+                        if($request->has('hub_id') && ($destination_id == $request->hub_id)){
+                            if ($destination_id == $origin && ($shipment->shipper_status_id == 20 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 30 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 37 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
+                                $destination_city_id = $shipment->pickup_address->city_id;
+                                $destination_city = City::find($destination_city_id);
+                                if ($destination_city->id == $destination_city->hub_id) {
+                                    $destination = $destination_city->name;
+                                    $hub = $destination_city->id;
+                                } else {
+                                    $hubid = $destination_city->hub_id;
+                                    $destinationHub = City::find($hubid);
+                                    $destination = $destinationHub->name;
+                                    $hub = $destinationHub->id;
+                                }
+                                $service = $shipment->booking_type->booking_type;
+                                $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                                if ($shipment_journey->exists()) {
+                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+//                            $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
+                                    $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                    if ($status_id != '') {
+                                        $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                        $status = $status_name->name;
+                                    } else {
+                                        $status = ' - ';
+                                    }
+                                }
+                                return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status]);
+
+                            } else
+                                if ($destination_id != $origin && ($shipment->shipper_status_id == 22 || $shipment->shipper_status_id == 24 || $shipment->shipper_status_id == 27 || $shipment->shipper_status_id == 29 || $shipment->shipper_status_id == 33 || $shipment->shipper_status_id == 35 || $shipment->shipper_status_id == 42 || $shipment->shipper_status_id == 44 || $shipment->shipper_status_id == 45 || $shipment->shipper_status_id == 46 || $shipment->shipper_status_id == 47 || $shipment->shipper_status_id == 48)) {
+                                    $destination_city_id = $shipment->pickup_address->city_id;
+                                    $destination_city = City::find($destination_city_id);
+                                    if ($destination_city->id == $destination_city->hub_id) {
+                                        $destination = $destination_city->name;
+                                        $hub = $destination_city->id;
+                                    } else {
+                                        $hubid = $destination_city->hub_id;
+                                        $destinationHub = City::find($hubid);
+                                        $destination = $destinationHub->name;
+                                        $hub = $destinationHub->id;
+                                    }
+
+                                    $service = $shipment->booking_type->booking_type;
+                                    $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
+                                    if ($shipment_journey->exists()) {
+                                        $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id)->select('shipper_status_id', 'remarks')->latest()->first();
+//                            $remarks = ($shipment_journey->remarks != '')? $shipment_journey->remarks:' - ';
+                                        $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
+                                        if ($status_id != '') {
+                                            $status_name = ShipmentStatus::where('id', $status_id)->select('name')->first();
+                                            $status = $status_name->name;
+                                        } else {
+                                            $status = ' - ';
+                                        }
+                                    }
+                                    return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status]);
+
+                                } else {
+                                    return ['status' => 1, 'error' => 'Return Shipment not arrived at origin center yet.'];
+
+                                }
+                        }else{
+                            return ['status' => 1, 'error' => 'Different hub, scan shipments of same hub!.'];
                         }
-                        return response()->json(['status' => 0, 'shId' => $shipment->id, 'tracking_number' => $shipment->tracking_number, 'destination' => $destination, 'hub' => $hub, 'consignee_name' => $shipment->consignee_name, 'phone' => $shipment->consignee_phone_number_1, 'address' => $shipment->consignee_address, 'amount' => $shipment->amount, 'service_type' => $service, 'shipment_status' => $status]);
-
-                    } else {
-                        return ['status' => 1, 'error' => 'Return Shipment not arrived at origin center yet.'];
-
-                    }
-                }else{
-                return ['status' => 1, 'error' => 'Different hub, scan shipments of same hub!.'];
-                }
                 } else {
                     return ['status' => 1, 'error' => 'This Shipment doesn\'t belongs to your assigned hubs!'];
                 }
@@ -723,10 +724,10 @@ class ReturnController extends Controller
             }
             if ($shipments_count != 0) {
 
-            $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
-            if ($note) {
-                foreach ($valid_shipments as $tracking) {
-                    $shipment = Shipment::where('id', $tracking);
+                $note = ReturnNote::create(['hub_id' => $hub_id, 'rider_id' => $rider, 'route_id' => $route, 'shipments_count' => $shipments_count, 'admin_id' => $admin]);
+                if ($note) {
+                    foreach ($valid_shipments as $tracking) {
+                        $shipment = Shipment::where('id', $tracking);
 
                         $shipment = $shipment->first();
 
@@ -763,11 +764,11 @@ class ReturnController extends Controller
                     }
                 }
             }
-                return redirect()->back()->with(['success' => "Return note has been created with Return Note Number:" . $note->id,'print'=>$note->id]);
-            }else{
+            return redirect()->back()->with(['success' => "Return note has been created with Return Note Number:" . $note->id,'print'=>$note->id]);
+        }else{
 
-                return ['error'=>"No shipments scanned"];
-            }
+            return ['error'=>"No shipments scanned"];
+        }
     }
     public function return_receive_deliveries_view(){
         return view('admin.return.receive');
@@ -785,55 +786,55 @@ class ReturnController extends Controller
         }
 
         $datatables = Datatables::of($deliveries)
-        ->editColumn('return_note', function ($deliveries) {
-            return "<a href='javascript:void(0);' class='printreturnnote'><u>" . str_pad($deliveries->return_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
-        })
-        ->addColumn('return_note_id_padded', function ($deliveries) {
-            return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
-        })
-        ->editColumn('shipments_count_link', function($deliveries) {
-            if ($deliveries->shipments_count != 0) {
-                return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
-            }
-            else {
-                return 0;
-            }
-        })
-        ->filterColumn('return_notes.id', function ($query, $keyword) {
-            return $query->where('return_notes.id', '=', $keyword);
-        })
-        ->addColumn("action", function ($result) {
-            $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
-            $route = route('admin.return.receive.update',['id'=>$result->return_note]);
+            ->editColumn('return_note', function ($deliveries) {
+                return "<a href='javascript:void(0);' class='printreturnnote'><u>" . str_pad($deliveries->return_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->addColumn('return_note_id_padded', function ($deliveries) {
+                return str_pad($deliveries->return_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('shipments_count_link', function($deliveries) {
+                if ($deliveries->shipments_count != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipments_count . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->filterColumn('return_notes.id', function ($query, $keyword) {
+                return $query->where('return_notes.id', '=', $keyword);
+            })
+            ->addColumn("action", function ($result) {
+                $statusUpdate = route('admin.return.receive.status',['id'=>$result->return_note]);
+                $route = route('admin.return.receive.update',['id'=>$result->return_note]);
 
-            $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item"><i class="ft-plus-circle primary"></i> Receive</a>';
-            $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item returnnoteupdate"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
+                $receive_button = '<a href="' . $statusUpdate . '" class="dropdown-item"><i class="ft-plus-circle primary"></i> Receive</a>';
+                $shift_shipment_button = '<a href="' . $route . '" class="dropdown-item returnnoteupdate"><i class="ft-plus-circle primary"></i> Edit Shipment</a>';
 
-            if (session('role_id') == 1 || count(array_intersect([50, 51], session('permissions'))) !== 0) {
-                $dropdown = "
+                if (session('role_id') == 1 || count(array_intersect([50, 51], session('permissions'))) !== 0) {
+                    $dropdown = "
                     <span class='dropdown'>
                         <button type='button' class='btn btn-success dropdown-toggle' data-toggle='dropdown'
                                 aria-haspopup='true' aria-expanded='false'><i class='ft-settings'></i></button>
                         <div class='dropdown-menu open-left arrow'>";
 
-                if (session('role_id') == 1 || in_array(50, session('permissions'))) {
-                  $dropdown .= $receive_button;
-                }
+                    if (session('role_id') == 1 || in_array(50, session('permissions'))) {
+                        $dropdown .= $receive_button;
+                    }
 
-                if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(51, session('permissions')))) {
-                  $dropdown .= $shift_shipment_button;
-                }
+                    if (($result->created_at->diffInMinutes(Carbon::now()) <= 60) && (session('role_id') == 1 || in_array(51, session('permissions')))) {
+                        $dropdown .= $shift_shipment_button;
+                    }
 
-                $dropdown .= "
+                    $dropdown .= "
                         </div>
                     </span>
                 ";
 
-                return $dropdown;
-            }
-            else {
-                return '';
-            }
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
             });
 
         if ($tracking_number = $request->get('search_tracking')) {
@@ -1030,22 +1031,22 @@ class ReturnController extends Controller
                 $reasonId = "reason_drop.$shipment";
                 $parcel = Shipment::where('id', $shipment)->first();
                 if (!in_array($parcel->shipper_status_id, $array_returned)) {
-                if (in_array($request->status_drop[$shipment],$array_returned_status)) {
-                    if($request->status_drop[$shipment] != $parcel->shipper_status_id){
-                        ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $return_note_id);
+                    if (in_array($request->status_drop[$shipment],$array_returned_status)) {
+                        if($request->status_drop[$shipment] != $parcel->shipper_status_id){
+                            ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], NULL, ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $return_note_id);
 
-                        Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
-                        ReturnNoteShipment::where(['return_note_id' => $return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
+                            Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment]]);
+                            ReturnNoteShipment::where(['return_note_id' => $return_note_id, 'shipment_id' => $shipment])->update(['status' => 1]);
 
+                        }
                     }
-                }
 //                else {
 //                    ShipmentsJourneyController::add($shipment, $request->status_drop[$shipment], $request->status_drop[$shipment], ($request->has($reasonId) ? $request->reason_drop[$shipment] : null), $request->remarks[$shipment], NULL, Auth::id(), $return_note_id);
 //
 //                    Shipment::where('id', $shipment)->update(['shipper_status_id' => $request->status_drop[$shipment], 'consignee_status_id' => $request->status_drop[$shipment]]);
 //                }
 
-            }
+                }
 
             }
             $shipment_status = ReturnNoteShipment::where(['return_note_id'=>$return_note_id,'status'=>0])->count();
@@ -1337,9 +1338,9 @@ class ReturnController extends Controller
 
             ->addColumn('main_status', function($deliveries) {
                 if($deliveries->status == 0){
-                        return 'Pending for Update';
+                    return 'Pending for Update';
                 }else if($deliveries->status == 1){
-                        return 'Verified';
+                    return 'Verified';
                 }else if($deliveries->status == 2){
                     return 'Canceled';
                 }

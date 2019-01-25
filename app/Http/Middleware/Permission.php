@@ -289,6 +289,10 @@ class Permission
             'reports.sales_person_performance.index' => 138,
             'reports.sales_person_performance.export_to_excel' => 138,
             'reports.sales_person_performance.download' => 138,
+            'reports.negative_balance_customers.index' => 148,
+            'reports.negative_balance_customers.list' => 148,
+            'reports.call_verification.index' => 153,
+            'reports.call_verification.list' => 153,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -352,6 +356,12 @@ class Permission
 
             'settings.shipment_cancellation_cut_off_days.index' => 116,
             'settings.shipment_cancellation_cut_off_days.store' => 116,
+
+            'settings.auto_account_disabled_days.auto_index' => 149,
+            'settings.auto_account_disabled_days.auto_store' => 149,
+
+            'settings.non_service_area.index' => 150,
+            'settings.non_service_area.store' => 150,
 
             'settings.daily_pickup_sales_cron.index' => 151,
             'settings.daily_pickup_sales_cron.store' => 151,

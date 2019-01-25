@@ -89,6 +89,8 @@
                         <th class="border-primary border-darken-1">Origin</th>
                         <th class="border-primary border-darken-1">Destination</th>
                         <th class="border-primary border-darken-1">Hub</th>
+                        <th class="border-primary border-darken-1">Product Type</th>
+                        <th class="border-primary border-darken-1">Product Description</th>
                         <th class="border-primary border-darken-1">Collection Amount</th>
                         <th class="border-primary border-darken-1">Aging (Arrival)</th>
                         <th class="border-primary border-darken-1">Aging (Last Status)</th>
@@ -247,6 +249,8 @@
                             head.push('Origin');
                             head.push('Destination');
                             head.push('Hub');
+                            head.push('Product Type');
+                            head.push('Product Description');
                             head.push('Amount');
                             head.push('Aging (Arrival)');
                             head.push('Aging (Last Status)');
@@ -265,6 +269,8 @@
                                 row.push(values.origin);
                                 row.push(values.destination);
                                 row.push(values.hub);
+                                row.push(values.product_type);
+                                row.push(values.description);
                                 row.push(values.amount);
                                 row.push(values.aging);
                                 row.push(values.aging_last_status);
@@ -322,6 +328,8 @@
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
                     {data: 'destination', name: 'dc.name', class: 'align-middle destination'},
                     {data: 'hub', name: 'h.name', class: 'align-middle hub'},
+                    {data: 'product_type', name: 'p.product_name', class: 'align-middle product_type'},
+                    {data: 'description', name: 'si.description', class: 'align-middle description'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'aging', name: 'aging', class: 'align-middle aging',orderable: false, searchable: false},
                     {data: 'aging_last_status', name: 'aging_last_status', class: 'align-middle aging',orderable: false, searchable: false}

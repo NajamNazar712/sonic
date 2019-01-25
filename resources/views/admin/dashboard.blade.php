@@ -206,8 +206,10 @@
                       <th class="border-primary border-darken-1">Consignee Address</th>
                       <th class="border-primary border-darken-1">Collection Amount</th>
                       <th class="border-primary border-darken-1">Product Type</th>
+                      <th class="border-primary border-darken-1">Product Description</th>
                       <th class="border-primary border-darken-1">Booking Date</th>
                       <th class="border-primary border-darken-1">Instructions</th>
+                      <th class="border-primary border-darken-1">Cancellation Remarks</th>
                       <th class="border-primary border-darken-1"></th>
                   </tr>
                   </thead>
@@ -497,7 +499,7 @@
                     }
                 },
                 rowId: 'shipment_id',
-                order: [[17, 'desc']],
+                order: [[18, 'desc']],
                 columns: [
                     {data: 'id', orderable: false, searchable: false, class: 'text-center align-middle select p-1', targets: 0, render: function (data, type, row) {return '';}},
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
@@ -516,8 +518,10 @@
                     {data: 'consignee_address', name: 'shipments.consignee_address', class: 'align-middle consignee_address'},
                     {data: 'amount', name: 'shipments.amount', class: 'align-middle amount'},
                     {data: 'product_type', name: 'product_type', class: 'align-middle product_type'},
+                    {data: 'product_description', name: 'si.description', class: 'align-middle product_description'},
                     {data: 'booking_date', name: 'shipments.created_at', class: 'align-middle booking_date'},
                     {data: 'instructions', name: 'shipments.special_instructions', class: 'align-middle instructions'},
+                    {data: 'cancellation_remarks', name: 'shipments_journey.remarks', class: 'align-middle cancellation_remarks'},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
 
                 ],
