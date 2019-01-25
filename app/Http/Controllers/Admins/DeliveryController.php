@@ -1473,9 +1473,10 @@ class DeliveryController extends Controller
                                             if ($verification == 1) {
                                                 NotificationsController::send(15, 0, $shipment);
                                                 NotificationsController::send(16, 0, $shipment);
-                                                ShipmentChargesController::return($shipment);
 
                                                 if ($parcel->booking_type_id != 4) {
+                                                    ShipmentChargesController::return($shipment);
+
                                                     AdminFinanceController::add_payment($shipment, 1);
                                                 }
                                                 else {
@@ -1484,6 +1485,8 @@ class DeliveryController extends Controller
                                                     $parcel->walk_in_status = 2;
 
                                                     $parcel->save();
+
+                                                    AdminFinanceController::done_payment($shipment, 1);
                                                 }
                                             }
 

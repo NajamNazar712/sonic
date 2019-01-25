@@ -212,9 +212,20 @@ class ReturnController extends Controller
                     NotificationsController::send(15, 0, $shipment);
                     NotificationsController::send(16, 0, $shipment);
 
-                    ShipmentChargesController::return($shipment);
+                    if ($parcel->booking_type_id != 4) {
+                        ShipmentChargesController::return($shipment);
 
-                    AdminFinanceController::add_payment($shipment, 1);
+                        AdminFinanceController::add_payment($shipment, 1);
+                    }
+                    else {
+                        ShipmentChargesController::walk_in_return($shipment);
+
+                        $parcel->walk_in_status = 2;
+
+                        $parcel->save();
+
+                        AdminFinanceController::done_payment($shipment, 1);
+                    }
                 }
                 else {
                     $remarks = ($request->remark[$parcel->id] != null)? $request->remark[$parcel->id] : null;
@@ -263,9 +274,20 @@ class ReturnController extends Controller
                 NotificationsController::send(15, 0, $request->shipment_id);
                 NotificationsController::send(16, 0, $request->shipment_id);
 
-                ShipmentChargesController::return($request->shipment_id);
+                if ($parcel->booking_type_id != 4) {
+                    ShipmentChargesController::return($request->shipment_id);
 
-                AdminFinanceController::add_payment($request->shipment_id, 1);
+                    AdminFinanceController::add_payment($request->shipment_id, 1);
+                }
+                else {
+                    ShipmentChargesController::walk_in_return($request->shipment_id);
+
+                    $parcel->walk_in_status = 2;
+
+                    $parcel->save();
+
+                    AdminFinanceController::done_payment($request->shipment_id, 1);
+                }
             }
             else {
                 Shipment::where('id',$request->shipment_id)->update(['shipper_status_id'=>17,'consignee_status_id'=>17]);
@@ -540,7 +562,7 @@ class ReturnController extends Controller
                 }
             })
             ->addColumn('action', function($shipment) {
-                if (($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
+                if (($shipment->booking_type_id != 4) && ($shipment->shipper_status_id == 20) && (session('role_id') == 1 || in_array(109, session('permissions')))) { //Change ID
                     $revert_button = '<button type="button" class="dropdown-item revert"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-plus-circle"></i></div><div class="col-9 offset-1">Revert</div></button>';
 
                     $dropdown = '
