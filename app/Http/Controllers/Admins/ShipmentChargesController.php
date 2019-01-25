@@ -795,13 +795,13 @@ class ShipmentChargesController extends Controller
             $percentage = $settings['national'];
         }
 
-        $charges = ROUND(($shipment->delivery_charges * $percentage), 0, PHP_ROUND_HALF_DOWN);
+        $charges = ROUND(($shipment->weight_charges * ($percentage / 100)), 0, PHP_ROUND_HALF_DOWN);
 
         $shipment->return_charges = $charges;
 
         $shipment->amount = $shipment->amount + $charges;
 
-        $shipment->received_amount = $shipment->received_amount + $charges;
+        $shipment->received_amount = $shipment->amount + $charges;
 
         $shipment->save();
     }
