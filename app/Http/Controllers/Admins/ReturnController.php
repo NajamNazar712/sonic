@@ -1034,7 +1034,7 @@ class ReturnController extends Controller
                 if(in_array($deliveries->shipper_status_id,$delivered_array)){
                     return $deliveries->current_status_name;
                 }else{
-                    if($deliveries->booking_type_id == 1){
+                    if($deliveries->booking_type_id == 1 || $deliveries->booking_type_id == 4){
                         $where = array(24,47,48);
                     }else if($deliveries->booking_type_id == 2){
                         $where = array(29,47,48);
@@ -1155,7 +1155,7 @@ class ReturnController extends Controller
         if(!empty($request->shipment_ids)){
             foreach ($request->shipment_ids as $shipment){
                 $parcel = Shipment::where('id',$shipment)->first();
-                if($parcel->booking_type_id == 1){
+                if($parcel->booking_type_id == 1 || $parcel->booking_type_id == 4){
                     ShipmentsJourneyController::add($shipment, 25, 25, NULL, NULL, NULL, Auth::id(),$request->return_note_id);
 
                     Shipment::where('id',$shipment)->update(['shipper_status_id'=>25,'consignee_status_id'=>25]);
