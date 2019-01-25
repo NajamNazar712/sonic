@@ -13,7 +13,7 @@ class UpdateModuleTableBookShipments extends Seeder
     {
         //
         DB::table('modules')->insert(array(
-            array('id' => 15, 'name' => 'Book Shipments')
+            array('id' => 16, 'name' => 'Book Shipments')
         ));
     }
 }
