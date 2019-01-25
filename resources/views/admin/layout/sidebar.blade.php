@@ -4,7 +4,9 @@
         <ul class="navigation navigation-main" id="main-menu-navigation" data-menu="menu-navigation">
             <li class=" nav-item"><a href="{{route('admin.orders.index')}}"><span class="menu-title" data-i18n="nav.dash.main">Order Management</span></a></li>
 
-            @if (session('role_id') == 1 || in_array(1, session('permissions')))
+            <li class=" nav-item"><a href="{{ route('admin.quick_tracking.index') }}"><span class="menu-title">Quick Tracking</span></a></li>
+
+        @if (session('role_id') == 1 || in_array(1, session('permissions')))
                 <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Dispute</span></a>
                     <ul class="menu-content">
                         <li><a class="menu-item" href="{{ route('admin.dispute.index') }}">Log</a></li>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\ShipmentsJourney;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
@@ -210,4 +211,37 @@ class AdminTrackingController extends Controller
         return $details;
     }
 
+    public function quick_tracking_index(){
+        return view('admin.tracking.quick_tracking');
+    }
+
+    public function quick_tracking_shipment_info(Request $request){
+        $tracking_no = $request->tracking;
+        if($tracking_no != null){
+            $shipment = Shipment::where('tracking_number', $tracking_no);
+            if ($shipment->exists()) {
+                $shipment = $shipment->first();
+
+                $details = array();
+
+                $details['tracking_number'] = $tracking_no;
+                $journey = ShipmentsJourney::where('shipment_id', $shipment->id)->latest()->first();
+                $details['status'] = $journey->shipment_status_shipper->name;
+                if($journey->status_reason_id != null){
+
+                    $details['reason'] = $journey->shipment_status_reason->name;
+                }else{
+                    $details['reason'] = null;
+                }
+                $details['remarks'] = $journey->remarks;
+                $details['current_status_date'] = Carbon::parse($journey->created_at)->toDateTimeString();
+                $details['origin'] = $shipment->pickup_address->city->name;
+                $details['destination'] = $shipment->consignee_city->name;
+                return response()->json(['status' => 1, 'details' => $details]);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Tracking Number not found!']);
+            }
+        }
+    }
 }

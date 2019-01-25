@@ -573,7 +573,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('cargo_consignment_details', 'Admins\AdminTrackingController@cargo_consignment_details')->name('cargo_consignment_details');
     });
 
-    Route::prefix('user_management')->name('user_management.')->group(function() {
+    Route::prefix('quick_tracking')->name('quick_tracking.')->group(function() {
+        Route::get('', 'Admins\AdminTrackingController@quick_tracking_index')->name('index');
+        Route::post('info', 'Admins\AdminTrackingController@quick_tracking_shipment_info')->name('info');
+    });
+        Route::prefix('user_management')->name('user_management.')->group(function() {
         Route::prefix('users')->name('users.')->group(function() {
             Route::get('', 'Admins\UserManagementController@user_index')->name('index');
             Route::get('list', 'Admins\UserManagementController@user_list')->name('list');
