@@ -113,7 +113,7 @@
                                 row.push(values.return_charges);
                                 row.push(values.gst);
                                 row.push(values.charges);
-                                row.push(values.charges_mode);
+                                row.push(values.charges_modes);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
                                 row.push(values.updated_by);
@@ -162,7 +162,7 @@
                     {data:'return_charges', name: 'shipments.return_charges', class: 'align-middle text-center return_charges'},
                     {data:'gst', name: 'shipments.gst', class: 'align-middle text-center gst'},
                     {data:'charges', name: 'shipments.amount', class: 'align-middle text-center charges'},
-                    {data:'charges_mode', name: 'cm.charges_mode', class: 'align-middle text-center charges_mode'},
+                    {data:'charges_modes', name: 'cm.charges_mode', class: 'align-middle text-center charges_mode'},
                     {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
                     {data:'updated_by', name: 'a.name', class: 'align-middle text-center updated_by'},
