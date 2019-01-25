@@ -16,6 +16,11 @@
                     <div class="card-content" aria-expanded="true">
                         <div class="card-body">
                             @include('admin.inc.messages')
+
+                            <div id="camera_scan" class="d-none">
+                                <div id="camera_view" class="camera_view"></div>
+                            </div>
+
                             <input type="hidden" id="draft_cargo_id" value="{{$draft->id}}">
                             <form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 
@@ -168,23 +173,6 @@
                                                 <button type="submit" name="submit_and_print" class="btn btn-primary" value="submit_and_print">Submit &amp; Print</button>
                                             </div>
                                         </form>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="modal fade" id="camera_scan" role="dialog" aria-labelledby="camera_scan_title" aria-hidden="true">
-                                <div class="modal-dialog modal-lg" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h4 class="modal-title" id="camera_scan_title">Camera Scan</h4>
-
-                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                <span aria-hidden="true">×</span>
-                                            </button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <div id="camera_view" class="camera_view"></div>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -563,13 +551,16 @@
             });
 
             $('#camera_scan_initiate').bind('click', function() {
-                $('#camera_scan').modal('show');
+                if ($('#camera_scan').hasClass('d-none')) {
+                    $('#camera_scan').removeClass('d-none');
 
-                camera_scanning_start('#camera_view');
-            });
+                    camera_scanning_start('#camera_view');
+                }
+                else {
+                    $('#camera_scan').addClass('d-none');
 
-            $('#camera_scan').on('hidden.bs.modal', function (e) {
-                camera_scanning_stop();
+                    camera_scanning_stop();
+                }
             });
 
             $('body').on('click','.cargo_remove',function () {
@@ -620,8 +611,6 @@
         });
 
         function camera_scan_detected(tracking_number) {
-            $('#camera_scan').modal('hide');
-
             $('#add_shipment_form input.tracking_number').val(tracking_number);
 
             $('#add_shipment_form').trigger('submit');

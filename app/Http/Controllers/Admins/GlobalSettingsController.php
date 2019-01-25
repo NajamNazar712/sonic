@@ -4,8 +4,12 @@ namespace App\Http\Controllers\Admins;
 
 use App\Http\Models\Admin\GlobalSettings;
 use App\Http\Models\Admin\NonServiceArea;
+use App\Http\Models\Admin\PettyCashAccountHead;
+use App\Http\Models\Admin\PettyCashAccountHeadAccountTitle;
+use App\Http\Models\Admin\PettyCashAccountTitle;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Yajra\Datatables\Datatables;
 
 class GlobalSettingsController extends Controller
 {
@@ -167,5 +171,266 @@ class GlobalSettingsController extends Controller
         $settings->save();
 
         return redirect()->back()->with('success', 'Settings Updated!');
+    }
+
+    public function petty_cash_heads_index(){
+        return view('admin.settings.petty_cash.account_head');
+    }
+    public function petty_cash_heads_list(Request $request){
+        $heads = PettyCashAccountHead::select('id','name','status');
+        return Datatables::of($heads)
+            ->editColumn('status', function ($heads){
+                if($heads->status == 0){
+                    return 'Inactive';
+                }else{
+                    return 'Active';
+                }
+            })
+            ->addColumn('action', function ($heads){
+                if (session('role_id') == 1 || count(array_intersect([160,161,162], session('permissions'))) !== 0) {
+
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                    if(session('role_id') == 1 || in_array(160, session('permissions'))){
+                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+
+                    }
+                    if ($heads->status == 1) {
+                        if(session('role_id') == 1 || in_array(162, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item inactive" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Inactive</div></button>';
+                        }else{
+                            $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">No Action</div></button>';
+                        }
+                    } else {
+                        if(session('role_id') == 1 || in_array(161, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Active</div></button>';
+                        }else{
+                            $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">No Action</div></button>';
+                        }
+                    }
+
+                    return $dropdown;
+                }else{
+                    return '';
+                }
+            })
+        
+        ->make(true);
+    }
+
+    public function petty_cash_heads_add(Request $request){
+        $head = trim($request->head);
+        if($head){
+            $account_head = new PettyCashAccountHead();
+            $account_head->name = $head;
+            $account_head->save();
+
+            return response()->json(['status' => 1, 'success' => 'Head of Account successfully added!']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Head of Account is empty']);
+        }
+    }
+
+    public function petty_cash_heads_edit(Request $request){
+        $head = $request->head_id;
+        if($head){
+            $account_head = PettyCashAccountHead::find($head);
+            $account_head->name = $request->account_head;
+            $account_head->save();
+
+            return response()->json(['status' => 1, 'success' => 'Head of Account successfully updated!']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Head of Account is empty!']);
+        }
+    }
+
+    public function petty_cash_heads_active(Request $request){
+        $head = $request->head_id;
+        if($head){
+            $account_head = PettyCashAccountHead::find($head);
+            if($account_head->status == 0){
+                $account_head->status = 1;
+                $account_head->save();
+                return response()->json(['status' => 1, 'success' => 'Head of Account successfully activated!']);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Head of Account is already active!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Head of Account is empty!']);
+        }
+    }
+
+    public function petty_cash_heads_inactive(Request $request){
+        $head = $request->head_id;
+        if($head){
+            $account_head = PettyCashAccountHead::find($head);
+            if($account_head->status == 1){
+                $account_head->status = 0;
+                $account_head->save();
+                return response()->json(['status' => 1, 'success' => 'Head of Account successfully inactivated!']);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Head of Account is already inactive!']);
+            }
+
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Head of Account is empty!']);
+        }
+    }
+
+    public function petty_cash_titles_index(){
+        $heads = PettyCashAccountHead::where('status',1)->get();
+        return view('admin.settings.petty_cash.account_title')->with(['heads' => $heads]);
+    }
+    public function petty_cash_titles_list(Request $request){
+        $heads = PettyCashAccountTitle::select('id','name','status');
+        return Datatables::of($heads)
+            ->editColumn('status', function ($heads){
+                if($heads->status == 0){
+                    return 'Inactive';
+                }else{
+                    return 'Active';
+                }
+            })
+            ->addColumn('action', function ($heads){
+                if (session('role_id') == 1 || count(array_intersect([160,161,162], session('permissions'))) !== 0) {
+                    $dropdown = '
+              <div class="btn-group">
+                <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                <div class="dropdown-menu dropdown-menu-sm">
+            ';
+                    if(session('role_id') == 1 || in_array(164, session('permissions'))) {
+                        $dropdown .= '<button type="button" class="dropdown-item edit" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-edit"></i></div><div class="col-9 offset-1">Edit</div></button>';
+                    }
+                    if ($heads->status == 1) {
+                        if(session('role_id') == 1 || in_array(166, session('permissions'))) {
+                            $dropdown .= '<button type="button" class="dropdown-item inactive" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-alert-octagon"></i></div><div class="col-9 offset-1">Inactive</div></button>';
+                        }else{
+                            $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">No Action</div></button>';
+                        }
+                    } else {
+                        if(session('role_id') == 1 || in_array(165, session('permissions'))) {
+
+                            $dropdown .= '<button type="button" class="dropdown-item enable" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check"></i></div><div class="col-9 offset-1">Active</div></button>';
+                        }else{
+                            $dropdown .= '<button type="button" class="dropdown-item" ><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-x"></i></div><div class="col-9 offset-1">No Action</div></button>';
+
+                        }
+                    }
+
+                    return $dropdown;
+                }else{
+                    return '';
+                }
+            })
+
+            ->make(true);
+    }
+
+    public function petty_cash_titles_add(Request $request){
+        $title = trim($request->title);
+        $heads = array();
+        $heads = $request->heads;
+        if($title){
+            $account_title = new PettyCashAccountTitle();
+            $account_title->name = $title;
+            $account_title->save();
+            foreach($heads as $head){
+                $head_title = new PettyCashAccountHeadAccountTitle();
+                $head_title->petty_cash_account_head_id = $head;
+                $head_title->petty_cash_account_title_id = $account_title->id;
+                $head_title->save();
+            }
+            return response()->json(['status' => 1, 'success' => 'Head of Account successfully added!']);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Head of Account is empty']);
+        }
+    }
+
+    public function petty_cash_titles_info(Request $request){
+        $title_id = $request->title_id;
+        $title = PettyCashAccountTitle::find($title_id);
+        if($title){
+            $heads = PettyCashAccountHeadAccountTitle::where('petty_cash_account_title_id',$title_id)->pluck('petty_cash_account_head_id')->toArray();
+
+            return response()->json(['status' => 1, 'heads' => $heads, 'title'=>$title]);
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Title not found!']);
+        }
+
+    }
+
+    public function petty_cash_titles_edit(Request $request){
+        $title = trim($request->account_title);
+        $heads = array();
+        $heads = $request->heads;
+        $title_id = $request->title_id;
+        if(!$title){
+            return response()->json(['status' => 0, 'error' => 'Title not found!']);
+        }
+        if(!$title_id){
+            return response()->json(['status' => 0, 'error' => 'Title ID not found!']);
+        }
+        if(empty($heads)){
+            return response()->json(['status' => 0, 'error' => 'Heads not selected!']);
+        }
+        $title_details = PettyCashAccountTitle::find($title_id);
+        $title_details->name = $title;
+        $title_details->save();
+        PettyCashAccountHeadAccountTitle::where('petty_cash_account_title_id',$title_id)->delete();
+        foreach ($heads as $head){
+            $title_heads = new PettyCashAccountHeadAccountTitle();
+            $title_heads->petty_cash_account_head_id = $head;
+            $title_heads->petty_cash_account_title_id = $title_id;
+            $title_heads->save();
+        }
+        return response()->json(['status' => 1, 'success' => 'Title successfully edited!']);
+    }
+
+    public function petty_cash_titles_active(Request $request){
+        $title = $request->title_id;
+        if($title){
+            $account_title = PettyCashAccountTitle::find($title);
+            if($account_title->status == 0){
+                $account_title->status = 1;
+                $account_title->save();
+                return response()->json(['status' => 1, 'success' => 'Title of Account successfully activated!']);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Title of Account is already active!']);
+            }
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Title of Account is empty!']);
+        }
+    }
+
+    public function petty_cash_titles_inactive(Request $request){
+        $title = $request->title_id;
+        if($title){
+            $account_title = PettyCashAccountTitle::find($title);
+            if($account_title->status == 1){
+                $account_title->status = 0;
+                $account_title->save();
+                return response()->json(['status' => 1, 'success' => 'Title of Account successfully inactivated!']);
+            }
+            else{
+                return response()->json(['status' => 0, 'error' => 'Title of Account is already inactive!']);
+            }
+
+        }
+        else{
+            return response()->json(['status' => 0, 'error' => 'Title of Account is empty!']);
+        }
     }
 }
