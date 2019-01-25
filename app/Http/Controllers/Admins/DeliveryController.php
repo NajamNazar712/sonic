@@ -713,6 +713,8 @@ class DeliveryController extends Controller
                     $shipment_details_row_start .= '
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                     ';
+
+                    $total_cod_amount += $shipment->amount;
                 }
                 else {
                     $shipment_details_row_start .= '
@@ -741,7 +743,6 @@ class DeliveryController extends Controller
                           </tr>
                 ';
 
-                $total_cod_amount += $shipment->amount;
                 $shipment_details .= $shipment_details_row_start;
             }
             $shipment_details .= '
