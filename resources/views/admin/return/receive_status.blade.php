@@ -141,10 +141,10 @@
                         className: 'btn btn-primary returned',
                         enabled: false,
                         action: function (e, dt, node, config) {
-                            if(selected_rows !== ''){
+                            if(selected_rows !== '') {
                                 swal({
                                     title: 'Are You Sure?',
-                                    text: 'Select Yes to change this shipment\'s status!',
+                                    text: 'Select Yes to change this shipment\'s status! Please make sure you have collected the charges!',
                                     icon: 'warning',
                                     buttons: {
                                         cancel: {
