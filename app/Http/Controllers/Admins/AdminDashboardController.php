@@ -23,9 +23,6 @@ use App\Http\Models\Rates\HistoryReturnCharge;
 use App\Http\Models\Rates\HistoryWeightCharge;
 use App\Http\Models\Rates\PendingRateStatus;
 use App\Http\Models\Rates\RateHistory;
-use App\Http\Models\RiderRoute;
-use App\Http\Models\RoutePoint;
-use App\Http\Models\RouteType;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
 use Illuminate\Support\Facades\DB;
@@ -566,7 +563,7 @@ class AdminDashboardController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
-			->editColumn('account_no', function ($shipment) {
+            ->editColumn('account_no', function ($shipment) {
                 return str_pad($shipment->account_no, 6, '0', STR_PAD_LEFT);
             })
             ->filterColumn('u.id', function ($query, $keyword) {
@@ -5631,8 +5628,8 @@ class AdminDashboardController extends Controller
             ->leftjoin('sale_person_tags as spt', function ($join) {
                 $join->on('spt.user_id', '=', 'users.id')
                     ->leftjoin('admins as ad','ad.id','=','spt.admin_id')
-	                    ->where('spt.status','=',0);
-	            })
+                        ->where('spt.status','=',0);
+                })
             ->select(['users.rate_status as rate_status','users.rejected_reason as rejected_reason','users.id','ad.name as admin_tag_id', 'users.name', 'cities.name as city' ,'users.poc','users.phone','users.address','users.status', 'users.email','users.created_at','products.product_name as product_type','users.blacklist','rab.name as rates_added_by','rabb.name as rates_authorized_by'])->whereIn('users.status',[0,1,2])->where('blacklist',0);
 
         if (session('role_id') != 1) {
@@ -5835,7 +5832,7 @@ class AdminDashboardController extends Controller
             AdminLogs::create([
                 'admin_id'=>Auth::id(),
                 'user_id'=>$user_id
-
+                
             ]);
         }
         else
@@ -6224,18 +6221,17 @@ class AdminDashboardController extends Controller
         ->make(true);
     }
     public function addRouteView(){
-       $route_types = RouteType::all();
        $city = City::select(['id','name'])->where('status',1)->get();
-        return view('admin.management.routes.add_route')->with(['cities' => $city, 'route_types' => $route_types]);
+        return view('admin.management.add_route_form')->with('cities',$city);
     }
     public function addRouteDetails(Request $request){
-        $way_points_array = explode(',', $request->way_points_array);
+//        return $request;
         $validations = [
             'city_id'=>'required|numeric',
             'route_code'=>'required',
             'start'=>'required',
             'end'=>'required',
-            'route_type'=>'required'
+            'junction'=>'required'
         ];
         $validate = Validator::make($request->all(), $validations);
 
@@ -6243,27 +6239,14 @@ class AdminDashboardController extends Controller
             return redirect()->back()
                 ->withErrors($validate);
         }
-        $route = Route::create([
+        Route::create([
             'city_id'=>$request->city_id,
             'code'=>$request->route_code,
             'start'=>$request->start,
             'end'=>$request->end,
-            'route_type_id'=>$request->route_type,
-            'start_point_lat' => $request->start_point_lat,
-            'start_point_long' => $request->start_point_long,
-            'end_point_lat' => $request->end_point_lat,
-            'end_point_long' => $request->end_point_long,
+            'junction'=>$request->junction,
             'status'=>1
         ]);
-        if($route){
-            foreach ($way_points_array as $point){
-                $route_point = new RoutePoint();
-                $route_point->route_id = $route->id;
-//                $route_point->waypoint_lat = ;
-//                $route_point->waypoint_long = ;
-            }
-
-        }
         return redirect()->back()->with('success','Route added successfully');
     }
     public function editRouteView($id){
@@ -6273,7 +6256,6 @@ class AdminDashboardController extends Controller
         return view('admin.management.edit_route_form')->with(['route_id'=>$id,'cities'=>$citylist,'route'=>$route]);
     }
     public function editRouteDetails(Request $request, $id){
-        return $request;
         $validations = [
             'city_id'=>'required|numeric',
             'route_code'=>'required',
@@ -6319,8 +6301,9 @@ class AdminDashboardController extends Controller
     }
     public function riderListAjax(){
         $rider = Rider::join('cities','riders.city_id','=','cities.id')
+            ->join('routes','routes.id','=','riders.route_id')
             ->join('rider_categories','rider_categories.id','=','riders.rider_category_id')
-            ->select(['cities.name as city','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','riders.vehicle_no','rider_categories.name as category','riders.status as status','riders.created_at']);
+            ->select(['cities.name as city','riders.id as rider_id','riders.id','riders.name as rider','riders.phone','riders.cnic','riders.address','routes.code as route','routes.start','routes.end','rider_categories.name as category','riders.status as status','riders.created_at']);
 
         if (session('role_id') != 1) {
             $rider = $rider->whereIn('cities.hub_id', session('hubs'));
@@ -6331,19 +6314,19 @@ class AdminDashboardController extends Controller
                 return ($rider->status == 0)? 'Inactive': 'Active';
             })
 
-//            ->editColumn('route', function ($rider) {
-//                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
-//            })
-//            ->filterColumn('route',function($query, $keyword){
-//                $keyword = strtolower($keyword);
-//                if ($keyword != '') {
-//                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
-//                }
-//
-//                else {
-//                    $query->whereRaw('false');
-//                }
-//            })
+            ->editColumn('route', function ($rider) {
+                return $rider->route.' ('.$rider->start. ' to '.$rider->end.')';
+            })
+            ->filterColumn('route',function($query, $keyword){
+                $keyword = strtolower($keyword);
+                if ($keyword != '') {
+                    $query->where('routes.code', 'like', '%'.$keyword.'%')->orWhere('routes.start', 'like', '%'.$keyword.'%')->orWhere('routes.end', 'like', '%'.$keyword.'%');
+                }
+
+                else {
+                    $query->whereRaw('false');
+                }
+            })
             ->addColumn("action", function ($rider) {
                 if (session('role_id') == 1 || count(array_intersect([98, 99], session('permissions'))) !== 0) {
                     $dropdown = '
@@ -6398,14 +6381,14 @@ class AdminDashboardController extends Controller
         return response()->json($route);
     }
     public function addRiderDetails(Request $request){
+
         $validations = [
             'city_id'=>'required|numeric',
             'rider_name'=>'required|max:255',
             'phone'=>'required|max:255',
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
-            'vehicle_no'=>'required',
-            'pin_code' => 'required',
+            'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -6420,48 +6403,21 @@ class AdminDashboardController extends Controller
             'phone'=>$request->phone,
             'cnic'=>$request->cnic,
             'address'=>$request->address,
+            'route_id'=>$request->route_id,
             'rider_category_id'=>$request->rider_category,
-            'pin_code'=>$request->pin_code,
-            'vehicle_no' => $request->vehicle_no,
             'status'=>1
         ]);
-        $route_ids = explode(',',$request->selected_routes);
-        if(!empty($route_ids)){
-            foreach ($route_ids as $id){
-                $check = "check.$id";
-                $route = new RiderRoute();
-                $route->rider_id = $rider->id;
-                $route->route_id = $id;
-                if($request->has($check)){
-
-                    $route->default_route = 1;
-                }
-                $route->save();
-            }
-        }
         if($rider){
             return redirect()->back()->with('success','Rider added successfully');
         }
 
     }
     public function editRiderView($id){
-        $default_route_id = '';
+        $city = City::select(['id','name'])->where('status',1)->get();
+        $category = RiderCategory::all();
         $rider = Rider::find($id);
-        if($rider){
-
-            $city = City::select(['id','name'])->where('status',1)->get();
-            $category = RiderCategory::all();
-            $rider_routes = RiderRoute::where('rider_id',$id)->pluck('route_id')->toArray();
-            $default_route = $rider->rider_routes->where('default_route',1)->first();
-            if($default_route){
-                $default_route_id = $default_route->route_id;
-            }
-            $route = Route::where('city_id',$rider->city_id)->get();
-            return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route, 'rider_routes'=>$rider_routes, 'default_route_id' => $default_route_id]);
-        }
-        else{
-            redirect()->back()->with(['error' => 'Rider Not found!']);
-        }
+        $route = Route::where('city_id',$rider->city_id)->get();
+        return view('admin.management.edit_rider_form')->with(['rider_id'=>$id,'cities'=>$city,'categories'=>$category,'rider'=>$rider,'routes'=>$route]);
     }
     public function editRiderDetails(Request $request,$id){
         $validations = [
@@ -6470,8 +6426,7 @@ class AdminDashboardController extends Controller
             'phone'=>'required|max:255',
             'cnic'=>'required|max:255',
             'address'=>'required|max:255',
-            'vehicle_no'=>'required',
-            'pin_code'=>'required',
+            'route_id'=>'required|numeric',
             'rider_category'=>'required|numeric'
         ];
         $validate = Validator::make($request->all(), $validations);
@@ -6486,27 +6441,9 @@ class AdminDashboardController extends Controller
             'phone'=>$request->phone,
             'cnic'=>$request->cnic,
             'address'=>$request->address,
-            'vehicle_no'=>$request->vehicle_no,
-            'pin_code' => $request->pin_code,
+            'route_id'=>$request->route_id,
             'rider_category_id'=>$request->rider_category
         ]);
-
-        $route_ids = explode(',',$request->selected_routes);
-        if(!empty($route_ids)){
-            RiderRoute::where('rider_id',$id)->delete();
-            foreach ($route_ids as $rid){
-                $check = "check.$rid";
-                $route = new RiderRoute();
-                $route->rider_id = $id;
-                $route->route_id = $rid;
-                if($request->has($check)){
-
-                    $route->default_route = 1;
-                }
-                $route->save();
-            }
-        }
-
         if($rider){
             return redirect()->back()->with('success','Rider updated successfully');
         }
@@ -6530,24 +6467,5 @@ class AdminDashboardController extends Controller
 
     }
 
-//    public function rider_routes_list(Request $request, $rider_id){
-//        $routes = RiderRoute::join('routes as ro', 'rider_routes.route_id', '=', 'ro.id')
-//            ->select(['ro.id as route_id','ro.code as route','ro.start','ro.end','rider_routes.default_route as default'])
-//            ->where('rider_routes.rider_id', $rider_id);
-//
-//        return Datatables::of($routes)
-//            ->editColumn('default',function($routes){
-//                if($routes->default == 1){
-//                    return "<input type='checkbox' class='default_checkbox' name='check[.$routes->route_id.]' checked>";
-//                }else{
-//                    return "<input type='checkbox' class='default_checkbox' name='check[.$routes->route_id.]'>";
-//                }
-//            })
-//            ->addColumn("action", function () {
-//                return '<a href="javascript:void(0);" class="btn btn-icon btn-danger routerow"><i class="la la-close"></i></a>';
-//
-//            })
-//            ->make(true);
-//    }
 }
 
