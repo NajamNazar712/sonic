@@ -13,7 +13,7 @@ class UpdatePermissionModuleTableWalkInBookShipments extends Seeder
     {
         //
         DB::table('module_permissions')->insert(array(
-            array('id' => 155, 'name' => 'Walk-In - View', 'module_id' => 15)
+            array('id' => 155, 'name' => 'Walk-In - View', 'module_id' => 17)
         ));
     }
 }
