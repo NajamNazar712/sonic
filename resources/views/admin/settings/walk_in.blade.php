@@ -46,7 +46,7 @@
                                                         <div class="col p-0">
                                                             <div class="input-group form-group">
                                                         <label class="form-control">Local</label>
-                                                        <input type="text" name="walk_in_hub_ol_a_local" class="form-control numeric" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_ol->local }}">
+                                                        <input type="text" name="walk_in_hub_ol_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_ol->local }}">
                                                                 <div class="input-group-append">
                                                                     <span class="input-group-text">%</span>
                                                                 </div>
@@ -55,7 +55,7 @@
                                                         <div class="col p-0">
                                                             <div class="input-group form-group">
                                                         <label class="form-control"  style="margin-left: 10px">National</label>
-                                                        <input type="text" name="walk_in_hub_ol_c_national" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_hub_ol->national }}">
+                                                        <input type="text" name="walk_in_hub_ol_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_hub_ol->national }}">
                                                                 <div class="input-group-append">
                                                                     <span class="input-group-text">%</span>
                                                                 </div>
@@ -87,7 +87,7 @@
                                                 <div class="col p-0">
                                                     <div class="input-group form-group">
                                                     <label class="form-control">Local</label>
-                                                    <input type="text" name="walk_in_door_ol_a_local" class="form-control numeric" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_ol->local }}">
+                                                    <input type="text" name="walk_in_door_ol_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_ol->local }}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -96,7 +96,7 @@
                                                 <div class="col p-0">
                                             <div class="input-group form-group">
                                                     <label class="form-control"  style="margin-left: 10px">National</label>
-                                                    <input type="text" name="walk_in_door_ol_c_national" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_door_ol->national }}">
+                                                    <input type="text" name="walk_in_door_ol_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_door_ol->national }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -129,7 +129,7 @@
                                                 <div class="col p-0">
                                                     <div class="input-group form-group">
                                                     <label class="form-control">Local</label>
-                                                    <input type="text" name="walk_in_hub_on_a_local" class="form-control numeric" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_on->local }}">
+                                                    <input type="text" name="walk_in_hub_on_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_on->local }}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -138,7 +138,7 @@
                                                 <div class="col p-0">
                                             <div class="input-group form-group">
                                                     <label class="form-control" style="margin-left: 10px">National</label>
-                                                    <input type="text" name="walk_in_hub_on_c_national" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_hub_on->national }}">
+                                                    <input type="text" name="walk_in_hub_on_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_hub_on->national }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -170,7 +170,7 @@
                                                 <div class="col p-0">
                                                     <div class="input-group form-group">
                                                     <label class="form-control">Local</label>
-                                                    <input type="text" name="walk_in_door_on_a_local" class="form-control numeric" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_on->local }}">
+                                                    <input type="text" name="walk_in_door_on_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_on->local }}">
                                                         <div class="input-group-append">
                                                             <span class="input-group-text">%</span>
                                                         </div>
@@ -179,7 +179,7 @@
                                                 <div class="col p-0">
                                             <div class="input-group form-group">
                                                     <label class="form-control"  style="margin-left: 10px">National</label>
-                                                    <input type="text" name="walk_in_door_on_c_national" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_door_on->national }}">
+                                                    <input type="text" name="walk_in_door_on_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_door_on->national }}">
                                                 <div class="input-group-append">
                                                     <span class="input-group-text">%</span>
                                                 </div>
@@ -213,7 +213,7 @@
                                                     <div class="col p-0">
                                                 <div class="input-group form-group">
                                                     <label class="form-control">Local</label>
-                                                    <input type="text" name="walk_in_hub_dn_a_local" class="form-control numeric" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_dn->local }}">
+                                                    <input type="text" name="walk_in_hub_dn_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_hub_dn->local }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">%</span>
                                                     </div>
@@ -222,7 +222,7 @@
                                                     <div class="col p-0">
                                                 <div class="input-group form-group">
                                                     <label class="form-control"  style="margin-left: 10px">National</label>
-                                                    <input type="text" name="walk_in_hub_dn_c_national" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_hub_dn->national }}">
+                                                    <input type="text" name="walk_in_hub_dn_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_hub_dn->national }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">%</span>
                                                     </div>
@@ -254,7 +254,7 @@
                                                     <div class="col p-0">
                                                 <div class="input-group form-group">
                                                     <label class="form-control">Local</label>
-                                                    <input type="text" name="walk_in_door_dn_a_local" class="form-control numeric" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_dn->local }}">
+                                                    <input type="text" name="walk_in_door_dn_a_local" class="form-control local" placeholder="" data-rule-required="true" data-msg-required="Local rate is required" value="{{ $walk_in_door_dn->local }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">%</span>
                                                     </div>
@@ -263,7 +263,7 @@
                                                 <div class="col p-0">
                                                 <div class="input-group form-group">
                                                     <label class="form-control" style="margin-left: 10px">National</label>
-                                                    <input type="text" name="walk_in_door_dn_c_national" class="form-control numeric" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_door_on->national }}">
+                                                    <input type="text" name="walk_in_door_dn_c_national" class="form-control national" placeholder="" required data-rule-required="true" data-msg-required="National Rate is required" value="{{ $walk_in_door_on->national }}">
                                                     <div class="input-group-append">
                                                         <span class="input-group-text">%</span>
                                                     </div>
@@ -298,6 +298,22 @@
                 'allowMinus': false,
                 'allowPlus': false,
                 'rightAlign': false
+            });
+            $('.local').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 1,
+                'max' :100
+            });
+            $('.national').inputmask({
+                'alias': 'integer',
+                'allowMinus': false,
+                'allowPlus': false,
+                'rightAlign': false,
+                'min': 1,
+                'max' :100
             });
             $('#settings_form').validate({
                 errorClass: 'danger',
