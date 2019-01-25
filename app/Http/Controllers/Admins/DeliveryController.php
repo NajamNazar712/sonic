@@ -1478,6 +1478,13 @@ class DeliveryController extends Controller
                                                 if ($parcel->booking_type_id != 4) {
                                                     AdminFinanceController::add_payment($shipment, 1);
                                                 }
+                                                else {
+                                                    ShipmentChargesController::walk_in_return($shipment);
+
+                                                    $parcel->walk_in_status = 2;
+
+                                                    $parcel->save();
+                                                }
                                             }
 
                                         } else {

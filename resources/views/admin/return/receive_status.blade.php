@@ -30,6 +30,7 @@
                             <th class="border-primary border-darken-1">Address</th>
                             <th class="border-primary border-darken-1">Destination</th>
                             <th class="border-primary border-darken-1">Service Type</th>
+                            <th class="border-primary border-darken-1">Collection Charges</th>
                             <th class="border-primary border-darken-1">Action</th>
                         </tr>
                         </thead>
@@ -276,6 +277,7 @@
                     {data:'address',name: 'usi.pickup_address', class: 'align-middle address'},
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
+                    {data:'return_charges',name: 'shipments.return_charges', class: 'align-middle return_charges'},
                     {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
