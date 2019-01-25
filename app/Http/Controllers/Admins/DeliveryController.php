@@ -1631,9 +1631,8 @@ class DeliveryController extends Controller
                 }
                 $dncc_status = array(14,26,27,28,29,30,31,32,33,34,35,36,37,38);
                 $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $delivery_note_id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
-                $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status);
-                $dncc_amount = $filtered_shipments->where('charges_mode_id', '!=', 1)->sum('received_amount');
-                $delivered_shipments = $filtered_shipments->count();
+                $dncc_amount = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->where('charges_mode_id', '!=', 1)->sum('received_amount');
+                $delivered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->count();
 
                 DeliveryNote::where('id', $delivery_note_id)->update(['delivered_shipments' => $delivered_shipments, 'verified_by' => Auth::id(), 'received_cod_amount' => $dncc_amount, 'status' => 1,'last_updated_at'=>$current_time,'status_verified_at'=>$current_time]);
 
