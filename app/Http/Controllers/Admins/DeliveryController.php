@@ -302,7 +302,7 @@ class DeliveryController extends Controller
                     $valid_shipments[] = $shipment;
                     $shipments_count++;
 
-                    if ($shipment_details->booking_type_id != 4 && ($shipment_details->charges_mode_id == NULL || $shipment_details->charges_mode_id == 2)) {
+                    if ($shipment_details->booking_type_id != 4 || ($shipment_details->booking_type_id == 4 && $shipment_details->charges_mode_id == 2)) {
                         $total_cod_amount += $shipment_details->amount;
                     }
                 }
@@ -564,7 +564,7 @@ class DeliveryController extends Controller
                 $count = $delivery->shipments_count;
                 $cod = $delivery->total_cod_amount;
                 $count = $count - 1;
-                if ($parcel->booking_type_id != 4 && ($parcel->charges_mode_id == NULL || $parcel->charges_mode_id == 2)) {
+                if ($parcel->booking_type_id != 4 || ($parcel->booking_type_id == 4 && $parcel->charges_mode_id == 2)) {
                     $cod = $cod - $parcel->amount;
                 }
                 if ($count == 0) {
@@ -709,7 +709,7 @@ class DeliveryController extends Controller
                 ';
                 }
 
-                if ($shipment->booking_type_id != 4 && ($shipment->charges_mode_id == NULL || $shipment->charges_mode_id == 2)) {
+                if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
                     $shipment_details_row_start .= '
                             <td>Rs ' . number_format($shipment->amount) . '</td>
                     ';
@@ -1763,7 +1763,7 @@ class DeliveryController extends Controller
                             <td>' . (($shipment->booking_type_id == 2) ? $shipment->replacement_weight : $shipment->actual_weight) . '</td>
                 ';
 
-                if ($shipment->booking_type_id != 4 && ($shipment->charges_mode_id == NULL || $shipment->charges_mode_id == 2)) {
+                if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
                     $shipment_details_row_start .= '
                             <td>Rs ' . number_format($shipment->received_amount) . '</td>
                     ';
@@ -2045,7 +2045,7 @@ class DeliveryController extends Controller
                             <td>' . $status->name . '</td>
                     ';
 
-                    if ($shipment->booking_type_id != 4 && ($shipment->charges_mode_id == NULL || $shipment->charges_mode_id == 2)) {
+                    if ($shipment->booking_type_id != 4 || ($shipment->booking_type_id == 4 && $shipment->charges_mode_id == 2)) {
                         $shipment_details_row_start .= '
                             <td>Rs ' . number_format($shipment->received_amount) . '</td>
                         ';
