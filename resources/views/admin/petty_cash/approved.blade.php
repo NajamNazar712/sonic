@@ -139,7 +139,7 @@
                 order: [1, 'asc'],
                 columns: [
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
-                    {data: 'statement_id', name: 'petty_cash_statements.id', class: 'align-middle statement_id'},
+                    {data: 'statement_link', name: 'petty_cash_statements.id', class: 'align-middle statement_link'},
                     {data: 'hub_name', name: 'h.name', class: 'align-middle hub_name'},
                     {data: 'reference_no', name: 'petty_cash_statements.reference_no', class: 'align-middle reference_no'},
                     {data: 'date', name: 'date', class: 'align-middle date', orderable:false},
@@ -251,7 +251,41 @@
                     toastr.error(error, 'Error!', {positionClass: 'toast-top-center', containerId: 'toast-top-center'});
                 }
             });
+            $('body').on('click','#datatable td.statement_link button', function () {
+                var statement_id = parseInt($(this).parents('tr').attr('id'));
+                if(statement_id){
+                    printStatement(statement_id);
+                }
+            });
 
+            function printStatement(id) {
+                $.ajax({
+                    url: '{!! route('admin.petty_cash.statements.print') !!}',
+                    method: 'POST',
+                    data: {
+                        'id': id,
+                        '_token': '{{ csrf_token() }}'
+                    }
+                })
+                    .done(function(data) {
+                        var tab = window.open('', '_blank');
+
+                        if(!tab) {
+                            swal({
+                                title: 'Popup Blocker Enabled!',
+                                text: 'Please add this site to your exception list.',
+                                icon: 'error',
+                                closeOnClickOutside: false,
+                                closeOnEsc: false
+                            });
+                        }
+                        else {
+                            tab.document.write(data);
+                            tab.document.close();
+                            tab.focus();
+                        }
+                    });
+            }
 
         });
     </script>
