@@ -838,7 +838,7 @@ class AdminFinanceController extends Controller
     }
 
     public function outstanding_walk_in_shipments_resolved(Request $request){
-        $shipment = Shipment::where('id', $request->id)->where('walk_in_status',0);
+        $shipment = Shipment::where('id', $request->id)->where('walk_in_status', '!=', 1);
 
         if ($shipment->exists()) {
             $shipment = $shipment->first();
