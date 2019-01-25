@@ -762,14 +762,10 @@ class AdminFinanceController extends Controller
                 $join->on('sj.shipment_id', '=', 'shipments.id')
                     ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
             })
-            ->leftjoin('shipments_journey as sjd', function($join) {
-                $join->on('sjd.shipment_id', '=', 'shipments.id')
-                    ->where('sjd.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipment_id = shipments.id AND shipper_status_id IN (14, 16, 30, 36))'));
-            })
             ->leftjoin('charges_modes as cm', 'shipments.charges_mode_id', '=', 'cm.id')
             ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
             ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
-            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'sjd.created_at as arrival_date','shipments.amount as charges', 'shipments.charges_mode_id as charges_mode', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount as charges', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status')
             ->where('shipments.booking_type_id',4);
 
 
@@ -799,7 +795,7 @@ class AdminFinanceController extends Controller
             ->addColumn('action', function($shipment) {
                 $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
 
-                if ((($shipment->charges_mode == 1) || ($shipment->charges_mode == 2 && ($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 25))) && ($shipment->walk_in_status == 0) && (session('role_id') == 1 || count(array_intersect([168], session('permissions') !== 0)))) {
+                if ((($shipment->charges_mode_id == 1) || ($shipment->charges_mode_id == 2 && ($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 25))) && ($shipment->walk_in_status == 0) && (session('role_id') == 1 || count(array_intersect([168], session('permissions') !== 0)))) {
                     $dropdown = '
                   <div class="btn-group">
                     <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
