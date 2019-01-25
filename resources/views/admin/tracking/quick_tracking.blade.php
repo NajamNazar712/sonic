@@ -200,9 +200,9 @@
                                 }else{
                                     var rowNo = table.rows().count();
 
-                                    table.row.add([rowNo+1,data.details.tracking_number,data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination]);
+                                    table.row.add([rowNo+1,parseInt(data.details.tracking_number),data.details.status,data.details.reason,data.details.remarks,data.details.current_status_date,data.details.origin,data.details.destination]);
                                     table.draw(false);
-                                    //table.order([0, 'desc']).draw();
+                                    table.order([0, 'desc']).draw();
                                 }
 
                                 scan.val('');
