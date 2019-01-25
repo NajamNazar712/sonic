@@ -30,10 +30,12 @@
                                     <th class="border-primary border-darken-1">Return Charges</th>
                                     <th class="border-primary border-darken-1">GST</th>
                                     <th class="border-primary border-darken-1">Total Charges</th>
-                                    <th class="border-primary border-darken-1">Status</th>
-                                    <th class="border-primary border-darken-1">Status Updated Datetime</th>
+                                    <th class="border-primary border-darken-1">Charges Mode</th>
+                                    <th class="border-primary border-darken-1">Shipment Status</th>
+                                    <th class="border-primary border-darken-1">Updated Datetime</th>
                                     <th class="border-primary border-darken-1">Updated By</th>
-                                    <th class="border-primary border-darken-1">Arrival Date/Time</th>
+                                    <th class="border-primary border-darken-1">Arrival DateTime</th>
+                                    <th class="border-primary border-darken-1">Status</th>
                                     <th class="border-primary border-darken-1">Aging</th>
                                     <th class="border-primary border-darken-1"></th>
                                 </tr>
@@ -87,10 +89,12 @@
                             head.push('Return Charges');
                             head.push('GST');
                             head.push('Total Charges');
-                            head.push('Status');
-                            head.push('Status Updated Datetime');
+                            head.push('Charges Mode');
+                            head.push('Shipment Status');
+                            head.push('Updated Datetime');
                             head.push('Updated By');
                             head.push('Arrival Date/Time');
+                            head.push('Status');
                             head.push('Aging');
 
 
@@ -109,10 +113,12 @@
                                 row.push(values.return_charges);
                                 row.push(values.gst);
                                 row.push(values.charges);
+                                row.push(values.charges_modes);
                                 row.push(values.status);
                                 row.push(values.status_updated_at);
                                 row.push(values.updated_by);
                                 row.push(values.arrival_date);
+                                row.push(values.walk_in_status);
                                 row.push(values.aging);
                                 body.push(row);
                             });
@@ -143,6 +149,7 @@
                     url: '{{ route('admin.finance.outstanding_shipments.walk_in_list') }}',
                 },
                 rowId: 'id',
+                order: [[13, 'desc']],
                 columns: [
                     {data: 'serial_number', orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 1, render: function (data, type, row) {return '';}},
                     {data:'tracking_number', name: 'shipments.tracking_number', class: 'align-middle text-center tracking_number'},
@@ -155,10 +162,12 @@
                     {data:'return_charges', name: 'shipments.return_charges', class: 'align-middle text-center return_charges'},
                     {data:'gst', name: 'shipments.gst', class: 'align-middle text-center gst'},
                     {data:'charges', name: 'shipments.amount', class: 'align-middle text-center charges'},
+                    {data:'charges_modes', name: 'cm.charges_mode', class: 'align-middle text-center charges_mode'},
                     {data:'status', name: 'ss.id', class: 'align-middle text-center status'},
                     {data:'status_updated_at', name: 'sj.updated_at', class: 'align-middle text-center status_updated_at'},
                     {data:'updated_by', name: 'a.name', class: 'align-middle text-center updated_by'},
                     {data:'arrival_date', name: 'sjd.created_at', class: 'align-middle text-center arrival_date'},
+                    {data:'walk_in_status', name: 'shipments.walk_in_status', class: 'align-middle text-center walk_in_status'},
                     {data:'aging', name: 'aging', class: 'align-middle text-center aging', orderable: false, searchable: false},
                     {data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
                 ],

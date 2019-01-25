@@ -30,7 +30,7 @@ class UpdateShipmentTableWalkInStatusAndUpdtedBy extends Migration
     {
         //
         Schema::table('shipments', function (Blueprint $table) {
-            $table->dropColumn('walk_in_delivery_type');
+            $table->dropColumn('walk_in_delivery_type_id');
             $table->dropColumn('walk_in_status');
             $table->dropColumn('charges_mode_id');
         });
