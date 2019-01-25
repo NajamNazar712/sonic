@@ -305,7 +305,7 @@
                 'allowPlus': false,
                 'rightAlign': false,
                 'min': 1,
-                'max' :100
+                'max' :500
             });
             $('.national').inputmask({
                 'alias': 'integer',
@@ -313,7 +313,7 @@
                 'allowPlus': false,
                 'rightAlign': false,
                 'min': 1,
-                'max' :100
+                'max' :500
             });
             $('#settings_form').validate({
                 errorClass: 'danger',
