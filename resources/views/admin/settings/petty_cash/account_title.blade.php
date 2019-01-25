@@ -141,7 +141,7 @@
                 @else
                 dom: 'ltipr',
                 @endif
-                scrollX: true,
+                scrollX: true, scrollY:'300px',
                 lengthMenu: [[50, 100, 500, 1000, -1], [50, 100, 500, 1000, 'All']],
                 pageLength: 50,
                 pagingType: 'full_numbers',

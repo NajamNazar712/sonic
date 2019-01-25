@@ -408,7 +408,7 @@ class AdminPettyCashController extends Controller
             ->leftjoin('admins as sab', 'sab.id', '=', 'petty_cash_statements.station_approved_by')
             ->leftjoin('admins as oab', 'oab.id', '=', 'petty_cash_statements.operation_approved_by')
             ->leftjoin('admins as fab', 'fab.id', '=', 'petty_cash_statements.finance_approved_by')
-            ->select('petty_cash_statements.id as statement_id','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status','petty_cash_statements.total_amount')
+            ->select('petty_cash_statements.id as statement_id','petty_cash_statements.id as statement_link','h.name as hub_name','petty_cash_statements.reference_no','petty_cash_statements.from','petty_cash_statements.to','cb.name as created_by','petty_cash_statements.created_at','sab.name as station_approved_by','petty_cash_statements.station_approved_at','oab.name as operation_approved_by','petty_cash_statements.operation_approved_at','fab.name as finance_approved_by','petty_cash_statements.finance_approved_at','petty_cash_statements.status','petty_cash_statements.total_amount')
             ->whereIn('petty_cash_statements.status',[3,4,5]);
 
         if (session('role_id') != 1) {
@@ -416,6 +416,9 @@ class AdminPettyCashController extends Controller
         }
 
         $petty = Datatables::of($petty)
+            ->editColumn('statement_link', function ($petty){
+                return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
+            })
             ->addColumn('date',function($petty){
                 return Carbon::parse($petty->from)->toDateString().' - '.Carbon::parse($petty->to)->toDateString();
             })
