@@ -626,7 +626,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
             Route::post('dncc/print', 'Admins\AdminFinanceController@outstanding_shipments_dncc_print')->name('dncc.print');
             Route::post('sdn/print', 'Admins\AdminFinanceController@outstanding_shipments_sdn_print')->name('sdn.print');
-
+            Route::get('walk_in_index', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_index')->name('walk_in_index');
+            Route::get('walk_in_list', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_list')->name('walk_in_list');
+            Route::put('walk_in_resolved', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_resolved')->name('walk_in_resolved');
         });
 
         Route::prefix('change_shipment_amount')->name('change_shipment_amount.')->group(function () {
@@ -887,7 +889,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ticker_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
         });
-
+        Route::prefix('walk_in')->name('walk_in.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');
+        });
         Route::prefix('petty_cash')->name('petty_cash.')->group(function (){
            Route::prefix('heads')->name('heads.')->group(function (){
               Route::get('', 'Admins\GlobalSettingsController@petty_cash_heads_index')->name('index');
@@ -906,6 +911,16 @@ Route::prefix('admin')->name('admin.')->group(function () {
               Route::post('active', 'Admins\GlobalSettingsController@petty_cash_titles_active')->name('active');
               Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_titles_inactive')->name('inactive');
            });
+        });
+    });
+    Route::prefix('shipment')->name('shipment.')->group(function () {
+        Route::prefix('book')->name('book.')->group(function () {
+            Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');
+            Route::get('order_id', 'Admins\AdminWalkInBookShipmentController@order_id')->name('order_id');
+            Route::post('store', 'Admins\AdminWalkInBookShipmentController@walk_in_store')->name('store');
+            Route::post('add_fuel_surcharge_gst_total', 'Admins\AdminWalkInBookShipmentController@add_fuel_surcharge_gst_total')->name('add_fuel_surcharge_gst_total');
+            Route::post('print_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_air_waybill')->name('print_air_waybill');
+            Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
         });
     });
 });

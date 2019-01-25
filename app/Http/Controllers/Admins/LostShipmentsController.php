@@ -42,17 +42,17 @@ class LostShipmentsController extends Controller
                 ->join('shipment_status as ss', 'ss.id', '=', 'shipments.shipper_status_id')
                 ->leftJoin('shipments_journey', function ($join) {
                     $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
-                        ->where('shipments_journey.created_at', '=',
-                            DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
+                        ->where('shipments_journey.id', '=',
+                            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
                 })
                 ->leftJoin('shipments_journey as sj', function ($join) {
                     $join->on('sj.shipment_id', '=', 'shipments.id')
-                        ->where('sj.created_at', '=',
-                            DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
+                        ->where('sj.id', '=',
+                            DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.shipper_status_id = 2)'));
                 })
                 ->leftJoin('shipment_status_reason as ssr', 'ssr.id', '=', 'shipments_journey.status_reason_id')
 //                ->leftJoin('shipment_payment_status as sps', 'sps.id', '=', 'shipments.payment_status_id')
-                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id')
+                ->select('shipments.id as shId', 'shipments.tracking_number as tracking_number_link', 'shipments.tracking_number', 'u.name as shipper', 'oc.name as origin', 'dc.name as destination', 'h.name as hub', 'shipments.consignee_name', 'shipments.consignee_phone_number_1 as phone', 'shipments.consignee_address', 'shipments.amount', 'sm.mode as shipping_mode', 'bt.booking_type as service_type', 'ss.name as status', 'ssr.name as reason', 'shipments_journey.remarks as remarks', 'shipments_journey.created_at as status_date', 'shipments_journey.created_at as current_status_date', 'sj.created_at as arrival','shipments.payment_status_id', 'shipments.booking_type_id', 'usi.poc')
 //                ->whereRaw('IF (shipments.payment_status_id != NULL, (shipments.payment_status_id > 1), TRUE)')
                 ->where('shipments.shipper_status_id', 18)
                 ->where(function ($sub_query) {
@@ -77,6 +77,25 @@ class LostShipmentsController extends Controller
                         return " - ";
                     }
                 })
+                ->editColumn('shipper', function ($shipment) {
+                    if ($shipment->booking_type_id == 4) {
+                        return $shipment->shipper .' (' . $shipment->poc . ')';
+                    }
+                    else {
+                        return $shipment->shipper;
+                    }
+                })
+                ->filterColumn('u.name', function ($query, $keyword) {
+                    $query->where(function ($sub_query) use ($keyword) {
+                        $sub_query->where('shipments.booking_type_id', '!=', 4)
+                            ->where('u.name', 'like', '%' . $keyword . '%');
+                    })
+                        ->orWhere(function ($sub_query) use ($keyword) {
+                            $sub_query->where('shipments.booking_type_id', '=', 4)
+                                ->where('usi.poc', 'like', '%' . $keyword . '%');
+                        });
+                })
+                ->orderColumn('u.name', 'u.name $1, usi.poc $1')
                 ->filterColumn('status', function ($query, $keyword) {
 
                     if ($keyword != '') {
@@ -158,7 +177,7 @@ class LostShipmentsController extends Controller
 
                         $data['id'] = $shipment->id;
                         $data['tracking_number'] = $shipment->tracking_number;
-                        $data['shipper_name'] = $shipment->user->name;
+                        $data['shipper_name'] = $shipment->user->name.' (' . $shipment->pickup_address->poc . ')';
                         $data['origin'] = $shipment->consignee_city->name;
                         $data['destination'] = $shipment->pickup_address->city->name;
                         $data['hub'] = $shipment->pickup_address->city->hub_city->name;

@@ -312,7 +312,7 @@
 									<div class="col">
 										<div class="form-group text-center">
 											<button type="submit" name="book" class="btn btn-primary" value="Book">Book</button>
-											<button type="submit" name="book_and_print" class="btn btn-primary ml-1" value="Book & Print">Book &amp; Print</button>
+											<button type="submit" name="book_and_print" class="btn btn-primary ml-1" value="Book & Print">Book & Print</button>
 										</div>
 									</div>
 								</div>

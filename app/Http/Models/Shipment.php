@@ -69,4 +69,8 @@ class Shipment extends Model
     public function done_payment_shipments() {
     	return $this->hasMany('App\Http\Models\DonePaymentShipment');
     }
+
+    public function charges_mode() {
+		return $this->belongsTo('App\Http\Models\ChargesMode');
+	}
 }

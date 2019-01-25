@@ -77,7 +77,7 @@ class AdminShipmentCancelController extends Controller
             ->where('shipments_journey.created_at', '=', DB::raw('(select max(created_at) from shipments_journey where shipments_journey.shipment_id = shipments.id)'));
         })
         ->leftjoin('shipment_payment_status as sps', 'shipments.payment_status_id', '=' , 'sps.id')
-        ->select(['shipments.id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'u.id as account_number', 'u.name as shipper', 'bt.booking_type as service_type', 'shipments_journey.remarks', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount as collection_amount', 'shipments.created_at as booking_date', 'shipments.special_instructions as instructions'])
+        ->select(['shipments.id', 'shipments.tracking_number as tracking_number', 'shipments.order_id', 'u.id as account_number', 'u.name as shipper', 'bt.booking_type as service_type', 'shipments_journey.remarks', 'oc.name as origin', 'dc.name as destination', 'shipments.consignee_name', 'shipments.consignee_phone_number_1', 'shipments.consignee_phone_number_2', 'shipments.consignee_address', 'shipments.amount as collection_amount', 'shipments.created_at as booking_date', 'shipments.special_instructions as instructions', 'shipments.booking_type_id', 'usi.poc'])
         ->where('shipments.shipper_status_id', '=', 17);
 
         if (session('role_id') != 1) {
@@ -99,6 +99,25 @@ class AdminShipmentCancelController extends Controller
 
             return $consignee_contact;
         })
+        ->editColumn('shipper', function ($shipment) {
+            if ($shipment->booking_type_id == 4) {
+                return $shipment->shipper .' (' . $shipment->poc . ')';
+            }
+            else {
+                return $shipment->shipper;
+            }
+        })
+        ->filterColumn('u.name', function ($query, $keyword) {
+            $query->where(function ($sub_query) use ($keyword) {
+                $sub_query->where('shipments.booking_type_id', '!=', 4)
+                    ->where('u.name', 'like', '%' . $keyword . '%');
+            })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('shipments.booking_type_id', '=', 4)
+                        ->where('usi.poc', 'like', '%' . $keyword . '%');
+                });
+        })
+        ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->addColumn('action', function($shipment) {
             if (session('role_id') == 1 || in_array(118, session('permissions'))) {
                 $dropdown = '
