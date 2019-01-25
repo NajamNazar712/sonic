@@ -9,6 +9,6 @@ class WalkInStandardWeightCharge extends Model
     //
     public $timestamps = FALSE;
     protected $fillable = [
-        'actual_weight','chargeable_weight'
+        'shipping_mode_id', 'delivery_type_id', 'actual_weight', 'chargeable_weight', 'local', 'national'
     ];
 }
