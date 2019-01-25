@@ -801,7 +801,7 @@ class ShipmentChargesController extends Controller
 
         $shipment->amount = $shipment->amount + $charges;
 
-        $shipment->received_amount = $shipment->received_amount + $charges;
+        $shipment->received_amount = $shipment->amount + $charges;
 
         $shipment->save();
     }
