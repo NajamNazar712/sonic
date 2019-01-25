@@ -253,7 +253,7 @@ class DeliveryController extends Controller
                             $service = $shipment->booking_type->booking_type;
                             $shipment_journey = ShipmentsJourney::where('shipment_id', $shipment->id);
                             if ($shipment_journey->exists()) {
-                                $shipment_journey = $shipment_journey->select('shipper_status_id', 'remarks')->latest()->first();
+                                $shipment_journey = $shipment_journey->select('shipper_status_id', 'remarks')->orderBy('id', 'DESC')->first();
 
                                 $remarks = ($shipment_journey->remarks != '') ? $shipment_journey->remarks : ' - ';
                                 $status_id = ($shipment_journey->shipper_status_id) ? $shipment_journey->shipper_status_id : '';
