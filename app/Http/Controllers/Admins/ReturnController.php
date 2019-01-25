@@ -1000,7 +1000,7 @@ class ReturnController extends Controller
             ->join('cities AS oc', 'usi.city_id', '=', 'oc.id')
             ->join('booking_types as bt','bt.id','=','shipments.booking_type_id')
             ->join('shipment_status as ss','ss.id','=','shipments.shipper_status_id')
-            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'shipments.booking_type_id', 'usi.poc', 'shipments.return_charges'])
+            ->select(['return_notes.id as return_note','shipments.tracking_number','shipments.id as shId','oc.name as destination','usi.pickup_address as address','users.name as shipper','bt.booking_type as service_type','shipments.booking_type_id','shipments.shipper_status_id','ss.name as current_status_name', 'usi.poc', 'shipments.charges_mode_id', 'shipments.amount', 'shipments.return_charges'])
             ->where('return_notes.id',$request->id);
 
         if (session('role_id') != 1) {
@@ -1071,9 +1071,14 @@ class ReturnController extends Controller
                 }
 
             })
-            ->editColumn('return_charges', function ($shipment) {
+            ->addColumn('charges', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
-                    return $shipment->return_charges;
+                    if ($shipment->charges_mode_id == 1) {
+                        return $shipment->return_charges;
+                    }
+                    else {
+                        return $shipment->amount;
+                    }
                 }
                 else {
                     return '';
@@ -1284,9 +1289,16 @@ class ReturnController extends Controller
                     ';
                 }
                 else {
-                    $shipment_details_row_start .= '
+                    if ($shipment->charges_mode_id == 1) {
+                        $shipment_details_row_start .= '
                             <td>' . $shipment->return_charges . '</td>
-                    ';
+                        ';
+                    }
+                    else {
+                        $shipment_details_row_start .= '
+                            <td>' . $shipment->amount . '</td>
+                        ';
+                    }
                 }
 
                 $shipment_details_row_start .= '

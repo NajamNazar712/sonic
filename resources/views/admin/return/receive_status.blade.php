@@ -277,7 +277,7 @@
                     {data:'address',name: 'usi.pickup_address', class: 'align-middle address'},
                     {data:'destination',name: 'oc.name', class: 'align-middle destination'},
                     {data:'service_type',name: 'bt.booking_type', class: 'align-middle service_type'},
-                    {data:'return_charges',name: 'shipments.return_charges', class: 'align-middle return_charges'},
+                    {data:'charges',name: 'shipments.charges', class: 'align-middle charges'},
                     {data:'action',name: 'action', class: 'align-middle action',orderable: false, searchable: false},
                 ],
                 rowCallback: function(row, data, index) {
