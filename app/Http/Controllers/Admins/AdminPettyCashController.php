@@ -91,7 +91,8 @@ class AdminPettyCashController extends Controller
 
     public function edit_petty_cash_statement_list(Request $request, $id){
         $petty_details = PettyCashStatementDetail::leftjoin('cities as h','h.id','=','petty_cash_statement_details.hub_id')
-            ->select('petty_cash_statement_details.id as statement_detail_id','h.name as hub','petty_cash_statement_details.hub_id','petty_cash_statement_details.account_head_id','petty_cash_statement_details.account_title_id','petty_cash_statement_details.date','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status')
+            ->join('petty_cash_statements as pcs','pcs.id', '=', 'petty_cash_statement_details.petty_cash_statement_id')
+            ->select('petty_cash_statement_details.id as statement_detail_id','h.name as hub','petty_cash_statement_details.hub_id','petty_cash_statement_details.account_head_id','petty_cash_statement_details.account_title_id','petty_cash_statement_details.date','petty_cash_statement_details.expense_details','petty_cash_statement_details.amount','petty_cash_statement_details.reference_no','petty_cash_statement_details.remarks','petty_cash_statement_details.status','pcs.status as petty_status')
             ->where('petty_cash_statement_details.petty_cash_statement_id',$id);
         return Datatables::of($petty_details)
             ->setRowAttr([
@@ -192,7 +193,7 @@ class AdminPettyCashController extends Controller
             })
             ->addColumn('action',function ($petty){
                 $dropdown = '';
-                if(session('role_id') == 1 || ($petty->status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
+                if(session('role_id') == 1 || ($petty->petty_status == 2 && (session('role_id') == 2 || session('role_id') == 7 || session('role_id') == 14))){
                 $dropdown = '
               <div class="btn-group">
                 <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
