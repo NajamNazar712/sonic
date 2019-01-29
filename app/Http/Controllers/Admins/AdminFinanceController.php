@@ -1907,8 +1907,8 @@ class AdminFinanceController extends Controller
 
 
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->join('shipments as s', 'pps.shipment_id', '=', 's.id')
-            ->where('s.tracking_number', '=', $tracking_number);
+            $datatables->join('shipments as ss', 'pps.shipment_id', '=', 'ss.id')
+            ->where('ss.tracking_number', '=', $tracking_number);
         }
 
         return $datatables->make(true);
