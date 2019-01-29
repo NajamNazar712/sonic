@@ -2531,7 +2531,8 @@ class AdminFinanceController extends Controller
         ->orderColumn('phone_numbers', 'u.phone $1, u.phone2 $1');
 
         if ($tracking_number = $request->get('tracking_number')) {
-            $datatables->where('s.tracking_number', '=', $tracking_number);
+            $datatables->join('shipments as ss', 'dps.shipment_id', '=', 'ss.id')
+            ->where('ss.tracking_number', '=', $tracking_number);
         }
 
         return $datatables->make(true);
