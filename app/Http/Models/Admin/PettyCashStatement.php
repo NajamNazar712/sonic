@@ -11,4 +11,7 @@ class PettyCashStatement extends Model
     public function petty_cash_statement_details(){
         return $this->hasMany('App\Http\Models\Admin\PettyCashStatementDetail');
     }
+    public function hub() {
+        return $this->belongsTo('App\Http\Models\City', 'hub_id', 'id');
+    }
 }

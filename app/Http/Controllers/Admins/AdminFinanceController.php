@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admins;
 
+use App\Http\Models\ChargesModes;
 use App\Http\Models\Rider;
 use App\Http\Models\ShipmentStatus;
 use Illuminate\Http\Request;
@@ -594,7 +595,7 @@ class AdminFinanceController extends Controller
         })
         ->join('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
         ->leftjoin('delivery_note_station_deposit_notes as dnsdn', 'delivery_note_shipments.delivery_note_id', '=', 'dnsdn.delivery_note_id')
-        ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at')
+        ->select('s.id', 's.tracking_number', 's.consignee_name as consignee', 's.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'u.name as shipper', 'bt.booking_type as service_type', 's.amount', 'ss.name as status', 'sj.updated_at as status_updated_at', 'sj.remarks', 'delivery_note_shipments.delivery_note_id as dncc', 'delivery_note_shipments.delivery_note_id as dncc_link', 'dnsdn.station_deposit_note_id as sdn', 'dnsdn.station_deposit_note_id as sdn_link', 'sjd.created_at as delivered_at', 's.booking_type_id', 'usi.poc')
         ->whereIn('delivery_note_shipments.status', [4, 5, 6]);
 
         if (session('role_id') != 1) {
@@ -610,6 +611,33 @@ class AdminFinanceController extends Controller
                     return $shipments->sdn;
                 },
             ])
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('ss.id', function ($query, $keyword){
+                if ($keyword != '') {
+                    $query->where('ss.id', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('s.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->editColumn('tracking_number',function ($shipments){
             $route = route('admin.tracking.index');
             return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
@@ -708,439 +736,7 @@ class AdminFinanceController extends Controller
 
         return $datatables->make(true);
     }
-
-    //print dncc
-    public function outstanding_shipments_dncc_print(Request $request)
-    {
-
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-
-        $html = '
-                <!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-
-                    <title>Delivery Note Cash Collection</title>
-
-                    <style>
-                      @page {
-                        size: A4 portrait;
-                      }
-
-                      * {
-                        -webkit-print-color-adjust: exact !important;
-                        color-adjust: exact !important;
-                      }
-
-                      body {
-                        background: none !important;
-                        color: #09262e !important;
-                        font-size: 0.9rem !important;
-                      }
-
-                      hr {
-                        border-top: 1px dashed #000000;
-                      }
-
-                      table.table-bordered {
-                        page-break-inside: avoid;
-                      }
-
-                      table.table-bordered tbody tr td {
-                        border: 1px solid #09262e !important;
-                      }
-
-                      .color.primary {
-                        background: #c8c8c8 !important;
-                      }
-
-                      .color.secondary {
-                        background: #ebebeb !important;
-                      }
-
-                      .border {
-                        border: 1px solid #09262e !important;
-                      }
-                      
-                      .w-150 {
-                        width: 150px;
-                      }
-                      
-                      .w-200 {
-                        width: 200px;
-                      }
-
-                      .line {
-                        border-bottom: 1px solid #09262e !important;
-                      }
-
-                      .manual_form {
-                        page-break-inside: avoid;
-                      }
-                    </style>
-                  </head>
-                  <body>
-                    <div>
-      ';
-        $delivery_note = DeliveryNote::where('id', $request->id);
-        if ($delivery_note->exists()) {
-            $delivery_note_data = $delivery_note->first();
-            $delivery_note_data->last_updated_at= Carbon::now();
-            $delivery_note_data->save();
-            $total_shipments = 0;
-            $total_cod_amount = 0;
-            $dncc_status = array(14, 16, 30, 36, 37);
-            $shipment_ids = DeliveryNoteShipment::where('delivery_note_id', $request->id)->where('status','>',1)->where('status','!=',8)->select('shipment_id')->get();
-            $filtered_shipments = Shipment::whereIn('id', $shipment_ids)->whereIn('shipper_status_id', $dncc_status)->orderBy('id')->get();
-            //echo "<pre>";print_r($filtered_shipments);echo "</pre>";die();
-            $shipment_details = '
-                      <table class="table table-sm table-bordered border">
-                        <tbody>
-                          <tr>
-                            <td class="color primary"><strong>S. No.</strong></td>
-                            <td class="color primary"><strong>Tracking No.</strong></td>
-                            <td class="color primary"><strong>Consignee Name & Phone No(s).</strong></td>
-                            <td class="color primary"><strong>Consignee Address</strong></td>
-                            <td class="color primary"><strong>Service Type</strong></td>
-                            <td class="color primary"><strong>Client Name & Phone</strong></td>
-                            <td class="color primary"><strong>Weight</strong></td>
-                            <td class="color primary"><strong>Collection Amount</strong></td>
-                          </tr>
-        ';
-
-
-            foreach ($filtered_shipments as $shipment) {
-                $total_shipments++;
-//                    $shipment = Shipment::find($parcel->shipment_id);
-
-                $shipment_details_row_start = '
-                          <tr>
-                            <td>' . $total_shipments . '</td>
-                            <td>' . $shipment->tracking_number . '</td>
-                            <td>' . $shipment->consignee_name . ' | ' . $shipment->consignee_phone_number_1 . (($shipment->consignee_phone_number_2) ? (' / ' . $shipment->consignee_phone_number_2) : '') . '</td>
-                            <td>' . $shipment->consignee_address . '</td>
-                            <td>' . $shipment->booking_type->booking_type . '</td>
-                            <td>' . $shipment->user->name . ' | ' . $shipment->user->phone . (($shipment->phone2) ? (' / ' . $shipment->phone2) : '') . '</td>
-                            <td>' . (($shipment->booking_type_id == 2) ? $shipment->replacement_weight : $shipment->actual_weight) . '</td>
-                            <td>Rs ' . number_format($shipment->received_amount) . '</td>
-                            
-                          </tr>
-            ';
-                $total_cod_amount += $shipment->received_amount;
-                $shipment_details .= $shipment_details_row_start;
-            }
-            $shipment_details .= '
-                        </tbody>
-                      </table>
-        ';
-            $delivery_note_details = DeliveryNote::where('id', $request->id)->first();
-            $rider = Rider::where('id', $delivery_note_details->rider_id)->first();
-            $city_name = $delivery_note_details->hub->name;
-            $rider_name = $rider->name;
-            $category = $rider->rider_category->name;
-            $route_name = $delivery_note_details->route->code . ' (' . $delivery_note_details->route->start . ' to ' . $delivery_note_details->route->end . ')';
-            $main_details = '
-                      <table class="table table-sm table-bordered border">
-                        <tbody>
-                          <tr>
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>';
-            if ($request->has('temporary') && ($request->temporary != null)) {
-                $main_details .= '<td class="text-center align-middle color primary"><strong>Temporary Cash Collection</strong></td>';
-            } else {
-                $main_details .= '<td class="text-center align-middle color primary"><strong>Delivery Note Cash Collection</strong></td>';
-            }
-
-
-            $main_details .= '<td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Delivery Note No.</strong></td>
-                            <td>' . str_pad($delivery_note_details->id, 6, '0', STR_PAD_LEFT) . '</td>
-                          </tr>
-                          <tr>
-                          <tr>
-                            <td class="color secondary"><strong>Rider Name</strong></td>
-                            <td>' . $rider_name . '</td>
-                            <td rowspan="7" class="pl-1 pr-1 text-center align-middle">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                            </td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Category</strong></td>
-                            <td>' . $category . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Route</strong></td>
-                            <td>' . $route_name . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>City</strong></td>
-                            <td>' . $city_name . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Total Shipments</strong></td>
-                            <td>' . $delivery_note_details->shipments_count . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Delivered Shipments</strong></td>
-                            <td>' . $total_shipments . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>DNCC Amount</strong></td>
-                            <td>Rs ' . number_format($total_cod_amount) . '</td>
-                          </tr>
-                        </tbody>
-                      </table>
-        ';
-            $html .= $main_details;
-            $html .= $shipment_details;
-            $html .= '
-                      <div class="mt-2 manual_form">
-                      <div class="row  mt-1">
-                         <div class="col">
-                            <div class="text-right">
-                                <span class="d-inline-block w-150 text-left"><strong>DNCC Amount</strong></span>
-                                <strong>Rs. '.number_format($total_cod_amount).'</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <hr>
-                        
-                        <div class="row justify-content-center align-items-end mt-5">
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Rider Name</strong>
-                            </div>
-                          </div>
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Rider Signature</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row justify-content-between align-items-end mt-5">
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Operation Staff Name</strong>
-                            </div>
-                          </div>
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Operation Staff Signature</strong>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="row justify-content-between align-items-end mt-5">
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Cashier Name</strong>
-                            </div>
-                          </div>
-                          <div class="col justify-content-center ">
-                            <div class="text-center">
-                              <span class="d-block w-200 mx-auto line"></span>
-                              <strong class="d-inline-block w-200">Cashier Signature</strong>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-        ';
-        }
-
-//        return $shipments;
-
-
-        $html .= '
-                    </div>
-
-                    <script>
-                      window.onload = function() {
-                        window.print();
-                      }
-                    </script>
-                  </body>
-                </html>
-      ';
-
-        return $html;
-
-
-    }
-    public function outstanding_shipments_sdn_print(Request $request)
-    {
-        $generator = new \Picqer\Barcode\BarcodeGeneratorPNG();
-
-        $html = '
-                <!doctype html>
-                <html lang="en">
-                  <head>
-                    <meta charset="utf-8">
-                    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-                    <link rel="stylesheet" type="text/css" href="' . asset('app-assets/css/bootstrap.min.css') . '">
-
-                    <title>Station Deposit Note</title>
-
-                    <style>
-                      @page {
-                        size: A4 portrait;
-                      }
-
-                      * {
-                        -webkit-print-color-adjust: exact !important;
-                        color-adjust: exact !important;
-                      }
-
-                      body {
-                        background: none !important;
-                        color: #09262e !important;
-                        font-size: 0.9rem !important;
-                      }
-
-                      hr {
-                        border-top: 1px dashed #000000;
-                      }
-
-                      table.table-bordered {
-                        page-break-inside: avoid;
-                      }
-
-                      table.table-bordered tbody tr td {
-                        border: 1px solid #09262e !important;
-                      }
-
-                      .color.primary {
-                        background: #c8c8c8 !important;
-                      }
-
-                      .color.secondary {
-                        background: #ebebeb !important;
-                      }
-
-                      .border {
-                        border: 1px solid #09262e !important;
-                      }
-                    </style>
-                  </head>
-                  <body>
-                    <div>
-      ';
-
-        $sdn = StationDepositNote::where('id', $request->id);
-        if ($sdn->exists()) {
-            $total_dncc = 0;
-
-//            $shipments = DeliveryNoteShipment::where('delivery_note_id',$request->id)->select('shipment_id')->get();
-            $dncc_ids = DeliveryNoteStationDepositNote::where('station_deposit_note_id', $request->id)->select('delivery_note_id')->get();
-            $shipment_details = '
-                      <table class="table table-sm table-bordered border">
-                        <tbody>
-                          <tr>
-                            <td class="color primary"><strong>S. No.</strong></td>
-                            <td class="color primary"><strong>DN No.</strong></td>
-                            <td class="color primary"><strong>Rider Name</strong></td>
-                            <td class="color primary"><strong>Route</strong></td>
-                            <td class="color primary"><strong>Total No. Of Shipments</strong></td>
-                            <td class="color primary"><strong>No. Of Delivered Shipments</strong></td>
-                            <td class="color primary"><strong>Collection Amount</strong></td>
-                          </tr>
-        ';
-
-
-            foreach ($dncc_ids as $dncc) {
-                $total_dncc++;
-                $dncc_note = DeliveryNote::find($dncc->delivery_note_id);
-
-                $shipment_details_row_start = '
-                          <tr>
-                            <td>' . $total_dncc . '</td>
-                            <td>' . str_pad($dncc_note->id, 6, '0', STR_PAD_LEFT) . '</td>
-                            <td>' . $dncc_note->rider->name . '</td>
-                            <td>' . $dncc_note->route->code . '( ' . $dncc_note->route->start . ' to ' . $dncc_note->route->end . ' )' . '</td>
-                            <td>' . $dncc_note->shipments_count . '</td>
-                            <td>' . $dncc_note->delivered_shipments . '</td>
-                            <td>Rs ' . number_format($dncc_note->received_cod_amount) . '</td>
-                            
-                          </tr>
-            ';
-
-                $shipment_details .= $shipment_details_row_start;
-            }
-            $shipment_details .= '
-                        </tbody>
-                      </table>
-        ';
-            $station_note_details = StationDepositNote::where('id', $request->id)->first();
-            $city_name = $station_note_details->hub->name;
-            $main_details = '
-                      <table class="table table-sm table-bordered border">
-                        <tbody>
-                          <tr>
-                            <td class="text-center align-middle"><img src="' . asset('img/trax_logo.png') . '" width="150" class="d-block mx-auto"></td>
-                            <td class="text-center align-middle color primary"><strong>Station Deposit Note</strong></td>
-                            <td class="text-center align-middle color secondary">Printed at ' . Carbon::now() . '</br> by ' . ucfirst(Auth::user()->name) . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Hub Name</strong></td>
-                            <td>' . $city_name . '</td>
-                            <td rowspan="7" class="text-center align-middle p-1">
-                              <img src="data:image/png;base64,' . base64_encode($generator->getBarcode(str_pad($request->id, 6, '0', STR_PAD_LEFT), $generator::TYPE_CODE_128, 2, 60)) . '" class="d-block mx-auto">
-                              <span><strong>' . str_pad($request->id, 6, '0', STR_PAD_LEFT) . '</strong></span>
-                            </td>
-                          </tr>                         
-                          <tr>
-                            <td class="color secondary"><strong>Total DNCC Amount</strong></td>
-                            <td>Rs ' . number_format($station_note_details->sdn_amount) . '</td>
-                          </tr>
-                         <!-- <tr>
-                            <td class="color secondary"><strong>Total Expenses</strong></td>
-                            <td>' . number_format($station_note_details->sdn_expense) . '</td>
-                          </tr>
-                          <tr>
-                            <td class="color secondary"><strong>Total Net Amount</strong></td>
-                            <td>' . number_format($station_note_details->sdn_net_amount) . '</td>
-                          </tr>-->
-                          
-                          <tr>
-                            <td class="color secondary"><strong>Bank Name</strong></td>
-                            <td>' . $station_note_details->bank->name . '</td>
-                          </tr>
-                        </tbody>
-                      </table>
-        ';
-            $html .= $main_details;
-            $html .= $shipment_details;
-
-        }
-
-//        return $shipments;
-
-
-        $html .= '
-                    </div>
-
-                    <script>
-                      window.onload = function() {
-                        window.print();
-                      }
-                    </script>
-                  </body>
-                </html>
-      ';
-
-        return $html;
-    }
-    //outstanding shipments print end
+    
     public function outstanding_shipments_resolved(Request $request) {
         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $request->id)->whereIn('status', [4, 5, 6]);
 
@@ -1158,6 +754,105 @@ class AdminFinanceController extends Controller
         }
     }
 
+    public function outstanding_walk_in_shipments_index(){
+        $shipment_status = ShipmentStatus::select('id','name')->get();
+        $charges_mode_name = ChargesModes::select('id','charges_mode')->get();
+        $status = [['id' => 0, 'text' => 'Pending Charges Collection'], ['id' => 1, 'text' => 'Resolved'], ['id' => 2, 'text' => 'Pending Return Charges Collection']];
+        return view('admin.finance.outstanding_walk_in_shipments')->with(['shipment_status' => $shipment_status, 'status' => json_encode($status), 'charges_mode_name' => $charges_mode_name]);
+    }
+
+    public function outstanding_walk_in_shipments_list(Request $request){
+        $shipments = Shipment::join('cities as dc', 'shipments.consignee_city_id', '=', 'dc.id')
+            ->join('cities as hc', 'dc.hub_id', '=', 'hc.id')
+            ->join('users as u', 'shipments.user_id', '=', 'u.id')
+            ->join('booking_types as bt', 'shipments.booking_type_id', '=', 'bt.id')
+            ->leftjoin('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=', DB::raw('(SELECT MAX(id) FROM shipments_journey WHERE shipments_journey.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('charges_modes as cm', 'shipments.charges_mode_id', '=', 'cm.id')
+            ->leftjoin('shipment_status as ss', 'sj.shipper_status_id', '=', 'ss.id')
+            ->leftjoin('admins as a', 'sj.admin_id', '=', 'a.id')
+            ->select('shipments.id', 'shipments.tracking_number', 'shipments.tracking_number as tracking_no', 'shipments.consignee_name as consignee', 'shipments.consignee_address as address', 'dc.name as destination', 'hc.name as hub', 'ss.name as status', 'sj.updated_at as status_updated_at', 'a.name as updated_by', 'shipments.created_at','shipments.amount as charges', 'shipments.charges_mode_id', 'sj.shipper_status_id as shipper_status_id', 'shipments.return_charges as return_charges', 'shipments.gst as gst', 'shipments.fuel_surcharge as fuel_surcharge', 'shipments.weight_charges as weight_charges', 'cm.charges_mode as charges_modes', 'shipments.walk_in_status as walk_in_status')
+            ->where('shipments.booking_type_id',4);
+
+
+        $datatables = Datatables::of($shipments)
+            ->editColumn('tracking_number',function ($shipments){
+                $route = route('admin.tracking.index');
+                return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('walk_in_status', function ($shipments) {
+                if($shipments->walk_in_status == 0) {
+                    return 'Pending Charges Collection';
+                }
+                else if($shipments->walk_in_status == 1) {
+                    return 'Resolved';
+                }
+                else {
+                    return 'Pending Return Charges Collection';
+                }
+            })
+            ->addColumn('aging', function($shipment) {
+                $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();
+
+                $now = Carbon::now()->startOfDay();
+
+                return $updated_at->diffInDays($now) . 'd';
+            })
+            ->filterColumn('ss.id', function ($query, $keyword){
+                if ($keyword != '') {
+                    $query->where('ss.id', $keyword);
+                }
+                else {
+                    $query->whereRaw('false');
+                }
+            })
+            ->addColumn('action', function($shipment) {
+                $resolve_button = '<button type="button" class="dropdown-item resolve"><div class="row no-gutters align-items-center"><div class="col-2"><i class="ft-check-circle"></i></div><div class="col-9 offset-1">Resolve</div></button>';
+
+                if ((($shipment->charges_mode_id == 1) || ($shipment->charges_mode_id == 2 && ($shipment->shipper_status_id == 14 || $shipment->shipper_status_id == 25))) && ($shipment->walk_in_status != 1) && (session('role_id') == 1 || count(array_intersect([168]), session('permissions') !== 0))) {
+                    $dropdown = '
+                  <div class="btn-group">
+                    <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
+                    <div class="dropdown-menu dropdown-menu-sm">
+                ';
+
+                    if (session('role_id') == 1 || in_array(168, session('permissions'))) {
+                        $dropdown .= $resolve_button;
+                    }
+
+                    $dropdown .= '
+                    </div>
+                  </div>
+                ';
+
+                    return $dropdown;
+                }
+                else {
+                    return '';
+                }
+            });
+
+        return $datatables->make(true);
+    }
+
+    public function outstanding_walk_in_shipments_resolved(Request $request){
+        $shipment = Shipment::where('id', $request->id)->where('walk_in_status', '!=', 1);
+
+        if ($shipment->exists()) {
+            $shipment = $shipment->first();
+
+            $shipment->walk_in_status = 1;
+
+            $shipment->save();
+
+            return ['status' => 0, 'success' => 'Shipment has been marked Resolved'];
+        }
+        else {
+            return ['status' => 1, 'error' => 'Given Tracking Number\'s Shipment has already been modified'];
+        }
+    }
     static public function replacement_collected_adjust_in_payment($shipment_id){
         $delivery_note_shipment = DeliveryNoteShipment::where('shipment_id', $shipment_id)->whereIn('status', [4, 5, 6]);
         if ($delivery_note_shipment->exists()) {
@@ -2058,7 +1753,9 @@ class AdminFinanceController extends Controller
         ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
         ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
         ->join('pending_payment_shipments as pps', 'pending_payments.id', '=', 'pps.pending_payment_id')
-        ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle')
+        ->join('shipments as s', 's.id', '=', 'pps.shipment_id')
+        ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+        ->select('pending_payments.id as id', 'pending_payments.created_at', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_payments.total_shipments', 'pending_payments.delivered_shipments', 'pending_payments.delivered_shipments as delivered_shipments_count', 'pending_payments.returned_shipments', 'pending_payments.returned_shipments as returned_shipments_count ', 'pending_payments.adjusted_shipments', 'pending_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(pps.amount) as total_amount'), DB::raw('SUM(pps.charges) as total_charges'), DB::raw('SUM(pps.gst) as total_gst'), DB::raw('SUM(pps.payable) as total_payable'), 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 'ubi.payment_mode', 'ubi.payment_cycle', 's.booking_type_id', 'usi.poc')
         ->groupBy('pending_payments.id');
 
         if (session('role_id') != 1) {
@@ -2069,6 +1766,25 @@ class AdminFinanceController extends Controller
         ->addColumn('total_deductable', function($pending_payments) {
             return number_format($pending_payments->total_charges + $pending_payments->total_gst);
         })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('s.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
+            })
+            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->editColumn('delivered_shipments', function($pending_payment) {
             if ($pending_payment->delivered_shipments != 0) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $pending_payment->delivered_shipments . '</button>';
@@ -2573,6 +2289,45 @@ class AdminFinanceController extends Controller
         return redirect()->back()->with(['success' => 'Payment(s) has been Made.', 'print' => $done_payment_ids]);
     }
 
+    static public function done_payment($shipment_id, $type) {
+        $shipment = Shipment::find($shipment_id);
+
+        $done_payment = new DonePayment();
+
+        $done_payment->user_id = $shipment->user_id;
+        $done_payment->total_shipments = 1;
+
+        if ($type == 0) {
+            $done_payment->delivered_shipments = 1;
+        }
+        else {
+            $done_payment->returned_shipments = 1;
+        }
+
+        $done_payment->status = 1;
+
+        $done_payment->save();
+
+        $done_payment_shipment = new DonePaymentShipment();
+
+        $done_payment_shipment->done_payment_id = $done_payment->id;
+        $done_payment_shipment->shipment_id = $shipment_id;
+        $done_payment_shipment->type = $type;
+        $done_payment_shipment->amount = 0;
+        $done_payment_shipment->charges = ($shipment->amount - $shipment->gst);
+        $done_payment_shipment->gst = $shipment->gst;
+        $done_payment_shipment->payable = $shipment->amount;
+
+        $done_payment_shipment->save();
+
+        $shipment->payment_status_id = 7;
+
+        $shipment->save();
+
+        ShipmentsPaymentJourneyController::add($shipment->id, 5, Auth::id());
+        ShipmentsPaymentJourneyController::add($shipment->id, 7, Auth::id());
+    }
+
     public function done_payments_index() {
         $banks = BanksList::all();
         $company_banks = BanksList::where('affiliate', 1)->get();
@@ -2586,8 +2341,10 @@ class AdminFinanceController extends Controller
         ->join('user_bank_infos as ubi', 'done_payments.user_id', '=', 'ubi.user_id')
         ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
         ->join('done_payment_shipments as dps', 'done_payments.id', '=', 'dps.done_payment_id')
+        ->join('shipments as s', 's.id', '=', 'dps.shipment_id')
+        ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
         ->leftjoin('banks_lists as b', 'done_payments.company_bank_id', '=', 'b.id')
-        ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status')
+        ->select('done_payments.id as id','done_payments.id as payment_id', 'u.name as shipper', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'done_payments.total_shipments', 'done_payments.delivered_shipments', 'done_payments.delivered_shipments as delivered_shipments_count', 'done_payments.returned_shipments', 'done_payments.returned_shipments as returned_shipments_count', 'done_payments.adjusted_shipments', 'done_payments.adjusted_shipments as adjusted_shipments_count', DB::raw('SUM(dps.amount) as total_amount'), DB::raw('SUM(dps.charges) as total_charges'), DB::raw('SUM(dps.gst) as total_gst'), DB::raw('SUM(dps.payable) as total_payable'), 'ub.name as bank', 'done_payments.reference_number', 'done_payments.created_at as done_at', 'b.name as company_bank', 'done_payments.status', 's.booking_type_id', 'usi.poc')
         ->groupBy('done_payments.id');
 
         if (session('role_id') != 1) {
@@ -2604,6 +2361,25 @@ class AdminFinanceController extends Controller
         ->editColumn('payment_id', function($done_payment) {
             return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . str_pad($done_payment->id, 6, '0', STR_PAD_LEFT) . '</span></button>';
         })
+        ->editColumn('shipper', function ($shipment) {
+            if ($shipment->booking_type_id == 4) {
+                return $shipment->shipper .' (' . $shipment->poc . ')';
+            }
+            else {
+                return $shipment->shipper;
+            }
+        })
+        ->filterColumn('u.name', function ($query, $keyword) {
+            $query->where(function ($sub_query) use ($keyword) {
+                $sub_query->where('s.booking_type_id', '!=', 4)
+                    ->where('u.name', 'like', '%' . $keyword . '%');
+            })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '=', 4)
+                        ->where('usi.poc', 'like', '%' . $keyword . '%');
+                });
+        })
+            ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->addColumn('total_deductable', function($done_payment) {
             return number_format($done_payment->total_charges + $done_payment->total_gst);
         })
@@ -3287,8 +3063,9 @@ class AdminFinanceController extends Controller
         ->join('cities as c', 'u.city_id', '=', 'c.id')
         ->join('user_bank_infos as ubi', 's.user_id', '=', 'ubi.user_id')
         ->join('banks_lists as ub', 'ubi.bank_name', '=', 'ub.id')
+        ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
         ->join('cities as bc', 'ubi.city_id', '=', 'bc.id')
-        ->select('pending_invoice_shipments.id', 'u.name as shipper', 's.tracking_number', 's.tracking_number as tracking_number_link', 'pending_invoice_shipments.type', 'pending_invoice_shipments.created_at', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_invoice_shipments.charges', 'pending_invoice_shipments.gst', 'pending_invoice_shipments.invoice_amount', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city');
+        ->select('pending_invoice_shipments.id', 'u.name as shipper', 's.tracking_number', 's.tracking_number as tracking_number_link', 'pending_invoice_shipments.type', 'pending_invoice_shipments.created_at', 'c.name as city', 'u.phone', 'u.phone2', 'u.address', 'pending_invoice_shipments.charges', 'pending_invoice_shipments.gst', 'pending_invoice_shipments.invoice_amount', 'ub.name as bank', 'ubi.bank_branch', 'ubi.account_no', 'ubi.account_title', 'ubi.iban', 'bc.name as account_city', 's.booking_type_id', 'usi.poc');
 
         if ($request->shipper && $request->from_date && $request->to_date) {
             $pending_invoice_shipments = $pending_invoice_shipments->where('s.user_id', $request->shipper)
@@ -3303,6 +3080,24 @@ class AdminFinanceController extends Controller
             ->editColumn('tracking_number_link', function ($pending_invoice_shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$pending_invoice_shipments->tracking_number' class='tracking' target='_blank'>$pending_invoice_shipments->tracking_number</a></u>";
+            })
+            ->editColumn('shipper', function ($shipment) {
+                if ($shipment->booking_type_id == 4) {
+                    return $shipment->shipper .' (' . $shipment->poc . ')';
+                }
+                else {
+                    return $shipment->shipper;
+                }
+            })
+            ->filterColumn('u.name', function ($query, $keyword) {
+                $query->where(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '!=', 4)
+                        ->where('u.name', 'like', '%' . $keyword . '%');
+                })
+                    ->orWhere(function ($sub_query) use ($keyword) {
+                        $sub_query->where('s.booking_type_id', '=', 4)
+                            ->where('usi.poc', 'like', '%' . $keyword . '%');
+                    });
             })
         ->editColumn('type', function($pending_invoice_shipment) {
             if ($pending_invoice_shipment->type == 0) {
@@ -3811,7 +3606,10 @@ class AdminFinanceController extends Controller
 
     public function invoices_history_list(Request $request) {
         $invoices = Invoice::join('users as u', 'invoices.user_id', '=', 'u.id')
-        ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'invoices.total_shipments', 'invoices.total_delivered_shipments', 'invoices.total_returned_shipments', 'invoices.total_adjusted_shipments', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.billing_period_from_date', 'invoices.billing_period_to_date', 'invoices.due_date');
+            ->leftjoin('invoice_shipments as is','is.invoice_id', '=', 'invoices.id')
+            ->leftjoin('shipments as s','s.id', '=', 'is.shipment_id')
+            ->join('user_shipping_infos AS usi', 's.pickup_address_id', '=', 'usi.id')
+        ->select('invoices.id', 'invoices.invoice_number', 'u.name as shipper', 'invoices.total_shipments', 'invoices.total_delivered_shipments', 'invoices.total_returned_shipments', 'invoices.total_adjusted_shipments', 'invoices.total_charges', 'invoices.total_gst', 'invoices.total_invoice_amount', 'invoices.billing_period_from_date', 'invoices.billing_period_to_date', 'invoices.due_date', 's.booking_type_id', 'usi.poc');
 
         $datatables = Datatables::of($invoices)
         ->addColumn('id_padded', function($invoice) {
@@ -3828,6 +3626,25 @@ class AdminFinanceController extends Controller
                 return 0;
             }
         })
+        ->editColumn('shipper', function ($shipment) {
+            if ($shipment->booking_type_id == 4) {
+                return $shipment->shipper .' (' . $shipment->poc . ')';
+            }
+            else {
+                return $shipment->shipper;
+            }
+        })
+        ->filterColumn('u.name', function ($query, $keyword) {
+            $query->where(function ($sub_query) use ($keyword) {
+                $sub_query->where('s.booking_type_id', '!=', 4)
+                    ->where('u.name', 'like', '%' . $keyword . '%');
+            })
+                ->orWhere(function ($sub_query) use ($keyword) {
+                    $sub_query->where('s.booking_type_id', '=', 4)
+                        ->where('usi.poc', 'like', '%' . $keyword . '%');
+                });
+        })
+        ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->editColumn('total_returned_shipments', function($invoice) {
             if ($invoice->total_returned_shipments != 0) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $invoice->total_returned_shipments . '</button>';

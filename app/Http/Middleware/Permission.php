@@ -241,6 +241,9 @@ class Permission
             'finance.invoices_history.delivered_shipments' => 122,
             'finance.invoices_history.returned_shipments' => 122,
             'finance.invoices_history.adjusted_shipments' => 122,
+            'finance.outstanding_shipments.walk_in_index' => 167,
+            'finance.outstanding_shipments.walk_in_list' => 167,
+            'finance.outstanding_shipments.walk_in_resolved' => 168,
 
             'admin.petty_cash.make.index' => 145,
             'admin.petty_cash.statements.index' => 146,
@@ -293,6 +296,9 @@ class Permission
             'reports.negative_balance_customers.list' => 148,
             'reports.call_verification.index' => 153,
             'reports.call_verification.list' => 153,
+
+            'reports.petty_cash.index' => 156,
+            'reports.petty_cash.list' => 156,
 
             'packaging.index' => 76,
             'packaging.list' => 76,
@@ -369,9 +375,27 @@ class Permission
             'settings.ticker.index' => 152,
             'settings.ticker.store' => 152,
 
+			'settings.walk_in.index' => 154,
+            'settings.walk_in.store' => 154,            'settings.petty_cash.heads.index' => 157,
+            'settings.petty_cash.heads.list' => 157,
+            'settings.petty_cash.heads.add' => 159,
+            'settings.petty_cash.heads.edit' => 160,
+            'settings.petty_cash.heads.active' => 161,
+            'settings.petty_cash.heads.inactive' => 162,
+
+            'settings.petty_cash.titles.index' => 158,
+            'settings.petty_cash.titles.list' => 158,
+            'settings.petty_cash.titles.add' => 163,
+            'settings.petty_cash.titles.edit' => 164,
+            'settings.petty_cash.titles.active' => 165,
+            'settings.petty_cash.titles.inactive' => 166,
+
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
-            'cancelled_shipments.revert' => 118
+            'cancelled_shipments.revert' => 118,
+
+            'shipment.book.walk_in' => 155,
+            'shipment.book.store' => 155
         ],
 
         'shipper' => [

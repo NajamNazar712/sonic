@@ -630,7 +630,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::put('adjust_in_payment', 'Admins\AdminFinanceController@outstanding_shipments_adjust_in_payment')->name('adjust_in_payment');
             Route::post('dncc/print', 'Admins\AdminFinanceController@outstanding_shipments_dncc_print')->name('dncc.print');
             Route::post('sdn/print', 'Admins\AdminFinanceController@outstanding_shipments_sdn_print')->name('sdn.print');
-
+            Route::get('walk_in_index', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_index')->name('walk_in_index');
+            Route::get('walk_in_list', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_list')->name('walk_in_list');
+            Route::put('walk_in_resolved', 'Admins\AdminFinanceController@outstanding_walk_in_shipments_resolved')->name('walk_in_resolved');
         });
 
         Route::prefix('change_shipment_amount')->name('change_shipment_amount.')->group(function () {
@@ -704,12 +706,14 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('statements')->name('statements.')->group(function (){
            Route::get('', 'Admins\AdminPettyCashController@petty_cash_statements_index')->name('index');
            Route::get('list', 'Admins\AdminPettyCashController@petty_cash_statements_list')->name('list');
-           Route::post('approve', 'Admins\AdminPettyCashController@petty_cash_statements_approve')->name('approve');
+            Route::post('print', 'Admins\AdminPettyCashController@statement_print')->name('print');
+            Route::post('approve', 'Admins\AdminPettyCashController@petty_cash_statements_approve')->name('approve');
             Route::get('{id}/edit', 'Admins\AdminPettyCashController@edit_petty_cash_statement_index')->name('edit');
             Route::get('{id}/edit/list', 'Admins\AdminPettyCashController@edit_petty_cash_statement_list')->name('edit.list');
             Route::post('edit/approve', 'Admins\AdminPettyCashController@edit_petty_cash_statements_approve')->name('edit.approve');
             Route::post('edit/reject', 'Admins\AdminPettyCashController@edit_petty_cash_statements_reject')->name('edit.reject');
             Route::put('edit/submit', 'Admins\AdminPettyCashController@edit_petty_cash_statements_submit')->name('edit.submit');
+
         });
         Route::prefix('approved')->name('approved.')->group(function (){
             Route::get('', 'Admins\AdminPettyCashController@approved_petty_cash_statements_index')->name('index');
@@ -820,6 +824,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('list', 'Admins\AdminReportsController@overall_sales_list')->name('list');
 
         });
+        Route::prefix('petty_cash')->name('petty_cash.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@petty_cash_statements_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@petty_cash_statements_list')->name('list');
+        });
         Route::prefix('negative_balance_customers')->name('negative_balance_customers.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@negative_balance_customers_index')->name('index');
             Route::get('list', 'Admins\AdminReportsController@negative_balance_customers_list')->name('list');
@@ -885,6 +893,38 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@ticker_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@ticker_store')->name('store');
         });
-
+        Route::prefix('walk_in')->name('walk_in.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');
+        });
+        Route::prefix('petty_cash')->name('petty_cash.')->group(function (){
+           Route::prefix('heads')->name('heads.')->group(function (){
+              Route::get('', 'Admins\GlobalSettingsController@petty_cash_heads_index')->name('index');
+              Route::get('list', 'Admins\GlobalSettingsController@petty_cash_heads_list')->name('list');
+              Route::post('add', 'Admins\GlobalSettingsController@petty_cash_heads_add')->name('add');
+              Route::post('edit', 'Admins\GlobalSettingsController@petty_cash_heads_edit')->name('edit');
+              Route::post('active', 'Admins\GlobalSettingsController@petty_cash_heads_active')->name('active');
+              Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_heads_inactive')->name('inactive');
+           });
+           Route::prefix('titles')->name('titles.')->group(function (){
+              Route::get('', 'Admins\GlobalSettingsController@petty_cash_titles_index')->name('index');
+              Route::get('list', 'Admins\GlobalSettingsController@petty_cash_titles_list')->name('list');
+              Route::post('add', 'Admins\GlobalSettingsController@petty_cash_titles_add')->name('add');
+              Route::post('info', 'Admins\GlobalSettingsController@petty_cash_titles_info')->name('info');
+              Route::post('edit', 'Admins\GlobalSettingsController@petty_cash_titles_edit')->name('edit');
+              Route::post('active', 'Admins\GlobalSettingsController@petty_cash_titles_active')->name('active');
+              Route::post('inactive', 'Admins\GlobalSettingsController@petty_cash_titles_inactive')->name('inactive');
+           });
+        });
+    });
+    Route::prefix('shipment')->name('shipment.')->group(function () {
+        Route::prefix('book')->name('book.')->group(function () {
+            Route::get('', 'Admins\AdminWalkInBookShipmentController@index')->name('walk_in');
+            Route::get('order_id', 'Admins\AdminWalkInBookShipmentController@order_id')->name('order_id');
+            Route::post('store', 'Admins\AdminWalkInBookShipmentController@walk_in_store')->name('store');
+            Route::post('add_fuel_surcharge_gst_total', 'Admins\AdminWalkInBookShipmentController@add_fuel_surcharge_gst_total')->name('add_fuel_surcharge_gst_total');
+            Route::post('print_air_waybill', 'Admins\AdminWalkInBookShipmentController@print_air_waybill')->name('print_air_waybill');
+            Route::post('check_standard_weight', 'Admins\AdminWalkInBookShipmentController@check_standard_weight')->name('check_standard_weight');
+        });
     });
 });

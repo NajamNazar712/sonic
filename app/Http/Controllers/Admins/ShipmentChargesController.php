@@ -13,6 +13,7 @@ use App\Http\Models\ReturnCharge;
 use App\Http\Models\FuelSurcharge;
 use App\Http\Models\BookingTypeCharges;
 use App\Http\Models\DiscountCharge;
+use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\ZoneClassCity;
 
 use Carbon\Carbon;
@@ -778,6 +779,29 @@ class ShipmentChargesController extends Controller
         }
 
         $shipment->packaging_material_charges = $charges;
+
+        $shipment->save();
+    }
+
+    static public function walk_in_return($id) {
+        $shipment = Shipment::find($id);
+
+        $settings = WalkInStandardWeightCharge::where(['shipping_mode_id' => $shipment->shipping_mode_id, 'delivery_type_id' => $shipment->walk_in_delivery_type_id])->first();
+
+        if ($shipment->pickup_address->city_id == $shipment->consignee_city_id) {
+            $percentage = $settings['local'];
+        }
+        else {
+            $percentage = $settings['national'];
+        }
+
+        $charges = ROUND(($shipment->weight_charges * ($percentage / 100)), 0, PHP_ROUND_HALF_DOWN);
+
+        $shipment->return_charges = $charges;
+
+        $shipment->amount = $shipment->amount + $charges;
+
+        $shipment->received_amount = $shipment->amount + $charges;
 
         $shipment->save();
     }

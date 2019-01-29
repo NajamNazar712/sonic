@@ -58,7 +58,7 @@ class AdminCargoController extends Controller
         $join->on('shipments_journey.shipment_id', '=', 'shipments.id')
         ->on('shipments_journey.shipper_status_id', '=', DB::raw(2));
       })
-      ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at');
+      ->select('shipments.shipper_status_id', 'shipments.tracking_number', 'shipments.tracking_number as tracking', 'shipments.order_id', 'bt.booking_type as service_type', 'ss.name as status', 'oc.name as origin', 'dc.name as destination', 'u.name as shipper', 'shipments.amount', 'sm.mode as shipping_mode', 'shipments.created_at as booked_at', 'shipments_journey.created_at as arrival_at', 'shipments.booking_type_id', 'usi.poc');
 
       if (session('role_id') != 1) {
         $shipments = $shipments->where(function ($query) {
@@ -94,6 +94,25 @@ class AdminCargoController extends Controller
           return $shipments->destination;
         }
       })
+          ->editColumn('shipper', function ($shipment) {
+              if ($shipment->booking_type_id == 4) {
+                  return $shipment->shipper .' (' . $shipment->poc . ')';
+              }
+              else {
+                  return $shipment->shipper;
+              }
+          })
+          ->filterColumn('u.name', function ($query, $keyword) {
+              $query->where(function ($sub_query) use ($keyword) {
+                  $sub_query->where('shipments.booking_type_id', '!=', 4)
+                      ->where('u.name', 'like', '%' . $keyword . '%');
+              })
+                  ->orWhere(function ($sub_query) use ($keyword) {
+                      $sub_query->where('shipments.booking_type_id', '=', 4)
+                          ->where('usi.poc', 'like', '%' . $keyword . '%');
+                  });
+          })
+          ->orderColumn('u.name', 'u.name $1, usi.poc $1')
       ->filterColumn('status',function ($query,$keyword){
 
           if ($keyword != '') {
@@ -1213,8 +1232,14 @@ class AdminCargoController extends Controller
         $consignee_status_id = NULL;
 
         if ($cargo_consignment->type == 1) {
-          $shipper_status_id = 4;
-          $consignee_status_id = 4;
+          if ($shipment->booking_type_id == 4 && $shipment->walk_in_delivery_type_id == 2) {
+              $shipper_status_id = 15;
+              $consignee_status_id = 15;
+          }
+          else {
+            $shipper_status_id = 4;
+            $consignee_status_id = 4;
+          }
         }
         else {
           if ($shipment->booking_type_id == 1) {
@@ -1225,9 +1250,17 @@ class AdminCargoController extends Controller
             $shipper_status_id = 27;
             $consignee_status_id = 27;
           }
-          else {
+          else if ($shipment->booking_type_id == 3) {
             $shipper_status_id = 33;
             $consignee_status_id = 33;
+          }
+          else if ($shipment->booking_type_id == 4) {
+            $shipper_status_id = 22;
+            $consignee_status_id = 22;
+          }
+          else {
+            $shipper_status_id = 22;
+            $consignee_status_id = 22;
           }
         }
 
