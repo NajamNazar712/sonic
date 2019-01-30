@@ -26,6 +26,7 @@ use App\Http\Models\Rates\RateHistory;
 use App\Http\Models\ShipmentsJourney;
 use App\Http\Models\Shipper\UserBankInfo;
 use App\Http\Models\Shipper\UserShippingInfo;
+use App\Http\Models\WalkInCities;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Models\Admin\StandardWeightCharge;
@@ -6041,7 +6042,7 @@ class AdminDashboardController extends Controller
         $hubs = City::where('hub',1)->where('status',1)->get();
         $zones = Zone::all();
         $shippingMode = ShippingMode::all();
-        $booking = BookingType::all();
+        $booking = BookingType::where('id','!=',4)->get();
         return view('admin.management.edit_city_form')->with(['hubs'=>$hubs, 'zones' => $zones, 'shippingMode'=>$shippingMode,'bookings'=>$booking,'isHub'=>$isHub,'city'=>$city,'delivery'=>$delivery,'cityhub'=>$cityhub]);
 
     }
@@ -6110,6 +6111,12 @@ class AdminDashboardController extends Controller
                 'status'=>1
             ]);
 
+            $walk_in_city = WalkInCities::create([
+                'city_id'=>$city->id,
+                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
+                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
+            ]);
+
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {
                 foreach ($shipping_modes as $shipping_mode_id => $shipping_mode_value) {
                     CityDelivery::create([
@@ -6129,6 +6136,13 @@ class AdminDashboardController extends Controller
                 'pickup'=>($request->has('pickup'))? 1:0,
                 'status'=>1
             ]);
+
+            $walk_in_city = WalkInCities::create([
+                'city_id'=>$city->id,
+                'pickup'=>($request->has('walk_in_pickup'))? 1:0,
+                'delivery'=>($request->has('walk_in_delivery'))? 1:0,
+            ]);
+            
             City::where('id',$city->id)->update(['hub_id'=>$city->id]);
 
             foreach ($request->delivery as $booking_type_id => $shipping_modes) {

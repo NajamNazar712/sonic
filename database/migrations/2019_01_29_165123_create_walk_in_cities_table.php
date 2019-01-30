@@ -15,8 +15,8 @@ class CreateWalkInCitiesTable extends Migration
     {
         Schema::create('walk_in_cities', function (Blueprint $table) {
             $table->integer('city_id');
-            $table->integer('pickup');
-            $table->integer('delivery');
+            $table->integer('pickup')->default(0);
+            $table->integer('delivery')->default(0);
         });
     }
 
