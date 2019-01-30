@@ -69,7 +69,23 @@ class ShipperTrackingController extends Controller
                     $details['order_information']['order_id'] = $shipment->order_id;
         			$details['order_information']['weight'] = ($shipment->actual_weight) ? floatval($shipment->actual_weight) : floatval($shipment->estimated_weight);
                     $details['order_information']['shipping_mode'] = $shipment->shipping_mode->mode;
-                    $details['order_information']['amount'] = $shipment->amount;
+
+                    $details['order_information']['booking_type_id'] = $shipment->booking_type_id;
+
+                    if ($shipment->booking_type_id != 4) {
+                        $details['order_information']['amount'] = $shipment->amount;
+                    }
+                    else {
+                        if ($shipment->charges_mode_id == 1) {
+                            $details['order_information']['amount'] = 0;
+                        }
+                        else {
+                            $details['order_information']['amount'] = $shipment->amount;
+                        }
+
+                        $details['order_information']['charges_mode'] = $shipment->charges_mode->charges_mode;
+                    }
+
                     $details['order_information']['instructions'] = $shipment->special_instructions;
 
         			foreach ($shipment->shipment_journey as $journey) {
