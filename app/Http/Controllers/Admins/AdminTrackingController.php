@@ -234,6 +234,7 @@ class AdminTrackingController extends Controller
                     $details['reason'] = null;
                 }
                 $details['remarks'] = $journey->remarks;
+                $details['status_id'] = $journey->shipper_status_id;
                 $details['current_status_date'] = Carbon::parse($journey->created_at)->toDateTimeString();
                 $details['origin'] = $shipment->pickup_address->city->name;
                 $details['destination'] = $shipment->consignee_city->name;
