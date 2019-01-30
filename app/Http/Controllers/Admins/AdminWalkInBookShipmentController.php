@@ -7,6 +7,7 @@ use App\Http\Models\Admin\StandardFuelSurcharge;
 use App\Http\Models\Admin\WalkInStandardWeightCharge;
 use App\Http\Models\ChargesModes;
 use App\Http\Models\DeliveryType;
+use App\Http\Models\WalkInCities;
 use App\Http\Models\Zone;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -140,14 +141,14 @@ class AdminWalkInBookShipmentController extends Controller
         $user_id = $check_id['setting_value'];
         $booking_types = BookingType::select('id')->where('id', '=', 4)->first();
         $user_shipping_infos = UserShippingInfo::where('user_id', $user_id)->get();
-        $cities = City::where('pickup', 1)->where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
-        $consignee_cities = City::where('status', 1)->whereNotNull('zone_id')->orderBy('name')->get();
+        $cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
+            ->select('c.name as city_name','c.id as city_id')->where('walk_in_cities.pickup', 1)->get();
+        $consignee_cities = WalkInCities::join('cities as c', 'c.id', '=', 'walk_in_cities.city_id')
+            ->select('c.name as city_name','c.id as city_id')->where('walk_in_cities.delivery', 1)->get();
         $products = Product::orderBy('product_name')->get();
         $shipping_mode = ShippingMode::where('id','!=', 4)->get();
         $delivery_type = DeliveryType::orderBy('delivery_type')->get();
         $charges_modes = ChargesModes::get();
-
-
         return view('admin.shipment.book.walk_in')->with(['booking_types' => $booking_types, 'shipping_mode' => $shipping_mode , 'user_shipping_infos' => $user_shipping_infos, 'cities' => $cities, 'products' => $products, 'delivery_type' => $delivery_type, 'charges_modes' => $charges_modes,'consignee_cities' => $consignee_cities]);
     }
 
