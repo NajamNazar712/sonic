@@ -300,8 +300,8 @@ class Permission
             'reports.petty_cash.index' => 156,
             'reports.petty_cash.list' => 156,
 
-            'reports.fake_status.index' => 156,
-            'reports.fake_status.list' => 156,
+            'reports.fake_status.index' => 169,
+            'reports.fake_status.list' => 169,
             'reports.fake_status.shipments.total' => 169,
             'reports.fake_status.shipments.undelivered' => 169,
             'reports.fake_status.fake_status_shipment' => 169,
