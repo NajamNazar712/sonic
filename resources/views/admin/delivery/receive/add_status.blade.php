@@ -271,7 +271,7 @@
                 'rightAlign': false,
                 'digits': 3,
                 'min': 0.00,
-                'max': 1000
+                'max': 10000
             });
             var shipment_status = [];
             var shipment_reason = [];
@@ -687,7 +687,7 @@
                                             'rightAlign': false,
                                             'digits': 3,
                                             'min': 0.01,
-                                            'max': 1000
+                                            'max': 10000
                                         });
                                     });
 

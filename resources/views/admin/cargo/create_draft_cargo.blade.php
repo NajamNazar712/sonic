@@ -427,7 +427,7 @@
                             'allowPlus': false,
                             'digits': 2,
                             'min': 0.1,
-                            'max': 10000
+                            'max': 100000
                         });
 
                         $.each(data.shipping_modes, function(index, shipping_mode) {
