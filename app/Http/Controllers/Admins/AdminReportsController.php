@@ -3839,7 +3839,7 @@ class AdminReportsController extends Controller
         return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones]);
     }
 
-    public function debriefing_list(Request $request){
+    public function debriefing_list(Request $request) {
         $hubs = City::join('cities as h', 'h.id', '=', 'cities.hub_id')
             ->leftjoin('shipments as s', 's.consignee_city_id', '=', 'cities.id')
             ->leftjoin('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
@@ -3913,11 +3913,13 @@ class AdminReportsController extends Controller
                     ->where('dnsc.delivery_note_id', '=',
                         DB::raw('(select max(dnsc.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 1)'));
             })
+            ->leftjoin('delivery_notes as dnc', 'dnc.id', '=', 'dnsc.delivery_note_id')
             ->leftjoin('delivery_note_shipments as dnsf', function($join) {
                 $join->on('dnsf.shipment_id', '=', 's.id')
                     ->where('dnsf.delivery_note_id', '=',
                         DB::raw('(select max(dnsf.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 0)'));
             })
+            ->leftjoin('delivery_notes as dnf', 'dnf.id', '=', 'dnsf.delivery_note_id')
             ->leftjoin('shipments_journey as sjtomorrow', function($join) {
                 $join->on('sjtomorrow.shipment_id', '=', 's.id')
                     ->where('sjtomorrow.id', '=',
@@ -3971,7 +3973,115 @@ class AdminReportsController extends Controller
                 }
             });
 
+        if ($search_hub = $request->get('search_hub')) {
+            $hubs = $hubs->where('h.id', '=', $search_hub);
+        }
+
+        if ($search_zone = $request->get('search_zone')) {
+            $hubs = $hubs->where('h.zone_id', '=', $search_zone);
+        }
+
+        if ($search_date = $request->get('search_date')) {
+            $hubs =  $hubs
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjpending.created_at', $search_date)
+                        ->orWhereNull('sjpending.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjdelivered.created_at', $search_date)
+                        ->orWhereNull('sjdelivered.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjunsuccessful.created_at', $search_date)
+                        ->orWhereNull('sjunsuccessful.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjnotattempted.created_at', $search_date)
+                        ->orWhereNull('sjnotattempted.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjonhold.created_at', $search_date)
+                        ->orWhereNull('sjonhold.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjnonservicearea.created_at', $search_date)
+                        ->orWhereNull('sjnonservicearea.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjmisrouted.created_at', $search_date)
+                        ->orWhereNull('sjmisrouted.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjselfcollection.created_at', $search_date)
+                        ->orWhereNull('sjselfcollection.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjreturnconfirmationpending.created_at', $search_date)
+                        ->orWhereNull('sjreturnconfirmationpending.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjlost.created_at', $search_date)
+                        ->orWhereNull('sjlost.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjreturnconfirm.created_at', $search_date)
+                        ->orWhereNull('sjreturnconfirm.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('dnc.created_at', $search_date)
+                        ->orWhereNull('dnc.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('dnf.created_at', $search_date)
+                        ->orWhereNull('dnf.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjtomorrow.created_at', $search_date)
+                        ->orWhereNull('sjtomorrow.created_at');
+                })
+                ->where(function ($query) use ($search_date) {
+                    $query->whereDate('sjdnpending.created_at', $search_date)
+                        ->orWhereNull('sjdnpending.created_at');
+                });
+        }
+
         return $hubs->make(true);
+    }
+
+    public function debriefing_delivered_shipments(Request $request){
+        $shipments_list = Shipment::join('cities as c', 'c.id', '=', 'shipments.consignee_city_id')
+            ->join('cities as h', 'h.id', '=', 'c.hub_id')
+            ->join('shipments_journey as sj', function($join) {
+                $join->on('sj.shipment_id', '=', 'shipments.id')
+                    ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id IN (14, 30, 36, 37))'));
+        });
+
+        if ($search_date = $request->input('search_date')) {
+            $shipments_list = $shipments_list->whereDate('sj.created_at', $search_date);
+        }
+
+        if ($search_hub = $request->get('search_hub')) {
+            $shipments_list = $shipments_list->where('h.id', '=', $search_hub);
+        }
+
+        if ($search_zone = $request->get('search_zone')) {
+            $shipments_list = $shipments_list->where('h.zone_id', '=', $search_zone);
+        }
+
+        $shipments = array();
+
+        if ($shipments_list->exists()) {
+            $shipments_list = $shipments_list->get();
+
+            foreach ($shipments_list as $shipment){
+                $shipments[] = $shipment->tracking_number;
+            }
+
+            return ['status' => 0, 'success' => 'Found Shipments', 'shipments' => $shipments];
+        }
+        else {
+            return ['status' => 0, 'success' => 'No Shipments', 'shipments' => FALSE];
+        }
     }
 }
 

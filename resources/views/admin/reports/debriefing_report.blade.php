@@ -77,6 +77,25 @@
         </div>
     </div>
 
+    <div class="modal fade" id="delivered_shipments_modal" data-backdrop="static" role="dialog" aria-labelledby="delivered_shipments_modal" aria-hidden="true">
+        <div class="modal-dialog modal-sm" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title" id="delivered_shipments_modal_title">Delivered Shipment(s)</h4>
+
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body text-center">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @section('css')
@@ -143,14 +162,14 @@
     <script type="text/javascript">
         $(document).ready(function () {
 
-            $('#search_region').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Region',
+            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Hub',
                 width:'100%',
                 allowClear:true
             });
 
-            $('#search_hub').prepend('<option value="" selected="selected"></option>').select2({
-                placeholder:'Search Hub',
+            $('#search_zone').prepend('<option value="" selected="selected"></option>').select2({
+                placeholder:'Search Zone',
                 width:'100%',
                 allowClear:true
             });
@@ -162,7 +181,7 @@
                 max:date,
                 selectYears: true,
                 selectMonths: true,
-                formatSubmit: 'yyyy-mm-dd 00:00:00',
+                formatSubmit: 'yyyy-mm-dd',
                 hiddenSuffix: '_formatted',
                 onOpen: function() {
                     $('#search_date_root').css('top','40px');
@@ -281,12 +300,11 @@
                 serverSide: true,
                 ajax: {
                     url: '{{ route('admin.reports.debriefing.list') }}',
-                    // data: function (d) {
-                    // d.search_date = $('input[name="search_date_formatted"]').val(),
-                    // d.rider = $('#search_region').val();
-                    // d.hub = $('#search_hub').val(),
-                    // d.zone = $('#zone_class').val()
-                    // }
+                    data: function (d) {
+                        d.search_date = $('input[name="search_date_formatted"]').val(),
+                        d.search_hub = $('#search_hub').val(),
+                        d.search_zone = $('#search_zone').val()
+                    }
                 },
                 // order: [[5, 'desc']],
                 // rowId: 'delivery_note_id',
@@ -324,6 +342,38 @@
 
             $('#search_filter_btn').on('click',function () {
                 table.draw();
+            });
+
+            var route = '{!! route('admin.tracking.index') !!}';
+
+            $('#datatable tbody').on('click','tr td.delivered_shipments',function () {
+                var id = parseInt($(this).parents('tr').attr('id'));
+                $('#delivered_shipments_modal .modal-body').html('');
+                $('#delivered_shipments_modal').modal('show');
+
+                $.ajax({
+                    url: '{!! route('admin.reports.debriefing.delivered_shipments') !!}',
+                    method: 'POST',
+                    data: {
+                        '_token': '{{ csrf_token() }}',
+                        'search_date' : $('input[name="search_date_formatted"]').val(),
+                        'search_hub' : $('#search_hub').val(),
+                        'search_zone' : $('#search_zone').val()
+                    }
+                })
+                    .done(function(data) {
+                        if (data) {
+                            var html = '';
+
+                            if (data.shipments) {
+                                $.each(data.shipments, function(index, tracking_number) {
+                                    html += '<u><a href='+route+'?tracking_number='+tracking_number+' target="_blank">'+tracking_number+'</a></u><br>';
+                                });
+                            }
+                            $('#delivered_shipments_modal .modal-body').html(html);
+                        }
+                    });
+
             });
 
         });
