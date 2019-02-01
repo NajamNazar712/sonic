@@ -3834,6 +3834,8 @@ class AdminReportsController extends Controller
     }
 
     public function debriefing_index(){
+        $debreifing = array();
+        $debreifing['pending'] =
         $hubs = City::where('hub',1)->select('id','name')->get();
         $zones = Zone::all();
         return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones]);
@@ -4083,5 +4085,8 @@ class AdminReportsController extends Controller
             return ['status' => 0, 'success' => 'No Shipments', 'shipments' => FALSE];
         }
     }
+
+
+
 }
 
