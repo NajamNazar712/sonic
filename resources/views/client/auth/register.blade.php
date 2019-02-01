@@ -444,19 +444,61 @@
                                                             </div>
                                                         </div>
                                                     <div class="form-group">
-                                                        <label for="mode_of_payment">Mode of Payment:
+
+                                                        <label for="bank_city">Bank City:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                            <select name="mode_of_payment" id="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                                <option value="IBFT" {{ old('mode_of_payment') == 'IBFT' ? 'selected' : '' }}>IBFT Reimbursements</option>
+                                                            <select name="cycle_of_invoicing" id="cycle_of_invoicing" class="select2 form-control required">
+                                                                @foreach($all_cities as $bank_city)
+                                                                    <option value="{{$bank_city->id}}"  {{ old('bank_city') == $bank_city->id ? 'selected' : '' }} >{{$bank_city->name}}</option>
+                                                                @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
-
                                                 </div>
 
                                                 </div>
+                                            <div id="billing_information_div" class="row d-none">
+
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="bank_branch">
+                                                                Billing Person Name:
+                                                                <span class="danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control required" value="{{ old('billing_person_name') }}" name="billing_person_name" placeholder="Billing Person Name*">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="bank_branch">
+                                                                Billing Person Phone:
+                                                                <span class="danger">*</span>
+                                                            </label>
+                                                            <input type="text" id="billing_phone" class="form-control required" value="{{ old('billing_person_phone') }}" name="billing_person_phone" placeholder="Billing Person Phone*">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="bank_branch">
+                                                                Billing Person Email:
+                                                                <span class="danger">*</span>
+                                                            </label>
+                                                            <input type="email" class="form-control required" value="{{ old('billing_person_email') }}" name="billing_person_email" placeholder="abc@mail.com*">
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="form-group">
+                                                            <label for="bank_branch">
+                                                                Billing Address:
+                                                                <span class="danger">*</span>
+                                                            </label>
+                                                            <input type="text" class="form-control required" value="{{ old('billing_address') }}" name="billing_address" placeholder="Billing Address*">
+                                                        </div>
+                                                    </div>
+
+                                            </div>
 
                                         </fieldset>
                                         <!-- Step 4 -->
@@ -556,12 +598,15 @@
            width:'100%',
            placeholder:'Select Nature of Account',
            dropdownParent:$('#registership')
-       });
-       $('#mode_of_payment').prepend('<option value="" selected="selected"></option>').select2({
-           width:'100%',
-           placeholder:'Select Mode of Payment',
-           dropdownParent:$('#registership')
-       });
+       }).bind('change', function() {
+
+           if (this.value == 2) {
+               $('#billing_information_div').removeClass('d-none');
+           }
+           else {
+               $('#billing_information_div-day').addClass('d-none');
+           }
+       });;
        $('#bank_city').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank City',
            dropdownParent:$('#registership')
@@ -585,7 +630,7 @@
         });
         $('#peye').on('mousedown',function(){$('input[name="password"]').attr('type','text')}).on('mouseup',function(){$('input[name="password"]').attr('type','password')});
         $("input[name='cnic']").inputmask({'mask': "99999-9999999-9", 'clearIncomplete': true});
-        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
+        $("input[name='shipper_phone'],input[name='shipper_phone2'],input[name='billing_person_phone'],input[name='shipping_phone[]']").inputmask({'mask': "9999-9999999", 'clearIncomplete': true});
         $("input[name='ntn_no']").inputmask({'mask': "9999999-9", 'clearIncomplete': true});
         $('#shipInfo').perfectScrollbar({
             suppressScrollX : true,

@@ -68,37 +68,68 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        if($data['nature_of_account'] == 1){
+            return Validator::make($data, [
+                'name' => 'required|string|max:255|unique:users',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:6',
+                'shipper_poc'=>'required|string|max:255',
+                'company_address'=>'required|string|max:255',
+                'shipper_phone'=>'required|string|max:255',
+                'nature_of_account' => 'required',
+                'cnic'=>'required|string|max:255',
+                'shipper_city'=>'required|string|max:255',
+                'shipper_product_type'=>'required|string|max:255',
+                'shipping_city.*'=>'required|string|max:255',
+                'pickup_address.*'=>'required|string|max:255',
+                'shipping_poc.*'=>'required|string|max:255',
+                'shipping_phone.*'=>'required|string|max:255',
+                'shipping_email.*'=>'required|string|max:255',
+                'product_type.*'=>'required|max:255',
+                'bank_city'=>'required|string|max:255',
+                'bank_name'=>'required|max:255',
+                'bank_branch'=>'required|string|max:255',
+                'account_no'=>'required|string|max:255',
+                'account_title'=>'required|string|max:255',
+                'iban_no'=>'required|string|max:255',
+                'cycle_of_payment'=>'required|string|max:255',
+                'g-recaptcha-response' => 'required|captcha'
 
-        return Validator::make($data, [
-            'name' => 'required|string|max:255|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-            'shipper_poc'=>'required|string|max:255',
-            'company_address'=>'required|string|max:255',
-            'shipper_phone'=>'required|string|max:255',
-            'nature_of_account' => 'required',
-//            'shipper_phone2'=>'string|max:255',
-            'cnic'=>'required|string|max:255',
-//            'ntn_no'=>'string|max:255',
-//            'url'=>'string|max:255',
-            'shipper_city'=>'required|string|max:255',
-            'shipper_product_type'=>'required|string|max:255',
-            'shipping_city.*'=>'required|string|max:255',
-            'pickup_address.*'=>'required|string|max:255',
-            'shipping_poc.*'=>'required|string|max:255',
-            'shipping_phone.*'=>'required|string|max:255',
-            'shipping_email.*'=>'required|string|max:255',
-            'product_type.*'=>'required|max:255',
-            'bank_city'=>'required|string|max:255',
-            'bank_name'=>'required|max:255',
-            'bank_branch'=>'required|string|max:255',
-            'account_no'=>'required|string|max:255',
-            'account_title'=>'required|string|max:255',
-            'iban_no'=>'required|string|max:255',
-            'cycle_of_payment'=>'required|string|max:255',
-            'g-recaptcha-response' => 'required|captcha'
+            ]);
+        }else{
+            return Validator::make($data, [
+                'name' => 'required|string|max:255|unique:users',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:6',
+                'shipper_poc'=>'required|string|max:255',
+                'company_address'=>'required|string|max:255',
+                'shipper_phone'=>'required|string|max:255',
+                'nature_of_account' => 'required',
+                'cnic'=>'required|string|max:255',
+                'shipper_city'=>'required|string|max:255',
+                'shipper_product_type'=>'required|string|max:255',
+                'shipping_city.*'=>'required|string|max:255',
+                'pickup_address.*'=>'required|string|max:255',
+                'shipping_poc.*'=>'required|string|max:255',
+                'shipping_phone.*'=>'required|string|max:255',
+                'shipping_email.*'=>'required|string|max:255',
+                'product_type.*'=>'required|max:255',
+                'bank_city'=>'required|string|max:255',
+                'bank_name'=>'required|max:255',
+                'bank_branch'=>'required|string|max:255',
+                'account_no'=>'required|string|max:255',
+                'account_title'=>'required|string|max:255',
+                'iban_no'=>'required|string|max:255',
+                'cycle_of_payment'=>'required|string|max:255',
+                'billing_person_name' => 'required|string|max:255',
+                'billing_person_phone' => 'required|string|max:255',
+                'billing_person_email' => 'required|string|email|max:255',
+                'billing_address' => 'required|string|max:255',
+                'g-recaptcha-response' => 'required|captcha'
 
-        ]);
+            ]);
+        }
+
     }
 
     public function register(Request $request)
@@ -172,17 +203,34 @@ class RegisterController extends Controller
                 ]);
             }
         }
-        UserBankInfo::create([
+        if($data['nature_of_account'] == 1){
+
+            UserBankInfo::create([
                 'user_id'=>$newUser->id,
                 'bank_name'=>$data['bank_name'],
                 'bank_branch'=>$data['bank_branch'],
                 'account_no'=>$data['account_no'],
                 'account_title'=>$data['account_title'],
                 'iban'=>$data['iban_no'],
-                'payment_mode'=>$data['mode_of_payment'],
                 'payment_cycle'=>$data['cycle_of_payment'],
                 'city_id'=>$data['bank_city'],
-        ]);
+            ]);
+        }else{
+            UserBankInfo::create([
+                'user_id'=>$newUser->id,
+                'bank_name'=>$data['bank_name'],
+                'bank_branch'=>$data['bank_branch'],
+                'account_no'=>$data['account_no'],
+                'account_title'=>$data['account_title'],
+                'iban'=>$data['iban_no'],
+                'payment_cycle'=>$data['cycle_of_payment'],
+                'city_id'=>$data['bank_city'],
+                'billing_person_name' => $data['billing_person_name'],
+                'billing_person_phone' => $data['billing_person_phone'],
+                'billing_person_email' => $data['billing_person_email'],
+                'billing_address' => $data['billing_address'],
+            ]);
+        }
 
         return $newUser;
     }
