@@ -3837,4 +3837,107 @@ class AdminReportsController extends Controller
         }
         return $petty->make(true);
     }
+
+    public function fake_status_index(){
+        $riders = Rider::all(['id','name']);
+        $hubs = City::where('hub',1)->select('id','name')->get();
+        return view('admin.reports.fake_statuses_report')->with(['riders' => $riders, 'hubs' => $hubs]);
+    }
+
+    public function fake_status_list(request $request){
+        $delivery_note = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
+            ->select('r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
+        ->where('dns.fake_status', 1)->groupBy('delivery_notes.id');
+
+
+        $delivery_note = Datatables::of($delivery_note)
+            ->editColumn('delivery_note_id', function ($deliveries) {
+                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('shipments_count_link', function($deliveries) {
+                if ($deliveries->total_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->total_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('shipment_fake_status_link', function($deliveries) {
+                if ($deliveries->shipment_fake_status != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipment_fake_status . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('undelivered_shipments_link', function($deliveries) {
+                $undelivered_shipments = $deliveries->total_shipments - $deliveries->delivered_shipments;
+                if ($undelivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $undelivered_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            });
+        if ($rider = $request->get('rider')) {
+            $delivery_note->where('r.id', '=', $rider);
+        }
+        if ($hub = $request->get('hub')) {
+            $delivery_note->where('delivery_notes.hub_id', $hub);
+        }
+        if($search_date = $request->get('search_date')){
+            $delivery_note->whereDate('delivery_notes.created_at',$search_date);
+        }
+        return $delivery_note->make(true);
+    }
+
+    public function fake_status_shipments_total(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->get();
+        $shipments = array();
+        if($delivery_note_shipments->count() != 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+    public function fake_status_shipments_undelivered(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('status','=',1)->get();
+        $shipments = array();
+        if($delivery_note_shipments->count() != 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+
+    public function fake_status_shipments(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('fake_status','=',1)->get();
+        $shipments = array();
+        if($delivery_note_shipments->count() != 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+
 }
