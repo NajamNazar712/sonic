@@ -97,6 +97,8 @@
                         <th class="border-primary border-darken-1">S. No.</th>
                         <th class="border-primary border-darken-1">Tracking No.</th>
                         <th class="border-primary border-darken-1">Account No.</th>
+                        <th class="border-primary border-darken-1">Cargo Number</th>
+                        <th class="border-primary border-darken-1">In Transit Date</th>
                         <th class="border-primary border-darken-1">Vendor</th>
                         <th class="border-primary border-darken-1">Shipper</th>
                         <th class="border-primary border-darken-1">Origin</th>
@@ -124,6 +126,8 @@
                         <th class="border-primary border-darken-1">Delivered Date(D)</th>
                         <th class="border-primary border-darken-1">Delivered TAT(A-D)</th>
                         <th class="border-primary border-darken-1">Return Confirm(E)</th>
+                        <th class="border-primary border-darken-1">Return Cargo Number</th>
+                        <th class="border-primary border-darken-1">Return In Transit Date</th>
                         <th class="border-primary border-darken-1">Reached At Origin(F)</th>
                         <th class="border-primary border-darken-1">Return Transit TAT(E-F)</th>
                         <th class="border-primary border-darken-1">Return Status</th>
@@ -303,6 +307,8 @@
                             head.push('S.No');
                             head.push('Tracking .No');
                             head.push('Account No.');
+                            head.push('Cargo Number');
+                            head.push('In Transit Date');
                             head.push('Vendor Name');
                             head.push('Shipper');
                             head.push('Origin');
@@ -330,6 +336,8 @@
                             head.push('Delivered Date(D)');
                             head.push('Delivered TAT(A-D)');
                             head.push('Return Confirm(E)');
+                            head.push('Return Cargo Number');
+                            head.push('Return In Transit Date');
                             head.push('Reached At Origin(F)');
                             head.push('Return Transit TAT(E-F)');
                             head.push('Return Status');
@@ -345,6 +353,8 @@
                                 row.push(index + 1);
                                 row.push(values.tracking_number);
                                 row.push(values.account_no);
+                                row.push(values.cargo_number);
+                                row.push(values.cargo_date_time);
                                 row.push(values.vendor);
                                 row.push(values.shipper);
                                 row.push(values.origin);
@@ -372,6 +382,8 @@
                                 row.push(values.delivered_date);
                                 row.push(values.delivered_tat);
                                 row.push(values.return_confirm);
+                                row.push(values.return_cargo_number);
+                                row.push(values.return_cargo_date_time);
                                 row.push(values.return_reached_at_destination);
                                 row.push(values.return_transit_tat);
                                 row.push(values.return_delivered_status);
@@ -430,6 +442,8 @@
                     {orderable: false, searchable: false, name: 'serial_number', class: 'align-middle serial_number', targets: 0, render: function (data, type, row) {return '';}},
                     {data: 'tracking_number_link', name: 'shipments.tracking_number', class: 'align-middle tracking_number_link'},
                     {data: 'account_no', name: 'u.id', class: 'align-middle account_no'},
+                    {data: 'cargo_number', name: 'ccss.id', class: 'align-middle cargo_number'},
+                    {data: 'cargo_date_time', name: 'ccss.created_at', class: 'align-middle cargo_date_time'},
                     {data: 'vendor', name: 'cc.transport_mode_vendor_id', class: 'align-middle vendor'},
                     {data: 'shipper', name: 'u.name', class: 'align-middle shipper'},
                     {data: 'origin', name: 'oc.name', class: 'align-middle origin'},
@@ -457,6 +471,8 @@
                     {data: 'delivered_date', name: 'delivered_date', class: 'align-middle delivered_date'},
                     {data: 'delivered_tat', name: 'delivered_tat', class: 'align-middle delivered_tat', orderable: false, searchable: false},
                     {data: 'return_confirm', name: 'return_confirm', class: 'align-middle return_confirm'},
+                    {data: 'return_cargo_number', name: 'ccssr.id', class: 'align-middle return_cargo_number'},
+                    {data: 'return_cargo_date_time', name: 'ccssr.created_at', class: 'align-middle return_cargo_date_time'},
                     {data: 'return_reached_at_destination', name: 'return_reached_at_destination', class: 'align-middle return_reached_at_destination'},
                     {data: 'return_transit_tat', name: 'return_transit_tat', class: 'align-middle return_transit_tat', orderable: false, searchable: false},
                     {data: 'return_delivered_status', name: 'return_delivered_status', class: 'align-middle return_delivered_status'},

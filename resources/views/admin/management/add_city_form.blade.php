@@ -26,12 +26,12 @@
     <div class="row mb-2" id="hub_list_div" >
         <div class="col-6">
             <fieldset class="form-group">
-                    <select name="hubs" id="hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
-                        <option value="" selected>Select a hub</option>
-                        @foreach($hubs as $hub)
-                            <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
-                        @endforeach
-                    </select>
+                <select name="hubs" id="hub_list" class="form-control select2" style="width: 100%;" required data-rule-required="true" data-msg-required="This field is required">
+                    <option value="" selected>Select a hub</option>
+                    @foreach($hubs as $hub)
+                        <option value="{{$hub->hub_id}}">{{$hub->name}}</option>
+                    @endforeach
+                </select>
             </fieldset>
         </div>
     </div>
@@ -70,24 +70,54 @@
             <h4 class="card-title font-weight-bold">Delivery</h4>
             {{--<p class="text-danger" id="service_error_1" style="display:none;">Regular delivery is required</p>--}}
 
-        @foreach($bookings as $booking)
+            @foreach($bookings as $booking)
 
-            <div class="bs-callout-primary callout-border-left callout-square p-1">
-                <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" class="icheckbox bookingtype{{$booking->id}}" {{($booking->id == 1)? 'checked disabled':''}}></strong>
+                <div class="bs-callout-primary callout-border-left callout-square p-1">
+                    <strong>{{$booking->booking_type}}&nbsp;<input type="checkbox" name="booking[{{$booking->id}}]" class="icheckbox bookingtype{{$booking->id}}" {{($booking->id == 1)? 'checked disabled':''}}></strong>
 
-                <div class="mt-1 form-group">
-                @foreach($shippingMode as $shipping)
-                    <fieldset class="checkbox-inline mr-1 ">
-                        <input type="checkbox" id="delivery[{{$booking->id}}][{{$shipping->id}}]" name="delivery[{{$booking->id}}][{{$shipping->id}}]" class="icheckbox shippingmode booking_{{$booking->id}}_shipping_mode" {{($booking->id == 1)? '':'disabled'}} {{($booking->id == 1) && ($shipping->id == 1)? 'checked':''}}>
-                        <label for="delivery[{{$booking->id}}][{{$shipping->id}}]" class="">{{ucfirst($shipping->mode)}}</label>
-                    </fieldset>
-                    @endforeach
-                <p class="text-danger" id="shipping_error{{$booking->id}}" style="display:none;">Please select atleast one option</p>
+                    <div class="mt-1 form-group">
+                        @foreach($shippingMode as $shipping)
+                            <fieldset class="checkbox-inline mr-1 ">
+                                <input type="checkbox" id="delivery[{{$booking->id}}][{{$shipping->id}}]" name="delivery[{{$booking->id}}][{{$shipping->id}}]" class="icheckbox shippingmode booking_{{$booking->id}}_shipping_mode" {{($booking->id == 1)? '':'disabled'}} {{($booking->id == 1) && ($shipping->id == 1)? 'checked':''}}>
+                                <label for="delivery[{{$booking->id}}][{{$shipping->id}}]" class="">{{ucfirst($shipping->mode)}}</label>
+                            </fieldset>
+                        @endforeach
+                        <p class="text-danger" id="shipping_error{{$booking->id}}" style="display:none;">Please select atleast one option</p>
+                    </div>
+
                 </div>
-
-            </div>
             @endforeach
 
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <h2 class="card-title"><U>Walk-In</U></h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="input-group">
+            <div class="col-3">
+                <h4 class="card-title font-weight-bold">Pickup</h4>
+            </div>
+            <div class="col">
+                <fieldset class="">
+                    <input type="checkbox" name="walk_in_pickup" class="icheckbox">
+                    <label for="walk_in_pickup" class="">Pickup</label>
+                </fieldset>
+            </div>
+        </div>
+        <div class="input-group">
+            <div class="col-3">
+                <h4 class="card-title font-weight-bold">Delivery</h4>
+            </div>
+            <div class="col">
+                <fieldset class="">
+                    <input type="checkbox" name="walk_in_delivery" class="icheckbox">
+                    <label for="walk_in_delivery" class="">Delivery</label>
+                </fieldset>
+            </div>
         </div>
     </div>
 
@@ -126,48 +156,48 @@
             }
 
         }
-    $('input.icheck').iCheck({
-        checkboxClass: 'icheckbox_square-red',
-        radioClass: 'iradio_square-red'
-    });
-    $('input.icheckbox').iCheck({
-        checkboxClass: 'icheckbox_flat-red',
-        radioClass: 'iradio_flat-red',
-        increaseArea: '20%' // optional
-    });
+        $('input.icheck').iCheck({
+            checkboxClass: 'icheckbox_square-red',
+            radioClass: 'iradio_square-red'
+        });
+        $('input.icheckbox').iCheck({
+            checkboxClass: 'icheckbox_flat-red',
+            radioClass: 'iradio_flat-red',
+            increaseArea: '20%' // optional
+        });
         $('.select2').select2({
             dropdownParent: $("#addCity")
         });
 
 
-    $('#zone').prepend('<option value="" selected></option>').select2({
-        placeholder: 'Zone',
-        width:'100%'
-    });
+        $('#zone').prepend('<option value="" selected></option>').select2({
+            placeholder: 'Zone',
+            width:'100%'
+        });
 
-    $("input[type='radio'][name='city-radio']").on('ifChecked', function(event){
-               var rtype = $(this).attr('rel');
-               if(rtype == 'city'){
-                   $('#city_type').val('city');
-                   if($('#hub_list_div').is(':hidden')){
-                       // $('#hub_list_div').css('display','block');
-                       $('#hub_list_div').fadeIn("slow");
+        $("input[type='radio'][name='city-radio']").on('ifChecked', function(event){
+            var rtype = $(this).attr('rel');
+            if(rtype == 'city'){
+                $('#city_type').val('city');
+                if($('#hub_list_div').is(':hidden')){
+                    // $('#hub_list_div').css('display','block');
+                    $('#hub_list_div').fadeIn("slow");
 
-                       $('#zone_selection').addClass('d-none');
-                   }
-               }else if(rtype == 'hub'){
-                   $('#city_type').val('hub');
+                    $('#zone_selection').addClass('d-none');
+                }
+            }else if(rtype == 'hub'){
+                $('#city_type').val('hub');
 
-                   if(!$('#hub_list_div').is(':hidden')){
-                       $('#hub_list_div').fadeOut("slow");
+                if(!$('#hub_list_div').is(':hidden')){
+                    $('#hub_list_div').fadeOut("slow");
 
-                       // $('#hub_list_div').fadeIn('slow');
+                    // $('#hub_list_div').fadeIn('slow');
 
-                       $('#zone_selection').removeClass('d-none');
-                   }
+                    $('#zone_selection').removeClass('d-none');
+                }
 
-               }
-    });
+            }
+        });
         // $('input.bookingtype1').on('ifUnchecked',function (e) {
         //     var checkbox = $(this);
         //         $('#service_error_1').css('display','block');

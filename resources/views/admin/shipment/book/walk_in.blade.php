@@ -60,7 +60,7 @@
                                             <div class="form-group">
                                                 <select name="new_pickup_city" class="select2" id="new_pickup_city" data-rule-required="true" data-msg-required="City is required">
                                                     @foreach($cities as $city)
-                                                        <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                                        <option value="{{ $city->city_id }}">{{ $city->city_name }}</option>
                                                     @endforeach
                                                 </select>
                                             </div>
@@ -81,7 +81,7 @@
                                         <div class="form-group">
                                             <select name="consignee_city" class="select2" id="consignee_city" data-rule-required="true" data-msg-required="City is required">
                                                 @foreach($consignee_cities as $city)
-                                                    <option value="{{ $city->id }}">{{ $city->name }}</option>
+                                                    <option value="{{ $city->city_id }}">{{ $city->city_name }}</option>
                                                 @endforeach
                                             </select>
                                         </div>
@@ -500,7 +500,7 @@
                 'allowPlus': false,
                 'digits': 2,
                 'min': 0.1,
-                'max': 1000
+                'max': 10000
             });
 
             $('.charges_per_kg').inputmask({

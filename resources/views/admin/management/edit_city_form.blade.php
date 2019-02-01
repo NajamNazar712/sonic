@@ -101,6 +101,36 @@
 
         </div>
     </div>
+
+    <div class="row">
+        <div class="col">
+            <h2 class="card-title"><U>Walk-In</U></h2>
+        </div>
+    </div>
+    <div class="row">
+        <div class="input-group">
+            <div class="col-3">
+                <h4 class="card-title font-weight-bold">Pickup</h4>
+            </div>
+            <div class="col">
+                <fieldset class="">
+                            <input type="checkbox" name="walk_in_pickup" class="icheckbox" {{($walk_in_city->pickup == 1)? 'checked':''}}>
+                            <label for="walk_in_pickup" class="">Pickup</label>
+                </fieldset>
+            </div>
+        </div>
+        <div class="input-group">
+            <div class="col-3">
+                <h4 class="card-title font-weight-bold">Delivery</h4>
+            </div>
+            <div class="col">
+                <fieldset class="">
+                    <input type="checkbox" name="walk_in_delivery" class="icheckbox" {{($walk_in_city->delivery == 1)? 'checked':''}}>
+                    <label for="walk_in_delivery" class="">Delivery</label>
+                </fieldset>
+            </div>
+        </div>
+    </div>
     <div>
 
 

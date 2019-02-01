@@ -17,9 +17,19 @@
 						<div class="card-body">
 							@include('admin.inc.messages')
 
+							<div id="camera_scan" class="d-none">
+			                    <div id="camera_view" class="camera_view"></div>
+			                </div>
+
 							<form id="add_shipment_form" class="form-inline mb-1 justify-content-center" novalidate="novalidate">
 								<div class="form-group">
 									<input type="text" name="tracking_number" class="form-control tracking_number" placeholder="Tracking Number*" data-rule-required="true" data-msg-required="Tracking Number is required">
+
+									<div class="d-inline-block ml-1">
+										<a href="#" id="camera_scan_initiate" tabindex="-1">
+				                            <i class="ft-camera h1"></i>
+				                        </a>
+				                    </div>
 								</div>
 
 								<div class="form-group ml-1">
@@ -78,6 +88,8 @@
 	<script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 	<script src="{{asset('app-assets/vendors/js/extensions/toastr.min.js')}}" type="text/javascript"></script>
+	<script src="{{asset('app-assets/vendors/js/quagga/quagga.min.js')}}" type="text/javascript"></script>
+    <script src="{{asset('js/custom.js')}}" type="text/javascript"></script>
 
 	<script>
 		$(document).ready(function() {
@@ -247,6 +259,25 @@
 					}
 				});
 			});
+
+			$('#camera_scan_initiate').bind('click', function() {
+				if ($('#camera_scan').hasClass('d-none')) {
+	                $('#camera_scan').removeClass('d-none');
+
+	                camera_scanning_start('#camera_view');
+            	}
+            	else {
+            		$('#camera_scan').addClass('d-none');
+
+            		camera_scanning_stop();
+            	}
+            });
 		});
+
+		function camera_scan_detected(tracking_number) {
+            $('#add_shipment_form input.tracking_number').val(tracking_number);
+
+            $('#add_shipment_form').trigger('submit');
+        }
 	</script>
 @endsection

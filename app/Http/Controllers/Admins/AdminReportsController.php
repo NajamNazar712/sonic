@@ -1112,15 +1112,25 @@ class AdminReportsController extends Controller
             })
             ->leftjoin('shipments_journey as fsjv',function($join) {
                 $join->on('fsjv.reference_1_id', '=', 'fdnsv.delivery_note_id')
-                ->where('fsjv.id','=', DB::raw('(select min(id) from shipments_journey where shipments_journey.reference_1_id = fdnsv.delivery_note_id and shipments_journey.shipper_status_id > 5 and shipments_journey.verification = 1)'));
+                    ->where('fsjv.id','=', DB::raw('(select min(id) from shipments_journey where shipments_journey.reference_1_id = fdnsv.delivery_note_id and shipments_journey.shipper_status_id > 5 and shipments_journey.verification = 1)'));
             })
             ->leftjoin('shipment_status as fssv','fssv.id','=','fsjv.shipper_status_id')
             ->leftjoin('shipments_journey as lsjv',function($join) {
                 $join->on('lsjv.reference_1_id', '=', 'ldnsv.delivery_note_id')
                     ->where('lsjv.id','=', DB::raw('(select max(id) from shipments_journey  where shipments_journey.reference_1_id = ldnsv.delivery_note_id and shipments_journey.verification = 1)'));
             })
+            ->leftjoin('cargo_consignment_shipments as cccc',function($join){
+                $join->on('cccc.shipment_id', '=', 'shipments.id')
+                    ->where('cccc.id', '=', DB::raw('(select min(id) from cargo_consignment_shipments where cargo_consignment_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('cargo_consignment_shipments as ccrc',function($join){
+                $join->on('ccrc.shipment_id', '=', 'shipments.id')
+                    ->where('ccrc.id', '=', DB::raw('(select max(id) from cargo_consignment_shipments where cargo_consignment_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('cargo_consignments as ccss','ccss.id', '=', 'cccc.cargo_consignment_id')
+            ->leftjoin('cargo_consignments as ccssr','ccssr.id', '=', 'ccrc.cargo_consignment_id')
             ->leftjoin('shipment_status as lssv','lssv.id','=','lsjv.shipper_status_id')
-            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc')
+            ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc', 'ccss.id as cargo_number', 'ccss.created_at as cargo_date_time', 'ccssr.id as return_cargo_number', 'ccssr.created_at as return_cargo_date_time')
             ->groupBy('shipments.id');
         if (session('role_id') != 1) {
             $shipments = $shipments->whereIn('dc.hub_id', session('hubs'));
@@ -1136,6 +1146,38 @@ class AdminReportsController extends Controller
                 }
                 else
                 {
+                    return "-";
+                }
+            })
+            ->editColumn('return_cargo_number', function ($shipment){
+                if($shipment->return_cargo_number != null){
+                    return $shipment->return_cargo_number;
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->editColumn('return_cargo_date_time', function ($shipment){
+                if($shipment->return_cargo_date_time != null){
+                    return $shipment->return_cargo_date_time;
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->editColumn('cargo_number', function ($shipment){
+                if($shipment->cargo_number != null){
+                    return $shipment->cargo_number;
+                }
+                else{
+                    return "-";
+                }
+            })
+            ->editColumn('cargo_date_time', function ($shipment){
+                if($shipment->cargo_date_time != null){
+                    return $shipment->cargo_date_time;
+                }
+                else{
                     return "-";
                 }
             })
@@ -1165,40 +1207,57 @@ class AdminReportsController extends Controller
                 return $query->where('u.name', '=', $keyword);
             })
             ->addColumn('transit_tat',function ($shipments){
-                return ($shipments->arrival_date && $shipments->reached_at_destination)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->reached_at_destination) :'-';
+                return ($shipments->arrival_date && $shipments->reached_at_destination)? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekendDays($shipments->reached_at_destination)-(new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                        $date->isSunday();
+                    },$shipments->reached_at_destination)):'-';
             })
             ->addColumn('attempt_tat',function ($shipments){
-                return ($shipments->arrival_date && $shipments->first_status_date)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->first_status_date) :'-';
+                return ($shipments->arrival_date && $shipments->first_status_date)? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekendDays($shipments->first_status_date)-(new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                        $date->isSunday();
+                    },$shipments->first_status_date)):'-';
             })
             ->addColumn('delivered_tat',function ($shipments){
-                return ($shipments->arrival_date && $shipments->delivered_date)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->delivered_date) :'-';
+                return ($shipments->arrival_date && $shipments->delivered_date)? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekendDays($shipments->delivered_date)-(new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                        $date->isSunday();
+                    },$shipments->delivered_date)):'-';
             })
             ->addColumn('dispatch_tat',function ($shipments){
-                return ($shipments->reached_at_destination && $shipments->first_status_date)? with(new Carbon($shipments->reached_at_destination, 'UTC'))->diffInDays($shipments->first_status_date) :'-';
+                return ($shipments->reached_at_destination && $shipments->first_status_date)? with((new Carbon($shipments->reached_at_destination, 'UTC'))->diffInWeekendDays($shipments->first_status_date)-(new Carbon($shipments->reached_at_destination, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                        $date->isSunday();
+                    },$shipments->first_status_date)):'-';
             })
             ->addColumn('return_transit_tat',function ($shipments){
-                return ($shipments->return_confirm && $shipments->return_reached_at_destination)? with(new Carbon($shipments->return_confirm, 'UTC'))->diffInDays($shipments->return_reached_at_destination) :'-';
+                return ($shipments->return_confirm && $shipments->return_reached_at_destination)? with((new Carbon($shipments->return_confirm, 'UTC'))->diffInWeekendDays($shipments->return_reached_at_destination)-(new Carbon($shipments->return_confirm, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                        $date->isSunday();
+                    },$shipments->return_reached_at_destination)):'-';
             })
             ->addColumn('return_dispatch_tat',function ($shipments){
-                return ($shipments->return_delivered_date && $shipments->return_reached_at_destination)? with(new Carbon($shipments->return_reached_at_destination, 'UTC'))->diffInDays($shipments->return_delivered_date) :'-';
+                return ($shipments->return_delivered_date && $shipments->return_reached_at_destination)? with((new Carbon($shipments->return_reached_at_destination, 'UTC'))->diffInWeekendDays($shipments->return_delivered_date)-(new Carbon($shipments->return_reached_at_destination, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                        $date->isSunday();
+                    },$shipments->return_delivered_date)):'-';
             })
             ->addColumn('return_tat',function ($shipments){
-                return ($shipments->return_confirm && $shipments->return_delivered_date)? with(new Carbon($shipments->return_confirm, 'UTC'))->diffInDays($shipments->return_delivered_date) :'-';
+                return ($shipments->return_confirm && $shipments->return_delivered_date)? with((new Carbon($shipments->return_confirm, 'UTC'))->diffInWeekendDays($shipments->return_delivered_date)-(new Carbon($shipments->return_confirm, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                        $date->isSunday();
+                    },$shipments->return_delivered_date)):'-';
             })
             ->addColumn('payment_tat',function ($shipments){
-
                 $return = array(20,42);
                 if(in_array($shipments->return_check,$return)){
-                    return ($shipments->return_delivered_date && $shipments->payment_done_date)? with(new Carbon($shipments->return_delivered_date, 'UTC'))->diffInDays($shipments->payment_done_date) :'-';
+                    return ($shipments->return_delivered_date && $shipments->payment_done_date)? with((new Carbon($shipments->return_delivered_date, 'UTC'))->diffInWeekendDays($shipments->payment_done_date)-(new Carbon($shipments->return_delivered_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                            $date->isSunday();
+                        },$shipments->payment_done_date)):'-';
                 }else{
-                    return ($shipments->delivered_date && $shipments->payment_done_date)? with(new Carbon($shipments->delivered_date, 'UTC'))->diffInDays($shipments->payment_done_date) :'-';
+                    return ($shipments->delivered_date && $shipments->payment_done_date)? with((new Carbon($shipments->delivered_date, 'UTC'))->diffInWeekendDays($shipments->payment_done_date)-(new Carbon($shipments->delivered_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                            $date->isSunday();
+                        },$shipments->payment_done_date)):'-';
                 }
             })
             ->addColumn('total_tat',function ($shipments){
-                return ($shipments->arrival_date && $shipments->latest_journey_date)? with(new Carbon($shipments->arrival_date, 'UTC'))->diffInDays($shipments->latest_journey_date) :'-';
-
+                return ($shipments->arrival_date && $shipments->latest_journey_date)? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekDays($shipments->latest_journey_date)-(new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
+                        $date->isSunday();
+                    },$shipments->latest_journey_date)):'-';
             });
-
         if($tracking = $request->get('search_tracking_no')){
             $lead_time->where('shipments.tracking_number', '=', $tracking);
         }
