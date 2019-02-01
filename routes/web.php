@@ -843,7 +843,11 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('export_to_excel', 'Admins\AdminReportsController@sales_person_performance_export_to_excel')->name('export_to_excel');
             Route::get('download', 'Admins\AdminReportsController@sales_person_performance_download')->name('download');
         });
+        Route::prefix('debriefing')->name('debriefing.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@debriefing_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
 
+        });
     });
 
     //Reports end

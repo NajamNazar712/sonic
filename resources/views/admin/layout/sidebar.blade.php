@@ -332,9 +332,13 @@
                         @if (session('role_id') == 1 || in_array(156, session('permissions')))
                                 <li><a class="menu-item" href="{{ route('admin.reports.petty_cash.index') }}">Petty Cash Statements</a></li>
                         @endif
-                            @if (session('role_id') == 1 || in_array(153, session('permissions')))
-                                <li><a class="menu-item" href="{{ route('admin.reports.call_verification.index') }}">Call Verification</a></li>
-                            @endif
+                        @if (session('role_id') == 1 || in_array(153, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.call_verification.index') }}">Call Verification</a></li>
+                        @endif
+
+                        @if (session('role_id') == 1 || in_array(169, session('permissions')))
+                            <li><a class="menu-item" href="{{ route('admin.reports.debriefing.index') }}">Debriefing</a></li>
+                        @endif
                     </ul>
                 </li>
             @endif
