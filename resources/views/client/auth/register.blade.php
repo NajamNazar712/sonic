@@ -183,6 +183,22 @@
                                                     </div>
                                                 </div>
                                             </div>
+                                            <div class="row">
+                                                <div class="col-6">
+                                                    <div class="form-group">
+                                                        <label for="nature_of_account">Nature Of Account:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="nature_of_account" id="nature_of_account" class="select2 form-control required">
+                                                                @foreach($account_types as $type)
+                                                                    <option value="{{$type->id}}" {{ old('nature_of_account') == $type->id ? 'selected' : '' }}>{{$type->name}}</option>
+                                                                @endforeach
+                                                            </select>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </fieldset>
                                         <!-- Step 2 -->
                                         <h6>Shipping Information</h6>
@@ -381,15 +397,20 @@
                                                         <input type="text" class="form-control required" value="{{ old('account_no') }}" name="account_no" placeholder="Account Number*">
                                                     </div>
                                                     <div class="form-group">
-                                                        <label for="mode_of_payment">Mode of Payment:
+
+                                                        <label for="cycle_of_payment">Cycle of Payment:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
-                                                        <select name="mode_of_payment" id="mode_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="IBFT" {{ old('mode_of_payment') == 'IBFT' ? 'selected' : '' }}>IBFT Reimbursements</option>
-                                                        </select>
+                                                            <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
+                                                                <option value="Daily" {{ old('cycle_of_payment') == 'Daily' ? 'selected' : '' }}>Daily</option>
+                                                                <option value="Weekly" {{ old('cycle_of_payment') == 'Weekly' ? 'selected' : '' }}>Weekly</option>
+                                                                <option value="Fortnight" {{ old('cycle_of_payment') == 'Fortnight' ? 'selected' : '' }}>Fortnight</option>
+                                                                <option value="Monthly" {{ old('cycle_of_payment') == 'Monthly' ? 'selected' : '' }}>Monthly</option>
+                                                            </select>
                                                         </div>
                                                     </div>
+
                                                 </div>
                                                 <div class="col-md-6">
                                                     <div class="form-group">
@@ -423,19 +444,16 @@
                                                             </div>
                                                         </div>
                                                     <div class="form-group">
-
-                                                            <label for="cycle_of_payment">Cycle of Payment:
-                                                                <span class="danger">*</span>
-                                                            </label>
+                                                        <label for="mode_of_payment">Mode of Payment:
+                                                            <span class="danger">*</span>
+                                                        </label>
                                                         <div>
-                                                        <select name="cycle_of_payment" id="cycle_of_payment" class="select2 form-control required" style="width: 100%;">
-                                                            <option value="Daily" {{ old('cycle_of_payment') == 'Daily' ? 'selected' : '' }}>Daily</option>
-                                                            <option value="Weekly" {{ old('cycle_of_payment') == 'Weekly' ? 'selected' : '' }}>Weekly</option>
-                                                            <option value="Fortnight" {{ old('cycle_of_payment') == 'Fortnight' ? 'selected' : '' }}>Fortnight</option>
-                                                            <option value="Monthly" {{ old('cycle_of_payment') == 'Monthly' ? 'selected' : '' }}>Monthly</option>
-                                                        </select>
+                                                            <select name="mode_of_payment" id="mode_of_payment" class="select2 form-control required" style="width: 100%;">
+                                                                <option value="IBFT" {{ old('mode_of_payment') == 'IBFT' ? 'selected' : '' }}>IBFT Reimbursements</option>
+                                                            </select>
                                                         </div>
                                                     </div>
+
                                                 </div>
 
                                                 </div>
@@ -534,7 +552,13 @@
            placeholder:'Select Bank',
            dropdownParent:$('#registership')
        });
+       $('#nature_of_account').prepend('<option value="" selected="selected"></option>').select2({
+           width:'100%',
+           placeholder:'Select Nature of Account',
+           dropdownParent:$('#registership')
+       });
        $('#mode_of_payment').prepend('<option value="" selected="selected"></option>').select2({
+           width:'100%',
            placeholder:'Select Mode of Payment',
            dropdownParent:$('#registership')
        });
