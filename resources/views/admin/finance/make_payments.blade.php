@@ -48,7 +48,6 @@
 										<th class="border-primary border-darken-1">Account Title</th>
 										<th class="border-primary border-darken-1">IBAN</th>
 										<th class="border-primary border-darken-1">Account City</th>
-										<th class="border-primary border-darken-1">Payment Mode</th>
 										<th class="border-primary border-darken-1">Payment Cycle</th>
 										<th class="border-primary border-darken-1">Return Shipments Avg. Aging</th>
 										<th class="border-primary border-darken-1"></th>
@@ -281,7 +280,6 @@
                             head.push('Account Title');
                             head.push('IBAN');
                             head.push('Account City');
-                            head.push('Payment Mode');
                             head.push('Payment Cycle');
                             head.push('Return Shipments Avg. Aging');
 
@@ -312,7 +310,6 @@
                                 row.push(values.account_title);
                                 row.push(values.iban);
                                 row.push(values.account_city);
-                                row.push(values.payment_mode);
                                 row.push(values.payment_cycle);
                                 row.push(values.return_shipments_average_aging);
 
@@ -463,7 +460,6 @@
 					{data:'account_title', name: 'ubi.account_title', class: 'align-middle text-center account_title'},
 					{data:'iban', name: 'ubi.iban', class: 'align-middle text-center iban'},
 					{data:'account_city', name: 'bc.name', class: 'align-middle text-center account_city'},
-					{data:'payment_mode', name: 'ubi.payment_mode', class: 'align-middle text-center payment_mode'},
 					{data:'payment_cycle', name: 'ubi.payment_cycle', class: 'align-middle text-center payment_cycle'},
 					{data:'return_shipments_average_aging', name: 'return_shipments_average_aging', class: 'align-middle text-center return_shipments_average_aging', orderable: false},
 					{data: 'action', name: 'action', class: 'text-center align-middle action p-1', orderable: false, searchable: false}
@@ -486,10 +482,10 @@
 					var input = '<input type="text" class="form-control form-control-sm input-sm primary">';
 					var icon = '<div class="form-control-position primary"><i class="la la-search"></i></div>';
                     var bank_select = '<select name="bank_select" id="bank_select" class="select2 form-control"></select>';
-                    var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control">' +
-                        '<option value="ibft">IBFT</option>' +
-                        '<option value="invoices">Invoices</option>' +
-                        '</select>';
+                    // var payment_mode_select = '<select name="payment_mode_select" id="payment_mode_select" class="select2 form-control">' +
+                    //     '<option value="ibft">IBFT</option>' +
+                    //     '<option value="invoices">Invoices</option>' +
+                    //     '</select>';
                     var payment_cycle_select = '<select name="payment_cycle_select" id="payment_cycle_select" class="select2 form-control">' +
                         '<option value="daily">Daily</option>' +
                         '<option value="weekly">Weekly</option>' +
@@ -507,11 +503,11 @@
                                 .on( 'change', function () {
                                     column.search($(this).val(), false, false, true).draw();
                                 } ).wrap(td);
-                        }else if($(header).is('.payment_mode')){
-                            $(payment_mode_select).appendTo($(search))
-                                .on( 'change', function () {
-                                    column.search($(this).val(), false, false, true).draw();
-                                } ).wrap(td);
+                        // }else if($(header).is('.payment_mode')){
+                        //     $(payment_mode_select).appendTo($(search))
+                        //         .on( 'change', function () {
+                        //             column.search($(this).val(), false, false, true).draw();
+                        //         } ).wrap(td);
                         }else if($(header).is('.payment_cycle')){
                             $(payment_cycle_select).appendTo($(search))
                                 .on( 'change', function () {
@@ -546,12 +542,12 @@
                         containerCssClass: 'select-xs',
                         dropdownCssClass: 'form-control-sm p-0'
                     });
-                    $("#payment_mode_select").prepend('<option value="" selected></option>').select2({
-                        placeholder: "Select Mode",
-                        width:'100%',
-                        containerCssClass: 'select-xs',
-                        dropdownCssClass: 'form-control-sm p-0'
-                    });
+                    // $("#payment_mode_select").prepend('<option value="" selected></option>').select2({
+                    //     placeholder: "Select Mode",
+                    //     width:'100%',
+                    //     containerCssClass: 'select-xs',
+                    //     dropdownCssClass: 'form-control-sm p-0'
+                    // });
                     $("#payment_cycle_select").prepend('<option value="" selected></option>').select2({
                         placeholder: "Select Cycle",
                         width:'100%',

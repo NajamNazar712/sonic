@@ -87,7 +87,7 @@
                                     <td>{{$user->city->name}}</td>
                                 </tr>
                                 <tr>
-                                    <td><b>Account Type</b></td>
+                                    <td><b>Nature Of Account</b></td>
                                     <td>{{$user->account_type->name}}</td>
                                 </tr>
                                 <tr>
@@ -107,33 +107,7 @@
                         @endif
                     </div>
                     <div class="tab-pane" id="link" role="tabpanel" aria-labelledby="link-tab" aria-expanded="false">
-                        {{--<div class="table-responsive">--}}
-                            {{--<table class="table" style="font-size: 14px">--}}
-                                {{--<thead>--}}
-                                {{--<tr>--}}
-                                    {{--<th>ID</th>--}}
-                                    {{--<th>Address</th>--}}
-                                    {{--<th>POC</th>--}}
-                                    {{--<th>Phone</th>--}}
-                                    {{--<th>Email</th>--}}
-                                    {{--<th>Status</th>--}}
-                                {{--</tr>--}}
-                                {{--</thead>--}}
-                                {{--<tbody>--}}
-                                {{--@foreach($user->shipping as $pickup)--}}
-                                    {{--<tr>--}}
-                                        {{--<td>{{$pickup->id}}</td>--}}
-                                        {{--<td>{{$pickup->pickup_address}}</td>--}}
-                                        {{--<td>{{$pickup->poc}}</td>--}}
-                                        {{--<td>{{$pickup->phone}}</td>--}}
-                                        {{--<td>{{$pickup->email}}</td>--}}
-                                        {{--<td>{{$pickup->default_address==1 ? "Default Address | " : ""}}--}}
-                                        {{--{{$pickup->status==1 ? "Enabled" : "Disabled"}}</td>--}}
-                                    {{--</tr>--}}
-                                {{--@endforeach--}}
-                                {{--</tbody>--}}
-                            {{--</table>--}}
-                        {{--</div>--}}
+
 
                         <div class="table-responsive">
                             <br>
@@ -194,10 +168,14 @@
                                     <td><b>Payment Cycle</b></td>
                                     <td>{{$user->bank->payment_cycle}}</td>
                                 </tr>
-                                {{--<tr>--}}
-                                    {{--<td><b>Invoicing Cycle</b></td>--}}
-                                    {{--<td>{{$user->bank->invoicing->name}}</td>--}}
-                                {{--</tr>--}}
+                                <tr>
+                                    <td><b>Invoicing Cycle</b></td>
+                                    <td>{{$user->bank->invoicing->name}}</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Generation Date</b></td>
+                                    <td>{{$user->bank->generation_date}}</td>
+                                </tr>
                                 @if($user->account_type_id == 2)
                                     <tr>
                                         <td><b>Billing Person Name</b></td>
@@ -457,16 +435,42 @@
                                         </select>
                                     </div>
                                 </div>
-                                <div class="form-group row">
-                                    <div class="form-group col-md-9">
-                                        <label>Payment Mode</label>
-                                        <span class="danger">*</span>
-                                        <select name="payment_mode" id="payment_mode" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required" style="width: 100%">
-                                            <option value="IBFT" {{ $user->bank->payment_mode == 'IBFT' ? 'selected' : '' }}>IBFT Reimbursements</option>
-                                            <option value="Invoices" {{ $user->bank->payment_mode == 'Invoices' ? 'selected' : '' }}>Invoices</option>
-                                        </select>
-                                    </div>
-                                </div>
+                                {{--<div class="form-group row">--}}
+                                    {{--<div class="form-group col-md-9">--}}
+                                        {{--<label>Invoicing Cycle</label>--}}
+                                        {{--<span class="danger">*</span>--}}
+                                        {{--<select name="invoicing_cycle" id="invoicing_cycle" data-rule-required="true" data-msg-required="Invoicing Cycle is required" class="select2 form-control required">--}}
+                                            {{--@foreach($invoicing_cycle as $cycle)--}}
+                                            {{--<option value="{{$cycle->id}}" {{ $user->bank->invoicing_cycle_id == $cycle->id ? 'selected' : '' }}>{{$cycle->name}}</option>--}}
+                                            {{--@endforeach--}}
+                                        {{--</select>--}}
+                                    {{--</div>--}}
+                                {{--</div>--}}
+                                {{--@if($user->bank->invoicing_cycle_id == 1)--}}
+                                    {{--<div class="form-group row">--}}
+                                        {{--<div class="form-group col-md-9">--}}
+                                            {{--<label>Generation Date</label>--}}
+                                            {{--<span class="danger">*</span>--}}
+                                            {{--<select name="generation_date" id="generation_date" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required">--}}
+                                                {{--@for($i = 1; $i <= 7; $i++)--}}
+                                                    {{--<option value="{{$i}}" {{ $user->bank->generation_date == $i ? 'selected' : '' }}>{{$i}}</option>--}}
+                                                {{--@endfor--}}
+                                            {{--</select>--}}
+                                        {{--</div>--}}
+                                    {{--</div>--}}
+                                    {{--@elseif($user->bank->invoicing_cycle_id == 3)--}}
+                                    {{--<div class="form-group row">--}}
+                                        {{--<div class="form-group col-md-9">--}}
+                                            {{--<label>Generation Date</label>--}}
+                                            {{--<span class="danger">*</span>--}}
+                                            {{--<select name="generation_date" id="generation_date" data-rule-required="true" data-msg-required="Payment Mode is required" class="select2 form-control required">--}}
+                                                {{--@for($i = 1; $i <= 28; $i++)--}}
+                                                    {{--<option value="{{$i}}" {{ $user->bank->generation_date == $i ? 'selected' : '' }}>{{$i}}</option>--}}
+                                                {{--@endfor--}}
+                                            {{--</select>--}}
+                                        {{--</div>--}}
+                                    {{--</div>--}}
+                                {{--@endif--}}
                             </div>
                         </div>
                     </div>
@@ -519,9 +523,32 @@
             $('#payment_cycle').select2({
                 width: '100%',
             });
-            $('#payment_mode').select2({
-                width: '100%',
-            });
+            // $('#invoicing_cycle').select2({
+            //     width: '100%',
+            // }).bind('change', function() {
+            //
+            //     if (this.value == 1) {
+            //         $('#generation_div').removeClass('d-none');
+            //         $('#generation_date').removeClass('d-none');
+            //         $('#generation_date').addClass('required');
+            //         $('#generation_date').empty().trigger('change');
+            //         $('#generation_date').select2({data: weekly, placeholder: 'Select Date'});
+            //     }
+            //     else if (this.value == 3) {
+            //         $('#generation_div').removeClass('d-none');
+            //         $('#generation_date').removeClass('d-none');
+            //         $('#generation_date').addClass('required');
+            //         $('#generation_date').empty().trigger('change');
+            //         $('#generation_date').select2({data: monthly, placeholder: 'Select Date'});
+            //     } else if (this.value == 2) {
+            //         $('#generation_div').addClass('d-none');
+            //         $('#generation_date').addClass('d-none');
+            //         $('#generation_date').removeClass('required');
+            //     }
+            // });
+            // $('#generation_date').select2({
+            //     width: '100%',
+            // });
             
             $('#edit-1').click(function () {
                 $("#profile-form").show();
