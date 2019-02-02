@@ -19,4 +19,7 @@ class UserBankInfo extends Model
     public function bank() {
         return $this->belongsTo('App\Http\Models\BanksList', 'bank_name', 'id');
     }
+    public function invoicing(){
+        return $this->belongsTo('App\Http\Models\InvoicingCycle','invoicing_cycle_id','id');
+    }
 }

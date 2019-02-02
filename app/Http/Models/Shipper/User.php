@@ -42,4 +42,7 @@ class User extends Authenticatable
     public function sales_person(){
         return $this->hasMany('App\Http\Models\Admin\SalePersonTag');
     }
+    public function account_type(){
+        return $this->belongsTo('App\Http\Models\AccountType','account_type_id','id');
+    }
 }

@@ -87,6 +87,10 @@
                                     <td>{{$user->city->name}}</td>
                                 </tr>
                                 <tr>
+                                    <td><b>Account Type</b></td>
+                                    <td>{{$user->account_type->name}}</td>
+                                </tr>
+                                <tr>
                                     <td><b>API Key</b></td>
                                     <td>{{$user->api_token}}</td>
                                 </tr>
@@ -187,13 +191,31 @@
                                     <td>{{$user->bank->iban}}</td>
                                 </tr>
                                 <tr>
-                                    <td><b>Payment Mode</b></td>
-                                    <td>{{$user->bank->payment_mode}}</td>
-                                </tr>
-                                <tr>
                                     <td><b>Payment Cycle</b></td>
                                     <td>{{$user->bank->payment_cycle}}</td>
                                 </tr>
+                                {{--<tr>--}}
+                                    {{--<td><b>Invoicing Cycle</b></td>--}}
+                                    {{--<td>{{$user->bank->invoicing->name}}</td>--}}
+                                {{--</tr>--}}
+                                @if($user->account_type_id == 2)
+                                    <tr>
+                                        <td><b>Billing Person Name</b></td>
+                                        <td>{{$user->bank->billing_person_name}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Billing Person Phone</b></td>
+                                        <td>{{$user->bank->billing_person_phone}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Billing Person Email</b></td>
+                                        <td>{{$user->bank->billing_person_email}}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Billing Address</b></td>
+                                        <td>{{$user->bank->billing_address}}</td>
+                                    </tr>
+                                @endif
                                 </tbody>
                             </table>
                         </div>
