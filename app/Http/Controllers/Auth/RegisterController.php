@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Models\AccountType;
 use App\Http\Models\BanksList;
 use App\Http\Models\City;
+use App\Http\Models\InvoicingCycle;
 use App\Http\Models\Shipper\User;
 use App\Http\Models\Shipper\UserShippingInfo;
 use App\Http\Models\Shipper\UserBankInfo;
@@ -50,6 +51,7 @@ class RegisterController extends Controller
 
     public function showRegistrationForm()
     {
+        $invoicing_cycle = InvoicingCycle::all();
         $account_type = AccountType::all();
         $products = Product::all();
         $banks = BanksList::all();
@@ -58,7 +60,7 @@ class RegisterController extends Controller
         // This needs to be modified to reflect the new Logic of Admin able to Select which City has Pickup enabled, which Booking Type is enabled and accordingly which Shipping Mode is enabled. PickupType is no longer valid.
         // $cities = PickupType::find(1)->cities()->orderBy('city_name')->get();
 
-        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type]);
+        return view('client.auth.register')->with(['products'=>$products,'cities'=>$city_list,'pickup_city_list'=>$pickup_city_list,'all_cities'=>$city_list,'banks'=>$banks,'account_types' => $account_type, 'invoicing_cycle' => $invoicing_cycle]);
     }
     /**
      * Get a validator for an incoming registration request.
@@ -68,37 +70,70 @@ class RegisterController extends Controller
      */
     protected function validator(array $data)
     {
+        if($data['nature_of_account'] == 1){
+            return Validator::make($data, [
+                'name' => 'required|string|max:255|unique:users',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:6',
+                'shipper_poc'=>'required|string|max:255',
+                'company_address'=>'required|string|max:255',
+                'shipper_phone'=>'required|string|max:255',
+                'nature_of_account' => 'required',
+                'cnic'=>'required|string|max:255',
+                'shipper_city'=>'required|string|max:255',
+                'shipper_product_type'=>'required|string|max:255',
+                'shipping_city.*'=>'required|string|max:255',
+                'pickup_address.*'=>'required|string|max:255',
+                'shipping_poc.*'=>'required|string|max:255',
+                'shipping_phone.*'=>'required|string|max:255',
+                'shipping_email.*'=>'required|string|max:255',
+                'product_type.*'=>'required|max:255',
+                'bank_city'=>'required|string|max:255',
+                'bank_name'=>'required|max:255',
+                'bank_branch'=>'required|string|max:255',
+                'account_no'=>'required|string|max:255',
+                'account_title'=>'required|string|max:255',
+                'iban_no'=>'required|string|max:255',
+                'cycle_of_payment'=>'required|string|max:255',
+                'g-recaptcha-response' => 'required|captcha'
 
-        return Validator::make($data, [
-            'name' => 'required|string|max:255|unique:users',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6',
-            'shipper_poc'=>'required|string|max:255',
-            'company_address'=>'required|string|max:255',
-            'shipper_phone'=>'required|string|max:255',
-            'nature_of_account' => 'required',
-//            'shipper_phone2'=>'string|max:255',
-            'cnic'=>'required|string|max:255',
-//            'ntn_no'=>'string|max:255',
-//            'url'=>'string|max:255',
-            'shipper_city'=>'required|string|max:255',
-            'shipper_product_type'=>'required|string|max:255',
-            'shipping_city.*'=>'required|string|max:255',
-            'pickup_address.*'=>'required|string|max:255',
-            'shipping_poc.*'=>'required|string|max:255',
-            'shipping_phone.*'=>'required|string|max:255',
-            'shipping_email.*'=>'required|string|max:255',
-            'product_type.*'=>'required|max:255',
-            'bank_city'=>'required|string|max:255',
-            'bank_name'=>'required|max:255',
-            'bank_branch'=>'required|string|max:255',
-            'account_no'=>'required|string|max:255',
-            'account_title'=>'required|string|max:255',
-            'iban_no'=>'required|string|max:255',
-            'cycle_of_payment'=>'required|string|max:255',
-            'g-recaptcha-response' => 'required|captcha'
+            ]);
+        }else{
+            return Validator::make($data, [
+                'name' => 'required|string|max:255|unique:users',
+                'email' => 'required|string|email|max:255|unique:users',
+                'password' => 'required|string|min:6',
+                'shipper_poc'=>'required|string|max:255',
+                'company_address'=>'required|string|max:255',
+                'shipper_phone'=>'required|string|max:255',
+                'nature_of_account' => 'required',
+                'cnic'=>'required|string|max:255',
+                'shipper_city'=>'required|string|max:255',
+                'shipper_product_type'=>'required|string|max:255',
+                'shipping_city.*'=>'required|string|max:255',
+                'pickup_address.*'=>'required|string|max:255',
+                'shipping_poc.*'=>'required|string|max:255',
+                'shipping_phone.*'=>'required|string|max:255',
+                'shipping_email.*'=>'required|string|max:255',
+                'product_type.*'=>'required|max:255',
+                'bank_city'=>'required|string|max:255',
+                'bank_name'=>'required|max:255',
+                'bank_branch'=>'required|string|max:255',
+                'account_no'=>'required|string|max:255',
+                'account_title'=>'required|string|max:255',
+                'iban_no'=>'required|string|max:255',
+                'cycle_of_payment'=>'required|string|max:255',
+                'cycle_of_invoicing' => 'required',
+//                'generation_date' => 'required_if:cycle_of_invoicing,==,1|required_if:cycle_of_invoicing,==,3|numeric',
+                'billing_person_name' => 'required|string|max:255',
+                'billing_person_phone' => 'required|string|max:255',
+                'billing_person_email' => 'required|string|email|max:255',
+                'billing_address' => 'required|string|max:255',
+                'g-recaptcha-response' => 'required|captcha'
 
-        ]);
+            ]);
+        }
+
     }
 
     public function register(Request $request)
@@ -139,7 +174,7 @@ class RegisterController extends Controller
             'url' => $data['url'],
             'city_id'=>$data['shipper_city'],
             'product_id'=>$data['shipper_product_type'],
-            'account_type' => $data['nature_of_account'],
+            'account_type_id' => $data['nature_of_account'],
             'api_token' => uniqid(base64_encode(str_random(60)))
         ]);
         $shipper = User::find($newUser->id);
@@ -172,17 +207,44 @@ class RegisterController extends Controller
                 ]);
             }
         }
-        UserBankInfo::create([
+        $generation_date = null;
+        if($data['cycle_of_invoicing'] == 2){
+            $generation_date = null;
+        }else{
+            $generation_date = $data['generation_date'];
+        }
+        if($data['nature_of_account'] == 1){
+
+            UserBankInfo::create([
                 'user_id'=>$newUser->id,
                 'bank_name'=>$data['bank_name'],
                 'bank_branch'=>$data['bank_branch'],
                 'account_no'=>$data['account_no'],
                 'account_title'=>$data['account_title'],
                 'iban'=>$data['iban_no'],
-                'payment_mode'=>$data['mode_of_payment'],
                 'payment_cycle'=>$data['cycle_of_payment'],
                 'city_id'=>$data['bank_city'],
-        ]);
+                'invoicing_cycle_id' => $data['cycle_of_invoicing'],
+                'generation_date' => $generation_date
+            ]);
+        }else{
+            UserBankInfo::create([
+                'user_id'=>$newUser->id,
+                'bank_name'=>$data['bank_name'],
+                'bank_branch'=>$data['bank_branch'],
+                'account_no'=>$data['account_no'],
+                'account_title'=>$data['account_title'],
+                'iban'=>$data['iban_no'],
+                'payment_cycle'=>$data['cycle_of_payment'],
+                'city_id'=>$data['bank_city'],
+                'invoicing_cycle_id' => $data['cycle_of_invoicing'],
+                'generation_date' => $generation_date,
+                'billing_person_name' => $data['billing_person_name'],
+                'billing_person_phone' => $data['billing_person_phone'],
+                'billing_person_email' => $data['billing_person_email'],
+                'billing_address' => $data['billing_address'],
+            ]);
+        }
 
         return $newUser;
     }
