@@ -26,6 +26,8 @@
     {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/icheck.css')}}">--}}
     {{--<link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/forms/icheck/custom.css')}}">--}}
     <!-- END VENDOR CSS-->
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/vendors/css/pickers/pickadate/pickadate.css')}}">
+    <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/plugins/pickers/daterange/daterange.min.css')}}">
     <!-- BEGIN MODERN CSS-->
 
     <link rel="stylesheet" type="text/css" href="{{asset('app-assets/css/app.css')}}">
@@ -43,6 +45,9 @@
     <!-- END Custom CSS-->
 
     <link rel="stylesheet" type="text/css" href="{{asset('css/login.css')}}">
+    <style type="text/css">
+        #generation_date_root .picker__holder { bottom: 0; margin-bottom: 42px;}
+    </style>
 </head>
 <body class="vertical-layout vertical-overlay-menu 1-column  bg-full-screen-image menu-expanded"
       data-open="click" data-menu="vertical-overlay-menu" data-col="1-column">
@@ -445,17 +450,27 @@
                                                         </div>
                                                     <div class="form-group">
 
-                                                        <label for="bank_city">Bank City:
+                                                        <label for="cycle_of_invoicing">Cycle Of Invoicing:
                                                             <span class="danger">*</span>
                                                         </label>
                                                         <div>
                                                             <select name="cycle_of_invoicing" id="cycle_of_invoicing" class="select2 form-control required">
-                                                                @foreach($all_cities as $bank_city)
-                                                                    <option value="{{$bank_city->id}}"  {{ old('bank_city') == $bank_city->id ? 'selected' : '' }} >{{$bank_city->name}}</option>
+                                                                @foreach($invoicing_cycle as $cycle)
+                                                                    <option value="{{$cycle->id}}"  {{ old('cycle_of_invoicing') == $cycle->id ? 'selected' : '' }} >{{$cycle->name}}</option>
                                                                 @endforeach
                                                             </select>
                                                         </div>
                                                     </div>
+                                                    <div class="form-group d-none" id="generation_div">
+
+                                                        <label for="generation_date">Generation Date:
+                                                            <span class="danger">*</span>
+                                                        </label>
+                                                        <div>
+                                                            <select name="generation_date" id="generation_date" class="select2 form-control d-none"></select>
+                                                        </div>
+                                                    </div>
+
                                                 </div>
 
                                                 </div>
@@ -570,6 +585,9 @@
 <script src="{{asset('app-assets/vendors/js/forms/validation/jquery.validate.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/extended/inputmask/jquery.inputmask.bundle.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/vendors/js/forms/icheck/icheck.min.js')}}" ></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/picker.date.js')}}" type="text/javascript"></script>
+<script src="{{asset('app-assets/vendors/js/pickers/pickadate/legacy.js')}}" type="text/javascript"></script>
 <!-- END PAGE VENDOR JS-->
 <script src="{{asset('app-assets/vendors/js/forms/select/select2.full.min.js')}}" type="text/javascript"></script>
 <script src="{{asset('app-assets/js/scripts/forms/wizard-steps.js')}}" type="text/javascript"></script>
@@ -590,6 +608,40 @@
            placeholder:'Select City',
            dropdownParent:$('#registership')
        });
+        var weekly = [1, 2, 3, 4, 5, 6, 7];
+        var monthly = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28];
+
+        $('#generation_date').prepend('<option value="" selected="selected"></option>').select2({
+            width:'100%',
+            placeholder:'Select Date',
+            dropdownParent:$('#registership')
+        });
+        $('#cycle_of_invoicing').prepend('<option value="" selected="selected"></option>').select2({
+           width:'100%',
+           placeholder:'Select Cycle Of Invoicing',
+           dropdownParent:$('#registership')
+       }).bind('change', function() {
+
+           if (this.value == 1) {
+               $('#generation_div').removeClass('d-none');
+               $('#generation_date').removeClass('d-none');
+               $('#generation_date').addClass('required');
+               $('#generation_date').empty().trigger('change');
+               $('#generation_date').select2({data:weekly,placeholder:'Select Date'});
+           }
+           else if(this.value == 3){
+               $('#generation_div').removeClass('d-none');
+               $('#generation_date').removeClass('d-none');
+               $('#generation_date').addClass('required');
+               $('#generation_date').empty().trigger('change');
+               $('#generation_date').select2({data:monthly,placeholder:'Select Date'});
+           }else if(this.value == 2){
+               $('#generation_div').addClass('d-none');
+               $('#generation_date').addClass('d-none');
+               $('#generation_date').removeClass('required');
+           }
+       });
+
        $('#bank_name').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank',
            dropdownParent:$('#registership')
@@ -606,7 +658,17 @@
            else {
                $('#billing_information_div-day').addClass('d-none');
            }
-       });;
+       });
+        {{--var generation_date = $('#generation_date').pickadate({--}}
+            {{--firstDay: 1,--}}
+            {{--clear: 'Clear',--}}
+            {{--max: '{{ Carbon\Carbon::now() }}',--}}
+            {{--format:'dd mmmm, yyyy',--}}
+            {{--selectYears: true,--}}
+            {{--selectMonths: true,--}}
+            {{--formatSubmit: 'yyyy-mm-dd 00:00:00',--}}
+            {{--hiddenSuffix: '_formatted'--}}
+        {{--});--}}
        $('#bank_city').prepend('<option value="" selected="selected"></option>').select2({
            placeholder:'Select Bank City',
            dropdownParent:$('#registership')

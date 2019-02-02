@@ -16,7 +16,7 @@ class InvoicingCycleTableSeeder extends Seeder
         DB::table('invoicing_cycles')->insert(array(
             array('id' => 1,'name'=>'Weekly'),
             array('id' => 2,'name'=>'Fortnightly'),
-            array('id' => 3,'name'=>'Weekly'),
+            array('id' => 3,'name'=>'Monthly'),
             ));
     }
 }

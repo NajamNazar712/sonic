@@ -15,7 +15,7 @@ class CreateInvoicingCyclesTable extends Migration
     {
         Schema::create('invoicing_cycles', function (Blueprint $table) {
             $table->increments('id');
-            $table->timestamps();
+            $table->string('name');
         });
     }
 
