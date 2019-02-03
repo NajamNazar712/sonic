@@ -275,7 +275,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 138, 148, 153, 156], session('permissions'))) !== 0)                <li class=" nav-item"><a href="#"><span class="menu-title">Reports</span></a>
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 138, 148, 153, 156, 169], session('permissions'))) !== 0)                <li class=" nav-item"><a href="#"><span class="menu-title">Reports</span></a>
                     <ul class="menu-content">
                         @if (session('role_id') == 1 || in_array(64, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.pickup_note.index') }}">Pickup Notes Completed</a></li>
