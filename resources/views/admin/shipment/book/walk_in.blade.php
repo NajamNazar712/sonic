@@ -500,7 +500,7 @@
                 'allowPlus': false,
                 'digits': 2,
                 'min': 0.1,
-                'max': 1000
+                'max': 10000
             });
 
             $('.charges_per_kg').inputmask({

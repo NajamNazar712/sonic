@@ -1121,7 +1121,15 @@ class AdminReportsController extends Controller
                 $join->on('lsjv.reference_1_id', '=', 'ldnsv.delivery_note_id')
                     ->where('lsjv.id','=', DB::raw('(select max(id) from shipments_journey  where shipments_journey.reference_1_id = ldnsv.delivery_note_id and shipments_journey.verification = 1)'));
             })
-            ->leftjoin('cargo_consignments as ccss', 'ccss.id', '=', 'ccs.cargo_consignment_id')
+			->leftjoin('cargo_consignment_shipments as cccc',function($join){
+                $join->on('cccc.shipment_id', '=', 'shipments.id')
+                    ->where('cccc.id', '=', DB::raw('(select min(id) from cargo_consignment_shipments where cargo_consignment_shipments.shipment_id = shipments.id)'));
+            })
+            ->leftjoin('cargo_consignment_shipments as ccrc',function($join){
+                $join->on('ccrc.shipment_id', '=', 'shipments.id')
+                    ->where('ccrc.id', '=', DB::raw('(select max(id) from cargo_consignment_shipments where cargo_consignment_shipments.shipment_id = shipments.id)'));
+            })            ->leftjoin('cargo_consignments as ccss','ccss.id', '=', 'cccc.cargo_consignment_id')
+            ->leftjoin('cargo_consignments as ccssr','ccssr.id', '=', 'ccrc.cargo_consignment_id')
             ->leftjoin('shipment_status as lssv','lssv.id','=','lsjv.shipper_status_id')
             ->select('fatstatus.created_at as first_attempt','ccjr.created_at as junction','cc.transport_mode_vendor_id as vendor','fssv.name as first_verification','lssv.name as last_verification','fsjv.created_at as verification_status_date', 'lsjv.created_at as last_verification_status_date','dns.delivery_note_id as first_delivery_note_id','dnss.delivery_note_id as last_delivery_note_id','shipments.id as Shipment_id','shipments.tracking_number','shipments.created_at as cd','shipments.tracking_number as tracking_number_link','u.id as account_no','u.name as shipper','oc.name as origin','dc.name as destination','h.name as hub','ss.name as current_status','sj.created_at as arrival_date','radd.created_at as reached_at_destination','fstatus.created_at as first_status_date','lstatus.created_at as last_status_date','fs.name as first_status','ls.name as last_status','dd.created_at as delivered_date','rc.created_at as return_confirm','rrad.created_at as return_reached_at_destination','rds.created_at as return_delivered_date','rdss.name as return_delivered_status','pd.created_at as payment_done_date','shipments.shipper_status_id','ret_or_del.shipper_status_id as return_check','lj.created_at as latest_journey_date','sps.name as payment_status', 'shipments.booking_type_id', 'usi.poc', 'ccss.id as cargo_number', 'ccss.created_at as cargo_date_time', 'ccss.type as return_type', 'ccss.id as return_cargo_number', 'ccss.created_at as return_cargo_date_time')
             ->groupBy('shipments.id');
@@ -1168,7 +1176,7 @@ class AdminReportsController extends Controller
             })
             ->editColumn('cargo_date_time', function ($shipment){
                 if($shipment->cargo_date_time != null){
-                    return $shipment->return_cargo_date_time;
+                    return $shipment->cargo_date_time;
                 }
                 else{
                     return "-";
@@ -1235,7 +1243,6 @@ class AdminReportsController extends Controller
                     },$shipments->return_delivered_date)):'-';
             })
             ->addColumn('payment_tat',function ($shipments){
-
                 $return = array(20,42);
                 if(in_array($shipments->return_check,$return)){
                     return ($shipments->return_delivered_date && $shipments->payment_done_date)? with((new Carbon($shipments->return_delivered_date, 'UTC'))->diffInWeekendDays($shipments->payment_done_date)-(new Carbon($shipments->return_delivered_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
@@ -1251,9 +1258,7 @@ class AdminReportsController extends Controller
                 return ($shipments->arrival_date && $shipments->latest_journey_date)? with((new Carbon($shipments->arrival_date, 'UTC'))->diffInWeekDays($shipments->latest_journey_date)-(new Carbon($shipments->arrival_date, 'UTC'))->diffInDaysFiltered(function (Carbon $date){
                         $date->isSunday();
                     },$shipments->latest_journey_date)):'-';
-
             });
-
         if($tracking = $request->get('search_tracking_no')){
             $lead_time->where('shipments.tracking_number', '=', $tracking);
         }
@@ -3834,7 +3839,109 @@ class AdminReportsController extends Controller
         return $petty->make(true);
     }
 
-    public function debriefing_index() {
+	public function fake_status_index(){
+        $riders = Rider::all(['id','name']);
+        $hubs = City::where('hub',1)->select('id','name')->get();
+        return view('admin.reports.fake_statuses_report')->with(['riders' => $riders, 'hubs' => $hubs]);
+    }
+
+    public function fake_status_list(request $request){
+        $delivery_note = DeliveryNote::join('delivery_note_shipments as dns','dns.delivery_note_id', '=', 'delivery_notes.id')
+            ->leftjoin('riders as r', 'r.id', '=', 'delivery_notes.rider_id')
+            ->leftjoin('cities as c', 'c.id', '=', 'r.city_id')
+            ->select('r.name as rider_name', 'c.name as rider_city', 'delivery_notes.id as delivery_note_id', 'delivery_notes.created_at as created_at', 'delivery_notes.status_verified_at as verified_at', 'delivery_notes.shipments_count as total_shipments', 'delivery_notes.delivered_shipments as delivered_shipments', DB::raw('(select count(shipment_id) from delivery_note_shipments where delivery_note_shipments.delivery_note_id = delivery_notes.id and delivery_note_shipments.fake_status = 1) as shipment_fake_status'))
+        ->where('dns.fake_status', 1)->groupBy('delivery_notes.id');
+
+
+        $delivery_note = Datatables::of($delivery_note)
+            ->editColumn('delivery_note_id', function ($deliveries) {
+                return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('shipments_count_link', function($deliveries) {
+                if ($deliveries->total_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->total_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('shipment_fake_status_link', function($deliveries) {
+                if ($deliveries->shipment_fake_status != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $deliveries->shipment_fake_status . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            })
+            ->editColumn('undelivered_shipments_link', function($deliveries) {
+                $undelivered_shipments = $deliveries->total_shipments - $deliveries->delivered_shipments;
+                if ($undelivered_shipments != 0) {
+                    return '<button class="btn btn-sm btn-outline-info align-middle">' . $undelivered_shipments . '</button>';
+                }
+                else {
+                    return 0;
+                }
+            });
+        if ($rider = $request->get('rider')) {
+            $delivery_note->where('r.id', '=', $rider);
+        }
+        if ($hub = $request->get('hub')) {
+            $delivery_note->where('delivery_notes.hub_id', $hub);
+        }
+        if($search_date = $request->get('search_date')){
+            $delivery_note->whereDate('delivery_notes.created_at',$search_date);
+        }
+        return $delivery_note->make(true);
+    }
+
+    public function fake_status_shipments_total(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->get();
+        $shipments = array();
+        if($delivery_note_shipments->count() != 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+    public function fake_status_shipments_undelivered(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('status','=',1)->get();
+        $shipments = array();
+        if($delivery_note_shipments->count() != 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+
+    public function fake_status_shipments(Request $request){
+        $delivery_note_id = $request->input('delivery_note_id');
+        $delivery_note_details = DeliveryNote::find($delivery_note_id);
+        $delivery_note_shipments = $delivery_note_details->delivery_note_shipments()->where('fake_status','=',1)->get();
+        $shipments = array();
+        if($delivery_note_shipments->count() != 0){
+            foreach ($delivery_note_shipments as $delivery_note_shipment){
+                $shipment = Shipment::find($delivery_note_shipment->shipment_id);
+                $shipments[] = $shipment->tracking_number;
+            }
+            return ['status' => 0, 'success' => 'Delivery Note Shipments', 'shipments' => $shipments];
+        }else{
+            return ['status' => 0, 'success' => 'No Delivery Note Shipments', 'shipments' => FALSE];
+        }
+    }
+
+	public function debriefing_index() {
         $hubs = City::where('hub', 1)->select('id','name')->get();
         $zones = Zone::all();
 
@@ -4211,6 +4318,5 @@ class AdminReportsController extends Controller
 
         $writer->save('php://output');
     }
-
 }
 

@@ -843,11 +843,19 @@ Route::prefix('admin')->name('admin.')->group(function () {
             Route::post('export_to_excel', 'Admins\AdminReportsController@sales_person_performance_export_to_excel')->name('export_to_excel');
             Route::get('download', 'Admins\AdminReportsController@sales_person_performance_download')->name('download');
         });
-        Route::prefix('debriefing')->name('debriefing.')->group(function (){
+
+		Route::prefix('fake_status')->name('fake_status.')->group(function (){
+            Route::get('', 'Admins\AdminReportsController@fake_status_index')->name('index');
+            Route::get('list', 'Admins\AdminReportsController@fake_status_list')->name('list');
+            Route::post('shipments/total','Admins\AdminReportsController@fake_status_shipments_total')->name('shipments.total');
+            Route::post('shipments/undelivered','Admins\AdminReportsController@fake_status_shipments_undelivered')->name('shipments.undelivered');
+            Route::post('fake_status_shipment','Admins\AdminReportsController@fake_status_shipments')->name('fake_status_shipment');
+        });
+
+		Route::prefix('debriefing')->name('debriefing.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@debriefing_index')->name('index');
             Route::post('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
             Route::get('export', 'Admins\AdminReportsController@debriefing_export')->name('export');
-
         });
     });
 

@@ -497,13 +497,9 @@ class AdminCargoController extends Controller
         $consignee_status_id = NULL;
 
         if ($request->input('cargo_type') == 1) {
-          $shipper_status_id = 3;
-          $consignee_status_id = 3;
-        }
-        else {
-          if ($shipment->booking_type_id == 1) {
-            $shipper_status_id = 21;
-            $consignee_status_id = 21;
+          if ($shipment->booking_type_id == 1 || $shipment->booking_type_id == 4) {
+            $shipper_status_id = 3;
+            $consignee_status_id = 3;
           }
           else if ($shipment->booking_type_id == 2) {
             $shipper_status_id = 26;
@@ -513,6 +509,10 @@ class AdminCargoController extends Controller
             $shipper_status_id = 32;
             $consignee_status_id = 32;
           }
+        }
+        else {
+          $shipper_status_id = 21;
+          $consignee_status_id = 21;
         }
 
         $shipment->shipper_status_id = $shipper_status_id;

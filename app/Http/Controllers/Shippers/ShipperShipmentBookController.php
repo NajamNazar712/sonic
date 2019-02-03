@@ -897,7 +897,7 @@ class ShipperShipmentBookController extends Controller
 
             'pickup_date' => ['required', 'date_format:Y-m-d', 'after:yesterday'],
             'special_instructions' => ['nullable', 'between:0,190'],
-            'estimated_weight' => ['required', 'numeric', 'between:0.1,1000'],
+            'estimated_weight' => ['required', 'numeric', 'between:0.1,10000'],
             'shipping_mode_id' => ['required', 'integer', 'digits_between:1,10', 'exists:shipping_modes,id'],
             'same_day_timing_id' => ['required_if:shipping_mode_id,4', 'nullable', 'integer', 'digits_between:1,10', 'exists:shipping_mode_same_day_timings,id'],
             'amount' => ['required', 'integer', 'digits_between:1,20', 'between:0,1000000'],
