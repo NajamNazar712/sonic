@@ -41,6 +41,7 @@ use PHPExcel_Cell;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use Yajra\Datatables\Datatables;
 
 class AdminReportsController extends Controller
@@ -3833,260 +3834,383 @@ class AdminReportsController extends Controller
         return $petty->make(true);
     }
 
-    public function debriefing_index(){
-        $debreifing = array();
-        $debreifing['pending'] =
-        $hubs = City::where('hub',1)->select('id','name')->get();
+    public function debriefing_index() {
+        $hubs = City::where('hub', 1)->select('id','name')->get();
         $zones = Zone::all();
+
         return view('admin.reports.debriefing_report')->with(['hubs' => $hubs, 'zones' => $zones]);
     }
 
-    public function debriefing_list(Request $request) {
-        $hubs = City::join('cities as h', 'h.id', '=', 'cities.hub_id')
-            ->leftjoin('shipments as s', 's.consignee_city_id', '=', 'cities.id')
-            ->leftjoin('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
-            ->leftjoin('cities as pc', 'pc.id', '=', 'usi.city_id')
-            ->leftjoin('zone_class_cities as zcc', function($join) {
-                $join->on('zcc.zone_id', '=', 'pc.zone_id')
-                    ->on('s.consignee_city_id', '=', 'zcc.city_id');
-            })
-            ->leftjoin('delivery_note_shipments as dns', function($join) {
-                $join->on('dns.shipment_id', '=', 's.id')
-                    ->where('dns.delivery_note_id', '=',
-                        DB::raw('(select max(dns.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
-            })
-            ->leftjoin('shipments_journey as sjpending', function($join) {
-                $join->on('sjpending.shipment_id', '=', 's.id')
-                    ->where('sjpending.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and (usi.city_id = s.consignee_city_id or zcc.class in (0, 1)) and dns.delivery_note_id is null and ((shipments_journey.shipper_status_id = 4 and hour(shipments_journey.created_at) < 13) or (shipments_journey.shipper_status_id = 2 and usi.city_id = s.consignee_city_id)))'));
-            })
-            ->leftjoin('shipments_journey as sjdelivered', function($join) {
-                $join->on('sjdelivered.shipment_id', '=', 's.id')
-                    ->where('sjdelivered.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id IN (14, 30, 36, 37))'));
-            })
-            ->leftjoin('shipments_journey as sjunsuccessful', function($join) {
-                $join->on('sjunsuccessful.shipment_id', '=', 's.id')
-                    ->where('sjunsuccessful.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 8)'));
-            })
-            ->leftjoin('shipments_journey as sjnotattempted', function($join) {
-                $join->on('sjnotattempted.shipment_id', '=', 's.id')
-                    ->where('sjnotattempted.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 7)'));
-            })
-            ->leftjoin('shipments_journey as sjonhold', function($join) {
-                $join->on('sjonhold.shipment_id', '=', 's.id')
-                    ->where('sjonhold.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 9)'));
-            })
-            ->leftjoin('shipments_journey as sjnonservicearea', function($join) {
-                $join->on('sjnonservicearea.shipment_id', '=', 's.id')
-                    ->where('sjnonservicearea.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 10)'));
-            })
-            ->leftjoin('shipments_journey as sjmisrouted', function($join) {
-                $join->on('sjmisrouted.shipment_id', '=', 's.id')
-                    ->where('sjmisrouted.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 11)'));
-            })
-            ->leftjoin('shipments_journey as sjselfcollection', function($join) {
-                $join->on('sjselfcollection.shipment_id', '=', 's.id')
-                    ->where('sjselfcollection.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 15)'));
-            })
-            ->leftjoin('shipments_journey as sjreturnconfirmationpending', function($join) {
-                $join->on('sjreturnconfirmationpending.shipment_id', '=', 's.id')
-                    ->where('sjreturnconfirmationpending.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 12)'));
-            })
-            ->leftjoin('shipments_journey as sjlost', function($join) {
-                $join->on('sjlost.shipment_id', '=', 's.id')
-                    ->where('sjlost.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 18)'));
-            })
-            ->leftjoin('shipments_journey as sjreturnconfirm', function($join) {
-                $join->on('sjreturnconfirm.shipment_id', '=', 's.id')
-                    ->where('sjreturnconfirm.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 20 and shipments_journey.reference_1_id is not null)'));
-            })
-            ->leftjoin('delivery_note_shipments as dnsc', function($join) {
-                $join->on('dnsc.shipment_id', '=', 's.id')
-                    ->where('dnsc.delivery_note_id', '=',
-                        DB::raw('(select max(dnsc.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 1)'));
-            })
-            ->leftjoin('delivery_notes as dnc', 'dnc.id', '=', 'dnsc.delivery_note_id')
-            ->leftjoin('delivery_note_shipments as dnsf', function($join) {
-                $join->on('dnsf.shipment_id', '=', 's.id')
-                    ->where('dnsf.delivery_note_id', '=',
-                        DB::raw('(select max(dnsf.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 0)'));
-            })
-            ->leftjoin('delivery_notes as dnf', 'dnf.id', '=', 'dnsf.delivery_note_id')
-            ->leftjoin('shipments_journey as sjtomorrow', function($join) {
-                $join->on('sjtomorrow.shipment_id', '=', 's.id')
-                    ->where('sjtomorrow.id', '=',
-                        DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 4 and hour(shipments_journey.created_at) >= 13 and zcc.class in (2, 3) and dns.delivery_note_id is null)'));
-            })
-            ->leftjoin('shipments_journey as sjdnpending', function($join) {
-                $join->on('sjdnpending.shipment_id', '=', 's.id')
-                    ->where('sjdnpending.id', '=',
-                        DB::raw('(select max(isj.id) from shipments_journey as isj left join shipments_journey as isjj on isj.shipment_id = isjj.shipment_id and isj.reference_1_id = isjj.reference_1_id and isj.id != isjj.id where isj.shipment_id = s.id and isj.verification = 1 and isj.shipper_status_id = 5 and isjj.id is null)'));
-            })
-            ->select('h.name as hub', DB::raw('COUNT(sjpending.id) as pending_shipments'), DB::raw('COUNT(sjdelivered.id) as delivered_shipments'), DB::raw('COUNT(sjunsuccessful.id) as unsuccessful_shipments'), DB::raw('COUNT(sjnotattempted.id) as notattempted_shipments'), DB::raw('COUNT(sjonhold.id) as onhold_shipments'), DB::raw('COUNT(sjnonservicearea.id) as nonservicearea_shipments'), DB::raw('COUNT(sjmisrouted.id) as misrouted_shipments'), DB::raw('COUNT(sjselfcollection.id) as selfcollection_shipments'), DB::raw('COUNT(sjreturnconfirmationpending.id) as returnconfirmationpending_shipments'), DB::raw('COUNT(sjlost.id) as lost_shipments'), DB::raw('COUNT(sjreturnconfirm.id) as returnconfirm_shipments'), DB::raw('COUNT(dnsc.delivery_note_id) as correct_status'), DB::raw('COUNT(dnsf.delivery_note_id) as fake_status'), DB::raw('COUNT(sjtomorrow.id) as tomorrow_shipments'), DB::raw('COUNT(sjdnpending.id) as dnpending_shipments'))
-            ->groupBy('h.id');
+    private function debriefing_data($date, $hub, $zone, $export = FALSE) {
+        $hubs = City::where('hub', 1)->select('id','name');
 
-        $hubs = Datatables::of($hubs)
-            ->addColumn('total', function ($hub) {
-                $total = 0;
-
-                $total += ($hub->pending_shipments + $hub->delivered_shipments + $hub->unsuccessful_shipments + $hub->notattempted_shipments + $hub->onhold_shipments + $hub->nonservicearea_shipments + $hub->misrouted_shipments + $hub->selfcollection_shipments + $hub->returnconfirmationpending_shipments + $hub->lost_shipments + $hub->returnconfirm_shipments);
-
-                return $total;
-            })
-            ->addColumn('total_ratio', function ($hub) {
-                $total = 0;
-
-                $total += ($hub->pending_shipments + $hub->delivered_shipments + $hub->unsuccessful_shipments + $hub->notattempted_shipments + $hub->onhold_shipments + $hub->nonservicearea_shipments + $hub->misrouted_shipments + $hub->selfcollection_shipments + $hub->returnconfirmationpending_shipments + $hub->lost_shipments + $hub->returnconfirm_shipments);
-
-                if ($total) {
-                    return round((($hub->delivered_shipments) / $total) * 100) . '%';
-                }
-                else {
-                    return '0%';
-                }
-            })
-            ->addColumn('grand_total', function ($hub) {
-                $grand_total = 0;
-
-                $grand_total += ($hub->pending_shipments + $hub->delivered_shipments + $hub->unsuccessful_shipments + $hub->notattempted_shipments + $hub->onhold_shipments + $hub->nonservicearea_shipments + $hub->misrouted_shipments + $hub->selfcollection_shipments + $hub->returnconfirmationpending_shipments + $hub->lost_shipments + $hub->returnconfirm_shipments  + $hub->tomorrow_shipments + $hub->dnpending_shipments);
-
-                return $grand_total;
-            })
-            ->addColumn('grand_total_ratio', function ($hub) {
-                $grand_total = 0;
-
-                $grand_total += ($hub->pending_shipments + $hub->delivered_shipments + $hub->unsuccessful_shipments + $hub->notattempted_shipments + $hub->onhold_shipments + $hub->nonservicearea_shipments + $hub->misrouted_shipments + $hub->selfcollection_shipments + $hub->returnconfirmationpending_shipments + $hub->lost_shipments + $hub->returnconfirm_shipments  + $hub->tomorrow_shipments + $hub->dnpending_shipments);
-
-                if ($grand_total) {
-                    return round((($hub->delivered_shipments) / $grand_total) * 100) . '%';
-                }
-                else {
-                    return '0%';
-                }
-            });
-
-        if ($search_hub = $request->get('search_hub')) {
-            $hubs = $hubs->where('h.id', '=', $search_hub);
+        if ($hub) {
+            $hubs = $hubs->where('id', '=', $hub);
         }
 
-        if ($search_zone = $request->get('search_zone')) {
-            $hubs = $hubs->where('h.zone_id', '=', $search_zone);
+        if ($zone) {
+            $hubs = $hubs->where('zone_id', '=', $zone);
         }
 
-        if ($search_date = $request->get('search_date')) {
-            $hubs =  $hubs
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjpending.created_at', $search_date)
-                        ->orWhereNull('sjpending.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjdelivered.created_at', $search_date)
-                        ->orWhereNull('sjdelivered.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjunsuccessful.created_at', $search_date)
-                        ->orWhereNull('sjunsuccessful.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjnotattempted.created_at', $search_date)
-                        ->orWhereNull('sjnotattempted.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjonhold.created_at', $search_date)
-                        ->orWhereNull('sjonhold.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjnonservicearea.created_at', $search_date)
-                        ->orWhereNull('sjnonservicearea.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjmisrouted.created_at', $search_date)
-                        ->orWhereNull('sjmisrouted.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjselfcollection.created_at', $search_date)
-                        ->orWhereNull('sjselfcollection.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjreturnconfirmationpending.created_at', $search_date)
-                        ->orWhereNull('sjreturnconfirmationpending.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjlost.created_at', $search_date)
-                        ->orWhereNull('sjlost.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjreturnconfirm.created_at', $search_date)
-                        ->orWhereNull('sjreturnconfirm.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('dnc.created_at', $search_date)
-                        ->orWhereNull('dnc.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('dnf.created_at', $search_date)
-                        ->orWhereNull('dnf.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjtomorrow.created_at', $search_date)
-                        ->orWhereNull('sjtomorrow.created_at');
-                })
-                ->where(function ($query) use ($search_date) {
-                    $query->whereDate('sjdnpending.created_at', $search_date)
-                        ->orWhereNull('sjdnpending.created_at');
-                });
-        }
+        if ($hubs->exists()) {
+            $hubs = $hubs->get();
 
-        return $hubs->make(true);
-    }
-
-    public function debriefing_delivered_shipments(Request $request){
-        $shipments_list = Shipment::join('cities as c', 'c.id', '=', 'shipments.consignee_city_id')
-            ->join('cities as h', 'h.id', '=', 'c.hub_id')
-            ->join('shipments_journey as sj', function($join) {
-                $join->on('sj.shipment_id', '=', 'shipments.id')
-                    ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = shipments.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id IN (14, 30, 36, 37))'));
-        });
-
-        if ($search_date = $request->input('search_date')) {
-            $shipments_list = $shipments_list->whereDate('sj.created_at', $search_date);
-        }
-
-        if ($search_hub = $request->get('search_hub')) {
-            $shipments_list = $shipments_list->where('h.id', '=', $search_hub);
-        }
-
-        if ($search_zone = $request->get('search_zone')) {
-            $shipments_list = $shipments_list->where('h.zone_id', '=', $search_zone);
-        }
-
-        $shipments = array();
-
-        if ($shipments_list->exists()) {
-            $shipments_list = $shipments_list->get();
-
-            foreach ($shipments_list as $shipment){
-                $shipments[] = $shipment->tracking_number;
+            if (!$date) {
+                $date = Carbon::now()->toDateString();
             }
 
-            return ['status' => 0, 'success' => 'Found Shipments', 'shipments' => $shipments];
+            $types = ['pending', 'delivered', 'delivery_unsucessful', 'not_attempted', 'on_hold', 'non_service_area', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'delivery_tomorrow', 'delivery_note_pending'];
+
+            $counts = array();
+
+            if ($export) {
+                $shipments = array();
+            }
+
+            foreach ($hubs as $hub) {
+                foreach ($types as $type) {
+                    $rows = City::join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
+
+                    if ($type == 'pending') {
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
+                        ->join('zone_class_cities as zcc', function($join) {
+                            $join->on('cities.zone_id', '=', 'zcc.zone_id')
+                            ->on('s.consignee_city_id', '=', 'zcc.city_id');
+                        })
+                        ->leftjoin('delivery_note_shipments as dns', function($join) {
+                            $join->on('s.id', '=', 'dns.shipment_id')
+                            ->where('dns.delivery_note_id', '=', DB::raw('(select max(dns.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
+                        })
+                        ->leftjoin('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id')
+                        ->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and (usi.city_id = s.consignee_city_id or zcc.class in (0, 1)) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)) and ((shipments_journey.shipper_status_id = 4 and hour(shipments_journey.created_at) < 13) or (shipments_journey.shipper_status_id = 2 and usi.city_id = s.consignee_city_id)))'));
+                        });
+                    }
+                    else if ($type == 'delivered') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id IN (14, 30, 36, 37))'));
+                        });
+                    }
+                    else if ($type == 'delivery_unsucessful') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 8)'));
+                        });
+                    }
+                    else if ($type == 'not_attempted') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 7)'));
+                        });
+                    }
+                    else if ($type == 'on_hold') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 9)'));
+                        });
+                    }
+                    else if ($type == 'non_service_area') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 10)'));
+                        });
+                    }
+                    else if ($type == 'misrouted') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 11)'));
+                        });
+                    }
+                    else if ($type == 'on_hold_for_self_collection') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 15)'));
+                        });
+                    }
+                    else if ($type == 'confirmation_pending') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 12)'));
+                        });
+                    }
+                    else if ($type == 'lost') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 18)'));
+                        });
+                    }
+                    else if ($type == 'confirm') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 20 and shipments_journey.reference_1_id is not null)'));
+                        });
+                    }
+                    else if ($type == 'correct_status') {
+                        $rows = $rows->join('delivery_note_shipments as dns', function($join) {
+                            $join->on('s.id', '=', 'dns.shipment_id')
+                            ->where('dns.delivery_note_id', '=', DB::raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 0)'));
+                        })
+                        ->join('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id');
+                    }
+                    else if ($type == 'fake_status') {
+                        $rows = $rows->join('delivery_note_shipments as dns', function($join) {
+                            $join->on('s.id', '=', 'dns.shipment_id')
+                            ->where('dns.delivery_note_id', '=', DB::raw('(select max(delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id and fake_status = 1)'));
+                        })
+                        ->join('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id');
+                    }
+                    else if ($type == 'delivery_tomorrow') {
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
+                        ->join('zone_class_cities as zcc', function($join) {
+                            $join->on('cities.zone_id', '=', 'zcc.zone_id')
+                            ->on('s.consignee_city_id', '=', 'zcc.city_id');
+                        })
+                        ->leftjoin('delivery_note_shipments as dns', function($join) {
+                            $join->on('s.id', '=', 'dns.shipment_id')
+                            ->where('dns.delivery_note_id', '=', DB::raw('(select max(dns.delivery_note_id) from delivery_note_shipments where delivery_note_shipments.shipment_id = s.id)'));
+                        })
+                        ->leftjoin('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id')
+                        ->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(id) from shipments_journey where shipments_journey.shipment_id = s.id and shipments_journey.verification = 1 and shipments_journey.shipper_status_id = 4 and hour(shipments_journey.created_at) >= 13 and zcc.class in (2, 3) and (dns.delivery_note_id is null or date(dn.created_at) > date(shipments_journey.created_at)))'));
+                        });
+                    }
+                    else if ($type == 'delivery_note_pending') {
+                        $rows = $rows->join('shipments_journey as sj', function($join) {
+                            $join->on('s.id', '=', 'sj.shipment_id')
+                        ->where('sj.id', '=', DB::raw('(select max(isj.id) from shipments_journey as isj left join shipments_journey as isjj on isj.shipment_id = isjj.shipment_id and isj.reference_1_id = isjj.reference_1_id and isj.id != isjj.id where isj.shipment_id = s.id and isj.verification = 1 and isj.shipper_status_id = 5 and isjj.id is null)'));
+                        });
+                    }
+
+                    $rows = $rows->select('s.tracking_number')->where('cities.hub_id', $hub->id);
+
+                    if ($type != 'correct_status' && $type != 'fake_status') {
+                        $rows = $rows->whereDate('sj.created_at', $date);
+                    }
+                    else {
+                        $rows = $rows->whereDate('dn.created_at', $date);
+                    }
+
+                    if ($rows->exists()) {
+                        $rows = $rows->groupBy('s.id');
+
+                        $rows = $rows->get();
+
+                        $counts[$hub->name][$type] = $rows->count();
+
+                        if ($type != 'correct_status' && $type != 'fake_status') {
+                            if ($type != 'delivery_tomorrow' && $type != 'delivery_note_pending') {
+                                if (!isset($counts[$hub->name]['total'])) {
+                                    $counts[$hub->name]['total'] = 0;
+                                }
+
+                                $counts[$hub->name]['total'] += $counts[$hub->name][$type];
+                            }
+
+                            if (!isset($counts[$hub->name]['grand_total'])) {
+                                $counts[$hub->name]['grand_total'] = 0;
+                            }
+
+                            $counts[$hub->name]['grand_total'] += $counts[$hub->name][$type];
+                        }
+
+                        if ($export) {
+                            $shipments[$type][$hub->name] = array();
+
+                            foreach ($rows as $row) {
+                                $shipments[$type][$hub->name][] = $row->tracking_number;
+                            }
+                        }
+                    }
+                    else {
+                        $counts[$hub->name][$type] = 0;
+                    }
+                }
+
+                foreach ($counts as $hub => $count) {
+                    if (isset($count['total']) && $count['total']) {
+                        $counts[$hub]['total_ratio'] = round(($count['delivered'] / $count['total']) * 100);
+
+                        if (!$export) {
+                            $counts[$hub]['total_ratio'] .= '%';
+                        }
+                    }
+                    else {
+                        $counts[$hub]['total'] = 0;
+
+                        if (!$export) {
+                            $counts[$hub]['total_ratio'] = '0%';
+                        }
+                        else {
+                            $counts[$hub]['total_ratio'] = 0;
+                        }
+                    }
+
+                    if (isset($count['grand_total']) && $count['grand_total']) {
+                        $counts[$hub]['grand_total_ratio'] = round(($count['delivered'] / $count['grand_total']) * 100);
+
+                        if (!$export) {
+                            $counts[$hub]['grand_total_ratio'] .= '%';
+                        }
+                    }
+                    else {
+                        $counts[$hub]['grand_total'] = 0;
+
+                        if (!$export) {
+                            $counts[$hub]['grand_total_ratio'] = '0%';
+                        }
+                        else {
+                            $counts[$hub]['grand_total_ratio'] = 0;
+                        }
+                    }
+                }
+            }
+
+            if (!$export) {
+                return ['status' => 0, 'success' => 'Shipments Found', 'counts' => $counts];
+            }
+            else {
+                return ['status' => 0, 'success' => 'Shipments Found', 'counts' => $counts, 'shipments' => $shipments];
+            }
         }
         else {
-            return ['status' => 0, 'success' => 'No Shipments', 'shipments' => FALSE];
+            return ['status' => 1, 'error' => 'No Shipments Found'];
         }
     }
 
+    public function debriefing_list(Request $request) {
+        $date = $request->get('search_date');
+        $hub = $request->get('search_hub');
+        $zone = $request->get('search_zone');
 
+        return $this->debriefing_data($date, $hub, $zone);
+    }
+
+    public function debriefing_export(Request $request) {
+        $date = $request->get('search_date');
+        $hub = $request->get('search_hub');
+        $zone = $request->get('search_zone');
+
+        $file_name = 'debriefing_report_';
+
+        $file_name .= $date;
+
+        if ($hub) {
+            $file_name .= '_' . $hub;
+        }
+
+        if ($zone) {
+            $file_name .= '_' . $zone;
+        }
+
+        $file_name .= '.xlsx';
+
+        $details = array();
+
+        $details[] = ['Hubs', 'Shipment - Pending', 'Shipment - Delivered', 'Shipment - Delivery Unsuccessful', 'Shipment - Not Attempted', 'Shipment - On Hold', 'Shipment - Non Service Area', 'Shipment - Misrouted', 'Shipment - On Hold for Self Collection', 'Return - Confirmation Pending', 'Shipment - Lost', 'Return - Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Tomorrow', 'Deivery Note Pending Shipment', 'Grand Total', 'Ratio'];
+
+        $result = $this->debriefing_data($date, $hub, $zone, TRUE);
+
+        if ($result['status'] == 0) {
+            $types = ['pending', 'delivered', 'delivery_unsucessful', 'not_attempted', 'on_hold', 'non_service_area', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
+
+            $type_names = ['pending' => 'Shipment - Pending', 'delivered' => 'Shipment - Delivered', 'delivery_unsucessful' => 'Shipment - Delivery Unsuccessful', 'not_attempted' => 'Shipment - Not Attempted', 'on_hold' => 'Shipment - On Hold', 'non_service_area' => 'Shipment - Non Service Area', 'misrouted' => 'Shipment - Misrouted', 'on_hold_for_self_collection' => 'Shipment - On Hold for Self Collection', 'confirmation_pending' => 'Return - Confirmation Pending', 'lost' => 'Shipment - Lost', 'confirm' => 'Return - Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total' => 'Total', 'total_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'delivery_note_pending' => 'Deivery Note Pending Shipment', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
+
+            foreach ($result['counts'] as $hub => $count) {
+                $row = array();
+
+                $row[] = $hub;
+
+                foreach ($types as $type) {
+                    if ($count[$type]) {
+                        $row[] = $count[$type];
+                    }
+                    else {
+                        $row[] = '0';
+                    }
+                }
+
+                $details[] = $row;
+            }
+
+            $spreadsheet = new Spreadsheet();
+
+            $spreadsheet->getActiveSheet()->getStyle('B')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('C')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('D')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('E')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('F')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('G')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('H')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('I')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('J')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('K')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('L')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('M')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('N')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('O')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('P')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
+            $spreadsheet->getActiveSheet()->getStyle('Q')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('R')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('S')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+            $spreadsheet->getActiveSheet()->getStyle('T')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_PERCENTAGE);
+
+            $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
+
+            $row_index = 0;
+            $column_index = 0;
+
+            foreach ($result['shipments'] as $type => $hubs) {
+                $details = array();
+
+                foreach ($hubs as $hub => $tracking_numbers) {
+                    $details[$column_index][$row_index] = $hub;
+
+                    $column_index++;
+
+                    foreach ($tracking_numbers as $tracking_number) {
+                        $details[$column_index][$row_index] = $tracking_number;
+
+                        $column_index++;
+                    }
+
+                    $row_index++;
+                }
+
+                $spreadsheet->createSheet()->setTitle($type_names[$type]);
+
+                $spreadsheet->setActiveSheetIndexByName($type_names[$type]);
+
+                for ($counter = 1; $counter <= $column_index; $counter++) {
+                    $column_name = Coordinate::stringFromColumnIndex($counter);
+
+                    $spreadsheet->getActiveSheet()->getStyle($column_name)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
+
+                    $spreadsheet->getActiveSheet()->getColumnDimension($column_name)->setWidth(15);
+                }
+
+                $spreadsheet->getActiveSheet()->setTitle($type_names[$type])->fromArray($details);
+            }
+
+            $spreadsheet->setActiveSheetIndex(0);
+
+            $writer = new Xlsx($spreadsheet);
+        }
+        else {
+            $spreadsheet = new Spreadsheet();
+            $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details);
+
+            $writer = new Xlsx($spreadsheet);
+        }
+
+        header('Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        header('Content-Disposition: attachment;filename="' . $file_name . '"');
+        header('Cache-Control: max-age=0');
+
+        $writer->save('php://output');
+    }
 
 }
 

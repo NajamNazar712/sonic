@@ -845,8 +845,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         });
         Route::prefix('debriefing')->name('debriefing.')->group(function (){
             Route::get('', 'Admins\AdminReportsController@debriefing_index')->name('index');
-            Route::get('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
-            Route::post('delivered_shipments', 'Admins\AdminReportsController@debriefing_delivered_shipments')->name('delivered_shipments');
+            Route::post('list', 'Admins\AdminReportsController@debriefing_list')->name('list');
+            Route::get('export', 'Admins\AdminReportsController@debriefing_export')->name('export');
 
         });
     });
