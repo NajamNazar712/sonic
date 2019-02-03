@@ -275,7 +275,7 @@
                 </li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 138, 148, 153, 156, 169], session('permissions'))) !== 0)
+            @if (session('role_id') == 1 || count(array_intersect([64, 65, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 138, 148, 153, 156, 169, 170], session('permissions'))) !== 0)
                 <li class=" nav-item"><a href="#"><span class="menu-title">Reports</span></a>
 
                     <ul class="menu-content">
@@ -346,7 +346,7 @@
                             <li><a class="menu-item" href="{{ route('admin.reports.fake_status.index') }}">Fake Statuses</a></li>
                         @endif
 
-						@if (session('role_id') == 1 || in_array(169, session('permissions')))
+						@if (session('role_id') == 1 || in_array(170, session('permissions')))
                             <li><a class="menu-item" href="{{ route('admin.reports.debriefing.index') }}">Debriefing</a></li>
                         @endif
                     </ul>
@@ -414,7 +414,8 @@
                 <li class=" nav-item"><a href="{{ route('admin.notifications.index') }}"><span class="menu-title">Notifications</span></a></li>
             @endif
 
-            @if (session('role_id') == 1 || count(array_intersect([104, 116, 149, 150, 151, 152, 154, 157, 158], session('permissions'))) !== 0)            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
+            @if (session('role_id') == 1 || count(array_intersect([104, 116, 149, 150, 151, 152, 154, 157, 158], session('permissions'))) !== 0)
+            <li class=" nav-item"><a href="#"><span class="menu-title" data-i18n="nav.dash.main">Settings</span></a>
                 <ul class="menu-content">
                     @if (session('role_id') == 1 || in_array(104, session('permissions')))
                         <li><a class="menu-item" href="{{route('admin.settings.pickup.index')}}">Pickup Weight Threshold</a></li>
@@ -455,7 +456,8 @@
                                 @endif
                             </ul>
                         </li>
-                    @endif                </ul>
+                    @endif
+                </ul>
             </li>
             @endif
         </ul>
