@@ -53,23 +53,23 @@
                     <thead>
                         <tr role="row" class="bg-primary white">
                             <th class="border-primary border-darken-1">Hubs</th>
-                            <th class="border-primary border-darken-1">Shipment - Pending</th>
-                            <th class="border-primary border-darken-1">Shipment - Delivered</th>
-                            <th class="border-primary border-darken-1">Shipment - Delivery Unsuccessful</th>
-                            <th class="border-primary border-darken-1">Shipment - Not Attempted</th>
-                            <th class="border-primary border-darken-1">Shipment - On Hold</th>
-                            <th class="border-primary border-darken-1">Shipment - Non Service Area</th>
-                            <th class="border-primary border-darken-1">Shipment - Misrouted</th>
-                            <th class="border-primary border-darken-1">Shipment - On Hold for Self Collection</th>
-                            <th class="border-primary border-darken-1">Return - Confirmation Pending</th>
-                            <th class="border-primary border-darken-1">Shipment - Lost</th>
-                            <th class="border-primary border-darken-1">Return - Confirm</th>
+                            <th class="border-primary border-darken-1">Pending</th>
+                            <th class="border-primary border-darken-1">Delivered</th>
+                            <th class="border-primary border-darken-1">Delivery Unsuccessful</th>
+                            <th class="border-primary border-darken-1">Not Attempted</th>
+                            <th class="border-primary border-darken-1">On Hold</th>
+                            <th class="border-primary border-darken-1">Non Service Area</th>
+                            <th class="border-primary border-darken-1">Misrouted</th>
+                            <th class="border-primary border-darken-1">On Hold for Self Collection</th>
+                            <th class="border-primary border-darken-1">Confirmation Pending</th>
+                            <th class="border-primary border-darken-1">Lost</th>
+                            <th class="border-primary border-darken-1">Confirm</th>
                             <th class="border-primary border-darken-1">Correct Status</th>
                             <th class="border-primary border-darken-1">Fake Status</th>
                             <th class="border-primary border-darken-1">Total</th>
                             <th class="border-primary border-darken-1">Ratio</th>
                             <th class="border-primary border-darken-1">Delivery Tomorrow</th>
-                            <th class="border-primary border-darken-1">Delivery Note Pending Shipment</th>
+                            <th class="border-primary border-darken-1">Delivery Note Pending</th>
                             <th class="border-primary border-darken-1">Grand Total</th>
                             <th class="border-primary border-darken-1">Ratio</th>
                         </tr>
