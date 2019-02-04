@@ -4071,8 +4071,9 @@ class AdminReportsController extends Controller
                     }
                     else if ($type == 'delivery_tomorrow') {
                         $rows = $rows->join('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
+                        ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
                         ->join('zone_class_cities as zcc', function($join) {
-                            $join->on('cities.zone_id', '=', 'zcc.zone_id')
+                            $join->on('pc.zone_id', '=', 'zcc.zone_id')
                             ->on('s.consignee_city_id', '=', 'zcc.city_id');
                         })
                         ->leftjoin('delivery_note_shipments as dns', function($join) {
