@@ -435,6 +435,17 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="form-group row">
+                                    <div class="form-group col-md-9">
+                                        <label>Invoicing Cycle</label>
+                                        <span class="danger">*</span>
+                                        <select name="invoicing_cycle" id="invoicing_cycle" data-rule-required="true" data-msg-required="Bank City is required" class="select2 form-control required" style="width: 100%">
+                                            @foreach($all_cities as $bank_city)
+                                                <option value="{{$bank_city->id}}"  {{ $user->bank->city_id == $bank_city->id ? 'selected' : '' }}  >{{$bank_city->name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
                                 {{--<div class="form-group row">--}}
                                     {{--<div class="form-group col-md-9">--}}
                                         {{--<label>Invoicing Cycle</label>--}}
