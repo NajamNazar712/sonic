@@ -136,6 +136,9 @@
             var types = ['pending', 'delivered', 'delivery_unsucessful', 'not_attempted', 'on_hold', 'non_service_area', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
 
             function list() {
+                $('#search_filter_btn').prop('disabled', true);
+                $('#export_btn').prop('disabled', true);
+
                 $.ajax({
                     url: '{!! route('admin.reports.debriefing.list') !!}',
                     method: 'POST',
@@ -167,6 +170,9 @@
                     else {
                         table.clear().draw();
                     }
+
+                    $('#search_filter_btn').prop('disabled', false);
+                    $('#export_btn').prop('disabled', false);
                 });
             }
 
