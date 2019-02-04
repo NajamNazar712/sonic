@@ -69,7 +69,7 @@
                             <th class="border-primary border-darken-1">Total</th>
                             <th class="border-primary border-darken-1">Ratio</th>
                             <th class="border-primary border-darken-1">Delivery Tomorrow</th>
-                            <th class="border-primary border-darken-1">Deivery Note Pending Shipment</th>
+                            <th class="border-primary border-darken-1">Delivery Note Pending Shipment</th>
                             <th class="border-primary border-darken-1">Grand Total</th>
                             <th class="border-primary border-darken-1">Ratio</th>
                         </tr>
@@ -179,8 +179,6 @@
             var search_date = $('input[name="search_date_formatted"]').val();
             var search_hub = $('#search_hub').val();
             var search_zone = $('#search_zone').val();
-
-            list();
 
             $('#search_filter_btn').on('click', function() {
                 search_date = $('input[name="search_date_formatted"]').val();

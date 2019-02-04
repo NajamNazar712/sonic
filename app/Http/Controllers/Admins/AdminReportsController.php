@@ -4217,14 +4217,14 @@ class AdminReportsController extends Controller
 
         $details = array();
 
-        $details[] = ['Hubs', 'Shipment - Pending', 'Shipment - Delivered', 'Shipment - Delivery Unsuccessful', 'Shipment - Not Attempted', 'Shipment - On Hold', 'Shipment - Non Service Area', 'Shipment - Misrouted', 'Shipment - On Hold for Self Collection', 'Return - Confirmation Pending', 'Shipment - Lost', 'Return - Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Tomorrow', 'Deivery Note Pending Shipment', 'Grand Total', 'Ratio'];
+        $details[] = ['Hubs', 'Shipment - Pending', 'Shipment - Delivered', 'Shipment - Delivery Unsuccessful', 'Shipment - Not Attempted', 'Shipment - On Hold', 'Shipment - Non Service Area', 'Shipment - Misrouted', 'Shipment - On Hold for Self Collection', 'Return - Confirmation Pending', 'Shipment - Lost', 'Return - Confirm', 'Correct Status', 'Fake Status', 'Total', 'Ratio', 'Delivery Tomorrow', 'Delivery Note Pending Shipment', 'Grand Total', 'Ratio'];
 
         $result = $this->debriefing_data($date, $hub, $zone, TRUE);
 
         if ($result['status'] == 0) {
             $types = ['pending', 'delivered', 'delivery_unsucessful', 'not_attempted', 'on_hold', 'non_service_area', 'misrouted', 'on_hold_for_self_collection', 'confirmation_pending', 'lost', 'confirm', 'correct_status', 'fake_status', 'total', 'total_ratio', 'delivery_tomorrow', 'delivery_note_pending', 'grand_total', 'grand_total_ratio'];
 
-            $type_names = ['pending' => 'Shipment - Pending', 'delivered' => 'Shipment - Delivered', 'delivery_unsucessful' => 'Shipment - Delivery Unsuccessful', 'not_attempted' => 'Shipment - Not Attempted', 'on_hold' => 'Shipment - On Hold', 'non_service_area' => 'Shipment - Non Service Area', 'misrouted' => 'Shipment - Misrouted', 'on_hold_for_self_collection' => 'Shipment - On Hold for Self Collection', 'confirmation_pending' => 'Return - Confirmation Pending', 'lost' => 'Shipment - Lost', 'confirm' => 'Return - Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total' => 'Total', 'total_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'delivery_note_pending' => 'Deivery Note Pending Shipment', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
+            $type_names = ['pending' => 'Shipment - Pending', 'delivered' => 'Shipment - Delivered', 'delivery_unsucessful' => 'Shipment - Delivery Unsuccessful', 'not_attempted' => 'Shipment - Not Attempted', 'on_hold' => 'Shipment - On Hold', 'non_service_area' => 'Shipment - Non Service Area', 'misrouted' => 'Shipment - Misrouted', 'on_hold_for_self_collection' => 'Shipment - On Hold for Self Collection', 'confirmation_pending' => 'Return - Confirmation Pending', 'lost' => 'Shipment - Lost', 'confirm' => 'Return - Confirm', 'correct_status' => 'Correct Status', 'fake_status' => 'Fake Status', 'total' => 'Total', 'total_ratio' => 'Ratio', 'delivery_tomorrow' => 'Delivery Tomorrow', 'delivery_note_pending' => 'Delivery Note Pending Shipment', 'grand_total' => 'Grand Total', 'grand_total_ratio' => 'Ratio'];
 
             foreach ($result['counts'] as $hub => $count) {
                 $row = array();
