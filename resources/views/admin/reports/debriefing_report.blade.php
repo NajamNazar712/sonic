@@ -189,6 +189,10 @@
             });
 
             $('#export_btn').on('click', function() {
+                search_date = $('input[name="search_date_formatted"]').val();
+                search_hub = $('#search_hub').val();
+                search_zone = $('#search_zone').val();
+
                 window.open('{!! route('admin.reports.debriefing.export') !!}?search_date=' + search_date + '&search_hub=' + search_hub + '&search_zone=' + search_zone, '_blank');
             });
         });
