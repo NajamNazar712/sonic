@@ -4167,7 +4167,7 @@ class AdminReportsController extends Controller
                             $counts[$hub]['grand_total_ratio'] .= '%';
                         }
                         else {
-                            $counts[$hub]['total_ratio'] = ($counts[$hub]['grand_total_ratio'] / 100);
+                            $counts[$hub]['grand_total_ratio'] = ($counts[$hub]['grand_total_ratio'] / 100);
                         }
                     }
                     else {
