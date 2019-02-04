@@ -4143,7 +4143,10 @@ class AdminReportsController extends Controller
                         $counts[$hub]['total_ratio'] = round(($count['delivered'] / $count['total']) * 100);
 
                         if (!$export) {
-                            $counts[$hub]['total_ratio'] .= ($counts[$hub]['total_ratio'] / 100) . '%';
+                            $counts[$hub]['total_ratio'] .= ($counts[$hub]['total_ratio']) . '%';
+                        }
+                        else {
+                            $counts[$hub]['total_ratio'] .= ($counts[$hub]['total_ratio'] / 100);
                         }
                     }
                     else {
@@ -4161,7 +4164,10 @@ class AdminReportsController extends Controller
                         $counts[$hub]['grand_total_ratio'] = round(($count['delivered'] / $count['grand_total']) * 100);
 
                         if (!$export) {
-                            $counts[$hub]['grand_total_ratio'] .= ($counts[$hub]['grand_total_ratio'] / 100) . '%';
+                            $counts[$hub]['grand_total_ratio'] .= ($counts[$hub]['grand_total_ratio']) . '%';
+                        }
+                        else {
+                            $counts[$hub]['total_ratio'] .= ($counts[$hub]['grand_total_ratio'] / 100);
                         }
                     }
                     else {
