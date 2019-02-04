@@ -3979,7 +3979,7 @@ class AdminReportsController extends Controller
                     $rows = City::join('shipments as s', 'cities.id', '=', 's.consignee_city_id');
 
                     if ($type == 'pending') {
-                        $rows = $rows->join('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
                         ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
                         ->join('zone_class_cities as zcc', function($join) {
                             $join->on('pc.zone_id', '=', 'zcc.zone_id')
@@ -4070,7 +4070,7 @@ class AdminReportsController extends Controller
                         ->join('delivery_notes as dn', 'dns.delivery_note_id', '=', 'dn.id');
                     }
                     else if ($type == 'delivery_tomorrow') {
-                        $rows = $rows->join('user_shipping_infos as usi', 'usi.user_id', '=', 's.pickup_address_id')
+                        $rows = $rows->join('user_shipping_infos as usi', 'usi.id', '=', 's.pickup_address_id')
                         ->join('cities as pc', 'usi.city_id', '=', 'pc.id')
                         ->join('zone_class_cities as zcc', function($join) {
                             $join->on('pc.zone_id', '=', 'zcc.zone_id')
