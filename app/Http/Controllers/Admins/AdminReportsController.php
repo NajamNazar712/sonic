@@ -4140,10 +4140,10 @@ class AdminReportsController extends Controller
 
                 foreach ($counts as $hub => $count) {
                     if (isset($count['total']) && $count['total']) {
-                        $counts[$hub]['total_ratio'] = round(($count['delivered'] / $count['total']));
+                        $counts[$hub]['total_ratio'] = round(($count['delivered'] / $count['total']) * 100);
 
                         if (!$export) {
-                            $counts[$hub]['total_ratio'] .= ($counts[$hub]['total_ratio'] * 100) . '%';
+                            $counts[$hub]['total_ratio'] .= ($counts[$hub]['total_ratio'] / 100) . '%';
                         }
                     }
                     else {
@@ -4158,10 +4158,10 @@ class AdminReportsController extends Controller
                     }
 
                     if (isset($count['grand_total']) && $count['grand_total']) {
-                        $counts[$hub]['grand_total_ratio'] = round(($count['delivered'] / $count['grand_total']));
+                        $counts[$hub]['grand_total_ratio'] = round(($count['delivered'] / $count['grand_total']) * 100);
 
                         if (!$export) {
-                            $counts[$hub]['grand_total_ratio'] .= ($counts[$hub]['grand_total_ratio'] * 100) . '%';
+                            $counts[$hub]['grand_total_ratio'] .= ($counts[$hub]['grand_total_ratio'] / 100) . '%';
                         }
                     }
                     else {
@@ -4277,17 +4277,17 @@ class AdminReportsController extends Controller
                 foreach ($hubs as $hub => $tracking_numbers) {
                     $details[$row_index][$column_index] = $hub;
 
-                    $column_index++;
+                    $row_index++;
 
                     foreach ($tracking_numbers as $tracking_number) {
                         $details[$row_index][$column_index] = $tracking_number;
 
-                        $column_index++;
+                        $row_index++;
                     }
 
-                    $row_index++;
+                    $column_index++;
 
-                    $column_index = 0;
+                    $row_index = 0;
                 }
 
                 $spreadsheet->createSheet()->setTitle($type_names[$type]);
