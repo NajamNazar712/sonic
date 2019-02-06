@@ -15,6 +15,8 @@ class CreateCorporateStandardFuelSurchargesTable extends Migration
     {
         Schema::create('corporate_standard_fuel_surcharges', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('shipping_mode_id');
+            $table->float('fuel_surcharge',10,2);
             $table->timestamps();
         });
     }

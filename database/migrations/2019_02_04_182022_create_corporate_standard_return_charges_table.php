@@ -15,6 +15,9 @@ class CreateCorporateStandardReturnChargesTable extends Migration
     {
         Schema::create('corporate_standard_return_charges', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('shipping_mode_id');
+            $table->integer('local');
+            $table->integer('national');
             $table->timestamps();
         });
     }

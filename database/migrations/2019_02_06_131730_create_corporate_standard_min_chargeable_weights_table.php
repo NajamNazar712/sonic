@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCorporateStandardRateStatusesTable extends Migration
+class CreateCorporateStandardMinChargeableWeightsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,8 +13,11 @@ class CreateCorporateStandardRateStatusesTable extends Migration
      */
     public function up()
     {
-        Schema::create('corporate_standard_rate_statuses', function (Blueprint $table) {
+        Schema::create('corporate_standard_min_chargeable_weights', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('shipping_mode_id');
+            $table->integer('delivery_type_id');
+            $table->float('min_chargeable_weight', 8, 2);
             $table->timestamps();
         });
     }
@@ -26,6 +29,6 @@ class CreateCorporateStandardRateStatusesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('corporate_standard_rate_statuses');
+        Schema::dropIfExists('corporate_standard_min_chargeable_weights');
     }
 }

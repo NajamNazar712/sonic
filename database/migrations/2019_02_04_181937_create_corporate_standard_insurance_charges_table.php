@@ -15,6 +15,10 @@ class CreateCorporateStandardInsuranceChargesTable extends Migration
     {
         Schema::create('corporate_standard_insurance_charges', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('shipping_mode_id');
+            $table->integer('range_up');
+            $table->integer('range_down');
+            $table->string('charges');
             $table->timestamps();
         });
     }

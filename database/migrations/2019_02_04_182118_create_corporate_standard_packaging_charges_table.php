@@ -15,6 +15,11 @@ class CreateCorporateStandardPackagingChargesTable extends Migration
     {
         Schema::create('corporate_standard_packaging_charges', function (Blueprint $table) {
             $table->increments('id');
+            $table->integer('shipping_mode_id');
+            $table->integer('sm_flyer');
+            $table->integer('md_flyer');
+            $table->integer('lg_flyer');
+            $table->integer('box_flyer');
             $table->timestamps();
         });
     }

@@ -232,7 +232,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
     Route::get('/accounts/{id}/view/rates','Admins\AdminDashboardController@viewRates')->name('view.rates');
     Route::prefix('corporate')->name('corporate.')->group(function (){
         Route::get('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_index')->name('add.rates');
-        Route::post('{id}/add/rates','Admins\AdminDashboardController@add_rates_submit')->name('add.rates');
+        Route::post('{id}/add/rates','Admins\AdminCorporateAccountsController@add_rates_submit')->name('add.rates');
 
     });
     //ajax request

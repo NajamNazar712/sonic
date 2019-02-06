@@ -17,7 +17,7 @@ class CreateCorporateFuelSurchargesTable extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('shipping_mode_id');
-            $table->decimal('fuel_surcharge',10,2);
+            $table->float('fuel_surcharge',10,2);
             $table->timestamps();
         });
     }

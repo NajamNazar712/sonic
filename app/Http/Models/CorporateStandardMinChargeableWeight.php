@@ -4,7 +4,7 @@ namespace App\Http\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class CorporateStandardDiscountCharge extends Model
+class CorporateStandardMinChargeableWeight extends Model
 {
     //
 }
