@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateAccountTypesTable extends Migration
+class UpdateAccountTypeForZoneClassCitiesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,9 +13,9 @@ class CreateAccountTypesTable extends Migration
      */
     public function up()
     {
-        Schema::create('account_types', function (Blueprint $table) {
-            $table->increments('id');
-            $table->string('type');
+        //
+        Schema::table('zone_class_cities', function (Blueprint $table) {
+            $table->integer('account_type_id')->default(1);
         });
     }
 
@@ -26,6 +26,9 @@ class CreateAccountTypesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('account_types');
+        //
+        Schema::table('zone_class_cities', function (Blueprint $table) {
+            $table->dropColumn('account_type_id');
+        });
     }
 }
