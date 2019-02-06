@@ -101,9 +101,10 @@ class AdminZonalManagementController extends Controller
     public function update_index($id) {
         $cities = City::where('status', 1)->get();
         $zone = Zone::find($id);
-        $zone_class_cities = ZoneClassCity::where('zone_id', $id)->pluck('class', 'city_id');
+        $zone_class_cities = ZoneClassCity::where(['zone_id' => $id, 'account_type_id' => 1])->pluck('class', 'city_id');
+        $zone_class_cities_cor = ZoneClassCity::where(['zone_id' => $id, 'account_type_id' => 1])->pluck('class', 'city_id');
 
-        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities]);
+        return view('admin.management.zonal.update.index')->with(['cities' => $cities, 'zone' => $zone, 'zone_class_cities' => $zone_class_cities, 'zone_class_cities_cor' => $zone_class_cities_cor]);
     }
 
     public function update_store(Request $request, $id) {
@@ -115,7 +116,7 @@ class AdminZonalManagementController extends Controller
         $zone->save();
 
         foreach ($request->city_class as $city_id => $class) {
-            $zone_class_city = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city_id);
+            $zone_class_city = ZoneClassCity::where('zone_id', $zone->id)->where(['city_id' => $city_id, 'account_type_id' => 1]);
 
             if ($zone_class_city->exists()) {
                 $zone_class_city = $zone_class_city->first();
@@ -128,6 +129,24 @@ class AdminZonalManagementController extends Controller
             }
 
             $zone_class_city->class = $class;
+
+            $zone_class_city->save();
+        }
+
+        foreach ($request->city_class_cor as $city_id_cor => $class_cor) {
+            $zone_class_city = ZoneClassCity::where('zone_id', $zone->id)->where(['city_id' => $city_id_cor, 'account_type_id' => 2]);
+
+            if ($zone_class_city->exists()) {
+                $zone_class_city = $zone_class_city->first();
+            }
+            else {
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city_id_cor;
+            }
+
+            $zone_class_city->class = $class_cor;
 
             $zone_class_city->save();
         }
