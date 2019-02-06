@@ -103,7 +103,7 @@ class AdminZonalManagementController extends Controller
         $zone->save();
 
         foreach ($request->city_class as $city_id => $class) {
-            $zone_class_city = ZoneClassCity::where('zone_id', $zone->id)->where('city_id', $city_id);
+            $zone_class_city = ZoneClassCity::where('zone_id', $zone->id)->where(['city_id' => $city_id, 'account_type' => 1]);
 
             if ($zone_class_city->exists()) {
                 $zone_class_city = $zone_class_city->first();
@@ -116,6 +116,24 @@ class AdminZonalManagementController extends Controller
             }
 
             $zone_class_city->class = $class;
+
+            $zone_class_city->save();
+        }
+
+        foreach ($request->city_class_cor as $city_id_cor => $class_cor) {
+            $zone_class_city = ZoneClassCity::where('zone_id', $zone->id)->where(['city_id' => $city_id, 'account_type' => 2]);
+
+            if ($zone_class_city->exists()) {
+                $zone_class_city = $zone_class_city->first();
+            }
+            else {
+                $zone_class_city = new ZoneClassCity();
+
+                $zone_class_city->zone_id = $zone->id;
+                $zone_class_city->city_id = $city_id_cor;
+            }
+
+            $zone_class_city->class = $class_cor;
 
             $zone_class_city->save();
         }
