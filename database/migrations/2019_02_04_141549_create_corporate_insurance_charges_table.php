@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCashHandlingChargesTable extends Migration
+class CreateCorporateInsuranceChargesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,7 +13,7 @@ class CreateCashHandlingChargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('cash_handling_charges', function (Blueprint $table) {
+        Schema::create('corporate_insurance_charges', function (Blueprint $table) {
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('shipping_mode_id');
@@ -31,6 +31,6 @@ class CreateCashHandlingChargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cash_handling_charges');
+        Schema::dropIfExists('corporate_insurance_charges');
     }
 }

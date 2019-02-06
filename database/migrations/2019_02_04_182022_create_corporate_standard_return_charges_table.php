@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateCashHandlingChargesTable extends Migration
+class CreateCorporateStandardReturnChargesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,8 @@ class CreateCashHandlingChargesTable extends Migration
      */
     public function up()
     {
-        Schema::create('cash_handling_charges', function (Blueprint $table) {
+        Schema::create('corporate_standard_return_charges', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->integer('shipping_mode_id');
-            $table->integer('range_up');
-            $table->integer('range_down');
-            $table->string('charges');
             $table->timestamps();
         });
     }
@@ -31,6 +26,6 @@ class CreateCashHandlingChargesTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('cash_handling_charges');
+        Schema::dropIfExists('corporate_standard_return_charges');
     }
 }
