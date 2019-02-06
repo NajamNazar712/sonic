@@ -79,6 +79,18 @@ class AdminZonalManagementController extends Controller
             $zone_class_city->zone_id = $zone->id;
             $zone_class_city->city_id = $city_id;
             $zone_class_city->class = $class;
+            $zone_class_city->account_type = 1;
+
+            $zone_class_city->save();
+        }
+
+        foreach ($request->city_class_cor as $city_id_cor => $class_cor) {
+            $zone_class_city = new ZoneClassCity();
+
+            $zone_class_city->zone_id = $zone->id;
+            $zone_class_city->city_id = $city_id_cor;
+            $zone_class_city->class = $class_cor;
+            $zone_class_city->account_type = 2;
 
             $zone_class_city->save();
         }
