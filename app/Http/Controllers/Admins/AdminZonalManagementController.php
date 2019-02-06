@@ -79,7 +79,7 @@ class AdminZonalManagementController extends Controller
             $zone_class_city->zone_id = $zone->id;
             $zone_class_city->city_id = $city_id;
             $zone_class_city->class = $class;
-            $zone_class_city->account_type = 1;
+            $zone_class_city->account_type_id = 1;
 
             $zone_class_city->save();
         }
@@ -90,7 +90,7 @@ class AdminZonalManagementController extends Controller
             $zone_class_city->zone_id = $zone->id;
             $zone_class_city->city_id = $city_id_cor;
             $zone_class_city->class = $class_cor;
-            $zone_class_city->account_type = 2;
+            $zone_class_city->account_type_id = 2;
 
             $zone_class_city->save();
         }
