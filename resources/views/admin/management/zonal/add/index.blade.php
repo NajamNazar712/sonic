@@ -39,11 +39,9 @@
 										<h3 class="form-section mb-2">City Class Categorization</h3>
 									</div>
 
-									<div class="col-12 align-center">
+									<div class="col-12 col-lg-6 mt-2 mt-lg-0">
 										<h3 class="form-section mb-2">Reimburse Account</h3>
-									</div>
 
-									<div class="col-12">
 										@foreach($cities as $city)
 											<div class="form-group">
 												<div class="row align-items-center justify-content-between">
@@ -79,11 +77,9 @@
 										@endforeach
 									</div>
 
-									<div class="col-12 align-center" style="margin-top: 100px">
+									<div class="col-12 col-lg-6 mt-2 mt-lg-0" style="margin-top: 100px">
 										<h3 class="form-section mb-2">Corporate Account</h3>
-									</div>
 
-									<div class="col-12">
 										@foreach($cities as $city)
 											<div class="form-group">
 												<div class="row align-items-center justify-content-between">
