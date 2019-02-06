@@ -35,11 +35,13 @@
 										</div>
 									</div>
 
-									<div class="col-12">
-										<h4 class="form-section mb-2">City Class Categorization</h4>
+									<div class="col-12" style="text-align: center">
+										<h3 class="form-section mb-2">City Class Categorization</h3>
 									</div>
 
-									<div class="col-12">
+									<div class="col-12 col-lg-6 mt-2 mt-lg-0">
+										<h3 class="form-section mb-2">Reimburse Account</h3>
+
 										@foreach($cities as $city)
 											<div class="form-group">
 												<div class="row align-items-center justify-content-between">
@@ -66,6 +68,44 @@
 														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
 															<input type="radio" id="city_class_{{ $city->id }}" class="city_class" name="city_class[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required">
 															<label for="city_class_{{ $city->id }}">Class D</label>
+														</fieldset>
+													</div>
+												</div>
+											</div>
+
+											<hr/>
+										@endforeach
+									</div>
+
+									<div class="col-12 col-lg-6 mt-2 mt-lg-0" style="margin-top: 100px">
+										<h3 class="form-section mb-2">Corporate Account</h3>
+
+										@foreach($cities as $city)
+											<div class="form-group">
+												<div class="row align-items-center justify-content-between">
+													<div class="col">
+														<label class="mb-0 mr-1">{{ $city->name }}</label>
+													</div>
+
+													<div class="col text-right">
+														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+															<input type="radio" id="city_class{{ $city->id }}" class="city_class" name="city_class_cor_[{{ $city->id }}]" value="0" data-rule-required="true" data-msg-required="Class is required">
+															<label for="city_class{{ $city->id }}">Class A</label>
+														</fieldset>
+
+														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+															<input type="radio" id="city_class{{ $city->id }}" class="city_class" name="city_class_cor_[{{ $city->id }}]" value="1"data-rule-required="true" data-msg-required="Class is required">
+															<label for="city_class{{ $city->id }}">Class B</label>
+														</fieldset>
+
+														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+															<input type="radio" id="city_class{{ $city->id }}" class="city_class" name="city_class_cor_[{{ $city->id }}]" value="2"data-rule-required="true" data-msg-required="Class is required">
+															<label for="city_class{{ $city->id }}">Class C</label>
+														</fieldset>
+
+														<fieldset class="d-inline-block mt-1 mb-1 ml-1 mr-0">
+															<input type="radio" id="city_class{{ $city->id }}" class="city_class" name="city_class_cor_[{{ $city->id }}]" value="3"data-rule-required="true" data-msg-required="Class is required">
+															<label for="city_class{{ $city->id }}">Class D</label>
 														</fieldset>
 													</div>
 												</div>
