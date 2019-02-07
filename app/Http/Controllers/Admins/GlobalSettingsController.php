@@ -484,4 +484,24 @@ class GlobalSettingsController extends Controller
         ]);
         return redirect()->back()->with('success', 'Settings Updated!');
     }
+
+    public function auto_invoice_generation_and_due_date_index(){
+        $auto_invoice_generation = GlobalSettings::where('type', 'auto_invoice_generation_time')->first();
+        $due_date_days = GlobalSettings::where('type', 'due_date_days')->first();
+        return view('admin.settings.auto_invoice_generation_and_due_date_index')->with(['auto_invoice_generation_time' => $auto_invoice_generation,'due_date_days' => $due_date_days]);
+    }
+
+    public function auto_invoice_generation_and_due_date_store(Request $request){
+
+        $settings_invoice = GlobalSettings::where('type', 'auto_invoice_generation_time')->first();
+        $settings_due_date = GlobalSettings::where('type', 'due_date_days')->first();
+
+        $settings_invoice->setting_value = $request->auto_invoice_generation_hours;
+        $settings_due_date->setting_value = $request->due_date_days;
+
+        $settings_invoice->save();
+        $settings_due_date->save();
+
+        return redirect()->back()->with('success', 'Settings Updated!');
+    }
 }
