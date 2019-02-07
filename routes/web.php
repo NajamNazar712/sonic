@@ -49,9 +49,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
+            Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
+            Route::post('corporate_store', 'Shippers\ShipperShipmentBookController@corporate_store')->name('corporate.store');
             Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
             Route::post('shipping_modes', 'Shippers\ShipperShipmentBookController@shipping_modes')->name('shipping_modes');
             Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
+            Route::post('corporate_invoice', 'Shippers\ShipperShipmentBookController@corporate_invoice')->name('corporate_invoice');
             Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
 
             Route::prefix('excel')->name('excel_')->group(function () {

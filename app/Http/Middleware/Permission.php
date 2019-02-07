@@ -401,6 +401,8 @@ class Permission
         'shipper' => [
             'shipment.book.index' => 1,
             'shipment.book.store' => 1,
+            'shipment.book.corporate.index' => 1,
+            'shipment.book.corporate.store' => 1,
             'shipment.book.order_id' => 1,
             'shipment.book.excel_index' => 1,
             'shipment.book.excel_store' => 1,
