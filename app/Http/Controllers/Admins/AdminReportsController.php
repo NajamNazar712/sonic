@@ -4274,33 +4274,28 @@ class AdminReportsController extends Controller
 
             $spreadsheet->getActiveSheet()->setTitle('Overall')->fromArray($details, NULL);
 
-            $row_index = 0;
-            $column_index = 0;
-
             foreach ($result['shipments'] as $type => $hubs) {
                 $details = array();
 
                 foreach ($hubs as $hub => $tracking_numbers) {
-                    $details[$row_index][$column_index] = $hub;
+                    $detail = array();
 
-                    $row_index++;
+                    $detail[] = $hub;
 
                     foreach ($tracking_numbers as $tracking_number) {
-                        $details[$row_index][$column_index] = $tracking_number;
-
-                        $row_index++;
+                        $detail[] = $tracking_number;
                     }
 
-                    $column_index++;
-
-                    $row_index = 0;
+                    $details[] = $detail;
                 }
+
+                $details = array_map(null, ...$details);
 
                 $spreadsheet->createSheet()->setTitle($type_names[$type]);
 
                 $spreadsheet->setActiveSheetIndexByName($type_names[$type]);
 
-                for ($counter = 1; $counter <= $column_index; $counter++) {
+                for ($counter = 1; $counter <= count($hubs); $counter++) {
                     $column_name = Coordinate::stringFromColumnIndex($counter);
 
                     $spreadsheet->getActiveSheet()->getStyle($column_name)->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_NUMBER);
