@@ -1037,7 +1037,7 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function edit_rates_submit(Request $request, $id){
-
+        return $request;
         $messages = [
             'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
             'on_door_mcw_charges.numeric' => 'The overnight doorstep minimum chargeable weight field must be numeric or decimal.',
@@ -2532,7 +2532,17 @@ class AdminCorporateAccountsController extends Controller
 
     }
 
-    public function view_rates_index(){
-        
+    public function view_rates_index($id){
+        $user = User::find($id);
+        $switches = CorporateRateStatus::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+        $weight = CorporateWeightCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $cash = CorporateCashHandlingCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $insurance = CorporateInsuranceCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $return = CorporateReturnCharges::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $fuel = CorporateFuelSurcharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+        $discount = CorporateDiscountCharge::all()->where('user_id',$id)->groupBy('shipping_mode_id');
+
+        return view('admin.accounts.corporate.view_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'min_weight' => $min_weight]);
     }
 }
