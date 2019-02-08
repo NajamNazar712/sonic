@@ -42,6 +42,14 @@ class CorporateAccountRatesTableSeeder extends Seeder
             array('shipping_mode_id'=>4,'delivery_type_id' => 1,'range_up'=>0.51,'range_down'=>1,'local_or_6hr'=>300,'national_charges_class_0'=>0,'national_charges_class_1'=>0,'national_charges_class_2'=>0,'national_charges_class_3'=>0),
         ));
 
+        DB::table('corporate_standard_booking_type_charges')->truncate();
+        DB::table('corporate_standard_booking_type_charges')->insert(array(
+            array('shipping_mode_id'=>1,'replacement_charges'=>100,'try_and_buy_charges'=>150),
+            array('shipping_mode_id'=>2,'replacement_charges'=>100,'try_and_buy_charges'=>150),
+            array('shipping_mode_id'=>3,'replacement_charges'=>100,'try_and_buy_charges'=>150),
+            array('shipping_mode_id'=>4,'replacement_charges'=>100,'try_and_buy_charges'=>150),
+        ));
+
         DB::table('corporate_standard_cash_handling_charges')->truncate();
         DB::table('corporate_standard_cash_handling_charges')->insert(array(
             array('shipping_mode_id'=>1,'range_up'=>0,'range_down'=>3000,'charges'=>0),

@@ -9,6 +9,7 @@ use App\Http\Models\Admin\StandardInsuranceCharge;
 use App\Http\Models\Admin\StandardPackagingCharge;
 use App\Http\Models\Admin\StandardReturnCharge;
 use App\Http\Models\Admin\StandardWeightCharge;
+use App\Http\Models\CorporateBookingTypeCharge;
 use App\Http\Models\CorporateCashHandlingCharges;
 use App\Http\Models\CorporateDiscountCharge;
 use App\Http\Models\CorporateFuelSurcharge;
@@ -16,7 +17,13 @@ use App\Http\Models\CorporateInsuranceCharges;
 use App\Http\Models\CorporateMinChargeableWeight;
 use App\Http\Models\CorporateRateStatus;
 use App\Http\Models\CorporateReturnCharges;
+use App\Http\Models\CorporateStandardBookingTypeCharge;
+use App\Http\Models\CorporateStandardCashHandlingCharges;
+use App\Http\Models\CorporateStandardFuelSurcharge;
+use App\Http\Models\CorporateStandardInsuranceCharges;
 use App\Http\Models\CorporateStandardMinChargeableWeight;
+use App\Http\Models\CorporateStandardReturnCharges;
+use App\Http\Models\CorporateStandardWeightCharge;
 use App\Http\Models\CorporateWeightCharge;
 use App\Http\Models\Rates\CorporateRateHistory;
 use App\Http\Models\Rates\PendingCorporateCashHandlingCharges;
@@ -55,12 +62,13 @@ class AdminCorporateAccountsController extends Controller
         $user = User::find($id);
         if (!CorporateRateStatus::where('user_id', $user->id)->exists()) {
             $min_weight = CorporateStandardMinChargeableWeight::all()->groupBy('shipping_mode_id');
-            $weight = StandardWeightCharge::all()->groupBy('shipping_mode_id');
-            $cash = StandardCashHandlingCharge::all()->groupBy('shipping_mode_id');
-            $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
-            $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
-            $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight]);
+            $weight = CorporateStandardWeightCharge::all()->groupBy('shipping_mode_id');
+            $bookingType = CorporateStandardBookingTypeCharge::all()->groupBy('shipping_mode_id');
+            $cash = CorporateStandardCashHandlingCharges::all()->groupBy('shipping_mode_id');
+            $insurance = CorporateStandardInsuranceCharges::all()->groupBy('shipping_mode_id');
+            $return = CorporateStandardReturnCharges::all()->groupBy('shipping_mode_id');
+            $fuel = CorporateStandardFuelSurcharge::all()->groupBy('shipping_mode_id');
+            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight,'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
@@ -94,6 +102,10 @@ class AdminCorporateAccountsController extends Controller
             'on_hub_class_1_charges.*.required' => 'The overnight class B charges field is required.',
             'on_hub_class_2_charges.*.required' => 'The overnight class C charges field is required.',
             'on_hub_class_3_charges.*.required' => 'The overnight class D charges field is required.',
+            'on_replacement_charges.numeric' => 'The overnight replacement charges field must be numeric.',
+            'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
+            'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
+            'on_tnb_charges.required' => 'The overnight try and buy charges field is required.',
             'on_cash_range_up.*.required_if' => 'The overnight cash range up field is required.',
             'on_cash_range_up.*.numeric' => 'The overnight cash range up field must be numeric.',
             'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
@@ -145,6 +157,10 @@ class AdminCorporateAccountsController extends Controller
             'ol_hub_class_1_charges.*.required' => 'The overland class B charges field is required.',
             'ol_hub_class_2_charges.*.required' => 'The overland class C charges field is required.',
             'ol_hub_class_3_charges.*.required' => 'The overland class D charges field is required.',
+            'ol_replacement_charges.numeric' => 'The overland replacement charges field must be numeric.',
+            'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
+            'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
+            'ol_tnb_charges.required' => 'The overland try and buy charges field is required.',
             'ol_cash_range_up.*.required_if' => 'The overland cash range up field is required.',
             'ol_cash_range_up.*.numeric' => 'The overland cash range up field must be numeric.',
             'ol_cash_range_down.*.required_if' => 'The overland cash range down field is required.',
@@ -196,6 +212,10 @@ class AdminCorporateAccountsController extends Controller
             'detain_hub_class_1_charges.*.required' => 'The detain class B charges field is required.',
             'detain_hub_class_2_charges.*.required' => 'The detain class C charges field is required.',
             'detain_hub_class_3_charges.*.required' => 'The detain class D charges field is required.',
+            'detain_replacement_charges.numeric' => 'The detain replacement charges field must be numeric.',
+            'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
+            'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
+            'detain_tnb_charges.required' => 'The detain try and buy charges field is required.',
             'detain_cash_range_up.*.required_if' => 'The detain cash range up field is required.',
             'detain_cash_range_up.*.numeric' => 'The detain cash range up field must be numeric.',
             'detain_cash_range_down.*.required_if' => 'The detain cash range down field is required.',
@@ -241,6 +261,10 @@ class AdminCorporateAccountsController extends Controller
             'sameday_hub_local_charges.*.numeric' => 'The sameday hub local charges field must be numeric.',
             'sameday_hub_class_0_charges.*.required' => 'The sameday hub class A charges field is required.',
             'sameday_hub_class_0_charges.*.numeric' => 'The sameday hub class A charges field must be numeric.',
+            'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
+            'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
+            'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
+            'sameday_tnb_charges.required' => 'The sameday try and buy charges field is required.',
             'sameday_cash_range_up.*.required_if' => 'The sameday cash range up field is required.',
             'sameday_cash_range_up.*.numeric' => 'The sameday cash range up field must be numeric.',
             'sameday_cash_range_down.*.required_if' => 'The sameday cash range down field is required.',
@@ -295,6 +319,8 @@ class AdminCorporateAccountsController extends Controller
                 'on_hub_class_1_charges.*' => 'required',
                 'on_hub_class_2_charges.*' => 'required',
                 'on_hub_class_3_charges.*' => 'required',
+                'on_replacement_charges'=>'required|numeric',
+                'on_tnb_charges'=>'required|numeric',
                 'on_cash_range_up.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
                 'on_cash_range_down.*'=>'required_if:on_cash_handling_switch,==,on|numeric',
                 'on_cash_charges.*'=>'required_if:on_cash_handling_switch,==,on',
@@ -331,6 +357,8 @@ class AdminCorporateAccountsController extends Controller
                 'ol_hub_class_1_charges.*' => 'required',
                 'ol_hub_class_2_charges.*' => 'required',
                 'ol_hub_class_3_charges.*' => 'required',
+                'ol_replacement_charges'=>'required|numeric',
+                'ol_tnb_charges'=>'required|numeric',
                 'ol_cash_range_up.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
                 'ol_cash_range_down.*'=>'required_if:ol_cash_handling_switch,==,on|numeric',
                 'ol_cash_charges.*'=>'required_if:ol_cash_handling_switch,==,on',
@@ -367,6 +395,8 @@ class AdminCorporateAccountsController extends Controller
                 'detain_hub_class_1_charges.*' => 'required',
                 'detain_hub_class_2_charges.*' => 'required',
                 'detain_hub_class_3_charges.*' => 'required',
+                'detain_replacement_charges'=>'required|numeric',
+                'detain_tnb_charges'=>'required|numeric',
                 'detain_cash_range_up.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
                 'detain_cash_range_down.*'=>'required_if:detain_cash_handling_switch,==,on|numeric',
                 'detain_cash_charges.*'=>'required_if:detain_cash_handling_switch,==,on',
@@ -403,6 +433,8 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_hub_class_1_charges.*' => 'required',
                 'sameday_hub_class_2_charges.*' => 'required',
                 'sameday_hub_class_3_charges.*' => 'required',
+                'sameday_replacement_charges'=>'required|numeric',
+                'sameday_tnb_charges'=>'required|numeric',
                 'sameday_cash_range_up.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
                 'sameday_cash_range_down.*'=>'required_if:sameday_cash_handling_switch,==,on|numeric',
                 'sameday_cash_charges.*'=>'required_if:sameday_cash_handling_switch,==,on',
@@ -488,6 +520,13 @@ class AdminCorporateAccountsController extends Controller
 
                 }
 
+                //Replacement and Try and Buy charges
+                CorporateBookingTypeCharge::create([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>1,
+                    'replacement_charges'=>$request->on_replacement_charges,
+                    'try_and_buy_charges'=>$request->on_tnb_charges
+                ]);
                 //Cash handling Charges
                 if($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on'){
                     foreach ($request->on_cash_range_up as $ind => $on_cash_range_up){
@@ -634,7 +673,12 @@ class AdminCorporateAccountsController extends Controller
                     ]);
 
                 }
-
+                CorporateBookingTypeCharge::create([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>2,
+                    'replacement_charges'=>$request->ol_replacement_charges,
+                    'try_and_buy_charges'=>$request->ol_tnb_charges
+                ]);
                 //Cash handling Charges
                 if($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on'){
                     foreach ($request->ol_cash_range_up as $ind => $ol_cash_range_up){
@@ -779,6 +823,13 @@ class AdminCorporateAccountsController extends Controller
                     ]);
 
                 }
+                //Replacement and Try and Buy charges
+                CorporateBookingTypeCharge::create([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>3,
+                    'replacement_charges'=>$request->detain_replacement_charges,
+                    'try_and_buy_charges'=>$request->detain_tnb_charges
+                ]);
 
                 //Cash handling Charges
                 if ($request->has('detain_cash_handling_switch') && $request->detain_cash_handling_switch == 'on') {
@@ -904,16 +955,16 @@ class AdminCorporateAccountsController extends Controller
                         'range_down' => $request->sameday_door_range_down[$index],
                         'local_or_6hr' => $request->sameday_door_local_charges[$index],
                         'national_charges_class_0' => $request->sameday_door_class_0_charges[$index],
-                        'national_charges_class_1' => $request->sameday_door_class_1_charges[$index],
-                        'national_charges_class_2' => $request->sameday_door_class_2_charges[$index],
-                        'national_charges_class_3' => $request->sameday_door_class_3_charges[$index]
+                        'national_charges_class_1' => 0,
+                        'national_charges_class_2' => 0,
+                        'national_charges_class_3' => 0
                     ]);
 
                 }
                 foreach ($request->sameday_hub_range_up as $index => $sameday_hub_range_up) {
                     CorporateWeightCharge::create([
                         'user_id' => $id,
-                        'shipping_mode_id' => 3,
+                        'shipping_mode_id' => 4,
                         'delivery_type_id' => 2,
                         'range_up' => $request->sameday_hub_range_up[$index],
                         'range_down' => $request->sameday_hub_range_down[$index],
@@ -925,7 +976,13 @@ class AdminCorporateAccountsController extends Controller
                     ]);
 
                 }
-
+                //Replacement and Try and Buy charges
+                CorporateBookingTypeCharge::create([
+                    'user_id'=>$id,
+                    'shipping_mode_id'=>4,
+                    'replacement_charges'=>$request->sameday_replacement_charges,
+                    'try_and_buy_charges'=>$request->sameday_tnb_charges
+                ]);
                 //Cash handling Charges
                 if($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on'){
                     foreach ($request->sameday_cash_range_up as $ind => $sameday_cash_range_up){
@@ -1024,7 +1081,7 @@ class AdminCorporateAccountsController extends Controller
             $switches = CorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $min_weight = CorporateMinChargeableWeight::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $weight = CorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-
+            $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = CorporateCashHandlingCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = CorporateInsuranceCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $return = CorporateReturnCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1037,7 +1094,7 @@ class AdminCorporateAccountsController extends Controller
 //        return $switches;
 //        var_dump(empty($switches));exit();
             $weight = PendingCorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//        $cash = '';
+            $bookingType = CorporateBookingTypeCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $cash = PendingCorporateCashHandlingCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $insurance = PendingCorporateInsuranceCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
             $return = PendingCorporateReturnCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
@@ -1046,12 +1103,12 @@ class AdminCorporateAccountsController extends Controller
             $rate_status = $user['rate_status'];
         }
 //        return $discount;
-        return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight]);
+        return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight, 'shippingType' => $bookingType, 'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight]);
     }
 
     public function edit_rates_submit(Request $request, $id)
     {
-
+//        return $request;
         $user = User::find($id);
         if ($user['status'] != 3) {
 
@@ -1082,6 +1139,10 @@ class AdminCorporateAccountsController extends Controller
                 'on_hub_class_1_charges.*.required' => 'The overnight class B charges field is required.',
                 'on_hub_class_2_charges.*.required' => 'The overnight class C charges field is required.',
                 'on_hub_class_3_charges.*.required' => 'The overnight class D charges field is required.',
+                'on_replacement_charges.numeric' => 'The overnight replacement charges field must be numeric.',
+                'on_replacement_charges.required' => 'The overnight replacement charges field is required.',
+                'on_tnb_charges.numeric' => 'The overnight try and buy charges field must be numeric.',
+                'on_tnb_charges.required' => 'The overnight try and buy charges field is required.',
                 'on_cash_range_up.*.required_if' => 'The overnight cash range up field is required.',
                 'on_cash_range_up.*.numeric' => 'The overnight cash range up field must be numeric.',
                 'on_cash_range_down.*.required_if' => 'The overnight cash range down field is required.',
@@ -1133,6 +1194,10 @@ class AdminCorporateAccountsController extends Controller
                 'ol_hub_class_1_charges.*.required' => 'The overland class B charges field is required.',
                 'ol_hub_class_2_charges.*.required' => 'The overland class C charges field is required.',
                 'ol_hub_class_3_charges.*.required' => 'The overland class D charges field is required.',
+                'ol_replacement_charges.numeric' => 'The overland replacement charges field must be numeric.',
+                'ol_replacement_charges.required' => 'The overland replacement charges field is required.',
+                'ol_tnb_charges.numeric' => 'The overland try and buy charges field must be numeric.',
+                'ol_tnb_charges.required' => 'The overland try and buy charges field is required.',
                 'ol_cash_range_up.*.required_if' => 'The overland cash range up field is required.',
                 'ol_cash_range_up.*.numeric' => 'The overland cash range up field must be numeric.',
                 'ol_cash_range_down.*.required_if' => 'The overland cash range down field is required.',
@@ -1184,6 +1249,10 @@ class AdminCorporateAccountsController extends Controller
                 'detain_hub_class_1_charges.*.required' => 'The detain class B charges field is required.',
                 'detain_hub_class_2_charges.*.required' => 'The detain class C charges field is required.',
                 'detain_hub_class_3_charges.*.required' => 'The detain class D charges field is required.',
+                'detain_replacement_charges.numeric' => 'The detain replacement charges field must be numeric.',
+                'detain_replacement_charges.required' => 'The detain replacement charges field is required.',
+                'detain_tnb_charges.numeric' => 'The detain try and buy charges field must be numeric.',
+                'detain_tnb_charges.required' => 'The detain try and buy charges field is required.',
                 'detain_cash_range_up.*.required_if' => 'The detain cash range up field is required.',
                 'detain_cash_range_up.*.numeric' => 'The detain cash range up field must be numeric.',
                 'detain_cash_range_down.*.required_if' => 'The detain cash range down field is required.',
@@ -1229,6 +1298,10 @@ class AdminCorporateAccountsController extends Controller
                 'sameday_hub_local_charges.*.numeric' => 'The sameday hub local charges field must be numeric.',
                 'sameday_hub_class_0_charges.*.required' => 'The sameday hub class A charges field is required.',
                 'sameday_hub_class_0_charges.*.numeric' => 'The sameday hub class A charges field must be numeric.',
+                'sameday_replacement_charges.numeric' => 'The sameday replacement charges field must be numeric.',
+                'sameday_replacement_charges.required' => 'The sameday replacement charges field is required.',
+                'sameday_tnb_charges.numeric' => 'The sameday try and buy charges field must be numeric.',
+                'sameday_tnb_charges.required' => 'The sameday try and buy charges field is required.',
                 'sameday_cash_range_up.*.required_if' => 'The sameday cash range up field is required.',
                 'sameday_cash_range_up.*.numeric' => 'The sameday cash range up field must be numeric.',
                 'sameday_cash_range_down.*.required_if' => 'The sameday cash range down field is required.',
@@ -1283,6 +1356,8 @@ class AdminCorporateAccountsController extends Controller
                     'on_hub_class_1_charges.*' => 'required',
                     'on_hub_class_2_charges.*' => 'required',
                     'on_hub_class_3_charges.*' => 'required',
+                    'on_replacement_charges' => 'required|numeric',
+                    'on_tnb_charges' => 'required|numeric',
                     'on_cash_range_up.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                     'on_cash_range_down.*' => 'required_if:on_cash_handling_switch,==,on|numeric',
                     'on_cash_charges.*' => 'required_if:on_cash_handling_switch,==,on',
@@ -1319,6 +1394,8 @@ class AdminCorporateAccountsController extends Controller
                     'ol_hub_class_1_charges.*' => 'required',
                     'ol_hub_class_2_charges.*' => 'required',
                     'ol_hub_class_3_charges.*' => 'required',
+                    'ol_replacement_charges' => 'required|numeric',
+                    'ol_tnb_charges' => 'required|numeric',
                     'ol_cash_range_up.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                     'ol_cash_range_down.*' => 'required_if:ol_cash_handling_switch,==,on|numeric',
                     'ol_cash_charges.*' => 'required_if:ol_cash_handling_switch,==,on',
@@ -1355,6 +1432,8 @@ class AdminCorporateAccountsController extends Controller
                     'detain_hub_class_1_charges.*' => 'required',
                     'detain_hub_class_2_charges.*' => 'required',
                     'detain_hub_class_3_charges.*' => 'required',
+                    'detain_replacement_charges' => 'required|numeric',
+                    'detain_tnb_charges' => 'required|numeric',
                     'detain_cash_range_up.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                     'detain_cash_range_down.*' => 'required_if:detain_cash_handling_switch,==,on|numeric',
                     'detain_cash_charges.*' => 'required_if:detain_cash_handling_switch,==,on',
@@ -1391,6 +1470,8 @@ class AdminCorporateAccountsController extends Controller
                     'sameday_hub_class_1_charges.*' => 'required',
                     'sameday_hub_class_2_charges.*' => 'required',
                     'sameday_hub_class_3_charges.*' => 'required',
+                    'sameday_replacement_charges' => 'required|numeric',
+                    'sameday_tnb_charges' => 'required|numeric',
                     'sameday_cash_range_up.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                     'sameday_cash_range_down.*' => 'required_if:sameday_cash_handling_switch,==,on|numeric',
                     'sameday_cash_charges.*' => 'required_if:sameday_cash_handling_switch,==,on',
@@ -1549,7 +1630,7 @@ class AdminCorporateAccountsController extends Controller
 
                         if ($request->on_door_weight_record[$index] != null) {
 
-                            $weight_row = CorporateWeightCharge::where('id', $request->on_door_weight_record[$index])
+                           CorporateWeightCharge::where('id', $request->on_door_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
@@ -1585,7 +1666,7 @@ class AdminCorporateAccountsController extends Controller
 
                         if ($request->on_hub_weight_record[$index] != null) {
 
-                            $weight_row = CorporateWeightCharge::where('id', $request->on_hub_weight_record[$index])
+                            CorporateWeightCharge::where('id', $request->on_hub_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 1,
@@ -1616,7 +1697,22 @@ class AdminCorporateAccountsController extends Controller
 
 
                     }
-
+                    //Replacement and Try and Buy charges
+                    if ($request->on_booking_record != null) {
+                        CorporateBookingTypeCharge::where(['id' => $request->on_booking_record])->update([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'replacement_charges' => $request->on_replacement_charges,
+                            'try_and_buy_charges' => $request->on_tnb_charges
+                        ]);
+                    } else {
+                        CorporateBookingTypeCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 1,
+                            'replacement_charges' => $request->on_replacement_charges,
+                            'try_and_buy_charges' => $request->on_tnb_charges
+                        ]);
+                    }
                     //Cash handling Charges
                     if ($request->has('on_cash_handling_switch') && $request->on_cash_handling_switch == 'on') {
                         CorporateCashHandlingCharges::where(['user_id' => $id, 'shipping_mode_id' => 1])->whereNotIn('id', $request->on_cash_record)->delete();
@@ -1709,7 +1805,7 @@ class AdminCorporateAccountsController extends Controller
 
                     if ($request->has('on_discount_weight_switch') && $request->on_discount_weight_switch == 'on') {
                         $discount_weight = $request->on_discount_weight_rate != null ? $request->on_discount_weight_rate : 0;
-//                    $discount_weight = $request->on_discount_weight_rate;
+
                     }
                     if ($request->has('on_discount_cash_switch') && $request->on_discount_cash_switch == 'on') {
                         $discount_cash = $request->on_discount_cash_rate != null ? $request->on_discount_cash_rate : 0;
@@ -1761,7 +1857,6 @@ class AdminCorporateAccountsController extends Controller
                     }
 
                 }
-                //dd($weightAlready);
             }
 
             if ($request->has('ol_main_switch') && $request->ol_main_switch == 'on') {
@@ -1805,7 +1900,7 @@ class AdminCorporateAccountsController extends Controller
 
                         if ($request->ol_door_weight_record[$index] != null) {
 
-                            $weight_row = CorporateWeightCharge::where('id', $request->ol_door_weight_record[$index])
+                            CorporateWeightCharge::where('id', $request->ol_door_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
@@ -1841,7 +1936,7 @@ class AdminCorporateAccountsController extends Controller
 
                         if ($request->ol_hub_weight_record[$index] != null) {
 
-                            $weight_row = CorporateWeightCharge::where('id', $request->ol_hub_weight_record[$index])
+                            CorporateWeightCharge::where('id', $request->ol_hub_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 2,
@@ -1872,7 +1967,22 @@ class AdminCorporateAccountsController extends Controller
 
 
                     }
-
+                        //Replacement and Try and Buy charges
+                    if ($request->ol_booking_record != null) {
+                        CorporateBookingTypeCharge::where(['id' => $request->ol_booking_record])->update([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'replacement_charges' => $request->ol_replacement_charges,
+                            'try_and_buy_charges' => $request->ol_tnb_charges
+                        ]);
+                    } else {
+                        CorporateBookingTypeCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 2,
+                            'replacement_charges' => $request->ol_replacement_charges,
+                            'try_and_buy_charges' => $request->ol_tnb_charges
+                        ]);
+                    }
 
                     //Cash handling Charges
                     if ($request->has('ol_cash_handling_switch') && $request->ol_cash_handling_switch == 'on') {
@@ -2064,7 +2174,7 @@ class AdminCorporateAccountsController extends Controller
 
                         if ($request->detain_door_weight_record[$index] != null) {
 
-                            $weight_row = CorporateWeightCharge::where('id', $request->detain_door_weight_record[$index])
+                            CorporateWeightCharge::where('id', $request->detain_door_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
@@ -2100,7 +2210,7 @@ class AdminCorporateAccountsController extends Controller
 
                         if ($request->detain_hub_weight_record[$index] != null) {
 
-                            $weight_row = CorporateWeightCharge::where('id', $request->detain_hub_weight_record[$index])
+                            CorporateWeightCharge::where('id', $request->detain_hub_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 3,
@@ -2130,6 +2240,23 @@ class AdminCorporateAccountsController extends Controller
                         }
 
 
+                    }
+
+                    //Replacement and Try and Buy charges
+                    if ($request->detain_booking_record != null) {
+                        CorporateBookingTypeCharge::where(['id' => $request->detain_booking_record])->update([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $request->detain_replacement_charges,
+                            'try_and_buy_charges' => $request->detain_tnb_charges
+                        ]);
+                    } else {
+                        CorporateBookingTypeCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 3,
+                            'replacement_charges' => $request->detain_replacement_charges,
+                            'try_and_buy_charges' => $request->detain_tnb_charges
+                        ]);
                     }
 
                     //Cash handling Charges
@@ -2323,7 +2450,7 @@ class AdminCorporateAccountsController extends Controller
 
                         if ($request->sameday_door_weight_record[$index] != null) {
 
-                            $weight_row = CorporateWeightCharge::where('id', $request->sameday_door_weight_record[$index])
+                            CorporateWeightCharge::where('id', $request->sameday_door_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
                                     'shipping_mode_id' => 4,
@@ -2354,15 +2481,15 @@ class AdminCorporateAccountsController extends Controller
 
 
                     }
-                    CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 3, 'delivery_type_id' => 2])->whereNotIn('id', $request->sameday_hub_weight_record)->delete();
+                    CorporateWeightCharge::where(['user_id' => $id, 'shipping_mode_id' => 4, 'delivery_type_id' => 2])->whereNotIn('id', $request->sameday_hub_weight_record)->delete();
                     foreach ($request->sameday_hub_weight_record as $index => $sameday_hub_weight_record) {
 
                         if ($request->sameday_hub_weight_record[$index] != null) {
 
-                            $weight_row = CorporateWeightCharge::where('id', $request->sameday_hub_weight_record[$index])
+                            CorporateWeightCharge::where('id', $request->sameday_hub_weight_record[$index])
                                 ->update([
                                     'user_id' => $id,
-                                    'shipping_mode_id' => 3,
+                                    'shipping_mode_id' => 4,
                                     'delivery_type_id' => 2,
                                     'range_up' => $request->sameday_hub_range_up[$index],
                                     'range_down' => $request->sameday_hub_range_down[$index],
@@ -2376,7 +2503,7 @@ class AdminCorporateAccountsController extends Controller
                         if ($request->sameday_hub_weight_record[$index] == null) {
                             CorporateWeightCharge::create([
                                 'user_id' => $id,
-                                'shipping_mode_id' => 3,
+                                'shipping_mode_id' => 4,
                                 'delivery_type_id' => 2,
                                 'range_up' => $request->sameday_hub_range_up[$index],
                                 'range_down' => $request->sameday_hub_range_down[$index],
@@ -2391,6 +2518,22 @@ class AdminCorporateAccountsController extends Controller
 
                     }
 
+                    //Replacement and Try and Buy charges
+                    if ($request->sameday_booking_record != null) {
+                        CorporateBookingTypeCharge::where(['id' => $request->sameday_booking_record])->update([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'replacement_charges' => $request->sameday_replacement_charges,
+                            'try_and_buy_charges' => $request->sameday_tnb_charges
+                        ]);
+                    } else {
+                        CorporateBookingTypeCharge::create([
+                            'user_id' => $id,
+                            'shipping_mode_id' => 4,
+                            'replacement_charges' => $request->sameday_replacement_charges,
+                            'try_and_buy_charges' => $request->sameday_tnb_charges
+                        ]);
+                    }
                     //Cash handling Charges
                     if ($request->has('sameday_cash_handling_switch') && $request->sameday_cash_handling_switch == 'on') {
                         CorporateCashHandlingCharges::where(['user_id' => $id, 'shipping_mode_id' => 4])->whereNotIn('id', $request->sameday_cash_record)->delete();
