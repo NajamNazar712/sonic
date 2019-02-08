@@ -83,6 +83,21 @@ class CorporateAccountRatesTableSeeder extends Seeder
             array('shipping_mode_id'=>4,'range_up'=>3001,'range_down'=>10000,'charges'=>'3%'),
         ));
 
+        DB::table('corporate_standard_return_charges')->truncate();
+        DB::table('corporate_standard_return_charges')->insert(array(
+            array('shipping_mode_id'=>1,'local'=>50,'national'=>100),
+            array('shipping_mode_id'=>2,'local'=>50,'national'=>100),
+            array('shipping_mode_id'=>3,'local'=>50,'national'=>100),
+            array('shipping_mode_id'=>4,'local'=>50,'national'=>100),
+
+        ));
+        DB::table('corporate_standard_fuel_surcharges')->truncate();
+        DB::table('corporate_standard_fuel_surcharges')->insert(array(
+            array('shipping_mode_id'=>1,'fuel_surcharge'=>3),
+            array('shipping_mode_id'=>2,'fuel_surcharge'=>3),
+            array('shipping_mode_id'=>3,'fuel_surcharge'=>3),
+            array('shipping_mode_id'=>4,'fuel_surcharge'=>3),
+        ));
 
 
     }
