@@ -95,6 +95,9 @@ class AdminReportsController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     return $shipment->shipper .' (' . $shipment->poc . ')';
@@ -1438,6 +1441,9 @@ class AdminReportsController extends Controller
                     return $shipments->sdn;
                 },
             ])
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('dncc', function ($shipments) {
                 if ($shipments->dncc) {
                     return str_pad($shipments->dncc, 6, '0', STR_PAD_LEFT);
@@ -2797,6 +2803,9 @@ class AdminReportsController extends Controller
             ->addColumn('aging_create_update',function ($deliveries){
                 return ($deliveries->created_at && $deliveries->updated_at)? Carbon::parse($deliveries->updated_at)->diffInDays($deliveries->created_at) :'-';
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->addColumn('aging_update_verified',function ($deliveries){
                 return ($deliveries->updated_at && $deliveries->verified_time)? Carbon::parse($deliveries->verified_time)->diffInDays($deliveries->updated_at) :'-';
             })
@@ -3412,9 +3421,45 @@ class AdminReportsController extends Controller
         }
 
         $datatable = Datatables::of($sales)
+            ->editColumn('insurance_charges', function($shipment){
+                return number_format($shipment->insurance_charges);
+            })
+            ->editColumn('return_charges', function($shipment){
+                return number_format($shipment->return_charges);
+            })
+            ->editColumn('replacement_charges', function($shipment){
+                return number_format($shipment->replacement_charges);
+            })
+            ->editColumn('try_and_buy_charges', function($shipment){
+                return number_format($shipment->try_and_buy_charges);
+            })
+            ->editColumn('packaging_material_charges', function($shipment){
+                return number_format($shipment->packaging_material_charges);
+            })
+            ->editColumn('p_total_charges', function($shipment){
+                return number_format($shipment->p_total_charges);
+            })
+            ->editColumn('d_total_charges', function($shipment){
+                return number_format($shipment->d_total_charges);
+            })
+            ->editColumn('p_net_payable', function($shipment){
+                return number_format($shipment->p_net_payable);
+            })
+            ->editColumn('d_net_payable', function($shipment){
+                return number_format($shipment->d_net_payable);
+            })
+            ->editColumn('d_gst', function($shipment){
+                return number_format($shipment->d_gst);
+            })
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('s_collection_amount', function($shipment){
+                return number_format($shipment->s_collection_amount);
+            })
+            ->editColumn('d_collection_amount', function($shipment){
+                return number_format($shipment->d_collection_amount);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -3433,7 +3478,7 @@ class AdminReportsController extends Controller
                 }else{
                     $amount = $sale->s_collection_amount;
                 }
-                return $amount;
+                return number_format($amount);
             })
             ->editColumn('p_gst',function($sale){
                 $gst = '';
@@ -3442,7 +3487,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_gst != null){
                     $gst = $sale->d_gst;
                 }
-                return $gst;
+                return number_format($gst);
             })
             ->editColumn('p_total_charges',function($sale){
                 $total = '';
@@ -3451,7 +3496,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_total_charges != null){
                     $total = $sale->d_total_charges;
                 }
-                return $total;
+                return number_format($total);
             })
             ->addColumn('estimated_charges',function($sale){
                 $estimated = '';
@@ -3465,7 +3510,7 @@ class AdminReportsController extends Controller
                 }else if($sale->d_net_payable != null){
                     $payable = $sale->d_net_payable;
                 }
-                return $payable;
+                return number_format($payable);
             })
             ->addColumn('class',function($sale){
                 $class = '';
@@ -3741,6 +3786,12 @@ class AdminReportsController extends Controller
             ->select('u.id as account_no','u.name as name','u.phone as phone','pending_payment_shipments.amount as amount','pending_payment_shipments.charges as charges','pending_payment_shipments.payable as payable')
             ->where('payable','<',0);
         $datatable = Datatables::of($negative)
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
+            ->editColumn('charges', function($shipment){
+                return number_format($shipment->charges);
+            })
             ->addColumn('account_no', function ($user) {
                 return str_pad($user->account_no, 6, '0', STR_PAD_LEFT);
             });
@@ -3812,6 +3863,9 @@ class AdminReportsController extends Controller
             })
             ->addColumn('entry_date',function($petty){
                 return Carbon::parse($petty->entry_date)->toDateString();
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->editColumn('status',function ($petty){
                 $status = '';

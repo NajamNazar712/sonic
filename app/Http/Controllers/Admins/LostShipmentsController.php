@@ -77,6 +77,9 @@ class LostShipmentsController extends Controller
                         return " - ";
                     }
                 })
+                ->editColumn('amount', function($shipment){
+                    return number_format($shipment->amount);
+                })
                 ->editColumn('shipper', function ($shipment) {
                     if ($shipment->booking_type_id == 4) {
                         return $shipment->shipper .' (' . $shipment->poc . ')';

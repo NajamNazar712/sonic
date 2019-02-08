@@ -154,13 +154,13 @@ class AdminDashboardController extends Controller
             });
         }
 
-        $stats['total'] = $stats['total']->count();
-        $stats['booked'] = $stats['booked']->count();
-        $stats['canceled'] = $stats['canceled']->count();
-        $stats['received'] = $stats['received']->count();
-        $stats['delivered'] = $stats['delivered']->count();
-        $stats['return'] = $stats['return']->count();
-        $stats['pending'] = $stats['pending']->count();
+        $stats['total'] = number_format($stats['total']->count());
+        $stats['booked'] = number_format($stats['booked']->count());
+        $stats['canceled'] = number_format($stats['canceled']->count());
+        $stats['received'] = number_format($stats['received']->count());
+        $stats['delivered'] = number_format($stats['delivered']->count());
+        $stats['return'] = number_format($stats['return']->count());
+        $stats['pending'] = number_format($stats['pending']->count());
 
         $graph_dates['current'] = Carbon::now();
         $graph_dates['old_date'] = Carbon::now()->subDays(29);
@@ -225,12 +225,12 @@ class AdminDashboardController extends Controller
                 });
             }
 
-            $graph['booked'][] = $booked->count();
-            $graph['received'][] = $received->count();
-            $graph['cancelled'][] = $cancelled->count();
-            $graph['delivered'][] = $delivered->count();
-            $graph['pending'][] = $pending->count();
-            $graph['return'][] = $return->count();
+            $graph['booked'][] = number_format($booked->count());
+            $graph['received'][] = number_format($received->count());
+            $graph['cancelled'][] = number_format($cancelled->count());
+            $graph['delivered'][] = number_format($delivered->count());
+            $graph['pending'][] = number_format($pending->count());
+            $graph['return'][] = number_format($return->count());
         }
         $shippers = User::where('status',3)->where('blacklist',0)->select('id','name')->get();
         $cities = City::where('status',1)->select('id','name')->get();
@@ -593,6 +593,9 @@ class AdminDashboardController extends Controller
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
             ->filterColumn('u.id', function ($query, $keyword) {
                 return $query->where('u.id', '=', $keyword);
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->editColumn('phone',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;

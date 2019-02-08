@@ -90,6 +90,9 @@ class DeliveryController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     return $shipment->shipper .' (' . $shipment->poc . ')';
@@ -388,6 +391,9 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -536,6 +542,9 @@ class DeliveryController extends Controller
             ->addColumn("action", function ($deliveries) {
                 return "<a href='javascript:void(0);' class='deliverynoterow'>Remove</a>";
 
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->filterColumn('service_type', function ($query, $keyword) {
 
@@ -878,6 +887,9 @@ class DeliveryController extends Controller
                     }
                 },
             ])
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     return $shipment->shipper .' (' . $shipment->poc . ')';
@@ -1322,6 +1334,9 @@ class DeliveryController extends Controller
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number_link' class='tracking' target='_blank'>$shipments->tracking_number_link</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->addColumn('shipment_id_padded', function ($deliveries) {
                 return str_pad($deliveries->shId, 6, '0', STR_PAD_LEFT);
@@ -2269,6 +2284,9 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -2395,6 +2413,9 @@ class DeliveryController extends Controller
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
             })
@@ -2477,6 +2498,9 @@ class DeliveryController extends Controller
         return Datatables::of($deliveries)
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);
+            })
+            ->editColumn('received_cod_amount', function($shipment){
+                return number_format($shipment->received_cod_amount);
             })
             ->filterColumn('delivery_notes.id', function ($query, $keyword) {
                 return $query->where('delivery_notes.id', '=', $keyword);
@@ -2564,6 +2588,12 @@ class DeliveryController extends Controller
         $datatable = Datatables::of($sdn)
             ->editColumn('sdn', function ($sdn) {
                 return "<a href='javascript:void(0);' class='printSDN'><u>" . str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT) . "</u></a>";
+            })
+            ->editColumn('sdn_amount', function($shipment){
+                return number_format($shipment->sdn_amount);
+            })
+            ->editColumn('sdn_net_amount', function($shipment){
+                return number_format($shipment->sdn_net_amount);
             })
             ->addColumn('sdn_id_padded', function ($sdn) {
                 return str_pad($sdn->sdn_id, 6, '0', STR_PAD_LEFT);
@@ -2677,6 +2707,9 @@ class DeliveryController extends Controller
             })
             ->editColumn('route', function ($rider) {
                 return $rider->route . ' (' . $rider->start . ' to ' . $rider->end . ')';
+            })
+            ->editColumn('received_cod_amount', function($shipment){
+                return number_format($shipment->received_cod_amount);
             })
             ->filterColumn('route', function ($query, $keyword) {
                 $keyword = strtolower($keyword);
@@ -2942,6 +2975,9 @@ class DeliveryController extends Controller
             ->editColumn('tracking_number_link', function ($shipments) {
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->editColumn('shipper', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
@@ -3399,6 +3435,9 @@ class DeliveryController extends Controller
         $datatable = Datatables::of($deliveries)
             ->editColumn('delivery_note', function ($deliveries) {
                 return "<a href='javascript:void(0);' class='printdeliverynote'><u>" . str_pad($deliveries->delivery_note, 6, '0', STR_PAD_LEFT) . "</u></a><br><a href='javascript:void(0);' class='printDNCC'><u>DNCC</u></a>";
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->addColumn('delivery_note_id_padded', function ($deliveries) {
                 return str_pad($deliveries->delivery_note_id, 6, '0', STR_PAD_LEFT);

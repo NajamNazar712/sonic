@@ -82,6 +82,9 @@ class ShipperDashboardController extends Controller
             ->editColumn('phone',function ($shipments){
                 return $shipments->phone1."<br>".$shipments->phone2;
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('cancellation_remarks',function ($shipments){
                 if($shipments->cancellation_remarks == null){
                     return '-';

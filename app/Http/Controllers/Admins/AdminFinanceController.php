@@ -111,6 +111,9 @@ class AdminFinanceController extends Controller
                 return 0;
             }
         })
+            ->editColumn('sdn_amount', function($shipment){
+                return number_format($shipment->sdn_amount);
+            })
         ->editColumn('delivered_shipments_link', function($station_deposit_note) {
             if ($station_deposit_note->sdn_delivered_shipments != 0) {
                 return '<button class="btn btn-sm btn-outline-info align-middle">' . $station_deposit_note->sdn_delivered_shipments . '</button>';
@@ -490,6 +493,9 @@ class AdminFinanceController extends Controller
         ->filterColumn('dn.id', function ($query, $keyword) {
             return $query->where('dn.id', '=', $keyword);
         })
+            ->editColumn('dncc_amount', function($shipment){
+                return number_format($shipment->dncc_amount);
+            })
         ->addColumn('action', function($delivery_notes) {
             return '<div class="btn-group">
                   <button type="button" class="btn btn-sm btn-success dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Actions</button>
@@ -636,6 +642,9 @@ class AdminFinanceController extends Controller
                         $sub_query->where('s.booking_type_id', '=', 4)
                             ->where('usi.poc', 'like', '%' . $keyword . '%');
                     });
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->orderColumn('u.name', 'u.name $1, usi.poc $1')
         ->editColumn('tracking_number',function ($shipments){
@@ -792,6 +801,15 @@ class AdminFinanceController extends Controller
                 else {
                     return 'Pending Return Charges Collection';
                 }
+            })
+            ->editColumn('charges', function($shipment){
+                return number_format($shipment->charges);
+            })
+            ->editColumn('return_charges', function($shipment){
+                return number_format($shipment->return_charges);
+            })
+            ->editColumn('weight_charges', function($shipment){
+                return number_format($shipment->weight_charges);
             })
             ->addColumn('aging', function($shipment) {
                 $updated_at = Carbon::parse($shipment->status_updated_at)->startOfDay();

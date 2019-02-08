@@ -235,6 +235,9 @@ class AdminPettyCashController extends Controller
             ->editColumn('statement_link', function ($petty){
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
             })
+            ->editColumn('total_amount', function($shipment){
+                return number_format($shipment->total_amount);
+            })
             ->addColumn('date',function($petty){
                 return Carbon::parse($petty->from)->toDateString().' - '.Carbon::parse($petty->to)->toDateString();
             })
@@ -419,6 +422,9 @@ class AdminPettyCashController extends Controller
         $petty = Datatables::of($petty)
             ->editColumn('statement_link', function ($petty){
                 return '<button class="btn btn-sm btn-outline-info align-middle"><i class="la la-lg la-print align-middle"></i> <span class="align-middle">' . $petty->statement_link . '</span></button>';
+            })
+            ->editColumn('total_amount', function($shipment){
+                return number_format($shipment->total_amount);
             })
             ->addColumn('date',function($petty){
                 return Carbon::parse($petty->from)->toDateString().' - '.Carbon::parse($petty->to)->toDateString();

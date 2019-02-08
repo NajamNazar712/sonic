@@ -112,6 +112,9 @@ class AdminCargoController extends Controller
                           ->where('usi.poc', 'like', '%' . $keyword . '%');
                   });
           })
+          ->editColumn('amount', function($shipment){
+              return number_format($shipment->amount);
+          })
           ->orderColumn('u.name', 'u.name $1, usi.poc $1')
       ->filterColumn('status',function ($query,$keyword){
 
@@ -1805,6 +1808,9 @@ class AdminCargoController extends Controller
             });
         }
        return Datatables::of($shipments)
+           ->editColumn('amount', function($shipment){
+               return number_format($shipment->amount);
+           })
            ->addColumn('action',function ($shipments){
                $dropdown = '<a href="javascript:void(0);" class="btn btn-icon btn-danger cargo_remove"><i class="la la-close"></i></a>';
                 return $dropdown;

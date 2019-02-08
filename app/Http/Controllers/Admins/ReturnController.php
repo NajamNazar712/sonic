@@ -81,6 +81,9 @@ class ReturnController extends Controller
                 $route = route('admin.tracking.index');
                 return "<u><a href='{$route}?tracking_number=$shipments->tracking_number' class='tracking' target='_blank'>$shipments->tracking_number</a></u>";
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->editColumn('shipper_phone',function ($shipper){
                 return "$shipper->shipper_phone1 | $shipper->shipper_phone2";
             })
@@ -496,6 +499,9 @@ class ReturnController extends Controller
                         return 'Cargo';
                     }
                 }
+            })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
             })
             ->editColumn('tracking_number',function ($shipments){
                 $route = route('admin.tracking.index');
@@ -1019,6 +1025,9 @@ class ReturnController extends Controller
                     return $shipment->shipper;
                 }
             })
+            ->editColumn('amount', function($shipment){
+                return number_format($shipment->amount);
+            })
             ->filterColumn('u.name', function ($query, $keyword) {
                 $query->where(function ($sub_query) use ($keyword) {
                     $sub_query->where('shipments.booking_type_id', '!=', 4)
@@ -1074,10 +1083,10 @@ class ReturnController extends Controller
             ->addColumn('charges', function ($shipment) {
                 if ($shipment->booking_type_id == 4) {
                     if ($shipment->charges_mode_id == 1) {
-                        return $shipment->return_charges;
+                        return number_format($shipment->return_charges);
                     }
                     else {
-                        return $shipment->amount;
+                        return number_format($shipment->amount);
                     }
                 }
                 else {
