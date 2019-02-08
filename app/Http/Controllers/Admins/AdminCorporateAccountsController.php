@@ -1033,17 +1033,17 @@ class AdminCorporateAccountsController extends Controller
             $rate_status = $user['rate_status'];
         }
         elseif(($user['rate_status']>=1) && $user['status']==3){
-//            $switches = PendingCorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-////        return $switches;
-////        var_dump(empty($switches));exit();
-//            $weight = PendingCorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-////        $cash = '';
-//            $cash = PendingCorporateCashHandlingCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//            $insurance = PendingCorporateInsuranceCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//            $return = PendingCorporateReturnCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//            $fuel = PendingCorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//            $discount = PendingCorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
-//            $rate_status = $user['rate_status'];
+            $switches = PendingCorporateRateStatus::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+//        return $switches;
+//        var_dump(empty($switches));exit();
+            $weight = PendingCorporateWeightCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+//        $cash = '';
+            $cash = PendingCorporateCashHandlingCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $insurance = PendingCorporateInsuranceCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $return = PendingCorporateReturnCharges::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $fuel = PendingCorporateFuelSurcharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $discount = PendingCorporateDiscountCharge::all()->where('user_id', $id)->groupBy('shipping_mode_id');
+            $rate_status = $user['rate_status'];
         }
 //        return $discount;
         return view('admin.accounts.corporate.edit_rates')->with(['shipper'=>$user,'switches'=>$switches,'weight'=>$weight,'cashHandling'=>$cash,'insuranceCharges'=>$insurance,'returnCharges'=>$return,'fuelCharges'=>$fuel, 'discountCharges'=>$discount, 'rate_status'=>$rate_status, 'min_weight' => $min_weight]);
