@@ -3033,6 +3033,10 @@
                                     @if ($shipper->status == 1 && (session('role_id') == 1 || in_array(8, session('permissions'))))
                                         <button id="accountActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Authorize</button>
                                     @endif
+
+                                    @if ($shipper->rate_status ==1 && $shipper->status == 3 && (session('role_id') == 1 || in_array(140, session('permissions'))))
+                                        <button id="accountApproveActiveSubmit" type="submit" class="btn btn-outline-primary round btn-min-width mr-1 mb-1">Approve</button>
+                                    @endif
                                 </div>
                             </div>
 
@@ -3175,6 +3179,13 @@
             });
         });
 
+        $('#accountActiveSubmit').on('click',function(){
+            $('#authorize').val(1);
+        });
+        $('#accountApproveActiveSubmit').on('click',function(){
+            $('#approve').val(1);
+            // console.log('ddd');
+        });
 
         $('.decimal').inputmask({
             'alias': 'decimal',
