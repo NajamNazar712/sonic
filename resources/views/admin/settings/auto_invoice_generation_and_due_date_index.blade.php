@@ -23,13 +23,15 @@
                                         {{ csrf_field() }}
 
                                                 <div class="input-group form-group">
-                                                    <input type="text" name="auto_invoice_generation_hours" class="form-control auto_invoice_generation_hours" placeholder="Auto Invoice Generation" data-rule-required="true" data-msg-required="Auto Account Disabled Days is required" value="{{ $auto_invoice_generation_time->setting_value }}" data-rule-min="1" data-msg-min="Auto Invoice Generation hours can not be less than 1" data-rule-max="24" data-msg-max="Auto Invoice Generation hours can not be greater than 24">
-                                                    <div class="input-group-append" style="width: 20px">
-                                                        <span class="input-group-text">hrs*</span>
+                                                    <label class="form-control" style="width: 100px">Auto Invoice Generation</label>
+                                                    <input type="text" name="auto_invoice_generation_hours" class="form-control auto_invoice_generation_hours" placeholder="" data-rule-required="true" data-msg-required="Auto Invoice Generation hours is required" value="{{ $auto_invoice_generation_time->setting_value }}" data-rule-min="1" data-msg-min="Auto Invoice Generation hours can not be less than 1" data-rule-max="24" data-msg-max="Auto Invoice Generation hours can not be greater than 24">
+                                                    <div class="input-group-append" style="width: 14px">
+                                                        <span class="input-group-text">Hours*</span>
                                                     </div>
                                                 </div>
                                                 <div class="input-group form-group">
-                                                    <input type="text" name="due_date_days" class="form-control due_date_days" placeholder="Due Date" data-rule-required="true" data-msg-required="Due Date Days is required" value="{{ $due_date_days->setting_value }}" data-rule-min="1" data-msg-min="Due Date Days can not be less than 1">
+                                                    <label class="form-control">Due Date</label>
+                                                    <input type="text" name="due_date_days" class="form-control due_date_days" placeholder="" data-rule-required="true" data-msg-required="Due Date Days is required" value="{{ $due_date_days->setting_value }}" data-rule-min="1" data-msg-min="Due Date Days can not be less than 1">
                                                     <div class="input-group-append" style="width: 5px">
                                                         <span class="input-group-text">Days*</span>
                                                     </div>

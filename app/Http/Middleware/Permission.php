@@ -376,7 +376,8 @@ class Permission
             'settings.ticker.store' => 152,
 
 			'settings.walk_in.index' => 154,
-            'settings.walk_in.store' => 154,            'settings.petty_cash.heads.index' => 157,
+            'settings.walk_in.store' => 154,
+            'settings.petty_cash.heads.index' => 157,
             'settings.petty_cash.heads.list' => 157,
             'settings.petty_cash.heads.add' => 159,
             'settings.petty_cash.heads.edit' => 160,
@@ -389,6 +390,9 @@ class Permission
             'settings.petty_cash.titles.edit' => 164,
             'settings.petty_cash.titles.active' => 165,
             'settings.petty_cash.titles.inactive' => 166,
+
+            'settings.auto_invoice_generation_and_due_date.index' => 171,
+            'settings.auto_invoice_generation_and_due_date.store' => 171,
 
             'cancelled_shipments.index' => 117,
             'cancelled_shipments.list' => 117,
