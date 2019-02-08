@@ -45,13 +45,13 @@ class AdminCorporateAccountsController extends Controller
             $insurance = StandardInsuranceCharge::all()->groupBy('shipping_mode_id');
             $return = StandardReturnCharge::all()->groupBy('shipping_mode_id');
             $fuel = StandardFuelSurcharge::all()->groupBy('shipping_mode_id');
-            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'shippingType' => $bookingType, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight]);
+            return view('admin.accounts.corporate.add_rates')->with(['shipper' => $user, 'weight' => $weight, 'cashHandling' => $cash, 'insuranceCharges' => $insurance, 'returnCharges' => $return, 'fuelCharges' => $fuel, 'min_weight' => $min_weight]);
         }
         return redirect()->back()->with('error','User rates not found!');
     }
 
     public function add_rates_submit(Request $request, $id){
-
+//        return $request;
         $messages = [
             'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
             'on_door_mcw_charges.numeric' => 'The overnight doorstep minimum chargeable weight field must be numeric or decimal.',
@@ -1037,7 +1037,7 @@ class AdminCorporateAccountsController extends Controller
     }
 
     public function edit_rates_submit(Request $request, $id){
-        return $request;
+
         $messages = [
             'on_door_mcw_charges.required' => 'The overnight doorstep minimum chargeable weight field is required.',
             'on_door_mcw_charges.numeric' => 'The overnight doorstep minimum chargeable weight field must be numeric or decimal.',
