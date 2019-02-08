@@ -55,30 +55,30 @@
                                 </div>
 
                                 <div class="row">
-                                    <div class="col-md-6 col-lg-3">
+                                    <div class="col-md-6 col-lg-4">
                                         <div class="form-group">
                                             <label for="sm_flyer">Small Flyers</label>
                                             <input type="text" id="sm_flyer" class="form-control numeric flyer" placeholder="Small Flyers Quantity" name="sm_flyer">
                                         </div>
                                     </div>
-                                    <div class="col-md-6 col-lg-3">
+                                    <div class="col-md-6 col-lg-4">
                                         <div class="form-group">
                                             <label for="md_flyer">Medium Flyers</label>
                                             <input type="text" id="md_flyer" class="form-control numeric flyer" placeholder="Medium Flyers Quantity" name="md_flyer">
                                         </div>
                                     </div>
-                                    <div class="col-md-6 col-lg-3">
+                                    <div class="col-md-6 col-lg-4">
                                         <div class="form-group">
                                             <label for="lg_flyer">Large Flyers</label>
                                             <input type="text" id="lg_flyer" class="form-control numeric flyer" placeholder="Large Flyers Quantity" name="lg_flyer">
                                         </div>
                                     </div>
-                                    <div class="col-md-6 col-lg-3">
-                                        <div class="form-group">
-                                            <label for="boxes">Boxes</label>
-                                            <input type="text" id="boxes" class="form-control numeric flyer" placeholder="Boxes Quantity" name="boxes">
-                                        </div>
-                                    </div>
+                                    {{--<div class="col-md-6 col-lg-3">--}}
+                                        {{--<div class="form-group">--}}
+                                            {{--<label for="boxes">Boxes</label>--}}
+                                            {{--<input type="text" id="boxes" class="form-control numeric flyer" placeholder="Boxes Quantity" name="boxes">--}}
+                                        {{--</div>--}}
+                                    {{--</div>--}}
                                 </div>
                                 <div class="row justify-content-center">
                                     <div class="col-md-12 col-lg-6">
@@ -187,9 +187,9 @@
                     lg_flyer: {
                         require_from_group: [1, ".flyer"]
                     },
-                    boxes: {
-                        require_from_group: [1, ".flyer"]
-                    }
+                    // boxes: {
+                    //     require_from_group: [1, ".flyer"]
+                    // }
                 },
                 errorClass: 'danger',
                 successClass: 'success',
