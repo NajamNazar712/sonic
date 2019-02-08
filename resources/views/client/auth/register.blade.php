@@ -656,7 +656,7 @@
                $('#billing_information_div').removeClass('d-none');
            }
            else {
-               $('#billing_information_div-day').addClass('d-none');
+               $('#billing_information_div').addClass('d-none');
            }
        });
         {{--var generation_date = $('#generation_date').pickadate({--}}

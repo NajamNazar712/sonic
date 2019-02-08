@@ -49,9 +49,12 @@ Route::prefix('cod')->name('cod.')->group(function () {
     });
     Route::prefix('shipment')->name('shipment.')->group(function () {
         Route::prefix('book')->name('book.')->group(function () {
+            Route::get('index', 'Shippers\ShipperShipmentBookController@corporate_index')->name('corporate.index');
+            Route::post('corporate_store', 'Shippers\ShipperShipmentBookController@corporate_store')->name('corporate.store');
             Route::get('order_id', 'Shippers\ShipperShipmentBookController@order_id')->name('order_id');
             Route::post('shipping_modes', 'Shippers\ShipperShipmentBookController@shipping_modes')->name('shipping_modes');
             Route::post('print_air_waybill', 'Shippers\ShipperShipmentBookController@print_air_waybill')->name('print_air_waybill');
+            Route::post('corporate_invoice', 'Shippers\ShipperShipmentBookController@corporate_invoice')->name('corporate_invoice');
             Route::post('check', 'Shippers\ShipperShipmentBookController@check')->name('check');
 
             Route::prefix('excel')->name('excel_')->group(function () {
@@ -903,6 +906,10 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::prefix('walk_in')->name('walk_in.')->group(function () {
             Route::get('', 'Admins\GlobalSettingsController@walk_in_index')->name('index');
             Route::post('', 'Admins\GlobalSettingsController@walk_in_store')->name('store');
+        });
+        Route::prefix('auto_invoice_generation_and_due_date')->name('auto_invoice_generation_and_due_date.')->group(function () {
+            Route::get('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_index')->name('index');
+            Route::post('', 'Admins\GlobalSettingsController@auto_invoice_generation_and_due_date_store')->name('store');
         });
         Route::prefix('petty_cash')->name('petty_cash.')->group(function (){
            Route::prefix('heads')->name('heads.')->group(function (){
